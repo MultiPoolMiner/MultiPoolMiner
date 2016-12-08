@@ -7,7 +7,7 @@ Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
  
 #$Wallet = "[enter wallet here]"
 $Username = "[enter username here]"
-$Worker = "MultiAlgoMiner"
+$Worker = "MultiPoolMiner"
 
 $Interval = 30 #seconds
 $ZecMiner64_Path = "C:\ZecMiner64\ZecMiner64.exe" 
@@ -42,19 +42,19 @@ function Set-Stat
     if($Value -is [ValueType])
     {
         $Stat = [PSCustomObject]@{
-            Live = $Value;
-            Minute = ((1-[math]::Min(($Date-$Stat.Updated).TotalMinutes,1))*$Stat.Minute)+([math]::Min(($Date-$Stat.Updated).TotalMinutes,1)*$Value);
-            Minute_Fluctuation = ((1-[math]::Min(($Date-$Stat.Updated).TotalMinutes,1))*$Stat.Minute_Fluctuation)+([math]::Min(($Date-$Stat.Updated).TotalMinutes,1)*([math]::Abs($Value-$Stat.Minute)/$Stat.Minute));
-            Minute_5 = ((1-[math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1))*$Stat.Minute_5)+([math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1)*$Value);
-            Minute_5_Fluctuation = ((1-[math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1))*$Stat.Minute_5_Fluctuation)+([math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1)*([math]::Abs($Value-$Stat.Minute_5)/$Stat.Minute_5));
-            Minute_10 = ((1-[math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1))*$Stat.Minute_10)+([math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1)*$Value);
-            Minute_10_Fluctuation = ((1-[math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1))*$Stat.Minute_10_Fluctuation)+([math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1)*([math]::Abs($Value-$Stat.Minute_10)/$Stat.Minute_10));
-            Hour = ((1-[math]::Min(($Date-$Stat.Updated).TotalHours,1))*$Stat.Hour)+([math]::Min(($Date-$Stat.Updated).TotalHours,1)*$Value);
-            Hour_Fluctuation = ((1-[math]::Min(($Date-$Stat.Updated).TotalHours,1))*$Stat.Hour_Fluctuation)+([math]::Min(($Date-$Stat.Updated).TotalHours,1)*([math]::Abs($Value-$Stat.Hour)/$Stat.Hour));
-            Day = ((1-[math]::Min(($Date-$Stat.Updated).TotalDays,1))*$Stat.Day)+([math]::Min(($Date-$Stat.Updated).TotalDays,1)*$Value);
-            Day_Fluctuation = ((1-[math]::Min(($Date-$Stat.Updated).TotalDays,1))*$Stat.Day_Fluctuation)+([math]::Min(($Date-$Stat.Updated).TotalDays,1)*([math]::Abs($Value-$Stat.Day)/$Stat.Day));
-            Week = ((1-[math]::Min((($Date-$Stat.Updated).TotalDays/7),1))*$Stat.Week)+([math]::Min((($Date-$Stat.Updated).TotalDays/7),1)*$Value);
-            Week_Fluctuation = ((1-[math]::Min((($Date-$Stat.Updated).TotalDays/7),1))*$Stat.Week_Fluctuation)+([math]::Min((($Date-$Stat.Updated).TotalDays/7),1)*([math]::Abs($Value-$Stat.Week)/$Stat.Week));
+            Live = $Value
+            Minute = ((1-[math]::Min(($Date-$Stat.Updated).TotalMinutes,1))*$Stat.Minute)+([math]::Min(($Date-$Stat.Updated).TotalMinutes,1)*$Value)
+            Minute_Fluctuation = ((1-[math]::Min(($Date-$Stat.Updated).TotalMinutes,1))*$Stat.Minute_Fluctuation)+([math]::Min(($Date-$Stat.Updated).TotalMinutes,1)*([math]::Abs($Value-$Stat.Minute)/$Stat.Minute))
+            Minute_5 = ((1-[math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1))*$Stat.Minute_5)+([math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1)*$Value)
+            Minute_5_Fluctuation = ((1-[math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1))*$Stat.Minute_5_Fluctuation)+([math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1)*([math]::Abs($Value-$Stat.Minute_5)/$Stat.Minute_5))
+            Minute_10 = ((1-[math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1))*$Stat.Minute_10)+([math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1)*$Value)
+            Minute_10_Fluctuation = ((1-[math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1))*$Stat.Minute_10_Fluctuation)+([math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1)*([math]::Abs($Value-$Stat.Minute_10)/$Stat.Minute_10))
+            Hour = ((1-[math]::Min(($Date-$Stat.Updated).TotalHours,1))*$Stat.Hour)+([math]::Min(($Date-$Stat.Updated).TotalHours,1)*$Value)
+            Hour_Fluctuation = ((1-[math]::Min(($Date-$Stat.Updated).TotalHours,1))*$Stat.Hour_Fluctuation)+([math]::Min(($Date-$Stat.Updated).TotalHours,1)*([math]::Abs($Value-$Stat.Hour)/$Stat.Hour))
+            Day = ((1-[math]::Min(($Date-$Stat.Updated).TotalDays,1))*$Stat.Day)+([math]::Min(($Date-$Stat.Updated).TotalDays,1)*$Value)
+            Day_Fluctuation = ((1-[math]::Min(($Date-$Stat.Updated).TotalDays,1))*$Stat.Day_Fluctuation)+([math]::Min(($Date-$Stat.Updated).TotalDays,1)*([math]::Abs($Value-$Stat.Day)/$Stat.Day))
+            Week = ((1-[math]::Min((($Date-$Stat.Updated).TotalDays/7),1))*$Stat.Week)+([math]::Min((($Date-$Stat.Updated).TotalDays/7),1)*$Value)
+            Week_Fluctuation = ((1-[math]::Min((($Date-$Stat.Updated).TotalDays/7),1))*$Stat.Week_Fluctuation)+([math]::Min((($Date-$Stat.Updated).TotalDays/7),1)*([math]::Abs($Value-$Stat.Week)/$Stat.Week))
             Updated = $Date
         }
         
@@ -197,7 +197,7 @@ while($true)
            $Miner_Pools.Add($_, ($Pools | Where Algorithm -EQ $_ | Sort -Descending Price)[0])
         }
         $Miner.HashRates.Keys | ForEach {
-           $Miner_Profits.Add($_, $Miner.HashRates[$_]*($Pools | Where Algorithm -EQ $_ | Sort -Descending Price)[0].Price*1000000000)
+           $Miner_Profits.Add($_, $Miner.HashRates[$_]*($Pools | Where Algorithm -EQ $_ | Sort -Descending Price)[0].Price)
         }
 
         Add-Member -InputObject $_ -MemberType NoteProperty -Name Pools -Value $Miner_Pools
@@ -209,7 +209,8 @@ while($true)
     $Miners | Sort -Descending Profit | Format-Table (
         @{Label = "Algorithm"; Expression={$_.HashRates.Keys}}, 
         @{Label = "BTC/Day"; Expression={$_.Profits.Values | ForEach {$_.ToString("0.00000")}}; Align='right'}, 
-        @{Label = "Pool"; Expression={$_.Pools.Values.Name}}
+        @{Label = "Pool"; Expression={$_.Pools.Values.Name}}, 
+        @{Label = "BTC/GH/Day"; Expression={$_.Pools.Values.Price | ForEach {($_*1000000000).ToString("0.00000")}}; Align='right'}
     ) | Out-Host
 
     $NewMiner = ($Miners | Sort -Descending Profit)[0]
