@@ -215,7 +215,7 @@ while($true)
 
     $NewMiner = ($Miners | Sort -Descending Profit)[0]
 
-    if($CurrentMiner -eq $null -or ($CurrentMiner.Path -ne $NewMiner.Path -and $CurrentMiner.Arguments -ne $NewMiner.Arguments))
+    if($CurrentMiner -eq $null -or $CurrentMiner.Path -ne $NewMiner.Path -or $CurrentMiner.Arguments -ne $NewMiner.Arguments)
     {
         $Miner_Path = $NewMiner.Path
         $Miner_Arguments = $NewMiner.Arguments
