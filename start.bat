@@ -1,1 +1,0 @@
-powershell -noexit -file .\multipoolminer.ps1 -username aaronsace
