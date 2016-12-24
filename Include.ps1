@@ -14,22 +14,22 @@
 
     if(Test-Path $Path)
     {
-        $Stat = Get-Content $Path -ErrorAction Stop | ConvertFrom-Json
+        $Stat = Get-Content $Path | ConvertFrom-Json
         $Stat = [PSCustomObject]@{
-            Live = [decimal]$Stat.Live
-            Minute = [decimal]$Stat.Minute
-            Minute_Fluctuation = [decimal]$Stat.Minute_Fluctuation
-            Minute_5 = [decimal]$Stat.Minute_5
-            Minute_5_Fluctuation = [decimal]$Stat.Minute_5_Fluctuation
-            Minute_10 = [decimal]$Stat.Minute_10
-            Minute_10_Fluctuation = [decimal]$Stat.Minute_10_Fluctuation
-            Hour = [decimal]$Stat.Hour
-            Hour_Fluctuation = [decimal]$Stat.Hour_Fluctuation
-            Day = [decimal]$Stat.Day
-            Day_Fluctuation = [decimal]$Stat.Day_Fluctuation
-            Week = [decimal]$Stat.Week
-            Week_Fluctuation = [decimal]$Stat.Week_Fluctuation
-            Updated = [DateTime]0 
+            Live = [Decimal]$Stat.Live
+            Minute = [Decimal]$Stat.Minute
+            Minute_Fluctuation = [Decimal]$Stat.Minute_Fluctuation
+            Minute_5 = [Decimal]$Stat.Minute_5
+            Minute_5_Fluctuation = [Decimal]$Stat.Minute_5_Fluctuation
+            Minute_10 = [Decimal]$Stat.Minute_10
+            Minute_10_Fluctuation = [Decimal]$Stat.Minute_10_Fluctuation
+            Hour = [Decimal]$Stat.Hour
+            Hour_Fluctuation = [Decimal]$Stat.Hour_Fluctuation
+            Day = [Decimal]$Stat.Day
+            Day_Fluctuation = [Decimal]$Stat.Day_Fluctuation
+            Week = [Decimal]$Stat.Week
+            Week_Fluctuation = [Decimal]$Stat.Week_Fluctuation
+            Updated = [DateTime]$Stat.Updated
         }
     }
     else
@@ -42,31 +42,29 @@
             Hour = $Value
             Day = $Value
             Week = $Value
-            Updated = [DateTime]0 
+            Updated = [DateTime]0
         }
     }
 
-    if($Value -is [ValueType])
-    {
-        $Stat = [PSCustomObject]@{
-            Live = $Value
-            Minute = ((1-[math]::Min(($Date-$Stat.Updated).TotalMinutes,1))*$Stat.Minute)+([math]::Min(($Date-$Stat.Updated).TotalMinutes,1)*$Value)
-            Minute_Fluctuation = ((1-[math]::Min(($Date-$Stat.Updated).TotalMinutes,1))*$Stat.Minute_Fluctuation)+([math]::Min(($Date-$Stat.Updated).TotalMinutes,1)*([math]::Abs($Value-$Stat.Minute)/[math]::Max([math]::Abs($Stat.Minute),$SmallestValue)))
-            Minute_5 = ((1-[math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1))*$Stat.Minute_5)+([math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1)*$Value)
-            Minute_5_Fluctuation = ((1-[math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1))*$Stat.Minute_5_Fluctuation)+([math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1)*([math]::Abs($Value-$Stat.Minute_5)/[math]::Max([math]::Abs($Stat.Minute_5),$SmallestValue)))
-            Minute_10 = ((1-[math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1))*$Stat.Minute_10)+([math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1)*$Value)
-            Minute_10_Fluctuation = ((1-[math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1))*$Stat.Minute_10_Fluctuation)+([math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1)*([math]::Abs($Value-$Stat.Minute_10)/[math]::Max([math]::Abs($Stat.Minute_10),$SmallestValue)))
-            Hour = ((1-[math]::Min(($Date-$Stat.Updated).TotalHours,1))*$Stat.Hour)+([math]::Min(($Date-$Stat.Updated).TotalHours,1)*$Value)
-            Hour_Fluctuation = ((1-[math]::Min(($Date-$Stat.Updated).TotalHours,1))*$Stat.Hour_Fluctuation)+([math]::Min(($Date-$Stat.Updated).TotalHours,1)*([math]::Abs($Value-$Stat.Hour)/[math]::Max([math]::Abs($Stat.Hour),$SmallestValue)))
-            Day = ((1-[math]::Min(($Date-$Stat.Updated).TotalDays,1))*$Stat.Day)+([math]::Min(($Date-$Stat.Updated).TotalDays,1)*$Value)
-            Day_Fluctuation = ((1-[math]::Min(($Date-$Stat.Updated).TotalDays,1))*$Stat.Day_Fluctuation)+([math]::Min(($Date-$Stat.Updated).TotalDays,1)*([math]::Abs($Value-$Stat.Day)/[math]::Max([math]::Abs($Stat.Day),$SmallestValue)))
-            Week = ((1-[math]::Min((($Date-$Stat.Updated).TotalDays/7),1))*$Stat.Week)+([math]::Min((($Date-$Stat.Updated).TotalDays/7),1)*$Value)
-            Week_Fluctuation = ((1-[math]::Min((($Date-$Stat.Updated).TotalDays/7),1))*$Stat.Week_Fluctuation)+([math]::Min((($Date-$Stat.Updated).TotalDays/7),1)*([math]::Abs($Value-$Stat.Week)/[math]::Max([math]::Abs($Stat.Week),$SmallestValue)))
-            Updated = $Date
-        }
-        
-        Set-Content $Path ($Stat | ConvertTo-Json)
+    $Stat = [PSCustomObject]@{
+        Live = $Value
+        Minute = ((1-[Math]::Min(($Date-$Stat.Updated).TotalMinutes,1))*$Stat.Minute)+([Math]::Min(($Date-$Stat.Updated).TotalMinutes,1)*$Value)
+        Minute_Fluctuation = ((1-[Math]::Min(($Date-$Stat.Updated).TotalMinutes,1))*$Stat.Minute_Fluctuation)+([Math]::Min(($Date-$Stat.Updated).TotalMinutes,1)*([Math]::Abs($Value-$Stat.Minute)/[Math]::Max([Math]::Abs($Stat.Minute),$SmallestValue)))
+        Minute_5 = ((1-[Math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1))*$Stat.Minute_5)+([Math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1)*$Value)
+        Minute_5_Fluctuation = ((1-[Math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1))*$Stat.Minute_5_Fluctuation)+([Math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1)*([Math]::Abs($Value-$Stat.Minute_5)/[Math]::Max([Math]::Abs($Stat.Minute_5),$SmallestValue)))
+        Minute_10 = ((1-[Math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1))*$Stat.Minute_10)+([Math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1)*$Value)
+        Minute_10_Fluctuation = ((1-[Math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1))*$Stat.Minute_10_Fluctuation)+([Math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1)*([Math]::Abs($Value-$Stat.Minute_10)/[Math]::Max([Math]::Abs($Stat.Minute_10),$SmallestValue)))
+        Hour = ((1-[Math]::Min(($Date-$Stat.Updated).TotalHours,1))*$Stat.Hour)+([Math]::Min(($Date-$Stat.Updated).TotalHours,1)*$Value)
+        Hour_Fluctuation = ((1-[Math]::Min(($Date-$Stat.Updated).TotalHours,1))*$Stat.Hour_Fluctuation)+([Math]::Min(($Date-$Stat.Updated).TotalHours,1)*([Math]::Abs($Value-$Stat.Hour)/[Math]::Max([Math]::Abs($Stat.Hour),$SmallestValue)))
+        Day = ((1-[Math]::Min(($Date-$Stat.Updated).TotalDays,1))*$Stat.Day)+([Math]::Min(($Date-$Stat.Updated).TotalDays,1)*$Value)
+        Day_Fluctuation = ((1-[Math]::Min(($Date-$Stat.Updated).TotalDays,1))*$Stat.Day_Fluctuation)+([Math]::Min(($Date-$Stat.Updated).TotalDays,1)*([Math]::Abs($Value-$Stat.Day)/[Math]::Max([Math]::Abs($Stat.Day),$SmallestValue)))
+        Week = ((1-[Math]::Min((($Date-$Stat.Updated).TotalDays/7),1))*$Stat.Week)+([Math]::Min((($Date-$Stat.Updated).TotalDays/7),1)*$Value)
+        Week_Fluctuation = ((1-[Math]::Min((($Date-$Stat.Updated).TotalDays/7),1))*$Stat.Week_Fluctuation)+([Math]::Min((($Date-$Stat.Updated).TotalDays/7),1)*([Math]::Abs($Value-$Stat.Week)/[Math]::Max([Math]::Abs($Stat.Week),$SmallestValue)))
+        Updated = $Date
     }
+
+    if(-not (Test-Path "Stats")){New-Item "Stats" -ItemType "directory"}
+    Set-Content $Path ($Stat | ConvertTo-Json)
 
     $Stat
 }
@@ -77,16 +75,17 @@ function Get-Stat {
         [String]$Name
     )
     
+    if(-not (Test-Path "Stats")){New-Item "Stats" -ItemType "directory"}
     Get-ChildItem "Stats" | Where Extension -NE ".ps1" | Where BaseName -EQ $Name | Get-Content | ConvertFrom-Json
 }
 
 function Get-ChildItemContent {
     param(
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$true)]
         [String]$Path
     )
-    
-    $ChildItems =  Get-ChildItem $Path | ForEach {
+
+    $ChildItems = Get-ChildItem $Path | ForEach {
         $Name = $_.BaseName
         if($_.Extension -eq ".ps1")
         {
@@ -109,10 +108,10 @@ function Get-ChildItemContent {
             {
                 $Item.Content.$_ = Invoke-Expression "`"$($Item.Content.$_)`""
             }
-            elseif($Item.Content.$_ -is [HashTable])
+            elseif($Item.Content.$_ -is [PSCustomObject])
             {
                 $Property = $Item.Content.$_
-                $PropertyKeys = $Property.Keys.Clone()
+                $PropertyKeys = $Property.PSObject.Properties.Name
                 $PropertyKeys | ForEach {
                     if($Property.$_ -is [String])
                     {
@@ -128,41 +127,67 @@ function Get-ChildItemContent {
 
 function Get-HashRate
 {
+    param(
+        [Parameter(Mandatory=$true)]
+        $API
+    )
+
     $Multiplier = 1000
 
-    try
+    switch($API)
     {
-        $server = "localhost"
-        $port = 4028
-        $message = @{command="summary"; parameter=""} | ConvertTo-Json
+        "xgminer"
+        {
+            $server = "localhost"
+            $port = 4028
+            $message = @{command="summary"; parameter=""} | ConvertTo-Json
 
-        $client = New-Object System.Net.Sockets.TcpClient $server, $port
-        $stream = $client.GetStream()
+            $client = New-Object System.Net.Sockets.TcpClient $server, $port
+            $stream = $client.GetStream()
 
-        $writer = New-Object System.IO.StreamWriter $stream
-        $writer.Write($message)
-        $writer.Flush()
+            $writer = New-Object System.IO.StreamWriter $stream
+            $writer.Write($message)
+            $writer.Flush()
 
-        $reader = New-Object System.IO.StreamReader $stream
+            $reader = New-Object System.IO.StreamReader $stream
 
-        $Request = $reader.ReadToEnd().Trim(' ')
-        $Data = ($Request.Substring($Request.IndexOf("{"),$Request.LastIndexOf("}")-$Request.IndexOf("{")+1) | ConvertFrom-Json).SUMMARY
-        [PSCustomObject]@([Decimal]$Data[0].'KHS 5s' * $Multiplier)
-    }
-    catch
-    {
-        try
+            $Request = $reader.ReadToEnd()
+            $Data = ($Request.Substring($Request.IndexOf("{"),$Request.LastIndexOf("}")-$Request.IndexOf("{")+1) | ConvertFrom-Json).SUMMARY
+            [Decimal]$Data[0].'KHS 5s'*$Multiplier
+        }
+        "ccminer"
+        {
+            $server = "localhost"
+            $port = 4068
+            $message = "summary"
+
+            $client = New-Object System.Net.Sockets.TcpClient $server, $port
+            $stream = $client.GetStream()
+
+            $writer = New-Object System.IO.StreamWriter $stream
+            $writer.Write($message)
+            $writer.Flush()
+
+            $reader = New-Object System.IO.StreamReader $stream
+
+            $Request = $reader.ReadToEnd()
+            $Data = $Request -split "[;=]"
+            [Decimal]$Data[11]*$Multiplier
+        }
+        "Claymore"
         {
             $Request = Invoke-WebRequest "http://localhost:3333" -UseBasicParsing
             $Data = ($Request.Content.Substring($Request.Content.IndexOf("{"),$Request.Content.LastIndexOf("}")-$Request.Content.IndexOf("{")+1) | ConvertFrom-Json).result
-            if($Request.Content.Contains("ZEC:")){$Multiplier = 1}
-            [PSCustomObject]@(
-                [Decimal]$Data[2].Split(";")[0] * $Multiplier
-                [Decimal]$Data[4].Split(";")[0] * $Multiplier
-            )
-        }
-        catch
-        {
+            if($Request.Content.Contains("ZEC:"))
+            {
+                [Decimal]$Data[2].Split(";")[0]
+            }
+            else
+            {
+                [Decimal]$Data[2].Split(";")[0]*$Multiplier
+            }
+
+            [Decimal]$Data[4].Split(";")[0]*$Multiplier
         }
     }
 }
