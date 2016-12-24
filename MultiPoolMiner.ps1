@@ -14,131 +14,161 @@ Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 $Interval = 60 #seconds
 $Delta = 0.10 #decimal percentage
 
-$CurrentMiner = $null
+$ActiveMinerPrograms = @()
+
+#Start the log
+Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_hh-mm-ss").txt"
 
 while($true)
 {
     #Load the Stats
-    $Stats = @{}
-    Get-ChildItemContent "Stats" | ForEach {
-        $Stats.Add($_.Name, $_.Content)
-    }
+    $Stats = [PSCustomObject]@{}
+    if(Test-Path "Stats"){Get-ChildItemContent "Stats" | ForEach {$Stats | Add-Member $_.Name $_.Content}}
 
     #Load information about the Pools
-    $AllPools = Get-ChildItemContent "Pools" | ForEach {
-        $_.Content | Add-Member @{Name = $_.Name} -PassThru
-    }
-    $Pools = @{}
-    $AllPools.Algorithm | Get-Unique | ForEach {
-        $Pools.Add($_, ($AllPools | Where Algorithm -EQ $_ | Sort Price -Descending | Select -First 1))
-    }
+    $AllPools = if(Test-Path "Pools"){Get-ChildItemContent "Pools" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru}}
+    $Pools = [PSCustomObject]@{}
+    $AllPools.Algorithm | Get-Unique | ForEach {$Pools | Add-Member $_ ($AllPools | Where Algorithm -EQ $_ | Sort Price -Descending | Select -First 1)}
     
     #Load information about the Miners
-    $Miners = Get-ChildItemContent "Miners" | ForEach {
-        $_.Content | Add-Member @{Name = $_.Name} -PassThru
-    }
+    #Messy...?
+    $Miners = if(Test-Path "Miners"){Get-ChildItemContent "Miners" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru}}
     $Miners | ForEach {
         $Miner = $_
-        $Miner_Algorithms = $Miner.HashRates.Keys.Clone()
-        $Miner_Pools = @{}
-        $Miner_Profits = @{}
-        $Miner_Profit = $null
 
-        $Miner_Algorithms | ForEach {
-            $Miner_Pools.Add($_, $Pools.$_)
+        $Miner_HashRates = [PSCustomObject]@{}
+        $Miner_Pools = [PSCustomObject]@{}
+        $Miner_Profits = [PSCustomObject]@{}
+
+        $Miner.HashRates.PSObject.Properties.Name | ForEach {
+            $Miner_HashRates | Add-Member $_ ([Decimal]$Miner.HashRates.$_)
+            $Miner_Pools | Add-Member $_ ([PSCustomObject]$Pools.$_)
+            $Miner_Profits | Add-Member $_ ([Decimal]$Miner.HashRates.$_*$Pools.$_.Price)
         }
 
-        $Miner_Algorithms | ForEach {
-            $Miner_Profits.Add($_, [Decimal]$Miner.HashRates.$_*$Pools.$_.Price)
+        $Miner_Profit = [Decimal]($Miner_Profits.PSObject.Properties.Value | Measure -Sum).Sum
+        
+        $Miner.HashRates.PSObject.Properties | Where Value -EQ "" | Select -ExpandProperty Name | ForEach {
+            $Miner_HashRates.$_ = $null
+            $Miner_Profits.$_ = $null
+            $Miner_Profit = $null
         }
         
-        $Miner_Profit = ($Miner_Profits.Values | Measure -Sum).Sum
-        
-        $Miner_Algorithms | ForEach {
-            if($Miner.HashRates.$_ -eq "")
-            {
-                $Miner.HashRates.$_ = $null
-                $Miner_Profits.$_ = $null
-                $Miner_Profit = $null
-            }
-            else
-            {
-                $Miner.HashRates.$_ = [Decimal]$Miner.HashRates.$_
-                $Miner_Profits.$_ = [Decimal]$Miner_Profits.$_
+        $Miner.HashRates = $Miner_HashRates
+        $Miner | Add-Member Pools $Miner_Pools
+        $Miner | Add-Member Profits $Miner_Profits
+        $Miner | Add-Member Profit $Miner_Profit
+        $Miner.Path = Convert-Path $Miner.Path
+    }
+
+    #Get all valid combinations of the miners i.e. AMD+NVIDIA+CPU
+    #Over complicated...?
+    $MinerCombos = [System.Collections.ArrayList]($Miners | ForEach {[Array]$_})
+    for($i = ($Miners.Type | Select -Unique).Count-1; $i -ge 1; $i--)
+    {
+        for($iMinerCombo = $MinerCombos.Count-1; $iMinerCombo -ge 0; $iMinerCombo--)
+        {
+            $Miners | ForEach {
+                $MinerCombo = [Array]$MinerCombos[$iMinerCombo]+$_
+                if($MinerCombo.Type.Count -eq ($MinerCombo.Type | Select -Unique).Count)
+                {
+                    if(($MinerCombos | Where {$_.Count -eq ([Array]$_+$MinerCombo | ForEach {$Miners.IndexOf($_)} | Select -Unique).Count}).Count -eq 0)
+                    {
+                        $MinerCombos.Add([Array]$MinerCombo) | Out-Null
+                    }
+                }
             }
         }
-
-        $Miner | Add-Member @{Pools = $Miner_Pools}
-        $Miner | Add-Member @{Profits = $Miner_Profits}
-        $Miner | Add-Member @{Profit = $Miner_Profit}
     }
     
     #Display mining information
-    #Clear-Host
-    $Miners | Sort -Descending Profit | Format-Table (
+    Clear-Host
+    $Miners | Where {$_.Profit -ge 0.000001 -or $_.Profit -eq $null} | Sort -Descending Type,Profit | Format-Table -GroupBy Type (
         @{Label = "Miner"; Expression={$_.Name}}, 
-        @{Label = "Algorithm"; Expression={$_.HashRates.Keys}}, 
-        @{Label = "Hash Rate"; Expression={$_.HashRates.Values | ForEach {if($_ -ne $null){$_.ToString("0,0.")}else{"Benchmarking"}}}; Align='right'}, 
-        @{Label = "BTC/Day"; Expression={$_.Profits.Values | ForEach {if($_ -ne $null){$_.ToString("0.00000")}else{"Benchmarking"}}}; Align='right'}, 
-        @{Label = "Pool"; Expression={$_.Pools.Values.Name}}, 
-        @{Label = "BTC/GH/Day"; Expression={$_.Pools.Values.Price | ForEach {($_*1000000000).ToString("0.00000")}}; Align='right'}
+        @{Label = "Algorithm"; Expression={$_.HashRates.PSObject.Properties.Name}}, 
+        @{Label = "GH/s"; Expression={$_.HashRates.PSObject.Properties.Value | ForEach {if($_ -ne $null){($_/1000000000).ToString(",0.000000")}else{"Benchmarking"}}}; Align='right'}, 
+        @{Label = "BTC/Day"; Expression={$_.Profits.PSObject.Properties.Value | ForEach {if($_ -ne $null){$_.ToString(",0.000000")}else{"Benchmarking"}}}; Align='right'}, 
+        @{Label = "BTC/GH/Day"; Expression={$_.Pools.PSObject.Properties.Value.Price | ForEach {($_*1000000000).ToString(",0.000000")}}; Align='right'}, 
+        @{Label = "Pool"; Expression={$_.Pools.PSObject.Properties.Value.Name}}
     ) | Out-Host
 
-    #Store most profitable miner
-    if($CurrentMiner -ne $null){($Miners | Where Path -EQ $CurrentMiner.Path | Where Arguments -EQ $CurrentMiner.Arguments).Profit *= 1+$Delta}
-    $NewMiner = $Miners | Sort -Descending {$_.Profit -isnot [ValueType]},Profit | Select -First 1
-    
-    $HashRateBoost = 1
+    #Apply delta to miners to avoid needless switching
+    $ActiveMinerPrograms | ForEach {$Miners | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments | ForEach {$_.Profit *= 1+$Delta}}
 
-    #If the new miner is already running then do nothing
-    if
-    (
-        $CurrentMiner -eq $null -or 
-        $CurrentMiner.Path -ne $NewMiner.Path -or 
-        $CurrentMiner.Arguments -ne $NewMiner.Arguments -or
-        (Get-Process | Where Id -eq $CurrentMiner.Process.Id) -eq $null
-    )
-    {
-        #Stop the previous miner (if there is one)
-        if($CurrentMiner -ne $null) {
-            Stop-Process $CurrentMiner.Process
+    #Store most profitable miner combo
+    $BestMinerCombo = $MinerCombos | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit -Sum).Sum} | Select -First 1
+
+    #Stop or start existing active miners depending on if they are the most profitable
+    $ActiveMinerPrograms | ForEach {
+        if(($BestMinerCombo | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments).Count -eq 0)
+        {
+            Stop-Process $_.Process
+            $_.Status = "Idle"
         }
-
-        #Start the new miner and store the process id
-        Add-Member -InputObject $NewMiner -MemberType NoteProperty -Name Process -Value (
-            Start-Process $NewMiner.Path -ArgumentList $NewMiner.Arguments -PassThru -WorkingDirectory (Split-Path $NewMiner.Path)
-        )
-
-        #Force stop the previous miner if still running (if there is one)
-        if($CurrentMiner -ne $null) {
-            if((Get-Process | Where Id -eq $CurrentMiner.Process.Id) -ne $null)
+        elseif($_.Process.HasExited)
+        {
+            $_.Active += $_.Process.ExitTime-$_.Process.StartTime
+            if($_.Process.Start())
             {
-                Stop-Process $CurrentMiner.Process -Force
+                $_.Status = "Running"
+            }
+            else
+            {
+                $_.Status = "Failed"
             }
         }
-
-        #Set the new miner as the current miner
-        $CurrentMiner = $NewMiner
-        $HashRateBoost = 1+$Delta
     }
+
+    #Start the most profitable miners that are not already active
+    $BestMinerCombo | ForEach {
+        if(($ActiveMinerPrograms | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments).Count -eq 0)
+        {
+            $ActiveMinerPrograms += [PSCustomObject]@{
+                Name = $_.Name
+                Path = $_.Path
+                Arguments = $_.Arguments
+                Process = Start-Process $_.Path $_.Arguments -WorkingDirectory (Split-Path $_.Path) -PassThru
+                API = $_.API
+                Algorithms = $_.HashRates.PSObject.Properties.Name
+                Boost = 1+$Delta
+                Active = [TimeSpan]0
+                Status = "Running"
+            }
+        }
+    }
+    
+    #Display active miners
+    $ActiveMinerPrograms | Sort -Descending Status,Active | Select -First 10 | Format-Table -Wrap -GroupBy Status (
+        @{Label = "Active"; Expression={if($_.Process.ExitTime -gt $_.Process.StartTime){($_.Active+($_.Process.ExitTime-$_.Process.StartTime)).ToString("hh\:mm")}else{($_.Active+((Get-Date)-$_.Process.StartTime)).ToString("hh\:mm")}}}, 
+        @{Label = "Path"; Expression={$_.Path.TrimStart((Convert-Path ".\"))}}, 
+        @{Label = "Arguments"; Expression={$_.Arguments}}
+    ) | Out-Host
     
     #Do nothing for a few seconds as to not overload the APIs
     Sleep $Interval
 
-    #Get the current hashrate
-    $HashRates = Get-HashRate
-    if($HashRates -ne $null)
-    {
-        $CurrentMiner.HashRates.Keys | ForEach {
-            $HashRate = $HashRates[0] * $HashRateBoost
-            $HashRates = $HashRates | Select -Skip 1
-            $Stat = Set-Stat -Name "$($CurrentMiner.Name)_$($_)_HashRate" -Value $HashRate
+    #Save current hash rates
+    $ActiveMinerPrograms | ForEach {
+        $Miner_HashRates = $null
+        if(-not $_.Process.HasExited)
+        {
+            $Miner_HashRates = Get-HashRate $_.API
+            for($i = 0; $i -lt [Math]::Min($_.Algorithms.Count, $Miner_HashRates.Count); $i++)
+            {
+                $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate" -Value (($Miner_HashRates | Select -Index $i)*$_.Boost)
+                $_.Boost = 1
+            }
         }
-    }
-    elseif($Stats.ContainsKey("$($CurrentMiner.Name)_$($_)_HashRate") -eq $false)
-    {
-        $CurrentMiner.HashRates.Keys | ForEach {
-            $Stat = Set-Stat -Name "$($CurrentMiner.Name)_$($_)_HashRate" -Value 0
+        for($i = [Math]::Min($_.Algorithms.Count, $Miner_HashRates.Count); $i -lt $_.Algorithms.Count; $i++)
+        {
+            if((Get-Stat "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate") -eq $null)
+            {
+                $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate" -Value (0*$_.Boost)
+                $_.Boost = 1
+            }
         }
     }
 }
+
+#Stop the log
+Stop-Transcript
