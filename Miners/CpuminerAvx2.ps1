@@ -1,15 +1,15 @@
-﻿$Path = '.\Bin\AMD\sgminer.exe'
+﻿$Path = '.\Bin\CPU\cpuminer_x64_AVX2.exe'
 
 if((Test-Path $Path) -eq $false)
 {
-    $FileName = "sgminer.zip"
+    $FileName = "ccminer.zip"
     try
     {
         if(Test-Path $FileName)
         {
             Remove-Item $FileName
         }
-        Invoke-WebRequest "https://github.com/nicehash/sgminer/releases/download/5.5.0a/sgminer-5.5.0-nicehash-46-windows-amd64.zip" -OutFile $FileName -UseBasicParsing
+        Invoke-WebRequest "https://github.com/nicehash/cpuminer-multi/releases/download/new-1.0.0/cpuminer.zip" -OutFile $FileName -UseBasicParsing
         Expand-Archive $FileName (Split-Path $Path)
     }
     catch
@@ -24,23 +24,23 @@ $Algorithms = [PSCustomObject]@{
     Sia = 'sia'
     Yescrypt = 'yescrypt'
     Blake_Vanilla = 'vanilla'
-    Lyra2RE2 = 'lyra2rev2'
-    Skein = 'skeincoin'
-    Qubit = 'qubitcoin'
+    Lyra2RE2 = 'lyra2v2'
+    Skein = 'skein'
+    Qubit = 'qubit'
     NeoScrypt = 'neoscrypt'
-    X11 = 'darkcoin-mod'
-    Myriad_Groestl = 'myriadcoin-groestl'
-    Groestl = 'groestlcoin'
-    Keccak = 'maxcoin'
-    Scrypt = 'zuikkis'
+    X11 = 'x11'
+    Myriad_Groestl = 'myr-gr'
+    Groestl = 'groestl'
+    Keccak = 'keccak'
+    Scrypt = 'scrypt'
 }
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
     [PSCustomObject]@{
-        Type = 'AMD'
+        Type = 'CPU'
         Path = $Path
-        Arguments = -Join ('--api-listen -k ', $Algorithms.$_, ' -o $($Pools.Equihash.Protocol)://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x')
+        Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x')
         HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Day)')}
-        API = 'Xgminer'
+        API = 'Cpuminer'
     }
 }

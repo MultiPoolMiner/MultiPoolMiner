@@ -1,8 +1,15 @@
 [
     {
         "Type":  "AMD",
+        "Path":  ".\\Bin\\Claymore\\Cryptonight\\NsGpuCNMiner.exe",
+        "Arguments":  "-o $($Pools.Equihash.Protocol)://$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port) -u $($Pools.Cryptonight.User) -p x",
+        "HashRates":  {"Cryptonight":  "$($Stats.Claymore_Cryptonight_HashRate.Day)"},
+        "API":  "Claymore"
+    },
+    {
+        "Type":  "AMD",
         "Path":  ".\\Bin\\Claymore\\Equihash\\ZecMiner64.exe",
-        "Arguments":  "-zpool $($Pools.Equihash.Host):$($Pools.Equihash.Port) -zwal $($Pools.Equihash.User) -zpsw x",
+        "Arguments":  "-zpool $($Pools.Equihash.Protocol)://$($Pools.Equihash.Host):$($Pools.Equihash.Port) -zwal $($Pools.Equihash.User) -zpsw x",
         "HashRates":  {"Equihash":  "$($Stats.Claymore_Equihash_HashRate.Day)"},
         "API":  "Claymore"
     },

@@ -1,17 +1,26 @@
 ﻿param(
+    [Parameter(Mandatory=$false)]
+    [String]$Wallet, 
     [Parameter(Mandatory=$true)]
     [String]$UserName, 
     [Parameter(Mandatory=$false)]
-    [String]$WorkerName = "MultiPoolMiner", 
+    [String]$WorkerName = "multipoolminer", 
     [Parameter(Mandatory=$false)]
-    [String]$Wallet
+    [Int]$API_ID = 0, 
+    [Parameter(Mandatory=$false)]
+    [String]$API_Key = "", 
+    [Parameter(Mandatory=$false)]
+    [Int]$Interval = 60, #seconds
+    [Parameter(Mandatory=$false)]
+    [String]$Location = "europe", #europe/us/asia
+    [Parameter(Mandatory=$false)]
+    [Switch]$SSL = $false
 )
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 
 . .\Include.ps1
 
-$Interval = 60 #seconds
 $Delta = 0.10 #decimal percentage
 
 $ActiveMinerPrograms = @()
@@ -26,13 +35,15 @@ while($true)
     if(Test-Path "Stats"){Get-ChildItemContent "Stats" | ForEach {$Stats | Add-Member $_.Name $_.Content}}
 
     #Load information about the Pools
-    $AllPools = if(Test-Path "Pools"){Get-ChildItemContent "Pools" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru}}
+    $AllPools = if(Test-Path "Pools"){Get-ChildItemContent "Pools" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | Where Location -EQ $Location | Where SSL -EQ $SSL}
+    if($AllPools.Count -eq 0){"No Pools!" | Out-Host; continue}
     $Pools = [PSCustomObject]@{}
     $AllPools.Algorithm | Get-Unique | ForEach {$Pools | Add-Member $_ ($AllPools | Where Algorithm -EQ $_ | Sort Price -Descending | Select -First 1)}
     
     #Load information about the Miners
     #Messy...?
     $Miners = if(Test-Path "Miners"){Get-ChildItemContent "Miners" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru}}
+    if($Miners.Count -eq 0){"No Miners!" | Out-Host; continue}
     $Miners | ForEach {
         $Miner = $_
 
@@ -63,16 +74,17 @@ while($true)
 
     #Get all valid combinations of the miners i.e. AMD+NVIDIA+CPU
     #Over complicated...?
-    $MinerCombos = [System.Collections.ArrayList]($Miners | ForEach {[Array]$_})
-    for($i = ($Miners.Type | Select -Unique).Count-1; $i -ge 1; $i--)
+    $BestMiners = $Miners | Select Type -Unique | ForEach {$Type = $_.Type; ($Miners | Where {(Compare $Type $_.Type | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
+    $MinerCombos = [System.Collections.ArrayList]($BestMiners | ForEach {[Array]$_})
+    for($i = ($BestMiners.Type | Select -Unique).Count-1; $i -ge 1; $i--)
     {
         for($iMinerCombo = $MinerCombos.Count-1; $iMinerCombo -ge 0; $iMinerCombo--)
         {
-            $Miners | ForEach {
+            $BestMiners | ForEach {
                 $MinerCombo = [Array]$MinerCombos[$iMinerCombo]+$_
                 if($MinerCombo.Type.Count -eq ($MinerCombo.Type | Select -Unique).Count)
                 {
-                    if(($MinerCombos | Where {$_.Count -eq ([Array]$_+$MinerCombo | ForEach {$Miners.IndexOf($_)} | Select -Unique).Count}).Count -eq 0)
+                    if(($MinerCombos | Where {$_.Count -eq ([Array]$_+$MinerCombo | ForEach {$BestMiners.IndexOf($_)} | Select -Unique).Count}).Count -eq 0)
                     {
                         $MinerCombos.Add([Array]$MinerCombo) | Out-Null
                     }
@@ -86,9 +98,9 @@ while($true)
     $Miners | Where {$_.Profit -ge 0.000001 -or $_.Profit -eq $null} | Sort -Descending Type,Profit | Format-Table -GroupBy Type (
         @{Label = "Miner"; Expression={$_.Name}}, 
         @{Label = "Algorithm"; Expression={$_.HashRates.PSObject.Properties.Name}}, 
-        @{Label = "GH/s"; Expression={$_.HashRates.PSObject.Properties.Value | ForEach {if($_ -ne $null){($_/1000000000).ToString(",0.000000")}else{"Benchmarking"}}}; Align='right'}, 
-        @{Label = "BTC/Day"; Expression={$_.Profits.PSObject.Properties.Value | ForEach {if($_ -ne $null){$_.ToString(",0.000000")}else{"Benchmarking"}}}; Align='right'}, 
-        @{Label = "BTC/GH/Day"; Expression={$_.Pools.PSObject.Properties.Value.Price | ForEach {($_*1000000000).ToString(",0.000000")}}; Align='right'}, 
+        @{Label = "Speed"; Expression={$_.HashRates.PSObject.Properties.Value | ForEach {if($_ -ne $null){"$($_ | ConvertTo-Hash)/s"}else{"Benchmarking"}}}; Align='right'}, 
+        @{Label = "BTC/Day"; Expression={$_.Profits.PSObject.Properties.Value | ForEach {if($_ -ne $null){$_.ToString("N5")}else{"Benchmarking"}}}; Align='right'}, 
+        @{Label = "BTC/GH/Day"; Expression={$_.Pools.PSObject.Properties.Value.Price | ForEach {($_*1000000000).ToString("N5")}}; Align='right'}, 
         @{Label = "Pool"; Expression={$_.Pools.PSObject.Properties.Value.Name}}
     ) | Out-Host
 
@@ -96,7 +108,7 @@ while($true)
     $ActiveMinerPrograms | ForEach {$Miners | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments | ForEach {$_.Profit *= 1+$Delta}}
 
     #Store most profitable miner combo
-    $BestMinerCombo = $MinerCombos | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit -Sum).Sum} | Select -First 1
+    $BestMinerCombo = $MinerCombos | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1
 
     #Stop or start existing active miners depending on if they are the most profitable
     $ActiveMinerPrograms | ForEach {
@@ -133,19 +145,20 @@ while($true)
                 Boost = 1+$Delta
                 Active = [TimeSpan]0
                 Status = "Running"
+                HashRate = 0
             }
         }
     }
     
     #Display active miners
     $ActiveMinerPrograms | Sort -Descending Status,Active | Select -First 10 | Format-Table -Wrap -GroupBy Status (
+        @{Label = "Speed"; Expression={$_.HashRate | ForEach {"$($_ | ConvertTo-Hash)/s"}}; Align='right'}, 
         @{Label = "Active"; Expression={if($_.Process.ExitTime -gt $_.Process.StartTime){($_.Active+($_.Process.ExitTime-$_.Process.StartTime)).ToString("hh\:mm")}else{($_.Active+((Get-Date)-$_.Process.StartTime)).ToString("hh\:mm")}}}, 
-        @{Label = "Path"; Expression={$_.Path.TrimStart((Convert-Path ".\"))}}, 
-        @{Label = "Arguments"; Expression={$_.Arguments}}
+        @{Label = "Command"; Expression={"$($_.Path.TrimStart((Convert-Path ".\"))) $($_.Arguments)"}}
     ) | Out-Host
     
     #Do nothing for a few seconds as to not overload the APIs
-    Sleep $Interval
+    Sleep ($Interval * ($ActiveMinerPrograms | Measure Boost -Maximum).Maximum)
 
     #Save current hash rates
     $ActiveMinerPrograms | ForEach {
@@ -167,6 +180,7 @@ while($true)
                 $_.Boost = 1
             }
         }
+        $_.HashRate = $Miner_HashRates | Select -First $_.Algorithms.Count
     }
 }
 

@@ -174,7 +174,26 @@ function Get-HashRate
             $Data = $Request -split "[;=]"
             [Decimal]$Data[11]*$Multiplier
         }
-        "Claymore"
+        "cpuminer"
+        {
+            $server = "localhost"
+            $port = 4048
+            $message = "summary"
+
+            $client = New-Object System.Net.Sockets.TcpClient $server, $port
+            $stream = $client.GetStream()
+
+            $writer = New-Object System.IO.StreamWriter $stream
+            $writer.Write($message)
+            $writer.Flush()
+
+            $reader = New-Object System.IO.StreamReader $stream
+
+            $Request = $reader.ReadToEnd()
+            $Data = $Request -split "[;=]"
+            [Decimal]$Data[11]*$Multiplier
+        }
+        "claymore"
         {
             $Request = Invoke-WebRequest "http://localhost:3333" -UseBasicParsing
             $Data = ($Request.Content.Substring($Request.Content.IndexOf("{"),$Request.Content.LastIndexOf("}")-$Request.Content.IndexOf("{")+1) | ConvertFrom-Json).result
@@ -189,5 +208,71 @@ function Get-HashRate
 
             [Decimal]$Data[4].Split(";")[0]*$Multiplier
         }
+        "nheqminer_3334"
+        {
+            $server = "localhost"
+            $port = 3334
+            $message = "status"
+
+            $client = New-Object System.Net.Sockets.TcpClient $server, $port
+            $stream = $client.GetStream()
+
+            $writer = New-Object System.IO.StreamWriter $stream
+            $writer.WriteLine($message)
+            $writer.Flush()
+
+            $reader = New-Object System.IO.StreamReader $stream
+            $Request = $reader.ReadLine()
+            $Data = ($Request | ConvertFrom-Json).result
+            [Decimal]$Data.speed_sps
+        }
+        "nheqminer_3335"
+        {
+            $server = "localhost"
+            $port = 3335
+            $message = "status"
+
+            $client = New-Object System.Net.Sockets.TcpClient $server, $port
+            $stream = $client.GetStream()
+
+            $writer = New-Object System.IO.StreamWriter $stream
+            $writer.WriteLine($message)
+            $writer.Flush()
+
+            $reader = New-Object System.IO.StreamReader $stream
+            $Request = $reader.ReadLine()
+            $Data = ($Request | ConvertFrom-Json).result
+            [Decimal]$Data.speed_sps
+        }
+        "nheqminer_3336"
+        {
+            $server = "localhost"
+            $port = 3336
+            $message = "status"
+
+            $client = New-Object System.Net.Sockets.TcpClient $server, $port
+            $stream = $client.GetStream()
+
+            $writer = New-Object System.IO.StreamWriter $stream
+            $writer.WriteLine($message)
+            $writer.Flush()
+
+            $reader = New-Object System.IO.StreamReader $stream
+            $Request = $reader.ReadLine()
+            $Data = ($Request | ConvertFrom-Json).result
+            [Decimal]$Data.speed_sps
+        }
+    }
+}
+
+Filter ConvertTo-Hash { 
+    $Hash = $_
+    switch ([math]::truncate([math]::log($Hash,[Math]::Pow(1000,1)))) {
+        0 {"{0:n0}  H" -f ($Hash / [Math]::Pow(1000,0))}
+        1 {"{0:n0} KH" -f ($Hash / [Math]::Pow(1000,1))}
+        2 {"{0:n0} MH" -f ($Hash / [Math]::Pow(1000,2))}
+        3 {"{0:n0} GH" -f ($Hash / [Math]::Pow(1000,3))}
+        4 {"{0:n0} TH" -f ($Hash / [Math]::Pow(1000,4))}
+        Default {"{0:n0} PH" -f ($Hash / [Math]::Pow(1000,5))}
     }
 }
