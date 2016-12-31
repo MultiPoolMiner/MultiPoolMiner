@@ -38,7 +38,7 @@ while($true)
     $AllPools = if(Test-Path "Pools"){Get-ChildItemContent "Pools" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | Where Location -EQ $Location | Where SSL -EQ $SSL}
     if($AllPools.Count -eq 0){"No Pools!" | Out-Host; continue}
     $Pools = [PSCustomObject]@{}
-    $AllPools.Algorithm | Get-Unique | ForEach {$Pools | Add-Member $_ ($AllPools | Where Algorithm -EQ $_ | Sort Price -Descending | Select -First 1)}
+    $AllPools.Algorithm | Select -Unique | ForEach {$Pools | Add-Member $_ ($AllPools | Where Algorithm -EQ $_ | Sort Price -Descending | Select -First 1)}
     
     #Load information about the Miners
     #Messy...?
@@ -71,27 +71,6 @@ while($true)
         $Miner | Add-Member Profit $Miner_Profit
         $Miner.Path = Convert-Path $Miner.Path
     }
-
-    #Get all valid combinations of the miners i.e. AMD+NVIDIA+CPU
-    #Over complicated...?
-    $BestMiners = $Miners | Select Type -Unique | ForEach {$Type = $_.Type; ($Miners | Where {(Compare $Type $_.Type | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
-    $MinerCombos = [System.Collections.ArrayList]($BestMiners | ForEach {[Array]$_})
-    for($i = ($BestMiners.Type | Select -Unique).Count-1; $i -ge 1; $i--)
-    {
-        for($iMinerCombo = $MinerCombos.Count-1; $iMinerCombo -ge 0; $iMinerCombo--)
-        {
-            $BestMiners | ForEach {
-                $MinerCombo = [Array]$MinerCombos[$iMinerCombo]+$_
-                if($MinerCombo.Type.Count -eq ($MinerCombo.Type | Select -Unique).Count)
-                {
-                    if(($MinerCombos | Where {$_.Count -eq ([Array]$_+$MinerCombo | ForEach {$BestMiners.IndexOf($_)} | Select -Unique).Count}).Count -eq 0)
-                    {
-                        $MinerCombos.Add([Array]$MinerCombo) | Out-Null
-                    }
-                }
-            }
-        }
-    }
     
     #Display mining information
     Clear-Host
@@ -107,7 +86,20 @@ while($true)
     #Apply delta to miners to avoid needless switching
     $ActiveMinerPrograms | ForEach {$Miners | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments | ForEach {$_.Profit *= 1+$Delta}}
 
-    #Store most profitable miner combo
+    #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
+    $BestMiners = $Miners | Select Type -Unique | ForEach {$Type = $_.Type; ($Miners | Where {(Compare $Type $_.Type | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
+    $MinerCombos = [System.Collections.ArrayList]@()
+    for($i = 0; $i -lt $BestMiners.Count; $i++)
+    {
+        $MinerCombo = @()
+        for($x = 0; $x -lt $BestMiners.Count; $x++){
+            $MinerCombo += $BestMiners[(($x+$i)%$BestMiners.Count)]
+            if($MinerCombo.Type.Count -eq ($MinerCombo.Type | Select -Unique).Count)
+            {
+                $MinerCombos.Add($MinerCombo.Clone()) | Out-Null
+            }
+        }
+    }
     $BestMinerCombo = $MinerCombos | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1
 
     #Stop or start existing active miners depending on if they are the most profitable
