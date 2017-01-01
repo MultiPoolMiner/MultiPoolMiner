@@ -21,15 +21,16 @@ if((Test-Path $Path) -eq $false)
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
+    Cryptonight = 'cryptonight'
     Sia = 'sia'
     Yescrypt = 'yescrypt'
-    Blake_Vanilla = 'vanilla'
+    BlakeVanilla = 'vanilla'
     Lyra2RE2 = 'lyra2v2'
     Skein = 'skein'
     Qubit = 'qubit'
     NeoScrypt = 'neoscrypt'
     X11 = 'x11'
-    Myriad_Groestl = 'myr-gr'
+    MyriadGroestl = 'myr-gr'
     Groestl = 'groestl'
     Keccak = 'keccak'
     Scrypt = 'scrypt'

@@ -14,14 +14,16 @@
     [Parameter(Mandatory=$false)]
     [String]$Location = "europe", #europe/us/asia
     [Parameter(Mandatory=$false)]
-    [Switch]$SSL = $false
+    [Switch]$SSL = $false, 
+    [Parameter(Mandatory=$false)]
+    [Array]$Type = $null #AMD/NVIDIA/CPU
 )
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 
 . .\Include.ps1
 
-$Delta = 0.10 #decimal percentage
+$Delta = 0.05 #decimal percentage
 
 $ActiveMinerPrograms = @()
 
@@ -42,7 +44,7 @@ while($true)
     
     #Load information about the Miners
     #Messy...?
-    $Miners = if(Test-Path "Miners"){Get-ChildItemContent "Miners" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru}}
+    $Miners = if(Test-Path "Miners"){Get-ChildItemContent "Miners" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | Where {$Type.Count -eq 0 -or (Compare $Type $_.Type -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0}}
     if($Miners.Count -eq 0){"No Miners!" | Out-Host; continue}
     $Miners | ForEach {
         $Miner = $_
@@ -74,7 +76,7 @@ while($true)
     
     #Display mining information
     Clear-Host
-    $Miners | Where {$_.Profit -ge 0.000001 -or $_.Profit -eq $null} | Sort -Descending Type,Profit | Format-Table -GroupBy Type (
+    $Miners | Where {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort -Descending Type,Profit | Format-Table -GroupBy Type (
         @{Label = "Miner"; Expression={$_.Name}}, 
         @{Label = "Algorithm"; Expression={$_.HashRates.PSObject.Properties.Name}}, 
         @{Label = "Speed"; Expression={$_.HashRates.PSObject.Properties.Value | ForEach {if($_ -ne $null){"$($_ | ConvertTo-Hash)/s"}else{"Benchmarking"}}}; Align='right'}, 
@@ -87,7 +89,7 @@ while($true)
     $ActiveMinerPrograms | ForEach {$Miners | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments | ForEach {$_.Profit *= 1+$Delta}}
 
     #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
-    $BestMiners = $Miners | Select Type -Unique | ForEach {$Type = $_.Type; ($Miners | Where {(Compare $Type $_.Type | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
+    $BestMiners = $Miners | Select Type -Unique | ForEach {$Miner_Type = $_.Type; ($Miners | Where {(Compare $Miner_Type $_.Type | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
     $MinerCombos = [System.Collections.ArrayList]@()
     for($i = 0; $i -lt $BestMiners.Count; $i++)
     {
@@ -106,19 +108,27 @@ while($true)
     $ActiveMinerPrograms | ForEach {
         if(($BestMinerCombo | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments).Count -eq 0)
         {
-            Stop-Process $_.Process
-            $_.Status = "Idle"
-        }
-        elseif($_.Process.HasExited)
-        {
-            $_.Active += $_.Process.ExitTime-$_.Process.StartTime
-            if($_.Process.Start())
+            if(-not $_.Process.HasExited)
             {
-                $_.Status = "Running"
+                Stop-Process $_.Process
+                $_.Status = "Idle"
             }
-            else
+        }
+        else
+        {
+            if($_.Process.HasExited)
             {
-                $_.Status = "Failed"
+                $_.New = $true
+                $_.Active += $_.Process.ExitTime-$_.Process.StartTime
+                $_.Activated += 1
+                if($_.Process.Start())
+                {
+                    $_.Status = "Running"
+                }
+                else
+                {
+                    $_.Status = "Failed"
+                }
             }
         }
     }
@@ -134,8 +144,9 @@ while($true)
                 Process = Start-Process $_.Path $_.Arguments -WorkingDirectory (Split-Path $_.Path) -PassThru
                 API = $_.API
                 Algorithms = $_.HashRates.PSObject.Properties.Name
-                Boost = 1+$Delta
+                New = $true
                 Active = [TimeSpan]0
+                Activated = 1
                 Status = "Running"
                 HashRate = 0
             }
@@ -146,33 +157,61 @@ while($true)
     $ActiveMinerPrograms | Sort -Descending Status,Active | Select -First 10 | Format-Table -Wrap -GroupBy Status (
         @{Label = "Speed"; Expression={$_.HashRate | ForEach {"$($_ | ConvertTo-Hash)/s"}}; Align='right'}, 
         @{Label = "Active"; Expression={if($_.Process.ExitTime -gt $_.Process.StartTime){($_.Active+($_.Process.ExitTime-$_.Process.StartTime)).ToString("hh\:mm")}else{($_.Active+((Get-Date)-$_.Process.StartTime)).ToString("hh\:mm")}}}, 
+        @{Label = "Activated"; Expression={"$($_.Activated) Time(s)"}}, 
         @{Label = "Command"; Expression={"$($_.Path.TrimStart((Convert-Path ".\"))) $($_.Arguments)"}}
     ) | Out-Host
     
     #Do nothing for a few seconds as to not overload the APIs
-    Sleep ($Interval * ($ActiveMinerPrograms | Measure Boost -Maximum).Maximum)
+    Sleep $Interval
 
     #Save current hash rates
     $ActiveMinerPrograms | ForEach {
         $Miner_HashRates = $null
-        if(-not $_.Process.HasExited)
+        $_.HashRate = 0
+        $New = $false
+        
+        if($_.Process.HasExited)
+        {
+            $_.Status = "Failed"
+
+            for($i = [Math]::Min($_.Algorithms.Count, $Miner_HashRates.Count); $i -lt $_.Algorithms.Count; $i++)
+            {
+                if((Get-Stat "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate") -eq $null)
+                {
+                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate" -Value 0
+                }
+            }
+        }
+        else
         {
             $Miner_HashRates = Get-HashRate $_.API
+        }
+
+        if($Miner_HashRates -ne $null)
+        {
+            $_.HashRate = $Miner_HashRates | Select -First $_.Algorithms.Count
+
+            $Miner_HashRates_Check = $Miner_HashRates
+            if($_.New)
+            {
+                sleep 10
+                $Miner_HashRates_Check = Get-HashRate $_.API
+            }
+            
             for($i = 0; $i -lt [Math]::Min($_.Algorithms.Count, $Miner_HashRates.Count); $i++)
             {
-                $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate" -Value (($Miner_HashRates | Select -Index $i)*$_.Boost)
-                $_.Boost = 1
+                if([Math]::Abs(($Miner_HashRates | Select -Index $i)-($Miner_HashRates_Check | Select -Index $i)) -le ($Miner_HashRates | Select -Index $i)*$Delta)
+                {
+                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate" -Value ((($Miner_HashRates | Select -Index $i),($Miner_HashRates_Check | Select -Index $i) | Measure -Maximum).Maximum)
+                }
+                else
+                {
+                    $New = $true
+                }
             }
+
+            $_.New = $New
         }
-        for($i = [Math]::Min($_.Algorithms.Count, $Miner_HashRates.Count); $i -lt $_.Algorithms.Count; $i++)
-        {
-            if((Get-Stat "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate") -eq $null)
-            {
-                $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate" -Value (0*$_.Boost)
-                $_.Boost = 1
-            }
-        }
-        $_.HashRate = $Miner_HashRates | Select -First $_.Algorithms.Count
     }
 }
 

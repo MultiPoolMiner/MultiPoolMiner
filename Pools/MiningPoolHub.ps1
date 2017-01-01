@@ -20,10 +20,10 @@ $Locations | ForEach {
     $Location = $_
 
     $MiningPoolHub_Request.return | ForEach {
-        $Algorithm = $_.algo -replace "-", "_"
+        $Algorithm = $_.algo -replace "-"
 
         $Stat = Set-Stat -Name "MiningPoolHub_$($Algorithm)_Profit" -Value ([decimal]$_.profit/1000000000)
-        $Price = (($Stat.Live*(1-[Math]::Min($Stat.Hour_Fluctuation,1)))+($Stat.Hour*(0+[Math]::Min($Stat.Hour_Fluctuation,1))))
+        $Price = (($Stat.Live*(1-[Math]::Min($Stat.Day_Fluctuation,1)))+($Stat.Day*(0+[Math]::Min($Stat.Day_Fluctuation,1))))
         
         [PSCustomObject]@{
             Algorithm = $Algorithm

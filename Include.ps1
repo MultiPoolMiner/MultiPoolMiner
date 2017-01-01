@@ -10,7 +10,7 @@
 
     $Path = "Stats\$Name.txt"
     $Date = $Date.ToUniversalTime()
-    $SmallestValue = 1E-09
+    $SmallestValue = 1E-20
 
     if(Test-Path $Path)
     {
@@ -18,17 +18,17 @@
         $Stat = [PSCustomObject]@{
             Live = [Decimal]$Stat.Live
             Minute = [Decimal]$Stat.Minute
-            Minute_Fluctuation = [Decimal]$Stat.Minute_Fluctuation
+            Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
             Minute_5 = [Decimal]$Stat.Minute_5
-            Minute_5_Fluctuation = [Decimal]$Stat.Minute_5_Fluctuation
+            Minute_5_Fluctuation = [Double]$Stat.Minute_5_Fluctuation
             Minute_10 = [Decimal]$Stat.Minute_10
-            Minute_10_Fluctuation = [Decimal]$Stat.Minute_10_Fluctuation
+            Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
             Hour = [Decimal]$Stat.Hour
-            Hour_Fluctuation = [Decimal]$Stat.Hour_Fluctuation
+            Hour_Fluctuation = [Double]$Stat.Hour_Fluctuation
             Day = [Decimal]$Stat.Day
-            Day_Fluctuation = [Decimal]$Stat.Day_Fluctuation
+            Day_Fluctuation = [Double]$Stat.Day_Fluctuation
             Week = [Decimal]$Stat.Week
-            Week_Fluctuation = [Decimal]$Stat.Week_Fluctuation
+            Week_Fluctuation = [Double]$Stat.Week_Fluctuation
             Updated = [DateTime]$Stat.Updated
         }
     }
@@ -37,29 +37,48 @@
         $Stat = [PSCustomObject]@{
             Live = $Value
             Minute = $Value
+            Minute_Fluctuation = 0.5
             Minute_5 = $Value
+            Minute_5_Fluctuation = 0.5
             Minute_10 = $Value
+            Minute_10_Fluctuation = 0.5
             Hour = $Value
+            Hour_Fluctuation = 0.5
             Day = $Value
+            Day_Fluctuation = 0.5
             Week = $Value
-            Updated = [DateTime]0
+            Week_Fluctuation = 0.5
+            Updated = $Date
         }
     }
+    
+    $Span_Minute = [Math]::Min(($Date-$Stat.Updated).TotalMinutes,1)
+    $Span_Minute_5 = [Math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1)
+    $Span_Minute_10 = [Math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1)
+    $Span_Hour = [Math]::Min(($Date-$Stat.Updated).TotalHours,1)
+    $Span_Day = [Math]::Min(($Date-$Stat.Updated).TotalDays,1)
+    $Span_Week = [Math]::Min((($Date-$Stat.Updated).TotalDays/7),1)
 
     $Stat = [PSCustomObject]@{
         Live = $Value
-        Minute = ((1-[Math]::Min(($Date-$Stat.Updated).TotalMinutes,1))*$Stat.Minute)+([Math]::Min(($Date-$Stat.Updated).TotalMinutes,1)*$Value)
-        Minute_Fluctuation = ((1-[Math]::Min(($Date-$Stat.Updated).TotalMinutes,1))*$Stat.Minute_Fluctuation)+([Math]::Min(($Date-$Stat.Updated).TotalMinutes,1)*([Math]::Abs($Value-$Stat.Minute)/[Math]::Max([Math]::Abs($Stat.Minute),$SmallestValue)))
-        Minute_5 = ((1-[Math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1))*$Stat.Minute_5)+([Math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1)*$Value)
-        Minute_5_Fluctuation = ((1-[Math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1))*$Stat.Minute_5_Fluctuation)+([Math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1)*([Math]::Abs($Value-$Stat.Minute_5)/[Math]::Max([Math]::Abs($Stat.Minute_5),$SmallestValue)))
-        Minute_10 = ((1-[Math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1))*$Stat.Minute_10)+([Math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1)*$Value)
-        Minute_10_Fluctuation = ((1-[Math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1))*$Stat.Minute_10_Fluctuation)+([Math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1)*([Math]::Abs($Value-$Stat.Minute_10)/[Math]::Max([Math]::Abs($Stat.Minute_10),$SmallestValue)))
-        Hour = ((1-[Math]::Min(($Date-$Stat.Updated).TotalHours,1))*$Stat.Hour)+([Math]::Min(($Date-$Stat.Updated).TotalHours,1)*$Value)
-        Hour_Fluctuation = ((1-[Math]::Min(($Date-$Stat.Updated).TotalHours,1))*$Stat.Hour_Fluctuation)+([Math]::Min(($Date-$Stat.Updated).TotalHours,1)*([Math]::Abs($Value-$Stat.Hour)/[Math]::Max([Math]::Abs($Stat.Hour),$SmallestValue)))
-        Day = ((1-[Math]::Min(($Date-$Stat.Updated).TotalDays,1))*$Stat.Day)+([Math]::Min(($Date-$Stat.Updated).TotalDays,1)*$Value)
-        Day_Fluctuation = ((1-[Math]::Min(($Date-$Stat.Updated).TotalDays,1))*$Stat.Day_Fluctuation)+([Math]::Min(($Date-$Stat.Updated).TotalDays,1)*([Math]::Abs($Value-$Stat.Day)/[Math]::Max([Math]::Abs($Stat.Day),$SmallestValue)))
-        Week = ((1-[Math]::Min((($Date-$Stat.Updated).TotalDays/7),1))*$Stat.Week)+([Math]::Min((($Date-$Stat.Updated).TotalDays/7),1)*$Value)
-        Week_Fluctuation = ((1-[Math]::Min((($Date-$Stat.Updated).TotalDays/7),1))*$Stat.Week_Fluctuation)+([Math]::Min((($Date-$Stat.Updated).TotalDays/7),1)*([Math]::Abs($Value-$Stat.Week)/[Math]::Max([Math]::Abs($Stat.Week),$SmallestValue)))
+        Minute = ((1-$Span_Minute)*$Stat.Minute)+($Span_Minute*$Value)
+        Minute_Fluctuation = ((1-$Span_Minute)*$Stat.Minute_Fluctuation)+
+            ($Span_Minute*([Math]::Abs($Value-$Stat.Minute)/[Math]::Max([Math]::Abs($Stat.Minute),$SmallestValue)))
+        Minute_5 = ((1-$Span_Minute_5)*$Stat.Minute_5)+($Span_Minute_5*$Value)
+        Minute_5_Fluctuation = ((1-$Span_Minute_5)*$Stat.Minute_5_Fluctuation)+
+            ($Span_Minute_5*([Math]::Abs($Value-$Stat.Minute_5)/[Math]::Max([Math]::Abs($Stat.Minute_5),$SmallestValue)))
+        Minute_10 = ((1-$Span_Minute_10)*$Stat.Minute_10)+($Span_Minute_10*$Value)
+        Minute_10_Fluctuation = ((1-$Span_Minute_10)*$Stat.Minute_10_Fluctuation)+
+            ($Span_Minute_10*([Math]::Abs($Value-$Stat.Minute_10)/[Math]::Max([Math]::Abs($Stat.Minute_10),$SmallestValue)))
+        Hour = ((1-$Span_Hour)*$Stat.Hour)+($Span_Hour*$Value)
+        Hour_Fluctuation = ((1-$Span_Hour)*$Stat.Hour_Fluctuation)+
+            ($Span_Hour*([Math]::Abs($Value-$Stat.Hour)/[Math]::Max([Math]::Abs($Stat.Hour),$SmallestValue)))
+        Day = ((1-$Span_Day)*$Stat.Day)+($Span_Day*$Value)
+        Day_Fluctuation = ((1-$Span_Day)*$Stat.Day_Fluctuation)+
+            ($Span_Day*([Math]::Abs($Value-$Stat.Day)/[Math]::Max([Math]::Abs($Stat.Day),$SmallestValue)))
+        Week = ((1-$Span_Week)*$Stat.Week)+($Span_Week*$Value)
+        Week_Fluctuation = ((1-$Span_Week)*$Stat.Week_Fluctuation)+
+            ($Span_Week*([Math]::Abs($Value-$Stat.Week)/[Math]::Max([Math]::Abs($Stat.Week),$SmallestValue)))
         Updated = $Date
     }
 
@@ -172,7 +191,10 @@ function Get-HashRate
 
             $Request = $reader.ReadToEnd()
             $Data = $Request -split "[;=]"
-            [Decimal]$Data[11]*$Multiplier
+            if($Data[13] -ne 0)
+            {
+                [Decimal]$Data[11]*$Multiplier
+            }
         }
         "cpuminer"
         {
@@ -191,7 +213,10 @@ function Get-HashRate
 
             $Request = $reader.ReadToEnd()
             $Data = $Request -split "[;=]"
-            [Decimal]$Data[11]*$Multiplier
+            if($Data[13] -ne 0)
+            {
+                [Decimal]$Data[11]*$Multiplier
+            }
         }
         "claymore"
         {

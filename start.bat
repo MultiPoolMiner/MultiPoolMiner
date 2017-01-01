@@ -1,1 +1,1 @@
-powershell -noexit -executionpolicy bypass -file .\multipoolminer.ps1 -username aaronsace -interval 60 -location europe -ssl
+powershell -noexit -executionpolicy bypass -windowstyle maximized -command "&.\multipoolminer.ps1 -username aaronsace -interval 60 -location europe -ssl -type amd,nvidia,cpu"
