@@ -29,11 +29,11 @@ $Algorithms = [PSCustomObject]@{
     Skein = 'skein'
     Qubit = 'qubit'
     NeoScrypt = 'neoscrypt'
-    X11 = 'x11'
+    #X11 = 'x11'
     MyriadGroestl = 'myr-gr'
     Groestl = 'groestl'
     Keccak = 'keccak'
-    Scrypt = 'scrypt'
+    #Scrypt = 'scrypt'
 }
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
