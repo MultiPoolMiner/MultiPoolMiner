@@ -172,7 +172,7 @@ while($true)
         
         if($_.Process.HasExited)
         {
-            $_.Status = "Failed"
+            if($_.Status -eq "Running"){$_.Status = "Failed"}
 
             for($i = [Math]::Min($_.Algorithms.Count, $Miner_HashRates.Count); $i -lt $_.Algorithms.Count; $i++)
             {
@@ -185,32 +185,32 @@ while($true)
         else
         {
             $Miner_HashRates = Get-HashRate $_.API
-        }
 
-        if($Miner_HashRates -ne $null)
-        {
-            $_.HashRate = $Miner_HashRates | Select -First $_.Algorithms.Count
-
-            $Miner_HashRates_Check = $Miner_HashRates
-            if($_.New)
+            if($Miner_HashRates -ne $null)
             {
-                sleep 10
-                $Miner_HashRates_Check = Get-HashRate $_.API
-            }
+                $_.HashRate = $Miner_HashRates | Select -First $_.Algorithms.Count
+
+                $Miner_HashRates_Check = $Miner_HashRates
+                if($_.New)
+                {
+                    sleep 10
+                    $Miner_HashRates_Check = Get-HashRate $_.API
+                }
             
-            for($i = 0; $i -lt [Math]::Min($_.Algorithms.Count, $Miner_HashRates.Count); $i++)
-            {
-                if([Math]::Abs(($Miner_HashRates | Select -Index $i)-($Miner_HashRates_Check | Select -Index $i)) -le ($Miner_HashRates | Select -Index $i)*$Delta)
+                for($i = 0; $i -lt [Math]::Min($_.Algorithms.Count, $Miner_HashRates.Count); $i++)
                 {
-                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate" -Value ((($Miner_HashRates | Select -Index $i),($Miner_HashRates_Check | Select -Index $i) | Measure -Maximum).Maximum)
+                    if([Math]::Abs(($Miner_HashRates | Select -Index $i)-($Miner_HashRates_Check | Select -Index $i)) -le ($Miner_HashRates | Select -Index $i)*$Delta)
+                    {
+                        $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate" -Value ((($Miner_HashRates | Select -Index $i),($Miner_HashRates_Check | Select -Index $i) | Measure -Maximum).Maximum)
+                    }
+                    else
+                    {
+                        $New = $true
+                    }
                 }
-                else
-                {
-                    $New = $true
-                }
-            }
 
-            $_.New = $New
+                $_.New = $New
+            }
         }
     }
 }
