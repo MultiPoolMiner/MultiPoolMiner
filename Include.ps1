@@ -290,7 +290,7 @@ function Get-HashRate
     }
 }
 
-Filter ConvertTo-Hash { 
+filter ConvertTo-Hash { 
     $Hash = $_
     switch ([math]::truncate([math]::log($Hash,[Math]::Pow(1000,1)))) {
         0 {"{0:n0}  H" -f ($Hash / [Math]::Pow(1000,0))}
@@ -299,5 +299,41 @@ Filter ConvertTo-Hash {
         3 {"{0:n0} GH" -f ($Hash / [Math]::Pow(1000,3))}
         4 {"{0:n0} TH" -f ($Hash / [Math]::Pow(1000,4))}
         Default {"{0:n0} PH" -f ($Hash / [Math]::Pow(1000,5))}
+    }
+}
+
+function Get-Permutation {
+    param(
+        [Parameter(Mandatory=$true)]
+        [Array]$Value, 
+        [Parameter(Mandatory=$false)]
+        [Int]$Size = $Value.Count
+    )
+    for($i = 0; $i -lt $Size; $i++)
+    {
+        Get-Permutation $Value ($Size - 1)
+        if($Size -eq 2){[PSCustomObject]@{Permutation = $Value.Clone()}}
+        $z = 0
+        $position = ($Value.Count - $Size)
+        $temp = $Value[$position]           
+        for($z=($position+1);$z -lt $Value.Count; $z++)
+        {
+            $Value[($z-1)] = $Value[$z]               
+        }
+        $Value[($z-1)] = $temp
+    }
+}
+
+function Get-Combination {
+    param(
+        [Parameter(Mandatory=$true)]
+        [Array]$Value
+    )
+
+    $Permutations = Get-Permutation ($Value | ForEach {$Value.IndexOf($_)})
+
+    for($i = $Value.Count; $i -gt 0; $i--)
+    {
+        $Permutations | ForEach {[PSCustomObject]@{Combination = ($_.Permutation | Select -First $i | Sort {$_})}} | Sort Combination -Unique | ForEach {[PSCustomObject]@{Combination = ($_.Combination | ForEach {$Value.GetValue($_)})}}
     }
 }
