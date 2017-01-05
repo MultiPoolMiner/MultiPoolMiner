@@ -5,10 +5,7 @@ if((Test-Path $Path) -eq $false)
     $FileName = "nheqminer.zip"
     try
     {
-        if(Test-Path $FileName)
-        {
-            Remove-Item $FileName
-        }
+        if(Test-Path $FileName){Remove-Item $FileName}
         Invoke-WebRequest "https://github.com/nicehash/nheqminer/releases/download/0.4b/nheqminer_v0.4b.zip" -OutFile $FileName -UseBasicParsing
         Expand-Archive $FileName (Split-Path $Path)
     }
@@ -42,5 +39,6 @@ $Devices = ($process.StandardOutput.ReadToEnd() | Select-String "#[0-9]" -AllMat
     Path = $Path
     Arguments = '-a ' + $Port + ' -l $($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User) -t 0 -cd ' + $Devices
     HashRates = [PSCustomObject]@{Equihash = '$($Stats.' + $Name + '_Equihash_HashRate.Day)'}
-    API = 'Nheqminer_' + $Port
+    API = 'Nheqminer'
+    Port = $Port
 }

@@ -4,20 +4,23 @@
         "Path":  ".\\Bin\\Claymore\\Cryptonight\\NsGpuCNMiner.exe",
         "Arguments":  "-o $($Pools.Equihash.Protocol)://$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port) -u $($Pools.Cryptonight.User) -p x",
         "HashRates":  {"Cryptonight":  "$($Stats.Claymore_Cryptonight_HashRate.Day)"},
-        "API":  "Claymore"
+        "API":  "Claymore",
+        "Port":  "3333"
     },
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\Claymore\\Equihash\\ZecMiner64.exe",
         "Arguments":  "-zpool $($Pools.Equihash.Protocol)://$($Pools.Equihash.Host):$($Pools.Equihash.Port) -zwal $($Pools.Equihash.User) -zpsw x",
         "HashRates":  {"Equihash":  "$($Stats.Claymore_Equihash_HashRate.Day)"},
-        "API":  "Claymore"
+        "API":  "Claymore",
+        "Port":  "3333"
     },
     {
         "Type":  ["AMD","NVIDIA"],
         "Path":  ".\\Bin\\Claymore\\Ethash\\EthDcrMiner64.exe",
         "Arguments":  "-epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw x -esm 3 -allpools 1",
         "HashRates":  {"Ethash":  "$($Stats.Claymore_Ethash_HashRate.Day)"},
-        "API":  "Claymore"
+        "API":  "Claymore",
+        "Port":  "3333"
     }
 ]

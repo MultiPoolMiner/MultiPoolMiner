@@ -5,10 +5,7 @@ if((Test-Path $Path) -eq $false)
     $FileName = "ccminer.zip"
     try
     {
-        if(Test-Path $FileName)
-        {
-            Remove-Item $FileName
-        }
+        if(Test-Path $FileName){Remove-Item $FileName}
         Invoke-WebRequest "https://github.com/nicehash/cpuminer-multi/releases/download/new-1.0.0/cpuminer.zip" -OutFile $FileName -UseBasicParsing
         Expand-Archive $FileName (Split-Path $Path)
     }
@@ -42,6 +39,7 @@ $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name 
         Path = $Path
         Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x')
         HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Day)')}
-        API = 'Cpuminer'
+        API = 'Ccminer'
+        Port = 4048
     }
 }

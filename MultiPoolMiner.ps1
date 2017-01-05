@@ -132,6 +132,7 @@ while($true)
                 Arguments = $_.Arguments
                 Process = Start-Process $_.Path $_.Arguments -WorkingDirectory (Split-Path $_.Path) -PassThru
                 API = $_.API
+                Port = $_.Port
                 Algorithms = $_.HashRates.PSObject.Properties.Name
                 New = $true
                 Active = [TimeSpan]0
@@ -173,7 +174,7 @@ while($true)
         }
         else
         {
-            $Miner_HashRates = Get-HashRate $_.API
+            $Miner_HashRates = Get-HashRate $_.API $_.Port
 
             if($Miner_HashRates -ne $null)
             {
@@ -183,7 +184,7 @@ while($true)
                 if($_.New)
                 {
                     sleep 10
-                    $Miner_HashRates_Check = Get-HashRate $_.API
+                    $Miner_HashRates_Check = Get-HashRate $_.API $_.Port
                 }
             
                 for($i = 0; $i -lt [Math]::Min($_.Algorithms.Count, $Miner_HashRates.Count); $i++)

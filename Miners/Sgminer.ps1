@@ -5,12 +5,12 @@ if((Test-Path $Path) -eq $false)
     $FileName = "sgminer.zip"
     try
     {
-        if(Test-Path $FileName)
-        {
-            Remove-Item $FileName
-        }
-        Invoke-WebRequest "https://github.com/nicehash/sgminer/releases/download/5.5.0a/sgminer-5.5.0-nicehash-46-windows-amd64.zip" -OutFile $FileName -UseBasicParsing
-        Expand-Archive $FileName (Split-Path $Path)
+        if(Test-Path $FileName){Remove-Item $FileName}
+        if(Test-Path "$(Split-Path (Split-Path $Path))\AMD"){Remove-Item "$(Split-Path (Split-Path $Path))\AMD" -Recurse}
+        if(Test-Path "$(Split-Path (Split-Path $Path))\sgminer-gm"){Remove-Item "$(Split-Path (Split-Path $Path))\sgminer-gm" -Recurse}
+        Invoke-WebRequest "https://github.com/genesismining/sgminer-gm/releases/download/5.5.4/sgminer-gm.zip" -OutFile $FileName -UseBasicParsing
+        Expand-Archive $FileName (Split-Path (Split-Path $Path))
+        Rename-Item "$(Split-Path (Split-Path $Path))\sgminer-gm" "AMD"
     }
     catch
     {
@@ -21,6 +21,9 @@ if((Test-Path $Path) -eq $false)
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
+    Equihash = 'equihash'
+    Cryptonight = 'cryptonight'
+    Ethash = 'ethash'
     Sia = 'sia'
     Yescrypt = 'yescrypt'
     BlakeVanilla = 'vanilla'
@@ -42,5 +45,6 @@ $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name 
         Arguments = -Join ('--api-listen -k ', $Algorithms.$_, ' -o $($Pools.Equihash.Protocol)://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x')
         HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Day)')}
         API = 'Xgminer'
+        Port = 4028
     }
 }

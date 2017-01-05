@@ -148,8 +148,12 @@ function Get-HashRate
 {
     param(
         [Parameter(Mandatory=$true)]
-        $API
+        $API, 
+        [Parameter(Mandatory=$true)]
+        $Port
     )
+    
+    $Server = "localhost"
 
     $Multiplier = 1000
 
@@ -157,61 +161,35 @@ function Get-HashRate
     {
         "xgminer"
         {
-            $server = "localhost"
-            $port = 4028
-            $message = @{command="summary"; parameter=""} | ConvertTo-Json
+            $Message = @{command="summary"; parameter=""} | ConvertTo-Json
 
-            $client = New-Object System.Net.Sockets.TcpClient $server, $port
-            $stream = $client.GetStream()
+            $Client = New-Object System.Net.Sockets.TcpClient $server, $port
+            $Stream = $Client.GetStream()
 
-            $writer = New-Object System.IO.StreamWriter $stream
-            $writer.Write($message)
-            $writer.Flush()
+            $Writer = New-Object System.IO.StreamWriter $Stream
+            $Writer.Write($Message)
+            $Writer.Flush()
 
-            $reader = New-Object System.IO.StreamReader $stream
+            $Reader = New-Object System.IO.StreamReader $Stream
 
-            $Request = $reader.ReadToEnd()
+            $Request = $Reader.ReadToEnd()
             $Data = ($Request.Substring($Request.IndexOf("{"),$Request.LastIndexOf("}")-$Request.IndexOf("{")+1) | ConvertFrom-Json).SUMMARY
-            [Decimal]$Data[0].'KHS 5s'*$Multiplier
+            ([Decimal]$Data[0].'KHS 5s'*$Multiplier)+([Decimal]$Data[0].'MHS 5s'*$Multiplier*$Multiplier)
         }
         "ccminer"
         {
-            $server = "localhost"
-            $port = 4068
-            $message = "summary"
+            $Message = "summary"
 
-            $client = New-Object System.Net.Sockets.TcpClient $server, $port
-            $stream = $client.GetStream()
+            $Client = New-Object System.Net.Sockets.TcpClient $server, $port
+            $Stream = $Client.GetStream()
 
-            $writer = New-Object System.IO.StreamWriter $stream
-            $writer.Write($message)
-            $writer.Flush()
+            $Writer = New-Object System.IO.StreamWriter $Stream
+            $Writer.Write($Message)
+            $Writer.Flush()
 
-            $reader = New-Object System.IO.StreamReader $stream
+            $Reader = New-Object System.IO.StreamReader $Stream
 
-            $Request = $reader.ReadToEnd()
-            $Data = $Request -split "[;=]"
-            if($Data[13] -ne 0)
-            {
-                [Decimal]$Data[11]*$Multiplier
-            }
-        }
-        "cpuminer"
-        {
-            $server = "localhost"
-            $port = 4048
-            $message = "summary"
-
-            $client = New-Object System.Net.Sockets.TcpClient $server, $port
-            $stream = $client.GetStream()
-
-            $writer = New-Object System.IO.StreamWriter $stream
-            $writer.Write($message)
-            $writer.Flush()
-
-            $reader = New-Object System.IO.StreamReader $stream
-
-            $Request = $reader.ReadToEnd()
+            $Request = $Reader.ReadToEnd()
             $Data = $Request -split "[;=]"
             if($Data[13] -ne 0)
             {
@@ -220,70 +198,32 @@ function Get-HashRate
         }
         "claymore"
         {
-            $Request = Invoke-WebRequest "http://localhost:3333" -UseBasicParsing
+            $Request = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing
             $Data = ($Request.Content.Substring($Request.Content.IndexOf("{"),$Request.Content.LastIndexOf("}")-$Request.Content.IndexOf("{")+1) | ConvertFrom-Json).result
-            if($Request.Content.Contains("ZEC:"))
+            if($Request.Content.Contains("ETH:"))
             {
-                [Decimal]$Data[2].Split(";")[0]
+                [Decimal]$Data[2].Split(";")[0]*$Multiplier
             }
             else
             {
-                [Decimal]$Data[2].Split(";")[0]*$Multiplier
+                [Decimal]$Data[2].Split(";")[0]
             }
 
             [Decimal]$Data[4].Split(";")[0]*$Multiplier
         }
-        "nheqminer_3334"
+        "nheqminer"
         {
-            $server = "localhost"
-            $port = 3334
-            $message = "status"
+            $Message = "status"
 
-            $client = New-Object System.Net.Sockets.TcpClient $server, $port
-            $stream = $client.GetStream()
+            $Client = New-Object System.Net.Sockets.TcpClient $server, $port
+            $Stream = $Client.GetStream()
 
-            $writer = New-Object System.IO.StreamWriter $stream
-            $writer.WriteLine($message)
-            $writer.Flush()
+            $Writer = New-Object System.IO.StreamWriter $Stream
+            $Writer.WriteLine($Message)
+            $Writer.Flush()
 
-            $reader = New-Object System.IO.StreamReader $stream
-            $Request = $reader.ReadLine()
-            $Data = ($Request | ConvertFrom-Json).result
-            [Decimal]$Data.speed_sps
-        }
-        "nheqminer_3335"
-        {
-            $server = "localhost"
-            $port = 3335
-            $message = "status"
-
-            $client = New-Object System.Net.Sockets.TcpClient $server, $port
-            $stream = $client.GetStream()
-
-            $writer = New-Object System.IO.StreamWriter $stream
-            $writer.WriteLine($message)
-            $writer.Flush()
-
-            $reader = New-Object System.IO.StreamReader $stream
-            $Request = $reader.ReadLine()
-            $Data = ($Request | ConvertFrom-Json).result
-            [Decimal]$Data.speed_sps
-        }
-        "nheqminer_3336"
-        {
-            $server = "localhost"
-            $port = 3336
-            $message = "status"
-
-            $client = New-Object System.Net.Sockets.TcpClient $server, $port
-            $stream = $client.GetStream()
-
-            $writer = New-Object System.IO.StreamWriter $stream
-            $writer.WriteLine($message)
-            $writer.Flush()
-
-            $reader = New-Object System.IO.StreamReader $stream
-            $Request = $reader.ReadLine()
+            $Reader = New-Object System.IO.StreamReader $Stream
+            $Request = $Reader.ReadLine()
             $Data = ($Request | ConvertFrom-Json).result
             [Decimal]$Data.speed_sps
         }

@@ -14,6 +14,8 @@ if(-not $MiningPoolHub_Request.success)
     return
 }
 
+$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
+
 $Locations = 'Europe', 'US', 'Asia'
 
 $Locations | ForEach {
@@ -22,7 +24,7 @@ $Locations | ForEach {
     $MiningPoolHub_Request.return | ForEach {
         $Algorithm = $_.algo -replace "-"
 
-        $Stat = Set-Stat -Name "MiningPoolHub_$($Algorithm)_Profit" -Value ([decimal]$_.profit/1000000000)
+        $Stat = Set-Stat -Name "$($Name)_$($Algorithm)_Profit" -Value ([decimal]$_.profit/1000000000)
         $Price = (($Stat.Live*(1-[Math]::Min($Stat.Day_Fluctuation,1)))+($Stat.Day*(0+[Math]::Min($Stat.Day_Fluctuation,1))))
         
         [PSCustomObject]@{

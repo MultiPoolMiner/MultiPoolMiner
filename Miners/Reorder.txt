@@ -1,0 +1,18 @@
+[
+    {
+        "Type":  "AMD",
+        "Path":  ".\\Bin\\Reorder\\cgminer.exe",
+        "Arguments":  "--api-listen --skein -o $($Pools.Skein.Protocol)://$($Pools.Skein.Host):$($Pools.Skein.Port) -u $($Pools.Skein.User) -p x",
+        "HashRates":  {"Skein":  "$($Stats.Reorder_Skein_HashRate.Day)"},
+        "API":  "Xgminer",
+        "Port":  "4028"
+    },
+    {
+        "Type":  "AMD",
+        "Path":  ".\\Bin\\Reorder\\cgminer.exe",
+        "Arguments":  "--api-listen --keccak -o $($Pools.Keccak.Protocol)://$($Pools.Keccak.Host):$($Pools.Keccak.Port) -u $($Pools.Keccak.User) -p x",
+        "HashRates":  {"Keccak":  "$($Stats.Reorder_Keccak_HashRate.Day)"},
+        "API":  "Xgminer",
+        "Port":  "4028"
+    }
+]
