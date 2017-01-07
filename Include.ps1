@@ -174,7 +174,8 @@ function Get-HashRate
 
             $Request = $Reader.ReadToEnd()
             $Data = ($Request.Substring($Request.IndexOf("{"),$Request.LastIndexOf("}")-$Request.IndexOf("{")+1) | ConvertFrom-Json).SUMMARY
-            ([Decimal]$Data[0].'KHS 5s'*$Multiplier)+([Decimal]$Data[0].'MHS 5s'*$Multiplier*$Multiplier)
+            if($Data[0].'MHS 5s' -ne $null){[Decimal]$Data[0].'MHS 5s'*$Multiplier*$Multiplier}
+            elseif($Data[0].'KHS 5s' -ne $null){[Decimal]$Data[0].'KHS 5s'*$Multiplier}
         }
         "ccminer"
         {
