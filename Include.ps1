@@ -192,7 +192,7 @@ function Get-HashRate
 
             $Request = $Reader.ReadToEnd()
             $Data = $Request -split "[;=]"
-            if($Data[13] -ne 0)
+            if($Data[13] -ne 0 -or $Data[11] -ne 0)
             {
                 [Decimal]$Data[11]*$Multiplier
             }
