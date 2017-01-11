@@ -1,22 +1,24 @@
-$Path = '.\Bin\Sgminer_miningpoolhub\sgminer.exe'
+$Path = '.\Bin\all-in-one-miner-20160728\AMD\sgminer.exe'
 
 if((Test-Path $Path) -eq $false)
 {
-    $FileName = "sgminer-gm.zip"
+    $FileName = "20160728.zip"
     try
     {
         if(Test-Path $FileName)
         {
             Remove-Item $FileName
         }
-        Invoke-WebRequest "https://github.com/genesismining/sgminer-gm/releases/download/5.5.4/sgminer-gm.zip" -OutFile $FileName -UseBasicParsing
-        Expand-Archive $FileName (Split-Path (Split-Path $Path))
+        Invoke-WebRequest "https://github.com/miningpoolhub/all-in-one-miner/archive/20160728.zip" -OutFile $FileName -UseBasicParsing
+        Expand-Archive $FileName -DestinationPath '.\Bin\' 
     }
     catch
     {
         return
     }
 }
+
+Get-ChildItem -Path ".\Bin\all-in-one-miner-20160728\AMD\kernel\*.cl" -Recurse | Move-Item -Destination ".\Bin\all-in-one-miner-20160728\AMD" -Force
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
