@@ -1,15 +1,15 @@
-$Path = '.\Bin\gatelessgate-0.1.0-win64\gatelessgate.exe'
+$Path = '.\Bin\gatelessgate-0.1.1-win64\gatelessgate.exe'
 
 if((Test-Path $Path) -eq $false)
 {
-    $FileName = "gatelessgate-0.1.0-win64.zip"
+    $FileName = "gatelessgate-0.1.1-win64.zip"
     try
     {
         if(Test-Path $FileName)
         {
             Remove-Item $FileName
         }
-        Invoke-WebRequest "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.0/gatelessgate-0.1.0-win64.zip" -OutFile $FileName -UseBasicParsing
+        Invoke-WebRequest "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.1/gatelessgate-0.1.1-win64.zip" -OutFile $FileName -UseBasicParsing
         Expand-Archive $FileName -DestinationPath '.\Bin\' 
     }
     catch
