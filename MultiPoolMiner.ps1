@@ -173,14 +173,6 @@ while($true)
         if($_.Process -eq $null -or $_.Process.HasExited)
         {
             if($_.Status -eq "Running"){$_.Status = "Failed"}
-
-            for($i = 0; $i -lt $_.Algorithms.Count; $i++)
-            {
-                if((Get-Stat "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate") -eq $null)
-                {
-                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate" -Value 0
-                }
-            }
         }
         else
         {
@@ -196,6 +188,14 @@ while($true)
                 }
 
                 $_.New = $false
+            }
+        }
+
+        for($i = $Miner_HashRates.Count; $i -lt $_.Algorithms.Count; $i++)
+        {
+            if((Get-Stat "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate") -eq $null)
+            {
+                $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate" -Value 0
             }
         }
     }

@@ -285,7 +285,7 @@ function Get-HashRate {
             {
                 $HashRate = Get-Content ".\Wrapper_$Port.ps1"
                 
-                if($HashRate -eq $null){sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.ps1"}
+                if($HashRate -eq $null){sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.txt"}
 
                 if($HashRate -eq $null){$HashRates = @(); break}
 
