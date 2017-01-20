@@ -1,6 +1,6 @@
-﻿$Path = '.\Bin\NVIDIA-Nanashi\ccminer.exe'
-$Uri = "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip"
-$Uri_SubFolder = $false
+﻿$Path = '.\Bin\Equihash-NiceHash\nheqminer.exe'
+$Uri = "https://github.com/nicehash/nheqminer/releases/download/0.5c/Windows_x64_nheqminer-5c.zip"
+$Uri_SubFolder = $true
 
 if((Test-Path $Path) -eq $false)
 {
@@ -25,32 +25,14 @@ if((Test-Path $Path) -eq $false)
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Algorithms = [PSCustomObject]@{
-    #Equihash = 'equihash'
-    #Cryptonight = 'cryptonight'
-    #Ethash = 'ethash'
-    Sia = 'sia'
-    Yescrypt = 'yescrypt'
-    BlakeVanilla = 'vanilla'
-    Lyra2RE2 = 'lyra2v2'
-    Skein = 'skein'
-    Qubit = 'qubit'
-    NeoScrypt = 'neoscrypt'
-    X11 = 'x11'
-    MyriadGroestl = 'myr-gr'
-    Groestl = 'groestl'
-    Keccak = 'keccak'
-    Scrypt = 'scrypt'
-}
+$Port = 3334
 
-$Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
-    [PSCustomObject]@{
-        Type = 'NVIDIA'
-        Path = $Path
-        Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x')
-        HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Day)')}
-        API = 'Ccminer'
-        Port = 4068
-        Wrap = $false
-    }
+[PSCustomObject]@{
+    Type = 'CPU'
+    Path = $Path
+    Arguments = -Join ('-a ', $Port, ' -l $($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User)')
+    HashRates = [PSCustomObject]@{Equihash = '$($Stats.' + $Name + '_Equihash_HashRate.Day)'}
+    API = 'Nheqminer'
+    Port = $Port
+    Wrap = $false
 }

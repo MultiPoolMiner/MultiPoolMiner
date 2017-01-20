@@ -1,5 +1,5 @@
-﻿$Path = '.\Bin\NVIDIA-Nanashi\ccminer.exe'
-$Uri = "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip"
+﻿$Path = '.\Bin\Cryptonight-KlausT\ccminer-cryptonight.exe'
+$Uri = "https://github.com/KlausT/ccminer-cryptonight/releases/download/2.00/ccminer-cryptonight-200-x64.zip"
 $Uri_SubFolder = $false
 
 if((Test-Path $Path) -eq $false)
@@ -26,21 +26,7 @@ if((Test-Path $Path) -eq $false)
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
-    #Equihash = 'equihash'
-    #Cryptonight = 'cryptonight'
-    #Ethash = 'ethash'
-    Sia = 'sia'
-    Yescrypt = 'yescrypt'
-    BlakeVanilla = 'vanilla'
-    Lyra2RE2 = 'lyra2v2'
-    Skein = 'skein'
-    Qubit = 'qubit'
-    NeoScrypt = 'neoscrypt'
-    X11 = 'x11'
-    MyriadGroestl = 'myr-gr'
-    Groestl = 'groestl'
-    Keccak = 'keccak'
-    Scrypt = 'scrypt'
+    Cryptonight = 'cryptonight'
 }
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
