@@ -2,7 +2,25 @@
     {
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\Equihash-EWBF\\miner.exe",
-        "Arguments":  "--boff --server $($Pools.Equihash.Host) --user $($Pools.Equihash.User) --pass x --port $($Pools.Equihash.Port)",
+        "Arguments":  "--boff --server $($Pools.Equihash.Host) --user $($Pools.Equihash.User) --pass x --port $($Pools.Equihash.Port) --eexit 1 --solver 0",
+        "HashRates":  {"Equihash":  "$($Stats.EWBF_Equihash_HashRate.Day)"},
+        "API":  "Wrapper",
+        "Port":  "0",
+        "Wrap":  true
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\Equihash-EWBF\\miner.exe",
+        "Arguments":  "--boff --server $($Pools.Equihash.Host) --user $($Pools.Equihash.User) --pass x --port $($Pools.Equihash.Port) --eexit 1 --solver 1",
+        "HashRates":  {"Equihash":  "$($Stats.EWBF_Equihash_HashRate.Day)"},
+        "API":  "Wrapper",
+        "Port":  "0",
+        "Wrap":  true
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\Equihash-EWBF\\miner.exe",
+        "Arguments":  "--boff --server $($Pools.Equihash.Host) --user $($Pools.Equihash.User) --pass x --port $($Pools.Equihash.Port) --eexit 1 --solver 2",
         "HashRates":  {"Equihash":  "$($Stats.EWBF_Equihash_HashRate.Day)"},
         "API":  "Wrapper",
         "Port":  "0",
