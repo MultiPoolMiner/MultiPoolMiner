@@ -1,6 +1,6 @@
-﻿$Path = '.\Bin\NVIDIA-Nanashi\ccminer.exe'
-$Uri = "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip"
-$Uri_SubFolder = $false
+﻿$Path = '.\Bin\NVIDIA-SP\ccminer.exe'
+$Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z"
+$Uri_SubFolder = $true
 
 if((Test-Path $Path) -eq $false)
 {

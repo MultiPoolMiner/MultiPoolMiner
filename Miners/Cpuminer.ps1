@@ -1,5 +1,5 @@
-﻿$Path = '.\Bin\NVIDIA-Nanashi\ccminer.exe'
-$Uri = "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip"
+﻿$Path = '.\Bin\CPU-TPruvot\cpuminer-x64.exe'
+$Uri = "https://github.com/tpruvot/cpuminer-multi/releases/download/v1.3-multi/cpuminer-multi-rel1.3.zip"
 $Uri_SubFolder = $false
 
 if((Test-Path $Path) -eq $false)
@@ -27,7 +27,7 @@ $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
     #Equihash = 'equihash'
-    #Cryptonight = 'cryptonight'
+    Cryptonight = 'cryptonight'
     #Ethash = 'ethash'
     Sia = 'sia'
     Yescrypt = 'yescrypt'
@@ -45,12 +45,12 @@ $Algorithms = [PSCustomObject]@{
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
     [PSCustomObject]@{
-        Type = 'NVIDIA'
+        Type = 'CPU'
         Path = $Path
         Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x')
         HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Day)')}
         API = 'Ccminer'
-        Port = 4068
+        Port = 4048
         Wrap = $false
     }
 }
