@@ -144,177 +144,102 @@ function Get-ChildItemContent {
     $ChildItems
 }
 
-function Get-HashRate {
+function Get-HashRate
+{
     param(
         [Parameter(Mandatory=$true)]
-        [String]$API, 
+        $API, 
         [Parameter(Mandatory=$true)]
-        [Int]$Port, 
-        [Parameter(Mandatory=$false)]
-        [Bool]$Safe = $false
+        $Port
     )
     
     $Server = "localhost"
+
     $Multiplier = 1000
-    $Delta = 0.05
-    $Interval = 5
-    $HashRates = @()
-    $HashRates_Dual = @()
 
     switch($API)
     {
         "xgminer"
         {
             $Message = @{command="summary"; parameter=""} | ConvertTo-Json
-            
-            do
-            {
-                $Client = New-Object System.Net.Sockets.TcpClient $server, $port
-                $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
-                $Reader = New-Object System.IO.StreamReader $Client.GetStream()
-                $Writer.AutoFlush = $true
 
-                $Writer.WriteLine($Message)
-                $Request = $Reader.ReadLine()
+            $Client = New-Object System.Net.Sockets.TcpClient $server, $port
+            $Stream = $Client.GetStream()
 
-                $Data = $Request.Substring($Request.IndexOf("{"),$Request.LastIndexOf("}")-$Request.IndexOf("{")+1) -replace " ","_" | ConvertFrom-Json
+            $Writer = New-Object System.IO.StreamWriter $Stream
+            $Writer.Write($Message)
+            $Writer.Flush()
 
-                $HashRate = if($Data.SUMMARY.HS_5s -ne $null){[Decimal]$Data.SUMMARY.HS_5s*[Math]::Pow($Multiplier,0)}
-                    elseif($Data.SUMMARY.KHS_5s -ne $null){[Decimal]$Data.SUMMARY.KHS_5s*[Math]::Pow($Multiplier,1)}
-                    elseif($Data.SUMMARY.MHS_5s -ne $null){[Decimal]$Data.SUMMARY.MHS_5s*[Math]::Pow($Multiplier,2)}
-                    elseif($Data.SUMMARY.GHS_5s -ne $null){[Decimal]$Data.SUMMARY.GHS_5s*[Math]::Pow($Multiplier,3)}
-                    elseif($Data.SUMMARY.THS_5s -ne $null){[Decimal]$Data.SUMMARY.THS_5s*[Math]::Pow($Multiplier,4)}
-                    elseif($Data.SUMMARY.PHS_5s -ne $null){[Decimal]$Data.SUMMARY.PHS_5s*[Math]::Pow($Multiplier,5)}
-                    else{$HashRates = @(); break}
+            $Reader = New-Object System.IO.StreamReader $Stream
 
-                $HashRates += $HashRate
-
-                if(-not $Safe){break}
-
-                $HashRate = if($Data.SUMMARY.HS_av -ne $null){[Decimal]$Data.SUMMARY.HS_av*[Math]::Pow($Multiplier,0)}
-                    elseif($Data.SUMMARY.KHS_av -ne $null){[Decimal]$Data.SUMMARY.KHS_av*[Math]::Pow($Multiplier,1)}
-                    elseif($Data.SUMMARY.MHS_av -ne $null){[Decimal]$Data.SUMMARY.MHS_av*[Math]::Pow($Multiplier,2)}
-                    elseif($Data.SUMMARY.GHS_av -ne $null){[Decimal]$Data.SUMMARY.GHS_av*[Math]::Pow($Multiplier,3)}
-                    elseif($Data.SUMMARY.THS_av -ne $null){[Decimal]$Data.SUMMARY.THS_av*[Math]::Pow($Multiplier,4)}
-                    elseif($Data.SUMMARY.PHS_av -ne $null){[Decimal]$Data.SUMMARY.PHS_av*[Math]::Pow($Multiplier,5)}
-                    else{$HashRates = @(); break}
-
-                $HashRates += $HashRate
-
-                sleep $Interval
-            } while($HashRates.Count -lt 6)
+            $Request = $Reader.ReadToEnd()
+            $Data = ($Request.Substring($Request.IndexOf("{"),$Request.LastIndexOf("}")-$Request.IndexOf("{")+1) | ConvertFrom-Json).SUMMARY
+            if($Data[0].'MHS 5s' -ne $null){[Decimal]$Data[0].'MHS 5s'*$Multiplier*$Multiplier}
+            elseif($Data[0].'KHS 5s' -ne $null){[Decimal]$Data[0].'KHS 5s'*$Multiplier}
         }
         "ccminer"
         {
             $Message = "summary"
 
-            do
+            $Client = New-Object System.Net.Sockets.TcpClient $server, $port
+            $Stream = $Client.GetStream()
+
+            $Writer = New-Object System.IO.StreamWriter $Stream
+            $Writer.Write($Message)
+            $Writer.Flush()
+
+            $Reader = New-Object System.IO.StreamReader $Stream
+
+            $Request = $Reader.ReadToEnd()
+            $Data = $Request -split "[;=]"
+            if($Data[13] -ne 0 -or $Data[11] -ne 0)
             {
-                $Client = New-Object System.Net.Sockets.TcpClient $server, $port
-                $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
-                $Reader = New-Object System.IO.StreamReader $Client.GetStream()
-                $Writer.AutoFlush = $true
+                [Decimal]$Data[11]*$Multiplier
+            }
+        }
+        "claymore"
+        {
+            $Request = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing
+            $Data = ($Request.Content.Substring($Request.Content.IndexOf("{"),$Request.Content.LastIndexOf("}")-$Request.Content.IndexOf("{")+1) | ConvertFrom-Json).result
+            if($Request.Content.Contains("ETH:"))
+            {
+                [Decimal]$Data[2].Split(";")[0]*$Multiplier
+            }
+            else
+            {
+                [Decimal]$Data[2].Split(";")[0]
+            }
 
-                $Writer.WriteLine($Message)
-                $Request = $Reader.ReadLine()
-
-                $Data = $Request -split ";" | ConvertFrom-StringData
-
-                $HashRate = if($Data.ACC -ne 0 -or $Data.KHS -ne 0){$Data.KHS}
-
-                if($HashRate -eq $null){$HashRates = @(); break}
-
-                $HashRates += [Decimal]$HashRate*$Multiplier
-
-                if(-not $Safe){break}
-
-                sleep $Interval
-            } while($HashRates.Count -lt 6)
+            [Decimal]$Data[4].Split(";")[0]*$Multiplier
         }
         "nheqminer"
         {
             $Message = "status"
 
             $Client = New-Object System.Net.Sockets.TcpClient $server, $port
-            $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
-            $Reader = New-Object System.IO.StreamReader $Client.GetStream()
-            $Writer.AutoFlush = $true
+            $Stream = $Client.GetStream()
 
-            do
-            {
-                $Writer.WriteLine($Message)
-                $Request = $Reader.ReadLine()
+            $Writer = New-Object System.IO.StreamWriter $Stream
+            $Writer.WriteLine($Message)
+            $Writer.Flush()
 
-                $Data = $Request | ConvertFrom-Json
-                
-                $HashRate = $Data.result.speed_sps
-
-                if($HashRate -eq $null){$HashRates = @(); break}
-
-                $HashRates += [Decimal]$HashRate
-
-                if(-not $Safe){break}
-
-                sleep $Interval
-            } while($HashRates.Count -lt 6)
-        }
-        "claymore"
-        {
-            do
-            {
-                $Request = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing
-                
-                $Data = $Request.Content.Substring($Request.Content.IndexOf("{"),$Request.Content.LastIndexOf("}")-$Request.Content.IndexOf("{")+1) | ConvertFrom-Json
-                
-                $HashRate = $Data.result[2].Split(";")[0]
-                $HashRate_Dual = $Data.result[4].Split(";")[0]
-
-                if($HashRate -eq $null -or $HashRate_Dual -eq $null){$HashRates = @(); $HashRate_Dual = @(); break}
-
-                if($Request.Content.Contains("ETH:")){$HashRates += [Decimal]$HashRate*$Multiplier; $HashRates_Dual += [Decimal]$HashRate_Dual*$Multiplier}
-                else{$HashRates += [Decimal]$HashRate; $HashRates_Dual += [Decimal]$HashRate_Dual}
-
-                if(-not $Safe){break}
-
-                sleep $Interval
-            } while($HashRates.Count -lt 6)
-        }
-        "wrapper"
-        {
-            do
-            {
-                $HashRate = Get-Content ".\Wrapper_$Port.ps1"
-                
-                if($HashRate -eq $null){sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.ps1"}
-
-                if($HashRate -eq $null){$HashRates = @(); break}
-
-                $HashRates += [Decimal]$HashRate
-
-                if(-not $Safe){break}
-
-                sleep $Interval
-            } while($HashRates.Count -lt 6)
+            $Reader = New-Object System.IO.StreamReader $Stream
+            $Request = $Reader.ReadLine()
+            $Data = ($Request | ConvertFrom-Json).result
+            [Decimal]$Data.speed_sps
         }
     }
-
-    $HashRates_Info = $HashRates | Measure -Maximum -Minimum -Average
-    if($HashRates_Info.Maximum-$HashRates_Info.Minimum -le $HashRates_Info.Average*$Delta){$HashRates_Info.Maximum}
-
-    $HashRates_Info_Dual = $HashRates_Dual | Measure -Maximum -Minimum -Average
-    if($HashRates_Info_Dual.Maximum-$HashRates_Info_Dual.Minimum -le $HashRates_Info_Dual.Average*$Delta){$HashRates_Info_Dual.Maximum}
 }
 
 filter ConvertTo-Hash { 
     $Hash = $_
-    switch([math]::truncate([math]::log($Hash,[Math]::Pow(1000,1))))
-    {
-        0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000,0))}
-        1 {"{0:n2} KH" -f ($Hash / [Math]::Pow(1000,1))}
-        2 {"{0:n2} MH" -f ($Hash / [Math]::Pow(1000,2))}
-        3 {"{0:n2} GH" -f ($Hash / [Math]::Pow(1000,3))}
-        4 {"{0:n2} TH" -f ($Hash / [Math]::Pow(1000,4))}
-        Default {"{0:n2} PH" -f ($Hash / [Math]::Pow(1000,5))}
+    switch ([math]::truncate([math]::log($Hash,[Math]::Pow(1000,1)))) {
+        0 {"{0:n0}  H" -f ($Hash / [Math]::Pow(1000,0))}
+        1 {"{0:n0} KH" -f ($Hash / [Math]::Pow(1000,1))}
+        2 {"{0:n0} MH" -f ($Hash / [Math]::Pow(1000,2))}
+        3 {"{0:n0} GH" -f ($Hash / [Math]::Pow(1000,3))}
+        4 {"{0:n0} TH" -f ($Hash / [Math]::Pow(1000,4))}
+        Default {"{0:n0} PH" -f ($Hash / [Math]::Pow(1000,5))}
     }
 }
 
@@ -328,7 +253,7 @@ function Get-Permutation {
     for($i = 0; $i -lt $Size; $i++)
     {
         Get-Permutation $Value ($Size - 1)
-        if($Size -eq 1){[PSCustomObject]@{Permutation = $Value.Clone()}}
+        if($Size -eq 2){[PSCustomObject]@{Permutation = $Value.Clone()}}
         $z = 0
         $position = ($Value.Count - $Size)
         $temp = $Value[$position]           
@@ -352,44 +277,4 @@ function Get-Combination {
     {
         $Permutations | ForEach {[PSCustomObject]@{Combination = ($_.Permutation | Select -First $i | Sort {$_})}} | Sort Combination -Unique | ForEach {[PSCustomObject]@{Combination = ($_.Combination | ForEach {$Value.GetValue($_)})}}
     }
-}
-
-function Start-SubProcess {
-    param(
-        [Parameter(Mandatory=$true)]
-        [String]$FilePath, 
-        [Parameter(Mandatory=$false)]
-        [String]$ArgumentList = "", 
-        [Parameter(Mandatory=$false)]
-        [String]$WorkingDirectory = ""
-    )
-
-    $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory {
-        param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory)
-
-        $ControllerProcess = Get-Process -Id $ControllerProcessID
-        if($ControllerProcess -eq $null){return}
-
-        $ProcessParam = @{}
-        $ProcessParam.Add("FilePath", $FilePath)
-        if($ArgumentList -ne ""){$ProcessParam.Add("ArgumentList", $ArgumentList)}
-        if($WorkingDirectory -ne ""){$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
-        $Process = Start-Process @ProcessParam -PassThru
-        if($Process -eq $null){[PSCustomObject]@{ProcessId = $null}; return}
-
-        [PSCustomObject]@{ProcessId = $Process.Id; ProcessHandle = $Process.Handle}
-        
-        $ControllerProcess.Handle | Out-Null
-        $Process.Handle | Out-Null
-
-        do{if($ControllerProcess.WaitForExit(1000)){$Process.CloseMainWindow() | Out-Null}}
-        while($Process.HasExited -eq $false)
-    }
-
-    do{sleep 1; $JobOutput = Receive-Job $Job}
-    while($JobOutput -eq $null)
-
-    $Process = Get-Process | Where Id -EQ $JobOutput.ProcessId
-    $Process.Handle | Out-Null
-    $Process
 }

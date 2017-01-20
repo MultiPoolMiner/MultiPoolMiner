@@ -1,12 +1,12 @@
-﻿$Path = '.\Bin\Nanashi\ccminer.exe'
+﻿$Path = '.\Bin\NVIDIA\ccminer.exe'
 
 if((Test-Path $Path) -eq $false)
 {
-    $FileName = "ccminer_nanashi.zip"
+    $FileName = "ccminer.zip"
     try
     {
         if(Test-Path $FileName){Remove-Item $FileName}
-        Invoke-WebRequest "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip" -OutFile $FileName -UseBasicParsing
+        Invoke-WebRequest "https://github.com/nicehash/ccminer-tpruvot/releases/download/1.8-decred-nicehash-2/ccminer.zip" -OutFile $FileName -UseBasicParsing
         Expand-Archive $FileName (Split-Path $Path)
     }
     catch

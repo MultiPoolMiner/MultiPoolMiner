@@ -17,11 +17,11 @@ if((Test-Path $Path) -eq $false)
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Port = 3335
+$Port = 3336
 
 $pinfo = New-Object System.Diagnostics.ProcessStartInfo
 $pinfo.FileName = Convert-Path $Path
-$pinfo.Arguments = "-ci"
+$pinfo.Arguments = "-oi"
 $pinfo.UseShellExecute = $false
 $pinfo.CreateNoWindow = $true
 $pinfo.RedirectStandardOutput = $true
@@ -35,9 +35,9 @@ $process.WaitForExit() | Out-Null
 $Devices = ($process.StandardOutput.ReadToEnd() | Select-String "#[0-9]" -AllMatches).Matches.Value -replace "#" -join " "
 
 [PSCustomObject]@{
-    Type = 'NVIDIA'
+    Type = 'AMD'
     Path = $Path
-    Arguments = '-a ' + $Port + ' -l $($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User) -t 0 -cd ' + $Devices
+    Arguments = '-a ' + $Port + ' -l $($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User) -t 0 -od ' + $Devices
     HashRates = [PSCustomObject]@{Equihash = '$($Stats.' + $Name + '_Equihash_HashRate.Day)'}
     API = 'Nheqminer'
     Port = $Port
