@@ -26,28 +26,46 @@ if((Test-Path $Path) -eq $false)
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
-    #Equihash = 'equihash'
-    #Cryptonight = 'cryptonight'
-    #Ethash = 'ethash'
-    Sia = 'sia'
-    Yescrypt = 'yescrypt'
-    BlakeVanilla = 'vanilla'
-    Lyra2RE2 = 'lyra2v2'
+    #Equihash = 'equihash' #not supported
+    #Cryptonight = 'cryptonight' #not supported
+    #Ethash = 'ethash' #not supported
+    #Sia = 'sia' #use TpruvoT
+    #Yescrypt = 'yescrypt' #use TpruvoT
+    #BlakeVanilla = 'vanilla' #use TpruvoT
+    #Lyra2RE2 = 'lyra2v2' #use TpruvoT
     Skein = 'skein'
-    Qubit = 'qubit'
-    NeoScrypt = 'neoscrypt'
-    X11 = 'x11'
-    MyriadGroestl = 'myr-gr'
-    Groestl = 'groestl'
-    Keccak = 'keccak'
-    Scrypt = 'scrypt'
+    #Qubit = 'qubit' #use TpruvoT
+    #NeoScrypt = 'neoscrypt' #use TpruvoT
+    #X11 = 'x11' #use TpruvoT
+    #MyriadGroestl = 'myr-gr' #use TpruvoT
+    #Groestl = 'groestl' #use TpruvoT
+    #Keccak = 'keccak' #use TpruvoT
+    #Scrypt = 'scrypt' #use TpruvoT
+}
+
+$Optimizations = [PSCustomObject]@{
+    Equihash = ''
+    Cryptonight = ''
+    Ethash = ''
+    Sia = ''
+    Yescrypt = ''
+    BlakeVanilla = ''
+    Lyra2RE2 = ''
+    Skein = ' -i 27'
+    Qubit = ''
+    NeoScrypt = ''
+    X11 = ''
+    MyriadGroestl = ''
+    Groestl = ''
+    Keccak = ''
+    Scrypt = ''
 }
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
     [PSCustomObject]@{
         Type = 'NVIDIA'
         Path = $Path
-        Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x')
+        Arguments = -Join ('-b 127.0.0.1:4068 -a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x', $Optimizations.$_)
         HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Day)')}
         API = 'Ccminer'
         Port = 4068

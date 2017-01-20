@@ -26,9 +26,9 @@ if((Test-Path $Path) -eq $false)
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
-    #Equihash = 'equihash'
-    #Cryptonight = 'cryptonight'
-    #Ethash = 'ethash'
+    #Equihash = 'equihash' #not supported
+    #Cryptonight = 'cryptonight' #not supported
+    #Ethash = 'ethash' #not supported
     Sia = 'sia'
     Yescrypt = 'yescrypt'
     BlakeVanilla = 'vanilla'
@@ -43,11 +43,29 @@ $Algorithms = [PSCustomObject]@{
     Scrypt = 'scrypt'
 }
 
+$Optimizations = [PSCustomObject]@{
+    Equihash = ''
+    Cryptonight = ''
+    Ethash = ''
+    Sia = ''
+    Yescrypt = ''
+    BlakeVanilla = ''
+    Lyra2RE2 = ''
+    Skein = ''
+    Qubit = ''
+    NeoScrypt = ''
+    X11 = ''
+    MyriadGroestl = ''
+    Groestl = ''
+    Keccak = ''
+    Scrypt = ''
+}
+
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
     [PSCustomObject]@{
         Type = 'NVIDIA'
         Path = $Path
-        Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x')
+        Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x', $Optimizations.$_)
         HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Day)')}
         API = 'Ccminer'
         Port = 4068

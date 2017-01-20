@@ -170,6 +170,8 @@ while($true)
     $ActiveMinerPrograms | ForEach {
         $_.HashRate = 0
         
+        if($_.Active -gt [TimeSpan]::FromMinutes(5)){$_.New = $false} #timeout
+
         if($_.Process -eq $null -or $_.Process.HasExited)
         {
             if($_.Status -eq "Running"){$_.Status = "Failed"}
@@ -191,11 +193,14 @@ while($true)
             }
         }
 
-        for($i = $Miner_HashRates.Count; $i -lt $_.Algorithms.Count; $i++)
+        if(-not $_.New)
         {
-            if((Get-Stat "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate") -eq $null)
+            for($i = $Miner_HashRates.Count; $i -lt $_.Algorithms.Count; $i++)
             {
-                $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate" -Value 0
+                if((Get-Stat "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate") -eq $null)
+                {
+                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select -Index $i)_HashRate" -Value 0
+                }
             }
         }
     }
