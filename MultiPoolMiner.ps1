@@ -120,6 +120,7 @@ while($true)
                 Activated = 0
                 Status = "Idle"
                 HashRate = 0
+                Benchmarked = 0
             }
         }
     }
@@ -170,8 +171,8 @@ while($true)
     $ActiveMinerPrograms | ForEach {
         $_.HashRate = 0
         $Miner_HashRates = $null
-        
-        if($_.Active -gt [TimeSpan]::FromMinutes(5)){$_.New = $false} #timeout
+
+        if($_.New){$_.Benchmarked++}
 
         if($_.Process -eq $null -or $_.Process.HasExited)
         {
@@ -179,7 +180,7 @@ while($true)
         }
         else
         {
-            $Miner_HashRates = Get-HashRate $_.API $_.Port $_.New
+            $Miner_HashRates = Get-HashRate $_.API $_.Port ($_.New -and $_.Benchmarked -lt 3)
 
             $_.HashRate = $Miner_HashRates | Select -First $_.Algorithms.Count
             
@@ -194,7 +195,8 @@ while($true)
             }
         }
 
-        if(-not $_.New -or $_.Process -eq $null -or $_.Process.HasExited)
+        #Benchmark timeout
+        if($_.Benchmarked -ge 3)
         {
             for($i = $Miner_HashRates.Count; $i -lt $_.Algorithms.Count; $i++)
             {
