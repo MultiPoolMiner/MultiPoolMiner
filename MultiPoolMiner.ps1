@@ -170,6 +170,8 @@ while($true)
     $ActiveMinerPrograms | ForEach {
         $_.HashRate = 0
         $Miner_HashRates = $null
+        
+        if($_.Active -gt [TimeSpan]::FromMinutes(5)){$_.New = $false} #timeout
 
         if($_.Process -eq $null -or $_.Process.HasExited)
         {
@@ -192,7 +194,7 @@ while($true)
             }
         }
 
-        if(-not $_.New)
+        if(-not $_.New -or $_.Process -eq $null -or $_.Process.HasExited)
         {
             for($i = $Miner_HashRates.Count; $i -lt $_.Algorithms.Count; $i++)
             {
@@ -202,8 +204,6 @@ while($true)
                 }
             }
         }
-
-        if($_.Process -eq $null -or $_.Process.HasExited -or ($_.Active+((Get-Date)-$_.Process.StartTime)) -gt [TimeSpan]::FromMinutes(5)){$_.New = $false} #timeout
     }
 }
 
