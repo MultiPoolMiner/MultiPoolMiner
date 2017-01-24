@@ -18,8 +18,8 @@ Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 Remove-Item ".\Wrapper_$Id.txt" -ErrorAction Ignore
 
 $PowerShell = [PowerShell]::Create()
-if($WorkingDirectory -ne ""){$PowerShell.AddScript("Set-Location $WorkingDirectory") | Out-Null}
-$Command = ". $FilePath"
+if($WorkingDirectory -ne ""){$PowerShell.AddScript("Set-Location '$WorkingDirectory'") | Out-Null}
+$Command = ". '$FilePath'"
 if($ArgumentList -ne ""){$Command += " $ArgumentList"}
 $PowerShell.AddScript("$Command | Write-Verbose -Verbose") | Out-Null
 $Result = $PowerShell.BeginInvoke()
