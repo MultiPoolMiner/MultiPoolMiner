@@ -34,6 +34,7 @@ $Locations | ForEach {
             Algorithm = $Algorithm
             Info = $Coin
             Price = $Price
+            StablePrice = $Stat.Week
             Protocol = 'stratum+tcp'
             Host = $_.host_list.split(";") | Sort -Descending {$_ -ilike "$Location*"} | Select -First 1
             Port = $_.port
@@ -47,6 +48,7 @@ $Locations | ForEach {
             Algorithm = $Algorithm
             Info = $Coin
             Price = $Price
+            StablePrice = $Stat.Week
             Protocol = 'stratum+ssl'
             Host = $_.host_list.split(";") | Sort -Descending {$_ -ilike "$Location*"} | Select -First 1
             Port = $_.port
