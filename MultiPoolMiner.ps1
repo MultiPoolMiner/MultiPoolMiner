@@ -49,7 +49,9 @@ while($true)
     $AllPools = if(Test-Path "Pools"){Get-ChildItemContent "Pools" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | Where Location -EQ $Location | Where SSL -EQ $SSL}
     if($AllPools.Count -eq 0){"No Pools!" | Out-Host; continue}
     $Pools = [PSCustomObject]@{}
+    $Pools_Comparison = [PSCustomObject]@{}
     $AllPools.Algorithm | Select -Unique | ForEach {$Pools | Add-Member $_ ($AllPools | Where Algorithm -EQ $_ | Sort Price -Descending | Select -First 1)}
+    $AllPools.Algorithm | Select -Unique | ForEach {$Pools_Comparison | Add-Member $_ ($AllPools | Where Algorithm -EQ $_ | Sort StablePrice -Descending | Select -First 1)}
     
     #Load information about the Miners
     #Messy...?
@@ -60,26 +62,35 @@ while($true)
 
         $Miner_HashRates = [PSCustomObject]@{}
         $Miner_Pools = [PSCustomObject]@{}
+        $Miner_Pools_Comparison = [PSCustomObject]@{}
         $Miner_Profits = [PSCustomObject]@{}
+        $Miner_Profits_Comparison = [PSCustomObject]@{}
 
         $Miner.HashRates.PSObject.Properties.Name | ForEach {
             $Miner_HashRates | Add-Member $_ ([Decimal]$Miner.HashRates.$_)
             $Miner_Pools | Add-Member $_ ([PSCustomObject]$Pools.$_)
+            $Miner_Pools_Comparison | Add-Member $_ ([PSCustomObject]$Pools_Comparison.$_)
             $Miner_Profits | Add-Member $_ ([Decimal]$Miner.HashRates.$_*$Pools.$_.Price)
+            $Miner_Profits_Comparison | Add-Member $_ ([Decimal]$Miner.HashRates.$_*$Pools_Comparison.$_.Price)
         }
-
+        
         $Miner_Profit = [Decimal]($Miner_Profits.PSObject.Properties.Value | Measure -Sum).Sum
+        $Miner_Profit_Comparison = [Decimal]($Miner_Profits_Comparison.PSObject.Properties.Value | Measure -Sum).Sum
         
         $Miner.HashRates.PSObject.Properties | Where Value -EQ "" | Select -ExpandProperty Name | ForEach {
             $Miner_HashRates.$_ = $null
             $Miner_Profits.$_ = $null
+            $Miner_Profits_Comparison.$_ = $null
             $Miner_Profit = $null
+            $Miner_Profit_Comparison = $null
         }
         
         $Miner.HashRates = $Miner_HashRates
         $Miner | Add-Member Pools $Miner_Pools
         $Miner | Add-Member Profits $Miner_Profits
+        $Miner | Add-Member Profits_Comparison $Miner_Profits_Comparison
         $Miner | Add-Member Profit $Miner_Profit
+        $Miner | Add-Member Profit_Comparison $Miner_Profit_Comparison
         $Miner.Path = Convert-Path $Miner.Path
     }
     
@@ -207,6 +218,8 @@ while($true)
             }
         }
     }
+
+    if(($BestMinerCombo | Where Profit -NE $null) -eq $null){Set-Stat -Name "Profit" -Value ($BestMinerCombo | Measure Profit -Sum)}
 }
 
 #Stop the log
