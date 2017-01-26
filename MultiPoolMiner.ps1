@@ -91,27 +91,20 @@ while($true)
         $Miner | Add-Member Profits_Comparison $Miner_Profits_Comparison
         $Miner | Add-Member Profit $Miner_Profit
         $Miner | Add-Member Profit_Comparison $Miner_Profit_Comparison
+        $Miner | Add-Member Profit_Bias $Miner_Profit
         $Miner.Path = Convert-Path $Miner.Path
     }
-    
-    #Display mining information
-    Clear-Host
-    $Miners | Where {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort -Descending Type,Profit | Format-Table -GroupBy Type (
-        @{Label = "Miner"; Expression={$_.Name}}, 
-        @{Label = "Algorithm"; Expression={$_.HashRates.PSObject.Properties.Name}}, 
-        @{Label = "Speed"; Expression={$_.HashRates.PSObject.Properties.Value | ForEach {if($_ -ne $null){"$($_ | ConvertTo-Hash)/s"}else{"Benchmarking"}}}; Align='right'}, 
-        @{Label = "BTC/Day"; Expression={$_.Profits.PSObject.Properties.Value | ForEach {if($_ -ne $null){$_.ToString("N5")}else{"Benchmarking"}}}; Align='right'}, 
-        @{Label = "BTC/GH/Day"; Expression={$_.Pools.PSObject.Properties.Value.Price | ForEach {($_*1000000000).ToString("N5")}}; Align='right'}, 
-        @{Label = "Pool"; Expression={$_.Pools.PSObject.Properties.Value | ForEach {"$($_.Name)-$($_.Info)"}}}
-    ) | Out-Host
 
     #Apply delta to miners to avoid needless switching
-    $ActiveMinerPrograms | ForEach {$Miners | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments | ForEach {$_.Profit *= 1+$Delta}}
+    $ActiveMinerPrograms | ForEach {$Miners | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments | ForEach {$_.Profit_Bias *= 1+$Delta}}
 
     #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
-    $BestMiners = $Miners | Select Type -Unique | ForEach {$Miner_Type = $_.Type; ($Miners | Where {(Compare $Miner_Type $_.Type | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
+    $BestMiners = $Miners | Select Type -Unique | ForEach {$Miner_Type = $_.Type; ($Miners | Where {(Compare $Miner_Type $_.Type | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit_Bias -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
+    $BestMiners_Comparison = $Miners | Select Type -Unique | ForEach {$Miner_Type = $_.Type; ($Miners | Where {(Compare $Miner_Type $_.Type | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit_Comparison -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
     $MinerCombos = Get-Combination $BestMiners | Where {$_.Combination.Type.Count -eq ($_.Combination.Type | Select -Unique).Count}
-    $BestMinerCombo = $MinerCombos | Sort -Descending {($_.Combination | Where Profit -EQ $null | Measure).Count},{($_.Combination | Measure Profit -Sum).Sum},{($_.Combination | Where Profit -NE 0 | Measure).Count} | Select -First 1 | Select -ExpandProperty Combination
+    $MinerCombos_Comparison = Get-Combination $BestMiners_Comparison | Where {$_.Combination.Type.Count -eq ($_.Combination.Type | Select -Unique).Count}
+    $BestMinerCombo = $MinerCombos | Sort -Descending {($_.Combination | Where Profit -EQ $null | Measure).Count},{($_.Combination | Measure Profit_Bias -Sum).Sum},{($_.Combination | Where Profit -NE 0 | Measure).Count} | Select -First 1 | Select -ExpandProperty Combination
+    $BestMinerCombo_Comparison = $MinerCombos_Comparison | Sort -Descending {($_.Combination | Where Profit -EQ $null | Measure).Count},{($_.Combination | Measure Profit_Comparison -Sum).Sum},{($_.Combination | Where Profit -NE 0 | Measure).Count} | Select -First 1 | Select -ExpandProperty Combination
 
     #Add the most profitable miners to the active list
     $BestMinerCombo | ForEach {
@@ -167,6 +160,17 @@ while($true)
         }
     }
     
+    #Display mining information
+    Clear-Host
+    $Miners | Where {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort -Descending Type,Profit | Format-Table -GroupBy Type (
+        @{Label = "Miner"; Expression={$_.Name}}, 
+        @{Label = "Algorithm"; Expression={$_.HashRates.PSObject.Properties.Name}}, 
+        @{Label = "Speed"; Expression={$_.HashRates.PSObject.Properties.Value | ForEach {if($_ -ne $null){"$($_ | ConvertTo-Hash)/s"}else{"Benchmarking"}}}; Align='right'}, 
+        @{Label = "BTC/Day"; Expression={$_.Profits.PSObject.Properties.Value | ForEach {if($_ -ne $null){$_.ToString("N5")}else{"Benchmarking"}}}; Align='right'}, 
+        @{Label = "BTC/GH/Day"; Expression={$_.Pools.PSObject.Properties.Value.Price | ForEach {($_*1000000000).ToString("N5")}}; Align='right'}, 
+        @{Label = "Pool"; Expression={$_.Pools.PSObject.Properties.Value | ForEach {"$($_.Name)-$($_.Info)"}}}
+    ) | Out-Host
+    
     #Display active miners list
     $ActiveMinerPrograms | Sort -Descending Status,{if($_.Process -eq $null){[DateTime]0}else{$_.Process.StartTime}} | Select -First 10 | Format-Table -Wrap -GroupBy Status (
         @{Label = "Speed"; Expression={$_.HashRate | ForEach {"$($_ | ConvertTo-Hash)/s"}}; Align='right'}, 
@@ -174,6 +178,17 @@ while($true)
         @{Label = "Launched"; Expression={Switch($_.Activated){0 {"Never"} 1 {"Once"} Default {"$_ Times"}}}}, 
         @{Label = "Command"; Expression={"$($_.Path.TrimStart((Convert-Path ".\"))) $($_.Arguments)"}}
     ) | Out-Host
+
+    #Display profit comparison
+    if(($BestMinerCombo | Where Profit -NE $null) -ne $null)
+    {
+        $Profit = (Set-Stat -Name "Profit" -Value ($BestMinerCombo | Measure Profit -Sum).Sum).Week
+
+        Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is $([Math]::Round((($Profit-$BestMinerCombo_Comparison.Profit_Comparison)/$BestMinerCombo_Comparison.Profit_Comparison)*100))% more profitable than conventional mining! "
+
+        [PSCustomObject]@{"Name" = "MultiPoolMiner"; "Algorithm" = "Multiple"; "BTC/Day" = ("{0:N5}" -f $Profit)}, 
+        [PSCustomObject]@{"Name" = $BestMinerCombo_Comparison.Name; "Algorithm" = $BestMinerCombo_Comparison.HashRates.PSObject.Properties.Name; "BTC/Day" = ("{0:N5}" -f $BestMinerCombo_Comparison.Profit_Comparison)} | Out-Host
+    }
     
     #Do nothing for a few seconds as to not overload the APIs
     Sleep $Interval
@@ -218,8 +233,6 @@ while($true)
             }
         }
     }
-
-    if(($BestMinerCombo | Where Profit -NE $null) -eq $null){Set-Stat -Name "Profit" -Value ($BestMinerCombo | Measure Profit -Sum)}
 }
 
 #Stop the log
