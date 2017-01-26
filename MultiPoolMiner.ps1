@@ -18,7 +18,7 @@
     [Parameter(Mandatory=$false)]
     [Array]$Type = $null, #AMD/NVIDIA/CPU
     [Parameter(Mandatory=$false)]
-    [String]$Currency = "USD", #i.e. GBP,USD ect.
+    [String]$Currency = "USD", #i.e. GBP,USD,ZEC,ETH ect.
     [Parameter(Mandatory=$false)]
     [Int]$Donate = 10 #Minutes per Day
 )
@@ -41,6 +41,8 @@ if(Test-Path "Stats"){Get-ChildItemContent "Stats" | ForEach {$Stat = Set-Stat $
 
 while($true)
 {
+    $Currency_Rate = (Invoke-WebRequest "https://api.cryptonator.com/api/ticker/btc-$Currency" -UseBasicParsing | ConvertFrom-Json).ticker.price
+
     #Load the Stats
     $Stats = [PSCustomObject]@{}
     if(Test-Path "Stats"){Get-ChildItemContent "Stats" | ForEach {$Stats | Add-Member $_.Name $_.Content}}
@@ -186,8 +188,8 @@ while($true)
 
         Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is $([Math]::Round((($Profit-$BestMinerCombo_Comparison.Profit_Comparison)/$BestMinerCombo_Comparison.Profit_Comparison)*100))% more profitable than conventional mining! "
 
-        [PSCustomObject]@{"Name" = "MultiPoolMiner"; "Algorithm" = "Multiple"; "BTC/Day" = ("{0:N5}" -f $Profit)}, 
-        [PSCustomObject]@{"Name" = $BestMinerCombo_Comparison.Name; "Algorithm" = $BestMinerCombo_Comparison.HashRates.PSObject.Properties.Name; "BTC/Day" = ("{0:N5}" -f $BestMinerCombo_Comparison.Profit_Comparison)} | Out-Host
+        [PSCustomObject]@{"Name" = "MultiPoolMiner"; "Algorithm" = "Multiple"; "BTC/Day" = ("{0:N5}" -f $Profit); "$Currency/Day" = ("{0:N2}" -f ($Profit*$Currency_Rate))}, 
+        [PSCustomObject]@{"Name" = $BestMinerCombo_Comparison.Name; "Algorithm" = $BestMinerCombo_Comparison.HashRates.PSObject.Properties.Name; "BTC/Day" = ("{0:N5}" -f $BestMinerCombo_Comparison.Profit_Comparison); "$Currency/Day" = ("{0:N2}" -f ($BestMinerCombo_Comparison.Profit_Comparison*$Currency_Rate))} | Out-Host
     }
     
     #Do nothing for a few seconds as to not overload the APIs
