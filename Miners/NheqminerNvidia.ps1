@@ -45,7 +45,7 @@ $Devices = ($process.StandardOutput.ReadToEnd() | Select-String "#[0-9]" -AllMat
 [PSCustomObject]@{
     Type = 'NVIDIA'
     Path = $Path
-    Arguments = -Join ('-a ', $Port, ' -l $($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User) -t 0 -od ', $Devices)
+    Arguments = -Join ('-a ', $Port, ' -l $($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User) -t 0 -cd ', $Devices)
     HashRates = [PSCustomObject]@{Equihash = '$($Stats.' + $Name + '_Equihash_HashRate.Day)'}
     API = 'Nheqminer'
     Port = $Port
