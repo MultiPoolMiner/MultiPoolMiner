@@ -182,14 +182,15 @@ while($true)
     ) | Out-Host
 
     #Display profit comparison
-    if(($BestMinerCombo | Where Profit -NE $null) -ne $null)
+    if(($BestMinerCombo | Where Profit -EQ $null | Measure).Count -eq 0)
     {
         $Profit = (Set-Stat -Name "Profit" -Value ($BestMinerCombo | Measure Profit -Sum).Sum).Week
+        $Profit_Comparison = ($BestMinerCombo_Comparison | Measure Profit_Comparison -Sum).Sum
 
-        Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is $([Math]::Round((($Profit-$BestMinerCombo_Comparison.Profit_Comparison)/$BestMinerCombo_Comparison.Profit_Comparison)*100))% more profitable than conventional mining! "
+        Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is $([Math]::Round((($Profit-$Profit_Comparison)/$Profit_Comparison)*100))% more profitable than conventional mining! "
 
         [PSCustomObject]@{"Name" = "MultiPoolMiner"; "Algorithm" = "Multiple"; "BTC/Day" = ("{0:N5}" -f $Profit); "$Currency/Day" = ("{0:N2}" -f ($Profit*$Currency_Rate))}, 
-        [PSCustomObject]@{"Name" = $BestMinerCombo_Comparison.Name; "Algorithm" = $BestMinerCombo_Comparison.HashRates.PSObject.Properties.Name; "BTC/Day" = ("{0:N5}" -f $BestMinerCombo_Comparison.Profit_Comparison); "$Currency/Day" = ("{0:N2}" -f ($BestMinerCombo_Comparison.Profit_Comparison*$Currency_Rate))} | Out-Host
+        [PSCustomObject]@{"Name" = $BestMinerCombo_Comparison.Name; "Algorithm" = $BestMinerCombo_Comparison.HashRates.PSObject.Properties.Name; "BTC/Day" = ("{0:N5}" -f $Profit_Comparison); "$Currency/Day" = ("{0:N2}" -f ($Profit_Comparison*$Currency_Rate))} | Out-Host
     }
     
     #Do nothing for a few seconds as to not overload the APIs
