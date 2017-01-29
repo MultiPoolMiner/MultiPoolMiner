@@ -190,7 +190,7 @@ while($true)
         Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is $([Math]::Round((($Profit-$Profit_Comparison)/$Profit_Comparison)*100))% more profitable than conventional mining! "
 
         [PSCustomObject]@{"Name" = "MultiPoolMiner"; "Algorithm" = "Multiple"; "BTC/Day" = ("{0:N5}" -f $Profit); "$Currency/Day" = ("{0:N2}" -f ($Profit*$Currency_Rate))}, 
-        [PSCustomObject]@{"Name" = $BestMinerCombo_Comparison.Name; "Algorithm" = $BestMinerCombo_Comparison.HashRates.PSObject.Properties.Name; "BTC/Day" = ("{0:N5}" -f $Profit_Comparison); "$Currency/Day" = ("{0:N2}" -f ($Profit_Comparison*$Currency_Rate))} | Out-Host
+        [PSCustomObject]@{"Name" = $BestMinerCombo_Comparison.Name; "Algorithm" = $BestMinerCombo_Comparison.HashRates | ForEach {$_.PSObject.Properties.Name}; "BTC/Day" = ("{0:N5}" -f $Profit_Comparison); "$Currency/Day" = ("{0:N2}" -f ($Profit_Comparison*$Currency_Rate))} | Out-Host
     }
     
     #Do nothing for a few seconds as to not overload the APIs
