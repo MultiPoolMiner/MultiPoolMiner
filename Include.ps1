@@ -161,148 +161,154 @@ function Get-HashRate {
     $HashRates = @()
     $HashRates_Dual = @()
 
-    switch($API)
+    try
     {
-        "xgminer"
+        switch($API)
         {
-            $Message = @{command="summary"; parameter=""} | ConvertTo-Json
+            "xgminer"
+            {
+                $Message = @{command="summary"; parameter=""} | ConvertTo-Json
             
-            do
+                do
+                {
+                    $Client = New-Object System.Net.Sockets.TcpClient $server, $port
+                    $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
+                    $Reader = New-Object System.IO.StreamReader $Client.GetStream()
+                    $Writer.AutoFlush = $true
+
+                    $Writer.WriteLine($Message)
+                    $Request = $Reader.ReadLine()
+
+                    $Data = $Request.Substring($Request.IndexOf("{"),$Request.LastIndexOf("}")-$Request.IndexOf("{")+1) -replace " ","_" | ConvertFrom-Json
+
+                    $HashRate = if($Data.SUMMARY.HS_5s -ne $null){[Decimal]$Data.SUMMARY.HS_5s*[Math]::Pow($Multiplier,0)}
+                        elseif($Data.SUMMARY.KHS_5s -ne $null){[Decimal]$Data.SUMMARY.KHS_5s*[Math]::Pow($Multiplier,1)}
+                        elseif($Data.SUMMARY.MHS_5s -ne $null){[Decimal]$Data.SUMMARY.MHS_5s*[Math]::Pow($Multiplier,2)}
+                        elseif($Data.SUMMARY.GHS_5s -ne $null){[Decimal]$Data.SUMMARY.GHS_5s*[Math]::Pow($Multiplier,3)}
+                        elseif($Data.SUMMARY.THS_5s -ne $null){[Decimal]$Data.SUMMARY.THS_5s*[Math]::Pow($Multiplier,4)}
+                        elseif($Data.SUMMARY.PHS_5s -ne $null){[Decimal]$Data.SUMMARY.PHS_5s*[Math]::Pow($Multiplier,5)}
+                        else{$HashRates = @(); break}
+
+                    $HashRates += $HashRate
+
+                    if(-not $Safe){break}
+
+                    $HashRate = if($Data.SUMMARY.HS_av -ne $null){[Decimal]$Data.SUMMARY.HS_av*[Math]::Pow($Multiplier,0)}
+                        elseif($Data.SUMMARY.KHS_av -ne $null){[Decimal]$Data.SUMMARY.KHS_av*[Math]::Pow($Multiplier,1)}
+                        elseif($Data.SUMMARY.MHS_av -ne $null){[Decimal]$Data.SUMMARY.MHS_av*[Math]::Pow($Multiplier,2)}
+                        elseif($Data.SUMMARY.GHS_av -ne $null){[Decimal]$Data.SUMMARY.GHS_av*[Math]::Pow($Multiplier,3)}
+                        elseif($Data.SUMMARY.THS_av -ne $null){[Decimal]$Data.SUMMARY.THS_av*[Math]::Pow($Multiplier,4)}
+                        elseif($Data.SUMMARY.PHS_av -ne $null){[Decimal]$Data.SUMMARY.PHS_av*[Math]::Pow($Multiplier,5)}
+                        else{$HashRates = @(); break}
+
+                    $HashRates += $HashRate
+
+                    sleep $Interval
+                } while($HashRates.Count -lt 6)
+            }
+            "ccminer"
             {
+                $Message = "summary"
+
+                do
+                {
+                    $Client = New-Object System.Net.Sockets.TcpClient $server, $port
+                    $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
+                    $Reader = New-Object System.IO.StreamReader $Client.GetStream()
+                    $Writer.AutoFlush = $true
+
+                    $Writer.WriteLine($Message)
+                    $Request = $Reader.ReadLine()
+
+                    $Data = $Request -split ";" | ConvertFrom-StringData
+
+                    $HashRate = if($Data.ACC -ne 0 -or $Data.KHS -ne 0){$Data.KHS}
+
+                    if($HashRate -eq $null){$HashRates = @(); break}
+
+                    $HashRates += [Decimal]$HashRate*$Multiplier
+
+                    if(-not $Safe){break}
+
+                    sleep $Interval
+                } while($HashRates.Count -lt 6)
+            }
+            "nheqminer"
+            {
+                $Message = "status"
+
                 $Client = New-Object System.Net.Sockets.TcpClient $server, $port
                 $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
                 $Reader = New-Object System.IO.StreamReader $Client.GetStream()
                 $Writer.AutoFlush = $true
 
-                $Writer.WriteLine($Message)
-                $Request = $Reader.ReadLine()
+                do
+                {
+                    $Writer.WriteLine($Message)
+                    $Request = $Reader.ReadLine()
 
-                $Data = $Request.Substring($Request.IndexOf("{"),$Request.LastIndexOf("}")-$Request.IndexOf("{")+1) -replace " ","_" | ConvertFrom-Json
-
-                $HashRate = if($Data.SUMMARY.HS_5s -ne $null){[Decimal]$Data.SUMMARY.HS_5s*[Math]::Pow($Multiplier,0)}
-                    elseif($Data.SUMMARY.KHS_5s -ne $null){[Decimal]$Data.SUMMARY.KHS_5s*[Math]::Pow($Multiplier,1)}
-                    elseif($Data.SUMMARY.MHS_5s -ne $null){[Decimal]$Data.SUMMARY.MHS_5s*[Math]::Pow($Multiplier,2)}
-                    elseif($Data.SUMMARY.GHS_5s -ne $null){[Decimal]$Data.SUMMARY.GHS_5s*[Math]::Pow($Multiplier,3)}
-                    elseif($Data.SUMMARY.THS_5s -ne $null){[Decimal]$Data.SUMMARY.THS_5s*[Math]::Pow($Multiplier,4)}
-                    elseif($Data.SUMMARY.PHS_5s -ne $null){[Decimal]$Data.SUMMARY.PHS_5s*[Math]::Pow($Multiplier,5)}
-                    else{$HashRates = @(); break}
-
-                $HashRates += $HashRate
-
-                if(-not $Safe){break}
-
-                $HashRate = if($Data.SUMMARY.HS_av -ne $null){[Decimal]$Data.SUMMARY.HS_av*[Math]::Pow($Multiplier,0)}
-                    elseif($Data.SUMMARY.KHS_av -ne $null){[Decimal]$Data.SUMMARY.KHS_av*[Math]::Pow($Multiplier,1)}
-                    elseif($Data.SUMMARY.MHS_av -ne $null){[Decimal]$Data.SUMMARY.MHS_av*[Math]::Pow($Multiplier,2)}
-                    elseif($Data.SUMMARY.GHS_av -ne $null){[Decimal]$Data.SUMMARY.GHS_av*[Math]::Pow($Multiplier,3)}
-                    elseif($Data.SUMMARY.THS_av -ne $null){[Decimal]$Data.SUMMARY.THS_av*[Math]::Pow($Multiplier,4)}
-                    elseif($Data.SUMMARY.PHS_av -ne $null){[Decimal]$Data.SUMMARY.PHS_av*[Math]::Pow($Multiplier,5)}
-                    else{$HashRates = @(); break}
-
-                $HashRates += $HashRate
-
-                sleep $Interval
-            } while($HashRates.Count -lt 6)
-        }
-        "ccminer"
-        {
-            $Message = "summary"
-
-            do
-            {
-                $Client = New-Object System.Net.Sockets.TcpClient $server, $port
-                $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
-                $Reader = New-Object System.IO.StreamReader $Client.GetStream()
-                $Writer.AutoFlush = $true
-
-                $Writer.WriteLine($Message)
-                $Request = $Reader.ReadLine()
-
-                $Data = $Request -split ";" | ConvertFrom-StringData
-
-                $HashRate = if($Data.ACC -ne 0 -or $Data.KHS -ne 0){$Data.KHS}
-
-                if($HashRate -eq $null){$HashRates = @(); break}
-
-                $HashRates += [Decimal]$HashRate*$Multiplier
-
-                if(-not $Safe){break}
-
-                sleep $Interval
-            } while($HashRates.Count -lt 6)
-        }
-        "nheqminer"
-        {
-            $Message = "status"
-
-            $Client = New-Object System.Net.Sockets.TcpClient $server, $port
-            $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
-            $Reader = New-Object System.IO.StreamReader $Client.GetStream()
-            $Writer.AutoFlush = $true
-
-            do
-            {
-                $Writer.WriteLine($Message)
-                $Request = $Reader.ReadLine()
-
-                $Data = $Request | ConvertFrom-Json
+                    $Data = $Request | ConvertFrom-Json
                 
-                $HashRate = $Data.result.speed_sps
+                    $HashRate = $Data.result.speed_sps
 
-                if($HashRate -eq $null){$HashRates = @(); break}
+                    if($HashRate -eq $null){$HashRates = @(); break}
 
-                $HashRates += [Decimal]$HashRate
+                    $HashRates += [Decimal]$HashRate
 
-                if(-not $Safe){break}
+                    if(-not $Safe){break}
 
-                sleep $Interval
-            } while($HashRates.Count -lt 6)
-        }
-        "claymore"
-        {
-            do
+                    sleep $Interval
+                } while($HashRates.Count -lt 6)
+            }
+            "claymore"
             {
-                $Request = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing
+                do
+                {
+                    $Request = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing
                 
-                $Data = $Request.Content.Substring($Request.Content.IndexOf("{"),$Request.Content.LastIndexOf("}")-$Request.Content.IndexOf("{")+1) | ConvertFrom-Json
+                    $Data = $Request.Content.Substring($Request.Content.IndexOf("{"),$Request.Content.LastIndexOf("}")-$Request.Content.IndexOf("{")+1) | ConvertFrom-Json
                 
-                $HashRate = $Data.result[2].Split(";")[0]
-                $HashRate_Dual = $Data.result[4].Split(";")[0]
+                    $HashRate = $Data.result[2].Split(";")[0]
+                    $HashRate_Dual = $Data.result[4].Split(";")[0]
 
-                if($HashRate -eq $null -or $HashRate_Dual -eq $null){$HashRates = @(); $HashRate_Dual = @(); break}
+                    if($HashRate -eq $null -or $HashRate_Dual -eq $null){$HashRates = @(); $HashRate_Dual = @(); break}
 
-                if($Request.Content.Contains("ETH:")){$HashRates += [Decimal]$HashRate*$Multiplier; $HashRates_Dual += [Decimal]$HashRate_Dual*$Multiplier}
-                else{$HashRates += [Decimal]$HashRate; $HashRates_Dual += [Decimal]$HashRate_Dual}
+                    if($Request.Content.Contains("ETH:")){$HashRates += [Decimal]$HashRate*$Multiplier; $HashRates_Dual += [Decimal]$HashRate_Dual*$Multiplier}
+                    else{$HashRates += [Decimal]$HashRate; $HashRates_Dual += [Decimal]$HashRate_Dual}
 
-                if(-not $Safe){break}
+                    if(-not $Safe){break}
 
-                sleep $Interval
-            } while($HashRates.Count -lt 6)
-        }
-        "wrapper"
-        {
-            do
+                    sleep $Interval
+                } while($HashRates.Count -lt 6)
+            }
+            "wrapper"
             {
-                $HashRate = Get-Content ".\Wrapper_$Port.txt"
+                do
+                {
+                    $HashRate = Get-Content ".\Wrapper_$Port.txt"
                 
-                if($HashRate -eq $null){sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.txt"}
+                    if($HashRate -eq $null){sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.txt"}
 
-                if($HashRate -eq $null){$HashRates = @(); break}
+                    if($HashRate -eq $null){$HashRates = @(); break}
 
-                $HashRates += [Decimal]$HashRate
+                    $HashRates += [Decimal]$HashRate
 
-                if(-not $Safe){break}
+                    if(-not $Safe){break}
 
-                sleep $Interval
-            } while($HashRates.Count -lt 6)
+                    sleep $Interval
+                } while($HashRates.Count -lt 6)
+            }
         }
+
+        $HashRates_Info = $HashRates | Measure -Maximum -Minimum -Average
+        if($HashRates_Info.Maximum-$HashRates_Info.Minimum -le $HashRates_Info.Average*$Delta){$HashRates_Info.Maximum}
+
+        $HashRates_Info_Dual = $HashRates_Dual | Measure -Maximum -Minimum -Average
+        if($HashRates_Info_Dual.Maximum-$HashRates_Info_Dual.Minimum -le $HashRates_Info_Dual.Average*$Delta){$HashRates_Info_Dual.Maximum}
     }
-
-    $HashRates_Info = $HashRates | Measure -Maximum -Minimum -Average
-    if($HashRates_Info.Maximum-$HashRates_Info.Minimum -le $HashRates_Info.Average*$Delta){$HashRates_Info.Maximum}
-
-    $HashRates_Info_Dual = $HashRates_Dual | Measure -Maximum -Minimum -Average
-    if($HashRates_Info_Dual.Maximum-$HashRates_Info_Dual.Minimum -le $HashRates_Info_Dual.Average*$Delta){$HashRates_Info_Dual.Maximum}
+    catch
+    {
+    }
 }
 
 filter ConvertTo-Hash { 
