@@ -222,9 +222,7 @@ function Get-HashRate {
 
                     $Data = $Request -split ";" | ConvertFrom-StringData
 
-                    if($Data.ACC -ne $null -and [Decimal]$Data.ACC -eq 0 -and [Decimal]$Data.KHS -eq 0 -and $Safe){continue}
-
-                    $HashRate = $Data.KHS
+                    $HashRate = if($Data.ACC -ne 0 -or $Data.KHS -ne 0){$Data.KHS}
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
