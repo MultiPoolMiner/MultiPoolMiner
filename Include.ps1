@@ -187,7 +187,8 @@ function Get-HashRate {
                         elseif($Data.SUMMARY.GHS_5s -ne $null){[Decimal]$Data.SUMMARY.GHS_5s*[Math]::Pow($Multiplier,3)}
                         elseif($Data.SUMMARY.THS_5s -ne $null){[Decimal]$Data.SUMMARY.THS_5s*[Math]::Pow($Multiplier,4)}
                         elseif($Data.SUMMARY.PHS_5s -ne $null){[Decimal]$Data.SUMMARY.PHS_5s*[Math]::Pow($Multiplier,5)}
-                        else{$HashRates = @(); break}
+
+                    if($HashRate -eq $null){$HashRates = @(); break}
 
                     $HashRates += $HashRate
 
@@ -199,7 +200,8 @@ function Get-HashRate {
                         elseif($Data.SUMMARY.GHS_av -ne $null){[Decimal]$Data.SUMMARY.GHS_av*[Math]::Pow($Multiplier,3)}
                         elseif($Data.SUMMARY.THS_av -ne $null){[Decimal]$Data.SUMMARY.THS_av*[Math]::Pow($Multiplier,4)}
                         elseif($Data.SUMMARY.PHS_av -ne $null){[Decimal]$Data.SUMMARY.PHS_av*[Math]::Pow($Multiplier,5)}
-                        else{$HashRates = @(); break}
+
+                    if($HashRate -eq $null){$HashRates = @(); break}
 
                     $HashRates += $HashRate
 
@@ -222,7 +224,7 @@ function Get-HashRate {
 
                     $Data = $Request -split ";" | ConvertFrom-StringData
 
-                    $HashRate = if($Data.ACC -ne 0 -or $Data.KHS -ne 0){$Data.KHS}
+                    $HashRate = if([Decimal]$Data.KHS -ne 0 -or [Decimal]$Data.ACC -ne 0){$Data.KHS}
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 

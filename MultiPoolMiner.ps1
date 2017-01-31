@@ -225,7 +225,7 @@ while($true)
         }
 
         #Benchmark timeout
-        if($_.Benchmarked -ge 3)
+        if($_.Benchmarked -ge 6 -or ($_.Benchmarked -ge 2 -and $_.Activated -ge 2))
         {
             for($i = $Miner_HashRates.Count; $i -lt $_.Algorithms.Count; $i++)
             {
