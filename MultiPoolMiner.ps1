@@ -27,7 +27,7 @@ Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 
 . .\Include.ps1
 
-$DeltaMax = 0.10 #decimal percentage
+$DeltaMax = 0.05 #decimal percentage
 $DeltaDecay = 0.01 #decimal percentage
 $Delta = 0 #decimal percentage
 
@@ -189,8 +189,8 @@ while($true)
 
         Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is $([Math]::Round((($Profit-$Profit_Comparison)/$Profit_Comparison)*100))% more profitable than conventional mining! "
 
-        [PSCustomObject]@{"Name" = "MultiPoolMiner"; "Algorithm" = "Multiple"; "BTC/Day" = ("{0:N5}" -f $Profit); "$Currency/Day" = ("{0:N2}" -f ($Profit*$Currency_Rate))}, 
-        [PSCustomObject]@{"Name" = $BestMinerCombo_Comparison.Name; "Algorithm" = $BestMinerCombo_Comparison.HashRates | ForEach {$_.PSObject.Properties.Name}; "BTC/Day" = ("{0:N5}" -f $Profit_Comparison); "$Currency/Day" = ("{0:N2}" -f ($Profit_Comparison*$Currency_Rate))} | Out-Host
+        [PSCustomObject]@{"Miner" = "MultiPoolMiner"; "BTC/Day" = ("{0:N5}" -f $Profit); "$Currency/Day" = ("{0:N2}" -f ($Profit*$Currency_Rate))}, 
+        [PSCustomObject]@{"Miner" = $BestMinerCombo_Comparison | ForEach {"$($_.Name)-$($_.HashRates.PSObject.Properties.Name -join "/"))"}; "BTC/Day" = ("{0:N5}" -f $Profit_Comparison); "$Currency/Day" = ("{0:N2}" -f ($Profit_Comparison*$Currency_Rate))} | Out-Host
     }
     
     #Do nothing for a few seconds as to not overload the APIs

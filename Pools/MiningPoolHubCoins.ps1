@@ -25,9 +25,8 @@ $Locations | ForEach {
         $Algorithm = $_.algo -replace "-"
         $Coin = (Get-Culture).TextInfo.ToTitleCase(($_.coin_name -replace "-", " ")) -replace " "
 
-        if((Get-Stat -Name "MiningPoolHubCoins_$($Coin)_Profit") -eq $null){Set-Stat -Name "MiningPoolHubCoins_$($Coin)_Profit" -Value 0}
-
-        $Stat = Set-Stat -Name "$($Name)_$($Coin)_Profit" -Value ([decimal]$_.profit/1000000000)
+        if((Get-Stat -Name "MiningPoolHubCoins_$($Coin)_Profit") -eq $null){$Stat = Set-Stat -Name "MiningPoolHubCoins_$($Coin)_Profit" -Value ([decimal]$_.profit/1000000000*(1-0.05))}
+        else{$Stat = Set-Stat -Name "$($Name)_$($Coin)_Profit" -Value ([decimal]$_.profit/1000000000)}
         $Price = (($Stat.Live*(1-[Math]::Min($Stat.Day_Fluctuation,1)))+($Stat.Day*(0+[Math]::Min($Stat.Day_Fluctuation,1))))
         
         [PSCustomObject]@{
