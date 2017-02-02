@@ -401,3 +401,23 @@ function Start-SubProcess {
     $Process.Handle | Out-Null
     $Process
 }
+
+function Expand-WebRequest {
+    param(
+        [Parameter(Mandatory=$true)]
+        [String]$Uri, 
+        [Parameter(Mandatory=$true)]
+        [String]$Path
+    )
+    $FolderName_Old = ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName
+    $FolderName_New = Split-Path $Path -Leaf
+    $FileName = "$FolderName_New$(([IO.FileInfo](Split-Path $Uri -Leaf)).Extension)"
+
+    if(Test-Path $FileName){Remove-Item $FileName}
+    if(Test-Path "$(Split-Path $Path)\$FolderName_New"){Remove-Item "$(Split-Path $Path)\$FolderName_New" -Recurse}
+    if(Test-Path "$(Split-Path $Path)\$FolderName_Old"){Remove-Item "$(Split-Path $Path)\$FolderName_Old" -Recurse}
+
+    Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
+    Start-Process "7za" "x $FileName -o$(Split-Path $Path)\$FolderName_Old -y -spe" -Wait
+    Rename-Item "$(Split-Path $Path)\$FolderName_Old" "$FolderName_New"
+}

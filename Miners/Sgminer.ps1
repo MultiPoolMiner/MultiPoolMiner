@@ -1,27 +1,5 @@
 ﻿$Path = '.\Bin\AMD-GenesisMining\sgminer.exe'
 $Uri = "https://github.com/genesismining/sgminer-gm/releases/download/5.5.5/sgminer-gm.zip"
-$Uri_SubFolder = $true
-
-if((Test-Path $Path) -eq $false)
-{
-    $FolderName_Old = if($Uri_SubFolder){([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName}else{""}
-    $FolderName_New = Split-Path (Split-Path $Path) -Leaf
-    $FileName = "$FolderName_New$(([IO.FileInfo](Split-Path $Uri -Leaf)).Extension)"
-
-    try
-    {
-        if(Test-Path $FileName){Remove-Item $FileName}
-        if(Test-Path "$(Split-Path (Split-Path $Path))\$FolderName_New"){Remove-Item "$(Split-Path (Split-Path $Path))\$FolderName_New" -Recurse}
-        if($FolderName_Old -ne ""){if(Test-Path "$(Split-Path (Split-Path $Path))\$FolderName_Old"){Remove-Item "$(Split-Path (Split-Path $Path))\$FolderName_Old" -Recurse}}
-        Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
-        if($FolderName_Old -ne ""){Start-Process "7za" "x $FileName -o$(Split-Path (Split-Path $Path)) -y" -Wait}else{Start-Process "7za" "x $FileName -o$(Split-Path $Path) -y" -Wait}
-        if($FolderName_Old -ne ""){Rename-Item "$(Split-Path (Split-Path $Path))\$FolderName_Old" "$FolderName_New"}
-    }
-    catch
-    {
-        return
-    }
-}
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
@@ -70,5 +48,6 @@ $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name 
         API = 'Xgminer'
         Port = 4028
         Wrap = $false
+        URI = $Uri
     }
 }
