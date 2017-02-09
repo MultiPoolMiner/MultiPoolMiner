@@ -9,7 +9,7 @@ $Port = 3334
     Type = 'CPU'
     Path = $Path
     Arguments = -Join ('-a ', $Port, ' -l $($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User)')
-    HashRates = [PSCustomObject]@{Equihash = '$($Stats.' + $Name + '_Equihash_HashRate.Day)'}
+    HashRates = [PSCustomObject]@{Equihash = '$($Stats.' + $Name + '_Equihash_HashRate.Week)'}
     API = 'Nheqminer'
     Port = $Port
     Wrap = $false

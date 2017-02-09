@@ -18,7 +18,13 @@
     [Parameter(Mandatory=$false)]
     [Array]$Type = $null, #AMD/NVIDIA/CPU
     [Parameter(Mandatory=$false)]
-    [String]$Currency = "USD", #i.e. GBP,USD,ZEC,ETH ect.
+    [Array]$Algorithm = $null, #Ethash/Equihash/
+    [Parameter(Mandatory=$false)]
+    [Array]$MinerName = $null, 
+    [Parameter(Mandatory=$false)]
+    [Array]$PoolName = $null, 
+    [Parameter(Mandatory=$false)]
+    [Array]$Currency = ("BTC","USD"), #i.e. GBP,EUR,ZEC,ETH ect.
     [Parameter(Mandatory=$false)]
     [Int]$Donate = 10 #Minutes per Day
 )
@@ -41,7 +47,8 @@ if(Test-Path "Stats"){Get-ChildItemContent "Stats" | ForEach {$Stat = Set-Stat $
 
 while($true)
 {
-    $Currency_Rate = (Invoke-WebRequest "https://api.cryptonator.com/api/ticker/btc-$Currency" -UseBasicParsing | ConvertFrom-Json).ticker.price
+    $Rates = [PSCustomObject]@{}
+    $Currency | ForEach {$Rates | Add-Member $_ (Invoke-WebRequest "https://api.cryptonator.com/api/ticker/btc-$_" -UseBasicParsing | ConvertFrom-Json).ticker.price}
 
     #Load the Stats
     $Stats = [PSCustomObject]@{}
@@ -185,13 +192,22 @@ while($true)
     #Display profit comparison
     if(($BestMinerCombo | Where Profit -EQ $null | Measure).Count -eq 0)
     {
-        $Profit = (Set-Stat -Name "Profit" -Value ($BestMinerCombo | Measure Profit -Sum).Sum).Week
-        $Profit_Comparison = ($BestMinerCombo_Comparison | Measure Profit_Comparison -Sum).Sum
+        $MinerComparisons = 
+            [PSCustomObject]@{"Miner" = "MultiPoolMiner"}, 
+            [PSCustomObject]@{"Miner" = $BestMinerCombo_Comparison | ForEach {"$($_.Name)-$($_.HashRates.PSObject.Properties.Name -join "/")"}}
+            
+        $MinerComparisons_Profit = 
+            (Set-Stat -Name "Profit" -Value ($BestMinerCombo | Measure Profit -Sum).Sum).Week, 
+            ($BestMinerCombo_Comparison | Measure Profit_Comparison -Sum).Sum
 
-        Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is $([Math]::Round((($Profit-$Profit_Comparison)/$Profit_Comparison)*100))% more profitable than conventional mining! "
+        $Currency | Foreach {
+            $MinerComparisons[0] | Add-Member $_ ("{0:N5}" -f ($MinerComparisons_Profit[0]*$Rates.$_))
+            $MinerComparisons[1] | Add-Member $_ ("{0:N5}" -f ($MinerComparisons_Profit[1]*$Rates.$_))
+        }
 
-        [PSCustomObject]@{"Miner" = "MultiPoolMiner"; "BTC/Day" = ("{0:N5}" -f $Profit); "$Currency/Day" = ("{0:N2}" -f ($Profit*$Currency_Rate))}, 
-        [PSCustomObject]@{"Miner" = $BestMinerCombo_Comparison | ForEach {"$($_.Name)-$($_.HashRates.PSObject.Properties.Name -join "/"))"}; "BTC/Day" = ("{0:N5}" -f $Profit_Comparison); "$Currency/Day" = ("{0:N2}" -f ($Profit_Comparison*$Currency_Rate))} | Out-Host
+        Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is $([Math]::Round((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])*100))% more profitable than conventional mining! "
+
+        $MinerComparisons | Out-Host
     }
     
     #Do nothing for a few seconds as to not overload the APIs

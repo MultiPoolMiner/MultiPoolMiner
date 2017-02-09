@@ -12,44 +12,40 @@
     $Date = $Date.ToUniversalTime()
     $SmallestValue = 1E-20
 
-    if(Test-Path $Path)
-    {
-        $Stat = Get-Content $Path | ConvertFrom-Json
-        $Stat = [PSCustomObject]@{
-            Live = [Decimal]$Stat.Live
-            Minute = [Decimal]$Stat.Minute
-            Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
-            Minute_5 = [Decimal]$Stat.Minute_5
-            Minute_5_Fluctuation = [Double]$Stat.Minute_5_Fluctuation
-            Minute_10 = [Decimal]$Stat.Minute_10
-            Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
-            Hour = [Decimal]$Stat.Hour
-            Hour_Fluctuation = [Double]$Stat.Hour_Fluctuation
-            Day = [Decimal]$Stat.Day
-            Day_Fluctuation = [Double]$Stat.Day_Fluctuation
-            Week = [Decimal]$Stat.Week
-            Week_Fluctuation = [Double]$Stat.Week_Fluctuation
-            Updated = [DateTime]$Stat.Updated
-        }
+    $Stat = [PSCustomObject]@{
+        Live = $Value
+        Minute = $Value
+        Minute_Fluctuation = 0.5
+        Minute_5 = $Value
+        Minute_5_Fluctuation = 0.5
+        Minute_10 = $Value
+        Minute_10_Fluctuation = 0.5
+        Hour = $Value
+        Hour_Fluctuation = 0.5
+        Day = $Value
+        Day_Fluctuation = 0.5
+        Week = $Value
+        Week_Fluctuation = 0.5
+        Updated = $Date
     }
-    else
-    {
-        $Stat = [PSCustomObject]@{
-            Live = $Value
-            Minute = $Value
-            Minute_Fluctuation = 0.5
-            Minute_5 = $Value
-            Minute_5_Fluctuation = 0.5
-            Minute_10 = $Value
-            Minute_10_Fluctuation = 0.5
-            Hour = $Value
-            Hour_Fluctuation = 0.5
-            Day = $Value
-            Day_Fluctuation = 0.5
-            Week = $Value
-            Week_Fluctuation = 0.5
-            Updated = $Date
-        }
+
+    if(Test-Path $Path){$Stat = Get-Content $Path | ConvertFrom-Json}
+
+    $Stat = [PSCustomObject]@{
+        Live = [Decimal]$Stat.Live
+        Minute = [Decimal]$Stat.Minute
+        Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
+        Minute_5 = [Decimal]$Stat.Minute_5
+        Minute_5_Fluctuation = [Double]$Stat.Minute_5_Fluctuation
+        Minute_10 = [Decimal]$Stat.Minute_10
+        Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
+        Hour = [Decimal]$Stat.Hour
+        Hour_Fluctuation = [Double]$Stat.Hour_Fluctuation
+        Day = [Decimal]$Stat.Day
+        Day_Fluctuation = [Double]$Stat.Day_Fluctuation
+        Week = [Decimal]$Stat.Week
+        Week_Fluctuation = [Double]$Stat.Week_Fluctuation
+        Updated = [DateTime]$Stat.Updated
     }
     
     $Span_Minute = [Math]::Min(($Date-$Stat.Updated).TotalMinutes,1)
@@ -106,6 +102,7 @@ function Get-ChildItemContent {
 
     $ChildItems = Get-ChildItem $Path | ForEach {
         $Name = $_.BaseName
+        $Content = @()
         if($_.Extension -eq ".ps1")
         {
            $Content = &$_.FullName

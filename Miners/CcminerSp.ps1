@@ -44,7 +44,7 @@ $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name 
         Type = 'NVIDIA'
         Path = $Path
         Arguments = -Join ('-b 127.0.0.1:4068 -a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x', $Optimizations.$_)
-        HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Day)')}
+        HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Week)')}
         API = 'Ccminer'
         Port = 4068
         Wrap = $false
