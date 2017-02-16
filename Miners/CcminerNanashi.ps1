@@ -1,9 +1,10 @@
 ﻿$Path = '.\Bin\NVIDIA-Nanashi\ccminer.exe'
-$Uri = "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip"
+$Uri = 'https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
+    #Lyra2z = 'lyra2z' #not supported
     #Equihash = 'equihash' #not supported
     #Cryptonight = 'cryptonight' #not supported
     #Ethash = 'ethash' #not supported
@@ -22,6 +23,7 @@ $Algorithms = [PSCustomObject]@{
 }
 
 $Optimizations = [PSCustomObject]@{
+    Lyra2z = ''
     Equihash = ''
     Cryptonight = ''
     Ethash = ''

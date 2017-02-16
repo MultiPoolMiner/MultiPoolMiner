@@ -1,9 +1,10 @@
 ﻿$Path = '.\Bin\NVIDIA-KlausT\ccminer.exe'
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.05/ccminer-805-x64.zip"
+$Uri = 'https://github.com/KlausT/ccminer/releases/download/8.05/ccminer-805-x64.zip'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
+    #Lyra2z = 'lyra2z' #not supported
     #Equihash = 'equihash' #not supported
     #Cryptonight = 'cryptonight' #not supported
     #Ethash = 'ethash' #not supported
@@ -22,6 +23,7 @@ $Algorithms = [PSCustomObject]@{
 }
 
 $Optimizations = [PSCustomObject]@{
+    Lyra2z = ''
     Equihash = ''
     Cryptonight = ''
     Ethash = ''

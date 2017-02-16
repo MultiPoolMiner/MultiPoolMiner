@@ -1,9 +1,10 @@
 ﻿$Path = '.\Bin\AMD-GenesisMining\sgminer.exe'
-$Uri = "https://github.com/genesismining/sgminer-gm/releases/download/5.5.5/sgminer-gm.zip"
+$Uri = 'https://github.com/genesismining/sgminer-gm/releases/download/5.5.5/sgminer-gm.zip'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
+    #Lyra2z = 'lyra2z' #not supported
     Equihash = 'equihash'
     Cryptonight = 'cryptonight'
     Ethash = 'ethash'
@@ -22,6 +23,7 @@ $Algorithms = [PSCustomObject]@{
 }
 
 $Optimizations = [PSCustomObject]@{
+    Lyra2z = ''
     Equihash = ' --gpu-threads 2 --worksize 256'
     Cryptonight = ' --gpu-threads 1 --worksize 8 --rawintensity 896'
     Ethash = ' --gpu-threads 1 --worksize 192 --xintensity 1024'

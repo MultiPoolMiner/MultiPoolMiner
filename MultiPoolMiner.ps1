@@ -66,7 +66,20 @@ while($true)
     #Messy...?
     $Miners = if(Test-Path "Miners"){Get-ChildItemContent "Miners" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | Where {$Type.Count -eq 0 -or (Compare $Type $_.Type -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0}}
     if($Miners.Count -eq 0){"No Miners!" | Out-Host; continue}
-    $Miners | ForEach {if((Test-Path $_.Path) -eq $false){Expand-WebRequest $_.URI (Split-Path $_.Path)}}
+    $Miners | ForEach {
+        if((Test-Path $_.Path) -eq $false)
+        {
+            if((Split-Path $_.URI -Leaf) -eq (Split-Path $_.Path -Leaf))
+            {
+                New-Item (Split-Path $_.Path) -ItemType "Directory" | Out-Null
+                Invoke-WebRequest $_.URI -OutFile $_.Path -UseBasicParsing
+            }
+            else
+            {
+                Expand-WebRequest $_.URI (Split-Path $_.Path)
+            }
+        }
+    }
     $Miners | ForEach {
         $Miner = $_
 

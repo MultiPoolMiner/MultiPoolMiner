@@ -415,6 +415,6 @@ function Expand-WebRequest {
     if(Test-Path "$(Split-Path $Path)\$FolderName_Old"){Remove-Item "$(Split-Path $Path)\$FolderName_Old" -Recurse}
 
     Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
-    Start-Process "7za" "x $FileName -o$(Split-Path $Path)\$FolderName_Old -y -spe" -Wait
+    Start-Process "7z" "x $FileName -o$(Split-Path $Path)\$FolderName_Old -y -spe" -Wait
     Rename-Item "$(Split-Path $Path)\$FolderName_Old" "$FolderName_New"
 }

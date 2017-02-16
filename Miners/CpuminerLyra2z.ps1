@@ -1,25 +1,10 @@
-﻿$Path = '.\Bin\CPU-TPruvot\cpuminer-x64.exe'
-$Uri = 'https://github.com/tpruvot/cpuminer-multi/releases/download/v1.3-multi/cpuminer-multi-rel1.3.zip'
+﻿$Path = '.\Bin\Lyra2z-CPU\cpuminer.exe'
+$Uri = 'https://ottrbutt.com/tmp/cpuminer.exe'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
-    #Lyra2z = 'lyra2z' #not supported
-    #Equihash = 'equihash' #not supported
-    Cryptonight = 'cryptonight'
-    #Ethash = 'ethash' #not supported
-    Sia = 'sia'
-    Yescrypt = 'yescrypt'
-    BlakeVanilla = 'vanilla'
-    Lyra2RE2 = 'lyra2v2'
-    Skein = 'skein'
-    Qubit = 'qubit'
-    NeoScrypt = 'neoscrypt'
-    X11 = 'x11'
-    MyriadGroestl = 'myr-gr'
-    Groestl = 'groestl'
-    Keccak = 'keccak'
-    Scrypt = 'scrypt'
+    Lyra2z = 'lyra2z'
 }
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
