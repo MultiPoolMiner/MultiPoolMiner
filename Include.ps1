@@ -264,9 +264,9 @@ function Get-HashRate {
                 do
                 {
                     $Request = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing
-                
+                    
                     $Data = $Request.Content.Substring($Request.Content.IndexOf("{"),$Request.Content.LastIndexOf("}")-$Request.Content.IndexOf("{")+1) | ConvertFrom-Json
-                
+                    
                     $HashRate = $Data.result[2].Split(";")[0]
                     $HashRate_Dual = $Data.result[4].Split(";")[0]
 
@@ -274,6 +274,27 @@ function Get-HashRate {
 
                     if($Request.Content.Contains("ETH:")){$HashRates += [Decimal]$HashRate*$Multiplier; $HashRates_Dual += [Decimal]$HashRate_Dual*$Multiplier}
                     else{$HashRates += [Decimal]$HashRate; $HashRates_Dual += [Decimal]$HashRate_Dual}
+
+                    if(-not $Safe){break}
+
+                    sleep $Interval
+                } while($HashRates.Count -lt 6)
+            }
+            "FireIce"
+            {
+                do
+                {
+                    $Request = Invoke-WebRequest "http://$($Server):$Port/h" -UseBasicParsing
+                    
+                    $Data = (((([System.Text.Encoding]::ASCII.GetString($Request.Content)) -split "`n") -match 'Total:*') -split " ")[3,4,5,6]
+                    
+                    $HashRate = $Data[0]
+                    if($HashRate -eq "(na)"){$HashRate = $Data[1]}
+                    if($HashRate -eq "(na)"){$HashRate = $Data[2]}
+
+                    if($HashRate -eq $null){$HashRates = @(); break}
+
+                    $HashRates += [Decimal]$HashRate
 
                     if(-not $Safe){break}
 

@@ -2,7 +2,7 @@
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\AMD-Reorder\\cgminer.exe",
-        "Arguments":  "--api-listen --skein -o $($Pools.Skein.Protocol)://$($Pools.Skein.Host):$($Pools.Skein.Port) -u $($Pools.Skein.User) -p x",
+        "Arguments":  "--api-listen --skein -o $($Pools.Skein.Protocol)://$($Pools.Skein.Host):$($Pools.Skein.Port) -u $($Pools.Skein.User) -p x --gpu-threads 2 --worksize 64 --intensity 11",
         "HashRates":  {"Skein":  "$($Stats.Reorder_Skein_HashRate.Week)"},
         "API":  "Xgminer",
         "Port":  "4028",

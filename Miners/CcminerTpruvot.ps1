@@ -1,12 +1,12 @@
-﻿$Path = '.\Bin\NVIDIA-TPruvot\ccminer-80-x64.exe'
-$Uri = 'https://github.com/tpruvot/ccminer/releases/download/1.8.4-tpruvot/ccminer-rel1.8.4-vc2013-x64.7z'
+﻿$Path = '.\Bin\NVIDIA-TPruvot\ccminer-x64.exe'
+$Uri = 'https://github.com/tpruvot/ccminer/releases/download/2.0-rc/ccminer-2.0-rc-cuda-8.0.7z'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
-    #Lyra2z = 'lyra2z' #not supported
+    Lyra2z = 'lyra2z'
     #Equihash = 'equihash' #not supported
-    #Cryptonight = 'cryptonight' #not supported
+    Cryptonight = 'cryptonight'
     #Ethash = 'ethash' #not supported
     Sia = 'sia'
     Yescrypt = 'yescrypt'

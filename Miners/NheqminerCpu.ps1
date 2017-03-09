@@ -1,5 +1,5 @@
 ﻿$Path = '.\Bin\Equihash-NiceHash\nheqminer.exe'
-$Uri = "https://github.com/nicehash/nheqminer/releases/download/0.5c/Windows_x64_nheqminer-5c.zip"
+$Uri = 'https://github.com/nicehash/nheqminer/releases/download/0.5c/Windows_x64_nheqminer-5c.zip'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 

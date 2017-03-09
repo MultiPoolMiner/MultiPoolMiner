@@ -1,14 +1,14 @@
-﻿$Path = '.\Bin\Cryptonight-NiceHash\ccminer.exe'
-$Uri = 'https://github.com/nicehash/ccminer-cryptonight/releases/download/v1.0.0/ccminer.zip'
+﻿$Path = '.\Bin\Groestl-NVIDIA\ccminer_x11gost.exe'
+$Uri = 'https://github.com/nicehash/ccminer-x11gost/releases/download/ccminer-x11gost_windows/ccminer_x11gost.7z'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
-    Cryptonight = 'cryptonight'
+    Groestl = 'groestl'
 }
 
 $Optimizations = [PSCustomObject]@{
-    Cryptonight = ''
+    Groestl = ''
 }
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {

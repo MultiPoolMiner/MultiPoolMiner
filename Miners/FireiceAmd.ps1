@@ -1,9 +1,9 @@
-﻿$Path = '.\Bin\Equihash-NiceHash\nheqminer.exe'
-$Uri = 'https://github.com/nicehash/nheqminer/releases/download/0.5c/Windows_x64_nheqminer-5c.zip'
+﻿$Path = '.\Bin\Cryptonight-AMD\xmr-stak-amd.exe'
+$Uri = 'https://github.com/fireice-uk/xmr-stak-amd/releases/download/v1.0.0-1.3.0/xmr-stak-amd-win64.zip'
 
 if((Test-Path $Path) -eq $false)
 {
-    $FolderName_Old = ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName
+    $FolderName_Old = ([IO.FileInfo](Split-Path $Path -Leaf)).BaseName
     $FolderName_New = Split-Path (Split-Path $Path) -Leaf
     $FileName = "$FolderName_New$(([IO.FileInfo](Split-Path $Uri -Leaf)).Extension)"
 
@@ -18,29 +18,22 @@ if((Test-Path $Path) -eq $false)
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Port = 3335
+$Port = 3336
 
-$pinfo = New-Object System.Diagnostics.ProcessStartInfo
-$pinfo.FileName = Convert-Path $Path
-$pinfo.Arguments = "-ci"
-$pinfo.UseShellExecute = $false
-$pinfo.CreateNoWindow = $true
-$pinfo.RedirectStandardOutput = $true
-$pinfo.RedirectStandardError = $true
-
-$process = New-Object System.Diagnostics.Process
-$process.StartInfo = $pinfo
-$process.Start() | Out-Null
-$process.WaitForExit() | Out-Null
-
-$Devices = ($process.StandardOutput.ReadToEnd() | Select-String "#[0-9]" -AllMatches).Matches.Value -replace "#" -join " "
+(Get-Content "$(Split-Path $Path)\config.txt") `
+-replace """pool_address"" : ""[^""]*"",", """pool_address"" : ""$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)""," `
+-replace """wallet_address"" : ""[^""]*"",", """wallet_address"" : ""$($Pools.Cryptonight.User)""," `
+-replace """pool_password"" : ""[^""]*"",", """pool_password"" : ""x""," `
+-replace """httpd_port"" : [^""]*,", """httpd_port"" : $Port," | `
+Set-Content "$(Split-Path $Path)\config.txt"
 
 [PSCustomObject]@{
-    Type = 'NVIDIA'
+    Type = 'AMD'
     Path = $Path
-    Arguments = -Join ('-a ', $Port, ' -l $($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User) -t 0 -cd ', $Devices)
+    Arguments = ''
     HashRates = [PSCustomObject]@{Equihash = '$($Stats.' + $Name + '_Equihash_HashRate.Week)'}
-    API = 'Nheqminer'
+    API = 'FireIce'
     Port = $Port
     Wrap = $false
+    URI = $Uri
 }

@@ -1,5 +1,5 @@
 ﻿$Path = '.\Bin\Lyra2z-NVIDIA\ccminer.exe'
-$Uri = 'https://github.com/djm34/ccminer-msvc2015/releases/download/v0.0.1-pre/ccminer.exe'
+$Uri = 'https://github.com/djm34/ccminer-msvc2015/releases/download/v0.0.2/ccminer.rar'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
