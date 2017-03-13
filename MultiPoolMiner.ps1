@@ -18,7 +18,7 @@
     [Parameter(Mandatory=$false)]
     [Array]$Type = $null, #AMD/NVIDIA/CPU
     [Parameter(Mandatory=$false)]
-    [Array]$Algorithm = $null, #Ethash/Equihash/
+    [Array]$Algorithm = $null, #i.e. Ethash,Equihash,Cryptonight ect.
     [Parameter(Mandatory=$false)]
     [Array]$MinerName = $null, 
     [Parameter(Mandatory=$false)]
@@ -45,8 +45,32 @@ Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_hh-mm-ss").txt"
 #Update stats with missing data and set to today's date/time
 if(Test-Path "Stats"){Get-ChildItemContent "Stats" | ForEach {$Stat = Set-Stat $_.Name $_.Content.Week}}
 
+#Set donation parameters
+$LastDonated = (Get-Date).AddDays(-1).AddHours(1)
+$WalletDonate = "1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb"
+$UserNameDonate = "aaronsace"
+$WorkerNameDonate = "multipoolminer"
+$WalletBackup = $Wallet
+$UserNameBackup = $UserName
+$WorkerNameBackup = $WorkerName
+
 while($true)
 {
+    #Activate or deactivate donation
+    if((Get-Date).AddDays(-1).AddMinutes($Donate) -ge $LastDonated)
+    {
+        $Wallet = $WalletDonate
+        $UserName = $UserNameDonate
+        $WorkerName = $WorkerNameDonate
+    }
+    if((Get-Date).AddDays(-1) -ge $LastDonated)
+    {
+        $Wallet = $WalletBackup
+        $UserName = $UserNameBackup
+        $WorkerName = $WorkerNameBackup
+        $LastDonated = Get-Date
+    }
+
     $Rates = [PSCustomObject]@{}
     $Currency | ForEach {$Rates | Add-Member $_ (Invoke-WebRequest "https://api.cryptonator.com/api/ticker/btc-$_" -UseBasicParsing | ConvertFrom-Json).ticker.price}
 
@@ -55,16 +79,22 @@ while($true)
     if(Test-Path "Stats"){Get-ChildItemContent "Stats" | ForEach {$Stats | Add-Member $_.Name $_.Content}}
 
     #Load information about the Pools
-    $AllPools = if(Test-Path "Pools"){Get-ChildItemContent "Pools" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | Where Location -EQ $Location | Where SSL -EQ $SSL}
+    $AllPools = if(Test-Path "Pools"){Get-ChildItemContent "Pools" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | 
+        Where Location -EQ $Location | 
+        Where SSL -EQ $SSL | 
+        Where {$PoolName.Count -eq 0 -or (Compare $PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0}}
     if($AllPools.Count -eq 0){"No Pools!" | Out-Host; continue}
     $Pools = [PSCustomObject]@{}
     $Pools_Comparison = [PSCustomObject]@{}
     $AllPools.Algorithm | Select -Unique | ForEach {$Pools | Add-Member $_ ($AllPools | Where Algorithm -EQ $_ | Sort Price -Descending | Select -First 1)}
     $AllPools.Algorithm | Select -Unique | ForEach {$Pools_Comparison | Add-Member $_ ($AllPools | Where Algorithm -EQ $_ | Sort StablePrice -Descending | Select -First 1)}
-    
+
     #Load information about the Miners
     #Messy...?
-    $Miners = if(Test-Path "Miners"){Get-ChildItemContent "Miners" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | Where {$Type.Count -eq 0 -or (Compare $Type $_.Type -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0}}
+    $Miners = if(Test-Path "Miners"){Get-ChildItemContent "Miners" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | 
+        Where {$Type.Count -eq 0 -or (Compare $Type $_.Type -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0} | 
+        Where {$Algorithm.Count -eq 0 -or (Compare $Algorithm $_.HashRates.PSObject.Properties.Name -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0} | 
+        Where {$MinerName.Count -eq 0 -or (Compare $MinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0}}
     if($Miners.Count -eq 0){"No Miners!" | Out-Host; continue}
     $Miners | ForEach {
         if((Test-Path $_.Path) -eq $false)
