@@ -31,7 +31,7 @@ Set-Content "$(Split-Path $Path)\config.txt"
     Type = 'CPU'
     Path = $Path
     Arguments = ''
-    HashRates = [PSCustomObject]@{Equihash = '$($Stats.' + $Name + '_Equihash_HashRate.Week)'}
+    HashRates = [PSCustomObject]@{Cryptonight = '$($Stats.' + $Name + '_Cryptonight_HashRate.Week)'}
     API = 'FireIce'
     Port = $Port
     Wrap = $false
