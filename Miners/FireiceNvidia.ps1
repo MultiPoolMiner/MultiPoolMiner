@@ -1,5 +1,5 @@
-﻿$Path = '.\Bin\Cryptonight-AMD\xmr-stak-amd.exe'
-$Uri = 'https://github.com/fireice-uk/xmr-stak-amd/releases/download/v1.0.0-1.3.1/xmr-stak-amd-win64.zip'
+﻿$Path = '.\Bin\Cryptonight-NVIDIA\xmr-stak-nvidia.exe'
+$Uri = 'https://github.com/fireice-uk/xmr-stak-nvidia/releases/download/v1.0.0-1.3.1/xmr-stak-nvidia-win64.zip'
 
 if((Test-Path $Path) -eq $false)
 {
@@ -18,7 +18,7 @@ if((Test-Path $Path) -eq $false)
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Port = 3336
+$Port = 3335
 
 (Get-Content "$(Split-Path $Path)\config.txt") `
 -replace """pool_address"" : ""[^""]*"",", """pool_address"" : ""$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)""," `
@@ -28,7 +28,7 @@ $Port = 3336
 Set-Content "$(Split-Path $Path)\config.txt"
 
 [PSCustomObject]@{
-    Type = 'AMD'
+    Type = 'NVIDIA'
     Path = $Path
     Arguments = ''
     HashRates = [PSCustomObject]@{Cryptonight = '$($Stats.' + $Name + '_Cryptonight_HashRate.Week)'}

@@ -1,5 +1,5 @@
 ﻿$Path = '.\Bin\Cryptonight-CPU\xmr-stak-cpu.exe'
-$Uri = 'https://github.com/fireice-uk/xmr-stak-cpu/releases/download/v1.1.0-1.3.0/xmr-stak-cpu-amd64.zip'
+$Uri = 'https://github.com/fireice-uk/xmr-stak-cpu/releases/download/v1.1.0-1.3.1/xmr-stak-cpu-win64.zip'
 
 if((Test-Path $Path) -eq $false)
 {

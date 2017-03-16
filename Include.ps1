@@ -286,11 +286,11 @@ function Get-HashRate {
                 {
                     $Request = Invoke-WebRequest "http://$($Server):$Port/h" -UseBasicParsing
                     
-                    $Data = (((([System.Text.Encoding]::ASCII.GetString($Request.Content)) -split "`n") -match 'Total:*') -split " ")[3,4,5,6]
+                    $Data = $Request.Content -split "</tr>" -match "total*" -split "<td>" -replace "<[^>]*>",""
                     
-                    $HashRate = $Data[0]
-                    if($HashRate -eq "(na)"){$HashRate = $Data[1]}
-                    if($HashRate -eq "(na)"){$HashRate = $Data[2]}
+                    $HashRate = $Data[1]
+                    if($HashRate -eq ""){$HashRate = $Data[2]}
+                    if($HashRate -eq ""){$HashRate = $Data[3]}
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
