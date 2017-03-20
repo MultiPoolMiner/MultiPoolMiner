@@ -4,4 +4,4 @@ setx GPU_USE_SYNC_OBJECTS 1
 setx GPU_MAX_ALLOC_PERCENT 100
 setx GPU_SINGLE_ALLOC_PERCENT 100
 
-powershell -version 5.0 -noexit -executionpolicy bypass -windowstyle maximized -command "&.\multipoolminer.ps1 -username aaronsace -workername multipoolminer -interval 60 -location europe -ssl -type amd,nvidia,cpu"
+powershell -version 5.0 -noexit -executionpolicy bypass -windowstyle maximized -command "&.\multipoolminer.ps1 -username aaronsace -workername multipoolminer -interval 60 -location europe -ssl -type amd,nvidia,cpu -algorithm cryptonight,ethash,equihash,lyra2z -poolname miningpoolhub -currency btc,usd -donate 10"
