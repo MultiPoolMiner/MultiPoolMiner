@@ -20,11 +20,14 @@ $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Port = 3334
 
+$Threads = 4
+
 (Get-Content "$(Split-Path $Path)\config.txt") `
 -replace """pool_address"" : ""[^""]*"",", """pool_address"" : ""$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)""," `
 -replace """wallet_address"" : ""[^""]*"",", """wallet_address"" : ""$($Pools.Cryptonight.User)""," `
 -replace """pool_password"" : ""[^""]*"",", """pool_password"" : ""x""," `
--replace """httpd_port"" : [^""]*,", """httpd_port"" : $Port," | `
+-replace """httpd_port"" : [^""]*,", """httpd_port"" : $Port," `
+-replace """cpu_thread_num"" : [^""]*,", """cpu_thread_num"" : $Threads," | `
 Set-Content "$(Split-Path $Path)\config.txt"
 
 [PSCustomObject]@{
