@@ -31,6 +31,8 @@
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 
+Get-ChildItem . -Recurse | Unblock-File
+
 . .\Include.ps1
 
 $DeltaMax = 0.05 #decimal percentage
