@@ -149,16 +149,22 @@ while($true)
         $Miner | Add-Member Profit_Comparison $Miner_Profit_Comparison
         $Miner | Add-Member Profit_Bias $Miner_Profit
         $Miner.Path = Convert-Path $Miner.Path
+
+        if($Miner.Type -eq $null){$Miner | Add-Member Type ($Miners.Type | Select -Unique) -Force}
+        if($Miner.Index -eq $null){$Miner | Add-Member Index ($Miners.Index | Select -Unique) -Force}
+
+        if($Miner.Type -eq $null){$Miner.Type = ""}
+        if($Miner.Index -eq $null){$Miner.Index = 0}
     }
 
     #Apply delta to miners to avoid needless switching
     $ActiveMinerPrograms | ForEach {$Miners | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments | ForEach {$_.Profit_Bias *= 1+$Delta}}
 
     #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
-    $BestMiners = $Miners | Select Type -Unique | ForEach {$Miner_Type = $_.Type; ($Miners | Where {(Compare $Miner_Type $_.Type | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit_Bias -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
-    $BestMiners_Comparison = $Miners | Select Type -Unique | ForEach {$Miner_Type = $_.Type; ($Miners | Where {(Compare $Miner_Type $_.Type | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit_Comparison -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
-    $MinerCombos = Get-Combination $BestMiners | Where {$_.Combination.Type.Count -eq ($_.Combination.Type | Select -Unique).Count}
-    $MinerCombos_Comparison = Get-Combination $BestMiners_Comparison | Where {$_.Combination.Type.Count -eq ($_.Combination.Type | Select -Unique).Count}
+    $BestMiners = $Miners | Select Type,Index -Unique | ForEach {$Miner_GPU = $_; ($Miners | Where {(Compare $Miner_GPU.Type $_.Type | Measure).Count + (Compare $Miner_GPU.Index $_.Index | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit_Bias -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
+    $BestMiners_Comparison = $Miners | Select Type,Index -Unique | ForEach {$Miner_GPU = $_; ($Miners | Where {(Compare $Miner_GPU.Type $_.Type | Measure).Count + (Compare $Miner_GPU.Index $_.Index | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit_Comparison -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
+    $MinerCombos = Get-Combination $BestMiners | Where {$Combination = $_ | ForEach {$_.Combination | ForEach {$Miner = $_; $Miner.Type | ForEach {[PSCustomObject]@{Type=$_; Index=$Miner.Index}}}}; $Combination.Count -eq ($Combination | Select * -Unique).Count}
+    $MinerCombos_Comparison = Get-Combination $BestMiners_Comparison | Where {$Combination = $_ | ForEach {$_.Combination | ForEach {$Miner = $_; $Miner.Type | ForEach {[PSCustomObject]@{Type=$_; Index=$Miner.Index}}}}; $Combination.Count -eq ($Combination | Select * -Unique).Count}
     $BestMinerCombo = $MinerCombos | Sort -Descending {($_.Combination | Where Profit -EQ $null | Measure).Count},{($_.Combination | Measure Profit_Bias -Sum).Sum},{($_.Combination | Where Profit -NE 0 | Measure).Count} | Select -First 1 | Select -ExpandProperty Combination
     $BestMinerCombo_Comparison = $MinerCombos_Comparison | Sort -Descending {($_.Combination | Where Profit -EQ $null | Measure).Count},{($_.Combination | Measure Profit_Comparison -Sum).Sum},{($_.Combination | Where Profit -NE 0 | Measure).Count} | Select -First 1 | Select -ExpandProperty Combination
 
