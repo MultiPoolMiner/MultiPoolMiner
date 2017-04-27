@@ -369,10 +369,12 @@ function Get-Permutation {
 function Get-Combination {
     param(
         [Parameter(Mandatory=$true)]
-        [Array]$Value
+        [Array]$Value, 
+        [Parameter(Mandatory=$false)]
+        [Int]$Size = $Value.Count
     )
 
-    $Permutations = Get-Permutation ($Value | ForEach {$Value.IndexOf($_)})
+    $Permutations = Get-Permutation ($Value | ForEach {$Value.IndexOf($_)}) $Size
 
     for($i = $Value.Count; $i -gt 0; $i--)
     {
