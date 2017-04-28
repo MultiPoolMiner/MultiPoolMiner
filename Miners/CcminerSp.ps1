@@ -1,5 +1,5 @@
-﻿$Path = '.\Bin\NVIDIA-Nanashi\ccminer.exe'
-$Uri = 'https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip'
+﻿$Path = '.\Bin\NVIDIA-SP\ccminer.exe'
+$Uri = 'https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
@@ -11,8 +11,8 @@ $Algorithms = [PSCustomObject]@{
     #Sia = 'sia' #use TpruvoT
     #Yescrypt = 'yescrypt' #use TpruvoT
     #BlakeVanilla = 'vanilla' #use TpruvoT
-    Lyra2RE2 = 'lyra2v2'
-    #Skein = 'skein' #use TpruvoT
+    #Lyra2RE2 = 'lyra2v2' #use TpruvoT
+    Skein = 'skein'
     #Qubit = 'qubit' #use TpruvoT
     #NeoScrypt = 'neoscrypt' #use TpruvoT
     #X11 = 'x11' #use TpruvoT
@@ -31,7 +31,7 @@ $Optimizations = [PSCustomObject]@{
     Yescrypt = ''
     BlakeVanilla = ''
     Lyra2RE2 = ''
-    Skein = ''
+    Skein = ' -i 27'
     Qubit = ''
     NeoScrypt = ''
     X11 = ''
@@ -45,7 +45,7 @@ $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name 
     [PSCustomObject]@{
         Type = 'NVIDIA'
         Path = $Path
-        Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x', $Optimizations.$_)
+        Arguments = -Join ('-b 127.0.0.1:4068 -a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x', $Optimizations.$_)
         HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Week)')}
         API = 'Ccminer'
         Port = 4068

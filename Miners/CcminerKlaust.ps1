@@ -1,5 +1,5 @@
-﻿$Path = '.\Bin\NVIDIA-Nanashi\ccminer.exe'
-$Uri = 'https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip'
+﻿$Path = '.\Bin\NVIDIA-KlausT\ccminer.exe'
+$Uri = 'https://github.com/KlausT/ccminer/releases/download/8.05/ccminer-805-x64.zip'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
@@ -10,14 +10,14 @@ $Algorithms = [PSCustomObject]@{
     #Ethash = 'ethash' #not supported
     #Sia = 'sia' #use TpruvoT
     #Yescrypt = 'yescrypt' #use TpruvoT
-    #BlakeVanilla = 'vanilla' #use TpruvoT
-    Lyra2RE2 = 'lyra2v2'
+    #BlakeVanilla = 'vanilla'
+    #Lyra2RE2 = 'lyra2v2' #use TpruvoT
     #Skein = 'skein' #use TpruvoT
     #Qubit = 'qubit' #use TpruvoT
-    #NeoScrypt = 'neoscrypt' #use TpruvoT
+    NeoScrypt = 'neoscrypt'
     #X11 = 'x11' #use TpruvoT
-    #MyriadGroestl = 'myr-gr' #use TpruvoT
-    #Groestl = 'groestl' #use TpruvoT
+    MyriadGroestl = 'myr-gr'
+    Groestl = 'groestl'
     #Keccak = 'keccak' #use TpruvoT
     #Scrypt = 'scrypt' #use TpruvoT
 }

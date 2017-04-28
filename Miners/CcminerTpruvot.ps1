@@ -1,25 +1,25 @@
-﻿$Path = '.\Bin\NVIDIA-Nanashi\ccminer.exe'
-$Uri = 'https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip'
+﻿$Path = '.\Bin\NVIDIA-TPruvot\ccminer-x64.exe'
+$Uri = 'https://github.com/tpruvot/ccminer/releases/download/2.0-rc2/ccminer-2.0-rc2-cuda-8.0.7z'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
-    #Lyra2z = 'lyra2z' #not supported
+    Lyra2z = 'lyra2z'
     #Equihash = 'equihash' #not supported
-    #Cryptonight = 'cryptonight' #not supported
+    Cryptonight = 'cryptonight'
     #Ethash = 'ethash' #not supported
-    #Sia = 'sia' #use TpruvoT
-    #Yescrypt = 'yescrypt' #use TpruvoT
-    #BlakeVanilla = 'vanilla' #use TpruvoT
+    Sia = 'sia'
+    Yescrypt = 'yescrypt'
+    BlakeVanilla = 'vanilla'
     Lyra2RE2 = 'lyra2v2'
-    #Skein = 'skein' #use TpruvoT
-    #Qubit = 'qubit' #use TpruvoT
-    #NeoScrypt = 'neoscrypt' #use TpruvoT
-    #X11 = 'x11' #use TpruvoT
-    #MyriadGroestl = 'myr-gr' #use TpruvoT
-    #Groestl = 'groestl' #use TpruvoT
-    #Keccak = 'keccak' #use TpruvoT
-    #Scrypt = 'scrypt' #use TpruvoT
+    Skein = 'skein'
+    Qubit = 'qubit'
+    NeoScrypt = 'neoscrypt'
+    X11 = 'x11'
+    MyriadGroestl = 'myr-gr'
+    Groestl = 'groestl'
+    Keccak = 'keccak'
+    Scrypt = 'scrypt'
 }
 
 $Optimizations = [PSCustomObject]@{
