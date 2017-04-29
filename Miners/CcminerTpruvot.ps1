@@ -1,5 +1,5 @@
 ﻿$Path = '.\Bin\NVIDIA-TPruvot\ccminer-x64.exe'
-$Uri = 'https://github.com/tpruvot/ccminer/releases/download/2.0-rc2/ccminer-2.0-rc2-cuda-8.0.7z'
+$Uri = 'https://github.com/tpruvot/ccminer/releases/download/2.0-rc3/ccminer-2.0-rc3-cuda-7.5.7z'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
@@ -20,6 +20,9 @@ $Algorithms = [PSCustomObject]@{
     Groestl = 'groestl'
     Keccak = 'keccak'
     Scrypt = 'scrypt'
+	Lbry = 'lbry'
+	Decred = 'decred'
+    Sib = 'sib'
 }
 
 $Optimizations = [PSCustomObject]@{
@@ -39,6 +42,9 @@ $Optimizations = [PSCustomObject]@{
     Groestl = ''
     Keccak = ''
     Scrypt = ''
+	Lbry = ''
+	Decred = ''
+    Sib = ''
 }
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
