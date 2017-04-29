@@ -29,7 +29,7 @@ $Locations | ForEach {
         $Price = (($Stat.Live*(1-[Math]::Min($Stat.Day_Fluctuation,1)))+($Stat.Day*(0+[Math]::Min($Stat.Day_Fluctuation,1))))
         
         [PSCustomObject]@{
-            Algorithm = $Algorithm
+            Algorithm = $Algorithm.ToLower()
             Info = $Coin
             Price = $Price
             StablePrice = $Stat.Week
@@ -43,7 +43,7 @@ $Locations | ForEach {
         }
         
         [PSCustomObject]@{
-            Algorithm = $Algorithm
+            Algorithm = $Algorithm.ToLower()
             Info = $Coin
             Price = $Price
             StablePrice = $Stat.Week
