@@ -11,18 +11,24 @@ $Algorithms = [PSCustomObject]@{
     Sia = 'sia'
     Yescrypt = 'yescrypt'
     BlakeVanilla = 'vanilla'
+	Blake2s = 'blake2s'
     Lyra2RE2 = 'lyra2v2'
-    Skein = 'skein'
+	Lyra2v2 = 'lyra2v2'
+    #Skein = 'skein'
     Qubit = 'qubit'
     NeoScrypt = 'neoscrypt'
+	Nist5 = 'nist5'
     X11 = 'x11'
+	X11evo = 'x11evo'
+	X17 = 'x17'
     MyriadGroestl = 'myr-gr'
-    Groestl = 'groestl'
+    #Groestl = 'groestl'
     Keccak = 'keccak'
     Scrypt = 'scrypt'
 	Lbry = 'lbry'
 	Decred = 'decred'
     Sib = 'sib'
+	Timetravel = 'timetravel'
 }
 
 $Optimizations = [PSCustomObject]@{
@@ -33,11 +39,16 @@ $Optimizations = [PSCustomObject]@{
     Sia = ''
     Yescrypt = ''
     BlakeVanilla = ''
+	Blake2s = ''
     Lyra2RE2 = ''
+	Lyra2v2 = ''
     Skein = ''
     Qubit = ''
     NeoScrypt = ''
+	Nist5 = ''
     X11 = ''
+	X11evo = ''
+	X17 = ''
     MyriadGroestl = ''
     Groestl = ''
     Keccak = ''
@@ -45,13 +56,14 @@ $Optimizations = [PSCustomObject]@{
 	Lbry = ''
 	Decred = ''
     Sib = ''
+	Timetravel = ''
 }
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
     [PSCustomObject]@{
         Type = 'NVIDIA'
         Path = $Path
-        Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x', $Optimizations.$_)
+        Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p $($Pools.', $_, '.Pass)', $Optimizations.$_)
         HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Week)')}
         API = 'Ccminer'
         Port = 4068
