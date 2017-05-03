@@ -20,6 +20,7 @@ $Locations = 'US'
 
 $algos = $zpool_Request | Get-Member -Type NoteProperty | Select Name | Where {$_.Name -in 
                                                                                     "blake2s",
+                                                                                    "bitcore"
 																					"Cryptonight",
                                                                                     "Equihash",
                                                                                     "Ethash",
