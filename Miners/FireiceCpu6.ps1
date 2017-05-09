@@ -1,4 +1,4 @@
-﻿$Threads = 2
+﻿$Threads = 6
 $Path_Threads = ".\Bin\Cryptonight-CPU$Threads\xmr-stak-cpu.exe"
 
 $Path = ".\Bin\Cryptonight-CPU\xmr-stak-cpu.exe"

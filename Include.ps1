@@ -344,39 +344,38 @@ filter ConvertTo-Hash {
     }
 }
 
-function Get-Permutation {
+function Get-Combination {
     param(
         [Parameter(Mandatory=$true)]
         [Array]$Value, 
         [Parameter(Mandatory=$false)]
-        [Int]$Size = $Value.Count
+        [Int]$SizeMax = $Value.Count, 
+        [Parameter(Mandatory=$false)]
+        [Int]$SizeMin = 1
     )
-    for($i = 0; $i -lt $Size; $i++)
+
+    $Combination = [PSCustomObject]@{}
+
+    for($i = 0; $i -lt $Value.Count; $i++)
     {
-        Get-Permutation $Value ($Size - 1)
-        if($Size -eq 1){[PSCustomObject]@{Permutation = $Value.Clone()}}
-        $z = 0
-        $position = ($Value.Count - $Size)
-        $temp = $Value[$position]           
-        for($z=($position+1);$z -lt $Value.Count; $z++)
-        {
-            $Value[($z-1)] = $Value[$z]               
-        }
-        $Value[($z-1)] = $temp
+        $Combination | Add-Member @{[Math]::Pow(2, $i) = $Value[$i]}
     }
-}
 
-function Get-Combination {
-    param(
-        [Parameter(Mandatory=$true)]
-        [Array]$Value
-    )
+    $Combination_Keys = $Combination | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name
 
-    $Permutations = Get-Permutation ($Value | ForEach {$Value.IndexOf($_)})
-
-    for($i = $Value.Count; $i -gt 0; $i--)
+    for($i = $SizeMin; $i -le $SizeMax; $i++)
     {
-        $Permutations | ForEach {[PSCustomObject]@{Combination = ($_.Permutation | Select -First $i | Sort {$_})}} | Sort Combination -Unique | ForEach {[PSCustomObject]@{Combination = ($_.Combination | ForEach {$Value.GetValue($_)})}}
+        $x = [Math]::Pow(2, $i)-1
+
+        while($x -le [Math]::Pow(2, $Value.Count)-1)
+        {
+            [PSCustomObject]@{Combination = $Combination_Keys | Where {$_ -band $x} | ForEach {$Combination.$_}}
+            $smallest = ($x -band -$x)
+            $ripple = $x + $smallest
+            $new_smallest = ($ripple -band -$ripple)
+            $ones = (($new_smallest/$smallest) -shr 1) - 1
+            $x = $ripple -bor $ones
+        }
     }
 }
 

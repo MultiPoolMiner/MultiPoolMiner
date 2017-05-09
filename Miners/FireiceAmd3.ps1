@@ -1,4 +1,7 @@
-﻿$Path = '.\Bin\Cryptonight-AMD\xmr-stak-amd.exe'
+﻿$ThreadIndex = 3
+$Path_Threads = ".\Bin\Cryptonight-AMD$ThreadIndex\xmr-stak-amd.exe"
+
+$Path = ".\Bin\Cryptonight-AMD\xmr-stak-amd.exe"
 $Uri = 'https://github.com/fireice-uk/xmr-stak-amd/releases/download/v1.0.0-1.3.1/xmr-stak-amd-win64.zip'
 
 if((Test-Path $Path) -eq $false)
@@ -16,24 +19,32 @@ if((Test-Path $Path) -eq $false)
     Rename-Item "$(Split-Path (Split-Path $Path))\$FolderName_Old" "$FolderName_New"
 }
 
+if((Test-Path $Path_Threads) -eq $false)
+{
+    Copy-Item (Split-Path $Path) (Split-Path $Path_Threads) -Recurse
+}
+
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Port = 3336
+$Port = 3336+($ThreadIndex*10000)
 
-(Get-Content "$(Split-Path $Path)\config.txt") `
--replace """pool_address"" : ""[^""]*"",", """pool_address"" : ""$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)""," `
--replace """wallet_address"" : ""[^""]*"",", """wallet_address"" : ""$($Pools.Cryptonight.User)""," `
--replace """pool_password"" : ""[^""]*"",", """pool_password"" : ""x""," `
--replace """httpd_port"" : [^""]*,", """httpd_port"" : $Port," | `
-Set-Content "$(Split-Path $Path)\config.txt"
+$Config = "{$((Get-Content "$(Split-Path $Path_Threads)\config.txt"))}" -replace "/\*(.|[\r\n])*?\*/" -replace ",(|[ \t\r\n])+}","}" -replace ",(|[ \t\r\n])+\]","]" ` | ConvertFrom-Json
+$Config.pool_address = "$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)"
+$Config.wallet_address = "$($Pools.Cryptonight.User)"
+$Config.pool_password = "x"
+$Config.httpd_port = $Port
+$Config.gpu_threads_conf = @(@{index = $ThreadIndex; intensity = 1000; worksize = 8; affine_to_cpu = $true})
+$Config.gpu_thread_num = 1
+($Config | ConvertTo-Json) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt"
 
 [PSCustomObject]@{
     Type = 'AMD'
-    Path = $Path
+    Path = $Path_Threads
     Arguments = ''
     HashRates = [PSCustomObject]@{Cryptonight = '$($Stats.' + $Name + '_Cryptonight_HashRate.Week)'}
     API = 'FireIce'
     Port = $Port
     Wrap = $false
     URI = $Uri
+    Index = $ThreadIndex
 }
