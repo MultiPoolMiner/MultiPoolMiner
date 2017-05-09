@@ -1,0 +1,6 @@
+bin/
+stats/
+logs/
+*.zip
+*.7z
+*.rar
