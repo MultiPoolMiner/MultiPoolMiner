@@ -4,8 +4,7 @@
         "Path":  ".\\Bin\\Equihash-EWBF\\miner.exe",
         "Arguments":  "--boff --server $($Pools.Equihash.Host) --user $($Pools.Equihash.User) --pass x --port $($Pools.Equihash.Port) --eexit 1 --solver 0",
         "HashRates":  {"Equihash":  "$($Stats.EWBF0_Equihash_HashRate.Week)"},
-        "API":  "Wrapper",
-        "Port":  "0",
-        "Wrap":  true
+        "API":  "EWBF",
+        "Port":  "42000"
     }
 ]

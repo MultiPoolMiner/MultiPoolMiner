@@ -185,11 +185,11 @@ function Get-HashRate {
                         elseif($Data.SUMMARY.THS_5s -ne $null){[Decimal]$Data.SUMMARY.THS_5s*[Math]::Pow($Multiplier,4)}
                         elseif($Data.SUMMARY.PHS_5s -ne $null){[Decimal]$Data.SUMMARY.PHS_5s*[Math]::Pow($Multiplier,5)}
 
-                    if($HashRate -eq $null){$HashRates = @(); break}
-
-                    $HashRates += $HashRate
-
-                    if(-not $Safe){break}
+                    if($HashRate -ne $null)
+                    {
+                        $HashRates += $HashRate
+                        if(-not $Safe){break}
+                    }
 
                     $HashRate = if($Data.SUMMARY.HS_av -ne $null){[Decimal]$Data.SUMMARY.HS_av*[Math]::Pow($Multiplier,0)}
                         elseif($Data.SUMMARY.KHS_av -ne $null){[Decimal]$Data.SUMMARY.KHS_av*[Math]::Pow($Multiplier,1)}
@@ -199,8 +199,8 @@ function Get-HashRate {
                         elseif($Data.SUMMARY.PHS_av -ne $null){[Decimal]$Data.SUMMARY.PHS_av*[Math]::Pow($Multiplier,5)}
 
                     if($HashRate -eq $null){$HashRates = @(); break}
-
                     $HashRates += $HashRate
+                    if(-not $Safe){break}
 
                     sleep $Interval
                 } while($HashRates.Count -lt 6)
@@ -259,6 +259,33 @@ function Get-HashRate {
                     sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
+            "ewbf"
+            {
+                $Message = @{id = 1; method = "getstat"} | ConvertTo-Json
+
+                $Client = New-Object System.Net.Sockets.TcpClient $server, $port
+                $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
+                $Reader = New-Object System.IO.StreamReader $Client.GetStream()
+                $Writer.AutoFlush = $true
+
+                do
+                {
+                    $Writer.WriteLine($Message)
+                    $Request = $Reader.ReadLine()
+
+                    $Data = $Request | ConvertFrom-Json
+                
+                    $HashRate = $Data.result.speed_sps
+
+                    if($HashRate -eq $null){$HashRates = @(); break}
+
+                    $HashRates += [Decimal]($HashRate | Measure -Sum).Sum
+
+                    if(-not $Safe){break}
+
+                    sleep $Interval
+                } while($HashRates.Count -lt 6)
+            }
             "claymore"
             {
                 do
@@ -280,7 +307,7 @@ function Get-HashRate {
                     sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
-            "FireIce"
+            "fireice"
             {
                 do
                 {
