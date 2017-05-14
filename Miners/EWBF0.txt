@@ -2,7 +2,7 @@
     {
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\Equihash-EWBF\\miner.exe",
-        "Arguments":  "--api --server $($Pools.Equihash.Host) --user $($Pools.Equihash.User) --pass x --port $($Pools.Equihash.Port) --eexit 1 --solver 0",
+        "Arguments":  "--api --server $($Pools.Equihash.Host) --user $($Pools.Equihash.User) --pass $($Pools.Equihash.Pass) --port $($Pools.Equihash.Port) --eexit 1 --solver 0",
         "HashRates":  {"Equihash":  "$($Stats.EWBF0_Equihash_HashRate.Week)"},
         "API":  "EWBF",
         "Port":  "42000",

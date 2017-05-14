@@ -31,7 +31,7 @@ $Port = 3336+($ThreadIndex*10000)
 $Config = "{$((Get-Content "$(Split-Path $Path_Threads)\config.txt"))}" -replace "/\*(.|[\r\n])*?\*/" -replace ",(|[ \t\r\n])+}","}" -replace ",(|[ \t\r\n])+\]","]" ` | ConvertFrom-Json
 $Config.pool_address = "$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)"
 $Config.wallet_address = "$($Pools.Cryptonight.User)"
-$Config.pool_password = "x"
+$Config.pool_password = "$($Pools.Cryptonight.Pass)"
 $Config.httpd_port = $Port
 $Config.gpu_threads_conf = @(@{index = $ThreadIndex; intensity = 1000; worksize = 8; affine_to_cpu = $true})
 $Config.gpu_thread_num = 1

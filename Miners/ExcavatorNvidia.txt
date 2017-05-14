@@ -2,7 +2,7 @@
     {
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\NiceHash-NVIDIA\\excavator.exe",
-        "Arguments":  "-p 3335 -a equihash -s $($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User):x -ca",
+        "Arguments":  "-p 3335 -a equihash -s $($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User):$($Pools.Equihash.Pass) -ca",
         "HashRates":  {"Equihash":  "$($Stats.ExcavatorNvidia_Equihash_HashRate.Week)"},
         "API":  "NiceHash",
         "Port":  "3335",
