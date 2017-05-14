@@ -273,7 +273,7 @@ while($true)
 
         if($MinerComparisons_Profit[0] -gt $MinerComparisons_Profit[1])
         {
-            Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is $([Math]::Round((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])*100))% more profitable than conventional mining! "
+            Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is $([Math]::Round((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])*100))% more profitable: "
         }
 
         $MinerComparisons | Out-Host
