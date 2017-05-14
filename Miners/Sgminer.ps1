@@ -23,7 +23,7 @@ $Algorithms = [PSCustomObject]@{
 }
 
 $Optimizations = [PSCustomObject]@{
-    Lyra2z = ''
+    Lyra2z = ' --worksize 32 --intensity 18'
     Equihash = ' --gpu-threads 2 --worksize 256'
     Cryptonight = ' --gpu-threads 1 --worksize 8 --rawintensity 896'
     Ethash = ' --gpu-threads 1 --worksize 192 --xintensity 1024'
