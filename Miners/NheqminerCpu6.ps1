@@ -1,4 +1,4 @@
-﻿$Threads = 8
+﻿$Threads = 6
 
 $Path = '.\Bin\Equihash-NiceHash\nheqminer.exe'
 $Uri = 'https://github.com/nicehash/nheqminer/releases/download/0.5c/Windows_x64_nheqminer-5c.zip'

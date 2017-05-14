@@ -1,8 +1,8 @@
-﻿$ThreadIndex = 5
-$Path_Threads = ".\Bin\Cryptonight-NVIDIA$ThreadIndex\xmr-stak-nvidia.exe"
+﻿$Threads = 6
+$Path_Threads = ".\Bin\Cryptonight-CPU$Threads\xmr-stak-cpu.exe"
 
-$Path = ".\Bin\Cryptonight-NVIDIA\xmr-stak-nvidia.exe"
-$Uri = 'https://github.com/fireice-uk/xmr-stak-nvidia/releases/download/v1.1.1-1.4.0/xmr-stak-nvidia.zip'
+$Path = ".\Bin\Cryptonight-CPU\xmr-stak-cpu.exe"
+$Uri = 'https://github.com/fireice-uk/xmr-stak-cpu/releases/download/v1.2.0-1.4.1/xmr-stak-cpu-win64.zip'
 
 if((Test-Path $Path) -eq $false)
 {
@@ -26,18 +26,18 @@ if((Test-Path $Path_Threads) -eq $false)
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Port = 3335+($ThreadIndex*10000)
+$Port = 3334
 
 $Config = "{$((Get-Content "$(Split-Path $Path_Threads)\config.txt"))}" -replace "/\*(.|[\r\n])*?\*/" -replace ",(|[ \t\r\n])+}","}" -replace ",(|[ \t\r\n])+\]","]" ` | ConvertFrom-Json
 $Config.pool_address = "$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)"
 $Config.wallet_address = "$($Pools.Cryptonight.User)"
 $Config.pool_password = "x"
 $Config.httpd_port = $Port
-$Config.gpu_threads_conf = @(@{index = $ThreadIndex; threads = 17; blocks = 60; bfactor = 0; bsleep =  0; affine_to_cpu = $true})
+$Config.cpu_threads_conf = @(@{low_power_mode = $false; no_prefetch = $false; affine_to_cpu = $false})*$Threads
 ($Config | ConvertTo-Json) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt"
 
 [PSCustomObject]@{
-    Type = 'NVIDIA'
+    Type = 'CPU'
     Path = $Path_Threads
     Arguments = ''
     HashRates = [PSCustomObject]@{Cryptonight = '$($Stats.' + $Name + '_Cryptonight_HashRate.Week)'}
@@ -45,5 +45,4 @@ $Config.gpu_threads_conf = @(@{index = $ThreadIndex; threads = 17; blocks = 60; 
     Port = $Port
     Wrap = $false
     URI = $Uri
-    Index = $ThreadIndex
 }

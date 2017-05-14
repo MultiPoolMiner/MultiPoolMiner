@@ -185,11 +185,11 @@ function Get-HashRate {
                         elseif($Data.SUMMARY.THS_5s -ne $null){[Decimal]$Data.SUMMARY.THS_5s*[Math]::Pow($Multiplier,4)}
                         elseif($Data.SUMMARY.PHS_5s -ne $null){[Decimal]$Data.SUMMARY.PHS_5s*[Math]::Pow($Multiplier,5)}
 
-                    if($HashRate -eq $null){$HashRates = @(); break}
-
-                    $HashRates += $HashRate
-
-                    if(-not $Safe){break}
+                    if($HashRate -ne $null)
+                    {
+                        $HashRates += $HashRate
+                        if(-not $Safe){break}
+                    }
 
                     $HashRate = if($Data.SUMMARY.HS_av -ne $null){[Decimal]$Data.SUMMARY.HS_av*[Math]::Pow($Multiplier,0)}
                         elseif($Data.SUMMARY.KHS_av -ne $null){[Decimal]$Data.SUMMARY.KHS_av*[Math]::Pow($Multiplier,1)}
@@ -199,8 +199,8 @@ function Get-HashRate {
                         elseif($Data.SUMMARY.PHS_av -ne $null){[Decimal]$Data.SUMMARY.PHS_av*[Math]::Pow($Multiplier,5)}
 
                     if($HashRate -eq $null){$HashRates = @(); break}
-
                     $HashRates += $HashRate
+                    if(-not $Safe){break}
 
                     sleep $Interval
                 } while($HashRates.Count -lt 6)
@@ -232,9 +232,38 @@ function Get-HashRate {
                     sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
-            "nheqminer"
+            "nicehash"
             {
                 $Message = "status"
+
+                $Client = New-Object System.Net.Sockets.TcpClient $server, $port
+                $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
+                $Reader = New-Object System.IO.StreamReader $Client.GetStream()
+                $Writer.AutoFlush = $true
+
+                do
+                {
+                    $Writer.WriteLine($Message)
+                    $Request = $Reader.ReadLine()
+
+                    $Data = $Request | ConvertFrom-Json
+                
+                    $HashRate = $Data.result.speed_hps
+                    
+                    if($HashRate -eq $null){$HashRate = $Data.result.speed_sps}
+
+                    if($HashRate -eq $null){$HashRates = @(); break}
+
+                    $HashRates += [Decimal]$HashRate
+
+                    if(-not $Safe){break}
+
+                    sleep $Interval
+                } while($HashRates.Count -lt 6)
+            }
+            "ewbf"
+            {
+                $Message = @{id = 1; method = "getstat"} | ConvertTo-Json
 
                 $Client = New-Object System.Net.Sockets.TcpClient $server, $port
                 $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
@@ -252,7 +281,7 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Decimal]$HashRate
+                    $HashRates += [Decimal]($HashRate | Measure -Sum).Sum
 
                     if(-not $Safe){break}
 
@@ -280,7 +309,7 @@ function Get-HashRate {
                     sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
-            "FireIce"
+            "fireice"
             {
                 do
                 {
@@ -344,41 +373,38 @@ filter ConvertTo-Hash {
     }
 }
 
-function Get-Permutation {
-    param(
-        [Parameter(Mandatory=$true)]
-        [Array]$Value, 
-        [Parameter(Mandatory=$false)]
-        [Int]$Size = $Value.Count
-    )
-    for($i = 0; $i -lt $Size; $i++)
-    {
-        Get-Permutation $Value ($Size - 1)
-        if($Size -eq 1){[PSCustomObject]@{Permutation = $Value.Clone()}}
-        $z = 0
-        $position = ($Value.Count - $Size)
-        $temp = $Value[$position]           
-        for($z=($position+1);$z -lt $Value.Count; $z++)
-        {
-            $Value[($z-1)] = $Value[$z]               
-        }
-        $Value[($z-1)] = $temp
-    }
-}
-
 function Get-Combination {
     param(
         [Parameter(Mandatory=$true)]
         [Array]$Value, 
         [Parameter(Mandatory=$false)]
-        [Int]$Size = $Value.Count
+        [Int]$SizeMax = $Value.Count, 
+        [Parameter(Mandatory=$false)]
+        [Int]$SizeMin = 1
     )
 
-    $Permutations = Get-Permutation ($Value | ForEach {$Value.IndexOf($_)}) $Size
+    $Combination = [PSCustomObject]@{}
 
-    for($i = $Value.Count; $i -gt 0; $i--)
+    for($i = 0; $i -lt $Value.Count; $i++)
     {
-        $Permutations | ForEach {[PSCustomObject]@{Combination = ($_.Permutation | Select -First $i | Sort {$_})}} | Sort Combination -Unique | ForEach {[PSCustomObject]@{Combination = ($_.Combination | ForEach {$Value.GetValue($_)})}}
+        $Combination | Add-Member @{[Math]::Pow(2, $i) = $Value[$i]}
+    }
+
+    $Combination_Keys = $Combination | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name
+
+    for($i = $SizeMin; $i -le $SizeMax; $i++)
+    {
+        $x = [Math]::Pow(2, $i)-1
+
+        while($x -le [Math]::Pow(2, $Value.Count)-1)
+        {
+            [PSCustomObject]@{Combination = $Combination_Keys | Where {$_ -band $x} | ForEach {$Combination.$_}}
+            $smallest = ($x -band -$x)
+            $ripple = $x + $smallest
+            $new_smallest = ($ripple -band -$ripple)
+            $ones = (($new_smallest/$smallest) -shr 1) - 1
+            $x = $ripple -bor $ones
+        }
     }
 }
 

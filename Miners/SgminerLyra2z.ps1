@@ -1,5 +1,5 @@
 ﻿$Path = '.\Bin\Lyra2z-AMD\sgminer.exe'
-$Uri = 'https://github.com/djm34/sgminer-msvc2015/releases/download/v0.2-pre/sgminer-msvc2015.rar'
+$Uri = 'https://github.com/djm34/sgminer-msvc2015/releases/download/v0.2-pre/sgminer.exe'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 

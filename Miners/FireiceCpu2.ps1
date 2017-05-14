@@ -2,7 +2,7 @@
 $Path_Threads = ".\Bin\Cryptonight-CPU$Threads\xmr-stak-cpu.exe"
 
 $Path = ".\Bin\Cryptonight-CPU\xmr-stak-cpu.exe"
-$Uri = 'https://github.com/fireice-uk/xmr-stak-cpu/releases/download/v1.1.0-1.3.1/xmr-stak-cpu-win64.zip'
+$Uri = 'https://github.com/fireice-uk/xmr-stak-cpu/releases/download/v1.2.0-1.4.1/xmr-stak-cpu-win64.zip'
 
 if((Test-Path $Path) -eq $false)
 {
@@ -28,13 +28,13 @@ $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Port = 3334
 
-(Get-Content "$(Split-Path $Path_Threads)\config.txt") `
--replace """pool_address"" : ""[^""]*"",", """pool_address"" : ""$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)""," `
--replace """wallet_address"" : ""[^""]*"",", """wallet_address"" : ""$($Pools.Cryptonight.User)""," `
--replace """pool_password"" : ""[^""]*"",", """pool_password"" : ""x""," `
--replace """httpd_port"" : [^""]*,", """httpd_port"" : $Port," `
--replace """cpu_thread_num"" : [^""]*,", """cpu_thread_num"" : $Threads," | `
-Set-Content "$(Split-Path $Path_Threads)\config.txt"
+$Config = "{$((Get-Content "$(Split-Path $Path_Threads)\config.txt"))}" -replace "/\*(.|[\r\n])*?\*/" -replace ",(|[ \t\r\n])+}","}" -replace ",(|[ \t\r\n])+\]","]" ` | ConvertFrom-Json
+$Config.pool_address = "$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)"
+$Config.wallet_address = "$($Pools.Cryptonight.User)"
+$Config.pool_password = "x"
+$Config.httpd_port = $Port
+$Config.cpu_threads_conf = @(@{low_power_mode = $false; no_prefetch = $false; affine_to_cpu = $false})*$Threads
+($Config | ConvertTo-Json) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt"
 
 [PSCustomObject]@{
     Type = 'CPU'

@@ -2,7 +2,7 @@
 $Path_Threads = ".\Bin\Cryptonight-NVIDIA$ThreadIndex\xmr-stak-nvidia.exe"
 
 $Path = ".\Bin\Cryptonight-NVIDIA\xmr-stak-nvidia.exe"
-$Uri = 'https://github.com/fireice-uk/xmr-stak-nvidia/releases/download/v1.0.0-1.3.1/xmr-stak-nvidia-win64.zip'
+$Uri = 'https://github.com/fireice-uk/xmr-stak-nvidia/releases/download/v1.1.1-1.4.0/xmr-stak-nvidia.zip'
 
 if((Test-Path $Path) -eq $false)
 {
