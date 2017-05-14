@@ -232,7 +232,7 @@ function Get-HashRate {
                     sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
-            "nheqminer"
+            "nicehash"
             {
                 $Message = "status"
 
@@ -248,7 +248,9 @@ function Get-HashRate {
 
                     $Data = $Request | ConvertFrom-Json
                 
-                    $HashRate = $Data.result.speed_sps
+                    $HashRate = $Data.result.speed_hps
+                    
+                    if($HashRate -eq $null){$HashRate = $Data.result.speed_sps}
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
