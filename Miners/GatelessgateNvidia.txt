@@ -1,0 +1,52 @@
+[
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
+        "Arguments":  "--api-port 4068 --api-listen -k cryptonight -o $($Pools.Cryptonight.Protocol)://$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port) -u $($Pools.Cryptonight.User) -p $($Pools.Cryptonight.Pass) --gpu-platform 1 --gpu-threads 1 --worksize 4 --rawintensity 720",
+        "HashRates":  {"Cryptonight":  "$($Stats.GatelessgateNvidia_Cryptonight_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  4068,
+        "Wrap":  false,
+        "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
+        "Arguments":  "--api-port 4068 --api-listen -k equihash -o $($Pools.Equihash.Protocol)://$($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User) -p $($Pools.Equihash.Pass) --gpu-platform 1 --gpu-threads 2 --worksize 256",
+        "HashRates":  {"Equihash":  "$($Stats.GatelessgateNvidia_Equihash_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  4068,
+        "Wrap":  false,
+        "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
+        "Arguments":  "--api-port 4068 --api-listen -k ethash-new -o $($Pools.Ethash.Protocol)://$($Pools.Ethash.Host):$($Pools.Ethash.Port) -u $($Pools.Ethash.User) -p $($Pools.Ethash.Pass) --gpu-platform 1 --gpu-threads 2 --worksize 192 --xintensity 4608",
+        "HashRates":  {"Ethash":  "$($Stats.GatelessgateNvidia_Ethash_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  4068,
+        "Wrap":  false,
+        "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
+        "Arguments":  "--api-port 4068 --api-listen -k neoscrypt -o $($Pools.NeoScrypt.Protocol)://$($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -u $($Pools.NeoScrypt.User) -p $($Pools.NeoScrypt.Pass) --gpu-platform 1 --gpu-threads 1 --worksize 256 --intensity 13",
+        "HashRates":  {"NeoScrypt":  "$($Stats.GatelessgateNvidia_NeoScrypt_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  4068,
+        "Wrap":  false,
+        "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
+        "Arguments":  "--api-port 4068 --api-listen -k pascal -o $($Pools.Pascal.Protocol)://$($Pools.Pascal.Host):$($Pools.Pascal.Port) -u $($Pools.Pascal.User) -p $($Pools.Pascal.Pass) --gpu-platform 1 --gpu-threads 1 --worksize 64 --intensity 21",
+        "HashRates":  {"Pascal":  "$($Stats.GatelessgateNvidia_Pascal_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  4068,
+        "Wrap":  false,
+        "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
+    }
+]
