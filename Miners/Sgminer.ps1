@@ -1,13 +1,13 @@
-﻿$Path = '.\Bin\AMD-NiceHash\sgminer.exe'
-$Uri = 'https://github.com/nicehash/sgminer/releases/download/5.6.1/sgminer-5.6.1-nicehash-51-windows-amd64.zip'
+﻿$Path = '.\Bin\AMD-GenesisMining\sgminer.exe'
+$Uri = 'https://github.com/genesismining/sgminer-gm/releases/download/5.5.5/sgminer-gm.zip'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
     #Lyra2z = 'lyra2z' #not supported
-    #Equihash = 'equihash' #not supported
-    #Cryptonight = 'cryptonight' #not supported
-    #Ethash = 'ethash' #not supported
+    Equihash = 'equihash'
+    Cryptonight = 'cryptonight'
+    Ethash = 'ethash'
     Sia = 'sia'
     Yescrypt = 'yescrypt'
     BlakeVanilla = 'vanilla'
@@ -45,7 +45,7 @@ $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name 
     [PSCustomObject]@{
         Type = 'AMD'
         Path = $Path
-        Arguments = -Join ('--api-listen -k ', $Algorithms.$_, ' -o $($Pools.', $_, '.Protocol)://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p $($Pools.', $_, '.Pass)', $Optimizations.$_)
+        Arguments = -Join ('--api-listen -k ', $Algorithms.$_, ' -o $($Pools.', $_, '.Protocol)://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p $($Pools.', $_, '.Pass) --gpu-platform 0', $Optimizations.$_)
         HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Week)')}
         API = 'Xgminer'
         Port = 4028

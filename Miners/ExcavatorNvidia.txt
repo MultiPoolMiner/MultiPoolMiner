@@ -7,6 +7,6 @@
         "API":  "NiceHash",
         "Port":  "3335",
         "Wrap":  false,
-        "URI":  "https://github.com/nicehash/excavator/releases/download/v1.2.0a/excavator_v1.2.0a_Win64.zip"
+        "URI":  "http://nicehash.com/tools/excavator_v1.1.4a_Win64.zip"
     }
 ]
