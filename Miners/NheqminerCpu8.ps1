@@ -12,7 +12,7 @@ $Port = 3334
     Path = $Path
     Arguments = -Join ('-a ', $Port, ' -l $($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User) -t ', $Threads)
     HashRates = [PSCustomObject]@{Equihash = '$($Stats.' + $Name + '_Equihash_HashRate.Week)'}
-    API = 'NiceHash'
+    API = 'NiceHashEquihash'
     Port = $Port
     Wrap = $false
     URI = $Uri

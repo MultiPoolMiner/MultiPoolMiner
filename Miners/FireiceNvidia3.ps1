@@ -34,7 +34,7 @@ $Config.wallet_address = "$($Pools.Cryptonight.User)"
 $Config.pool_password = "$($Pools.Cryptonight.Pass)"
 $Config.httpd_port = $Port
 $Config.gpu_threads_conf = @(@{index = $ThreadIndex; threads = 17; blocks = 60; bfactor = 0; bsleep =  0; affine_to_cpu = $true})
-($Config | ConvertTo-Json) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt"
+($Config | ConvertTo-Json -Depth 10) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt"
 
 [PSCustomObject]@{
     Type = 'NVIDIA'

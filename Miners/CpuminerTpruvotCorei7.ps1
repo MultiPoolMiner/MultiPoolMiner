@@ -1,5 +1,5 @@
-﻿$Path = '.\Bin\CPU-TPruvot\cpuminer-x64.exe'
-$Uri = 'https://github.com/tpruvot/cpuminer-multi/releases/download/v1.3-multi/cpuminer-multi-rel1.3.zip'
+﻿$Path = '.\Bin\CPU-TPruvot\cpuminer-gw64-corei7.exe'
+$Uri = 'https://github.com/tpruvot/cpuminer-multi/releases/download/v1.3.1-multi/cpuminer-multi-rel1.3.1-x64.zip'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 

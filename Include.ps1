@@ -141,6 +141,26 @@ function Get-ChildItemContent {
     $ChildItems
 }
 
+function Set-Algorithm {
+    param(
+        [Parameter(Mandatory=$true)]
+        [String]$API, 
+        [Parameter(Mandatory=$true)]
+        [Int]$Port, 
+        [Parameter(Mandatory=$false)]
+        [Array]$Parameters = @()
+    )
+    
+    $Server = "localhost"
+    
+    switch($API)
+    {
+        "nicehash"
+        {
+        }
+    }
+}
+
 function Get-HashRate {
     param(
         [Parameter(Mandatory=$true)]
@@ -148,10 +168,13 @@ function Get-HashRate {
         [Parameter(Mandatory=$true)]
         [Int]$Port, 
         [Parameter(Mandatory=$false)]
+        [Object]$Parameters = @{}, 
+        [Parameter(Mandatory=$false)]
         [Bool]$Safe = $false
     )
     
     $Server = "localhost"
+    
     $Multiplier = 1000
     $Delta = 0.05
     $Interval = 5
@@ -164,7 +187,7 @@ function Get-HashRate {
         {
             "xgminer"
             {
-                $Message = @{command="summary"; parameter=""} | ConvertTo-Json
+                $Message = @{command="summary"; parameter=""} | ConvertTo-Json -Compress
             
                 do
                 {
@@ -232,7 +255,7 @@ function Get-HashRate {
                     sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
-            "nicehash"
+            "nicehashequihash"
             {
                 $Message = "status"
 
@@ -261,9 +284,36 @@ function Get-HashRate {
                     sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
+            "nicehash"
+            {
+                $Message = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
+
+                $Client = New-Object System.Net.Sockets.TcpClient $server, $port
+                $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
+                $Reader = New-Object System.IO.StreamReader $Client.GetStream()
+                $Writer.AutoFlush = $true
+
+                do
+                {
+                    $Writer.WriteLine($Message)
+                    $Request = $Reader.ReadLine()
+
+                    $Data = $Request | ConvertFrom-Json
+                
+                    $HashRate = $Data.algorithms.workers.speed
+
+                    if($HashRate -eq $null){$HashRates = @(); break}
+
+                    $HashRates += [Decimal]($HashRate | Measure -Sum).Sum
+
+                    if(-not $Safe){break}
+
+                    sleep $Interval
+                } while($HashRates.Count -lt 6)
+            }
             "ewbf"
             {
-                $Message = @{id = 1; method = "getstat"} | ConvertTo-Json
+                $Message = @{id = 1; method = "getstat"} | ConvertTo-Json -Compress
 
                 $Client = New-Object System.Net.Sockets.TcpClient $server, $port
                 $Writer = New-Object System.IO.StreamWriter $Client.GetStream()

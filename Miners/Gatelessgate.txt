@@ -1,8 +1,8 @@
 [
     {
-        "Type":  "AMD",
+        "Type":  ["AMD","NVIDIA"],
         "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
-        "Arguments":  "--api-port 4028 --api-listen -k cryptonight -o $($Pools.Cryptonight.Protocol)://$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port) -u $($Pools.Cryptonight.User) -p $($Pools.Cryptonight.Pass) --gpu-platform 0 --gpu-threads 1 --worksize 4 --rawintensity 720",
+        "Arguments":  "--api-listen -k cryptonight -o $($Pools.Cryptonight.Protocol)://$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port) -u $($Pools.Cryptonight.User) -p $($Pools.Cryptonight.Pass) --gpu-threads 1 --worksize 4 --rawintensity 720",
         "HashRates":  {"Cryptonight":  "$($Stats.GatelessgateAmd_Cryptonight_HashRate.Week)"},
         "API":  "Xgminer",
         "Port":  4028,
@@ -10,9 +10,9 @@
         "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
     },
     {
-        "Type":  "AMD",
+        "Type":  ["AMD","NVIDIA"],
         "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
-        "Arguments":  "--api-port 4028 --api-listen -k equihash -o $($Pools.Equihash.Protocol)://$($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User) -p $($Pools.Equihash.Pass) --gpu-platform 0 --gpu-threads 2 --worksize 256",
+        "Arguments":  "--api-listen -k equihash -o $($Pools.Equihash.Protocol)://$($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User) -p $($Pools.Equihash.Pass) --gpu-threads 2 --worksize 256",
         "HashRates":  {"Equihash":  "$($Stats.GatelessgateAmd_Equihash_HashRate.Week)"},
         "API":  "Xgminer",
         "Port":  4028,
@@ -20,9 +20,9 @@
         "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
     },
     {
-        "Type":  "AMD",
+        "Type":  ["AMD","NVIDIA"],
         "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
-        "Arguments":  "--api-port 4028 --api-listen -k ethash-new -o $($Pools.Ethash.Protocol)://$($Pools.Ethash.Host):$($Pools.Ethash.Port) -u $($Pools.Ethash.User) -p $($Pools.Ethash.Pass) --gpu-platform 0 --gpu-threads 2 --worksize 192 --xintensity 4608",
+        "Arguments":  "--api-listen -k ethash-new -o $($Pools.Ethash.Protocol)://$($Pools.Ethash.Host):$($Pools.Ethash.Port) -u $($Pools.Ethash.User) -p $($Pools.Ethash.Pass) --gpu-threads 2 --worksize 192 --xintensity 4608",
         "HashRates":  {"Ethash":  "$($Stats.GatelessgateAmd_Ethash_HashRate.Week)"},
         "API":  "Xgminer",
         "Port":  4028,
@@ -30,9 +30,9 @@
         "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
     },
     {
-        "Type":  "AMD",
+        "Type":  ["AMD","NVIDIA"],
         "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
-        "Arguments":  "--api-port 4028 --api-listen -k neoscrypt -o $($Pools.NeoScrypt.Protocol)://$($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -u $($Pools.NeoScrypt.User) -p $($Pools.NeoScrypt.Pass) --gpu-platform 0 --gpu-threads 1 --worksize 256 --intensity 13",
+        "Arguments":  "--api-listen -k neoscrypt -o $($Pools.NeoScrypt.Protocol)://$($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -u $($Pools.NeoScrypt.User) -p $($Pools.NeoScrypt.Pass) --gpu-threads 1 --worksize 256 --intensity 13",
         "HashRates":  {"NeoScrypt":  "$($Stats.GatelessgateAmd_NeoScrypt_HashRate.Week)"},
         "API":  "Xgminer",
         "Port":  4028,
@@ -40,9 +40,9 @@
         "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
     },
     {
-        "Type":  "AMD",
+        "Type":  ["AMD","NVIDIA"],
         "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
-        "Arguments":  "--api-port 4028 --api-listen -k pascal -o $($Pools.Pascal.Protocol)://$($Pools.Pascal.Host):$($Pools.Pascal.Port) -u $($Pools.Pascal.User) -p $($Pools.Pascal.Pass) --gpu-platform 0 --gpu-threads 1 --worksize 64 --intensity 21",
+        "Arguments":  "--api-listen -k pascal -o $($Pools.Pascal.Protocol)://$($Pools.Pascal.Host):$($Pools.Pascal.Port) -u $($Pools.Pascal.User) -p $($Pools.Pascal.Pass) --gpu-threads 1 --worksize 64 --intensity 21",
         "HashRates":  {"Pascal":  "$($Stats.GatelessgateAmd_Pascal_HashRate.Week)"},
         "API":  "Xgminer",
         "Port":  4028,

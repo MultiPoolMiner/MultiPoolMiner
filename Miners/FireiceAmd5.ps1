@@ -35,7 +35,7 @@ $Config.pool_password = "$($Pools.Cryptonight.Pass)"
 $Config.httpd_port = $Port
 $Config.gpu_threads_conf = @(@{index = $ThreadIndex; intensity = 1000; worksize = 8; affine_to_cpu = $true})
 $Config.gpu_thread_num = 1
-($Config | ConvertTo-Json) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt"
+($Config | ConvertTo-Json -Depth 10) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt"
 
 [PSCustomObject]@{
     Type = 'AMD'
