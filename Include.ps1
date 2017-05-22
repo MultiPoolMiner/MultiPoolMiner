@@ -3,7 +3,7 @@
         [Parameter(Mandatory=$true)]
         [String]$Name, 
         [Parameter(Mandatory=$true)]
-        [Decimal]$Value, 
+        [Double]$Value, 
         [Parameter(Mandatory=$false)]
         [DateTime]$Date = (Get-Date)
     )
@@ -32,18 +32,18 @@
     if(Test-Path $Path){$Stat = Get-Content $Path | ConvertFrom-Json}
 
     $Stat = [PSCustomObject]@{
-        Live = [Decimal]$Stat.Live
-        Minute = [Decimal]$Stat.Minute
+        Live = [Double]$Stat.Live
+        Minute = [Double]$Stat.Minute
         Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
-        Minute_5 = [Decimal]$Stat.Minute_5
+        Minute_5 = [Double]$Stat.Minute_5
         Minute_5_Fluctuation = [Double]$Stat.Minute_5_Fluctuation
-        Minute_10 = [Decimal]$Stat.Minute_10
+        Minute_10 = [Double]$Stat.Minute_10
         Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
-        Hour = [Decimal]$Stat.Hour
+        Hour = [Double]$Stat.Hour
         Hour_Fluctuation = [Double]$Stat.Hour_Fluctuation
-        Day = [Decimal]$Stat.Day
+        Day = [Double]$Stat.Day
         Day_Fluctuation = [Double]$Stat.Day_Fluctuation
-        Week = [Decimal]$Stat.Week
+        Week = [Double]$Stat.Week
         Week_Fluctuation = [Double]$Stat.Week_Fluctuation
         Updated = [DateTime]$Stat.Updated
     }
@@ -76,6 +76,23 @@
         Week_Fluctuation = ((1-$Span_Week)*$Stat.Week_Fluctuation)+
             ($Span_Week*([Math]::Abs($Value-$Stat.Week)/[Math]::Max([Math]::Abs($Stat.Week),$SmallestValue)))
         Updated = $Date
+    }
+
+    $Stat = [PSCustomObject]@{
+        Live = [Decimal]$Stat.Live
+        Minute = [Decimal]$Stat.Minute
+        Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
+        Minute_5 = [Decimal]$Stat.Minute_5
+        Minute_5_Fluctuation = [Double]$Stat.Minute_5_Fluctuation
+        Minute_10 = [Decimal]$Stat.Minute_10
+        Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
+        Hour = [Decimal]$Stat.Hour
+        Hour_Fluctuation = [Double]$Stat.Hour_Fluctuation
+        Day = [Decimal]$Stat.Day
+        Day_Fluctuation = [Double]$Stat.Day_Fluctuation
+        Week = [Decimal]$Stat.Week
+        Week_Fluctuation = [Double]$Stat.Week_Fluctuation
+        Updated = [DateTime]$Stat.Updated
     }
 
     if(-not (Test-Path "Stats")){New-Item "Stats" -ItemType "directory"}
