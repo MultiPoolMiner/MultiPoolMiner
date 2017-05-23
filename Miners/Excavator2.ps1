@@ -2,22 +2,7 @@
 $Threads = 2
 
 $Path = ".\Bin\Excavator\excavator.exe"
-$Uri = 'https://github.com/nicehash/excavator/releases/download/v1.2.1a/excavator_v1.2.1a_Win64.zip'
-
-if((Test-Path $Path) -eq $false)
-{
-    $FolderName_Old = ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName
-    $FolderName_New = Split-Path (Split-Path $Path) -Leaf
-    $FileName = "$FolderName_New$(([IO.FileInfo](Split-Path $Uri -Leaf)).Extension)"
-
-    if(Test-Path $FileName){Remove-Item $FileName}
-    if(Test-Path "$(Split-Path (Split-Path $Path))\$FolderName_New"){Remove-Item "$(Split-Path (Split-Path $Path))\$FolderName_New" -Recurse}
-    if(Test-Path "$(Split-Path (Split-Path $Path))\$FolderName_Old"){Remove-Item "$(Split-Path (Split-Path $Path))\$FolderName_Old" -Recurse}
-
-    Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
-    Start-Process "7z" "x $FileName -o$(Split-Path (Split-Path $Path))\$FolderName_Old -y -spe" -Wait
-    Rename-Item "$(Split-Path (Split-Path $Path))\$FolderName_Old" "$FolderName_New"
-}
+$Uri = 'https://github.com/nicehash/excavator/releases/'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
@@ -25,17 +10,24 @@ $Algorithms = [PSCustomObject]@{
     #Decred = 'decred'
     #Pascal = 'pascal'
     Equihash = 'equihash'
+    Sia = 'sia'
 }
 
 $Port = 3456+($ThreadIndex*10000)
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
-    $Config = Get-Content "$(Split-Path $Path)\default_command_file.json" | ConvertFrom-Json
-    $Config[0].commands[0].params[0] = $Algorithms.$_
-    $Config[0].commands[0].params[1] = "$($Pools.$_.Host):$($Pools.$_.Port)"
-    $Config[0].commands[0].params[2] = "$($Pools.$_.User):$($Pools.$_.Pass)"
-    $Config[1].commands = @(@{id = 1; method = "worker.add"; params = @("0","$ThreadIndex")})*$Threads
-    ($Config | ConvertTo-Json -Depth 10) | Set-Content "$(Split-Path $Path)\$_$ThreadIndex.json"
+    try
+    {
+        $Config = Get-Content "$(Split-Path $Path)\default_command_file.json" -ErrorAction Stop | ConvertFrom-Json
+        $Config[0].commands[0].params[0] = $Algorithms.$_
+        $Config[0].commands[0].params[1] = "$($Pools.$_.Host):$($Pools.$_.Port)"
+        $Config[0].commands[0].params[2] = "$($Pools.$_.User):$($Pools.$_.Pass)"
+        $Config[1].commands = @(@{id = 1; method = "worker.add"; params = @("0","$ThreadIndex")})*$Threads
+        ($Config | ConvertTo-Json -Depth 10) | Set-Content "$(Split-Path $Path)\$_$ThreadIndex.json"
+    }
+    catch
+    {
+    }
 
     [PSCustomObject]@{
         Type = 'AMD','NVIDIA'

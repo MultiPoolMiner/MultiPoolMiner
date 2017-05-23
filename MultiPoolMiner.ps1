@@ -98,21 +98,41 @@ while($true)
         Where {$Type.Count -eq 0 -or (Compare $Type $_.Type -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0} | 
         Where {$Algorithm.Count -eq 0 -or (Compare $Algorithm $_.HashRates.PSObject.Properties.Name -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0} | 
         Where {$MinerName.Count -eq 0 -or (Compare $MinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0}}
-    if($Miners.Count -eq 0){"No Miners!" | Out-Host; continue}
-    $Miners | ForEach {
-        if((Test-Path $_.Path) -eq $false)
+    $Miners = $Miners | ForEach {
+        $Miner = $_
+        if((Test-Path $Miner.Path) -eq $false)
         {
-            if((Split-Path $_.URI -Leaf) -eq (Split-Path $_.Path -Leaf))
+            if((Split-Path $Miner.URI -Leaf) -eq (Split-Path $Miner.Path -Leaf))
             {
-                New-Item (Split-Path $_.Path) -ItemType "Directory" | Out-Null
-                Invoke-WebRequest $_.URI -OutFile $_.Path -UseBasicParsing
+                New-Item (Split-Path $Miner.Path) -ItemType "Directory" | Out-Null
+                Invoke-WebRequest $Miner.URI -OutFile $_.Path -UseBasicParsing
+            }
+            elseif(([IO.FileInfo](Split-Path $_.URI -Leaf)).Extension -eq '')
+            {
+                $Path_Old = Get-PSDrive -PSProvider FileSystem | ForEach {Get-ChildItem -Path $_.Root -Include (Split-Path $Miner.Path -Leaf) -Recurse -ErrorAction Ignore} | Sort LastWriteTimeUtc -Descending | Select -First 1
+                $Path_New = $Miner.Path
+
+                if($Path_Old -ne $null)
+                {
+                    if(Test-Path (Split-Path $Path_New)){(Split-Path $Path_New) | Remove-Item -Recurse -Force}
+                    (Split-Path $Path_Old) | Copy-Item -Destination (Split-Path $Path_New) -Recurse -Force
+                }
+                else
+                {
+                    Write-Host -BackgroundColor Yellow -ForegroundColor Black "Cannot find $($Miner.Path) distributed at $($Miner.URI). "
+                }
             }
             else
             {
-                Expand-WebRequest $_.URI (Split-Path $_.Path)
+                Expand-WebRequest $Miner.URI (Split-Path $Miner.Path)
             }
         }
+        else
+        {
+            $Miner
+        }
     }
+    if($Miners.Count -eq 0){"No Miners!" | Out-Host; continue}
     $Miners | ForEach {
         $Miner = $_
 
