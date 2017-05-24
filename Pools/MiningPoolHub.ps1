@@ -28,6 +28,8 @@ $Locations | ForEach {
         $Stat = Set-Stat -Name "$($Name)_$($Algorithm)_Profit" -Value ([decimal]$_.profit/1000000000)
         $Price = (($Stat.Live*(1-[Math]::Min($Stat.Day_Fluctuation,1)))+($Stat.Day*(0+[Math]::Min($Stat.Day_Fluctuation,1))))
         
+        if($Stat.Day_Fluctuation -gt 1){$Price = [Math]::Min($Stat.Live,$Stat.Week)} #detect failed stat
+
         [PSCustomObject]@{
             Algorithm = $Algorithm
             Info = $Coin
