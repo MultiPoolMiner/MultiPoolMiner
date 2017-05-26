@@ -26,13 +26,17 @@
     [Parameter(Mandatory=$false)]
     [Array]$Currency = ("BTC","USD"), #i.e. GBP,EUR,ZEC,ETH ect.
     [Parameter(Mandatory=$false)]
-    [Int]$Donate = 10 #Minutes per Day
+    [Int]$Donate = 10, #Minutes per Day
+    [Parameter(Mandatory=$false)]
+    [String]$Proxy = "" #i.e http://192.0.0.1:8080
 )
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 
 Get-ChildItem . -Recurse | Unblock-File
 try{if((Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)){Start-Process powershell -Verb runAs -ArgumentList "Add-MpPreference -ExclusionPath '$(Convert-Path .)'"}}catch{}
+
+if($Proxy -ne ""){$PSDefaultParameterValues["*:Proxy"] = $Proxy}
 
 . .\Include.ps1
 
