@@ -36,7 +36,8 @@ Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 Get-ChildItem . -Recurse | Unblock-File
 try{if((Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)){Start-Process powershell -Verb runAs -ArgumentList "Add-MpPreference -ExclusionPath '$(Convert-Path .)'"}}catch{}
 
-if($Proxy -ne ""){$PSDefaultParameterValues["*:Proxy"] = $Proxy}
+if($Proxy -eq ""){$PSDefaultParameterValues.Remove("*:Proxy")}
+else{$PSDefaultParameterValues["*:Proxy"] = $Proxy}
 
 . .\Include.ps1
 
