@@ -15,17 +15,17 @@
     $Stat = [PSCustomObject]@{
         Live = $Value
         Minute = $Value
-        Minute_Fluctuation = 0.5
+        Minute_Fluctuation = 1/2
         Minute_5 = $Value
-        Minute_5_Fluctuation = 0.5
+        Minute_5_Fluctuation = 1/2
         Minute_10 = $Value
-        Minute_10_Fluctuation = 0.5
+        Minute_10_Fluctuation = 1/2
         Hour = $Value
-        Hour_Fluctuation = 0.5
+        Hour_Fluctuation = 1/2
         Day = $Value
-        Day_Fluctuation = 0.5
+        Day_Fluctuation = 1/2
         Week = $Value
-        Week_Fluctuation = 0.5
+        Week_Fluctuation = 1/2
         Updated = $Date
     }
 
@@ -78,7 +78,8 @@
         Updated = $Date
     }
 
-    $Stat = [PSCustomObject]@{
+    if(-not (Test-Path "Stats")){New-Item "Stats" -ItemType "directory"}
+    [PSCustomObject]@{
         Live = [Decimal]$Stat.Live
         Minute = [Decimal]$Stat.Minute
         Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
@@ -93,10 +94,7 @@
         Week = [Decimal]$Stat.Week
         Week_Fluctuation = [Double]$Stat.Week_Fluctuation
         Updated = [DateTime]$Stat.Updated
-    }
-
-    if(-not (Test-Path "Stats")){New-Item "Stats" -ItemType "directory"}
-    Set-Content $Path ($Stat | ConvertTo-Json)
+    } | ConvertTo-Json | Set-Content $Path
 
     $Stat
 }
@@ -218,12 +216,12 @@ function Get-HashRate {
 
                     $Data = $Request.Substring($Request.IndexOf("{"),$Request.LastIndexOf("}")-$Request.IndexOf("{")+1) -replace " ","_" | ConvertFrom-Json
 
-                    $HashRate = if($Data.SUMMARY.HS_5s -ne $null){[Decimal]$Data.SUMMARY.HS_5s*[Math]::Pow($Multiplier,0)}
-                        elseif($Data.SUMMARY.KHS_5s -ne $null){[Decimal]$Data.SUMMARY.KHS_5s*[Math]::Pow($Multiplier,1)}
-                        elseif($Data.SUMMARY.MHS_5s -ne $null){[Decimal]$Data.SUMMARY.MHS_5s*[Math]::Pow($Multiplier,2)}
-                        elseif($Data.SUMMARY.GHS_5s -ne $null){[Decimal]$Data.SUMMARY.GHS_5s*[Math]::Pow($Multiplier,3)}
-                        elseif($Data.SUMMARY.THS_5s -ne $null){[Decimal]$Data.SUMMARY.THS_5s*[Math]::Pow($Multiplier,4)}
-                        elseif($Data.SUMMARY.PHS_5s -ne $null){[Decimal]$Data.SUMMARY.PHS_5s*[Math]::Pow($Multiplier,5)}
+                    $HashRate = if($Data.SUMMARY.HS_5s -ne $null){[Double]$Data.SUMMARY.HS_5s*[Math]::Pow($Multiplier,0)}
+                        elseif($Data.SUMMARY.KHS_5s -ne $null){[Double]$Data.SUMMARY.KHS_5s*[Math]::Pow($Multiplier,1)}
+                        elseif($Data.SUMMARY.MHS_5s -ne $null){[Double]$Data.SUMMARY.MHS_5s*[Math]::Pow($Multiplier,2)}
+                        elseif($Data.SUMMARY.GHS_5s -ne $null){[Double]$Data.SUMMARY.GHS_5s*[Math]::Pow($Multiplier,3)}
+                        elseif($Data.SUMMARY.THS_5s -ne $null){[Double]$Data.SUMMARY.THS_5s*[Math]::Pow($Multiplier,4)}
+                        elseif($Data.SUMMARY.PHS_5s -ne $null){[Double]$Data.SUMMARY.PHS_5s*[Math]::Pow($Multiplier,5)}
 
                     if($HashRate -ne $null)
                     {
@@ -231,12 +229,12 @@ function Get-HashRate {
                         if(-not $Safe){break}
                     }
 
-                    $HashRate = if($Data.SUMMARY.HS_av -ne $null){[Decimal]$Data.SUMMARY.HS_av*[Math]::Pow($Multiplier,0)}
-                        elseif($Data.SUMMARY.KHS_av -ne $null){[Decimal]$Data.SUMMARY.KHS_av*[Math]::Pow($Multiplier,1)}
-                        elseif($Data.SUMMARY.MHS_av -ne $null){[Decimal]$Data.SUMMARY.MHS_av*[Math]::Pow($Multiplier,2)}
-                        elseif($Data.SUMMARY.GHS_av -ne $null){[Decimal]$Data.SUMMARY.GHS_av*[Math]::Pow($Multiplier,3)}
-                        elseif($Data.SUMMARY.THS_av -ne $null){[Decimal]$Data.SUMMARY.THS_av*[Math]::Pow($Multiplier,4)}
-                        elseif($Data.SUMMARY.PHS_av -ne $null){[Decimal]$Data.SUMMARY.PHS_av*[Math]::Pow($Multiplier,5)}
+                    $HashRate = if($Data.SUMMARY.HS_av -ne $null){[Double]$Data.SUMMARY.HS_av*[Math]::Pow($Multiplier,0)}
+                        elseif($Data.SUMMARY.KHS_av -ne $null){[Double]$Data.SUMMARY.KHS_av*[Math]::Pow($Multiplier,1)}
+                        elseif($Data.SUMMARY.MHS_av -ne $null){[Double]$Data.SUMMARY.MHS_av*[Math]::Pow($Multiplier,2)}
+                        elseif($Data.SUMMARY.GHS_av -ne $null){[Double]$Data.SUMMARY.GHS_av*[Math]::Pow($Multiplier,3)}
+                        elseif($Data.SUMMARY.THS_av -ne $null){[Double]$Data.SUMMARY.THS_av*[Math]::Pow($Multiplier,4)}
+                        elseif($Data.SUMMARY.PHS_av -ne $null){[Double]$Data.SUMMARY.PHS_av*[Math]::Pow($Multiplier,5)}
 
                     if($HashRate -eq $null){$HashRates = @(); break}
                     $HashRates += $HashRate
@@ -261,11 +259,11 @@ function Get-HashRate {
 
                     $Data = $Request -split ";" | ConvertFrom-StringData
 
-                    $HashRate = if([Decimal]$Data.KHS -ne 0 -or [Decimal]$Data.ACC -ne 0){$Data.KHS}
+                    $HashRate = if([Double]$Data.KHS -ne 0 -or [Double]$Data.ACC -ne 0){$Data.KHS}
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Decimal]$HashRate*$Multiplier
+                    $HashRates += [Double]$HashRate*$Multiplier
 
                     if(-not $Safe){break}
 
@@ -294,7 +292,7 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Decimal]$HashRate
+                    $HashRates += [Double]$HashRate
 
                     if(-not $Safe){break}
 
@@ -321,7 +319,7 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Decimal]($HashRate | Measure -Sum).Sum
+                    $HashRates += [Double]($HashRate | Measure -Sum).Sum
 
                     if(-not $Safe){break}
 
@@ -348,7 +346,7 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Decimal]($HashRate | Measure -Sum).Sum
+                    $HashRates += [Double]($HashRate | Measure -Sum).Sum
 
                     if(-not $Safe){break}
 
@@ -368,8 +366,8 @@ function Get-HashRate {
 
                     if($HashRate -eq $null -or $HashRate_Dual -eq $null){$HashRates = @(); $HashRate_Dual = @(); break}
 
-                    if($Request.Content.Contains("ETH:")){$HashRates += [Decimal]$HashRate*$Multiplier; $HashRates_Dual += [Decimal]$HashRate_Dual*$Multiplier}
-                    else{$HashRates += [Decimal]$HashRate; $HashRates_Dual += [Decimal]$HashRate_Dual}
+                    if($Request.Content.Contains("ETH:")){$HashRates += [Double]$HashRate*$Multiplier; $HashRates_Dual += [Double]$HashRate_Dual*$Multiplier}
+                    else{$HashRates += [Double]$HashRate; $HashRates_Dual += [Double]$HashRate_Dual}
 
                     if(-not $Safe){break}
 
@@ -390,7 +388,7 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Decimal]$HashRate
+                    $HashRates += [Double]$HashRate
 
                     if(-not $Safe){break}
 
@@ -407,7 +405,7 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Decimal]$HashRate
+                    $HashRates += [Double]$HashRate
 
                     if(-not $Safe){break}
 

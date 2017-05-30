@@ -27,13 +27,13 @@ $Locations | ForEach {
 
         if((Get-Stat -Name "MiningPoolHubCoins_$($Coin)_Profit") -eq $null){$Stat = Set-Stat -Name "MiningPoolHubCoins_$($Coin)_Profit" -Value ([decimal]$_.profit/1000000000*(1-0.05))}
         else{$Stat = Set-Stat -Name "$($Name)_$($Coin)_Profit" -Value ([decimal]$_.profit/1000000000)}
-        $Price = (($Stat.Live*(1-[Math]::Min($Stat.Day_Fluctuation,1)))+($Stat.Day*(0+[Math]::Min($Stat.Day_Fluctuation,1))))
         
         [PSCustomObject]@{
             Algorithm = $Algorithm
             Info = $Coin
-            Price = $Price
+            Price = $Stat.Live
             StablePrice = $Stat.Week
+            MarginOfError = $Stat.Fluctuation
             Protocol = 'stratum+tcp'
             Host = $_.host_list.split(";") | Sort -Descending {$_ -ilike "$Location*"} | Select -First 1
             Port = $_.port
@@ -46,8 +46,9 @@ $Locations | ForEach {
         [PSCustomObject]@{
             Algorithm = $Algorithm
             Info = $Coin
-            Price = $Price
+            Price = $Stat.Live
             StablePrice = $Stat.Week
+            MarginOfError = $Stat.Fluctuation
             Protocol = 'stratum+ssl'
             Host = $_.host_list.split(";") | Sort -Descending {$_ -ilike "$Location*"} | Select -First 1
             Port = $_.port

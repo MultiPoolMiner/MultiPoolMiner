@@ -26,15 +26,13 @@ $Locations | ForEach {
         $Coin = (Get-Culture).TextInfo.ToTitleCase(($_.current_mining_coin -replace "-", " ")) -replace " "
 
         $Stat = Set-Stat -Name "$($Name)_$($Algorithm)_Profit" -Value ([decimal]$_.profit/1000000000)
-        $Price = (($Stat.Live*(1-[Math]::Min($Stat.Day_Fluctuation,1)))+($Stat.Day*(0+[Math]::Min($Stat.Day_Fluctuation,1))))
-        
-        if($Stat.Day_Fluctuation -gt 1){$Price = [Math]::Min($Stat.Live,$Stat.Week)} #detect failed stat
 
         [PSCustomObject]@{
             Algorithm = $Algorithm
             Info = $Coin
-            Price = $Price
+            Price = $Stat.Live
             StablePrice = $Stat.Week
+            MarginOfError = $Stat.Fluctuation
             Protocol = 'stratum+tcp'
             Host = $_.all_host_list.split(";") | Sort -Descending {$_ -ilike "$Location*"} | Select -First 1
             Port = $_.algo_switch_port
@@ -49,6 +47,7 @@ $Locations | ForEach {
             Info = $Coin
             Price = $Price
             StablePrice = $Stat.Week
+            MarginOfError = $Stat.Week_Fluctuation
             Protocol = 'stratum+ssl'
             Host = $_.all_host_list.split(";") | Sort -Descending {$_ -ilike "$Location*"} | Select -First 1
             Port = $_.algo_switch_port

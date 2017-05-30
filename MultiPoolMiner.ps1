@@ -41,9 +41,9 @@ else{$PSDefaultParameterValues["*:Proxy"] = $Proxy}
 
 . .\Include.ps1
 
-$DeltaMax = 0.05 #decimal percentage
-$DeltaDecay = 0.01 #decimal percentage
-$Delta = 0 #decimal percentage
+$DecayStart = Get-Date
+$DecayPeriod = 60 #seconds
+$DecayBase = 1-0.1 #decimal percentage
 
 $ActiveMinerPrograms = @()
 
@@ -64,6 +64,8 @@ $WorkerNameBackup = $WorkerName
 
 while($true)
 {
+    $DecayExponent = [int](((Get-Date)-$DecayStart).TotalSeconds/$DecayPeriod)
+
     #Activate or deactivate donation
     if((Get-Date).AddDays(-1).AddMinutes($Donate) -ge $LastDonated)
     {
@@ -146,20 +148,22 @@ while($true)
         $Miner_Pools_Comparison = [PSCustomObject]@{}
         $Miner_Profits = [PSCustomObject]@{}
         $Miner_Profits_Comparison = [PSCustomObject]@{}
+        $Miner_Profits_Bias = [PSCustomObject]@{}
 
         $Miner_Types = $Miner.Type | Select -Unique
         $Miner_Indexes = $Miner.Index | Select -Unique
 
         $Miner.HashRates.PSObject.Properties.Name | ForEach {
-            $Miner_HashRates | Add-Member $_ ([Decimal]$Miner.HashRates.$_)
+            $Miner_HashRates | Add-Member $_ ([Double]$Miner.HashRates.$_)
             $Miner_Pools | Add-Member $_ ([PSCustomObject]$Pools.$_)
             $Miner_Pools_Comparison | Add-Member $_ ([PSCustomObject]$Pools_Comparison.$_)
-            $Miner_Profits | Add-Member $_ ([Decimal]$Miner.HashRates.$_*$Pools.$_.Price)
-            $Miner_Profits_Comparison | Add-Member $_ ([Decimal]$Miner.HashRates.$_*$Pools_Comparison.$_.Price)
+            $Miner_Profits | Add-Member $_ ([Double]$Miner.HashRates.$_*$Pools.$_.Price)
+            $Miner_Profits_Comparison | Add-Member $_ ([Double]$Miner.HashRates.$_*$Pools_Comparison.$_.Price)
+            $Miner_Profits_Bias | Add-Member $_ ([Double]$Miner.HashRates.$_*$Pools.$_.Price*(1-($Pools.$_.MarginOfError*[Math]::Pow($DecayBase,$DecayExponent))))
         }
         
-        $Miner_Profit = [Decimal]($Miner_Profits.PSObject.Properties.Value | Measure -Sum).Sum
-        $Miner_Profit_Comparison = [Decimal]($Miner_Profits_Comparison.PSObject.Properties.Value | Measure -Sum).Sum
+        $Miner_Profit = [Double]($Miner_Profits.PSObject.Properties.Value | Measure -Sum).Sum
+        $Miner_Profit_Comparison = [Double]($Miner_Profits_Comparison.PSObject.Properties.Value | Measure -Sum).Sum
         
         $Miner.HashRates.PSObject.Properties | Where Value -EQ "" | Select -ExpandProperty Name | ForEach {
             $Miner_HashRates.$_ = $null
@@ -167,6 +171,7 @@ while($true)
             $Miner_Profits_Comparison.$_ = $null
             $Miner_Profit = $null
             $Miner_Profit_Comparison = $null
+            $Miner_Profit_Bias = $null
         }
 
         if($Miner_Types -eq $null){$Miner_Types = $Miners.Type | Select -Unique}
@@ -182,7 +187,7 @@ while($true)
         $Miner | Add-Member Profits_Comparison $Miner_Profits_Comparison
         $Miner | Add-Member Profit $Miner_Profit
         $Miner | Add-Member Profit_Comparison $Miner_Profit_Comparison
-        $Miner | Add-Member Profit_Bias $Miner_Profit
+        $Miner | Add-Member Profit_Bias $Miner_Profit_Bias
         
         $Miner | Add-Member Type $Miner_Types -Force
         $Miner | Add-Member Index $Miner_Indexes -Force
@@ -197,8 +202,8 @@ while($true)
         $Miner | Add-Member Device $Miner_Devices -Force
     }
 
-    #Apply delta to miners to avoid needless switching
-    $ActiveMinerPrograms | ForEach {$Miners | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments | ForEach {$_.Profit_Bias *= 1+$Delta}}
+    #Don't penalize active miners
+    $ActiveMinerPrograms | ForEach {$Miners | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments | ForEach {$_.Profit_Bias = $_.Profit}}
 
     #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
     $BestMiners = $Miners | Select Type,Index -Unique | ForEach {$Miner_GPU = $_; ($Miners | Where {(Compare $Miner_GPU.Type $_.Type | Measure).Count -eq 0 -and (Compare $Miner_GPU.Index $_.Index | Measure).Count -eq 0} | Sort -Descending {($_ | Where Profit -EQ $null | Measure).Count},{($_ | Measure Profit_Bias -Sum).Sum},{($_ | Where Profit -NE 0 | Measure).Count} | Select -First 1)}
@@ -239,7 +244,6 @@ while($true)
     }
 
     #Stop or start miners in the active list depending on if they are the most profitable
-    $Delta *= 1-$DeltaDecay
     $ActiveMinerPrograms | ForEach {
         if(($BestMiners_Combo | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments).Count -eq 0)
         {
@@ -257,7 +261,7 @@ while($true)
         {
             if($_.Process -eq $null -or $_.Process.HasExited -ne $false)
             {
-                $Delta = $DeltaMax
+                $DecayStart = Get-Date
                 $_.New = $true
                 $_.Activated++
                 if($_.Process -ne $null){$_.Active += $_.Process.ExitTime-$_.Process.StartTime}
@@ -295,8 +299,10 @@ while($true)
             [PSCustomObject]@{"Miner" = "MultiPoolMiner"}, 
             [PSCustomObject]@{"Miner" = $BestMiners_Combo_Comparison | ForEach {"$($_.Name)-$($_.HashRates.PSObject.Properties.Name -join "/")"}}
             
+        $BestMiners_Combo_Stat = Set-Stat -Name "Profit" -Value ($BestMiners_Combo | Measure Profit -Sum).Sum
+
         $MinerComparisons_Profit = 
-            (Set-Stat -Name "Profit" -Value ($BestMiners_Combo | Measure Profit -Sum).Sum).Week, 
+            $BestMiners_Combo_Stat.Week, 
             ($BestMiners_Combo_Comparison | Measure Profit_Comparison -Sum).Sum
 
         $Currency | Foreach {
