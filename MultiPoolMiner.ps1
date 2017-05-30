@@ -10,7 +10,7 @@
     [Parameter(Mandatory=$false)]
     [String]$API_Key = "", 
     [Parameter(Mandatory=$false)]
-    [Int]$Interval = 60, #seconds
+    [Int]$Interval = 60, #seconds before reading hash rate from miners
     [Parameter(Mandatory=$false)]
     [String]$Location = "europe", #europe/us/asia
     [Parameter(Mandatory=$false)]
@@ -28,7 +28,9 @@
     [Parameter(Mandatory=$false)]
     [Int]$Donate = 10, #Minutes per Day
     [Parameter(Mandatory=$false)]
-    [String]$Proxy = "" #i.e http://192.0.0.1:8080
+    [String]$Proxy = "", #i.e http://192.0.0.1:8080 
+    [Parameter(Mandatory=$false)]
+    [Int]$Delay = 0 #seconds before opening each miner
 )
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
@@ -261,6 +263,7 @@ while($true)
         {
             if($_.Process -eq $null -or $_.Process.HasExited -ne $false)
             {
+                Sleep $Delay #Wait to prevent BSOD
                 $DecayStart = Get-Date
                 $_.New = $true
                 $_.Activated++
