@@ -28,7 +28,7 @@ $Locations | ForEach {
         $Stat = Set-Stat -Name "$($Name)_$($Algorithm)_Profit" -Value ([decimal]$_.profit/1000000000)
 
         [PSCustomObject]@{
-            Algorithm = $Algorithm
+            Algorithm = $Algorithm.ToLower()
             Info = $Coin
             Price = $Stat.Live
             StablePrice = $Stat.Week
@@ -43,7 +43,7 @@ $Locations | ForEach {
         }
         
         [PSCustomObject]@{
-            Algorithm = $Algorithm
+            Algorithm = $Algorithm.ToLower()
             Info = $Coin
             Price = $Stat.Live
             StablePrice = $Stat.Week

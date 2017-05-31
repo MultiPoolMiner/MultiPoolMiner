@@ -1,4 +1,4 @@
-﻿$Path = '.\Bin\NVIDIA-TPruvot\ccminer-x64.exe'
+$Path = '.\Bin\NVIDIA-TPruvot\ccminer-x64.exe'
 $Uri = 'https://github.com/tpruvot/ccminer/releases/download/v2.0-tpruvot/ccminer-2.0-release-x64-cuda-8.0.7z'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
@@ -11,15 +11,24 @@ $Algorithms = [PSCustomObject]@{
     Sia = 'sia'
     Yescrypt = 'yescrypt'
     BlakeVanilla = 'vanilla'
+	Blake2s = 'blake2s'
     Lyra2RE2 = 'lyra2v2'
-    Skein = 'skein'
+	Lyra2v2 = 'lyra2v2'
+    #Skein = 'skein'
     Qubit = 'qubit'
     NeoScrypt = 'neoscrypt'
+	Nist5 = 'nist5'
     X11 = 'x11'
+	X11evo = 'x11evo'
+	X17 = 'x17'
     MyriadGroestl = 'myr-gr'
-    Groestl = 'groestl'
+    #Groestl = 'groestl'
     Keccak = 'keccak'
     Scrypt = 'scrypt'
+	Lbry = 'lbry'
+	Decred = 'decred'
+    Sib = 'sib'
+	Timetravel = 'timetravel'
 }
 
 $Optimizations = [PSCustomObject]@{
@@ -30,15 +39,24 @@ $Optimizations = [PSCustomObject]@{
     Sia = ''
     Yescrypt = ''
     BlakeVanilla = ''
+	Blake2s = ''
     Lyra2RE2 = ''
+	Lyra2v2 = ''
     Skein = ''
     Qubit = ''
     NeoScrypt = ''
+	Nist5 = ''
     X11 = ''
+	X11evo = ''
+	X17 = ''
     MyriadGroestl = ''
     Groestl = ''
     Keccak = ''
     Scrypt = ''
+	Lbry = ''
+	Decred = ''
+    Sib = ''
+	Timetravel = ''
 }
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
