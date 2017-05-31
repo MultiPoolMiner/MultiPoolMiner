@@ -45,7 +45,7 @@ $Locations | ForEach {
         [PSCustomObject]@{
             Algorithm = $Algorithm
             Info = $Coin
-            Price = $Price
+            Price = $Stat.Live
             StablePrice = $Stat.Week
             MarginOfError = $Stat.Week_Fluctuation
             Protocol = 'stratum+ssl'
