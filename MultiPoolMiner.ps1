@@ -166,13 +166,11 @@ while($true)
         
         $Miner_Profit = [Double]($Miner_Profits.PSObject.Properties.Value | Measure -Sum).Sum
         $Miner_Profit_Comparison = [Double]($Miner_Profits_Comparison.PSObject.Properties.Value | Measure -Sum).Sum
-        $Miner_Profit_Bias = [Double]($Miner_Profits_Bias.PSObject.Properties.Value | Measure -Sum).Sum
         
         $Miner.HashRates.PSObject.Properties | Where Value -EQ "" | Select -ExpandProperty Name | ForEach {
             $Miner_HashRates.$_ = $null
             $Miner_Profits.$_ = $null
             $Miner_Profits_Comparison.$_ = $null
-            $Miner_Profits_Bias.$_ = $null
             $Miner_Profit = $null
             $Miner_Profit_Comparison = $null
             $Miner_Profit_Bias = $null
@@ -189,7 +187,6 @@ while($true)
         $Miner | Add-Member Pools $Miner_Pools
         $Miner | Add-Member Profits $Miner_Profits
         $Miner | Add-Member Profits_Comparison $Miner_Profits_Comparison
-        $Miner | Add-Member Profits_Bias $Miner_Profits_Bias
         $Miner | Add-Member Profit $Miner_Profit
         $Miner | Add-Member Profit_Comparison $Miner_Profit_Comparison
         $Miner | Add-Member Profit_Bias $Miner_Profit_Bias
