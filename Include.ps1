@@ -532,3 +532,21 @@ function Expand-WebRequest {
     Start-Process "7z" "x $FileName -o$(Split-Path $Path)\$FolderName_Old -y -spe" -Wait
     Rename-Item "$(Split-Path $Path)\$FolderName_Old" "$FolderName_New"
 }
+
+function Get-Algorithm {
+    param(
+        [Parameter(Mandatory=$true)]
+        [String]$Algorithm
+    )
+    
+    $Algorithms = [PSCustomObject]@{
+        lyra2re2 = "Lyra2RE2"
+        lyra2v2	= "Lyra2RE2"
+        myrgr = "MyriadGroestl"
+        neoscrypt = "NeoScrypt"
+        sha256 = "SHA256"
+    }
+
+    if($Algorithms -contains $Algorithm){$Algorithms.($Algorithm -replace "-" -replace "_")}
+    else{(Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-"," " -replace "_"," ")) -replace " "}
+}
