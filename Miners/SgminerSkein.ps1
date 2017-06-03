@@ -1,14 +1,14 @@
-﻿$Path = '.\Bin\Lyra2z-AMD\sgminer.exe'
-$Uri = 'https://github.com/djm34/sgminer-msvc2015/releases/download/v0.2-pre/sgminer.exe'
+﻿$Path = '.\Bin\Skein-AMD\sgminer.exe'
+$Uri = 'https://github.com/miningpoolhub/sgminer/releases/download/5.3.1/Release.zip'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
-    Lyra2z = 'lyra2z'
+    Skein = 'skeincoin'
 }
 
 $Optimizations = [PSCustomObject]@{
-    Lyra2z = ' --worksize 32 --intensity 18'
+    Skein = ' --gpu-threads 2 --worksize 256 --intensity 23'
 }
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {

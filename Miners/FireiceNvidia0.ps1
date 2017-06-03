@@ -31,10 +31,10 @@ $Port = 3335+($ThreadIndex*10000)
 $Config = "{$((Get-Content "$(Split-Path $Path_Threads)\config.txt"))}" -replace "/\*(.|[\r\n])*?\*/" -replace ",(|[ \t\r\n])+}","}" -replace ",(|[ \t\r\n])+\]","]" ` | ConvertFrom-Json
 $Config.pool_address = "$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)"
 $Config.wallet_address = "$($Pools.Cryptonight.User)"
-$Config.pool_password = "x"
+$Config.pool_password = "$($Pools.Cryptonight.Pass)"
 $Config.httpd_port = $Port
 $Config.gpu_threads_conf = @(@{index = $ThreadIndex; threads = 17; blocks = 60; bfactor = 0; bsleep =  0; affine_to_cpu = $true})
-($Config | ConvertTo-Json) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt"
+($Config | ConvertTo-Json -Depth 10) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt"
 
 [PSCustomObject]@{
     Type = 'NVIDIA'

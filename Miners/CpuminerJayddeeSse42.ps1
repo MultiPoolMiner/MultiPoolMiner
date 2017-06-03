@@ -1,17 +1,17 @@
-﻿$Path = '.\Bin\NVIDIA-Nanashi\ccminer.exe'
-$Uri = 'https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip'
+﻿$Path = '.\Bin\CPU-JayDDee\cpuminer-sse42.exe'
+$Uri = 'https://github.com/JayDDee/cpuminer-opt/releases/download/v3.6.3/cpuminer-opt-3.6.3-windows.zip'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
-    #Lyra2z = 'lyra2z' #not supported
+    Lyra2z = 'lyra2z' #not supported
     #Equihash = 'equihash' #not supported
-    #Cryptonight = 'cryptonight' #not supported
+    Cryptonight = 'cryptonight'
     #Ethash = 'ethash' #not supported
-    #Sia = 'sia' #use TpruvoT
+    #Sia = 'sia' #not supported
     #Yescrypt = 'yescrypt' #use TpruvoT
     #BlakeVanilla = 'vanilla' #use TpruvoT
-    Lyra2RE2 = 'lyra2v2'
+    #Lyra2RE2 = 'lyra2v2' #use TpruvoT
     #Skein = 'skein' #use TpruvoT
     #Qubit = 'qubit' #use TpruvoT
     #NeoScrypt = 'neoscrypt' #use TpruvoT
@@ -22,33 +22,14 @@ $Algorithms = [PSCustomObject]@{
     #Scrypt = 'scrypt' #use TpruvoT
 }
 
-$Optimizations = [PSCustomObject]@{
-    Lyra2z = ''
-    Equihash = ''
-    Cryptonight = ''
-    Ethash = ''
-    Sia = ''
-    Yescrypt = ''
-    BlakeVanilla = ''
-    Lyra2RE2 = ''
-    Skein = ''
-    Qubit = ''
-    NeoScrypt = ''
-    X11 = ''
-    MyriadGroestl = ''
-    Groestl = ''
-    Keccak = ''
-    Scrypt = ''
-}
-
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
     [PSCustomObject]@{
-        Type = 'NVIDIA'
+        Type = 'CPU'
         Path = $Path
-        Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p $($Pools.', $_, '.Pass)', $Optimizations.$_)
+        Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p $($Pools.', $_, '.Pass)')
         HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Week)')}
         API = 'Ccminer'
-        Port = 4068
+        Port = 4048
         Wrap = $false
         URI = $Uri
     }

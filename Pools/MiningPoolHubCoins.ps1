@@ -9,52 +9,57 @@ catch
     return
 }
 
-if(-not $MiningPoolHub_Request.success)
-{
-    return
-}
+if(-not $MiningPoolHub_Request.success){return}
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Locations = 'Europe', 'US', 'Asia'
+$Locations = "Europe", "US", "Asia"
 
-$Locations | ForEach {
-    $Location = $_
+$MiningPoolHub_Request.return | ForEach {
+    $MiningPoolHub_Hosts = $_.host_list.split(";")
+    $MiningPoolHub_Port = $_.port
+    $MiningPoolHub_Algorithm = Get-Algorithm $_.algo
+    $MiningPoolHub_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.coin_name -replace "-"," " -replace "_"," ")) -replace " "
 
-    $MiningPoolHub_Request.return | ForEach {
-        $Algorithm = $_.algo -replace "-"
-        $Coin = (Get-Culture).TextInfo.ToTitleCase(($_.coin_name -replace "-", " ")) -replace " "
+    $Divisor = 1000000000
 
-        if((Get-Stat -Name "MiningPoolHubCoins_$($Coin)_Profit") -eq $null){$Stat = Set-Stat -Name "MiningPoolHubCoins_$($Coin)_Profit" -Value ([decimal]$_.profit/1000000000*(1-0.05))}
-        else{$Stat = Set-Stat -Name "$($Name)_$($Coin)_Profit" -Value ([decimal]$_.profit/1000000000)}
-        $Price = (($Stat.Live*(1-[Math]::Min($Stat.Day_Fluctuation,1)))+($Stat.Day*(0+[Math]::Min($Stat.Day_Fluctuation,1))))
+    if((Get-Stat -Name "MiningPoolHubCoins_$($MiningPoolHub_Coin)_Profit") -eq $null){$Stat = Set-Stat -Name "MiningPoolHubCoins_$($MiningPoolHub_Coin)_Profit" -Value ([Double]$_.profit/$Divisor*(1-0.05))}
+    else{$Stat = Set-Stat -Name "$($Name)_$($MiningPoolHub_Coin)_Profit" -Value ([Double]$_.profit/$Divisor)}
+
+    $Locations | ForEach {
+        $Location = $_
         
-        [PSCustomObject]@{
-            Algorithm = $Algorithm.ToLower()
-            Info = $Coin
-            Price = $Price
-            StablePrice = $Stat.Week
-            Protocol = 'stratum+tcp'
-            Host = $_.host_list.split(";") | Sort -Descending {$_ -ilike "$Location*"} | Select -First 1
-            Port = $_.port
-            User = '$UserName.$WorkerName'
-            Pass = 'x'
-            Location = $Location
-            SSL = $false
-        }
+        if($UserName)
+        {
+            [PSCustomObject]@{
+                Algorithm = $MiningPoolHub_Algorithm
+                Info = $MiningPoolHub_Coin
+                Price = $Stat.Live
+                StablePrice = $Stat.Week
+                MarginOfError = $Stat.Fluctuation
+                Protocol = "stratum+tcp"
+                Host = $MiningPoolHub_Hosts | Sort -Descending {$_ -ilike "$Location*"} | Select -First 1
+                Port = $MiningPoolHub_Port
+                User = "$UserName.$WorkerName"
+                Pass = "x"
+                Location = $Location
+                SSL = $false
+            }
         
-        [PSCustomObject]@{
-            Algorithm = $Algorithm.ToLower()
-            Info = $Coin
-            Price = $Price
-            StablePrice = $Stat.Week
-            Protocol = 'stratum+ssl'
-            Host = $_.host_list.split(";") | Sort -Descending {$_ -ilike "$Location*"} | Select -First 1
-            Port = $_.port
-            User = '$UserName.$WorkerName'
-            Pass = 'x'
-            Location = $Location
-            SSL = $true
+            [PSCustomObject]@{
+                Algorithm = $MiningPoolHub_Algorithm
+                Info = $MiningPoolHub_Coin
+                Price = $Stat.Live
+                StablePrice = $Stat.Week
+                MarginOfError = $Stat.Fluctuation
+                Protocol = "stratum+ssl"
+                Host = $MiningPoolHub_Hosts | Sort -Descending {$_ -ilike "$Location*"} | Select -First 1
+                Port = $MiningPoolHub_Port
+                User = "$UserName.$WorkerName"
+                Pass = "x"
+                Location = $Location
+                SSL = $true
+            }
         }
     }
 }

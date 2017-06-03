@@ -31,10 +31,10 @@ $Port = 3334
 $Config = "{$((Get-Content "$(Split-Path $Path_Threads)\config.txt"))}" -replace "/\*(.|[\r\n])*?\*/" -replace ",(|[ \t\r\n])+}","}" -replace ",(|[ \t\r\n])+\]","]" ` | ConvertFrom-Json
 $Config.pool_address = "$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)"
 $Config.wallet_address = "$($Pools.Cryptonight.User)"
-$Config.pool_password = "x"
+$Config.pool_password = "$($Pools.Cryptonight.Pass)"
 $Config.httpd_port = $Port
 $Config.cpu_threads_conf = @(@{low_power_mode = $false; no_prefetch = $false; affine_to_cpu = $false})*$Threads
-($Config | ConvertTo-Json) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt"
+($Config | ConvertTo-Json -Depth 10) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt"
 
 [PSCustomObject]@{
     Type = 'CPU'

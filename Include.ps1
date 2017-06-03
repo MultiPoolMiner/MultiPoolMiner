@@ -3,7 +3,7 @@
         [Parameter(Mandatory=$true)]
         [String]$Name, 
         [Parameter(Mandatory=$true)]
-        [Decimal]$Value, 
+        [Double]$Value, 
         [Parameter(Mandatory=$false)]
         [DateTime]$Date = (Get-Date)
     )
@@ -15,35 +15,35 @@
     $Stat = [PSCustomObject]@{
         Live = $Value
         Minute = $Value
-        Minute_Fluctuation = 0.5
+        Minute_Fluctuation = 1/2
         Minute_5 = $Value
-        Minute_5_Fluctuation = 0.5
+        Minute_5_Fluctuation = 1/2
         Minute_10 = $Value
-        Minute_10_Fluctuation = 0.5
+        Minute_10_Fluctuation = 1/2
         Hour = $Value
-        Hour_Fluctuation = 0.5
+        Hour_Fluctuation = 1/2
         Day = $Value
-        Day_Fluctuation = 0.5
+        Day_Fluctuation = 1/2
         Week = $Value
-        Week_Fluctuation = 0.5
+        Week_Fluctuation = 1/2
         Updated = $Date
     }
 
     if(Test-Path $Path){$Stat = Get-Content $Path | ConvertFrom-Json}
 
     $Stat = [PSCustomObject]@{
-        Live = [Decimal]$Stat.Live
-        Minute = [Decimal]$Stat.Minute
+        Live = [Double]$Stat.Live
+        Minute = [Double]$Stat.Minute
         Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
-        Minute_5 = [Decimal]$Stat.Minute_5
+        Minute_5 = [Double]$Stat.Minute_5
         Minute_5_Fluctuation = [Double]$Stat.Minute_5_Fluctuation
-        Minute_10 = [Decimal]$Stat.Minute_10
+        Minute_10 = [Double]$Stat.Minute_10
         Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
-        Hour = [Decimal]$Stat.Hour
+        Hour = [Double]$Stat.Hour
         Hour_Fluctuation = [Double]$Stat.Hour_Fluctuation
-        Day = [Decimal]$Stat.Day
+        Day = [Double]$Stat.Day
         Day_Fluctuation = [Double]$Stat.Day_Fluctuation
-        Week = [Decimal]$Stat.Week
+        Week = [Double]$Stat.Week
         Week_Fluctuation = [Double]$Stat.Week_Fluctuation
         Updated = [DateTime]$Stat.Updated
     }
@@ -79,7 +79,22 @@
     }
 
     if(-not (Test-Path "Stats")){New-Item "Stats" -ItemType "directory"}
-    Set-Content $Path ($Stat | ConvertTo-Json)
+    [PSCustomObject]@{
+        Live = [Decimal]$Stat.Live
+        Minute = [Decimal]$Stat.Minute
+        Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
+        Minute_5 = [Decimal]$Stat.Minute_5
+        Minute_5_Fluctuation = [Double]$Stat.Minute_5_Fluctuation
+        Minute_10 = [Decimal]$Stat.Minute_10
+        Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
+        Hour = [Decimal]$Stat.Hour
+        Hour_Fluctuation = [Double]$Stat.Hour_Fluctuation
+        Day = [Decimal]$Stat.Day
+        Day_Fluctuation = [Double]$Stat.Day_Fluctuation
+        Week = [Decimal]$Stat.Week
+        Week_Fluctuation = [Double]$Stat.Week_Fluctuation
+        Updated = [DateTime]$Stat.Updated
+    } | ConvertTo-Json | Set-Content $Path
 
     $Stat
 }
@@ -141,6 +156,26 @@ function Get-ChildItemContent {
     $ChildItems
 }
 
+function Set-Algorithm {
+    param(
+        [Parameter(Mandatory=$true)]
+        [String]$API, 
+        [Parameter(Mandatory=$true)]
+        [Int]$Port, 
+        [Parameter(Mandatory=$false)]
+        [Array]$Parameters = @()
+    )
+    
+    $Server = "localhost"
+    
+    switch($API)
+    {
+        "nicehash"
+        {
+        }
+    }
+}
+
 function Get-HashRate {
     param(
         [Parameter(Mandatory=$true)]
@@ -148,10 +183,13 @@ function Get-HashRate {
         [Parameter(Mandatory=$true)]
         [Int]$Port, 
         [Parameter(Mandatory=$false)]
+        [Object]$Parameters = @{}, 
+        [Parameter(Mandatory=$false)]
         [Bool]$Safe = $false
     )
     
     $Server = "localhost"
+    
     $Multiplier = 1000
     $Delta = 0.05
     $Interval = 5
@@ -164,7 +202,7 @@ function Get-HashRate {
         {
             "xgminer"
             {
-                $Message = @{command="summary"; parameter=""} | ConvertTo-Json
+                $Message = @{command="summary"; parameter=""} | ConvertTo-Json -Compress
             
                 do
                 {
@@ -178,12 +216,12 @@ function Get-HashRate {
 
                     $Data = $Request.Substring($Request.IndexOf("{"),$Request.LastIndexOf("}")-$Request.IndexOf("{")+1) -replace " ","_" | ConvertFrom-Json
 
-                    $HashRate = if($Data.SUMMARY.HS_5s -ne $null){[Decimal]$Data.SUMMARY.HS_5s*[Math]::Pow($Multiplier,0)}
-                        elseif($Data.SUMMARY.KHS_5s -ne $null){[Decimal]$Data.SUMMARY.KHS_5s*[Math]::Pow($Multiplier,1)}
-                        elseif($Data.SUMMARY.MHS_5s -ne $null){[Decimal]$Data.SUMMARY.MHS_5s*[Math]::Pow($Multiplier,2)}
-                        elseif($Data.SUMMARY.GHS_5s -ne $null){[Decimal]$Data.SUMMARY.GHS_5s*[Math]::Pow($Multiplier,3)}
-                        elseif($Data.SUMMARY.THS_5s -ne $null){[Decimal]$Data.SUMMARY.THS_5s*[Math]::Pow($Multiplier,4)}
-                        elseif($Data.SUMMARY.PHS_5s -ne $null){[Decimal]$Data.SUMMARY.PHS_5s*[Math]::Pow($Multiplier,5)}
+                    $HashRate = if($Data.SUMMARY.HS_5s -ne $null){[Double]$Data.SUMMARY.HS_5s*[Math]::Pow($Multiplier,0)}
+                        elseif($Data.SUMMARY.KHS_5s -ne $null){[Double]$Data.SUMMARY.KHS_5s*[Math]::Pow($Multiplier,1)}
+                        elseif($Data.SUMMARY.MHS_5s -ne $null){[Double]$Data.SUMMARY.MHS_5s*[Math]::Pow($Multiplier,2)}
+                        elseif($Data.SUMMARY.GHS_5s -ne $null){[Double]$Data.SUMMARY.GHS_5s*[Math]::Pow($Multiplier,3)}
+                        elseif($Data.SUMMARY.THS_5s -ne $null){[Double]$Data.SUMMARY.THS_5s*[Math]::Pow($Multiplier,4)}
+                        elseif($Data.SUMMARY.PHS_5s -ne $null){[Double]$Data.SUMMARY.PHS_5s*[Math]::Pow($Multiplier,5)}
 
                     if($HashRate -ne $null)
                     {
@@ -191,12 +229,12 @@ function Get-HashRate {
                         if(-not $Safe){break}
                     }
 
-                    $HashRate = if($Data.SUMMARY.HS_av -ne $null){[Decimal]$Data.SUMMARY.HS_av*[Math]::Pow($Multiplier,0)}
-                        elseif($Data.SUMMARY.KHS_av -ne $null){[Decimal]$Data.SUMMARY.KHS_av*[Math]::Pow($Multiplier,1)}
-                        elseif($Data.SUMMARY.MHS_av -ne $null){[Decimal]$Data.SUMMARY.MHS_av*[Math]::Pow($Multiplier,2)}
-                        elseif($Data.SUMMARY.GHS_av -ne $null){[Decimal]$Data.SUMMARY.GHS_av*[Math]::Pow($Multiplier,3)}
-                        elseif($Data.SUMMARY.THS_av -ne $null){[Decimal]$Data.SUMMARY.THS_av*[Math]::Pow($Multiplier,4)}
-                        elseif($Data.SUMMARY.PHS_av -ne $null){[Decimal]$Data.SUMMARY.PHS_av*[Math]::Pow($Multiplier,5)}
+                    $HashRate = if($Data.SUMMARY.HS_av -ne $null){[Double]$Data.SUMMARY.HS_av*[Math]::Pow($Multiplier,0)}
+                        elseif($Data.SUMMARY.KHS_av -ne $null){[Double]$Data.SUMMARY.KHS_av*[Math]::Pow($Multiplier,1)}
+                        elseif($Data.SUMMARY.MHS_av -ne $null){[Double]$Data.SUMMARY.MHS_av*[Math]::Pow($Multiplier,2)}
+                        elseif($Data.SUMMARY.GHS_av -ne $null){[Double]$Data.SUMMARY.GHS_av*[Math]::Pow($Multiplier,3)}
+                        elseif($Data.SUMMARY.THS_av -ne $null){[Double]$Data.SUMMARY.THS_av*[Math]::Pow($Multiplier,4)}
+                        elseif($Data.SUMMARY.PHS_av -ne $null){[Double]$Data.SUMMARY.PHS_av*[Math]::Pow($Multiplier,5)}
 
                     if($HashRate -eq $null){$HashRates = @(); break}
                     $HashRates += $HashRate
@@ -221,18 +259,18 @@ function Get-HashRate {
 
                     $Data = $Request -split ";" | ConvertFrom-StringData
 
-                    $HashRate = if([Decimal]$Data.KHS -ne 0 -or [Decimal]$Data.ACC -ne 0){$Data.KHS}
+                    $HashRate = if([Double]$Data.KHS -ne 0 -or [Double]$Data.ACC -ne 0){$Data.KHS}
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Decimal]$HashRate*$Multiplier
+                    $HashRates += [Double]$HashRate*$Multiplier
 
                     if(-not $Safe){break}
 
                     sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
-            "nicehash"
+            "nicehashequihash"
             {
                 $Message = "status"
 
@@ -254,7 +292,34 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Decimal]$HashRate
+                    $HashRates += [Double]$HashRate
+
+                    if(-not $Safe){break}
+
+                    sleep $Interval
+                } while($HashRates.Count -lt 6)
+            }
+            "nicehash"
+            {
+                $Message = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
+
+                $Client = New-Object System.Net.Sockets.TcpClient $server, $port
+                $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
+                $Reader = New-Object System.IO.StreamReader $Client.GetStream()
+                $Writer.AutoFlush = $true
+
+                do
+                {
+                    $Writer.WriteLine($Message)
+                    $Request = $Reader.ReadLine()
+
+                    $Data = $Request | ConvertFrom-Json
+                
+                    $HashRate = $Data.algorithms.workers.speed
+
+                    if($HashRate -eq $null){$HashRates = @(); break}
+
+                    $HashRates += [Double]($HashRate | Measure -Sum).Sum
 
                     if(-not $Safe){break}
 
@@ -263,7 +328,7 @@ function Get-HashRate {
             }
             "ewbf"
             {
-                $Message = @{id = 1; method = "getstat"} | ConvertTo-Json
+                $Message = @{id = 1; method = "getstat"} | ConvertTo-Json -Compress
 
                 $Client = New-Object System.Net.Sockets.TcpClient $server, $port
                 $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
@@ -281,7 +346,7 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Decimal]($HashRate | Measure -Sum).Sum
+                    $HashRates += [Double]($HashRate | Measure -Sum).Sum
 
                     if(-not $Safe){break}
 
@@ -301,8 +366,8 @@ function Get-HashRate {
 
                     if($HashRate -eq $null -or $HashRate_Dual -eq $null){$HashRates = @(); $HashRate_Dual = @(); break}
 
-                    if($Request.Content.Contains("ETH:")){$HashRates += [Decimal]$HashRate*$Multiplier; $HashRates_Dual += [Decimal]$HashRate_Dual*$Multiplier}
-                    else{$HashRates += [Decimal]$HashRate; $HashRates_Dual += [Decimal]$HashRate_Dual}
+                    if($Request.Content.Contains("ETH:")){$HashRates += [Double]$HashRate*$Multiplier; $HashRates_Dual += [Double]$HashRate_Dual*$Multiplier}
+                    else{$HashRates += [Double]$HashRate; $HashRates_Dual += [Double]$HashRate_Dual}
 
                     if(-not $Safe){break}
 
@@ -323,7 +388,7 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Decimal]$HashRate
+                    $HashRates += [Double]$HashRate
 
                     if(-not $Safe){break}
 
@@ -340,7 +405,7 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Decimal]$HashRate
+                    $HashRates += [Double]$HashRate
 
                     if(-not $Safe){break}
 
@@ -466,4 +531,22 @@ function Expand-WebRequest {
     Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
     Start-Process "7z" "x $FileName -o$(Split-Path $Path)\$FolderName_Old -y -spe" -Wait
     Rename-Item "$(Split-Path $Path)\$FolderName_Old" "$FolderName_New"
+}
+
+function Get-Algorithm {
+    param(
+        [Parameter(Mandatory=$true)]
+        [String]$Algorithm
+    )
+    
+    $Algorithms = [PSCustomObject]@{
+        lyra2re2 = "Lyra2RE2"
+        lyra2v2	= "Lyra2RE2"
+        myrgr = "MyriadGroestl"
+        neoscrypt = "NeoScrypt"
+        sha256 = "SHA256"
+    }
+
+    if($Algorithms -contains $Algorithm){$Algorithms.($Algorithm -replace "-" -replace "_")}
+    else{(Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-"," " -replace "_"," ")) -replace " "}
 }

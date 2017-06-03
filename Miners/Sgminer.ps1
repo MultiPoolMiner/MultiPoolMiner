@@ -1,13 +1,13 @@
-﻿$Path = '.\Bin\AMD-GenesisMining\sgminer.exe'
-$Uri = 'https://github.com/genesismining/sgminer-gm/releases/download/5.5.5/sgminer-gm.zip'
+﻿$Path = '.\Bin\AMD-NiceHash\sgminer.exe'
+$Uri = 'https://github.com/nicehash/sgminer/releases/download/5.6.1/sgminer-5.6.1-nicehash-51-windows-amd64.zip'
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Algorithms = [PSCustomObject]@{
     #Lyra2z = 'lyra2z' #not supported
-    Equihash = 'equihash'
-    Cryptonight = 'cryptonight'
-    Ethash = 'ethash'
+    #Equihash = 'equihash' #not supported
+    #Cryptonight = 'cryptonight' #not supported
+    #Ethash = 'ethash' #not supported
     Sia = 'sia'
     Yescrypt = 'yescrypt'
     BlakeVanilla = 'vanilla'
@@ -23,7 +23,7 @@ $Algorithms = [PSCustomObject]@{
 }
 
 $Optimizations = [PSCustomObject]@{
-    Lyra2z = ''
+    Lyra2z = ' --worksize 32 --intensity 18'
     Equihash = ' --gpu-threads 2 --worksize 256'
     Cryptonight = ' --gpu-threads 1 --worksize 8 --rawintensity 896'
     Ethash = ' --gpu-threads 1 --worksize 192 --xintensity 1024'
@@ -31,7 +31,7 @@ $Optimizations = [PSCustomObject]@{
     Yescrypt = ' --worksize 4 --rawintensity 256'
     BlakeVanilla = ' --intensity d'
     Lyra2RE2 = ' --gpu-threads 2 --worksize 128 --intensity d'
-    Skein = ' --gpu-threads 2 --worksize 64 --intensity 11'
+    Skein = ' --gpu-threads 2 --worksize 256 --intensity 23'
     Qubit = ' --gpu-threads 2 --worksize 128 --intensity d'
     NeoScrypt = ' --gpu-threads 1 --worksize 64 --intensity 13 --thread-concurrency 64'
     X11 = ' --gpu-threads 2 --worksize 128 --intensity d'
@@ -45,7 +45,7 @@ $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name 
     [PSCustomObject]@{
         Type = 'AMD'
         Path = $Path
-        Arguments = -Join ('--api-listen -k ', $Algorithms.$_, ' -o $($Pools.', $_, '.Protocol)://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p x', $Optimizations.$_)
+        Arguments = -Join ('--api-listen -k ', $Algorithms.$_, ' -o $($Pools.', $_, '.Protocol)://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p $($Pools.', $_, '.Pass)', $Optimizations.$_)
         HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Week)')}
         API = 'Xgminer'
         Port = 4028
