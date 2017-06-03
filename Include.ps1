@@ -491,6 +491,7 @@ function Start-SubProcess {
 
         $ProcessParam = @{}
         $ProcessParam.Add("FilePath", $FilePath)
+		$ProcessParam.Add("WindowStyle", 'Minimized')
         if($ArgumentList -ne ""){$ProcessParam.Add("ArgumentList", $ArgumentList)}
         if($WorkingDirectory -ne ""){$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
         $Process = Start-Process @ProcessParam -PassThru
