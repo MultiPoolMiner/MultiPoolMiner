@@ -547,6 +547,8 @@ function Get-Algorithm {
         sha256 = "SHA256"
     }
 
-    if($Algorithms -contains $Algorithm){$Algorithms.($Algorithm -replace "-" -replace "_")}
-    else{(Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-"," " -replace "_"," ")) -replace " "}
+    $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-"," " -replace "_"," ")) -replace " "
+
+    if($Algorithms.$Algorithm){$Algorithms.$Algorithm}
+    else{$Algorithm}
 }
