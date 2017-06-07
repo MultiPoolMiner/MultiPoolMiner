@@ -29,6 +29,9 @@ $Algorithms = [PSCustomObject]@{
 	Decred = 'decred'
     Sib = 'sib'
 	Timetravel = 'timetravel'
+	Bitcore = 'bitcore'
+	hmq1725 = 'hmq1725'
+	Blakecoin = 'blakecoin'
 }
 
 $Optimizations = [PSCustomObject]@{
@@ -57,6 +60,9 @@ $Optimizations = [PSCustomObject]@{
 	Decred = ''
     Sib = ''
 	Timetravel = ''
+	Bitcore = ''
+	hmq1725 = ''
+	Blakecoin = ''
 }
 
 $Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {

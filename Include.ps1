@@ -491,6 +491,7 @@ function Start-SubProcess {
 
         $ProcessParam = @{}
         $ProcessParam.Add("FilePath", $FilePath)
+		$ProcessParam.Add("WindowStyle", 'Minimized')
         if($ArgumentList -ne ""){$ProcessParam.Add("ArgumentList", $ArgumentList)}
         if($WorkingDirectory -ne ""){$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
         $Process = Start-Process @ProcessParam -PassThru
@@ -547,6 +548,8 @@ function Get-Algorithm {
         sha256 = "SHA256"
     }
 
-    if($Algorithms -contains $Algorithm){$Algorithms.($Algorithm -replace "-" -replace "_")}
-    else{(Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-"," " -replace "_"," ")) -replace " "}
+    $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-"," " -replace "_"," ")) -replace " "
+
+    if($Algorithms.$Algorithm){$Algorithms.$Algorithm}
+    else{$Algorithm}
 }

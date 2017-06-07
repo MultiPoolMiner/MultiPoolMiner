@@ -27,6 +27,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty | Select -ExpandProperty Na
     {
         "equihash"{$Divisor /= 1000}
         "blake2s"{$Divisor *= 1000}
+		"blakecoin"{$Divisor *= 1000}
         "decred"{$Divisor *= 1000}
     }
 
