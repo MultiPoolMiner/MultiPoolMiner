@@ -35,6 +35,8 @@
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 
+$BasePath = (Split-Path $script:MyInvocation.MyCommand.Path)
+
 Get-ChildItem . -Recurse | Unblock-File
 try{if((Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)){Start-Process powershell -Verb runAs -ArgumentList "Add-MpPreference -ExclusionPath '$(Convert-Path .)'"}}catch{}
 
@@ -248,6 +250,9 @@ while($true)
         }
     }
 
+	#Get Nvidia Stats
+	If ($Type -Contains 'NVIDIA') { $NvidiaStats = Get-NvidiaStats }
+		
     #Stop or start miners in the active list depending on if they are the most profitable
     $ActiveMinerPrograms | ForEach {
         if(($BestMiners_Combo | Where Path -EQ $_.Path | Where Arguments -EQ $_.Arguments).Count -eq 0)
@@ -324,6 +329,18 @@ while($true)
         $MinerComparisons | Out-Host
     }
     
+	If ($Type -Contains 'NVIDIA') {
+		$NvidiaStats | Format-Table (
+			@{Label = "GPU ID"; Width = 15; Expression={$_.id}},
+			@{Label = "Model"; Width = 20; Expression={$_.product_name}},
+			@{Label = "Fan Speed"; Width = 10; Expression={$_.fan_speed}},
+			@{Label = "GPU Util"; Width = 10; Expression={$_.gpu_util}},
+			@{Label = "MEM Util"; Width = 10; Expression={$_.memory_util}},
+			@{Label = "GPU Temp"; Width = 10; Expression={$_.gpu_temp}},
+			@{Label = "Power Draw"; Width = 10; Expression={$_.power_draw}}
+		)
+	}
+		
     #Do nothing for a few seconds as to not overload the APIs
     Sleep $Interval
 
