@@ -1,77 +1,48 @@
-$Path = '.\Bin\NVIDIA-TPruvot\ccminer-x64.exe'
-$Uri = 'https://github.com/tpruvot/ccminer/releases/download/v2.0-tpruvot/ccminer-2.0-release-x64-cuda-8.0.7z'
+. .\Include.ps1
+
+$Path = ".\Bin\NVIDIA-TPruvot\ccminer-x64.exe"
+$Uri = "https://github.com/tpruvot/ccminer/releases/download/v2.0-tpruvot/ccminer-2.0-release-x64-cuda-8.0.7z"
+
+$Commands = [PSCustomObject]@{
+    "bitcore" = "" #Bitcore
+    "blake2s" = "" #Blake2s
+    "blakecoin" = "" #Blakecoin
+    "vanilla" = "" #BlakeVanilla
+    "cryptonight" = "" #Cryptonight
+    "decred" = "" #Decred
+    "equihash" = "" #Equihash
+    "ethash" = "" #Ethash
+    "groestl" = "" #Groestl
+    "hmq1725" = "" #hmq1725
+    "keccak" = "" #Keccak
+    "lbry" = "" #Lbry
+    "lyra2v2" = "" #Lyra2RE2
+    "lyra2z" = "" #Lyra2z
+    "myr-gr" = "" #MyriadGroestl
+    "neoscrypt" = "" #NeoScrypt
+    "nist5" = "" #Nist5
+    "pascal" = "" #Pascal
+    "qubit" = "" #Qubit
+    "scrypt" = "" #Scrypt
+    "sia" = "" #Sia
+    "sib" = "" #Sib
+    "skein" = "" #Skein
+    "timetravel" = "" #Timetravel
+    "x11" = "" #X11
+    "x11evo" = "" #X11evo
+    "x17" = "" #X17
+    "yescrypt" = "" #Yescrypt
+}
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Algorithms = [PSCustomObject]@{
-    Lyra2z = 'lyra2z'
-    #Equihash = 'equihash' #not supported
-    Cryptonight = 'cryptonight'
-    #Ethash = 'ethash' #not supported
-    Sia = 'sia'
-    Yescrypt = 'yescrypt'
-    BlakeVanilla = 'vanilla'
-	Blake2s = 'blake2s'
-    Lyra2RE2 = 'lyra2v2'
-	Lyra2v2 = 'lyra2v2'
-    #Skein = 'skein'
-    Qubit = 'qubit'
-    NeoScrypt = 'neoscrypt'
-	Nist5 = 'nist5'
-    X11 = 'x11'
-	X11evo = 'x11evo'
-	X17 = 'x17'
-    MyriadGroestl = 'myr-gr'
-    #Groestl = 'groestl'
-    Keccak = 'keccak'
-    Scrypt = 'scrypt'
-	Lbry = 'lbry'
-	Decred = 'decred'
-    Sib = 'sib'
-	Timetravel = 'timetravel'
-	Bitcore = 'bitcore'
-	hmq1725 = 'hmq1725'
-	Blakecoin = 'blakecoin'
-}
-
-$Optimizations = [PSCustomObject]@{
-    Lyra2z = ''
-    Equihash = ''
-    Cryptonight = ''
-    Ethash = ''
-    Sia = ''
-    Yescrypt = ''
-    BlakeVanilla = ''
-	Blake2s = ''
-    Lyra2RE2 = ''
-	Lyra2v2 = ''
-    Skein = ''
-    Qubit = ''
-    NeoScrypt = ''
-	Nist5 = ''
-    X11 = ''
-	X11evo = ''
-	X17 = ''
-    MyriadGroestl = ''
-    Groestl = ''
-    Keccak = ''
-    Scrypt = ''
-	Lbry = ''
-	Decred = ''
-    Sib = ''
-	Timetravel = ''
-	Bitcore = ''
-	hmq1725 = ''
-	Blakecoin = ''
-}
-
-$Algorithms | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
+$Commands | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
     [PSCustomObject]@{
-        Type = 'NVIDIA'
+        Type = "NVIDIA"
         Path = $Path
-        Arguments = -Join ('-a ', $Algorithms.$_, ' -o stratum+tcp://$($Pools.', $_, '.Host):$($Pools.', $_, '.Port) -u $($Pools.', $_, '.User) -p $($Pools.', $_, '.Pass)', $Optimizations.$_)
-        HashRates = [PSCustomObject]@{$_ = -Join ('$($Stats.', $Name, '_', $_, '_HashRate.Week)')}
-        API = 'Ccminer'
+        Arguments = "-a $_ -o stratum+tcp://$($Pools.(Get-Algorithm($_)).Host):$($Pools.(Get-Algorithm($_)).Port) -u $($Pools.(Get-Algorithm($_)).User) -p $($Pools.(Get-Algorithm($_)).Pass)$($Commands.$_)"
+        HashRates = [PSCustomObject]@{(Get-Algorithm($_)) = $Stats."$Name_$(Get-Algorithm($_))_HashRate".Week}
+        API = "Ccminer"
         Port = 4068
         Wrap = $false
         URI = $Uri

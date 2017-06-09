@@ -155,7 +155,7 @@ function Get-ChildItemContent {
     
     $ChildItems
 }
-
+<#
 function Set-Algorithm {
     param(
         [Parameter(Mandatory=$true)]
@@ -175,7 +175,7 @@ function Set-Algorithm {
         }
     }
 }
-
+#>
 function Get-HashRate {
     param(
         [Parameter(Mandatory=$true)]
@@ -546,6 +546,7 @@ function Get-Algorithm {
         myrgr = "MyriadGroestl"
         neoscrypt = "NeoScrypt"
         sha256 = "SHA256"
+        vanilla = "BlakeVanilla"
     }
 
     $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-"," " -replace "_"," ")) -replace " "
