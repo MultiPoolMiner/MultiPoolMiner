@@ -50,7 +50,8 @@ $DecayBase = 1-0.1 #decimal percentage
 $ActiveMinerPrograms = @()
 
 #Start the log
-Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_hh-mm-ss").txt"
+$TimeStamp = Get-Date -Format o | foreach {$_ -replace ":", "."}
+Start-Transcript ".\Logs\$TimeStamp.txt"
 
 #Update stats with missing data and set to today's date/time
 if(Test-Path "Stats"){Get-ChildItemContent "Stats" | ForEach {$Stat = Set-Stat $_.Name $_.Content.Week}}
