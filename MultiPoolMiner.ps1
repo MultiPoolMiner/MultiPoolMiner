@@ -329,6 +329,7 @@ while($true)
         $MinerComparisons | Out-Host
     }
     
+	#Display NVIDIA Stats
 	If ($Type -Contains 'NVIDIA') {
 		$NvidiaStats | Format-Table (
 			@{Label = "GPU ID"; Width = 15; Expression={$_.id}},
