@@ -155,7 +155,7 @@ while($true)
         $Miner_Types = $Miner.Type | Select -Unique
         $Miner_Indexes = $Miner.Index | Select -Unique
 
-        $Miner.HashRates.PSObject.Properties.Name | ForEach {
+        $Miner.HashRates | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
             $Miner_HashRates | Add-Member $_ ([Double]$Miner.HashRates.$_)
             $Miner_Pools | Add-Member $_ ([PSCustomObject]$Pools.$_)
             $Miner_Pools_Comparison | Add-Member $_ ([PSCustomObject]$Pools_Comparison.$_)
@@ -168,14 +168,17 @@ while($true)
         $Miner_Profit_Comparison = [Double]($Miner_Profits_Comparison.PSObject.Properties.Value | Measure -Sum).Sum
         $Miner_Profit_Bias = [Double]($Miner_Profits_Bias.PSObject.Properties.Value | Measure -Sum).Sum
         
-        $Miner.HashRates.PSObject.Properties | Where Value -EQ "" | Select -ExpandProperty Name | ForEach {
-            $Miner_HashRates.$_ = $null
-            $Miner_Profits.$_ = $null
-            $Miner_Profits_Comparison.$_ = $null
-            $Miner_Profits_Bias.$_ = $null
-            $Miner_Profit = $null
-            $Miner_Profit_Comparison = $null
-            $Miner_Profit_Bias = $null
+        $Miner.HashRates | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
+            if(-not [String]$Miner.HashRates.$_)
+            {
+                $Miner_HashRates.$_ = $null
+                $Miner_Profits.$_ = $null
+                $Miner_Profits_Comparison.$_ = $null
+                $Miner_Profits_Bias.$_ = $null
+                $Miner_Profit = $null
+                $Miner_Profit_Comparison = $null
+                $Miner_Profit_Bias = $null
+            }
         }
 
         if($Miner_Types -eq $null){$Miner_Types = $Miners.Type | Select -Unique}
