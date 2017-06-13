@@ -1,47 +1,44 @@
-﻿$ThreadIndex = 0
+﻿. .\Include.ps1
+
+$ThreadIndex = 0
 $Path_Threads = ".\Bin\Cryptonight-NVIDIA$ThreadIndex\xmr-stak-nvidia.exe"
 
 $Path = ".\Bin\Cryptonight-NVIDIA\xmr-stak-nvidia.exe"
-$Uri = 'https://github.com/fireice-uk/xmr-stak-nvidia/releases/download/v1.1.1-1.4.0/xmr-stak-nvidia.zip'
+$Uri = "https://github.com/fireice-uk/xmr-stak-nvidia/releases/download/v1.1.1-1.4.0/xmr-stak-nvidia.zip"
 
-if((Test-Path $Path) -eq $false)
-{
-    $FolderName_Old = ([IO.FileInfo](Split-Path $Path -Leaf)).BaseName
-    $FolderName_New = Split-Path (Split-Path $Path) -Leaf
-    $FileName = "$FolderName_New$(([IO.FileInfo](Split-Path $Uri -Leaf)).Extension)"
+if((Test-Path $Path) -eq $false){Expand-WebRequest $Uri (Split-Path $Path) -ErrorAction SilentlyContinue}
+if((Test-Path $Path_Threads) -eq $false){Copy-Item (Split-Path $Path) (Split-Path $Path_Threads) -Recurse -Force -ErrorAction SilentlyContinue}
 
-    if(Test-Path $FileName){Remove-Item $FileName}
-    if(Test-Path "$(Split-Path (Split-Path $Path))\$FolderName_New"){Remove-Item "$(Split-Path (Split-Path $Path))\$FolderName_New" -Recurse}
-    if(Test-Path "$(Split-Path (Split-Path $Path))\$FolderName_Old"){Remove-Item "$(Split-Path (Split-Path $Path))\$FolderName_Old" -Recurse}
-
-    Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
-    Start-Process "7z" "x $FileName -o$(Split-Path (Split-Path $Path))\$FolderName_Old -y -spe" -Wait
-    Rename-Item "$(Split-Path (Split-Path $Path))\$FolderName_Old" "$FolderName_New"
-}
-
-if((Test-Path $Path_Threads) -eq $false)
-{
-    Copy-Item (Split-Path $Path) (Split-Path $Path_Threads) -Recurse
-}
+if((Test-Path $Path) -eq $false){Move-Item "$(Split-Path $Path)\xmr-stak-nvidia\*" (Split-Path $Path) -Force -ErrorAction SilentlyContinue} #temp fix
+if((Test-Path $Path_Threads) -eq $false){Move-Item "$(Split-Path $Path_Threads)\xmr-stak-nvidia\*" (Split-Path $Path_Threads) -Force -ErrorAction SilentlyContinue} #temp fix
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
-
 $Port = 3335+($ThreadIndex*10000)
 
-$Config = "{$((Get-Content "$(Split-Path $Path_Threads)\config.txt"))}" -replace "/\*(.|[\r\n])*?\*/" -replace ",(|[ \t\r\n])+}","}" -replace ",(|[ \t\r\n])+\]","]" ` | ConvertFrom-Json
-$Config.pool_address = "$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)"
-$Config.wallet_address = "$($Pools.Cryptonight.User)"
-$Config.pool_password = "$($Pools.Cryptonight.Pass)"
-$Config.httpd_port = $Port
-$Config.gpu_threads_conf = @(@{index = $ThreadIndex; threads = 17; blocks = 60; bfactor = 0; bsleep =  0; affine_to_cpu = $true})
-($Config | ConvertTo-Json -Depth 10) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt"
+([PSCustomObject]@{
+    gpu_threads_conf = @([PSCustomObject]@{index = $ThreadIndex; threads = 17; blocks = 60; bfactor = 0; bsleep =  0; affine_to_cpu = $true})
+    use_tls = $false
+    tls_secure_algo = $true
+    tls_fingerprint = ""
+    pool_address = "$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)"
+    wallet_address = "$($Pools.Cryptonight.User)"
+    pool_password = "$($Pools.Cryptonight.Pass)"
+    call_timeout = 10
+    retry_time = 10
+    giveup_limit = 0
+    verbose_level = 3
+    h_print_time = 60
+    output_file = ""
+    httpd_port = $Port
+    prefer_ipv4 = $true
+} | ConvertTo-Json -Depth 10) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt" -Force -ErrorAction SilentlyContinue
 
 [PSCustomObject]@{
-    Type = 'NVIDIA'
+    Type = "NVIDIA"
     Path = $Path_Threads
     Arguments = ''
-    HashRates = [PSCustomObject]@{Cryptonight = '$($Stats.' + $Name + '_Cryptonight_HashRate.Week)'}
-    API = 'FireIce'
+    HashRates = [PSCustomObject]@{Cryptonight = $Stats."$($Name)_Cryptonight_HashRate".Week}
+    API = "FireIce"
     Port = $Port
     Wrap = $false
     URI = $Uri
