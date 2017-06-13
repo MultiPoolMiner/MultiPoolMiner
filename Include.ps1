@@ -540,14 +540,7 @@ function Get-Algorithm {
         [String]$Algorithm
     )
     
-    $Algorithms = [PSCustomObject]@{
-        lyra2re2 = "Lyra2RE2"
-        lyra2v2	= "Lyra2RE2"
-        myrgr = "MyriadGroestl"
-        neoscrypt = "NeoScrypt"
-        sha256 = "SHA256"
-        vanilla = "BlakeVanilla"
-    }
+    $Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
 
     $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-"," " -replace "_"," ")) -replace " "
 
