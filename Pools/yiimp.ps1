@@ -62,7 +62,7 @@ $YiiMP_Request | Get-Member -MemberType NoteProperty | Select -ExpandProperty Na
     if((Get-Stat -Name "$($Name)_$($YiiMP_Coin)_Profit") -eq $null){$Stat = Set-Stat -Name "$($Name)_$($YiiMP_Coin)_Profit" -Value ([Double]$YiiMP_Request.$_.estimate/$Divisor)}
     else{$Stat = Set-Stat -Name "$($Name)_$($YiiMP_Coin)_Profit" -Value ([Double]$YiiMP_Request.$_.estimate/$Divisor)}
 	
-    if($Wallet)
+    if($YiiMP_Wallets.$YiiMP_Coin)
     {
         [PSCustomObject]@{
             Algorithm = $YiiMP_Algorithm
