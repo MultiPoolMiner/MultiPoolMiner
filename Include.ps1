@@ -155,7 +155,7 @@ function Get-ChildItemContent {
     
     $ChildItems
 }
-
+<#
 function Set-Algorithm {
     param(
         [Parameter(Mandatory=$true)]
@@ -175,7 +175,7 @@ function Set-Algorithm {
         }
     }
 }
-
+#>
 function Get-HashRate {
     param(
         [Parameter(Mandatory=$true)]
@@ -546,10 +546,13 @@ function Get-Algorithm {
         myrgr = "MyriadGroestl"
         neoscrypt = "NeoScrypt"
         sha256 = "SHA256"
+        vanilla = "BlakeVanilla"
     }
 
-    if($Algorithms -contains $Algorithm){$Algorithms.($Algorithm -replace "-" -replace "_")}
-    else{(Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-"," " -replace "_"," ")) -replace " "}
+    $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-"," " -replace "_"," ")) -replace " "
+
+    if($Algorithms.$Algorithm){$Algorithms.$Algorithm}
+    else{$Algorithm}
 }
 
 function Get-NvidiaStats {	
@@ -583,4 +586,3 @@ function Get-NvidiaStats {
 			video_clock			=	$GPU.clocks.video_clock
 		}
 	}
-}

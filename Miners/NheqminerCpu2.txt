@@ -1,0 +1,10 @@
+{
+    "Type":  "CPU",
+    "Path":  ".\\Bin\\Equihash-NiceHash\\nheqminer.exe",
+    "Arguments":  "-a 3334 -l $($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User) -t 2",
+    "HashRates":  {"Equihash":  "$($Stats.NheqminerCpu2_Equihash_HashRate.Week)"},
+    "API":  "NiceHashEquihash",
+    "Port":  3334,
+    "Wrap":  false,
+    "URI":  "https://github.com/nicehash/nheqminer/releases/download/0.5c/Windows_x64_nheqminer-5c.zip"
+}
