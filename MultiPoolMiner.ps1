@@ -91,15 +91,12 @@ while($true)
     if(Test-Path "Stats"){Get-ChildItemContent "Stats" | ForEach {$Stats | Add-Member $_.Name $_.Content}}
 
     #Load information about the Pools
-    $AllPools = if(Test-Path "Pools"){Get-ChildItemContent "Pools" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | 
-        Where Location -EQ $Location | 
-        Where SSL -EQ $SSL | 
-        Where {$PoolName.Count -eq 0 -or (Compare $PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0}}
+    $AllPools = if(Test-Path "Pools"){Get-ChildItemContent "Pools" | ForEach {$_.Content | Add-Member @{Name = $_.Name} -PassThru}}
     if($AllPools.Count -eq 0){"No Pools!" | Out-Host; sleep $Interval; continue}
     $Pools = [PSCustomObject]@{}
     $Pools_Comparison = [PSCustomObject]@{}
-    $AllPools.Algorithm | Select -Unique | ForEach {$Pools | Add-Member $_ ($AllPools | Where Algorithm -EQ $_ | Sort Price -Descending | Select -First 1)}
-    $AllPools.Algorithm | Select -Unique | ForEach {$Pools_Comparison | Add-Member $_ ($AllPools | Where Algorithm -EQ $_ | Sort StablePrice -Descending | Select -First 1)}
+    $AllPools.Algorithm | ForEach {$_.ToLower()} | Select -Unique | ForEach {$Pools | Add-Member $_ ($AllPools | Sort -Descending {$PoolName.Count -eq 0 -or (Compare $PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0},Price,{$_.Location -EQ $Location},{$_.SSL -EQ $SSL} | Where Algorithm -EQ $_ | Select -First 1)}
+    $AllPools.Algorithm | ForEach {$_.ToLower()} | Select -Unique | ForEach {$Pools_Comparison | Add-Member $_ ($AllPools | Sort -Descending {$PoolName.Count -eq 0 -or (Compare $PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure).Count -gt 0},StablePrice,{$_.Location -EQ $Location},{$_.SSL -EQ $SSL} | Where Algorithm -EQ $_ | Select -First 1)}
 
     #Load information about the Miners
     #Messy...?
