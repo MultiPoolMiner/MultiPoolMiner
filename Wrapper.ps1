@@ -28,17 +28,17 @@ Write-Host "MultiPoolMiner Wrapper Started" -BackgroundColor Yellow -ForegroundC
 
 do
 {
-    sleep 1
+    Start-Sleep 1
 
-    $PowerShell.Streams.Verbose.ReadAll() | ForEach {
+    $PowerShell.Streams.Verbose.ReadAll() | ForEach-Object {
         $Line = $_
 
         if($Line -like "*total speed:*" -or $Line -like "*accepted:*")
         {
             $Words = $Line -split " "
-            $HashRate = [Decimal]$Words[$Words.IndexOf(($Words -like "*/s" | Select -Last 1))-1]
+            $HashRate = [Decimal]$Words[$Words.IndexOf(($Words -like "*/s" | Select-Object -Last 1))-1]
 
-            switch($Words[$Words.IndexOf(($Words -like "*/s" | Select -Last 1))])
+            switch($Words[$Words.IndexOf(($Words -like "*/s" | Select-Object -Last 1))])
             {
                 "kh/s" {$HashRate *= [Math]::Pow(1000,1)}
                 "mh/s" {$HashRate *= [Math]::Pow(1000,2)}
@@ -53,7 +53,7 @@ do
         $Line
     }
 
-    if((Get-Process | Where Id -EQ $ControllerProcessID) -eq $null){$PowerShell.Stop() | Out-Null}
+    if((Get-Process | Where-Object Id -EQ $ControllerProcessID) -eq $null){$PowerShell.Stop() | Out-Null}
 }
 until($Result.IsCompleted)
 

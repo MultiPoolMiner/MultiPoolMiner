@@ -15,7 +15,7 @@ $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Locations = "Europe", "US", "Asia"
 
-$MiningPoolHub_Request.return | ForEach {
+$MiningPoolHub_Request.return | ForEach-Object {
     $MiningPoolHub_Hosts = $_.host_list.split(";")
     $MiningPoolHub_Port = $_.port
     $MiningPoolHub_Algorithm = Get-Algorithm $_.algo
@@ -26,7 +26,7 @@ $MiningPoolHub_Request.return | ForEach {
     if((Get-Stat -Name "MiningPoolHubCoins_$($MiningPoolHub_Coin)_Profit") -eq $null){$Stat = Set-Stat -Name "MiningPoolHubCoins_$($MiningPoolHub_Coin)_Profit" -Value ([Double]$_.profit/$Divisor*(1-0.05))}
     else{$Stat = Set-Stat -Name "$($Name)_$($MiningPoolHub_Coin)_Profit" -Value ([Double]$_.profit/$Divisor)}
 
-    $Locations | ForEach {
+    $Locations | ForEach-Object {
         $Location = $_
         
         if($UserName)
@@ -38,7 +38,7 @@ $MiningPoolHub_Request.return | ForEach {
                 StablePrice = $Stat.Week
                 MarginOfError = $Stat.Fluctuation
                 Protocol = "stratum+tcp"
-                Host = $MiningPoolHub_Hosts | Sort -Descending {$_ -ilike "$Location*"} | Select -First 1
+                Host = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$Location*"} | Select-Object -First 1
                 Port = $MiningPoolHub_Port
                 User = "$UserName.$WorkerName"
                 Pass = "x"
@@ -53,7 +53,7 @@ $MiningPoolHub_Request.return | ForEach {
                 StablePrice = $Stat.Week
                 MarginOfError = $Stat.Fluctuation
                 Protocol = "stratum+ssl"
-                Host = $MiningPoolHub_Hosts | Sort -Descending {$_ -ilike "$Location*"} | Select -First 1
+                Host = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$Location*"} | Select-Object -First 1
                 Port = $MiningPoolHub_Port
                 User = "$UserName.$WorkerName"
                 Pass = "x"

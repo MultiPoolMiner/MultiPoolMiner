@@ -106,7 +106,7 @@ function Get-Stat {
     )
     
     if(-not (Test-Path "Stats")){New-Item "Stats" -ItemType "directory"}
-    Get-ChildItem "Stats" | Where Extension -NE ".ps1" | Where BaseName -EQ $Name | Get-Content | ConvertFrom-Json
+    Get-ChildItem "Stats" | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
 }
 
 function Get-ChildItemContent {
@@ -115,7 +115,7 @@ function Get-ChildItemContent {
         [String]$Path
     )
 
-    $ChildItems = Get-ChildItem $Path | ForEach {
+    $ChildItems = Get-ChildItem $Path | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
         if($_.Extension -eq ".ps1")
@@ -126,15 +126,15 @@ function Get-ChildItemContent {
         {
            $Content = $_ | Get-Content | ConvertFrom-Json
         }
-        $Content | ForEach {
+        $Content | ForEach-Object {
             [PSCustomObject]@{Name = $Name; Content = $_}
         }
     }
     
-    $ChildItems | ForEach {
+    $ChildItems | ForEach-Object {
         $Item = $_
         $ItemKeys = $Item.Content.PSObject.Properties.Name.Clone()
-        $ItemKeys | ForEach {
+        $ItemKeys | ForEach-Object {
             if($Item.Content.$_ -is [String])
             {
                 $Item.Content.$_ = Invoke-Expression "`"$($Item.Content.$_)`""
@@ -143,7 +143,7 @@ function Get-ChildItemContent {
             {
                 $Property = $Item.Content.$_
                 $PropertyKeys = $Property.PSObject.Properties.Name
-                $PropertyKeys | ForEach {
+                $PropertyKeys | ForEach-Object {
                     if($Property.$_ -is [String])
                     {
                         $Property.$_ = Invoke-Expression "`"$($Property.$_)`""
@@ -240,7 +240,7 @@ function Get-HashRate {
                     $HashRates += $HashRate
                     if(-not $Safe){break}
 
-                    sleep $Interval
+                    Start-Sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
             "ccminer"
@@ -267,7 +267,7 @@ function Get-HashRate {
 
                     if(-not $Safe){break}
 
-                    sleep $Interval
+                    Start-Sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
             "nicehashequihash"
@@ -296,7 +296,7 @@ function Get-HashRate {
 
                     if(-not $Safe){break}
 
-                    sleep $Interval
+                    Start-Sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
             "nicehash"
@@ -319,11 +319,11 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Double]($HashRate | Measure -Sum).Sum
+                    $HashRates += [Double]($HashRate | Measure-Object -Sum).Sum
 
                     if(-not $Safe){break}
 
-                    sleep $Interval
+                    Start-Sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
             "ewbf"
@@ -346,11 +346,11 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
-                    $HashRates += [Double]($HashRate | Measure -Sum).Sum
+                    $HashRates += [Double]($HashRate | Measure-Object -Sum).Sum
 
                     if(-not $Safe){break}
 
-                    sleep $Interval
+                    Start-Sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
             "claymore"
@@ -371,7 +371,7 @@ function Get-HashRate {
 
                     if(-not $Safe){break}
 
-                    sleep $Interval
+                    Start-Sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
             "fireice"
@@ -392,7 +392,7 @@ function Get-HashRate {
 
                     if(-not $Safe){break}
 
-                    sleep $Interval
+                    Start-Sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
             "wrapper"
@@ -401,7 +401,7 @@ function Get-HashRate {
                 {
                     $HashRate = Get-Content ".\Wrapper_$Port.txt"
                 
-                    if($HashRate -eq $null){sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.txt"}
+                    if($HashRate -eq $null){Start-Sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.txt"}
 
                     if($HashRate -eq $null){$HashRates = @(); break}
 
@@ -409,15 +409,15 @@ function Get-HashRate {
 
                     if(-not $Safe){break}
 
-                    sleep $Interval
+                    Start-Sleep $Interval
                 } while($HashRates.Count -lt 6)
             }
         }
 
-        $HashRates_Info = $HashRates | Measure -Maximum -Minimum -Average
+        $HashRates_Info = $HashRates | Measure-Object -Maximum -Minimum -Average
         if($HashRates_Info.Maximum-$HashRates_Info.Minimum -le $HashRates_Info.Average*$Delta){$HashRates_Info.Maximum}
 
-        $HashRates_Info_Dual = $HashRates_Dual | Measure -Maximum -Minimum -Average
+        $HashRates_Info_Dual = $HashRates_Dual | Measure-Object -Maximum -Minimum -Average
         if($HashRates_Info_Dual.Maximum-$HashRates_Info_Dual.Minimum -le $HashRates_Info_Dual.Average*$Delta){$HashRates_Info_Dual.Maximum}
     }
     catch
@@ -455,7 +455,7 @@ function Get-Combination {
         $Combination | Add-Member @{[Math]::Pow(2, $i) = $Value[$i]}
     }
 
-    $Combination_Keys = $Combination | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name
+    $Combination_Keys = $Combination | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name
 
     for($i = $SizeMin; $i -le $SizeMax; $i++)
     {
@@ -463,7 +463,7 @@ function Get-Combination {
 
         while($x -le [Math]::Pow(2, $Value.Count)-1)
         {
-            [PSCustomObject]@{Combination = $Combination_Keys | Where {$_ -band $x} | ForEach {$Combination.$_}}
+            [PSCustomObject]@{Combination = $Combination_Keys | Where-Object {$_ -band $x} | ForEach-Object {$Combination.$_}}
             $smallest = ($x -band -$x)
             $ripple = $x + $smallest
             $new_smallest = ($ripple -band -$ripple)
@@ -506,10 +506,10 @@ function Start-SubProcess {
         while($Process.HasExited -eq $false)
     }
 
-    do{sleep 1; $JobOutput = Receive-Job $Job}
+    do{Start-Sleep 1; $JobOutput = Receive-Job $Job}
     while($JobOutput -eq $null)
 
-    $Process = Get-Process | Where Id -EQ $JobOutput.ProcessId
+    $Process = Get-Process | Where-Object Id -EQ $JobOutput.ProcessId
     $Process.Handle | Out-Null
     $Process
 }
