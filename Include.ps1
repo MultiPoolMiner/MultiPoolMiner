@@ -118,12 +118,10 @@ function Get-ChildItemContent {
     $ChildItems = Get-ChildItem $Path | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
-        if($_.Extension -eq ".ps1")
-        {
+        if($_.Extension -eq ".ps1") {
            $Content = &$_.FullName
         }
-        else
-        {
+        else {
            $Content = $_ | Get-Content | ConvertFrom-Json
         }
         $Content | ForEach-Object {
@@ -135,17 +133,14 @@ function Get-ChildItemContent {
         $Item = $_
         $ItemKeys = $Item.Content.PSObject.Properties.Name.Clone()
         $ItemKeys | ForEach-Object {
-            if($Item.Content.$_ -is [String])
-            {
+            if($Item.Content.$_ -is [String]) {
                 $Item.Content.$_ = Invoke-Expression "`"$($Item.Content.$_)`""
             }
-            elseif($Item.Content.$_ -is [PSCustomObject])
-            {
+            elseif($Item.Content.$_ -is [PSCustomObject]) {
                 $Property = $Item.Content.$_
                 $PropertyKeys = $Property.PSObject.Properties.Name
                 $PropertyKeys | ForEach-Object {
-                    if($Property.$_ -is [String])
-                    {
+                    if($Property.$_ -is [String]) {
                         $Property.$_ = Invoke-Expression "`"$($Property.$_)`""
                     }
                 }
@@ -196,16 +191,12 @@ function Get-HashRate {
     $HashRates = @()
     $HashRates_Dual = @()
 
-    try
-    {
-        switch($API)
-        {
-            "xgminer"
-            {
+    try {
+        switch($API) {
+            "xgminer" {
                 $Message = @{command="summary"; parameter=""} | ConvertTo-Json -Compress
             
-                do
-                {
+                do {
                     $Client = New-Object System.Net.Sockets.TcpClient $server, $port
                     $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
                     $Reader = New-Object System.IO.StreamReader $Client.GetStream()
@@ -223,8 +214,7 @@ function Get-HashRate {
                         elseif($Data.SUMMARY.THS_5s -ne $null){[Double]$Data.SUMMARY.THS_5s*[Math]::Pow($Multiplier,4)}
                         elseif($Data.SUMMARY.PHS_5s -ne $null){[Double]$Data.SUMMARY.PHS_5s*[Math]::Pow($Multiplier,5)}
 
-                    if($HashRate -ne $null)
-                    {
+                    if($HashRate -ne $null) {
                         $HashRates += $HashRate
                         if(-not $Safe){break}
                     }
@@ -238,17 +228,15 @@ function Get-HashRate {
 
                     if($HashRate -eq $null){$HashRates = @(); break}
                     $HashRates += $HashRate
-                    if(-not $Safe){break}
+                    if(-not $Safe) {break}
 
                     Start-Sleep $Interval
-                } while($HashRates.Count -lt 6)
+                } while ($HashRates.Count -lt 6)
             }
-            "ccminer"
-            {
+            "ccminer" {
                 $Message = "summary"
 
-                do
-                {
+                do {
                     $Client = New-Object System.Net.Sockets.TcpClient $server, $port
                     $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
                     $Reader = New-Object System.IO.StreamReader $Client.GetStream()
@@ -259,19 +247,18 @@ function Get-HashRate {
 
                     $Data = $Request -split ";" | ConvertFrom-StringData
 
-                    $HashRate = if([Double]$Data.KHS -ne 0 -or [Double]$Data.ACC -ne 0){$Data.KHS}
+                    $HashRate = if ([Double]$Data.KHS -ne 0 -or [Double]$Data.ACC -ne 0) {$Data.KHS}
 
-                    if($HashRate -eq $null){$HashRates = @(); break}
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
 
-                    $HashRates += [Double]$HashRate*$Multiplier
+                    $HashRates += [Double]$HashRate * $Multiplier
 
-                    if(-not $Safe){break}
+                    if (-not $Safe) {break}
 
                     Start-Sleep $Interval
-                } while($HashRates.Count -lt 6)
+                } while ($HashRates.Count -lt 6)
             }
-            "nicehashequihash"
-            {
+            "nicehashequihash" {
                 $Message = "status"
 
                 $Client = New-Object System.Net.Sockets.TcpClient $server, $port
@@ -279,8 +266,7 @@ function Get-HashRate {
                 $Reader = New-Object System.IO.StreamReader $Client.GetStream()
                 $Writer.AutoFlush = $true
 
-                do
-                {
+                do {
                     $Writer.WriteLine($Message)
                     $Request = $Reader.ReadLine()
 
@@ -288,19 +274,18 @@ function Get-HashRate {
                 
                     $HashRate = $Data.result.speed_hps
                     
-                    if($HashRate -eq $null){$HashRate = $Data.result.speed_sps}
+                    if ($HashRate -eq $null) {$HashRate = $Data.result.speed_sps}
 
-                    if($HashRate -eq $null){$HashRates = @(); break}
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
 
                     $HashRates += [Double]$HashRate
 
-                    if(-not $Safe){break}
+                    if (-not $Safe) {break}
 
                     Start-Sleep $Interval
-                } while($HashRates.Count -lt 6)
+                } while ($HashRates.Count -lt 6)
             }
-            "nicehash"
-            {
+            "nicehash" {
                 $Message = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
 
                 $Client = New-Object System.Net.Sockets.TcpClient $server, $port
@@ -308,8 +293,7 @@ function Get-HashRate {
                 $Reader = New-Object System.IO.StreamReader $Client.GetStream()
                 $Writer.AutoFlush = $true
 
-                do
-                {
+                do {
                     $Writer.WriteLine($Message)
                     $Request = $Reader.ReadLine()
 
@@ -317,17 +301,16 @@ function Get-HashRate {
                 
                     $HashRate = $Data.algorithms.workers.speed
 
-                    if($HashRate -eq $null){$HashRates = @(); break}
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
 
                     $HashRates += [Double]($HashRate | Measure-Object -Sum).Sum
 
-                    if(-not $Safe){break}
+                    if (-not $Safe) {break}
 
                     Start-Sleep $Interval
-                } while($HashRates.Count -lt 6)
+                } while ($HashRates.Count -lt 6)
             }
-            "ewbf"
-            {
+            "ewbf" {
                 $Message = @{id = 1; method = "getstat"} | ConvertTo-Json -Compress
 
                 $Client = New-Object System.Net.Sockets.TcpClient $server, $port
@@ -335,8 +318,7 @@ function Get-HashRate {
                 $Reader = New-Object System.IO.StreamReader $Client.GetStream()
                 $Writer.AutoFlush = $true
 
-                do
-                {
+                do {
                     $Writer.WriteLine($Message)
                     $Request = $Reader.ReadLine()
 
@@ -344,130 +326,119 @@ function Get-HashRate {
                 
                     $HashRate = $Data.result.speed_sps
 
-                    if($HashRate -eq $null){$HashRates = @(); break}
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
 
                     $HashRates += [Double]($HashRate | Measure-Object -Sum).Sum
 
-                    if(-not $Safe){break}
+                    if (-not $Safe) {break}
 
                     Start-Sleep $Interval
-                } while($HashRates.Count -lt 6)
+                } while ($HashRates.Count -lt 6)
             }
-            "claymore"
-            {
-                do
-                {
+            "claymore" {
+                do {
                     $Request = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing
                     
-                    $Data = $Request.Content.Substring($Request.Content.IndexOf("{"),$Request.Content.LastIndexOf("}")-$Request.Content.IndexOf("{")+1) | ConvertFrom-Json
+                    $Data = $Request.Content.Substring($Request.Content.IndexOf("{"), $Request.Content.LastIndexOf("}") - $Request.Content.IndexOf("{") + 1) | ConvertFrom-Json
                     
                     $HashRate = $Data.result[2].Split(";")[0]
                     $HashRate_Dual = $Data.result[4].Split(";")[0]
 
-                    if($HashRate -eq $null -or $HashRate_Dual -eq $null){$HashRates = @(); $HashRate_Dual = @(); break}
+                    if ($HashRate -eq $null -or $HashRate_Dual -eq $null) {$HashRates = @(); $HashRate_Dual = @(); break}
 
-                    if($Request.Content.Contains("ETH:")){$HashRates += [Double]$HashRate*$Multiplier; $HashRates_Dual += [Double]$HashRate_Dual*$Multiplier}
-                    else{$HashRates += [Double]$HashRate; $HashRates_Dual += [Double]$HashRate_Dual}
+                    if ($Request.Content.Contains("ETH:")) {$HashRates += [Double]$HashRate * $Multiplier; $HashRates_Dual += [Double]$HashRate_Dual * $Multiplier}
+                    else {$HashRates += [Double]$HashRate; $HashRates_Dual += [Double]$HashRate_Dual}
 
-                    if(-not $Safe){break}
+                    if (-not $Safe) {break}
 
                     Start-Sleep $Interval
-                } while($HashRates.Count -lt 6)
+                } while ($HashRates.Count -lt 6)
             }
-            "fireice"
-            {
-                do
-                {
+            "fireice" {
+                do {
                     $Request = Invoke-WebRequest "http://$($Server):$Port/h" -UseBasicParsing
                     
-                    $Data = $Request.Content -split "</tr>" -match "total*" -split "<td>" -replace "<[^>]*>",""
+                    $Data = $Request.Content -split "</tr>" -match "total*" -split "<td>" -replace "<[^>]*>", ""
                     
                     $HashRate = $Data[1]
-                    if($HashRate -eq ""){$HashRate = $Data[2]}
-                    if($HashRate -eq ""){$HashRate = $Data[3]}
+                    if ($HashRate -eq "") {$HashRate = $Data[2]}
+                    if ($HashRate -eq "") {$HashRate = $Data[3]}
 
-                    if($HashRate -eq $null){$HashRates = @(); break}
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
 
                     $HashRates += [Double]$HashRate
 
-                    if(-not $Safe){break}
+                    if (-not $Safe) {break}
 
                     Start-Sleep $Interval
-                } while($HashRates.Count -lt 6)
+                } while ($HashRates.Count -lt 6)
             }
-            "wrapper"
-            {
-                do
-                {
+            "wrapper" {
+                do {
                     $HashRate = Get-Content ".\Wrapper_$Port.txt"
                 
-                    if($HashRate -eq $null){Start-Sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.txt"}
+                    if ($HashRate -eq $null) {Start-Sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.txt"}
 
-                    if($HashRate -eq $null){$HashRates = @(); break}
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
 
                     $HashRates += [Double]$HashRate
 
-                    if(-not $Safe){break}
+                    if (-not $Safe) {break}
 
                     Start-Sleep $Interval
-                } while($HashRates.Count -lt 6)
+                } while ($HashRates.Count -lt 6)
             }
         }
 
         $HashRates_Info = $HashRates | Measure-Object -Maximum -Minimum -Average
-        if($HashRates_Info.Maximum-$HashRates_Info.Minimum -le $HashRates_Info.Average*$Delta){$HashRates_Info.Maximum}
+        if ($HashRates_Info.Maximum - $HashRates_Info.Minimum -le $HashRates_Info.Average * $Delta) {$HashRates_Info.Maximum}
 
         $HashRates_Info_Dual = $HashRates_Dual | Measure-Object -Maximum -Minimum -Average
-        if($HashRates_Info_Dual.Maximum-$HashRates_Info_Dual.Minimum -le $HashRates_Info_Dual.Average*$Delta){$HashRates_Info_Dual.Maximum}
+        if ($HashRates_Info_Dual.Maximum - $HashRates_Info_Dual.Minimum -le $HashRates_Info_Dual.Average * $Delta) {$HashRates_Info_Dual.Maximum}
     }
-    catch
-    {
+    catch {
     }
 }
 
 filter ConvertTo-Hash { 
     $Hash = $_
-    switch([math]::truncate([math]::log($Hash,[Math]::Pow(1000,1))))
-    {
-        0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000,0))}
-        1 {"{0:n2} KH" -f ($Hash / [Math]::Pow(1000,1))}
-        2 {"{0:n2} MH" -f ($Hash / [Math]::Pow(1000,2))}
-        3 {"{0:n2} GH" -f ($Hash / [Math]::Pow(1000,3))}
-        4 {"{0:n2} TH" -f ($Hash / [Math]::Pow(1000,4))}
-        Default {"{0:n2} PH" -f ($Hash / [Math]::Pow(1000,5))}
+    switch ([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1)))) {
+        0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0))}
+        1 {"{0:n2} KH" -f ($Hash / [Math]::Pow(1000, 1))}
+        2 {"{0:n2} MH" -f ($Hash / [Math]::Pow(1000, 2))}
+        3 {"{0:n2} GH" -f ($Hash / [Math]::Pow(1000, 3))}
+        4 {"{0:n2} TH" -f ($Hash / [Math]::Pow(1000, 4))}
+        Default {"{0:n2} PH" -f ($Hash / [Math]::Pow(1000, 5))}
     }
 }
 
 function Get-Combination {
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [Array]$Value, 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [Int]$SizeMax = $Value.Count, 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [Int]$SizeMin = 1
     )
 
     $Combination = [PSCustomObject]@{}
 
-    for($i = 0; $i -lt $Value.Count; $i++)
-    {
+    for ($i = 0; $i -lt $Value.Count; $i++) {
         $Combination | Add-Member @{[Math]::Pow(2, $i) = $Value[$i]}
     }
 
     $Combination_Keys = $Combination | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name
 
-    for($i = $SizeMin; $i -le $SizeMax; $i++)
-    {
-        $x = [Math]::Pow(2, $i)-1
+    for ($i = $SizeMin; $i -le $SizeMax; $i++) {
+        $x = [Math]::Pow(2, $i) - 1
 
-        while($x -le [Math]::Pow(2, $Value.Count)-1)
-        {
+        while ($x -le [Math]::Pow(2, $Value.Count) - 1) {
             [PSCustomObject]@{Combination = $Combination_Keys | Where-Object {$_ -band $x} | ForEach-Object {$Combination.$_}}
-            $smallest = ($x -band -$x)
+            $smallest = ($x -band - $x)
             $ripple = $x + $smallest
-            $new_smallest = ($ripple -band -$ripple)
-            $ones = (($new_smallest/$smallest) -shr 1) - 1
+            $new_smallest = ($ripple -band - $ripple)
+            $ones = (($new_smallest / $smallest) -shr 1) - 1
             $x = $ripple -bor $ones
         }
     }
@@ -475,11 +446,11 @@ function Get-Combination {
 
 function Start-SubProcess {
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [String]$FilePath, 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [String]$ArgumentList = "", 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [String]$WorkingDirectory = ""
     )
 
@@ -487,27 +458,28 @@ function Start-SubProcess {
         param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory)
 
         $ControllerProcess = Get-Process -Id $ControllerProcessID
-        if($ControllerProcess -eq $null){return}
+        if ($ControllerProcess -eq $null) {return}
 
         $ProcessParam = @{}
         $ProcessParam.Add("FilePath", $FilePath)
 		$ProcessParam.Add("WindowStyle", 'Minimized')
-        if($ArgumentList -ne ""){$ProcessParam.Add("ArgumentList", $ArgumentList)}
-        if($WorkingDirectory -ne ""){$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
+        if ($ArgumentList -ne "") {$ProcessParam.Add("ArgumentList", $ArgumentList)}
+        if ($WorkingDirectory -ne "") {$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
         $Process = Start-Process @ProcessParam -PassThru
-        if($Process -eq $null){[PSCustomObject]@{ProcessId = $null}; return}
+        if ($Process -eq $null) {[PSCustomObject]@{ProcessId = $null}; return
+        }
 
         [PSCustomObject]@{ProcessId = $Process.Id; ProcessHandle = $Process.Handle}
         
         $ControllerProcess.Handle | Out-Null
         $Process.Handle | Out-Null
 
-        do{if($ControllerProcess.WaitForExit(1000)){$Process.CloseMainWindow() | Out-Null}}
-        while($Process.HasExited -eq $false)
+        do {if ($ControllerProcess.WaitForExit(1000)) {$Process.CloseMainWindow() | Out-Null}}
+        while ($Process.HasExited -eq $false)
     }
 
-    do{Start-Sleep 1; $JobOutput = Receive-Job $Job}
-    while($JobOutput -eq $null)
+    do {Start-Sleep 1; $JobOutput = Receive-Job $Job}
+    while ($JobOutput -eq $null)
 
     $Process = Get-Process | Where-Object Id -EQ $JobOutput.ProcessId
     $Process.Handle | Out-Null
@@ -516,18 +488,18 @@ function Start-SubProcess {
 
 function Expand-WebRequest {
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [String]$Uri, 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [String]$Path
     )
     $FolderName_Old = ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName
     $FolderName_New = Split-Path $Path -Leaf
     $FileName = "$FolderName_New$(([IO.FileInfo](Split-Path $Uri -Leaf)).Extension)"
 
-    if(Test-Path $FileName){Remove-Item $FileName}
-    if(Test-Path "$(Split-Path $Path)\$FolderName_New"){Remove-Item "$(Split-Path $Path)\$FolderName_New" -Recurse}
-    if(Test-Path "$(Split-Path $Path)\$FolderName_Old"){Remove-Item "$(Split-Path $Path)\$FolderName_Old" -Recurse}
+    if (Test-Path $FileName) {Remove-Item $FileName}
+    if (Test-Path "$(Split-Path $Path)\$FolderName_New") {Remove-Item "$(Split-Path $Path)\$FolderName_New" -Recurse}
+    if (Test-Path "$(Split-Path $Path)\$FolderName_Old") {Remove-Item "$(Split-Path $Path)\$FolderName_Old" -Recurse}
 
     Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
     Start-Process "7z" "x $FileName -o$(Split-Path $Path)\$FolderName_Old -y -spe" -Wait
@@ -536,14 +508,14 @@ function Expand-WebRequest {
 
 function Get-Algorithm {
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [String]$Algorithm
     )
     
     $Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
 
-    $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-"," " -replace "_"," ")) -replace " "
+    $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-", " " -replace "_", " ")) -replace " "
 
-    if($Algorithms.$Algorithm){$Algorithms.$Algorithm}
-    else{$Algorithm}
+    if ($Algorithms.$Algorithm) {$Algorithms.$Algorithm}
+    else {$Algorithm}
 }
