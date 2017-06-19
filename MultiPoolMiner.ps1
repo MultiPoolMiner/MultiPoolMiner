@@ -102,42 +102,57 @@ while($true)
     #Messy...?
     $Miners = if(Test-Path "Miners"){Get-ChildItemContent "Miners" | ForEach-Object {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | 
         Where-Object {$Type.Count -eq 0 -or (Compare-Object $Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
-        Where-Object {$Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.HashRates.PSObject.Properties.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
+        Where-Object {($Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.HashRates.PSObject.Properties.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0) -and ((Compare-Object $Pools.PSObject.Properties.Name $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0)} | 
         Where-Object {$MinerName.Count -eq 0 -or (Compare-Object $MinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}}
-    $Miners = $Miners | ForEach-Object {
-        $Miner = $_
-        if((Test-Path $Miner.Path) -eq $false)
-        {
-            if((Split-Path $Miner.URI -Leaf) -eq (Split-Path $Miner.Path -Leaf))
-            {
-                New-Item (Split-Path $Miner.Path) -ItemType "Directory" | Out-Null
-                Invoke-WebRequest $Miner.URI -OutFile $_.Path -UseBasicParsing
-            }
-            elseif(([IO.FileInfo](Split-Path $_.URI -Leaf)).Extension -eq '')
-            {
-                $Path_Old = Get-PSDrive -PSProvider FileSystem | ForEach-Object {Get-ChildItem -Path $_.Root -Include (Split-Path $Miner.Path -Leaf) -Recurse -ErrorAction Ignore} | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
-                $Path_New = $Miner.Path
+    Get-Job | Receive-Job
+    if(-not (Get-Job -State Running))
+    {
+        $Miners | Where-Object {-not (Test-Path $_.Path)} | Select-Object URI,Path -Unique | Select-Object -First (($Miners.Type | Select-Object -Unique).Count*2) | ForEach-Object {
+            $Miner = $_
+            Start-Job -ArgumentList (Get-Location),$Miner.URI,$Miner.Path,(($Miners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0) {
+                param($Location,$URI,$Path,$Searchable)
 
-                if($Path_Old -ne $null)
+                Set-Location $Location
+
+                . .\Include.ps1
+
+                try
                 {
-                    if(Test-Path (Split-Path $Path_New)){(Split-Path $Path_New) | Remove-Item -Recurse -Force}
-                    (Split-Path $Path_Old) | Copy-Item -Destination (Split-Path $Path_New) -Recurse -Force
+                    if($URI -and (Split-Path $URI -Leaf) -eq (Split-Path $Path -Leaf))
+                    {
+                        New-Item (Split-Path $Path) -ItemType "Directory" | Out-Null
+                        Invoke-WebRequest $URI -OutFile $_.Path -UseBasicParsing -ErrorAction Stop
+                    }
+                    else
+                    {
+                        Expand-WebRequest $URI (Split-Path $Path) -ErrorAction Stop
+                    }
                 }
-                else
+                catch
                 {
-                    Write-Host -BackgroundColor Yellow -ForegroundColor Black "Cannot find $($Miner.Path) distributed at $($Miner.URI). "
+                    if($Searchable)
+                    {
+                        Write-Host -BackgroundColor Yellow -ForegroundColor Black "Searching for $($Path). "
+
+                        $Path_Old = Get-PSDrive -PSProvider FileSystem | ForEach-Object {Get-ChildItem -Path $_.Root -Include (Split-Path $Path -Leaf) -Recurse -ErrorAction Ignore} | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
+                        $Path_New = $Path
+                    }
+                    
+                    if($Path_Old)
+                    {
+                        if(Test-Path (Split-Path $Path_New)){(Split-Path $Path_New) | Remove-Item -Recurse -Force}
+                        (Split-Path $Path_Old) | Copy-Item -Destination (Split-Path $Path_New) -Recurse -Force
+                    }
+                    else
+                    {
+                        if($URI){Write-Host -BackgroundColor Yellow -ForegroundColor Black "Cannot find $($Path) distributed at $($URI). "}
+                        else{Write-Host -BackgroundColor Yellow -ForegroundColor Black "Cannot find $($Path). "}
+                    }
                 }
-            }
-            else
-            {
-                Expand-WebRequest $Miner.URI (Split-Path $Miner.Path)
-            }
-        }
-        else
-        {
-            $Miner
+            } | Out-Null
         }
     }
+    $Miners = $Miners | Where-Object {Test-Path $_.Path}
     if($Miners.Count -eq 0){"No Miners!" | Out-Host; Start-Sleep $Interval; continue}
     $Miners | ForEach-Object {
         $Miner = $_
