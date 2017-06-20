@@ -30,7 +30,7 @@ $Commands = [PSCustomObject]@{
     #"timetravel" = "" #Timetravel
     #"x11" = "" #X11
     #"x11evo" = "" #X11evo
-    #"x17" = "" #X17
+    "x17" = "" #X17
     #"yescrypt" = "" #Yescrypt
 }
 

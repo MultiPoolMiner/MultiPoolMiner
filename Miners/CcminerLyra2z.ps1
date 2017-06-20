@@ -1,7 +1,7 @@
 ﻿. .\Include.ps1
 
 $Path = ".\Bin\Lyra2z-NVIDIA\ccminer.exe"
-$Uri = "https://github.com/djm34/ccminer-msvc2015/releases/download/v0.0.2/ccminer.rar"
+$Uri = "https://github.com/djm34/ccminer-msvc2015/releases/download/v0.0.3/ccminer.exe"
 
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore

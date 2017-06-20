@@ -1,9 +1,7 @@
 ﻿. .\Include.ps1
 
-$Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.08/ccminer-808-x64.zip"
-
-$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
+$Path = ".\Bin\NVIDIA-SP\ccminer.exe"
+$Uri = "https://github.com/sp-hash/ccminer/releases/download/LBRYSP6/lbry-sp-mod6_2.7z"
 
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore
@@ -14,14 +12,14 @@ $Commands = [PSCustomObject]@{
     #"decred" = "" #Decred
     #"equihash" = "" #Equihash
     #"ethash" = "" #Ethash
-    "groestl" = "" #Groestl
+    #"groestl" = "" #Groestl
     #"hmq1725" = "" #hmq1725
     #"keccak" = "" #Keccak
-    #"lbry" = "" #Lbry
+    "lbry" = "" #Lbry
     #"lyra2v2" = "" #Lyra2RE2
     #"lyra2z" = "" #Lyra2z
-    "myr-gr" = "" #MyriadGroestl
-    "neoscrypt" = "" #NeoScrypt
+    #"myr-gr" = "" #MyriadGroestl
+    #"neoscrypt" = "" #NeoScrypt
     #"nist5" = "" #Nist5
     #"pascal" = "" #Pascal
     #"qubit" = "" #Qubit
