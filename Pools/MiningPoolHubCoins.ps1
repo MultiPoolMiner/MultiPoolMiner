@@ -19,6 +19,8 @@ $MiningPoolHub_Request.return | ForEach-Object {
     $MiningPoolHub_Algorithm = Get-Algorithm $_.algo
     $MiningPoolHub_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.coin_name -replace "-", " " -replace "_", " ")) -replace " "
 
+    if ($MiningPoolHub_Algorithm -eq "Sia") {$MiningPoolHub_Algorithm = "SiaClaymore"} #temp fix
+
     $Divisor = 1000000000
 
     if ((Get-Stat -Name "MiningPoolHubCoins_$($MiningPoolHub_Coin)_Profit") -eq $null) {$Stat = Set-Stat -Name "MiningPoolHubCoins_$($MiningPoolHub_Coin)_Profit" -Value ([Double]$_.profit / $Divisor * (1 - 0.05))}
