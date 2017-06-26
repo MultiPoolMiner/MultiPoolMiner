@@ -3,7 +3,7 @@
         "Type":  ["AMD","NVIDIA"],
         "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
         "Arguments":  "-epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -dpool $($Pools.Sia.Host):$($Pools.Sia.Port) -dwal $($Pools.Sia.User) -dpsw $($Pools.Sia.Pass) -dcoin sc -dcri 40",
-        "HashRates":  {"Ethash":  "$($Stats.ClaymoreDual20_Ethash_HashRate.Week)","Sia":  "$($Stats.ClaymoreDual20_Sia_HashRate.Week)"},
+        "HashRates":  {"Ethash":  "$($Stats.ClaymoreDual40_Ethash_HashRate.Week)","Sia":  "$($Stats.ClaymoreDual40_Sia_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "3333",
         "Wrap":  false
@@ -12,7 +12,34 @@
         "Type":  ["AMD","NVIDIA"],
         "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
         "Arguments":  "-epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -dpool $($Pools.Sia.Host):$($Pools.Sia.Port) -dwal $($Pools.Sia.User) -dpsw $($Pools.Sia.Pass) -dcoin sc -dcri 40",
-        "HashRates":  {"Ethash":  "$($Stats.ClaymoreDual20_Ethash_HashRate.Week)","SiaClaymore":  "$($Stats.ClaymoreDual20_Sia_HashRate.Week)"},
+        "HashRates":  {"Ethash":  "$($Stats.ClaymoreDual40_Ethash_HashRate.Week)","SiaClaymore":  "$($Stats.ClaymoreDual40_Sia_HashRate.Week)"},
+        "API":  "Claymore",
+        "Port":  "3333",
+        "Wrap":  false
+    },
+    {
+        "Type":  ["AMD","NVIDIA"],
+        "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "Arguments":  "-epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -dpool $($Pools.Decred.Host):$($Pools.Decred.Port) -dwal $($Pools.Decred.User) -dpsw $($Pools.Decred.Pass) -dcoin dcr -dcri 40",
+        "HashRates":  {"Ethash":  "$($Stats.ClaymoreDual40_Ethash_HashRate.Week)","Decred":  "$($Stats.ClaymoreDual40_Decred_HashRate.Week)"},
+        "API":  "Claymore",
+        "Port":  "3333",
+        "Wrap":  false
+    },
+    {
+        "Type":  ["AMD","NVIDIA"],
+        "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "Arguments":  "-epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -dpool $($Pools.Lbry.Host):$($Pools.Lbry.Port) -dwal $($Pools.Lbry.User) -dpsw $($Pools.Lbry.Pass) -dcoin lbc -dcri 40",
+        "HashRates":  {"Ethash":  "$($Stats.ClaymoreDual40_Ethash_HashRate.Week)","Lbry":  "$($Stats.ClaymoreDual40_Lbry_HashRate.Week)"},
+        "API":  "Claymore",
+        "Port":  "3333",
+        "Wrap":  false
+    },
+    {
+        "Type":  ["AMD","NVIDIA"],
+        "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "Arguments":  "-epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -dpool $($Pools.Pascal.Host):$($Pools.Pascal.Port) -dwal $($Pools.Pascal.User) -dpsw $($Pools.Pascal.Pass) -dcoin pasc -dcri 40",
+        "HashRates":  {"Ethash":  "$($Stats.ClaymoreDual40_Ethash_HashRate.Week)","Pascal":  "$($Stats.ClaymoreDual40_Pascal_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "3333",
         "Wrap":  false
