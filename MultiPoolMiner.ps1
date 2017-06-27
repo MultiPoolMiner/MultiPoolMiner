@@ -179,48 +179,50 @@ while ($true) {
 
     #Update the active miners
     $Miners | ForEach-Object {
-        $ActiveMiner = $ActiveMiners | 
-            Where-Object Name -EQ $_.Name | 
-            Where-Object Path -EQ $_.Path | 
-            Where-Object Arguments -EQ $_.Arguments | 
-            Where-Object Wrap -EQ $_.Wrap | 
-            Where-Object API -EQ $_.API | 
-            Where-Object Port -EQ $_.Port | 
-            Where-Object Algorithms -EQ ($_.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name)
+        $Miner = $_
+        $ActiveMiner = $ActiveMiners | Where-Object {
+            $_.Name -eq $Miner.Name -and 
+            $_.Path -eq $Miner.Path -and 
+            $_.Arguments -eq $Miner.Arguments -and 
+            $_.Wrap -eq $Miner.Wrap -and 
+            $_.API -eq $Miner.API -and 
+            $_.Port -eq $Miner.Port -and 
+            (Compare-Object $_.Algorithms ($Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name) | Measure-Object).Count -eq 0
+        }
         if ($ActiveMiner) {
-            $ActiveMiner.Type = $_.Type
-            $ActiveMiner.Index = $_.Index
-            $ActiveMiner.Device = $_.Device
-            $ActiveMiner.Profit = $_.Profit
-            $ActiveMiner.Profit_Comparison = $_.Profit_Comparison
-            $ActiveMiner.Profit_Bias = $_.Profit_Bias
+            $ActiveMiner.Type = $Miner.Type
+            $ActiveMiner.Index = $Miner.Index
+            $ActiveMiner.Device = $Miner.Device
+            $ActiveMiner.Profit = $Miner.Profit
+            $ActiveMiner.Profit_Comparison = $Miner.Profit_Comparison
+            $ActiveMiner.Profit_Bias = $Miner.Profit_Bias
             $ActiveMiner.Best = $false
             $ActiveMiner.Best_Comparison = $false
         }
         else {
             $ActiveMiners += [PSCustomObject]@{
-                Name              = $_.Name
-                Path              = $_.Path
-                Arguments         = $_.Arguments
-                Wrap              = $_.Wrap
-                API               = $_.API
-                Port              = $_.Port
-                Algorithms        = $_.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name
-                Type              = $_.Type
-                Index             = $_.Index
-                Device            = $_.Device
-                Profit            = $_.Profit
-                Profit_Comparison = $_.Profit_Comparison
-                Profit_Bias       = $_.Profit_Bias
-                Best              = $false
-                Best_Comparison   = $false
-                Process           = $null
-                New               = $false
-                Active            = [TimeSpan]0
-                Activated         = 0
-                Status            = ""
-                HashRate          = 0
-                Benchmarked       = 0
+                Name                 = $Miner.Name
+                Path                 = $Miner.Path
+                Arguments            = $Miner.Arguments
+                Wrap                 = $Miner.Wrap
+                API                  = $Miner.API
+                Port                 = $Miner.Port
+                Algorithms           = $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name
+                Type                 = $Miner.Type
+                Index                = $Miner.Index
+                Device               = $Miner.Device
+                Profit               = $Miner.Profit
+                Profit_Comparison    = $Miner.Profit_Comparison
+                Profit_Bias          = $Miner.Profit_Bias
+                Best                 = $false
+                Best_Comparison      = $false
+                Process              = $null
+                New                  = $false
+                Active               = [TimeSpan]0
+                Activated            = 0
+                Status               = ""
+                HashRate             = 0
+                Benchmarked          = 0
             }
         }
     }
