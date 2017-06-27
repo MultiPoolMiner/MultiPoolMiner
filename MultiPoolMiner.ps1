@@ -313,7 +313,7 @@ while ($true) {
     }
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
-    for (int $i =0; $i -lt 10; $i++) {
+    for ($i =0; $i -lt 10; $i++) {
         Get-Job | Receive-Job
         Start-Sleep ($Interval / 10)
     }
