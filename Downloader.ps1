@@ -49,3 +49,5 @@ $DownloadList | ForEach-Object {
         }
     }
 }
+
+Write-Progress -Activity "Downloader" -Completed
