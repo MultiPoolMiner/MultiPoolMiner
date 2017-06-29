@@ -4,7 +4,7 @@ $Path = ".\Bin\NeoScrypt-AMD\nsgminer.exe"
 $Uri = "https://github.com/ghostlander/nsgminer/releases/download/nsgminer-v0.9.2/nsgminer-win64-0.9.2.zip"
 
 $Commands = [PSCustomObject]@{
-    "neoscrypt" = " --gpu-threads 1 --worksize 64 --intensity 13 --thread-concurrency 64" #NeoScrypt
+    "neoscrypt" = " --gpu-threads 1 --worksize 64 --intensity 11 --thread-concurrency 64" #NeoScrypt
 }
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
