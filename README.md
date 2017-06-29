@@ -39,9 +39,11 @@ https://github.com/nicehash/excavator/releases
 Frequently Asked Questions (v1.8):
 
 Q1. A miner crashes my computer or does not work correctly. I want to exclude it from mining/benchmarking. What should I do?
+
 A1. Simply locate the configuration file for that particular miner in the /Miners folder and delete the file or exclude that algorithm entirely (see Q3 below). These have either .txt or .ps1 file extensions. Please note that some of the miners have multiple config files and/or can mine multiple coins/algorithms.
 
 Q2. Miner says CL device is missing (or not found). How do I resolve this issue?
+
 A2. You most likely have NVIDIA cards in your rig. Open the start.bat in a text editor and look for ‘-type amd,nvidia,cpu’ and change it to ‘-type nvidia,cpu’. This will disable the AMD exclusive miners and save you plenty of time when benchmarking. You can also exclude the cpu option if you don’t want to mine with your processor.
 
 Q3. I only want to mine certain algorithms even if they are not the most profitable. I want to exclude algorithms. How do I do that?
