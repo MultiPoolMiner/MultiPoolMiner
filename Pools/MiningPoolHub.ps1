@@ -34,7 +34,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 Info          = $MiningPoolHub_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
-                MarginOfError = $Stat.Fluctuation
+                MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
                 Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$Location*"} | Select-Object -First 1
                 Port          = $MiningPoolHub_Port

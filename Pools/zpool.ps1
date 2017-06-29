@@ -37,7 +37,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProp
             Info          = $Zpool_Coin
             Price         = $Stat.Live
             StablePrice   = $Stat.Week
-            MarginOfError = $Stat.Fluctuation
+            MarginOfError = $Stat.Week_Fluctuation
             Protocol      = "stratum+tcp"
             Host          = $Zpool_Host
             Port          = $Zpool_Port
