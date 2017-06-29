@@ -178,6 +178,14 @@ while ($true) {
     }
 
     #Update the active miners
+    $ActiveMiners | ForEach-Object {
+        $_.Profit = 0
+        $_.Profit_Comparison = 0
+        $_.Profit_MarginOfError = 0
+        $_.Profit_Bias = 0
+        $_.Best = $false
+        $_.Best_Comparison = $false
+    }
     $Miners | ForEach-Object {
         $Miner = $_
         $ActiveMiner = $ActiveMiners | Where-Object {
@@ -196,8 +204,6 @@ while ($true) {
             $ActiveMiner.Profit = $Miner.Profit
             $ActiveMiner.Profit_Comparison = $Miner.Profit_Comparison
             $ActiveMiner.Profit_Bias = $Miner.Profit_Bias
-            $ActiveMiner.Best = $false
-            $ActiveMiner.Best_Comparison = $false
         }
         else {
             $ActiveMiners += [PSCustomObject]@{
