@@ -118,6 +118,7 @@ while ($true) {
         $Miner_Pools_Comparison = [PSCustomObject]@{}
         $Miner_Profits = [PSCustomObject]@{}
         $Miner_Profits_Comparison = [PSCustomObject]@{}
+        $Miner_Profits_MarginOfError = [PSCustomObject]@{}
         $Miner_Profits_Bias = [PSCustomObject]@{}
 
         $Miner_Types = $Miner.Type | Select-Object -Unique
@@ -135,6 +136,12 @@ while ($true) {
         $Miner_Profit = [Double]($Miner_Profits.PSObject.Properties.Value | Measure-Object -Sum).Sum
         $Miner_Profit_Comparison = [Double]($Miner_Profits_Comparison.PSObject.Properties.Value | Measure-Object -Sum).Sum
         $Miner_Profit_Bias = [Double]($Miner_Profits_Bias.PSObject.Properties.Value | Measure-Object -Sum).Sum
+
+        $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
+            $Miner_Profits_MarginOfError | Add-Member $_ ([Double]$Pools.$_.MarginOfError * (& {if ($Miner_Profit) {([Double]$Miner.HashRates.$_ * $Pools_Comparison.$_.Price) / $Miner_Profit}else {1}}))
+        }
+        
+        $Miner_Profit_MarginOfError = [Double]($Miner_Profits_MarginOfError.PSObject.Properties.Value | Measure-Object -Sum).Sum
         
         $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
             if (-not [String]$Miner.HashRates.$_) {
@@ -144,10 +151,11 @@ while ($true) {
                 $Miner_Profits_Bias.$_ = $null
                 $Miner_Profit = $null
                 $Miner_Profit_Comparison = $null
+                $Miner_Profits_MarginOfError = $null
                 $Miner_Profit_Bias = $null
             }
         }
-
+        
         if ($Miner_Types -eq $null) {$Miner_Types = $Miners.Type | Select-Object -Unique}
         if ($Miner_Indexes -eq $null) {$Miner_Indexes = $Miners.Index | Select-Object -Unique}
         
@@ -162,6 +170,7 @@ while ($true) {
         $Miner | Add-Member Profits_Bias $Miner_Profits_Bias
         $Miner | Add-Member Profit $Miner_Profit
         $Miner | Add-Member Profit_Comparison $Miner_Profit_Comparison
+        $Miner | Add-Member Profit_MarginOfError $Miner_Profit_MarginOfError
         $Miner | Add-Member Profit_Bias $Miner_Profit_Bias
         
         $Miner | Add-Member Type $Miner_Types -Force
@@ -203,6 +212,7 @@ while ($true) {
             $ActiveMiner.Device = $Miner.Device
             $ActiveMiner.Profit = $Miner.Profit
             $ActiveMiner.Profit_Comparison = $Miner.Profit_Comparison
+            $ActiveMiner.Profit_MarginOfError = $Miner.Profit_MarginOfError
             $ActiveMiner.Profit_Bias = $Miner.Profit_Bias
         }
         else {
@@ -219,6 +229,7 @@ while ($true) {
                 Device               = $Miner.Device
                 Profit               = $Miner.Profit
                 Profit_Comparison    = $Miner.Profit_Comparison
+                Profit_MarginOfError = $Miner.Profit_MarginOfError
                 Profit_Bias          = $Miner.Profit_Bias
                 Best                 = $false
                 Best_Comparison      = $false
@@ -304,24 +315,25 @@ while ($true) {
             
         $BestMiners_Combo_Stat = Set-Stat -Name "Profit" -Value ($BestMiners_Combo | Measure-Object Profit -Sum).Sum
 
-        $MinerComparisons_Profit = 
-        $BestMiners_Combo_Stat.Week, 
-        ($BestMiners_Combo_Comparison | Measure-Object Profit_Comparison -Sum).Sum
+        $MinerComparisons_Profit = $BestMiners_Combo_Stat.Week, ($BestMiners_Combo_Comparison | Measure-Object Profit_Comparison -Sum).Sum
+
+        $MinerComparisons_MarginOfError = $BestMiners_Combo_Stat.Week_Fluctuation, ($BestMiners_Combo_Comparison | ForEach-Object {$_.Profit_MarginOfError * (& {if ($MinerComparisons_Profit[1]) {$_.Profit_Comparison / $MinerComparisons_Profit[1]}else {1}})} | Measure-Object -Sum).Sum
 
         $Currency | ForEach-Object {
-            $MinerComparisons[0] | Add-Member $_ ("{0:N5}" -f ($MinerComparisons_Profit[0] * $Rates.$_))
-            $MinerComparisons[1] | Add-Member $_ ("{0:N5}" -f ($MinerComparisons_Profit[1] * $Rates.$_))
+            $MinerComparisons[0] | Add-Member $_ ("{0:N5} ±{1:P0}" -f ($MinerComparisons_Profit[0] * $Rates.$_), $MinerComparisons_MarginOfError[0])
+            $MinerComparisons[1] | Add-Member $_ ("{0:N5} ±{1:P0}" -f ($MinerComparisons_Profit[1] * $Rates.$_), $MinerComparisons_MarginOfError[1])
         }
 
         if ($MinerComparisons_Profit[0] -gt $MinerComparisons_Profit[1]) {
-            Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is $([Math]::Round((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])*100))% more profitable: "
+            $MinerComparisons_Range = ($MinerComparisons_MarginOfError | Measure -Average | Select -ExpandProperty Average),(($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1]) | Measure -Minimum | Select -ExpandProperty Minimum
+            Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is between $([Math]::Round((((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])-$MinerComparisons_Range)*100)))% and $([Math]::Round((((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])+$MinerComparisons_Range)*100)))% more profitable than the fastest miner: "
         }
 
         $MinerComparisons | Out-Host
     }
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
-    for ($i =0; $i -lt 10; $i++) {
+    for ($i = 0; $i -lt 10; $i++) {
         Get-Job | Receive-Job
         Start-Sleep ($Interval / 10)
     }
