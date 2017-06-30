@@ -204,7 +204,7 @@ while ($true) {
             $_.Wrap -eq $Miner.Wrap -and 
             $_.API -eq $Miner.API -and 
             $_.Port -eq $Miner.Port -and 
-            (Compare-Object $_.Algorithms ($Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name) | Measure-Object).Count -eq 0
+            (Compare-Object $_.Algorithm ($Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name) | Measure-Object).Count -eq 0
         }
         if ($ActiveMiner) {
             $ActiveMiner.Type = $Miner.Type
@@ -214,6 +214,7 @@ while ($true) {
             $ActiveMiner.Profit_Comparison = $Miner.Profit_Comparison
             $ActiveMiner.Profit_MarginOfError = $Miner.Profit_MarginOfError
             $ActiveMiner.Profit_Bias = $Miner.Profit_Bias
+            $ActiveMiner.Speed = $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach {$Miner.HashRates.$_}
         }
         else {
             $ActiveMiners += [PSCustomObject]@{
@@ -223,7 +224,7 @@ while ($true) {
                 Wrap                 = $Miner.Wrap
                 API                  = $Miner.API
                 Port                 = $Miner.Port
-                Algorithms           = $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name
+                Algorithm            = $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name
                 Type                 = $Miner.Type
                 Index                = $Miner.Index
                 Device               = $Miner.Device
@@ -231,6 +232,8 @@ while ($true) {
                 Profit_Comparison    = $Miner.Profit_Comparison
                 Profit_MarginOfError = $Miner.Profit_MarginOfError
                 Profit_Bias          = $Miner.Profit_Bias
+                Speed                = $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach {$Miner.HashRates.$_}
+                Speed_Live           = 0
                 Best                 = $false
                 Best_Comparison      = $false
                 Process              = $null
@@ -301,7 +304,7 @@ while ($true) {
     
     #Display active miners list
     $ActiveMiners | Where-Object Activated -GT 0 | Sort-Object -Descending Status, {if ($_.Process -eq $null) {[DateTime]0}else {$_.Process.StartTime}} | Select-Object -First (1 + 6 + 6) | Format-Table -Wrap -GroupBy Status (
-        @{Label = "Speed"; Expression = {$_.HashRate | ForEach-Object {"$($_ | ConvertTo-Hash)/s"}}; Align = 'right'}, 
+        @{Label = "Speed"; Expression = {$_.Speed_Live | ForEach-Object {"$($_ | ConvertTo-Hash)/s"}}; Align = 'right'}, 
         @{Label = "Active"; Expression = {"{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f $(if ($_.Process -eq $null) {$_.Active}else {if ($_.Process.ExitTime -gt $_.Process.StartTime) {($_.Active + ($_.Process.ExitTime - $_.Process.StartTime))}else {($_.Active + ((Get-Date) - $_.Process.StartTime))}})}}, 
         @{Label = "Launched"; Expression = {Switch ($_.Activated) {0 {"Never"} 1 {"Once"} Default {"$_ Times"}}}}, 
         @{Label = "Command"; Expression = {"$($_.Path.TrimStart((Convert-Path ".\"))) $($_.Arguments)"}}
@@ -311,7 +314,7 @@ while ($true) {
     if (($BestMiners_Combo | Where-Object Profit -EQ $null | Measure-Object).Count -eq 0) {
         $MinerComparisons = 
         [PSCustomObject]@{"Miner" = "MultiPoolMiner"}, 
-        [PSCustomObject]@{"Miner" = $BestMiners_Combo_Comparison | ForEach-Object {"$($_.Name)-$($_.HashRates.PSObject.Properties.Name -join "/")"}}
+        [PSCustomObject]@{"Miner" = $BestMiners_Combo_Comparison | ForEach-Object {"$($_.Name)-$($_.Algorithm -join "/")"}}
             
         $BestMiners_Combo_Stat = Set-Stat -Name "Profit" -Value ($BestMiners_Combo | Measure-Object Profit -Sum).Sum
 
@@ -325,7 +328,7 @@ while ($true) {
         }
 
         if ($MinerComparisons_Profit[0] -gt $MinerComparisons_Profit[1]) {
-            $MinerComparisons_Range = ($MinerComparisons_MarginOfError | Measure -Average | Select -ExpandProperty Average),(($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1]) | Measure -Minimum | Select -ExpandProperty Minimum
+            $MinerComparisons_Range = ($MinerComparisons_MarginOfError | Measure -Average | Select -ExpandProperty Average), (($MinerComparisons_Profit[0] - $MinerComparisons_Profit[1]) / $MinerComparisons_Profit[1]) | Measure -Minimum | Select -ExpandProperty Minimum
             Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is between $([Math]::Round((((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])-$MinerComparisons_Range)*100)))% and $([Math]::Round((((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])+$MinerComparisons_Range)*100)))% more profitable than the fastest miner: "
         }
 
@@ -340,7 +343,7 @@ while ($true) {
 
     #Save current hash rates
     $ActiveMiners | ForEach-Object {
-        $_.HashRate = 0
+        $_.Speed_Live = 0
         $Miner_HashRates = $null
 
         if ($_.New) {$_.Benchmarked++}
@@ -351,11 +354,11 @@ while ($true) {
         else {
             $Miner_HashRates = Get-HashRate $_.API $_.Port ($_.New -and $_.Benchmarked -lt 3)
 
-            $_.HashRate = $Miner_HashRates | Select-Object -First $_.Algorithms.Count
+            $_.Speed_Live = $Miner_HashRates | Select-Object -First $_.Algorithm.Count
             
-            if ($Miner_HashRates.Count -ge $_.Algorithms.Count) {
-                for ($i = 0; $i -lt $_.Algorithms.Count; $i++) {
-                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select-Object -Index $i)_HashRate" -Value ($Miner_HashRates | Select-Object -Index $i)
+            if ($Miner_HashRates.Count -ge $_.Algorithm.Count) {
+                for ($i = 0; $i -lt $_.Algorithm.Count; $i++) {
+                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate" -Value ($Miner_HashRates | Select-Object -Index $i)
                 }
 
                 $_.New = $false
@@ -364,9 +367,9 @@ while ($true) {
 
         #Benchmark timeout
         if ($_.Benchmarked -ge 6 -or ($_.Benchmarked -ge 2 -and $_.Activated -ge 2)) {
-            for ($i = $Miner_HashRates.Count; $i -lt $_.Algorithms.Count; $i++) {
-                if ((Get-Stat "$($_.Name)_$($_.Algorithms | Select-Object -Index $i)_HashRate") -eq $null) {
-                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithms | Select-Object -Index $i)_HashRate" -Value 0
+            for ($i = $Miner_HashRates.Count; $i -lt $_.Algorithm.Count; $i++) {
+                if ((Get-Stat "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate") -eq $null) {
+                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate" -Value 0
                 }
             }
         }
