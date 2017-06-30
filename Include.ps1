@@ -1,10 +1,10 @@
 ﻿function Set-Stat {
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [String]$Name, 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [Double]$Value, 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [DateTime]$Date = (Get-Date)
     )
 
@@ -15,21 +15,21 @@
     $Stat = [PSCustomObject]@{
         Live = $Value
         Minute = $Value
-        Minute_Fluctuation = 1/2
+        Minute_Fluctuation = 1 / 2
         Minute_5 = $Value
-        Minute_5_Fluctuation = 1/2
+        Minute_5_Fluctuation = 1 / 2
         Minute_10 = $Value
-        Minute_10_Fluctuation = 1/2
+        Minute_10_Fluctuation = 1 / 2
         Hour = $Value
-        Hour_Fluctuation = 1/2
+        Hour_Fluctuation = 1 / 2
         Day = $Value
-        Day_Fluctuation = 1/2
+        Day_Fluctuation = 1 / 2
         Week = $Value
-        Week_Fluctuation = 1/2
+        Week_Fluctuation = 1 / 2
         Updated = $Date
     }
 
-    if(Test-Path $Path){$Stat = Get-Content $Path | ConvertFrom-Json}
+    if (Test-Path $Path) {$Stat = Get-Content $Path | ConvertFrom-Json}
 
     $Stat = [PSCustomObject]@{
         Live = [Double]$Stat.Live
@@ -48,37 +48,37 @@
         Updated = [DateTime]$Stat.Updated
     }
     
-    $Span_Minute = [Math]::Min(($Date-$Stat.Updated).TotalMinutes,1)
-    $Span_Minute_5 = [Math]::Min((($Date-$Stat.Updated).TotalMinutes/5),1)
-    $Span_Minute_10 = [Math]::Min((($Date-$Stat.Updated).TotalMinutes/10),1)
-    $Span_Hour = [Math]::Min(($Date-$Stat.Updated).TotalHours,1)
-    $Span_Day = [Math]::Min(($Date-$Stat.Updated).TotalDays,1)
-    $Span_Week = [Math]::Min((($Date-$Stat.Updated).TotalDays/7),1)
+    $Span_Minute = [Math]::Min(($Date - $Stat.Updated).TotalMinutes, 1)
+    $Span_Minute_5 = [Math]::Min((($Date - $Stat.Updated).TotalMinutes / 5), 1)
+    $Span_Minute_10 = [Math]::Min((($Date - $Stat.Updated).TotalMinutes / 10), 1)
+    $Span_Hour = [Math]::Min(($Date - $Stat.Updated).TotalHours, 1)
+    $Span_Day = [Math]::Min(($Date - $Stat.Updated).TotalDays, 1)
+    $Span_Week = [Math]::Min((($Date - $Stat.Updated).TotalDays / 7), 1)
 
     $Stat = [PSCustomObject]@{
         Live = $Value
-        Minute = ((1-$Span_Minute)*$Stat.Minute)+($Span_Minute*$Value)
-        Minute_Fluctuation = ((1-$Span_Minute)*$Stat.Minute_Fluctuation)+
-            ($Span_Minute*([Math]::Abs($Value-$Stat.Minute)/[Math]::Max([Math]::Abs($Stat.Minute),$SmallestValue)))
-        Minute_5 = ((1-$Span_Minute_5)*$Stat.Minute_5)+($Span_Minute_5*$Value)
-        Minute_5_Fluctuation = ((1-$Span_Minute_5)*$Stat.Minute_5_Fluctuation)+
-            ($Span_Minute_5*([Math]::Abs($Value-$Stat.Minute_5)/[Math]::Max([Math]::Abs($Stat.Minute_5),$SmallestValue)))
-        Minute_10 = ((1-$Span_Minute_10)*$Stat.Minute_10)+($Span_Minute_10*$Value)
-        Minute_10_Fluctuation = ((1-$Span_Minute_10)*$Stat.Minute_10_Fluctuation)+
-            ($Span_Minute_10*([Math]::Abs($Value-$Stat.Minute_10)/[Math]::Max([Math]::Abs($Stat.Minute_10),$SmallestValue)))
-        Hour = ((1-$Span_Hour)*$Stat.Hour)+($Span_Hour*$Value)
-        Hour_Fluctuation = ((1-$Span_Hour)*$Stat.Hour_Fluctuation)+
-            ($Span_Hour*([Math]::Abs($Value-$Stat.Hour)/[Math]::Max([Math]::Abs($Stat.Hour),$SmallestValue)))
-        Day = ((1-$Span_Day)*$Stat.Day)+($Span_Day*$Value)
-        Day_Fluctuation = ((1-$Span_Day)*$Stat.Day_Fluctuation)+
-            ($Span_Day*([Math]::Abs($Value-$Stat.Day)/[Math]::Max([Math]::Abs($Stat.Day),$SmallestValue)))
-        Week = ((1-$Span_Week)*$Stat.Week)+($Span_Week*$Value)
-        Week_Fluctuation = ((1-$Span_Week)*$Stat.Week_Fluctuation)+
-            ($Span_Week*([Math]::Abs($Value-$Stat.Week)/[Math]::Max([Math]::Abs($Stat.Week),$SmallestValue)))
+        Minute = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
+        Minute_Fluctuation = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + 
+        ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
+        Minute_5 = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
+        Minute_5_Fluctuation = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + 
+        ($Span_Minute_5 * ([Math]::Abs($Value - $Stat.Minute_5) / [Math]::Max([Math]::Abs($Stat.Minute_5), $SmallestValue)))
+        Minute_10 = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
+        Minute_10_Fluctuation = ((1 - $Span_Minute_10) * $Stat.Minute_10_Fluctuation) + 
+        ($Span_Minute_10 * ([Math]::Abs($Value - $Stat.Minute_10) / [Math]::Max([Math]::Abs($Stat.Minute_10), $SmallestValue)))
+        Hour = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
+        Hour_Fluctuation = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + 
+        ($Span_Hour * ([Math]::Abs($Value - $Stat.Hour) / [Math]::Max([Math]::Abs($Stat.Hour), $SmallestValue)))
+        Day = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
+        Day_Fluctuation = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + 
+        ($Span_Day * ([Math]::Abs($Value - $Stat.Day) / [Math]::Max([Math]::Abs($Stat.Day), $SmallestValue)))
+        Week = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
+        Week_Fluctuation = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + 
+        ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
         Updated = $Date
     }
 
-    if(-not (Test-Path "Stats")){New-Item "Stats" -ItemType "directory"}
+    if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory"}
     [PSCustomObject]@{
         Live = [Decimal]$Stat.Live
         Minute = [Decimal]$Stat.Minute
@@ -101,28 +101,28 @@
 
 function Get-Stat {
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [String]$Name
     )
     
-    if(-not (Test-Path "Stats")){New-Item "Stats" -ItemType "directory"}
+    if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory"}
     Get-ChildItem "Stats" | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
 }
 
 function Get-ChildItemContent {
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [String]$Path
     )
 
     $ChildItems = Get-ChildItem $Path | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
-        if($_.Extension -eq ".ps1") {
-           $Content = &$_.FullName
+        if ($_.Extension -eq ".ps1") {
+            $Content = &$_.FullName
         }
         else {
-           $Content = $_ | Get-Content | ConvertFrom-Json
+            $Content = $_ | Get-Content | ConvertFrom-Json
         }
         $Content | ForEach-Object {
             [PSCustomObject]@{Name = $Name; Content = $_}
@@ -133,14 +133,14 @@ function Get-ChildItemContent {
         $Item = $_
         $ItemKeys = $Item.Content.PSObject.Properties.Name.Clone()
         $ItemKeys | ForEach-Object {
-            if($Item.Content.$_ -is [String]) {
+            if ($Item.Content.$_ -is [String]) {
                 $Item.Content.$_ = Invoke-Expression "`"$($Item.Content.$_)`""
             }
-            elseif($Item.Content.$_ -is [PSCustomObject]) {
+            elseif ($Item.Content.$_ -is [PSCustomObject]) {
                 $Property = $Item.Content.$_
                 $PropertyKeys = $Property.PSObject.Properties.Name
                 $PropertyKeys | ForEach-Object {
-                    if($Property.$_ -is [String]) {
+                    if ($Property.$_ -is [String]) {
                         $Property.$_ = Invoke-Expression "`"$($Property.$_)`""
                     }
                 }
@@ -173,13 +173,13 @@ function Set-Algorithm {
 #>
 function Get-HashRate {
     param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [String]$API, 
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [Int]$Port, 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [Object]$Parameters = @{}, 
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         [Bool]$Safe = $false
     )
     
@@ -192,9 +192,9 @@ function Get-HashRate {
     $HashRates_Dual = @()
 
     try {
-        switch($API) {
+        switch ($API) {
             "xgminer" {
-                $Message = @{command="summary"; parameter=""} | ConvertTo-Json -Compress
+                $Message = @{command = "summary"; parameter = ""} | ConvertTo-Json -Compress
             
                 do {
                     $Client = New-Object System.Net.Sockets.TcpClient $server, $port
@@ -205,30 +205,30 @@ function Get-HashRate {
                     $Writer.WriteLine($Message)
                     $Request = $Reader.ReadLine()
 
-                    $Data = $Request.Substring($Request.IndexOf("{"),$Request.LastIndexOf("}")-$Request.IndexOf("{")+1) -replace " ","_" | ConvertFrom-Json
+                    $Data = $Request.Substring($Request.IndexOf("{"), $Request.LastIndexOf("}") - $Request.IndexOf("{") + 1) -replace " ", "_" | ConvertFrom-Json
 
-                    $HashRate = if($Data.SUMMARY.HS_5s -ne $null){[Double]$Data.SUMMARY.HS_5s*[Math]::Pow($Multiplier,0)}
-                        elseif($Data.SUMMARY.KHS_5s -ne $null){[Double]$Data.SUMMARY.KHS_5s*[Math]::Pow($Multiplier,1)}
-                        elseif($Data.SUMMARY.MHS_5s -ne $null){[Double]$Data.SUMMARY.MHS_5s*[Math]::Pow($Multiplier,2)}
-                        elseif($Data.SUMMARY.GHS_5s -ne $null){[Double]$Data.SUMMARY.GHS_5s*[Math]::Pow($Multiplier,3)}
-                        elseif($Data.SUMMARY.THS_5s -ne $null){[Double]$Data.SUMMARY.THS_5s*[Math]::Pow($Multiplier,4)}
-                        elseif($Data.SUMMARY.PHS_5s -ne $null){[Double]$Data.SUMMARY.PHS_5s*[Math]::Pow($Multiplier,5)}
+                    $HashRate = if ($Data.SUMMARY.HS_5s -ne $null) {[Double]$Data.SUMMARY.HS_5s * [Math]::Pow($Multiplier, 0)}
+                    elseif ($Data.SUMMARY.KHS_5s -ne $null) {[Double]$Data.SUMMARY.KHS_5s * [Math]::Pow($Multiplier, 1)}
+                    elseif ($Data.SUMMARY.MHS_5s -ne $null) {[Double]$Data.SUMMARY.MHS_5s * [Math]::Pow($Multiplier, 2)}
+                    elseif ($Data.SUMMARY.GHS_5s -ne $null) {[Double]$Data.SUMMARY.GHS_5s * [Math]::Pow($Multiplier, 3)}
+                    elseif ($Data.SUMMARY.THS_5s -ne $null) {[Double]$Data.SUMMARY.THS_5s * [Math]::Pow($Multiplier, 4)}
+                    elseif ($Data.SUMMARY.PHS_5s -ne $null) {[Double]$Data.SUMMARY.PHS_5s * [Math]::Pow($Multiplier, 5)}
 
-                    if($HashRate -ne $null) {
+                    if ($HashRate -ne $null) {
                         $HashRates += $HashRate
-                        if(-not $Safe){break}
+                        if (-not $Safe) {break}
                     }
 
-                    $HashRate = if($Data.SUMMARY.HS_av -ne $null){[Double]$Data.SUMMARY.HS_av*[Math]::Pow($Multiplier,0)}
-                        elseif($Data.SUMMARY.KHS_av -ne $null){[Double]$Data.SUMMARY.KHS_av*[Math]::Pow($Multiplier,1)}
-                        elseif($Data.SUMMARY.MHS_av -ne $null){[Double]$Data.SUMMARY.MHS_av*[Math]::Pow($Multiplier,2)}
-                        elseif($Data.SUMMARY.GHS_av -ne $null){[Double]$Data.SUMMARY.GHS_av*[Math]::Pow($Multiplier,3)}
-                        elseif($Data.SUMMARY.THS_av -ne $null){[Double]$Data.SUMMARY.THS_av*[Math]::Pow($Multiplier,4)}
-                        elseif($Data.SUMMARY.PHS_av -ne $null){[Double]$Data.SUMMARY.PHS_av*[Math]::Pow($Multiplier,5)}
+                    $HashRate = if ($Data.SUMMARY.HS_av -ne $null) {[Double]$Data.SUMMARY.HS_av * [Math]::Pow($Multiplier, 0)}
+                    elseif ($Data.SUMMARY.KHS_av -ne $null) {[Double]$Data.SUMMARY.KHS_av * [Math]::Pow($Multiplier, 1)}
+                    elseif ($Data.SUMMARY.MHS_av -ne $null) {[Double]$Data.SUMMARY.MHS_av * [Math]::Pow($Multiplier, 2)}
+                    elseif ($Data.SUMMARY.GHS_av -ne $null) {[Double]$Data.SUMMARY.GHS_av * [Math]::Pow($Multiplier, 3)}
+                    elseif ($Data.SUMMARY.THS_av -ne $null) {[Double]$Data.SUMMARY.THS_av * [Math]::Pow($Multiplier, 4)}
+                    elseif ($Data.SUMMARY.PHS_av -ne $null) {[Double]$Data.SUMMARY.PHS_av * [Math]::Pow($Multiplier, 5)}
 
-                    if($HashRate -eq $null){$HashRates = @(); break}
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
                     $HashRates += $HashRate
-                    if(-not $Safe) {break}
+                    if (-not $Safe) {break}
 
                     Start-Sleep $Interval
                 } while ($HashRates.Count -lt 6)
@@ -462,11 +462,13 @@ function Start-SubProcess {
 
         $ProcessParam = @{}
         $ProcessParam.Add("FilePath", $FilePath)
-		$ProcessParam.Add("WindowStyle", 'Minimized')
+        $ProcessParam.Add("WindowStyle", 'Minimized')
         if ($ArgumentList -ne "") {$ProcessParam.Add("ArgumentList", $ArgumentList)}
         if ($WorkingDirectory -ne "") {$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
         $Process = Start-Process @ProcessParam -PassThru
-        if ($Process -eq $null) {[PSCustomObject]@{ProcessId = $null}; return
+        if ($Process -eq $null) {
+            [PSCustomObject]@{ProcessId = $null}
+            return        
         }
 
         [PSCustomObject]@{ProcessId = $Process.Id; ProcessHandle = $Process.Handle}
@@ -493,6 +495,7 @@ function Expand-WebRequest {
         [Parameter(Mandatory = $true)]
         [String]$Path
     )
+
     $FolderName_Old = ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName
     $FolderName_New = Split-Path $Path -Leaf
     $FileName = "$FolderName_New$(([IO.FileInfo](Split-Path $Uri -Leaf)).Extension)"
@@ -503,7 +506,13 @@ function Expand-WebRequest {
 
     Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
     Start-Process "7z" "x $FileName -o$(Split-Path $Path)\$FolderName_Old -y -spe" -Wait
-    Rename-Item "$(Split-Path $Path)\$FolderName_Old" "$FolderName_New"
+    if (Get-ChildItem "$(Split-Path $Path)\$FolderName_Old" | Where-Object PSIsContainer -EQ $false) {
+        Rename-Item "$(Split-Path $Path)\$FolderName_Old" "$FolderName_New"
+    }
+    else {
+        Get-ChildItem "$(Split-Path $Path)\$FolderName_Old" | Where-Object PSIsContainer -EQ $true | ForEach-Object {Move-Item "$(Split-Path $Path)\$FolderName_Old\$_" "$(Split-Path $Path)\$FolderName_New"}
+        Remove-Item "$(Split-Path $Path)\$FolderName_Old"
+    }
 }
 
 function Get-Algorithm {

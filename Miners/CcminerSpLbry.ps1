@@ -1,6 +1,6 @@
 ﻿. .\Include.ps1
 
-$Path = ".\Bin\NVIDIA-SP\ccminer.exe"
+$Path = ".\Bin\NVIDIA-SPLbry\ccminer.exe"
 $Uri = "https://github.com/sp-hash/ccminer/releases/download/LBRYSP6/lbry-sp-mod6_2.7z"
 
 $Commands = [PSCustomObject]@{

@@ -9,9 +9,6 @@ $Uri = "https://github.com/fireice-uk/xmr-stak-amd/releases/download/v1.1.0-1.4.
 if ((Test-Path $Path) -eq $false) {Expand-WebRequest $Uri (Split-Path $Path) -ErrorAction SilentlyContinue}
 if ((Test-Path $Path_Threads) -eq $false) {Copy-Item (Split-Path $Path) (Split-Path $Path_Threads) -Recurse -Force -ErrorAction SilentlyContinue}
 
-if ((Test-Path $Path) -eq $false) {Move-Item "$(Split-Path $Path)\xmr-stak-amd\*" (Split-Path $Path) -Force -ErrorAction SilentlyContinue} #temp fix
-if ((Test-Path $Path_Threads) -eq $false) {Move-Item "$(Split-Path $Path_Threads)\xmr-stak-amd\*" (Split-Path $Path_Threads) -Force -ErrorAction SilentlyContinue} #temp fix
-
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 $Port = 3336 + ($ThreadIndex * 10000)
 

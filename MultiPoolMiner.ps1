@@ -214,7 +214,7 @@ while ($true) {
             $ActiveMiner.Profit_Comparison = $Miner.Profit_Comparison
             $ActiveMiner.Profit_MarginOfError = $Miner.Profit_MarginOfError
             $ActiveMiner.Profit_Bias = $Miner.Profit_Bias
-            $ActiveMiner.Speed = $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach {$Miner.HashRates.$_}
+            $ActiveMiner.Speed = $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Miner.HashRates.$_}
         }
         else {
             $ActiveMiners += [PSCustomObject]@{
@@ -232,7 +232,7 @@ while ($true) {
                 Profit_Comparison    = $Miner.Profit_Comparison
                 Profit_MarginOfError = $Miner.Profit_MarginOfError
                 Profit_Bias          = $Miner.Profit_Bias
-                Speed                = $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach {$Miner.HashRates.$_}
+                Speed                = $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Miner.HashRates.$_}
                 Speed_Live           = 0
                 Best                 = $false
                 Best_Comparison      = $false
@@ -328,7 +328,7 @@ while ($true) {
         }
 
         if ($MinerComparisons_Profit[0] -gt $MinerComparisons_Profit[1]) {
-            $MinerComparisons_Range = ($MinerComparisons_MarginOfError | Measure -Average | Select -ExpandProperty Average), (($MinerComparisons_Profit[0] - $MinerComparisons_Profit[1]) / $MinerComparisons_Profit[1]) | Measure -Minimum | Select -ExpandProperty Minimum
+            $MinerComparisons_Range = ($MinerComparisons_MarginOfError | Measure-Object -Average | Select-Object -ExpandProperty Average), (($MinerComparisons_Profit[0] - $MinerComparisons_Profit[1]) / $MinerComparisons_Profit[1]) | Measure-Object -Minimum | Select-Object -ExpandProperty Minimum
             Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is between $([Math]::Round((((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])-$MinerComparisons_Range)*100)))% and $([Math]::Round((((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])+$MinerComparisons_Range)*100)))% more profitable than the fastest miner: "
         }
 
