@@ -21,7 +21,7 @@ $PowerShell = [PowerShell]::Create()
 if ($WorkingDirectory -ne "") {$PowerShell.AddScript("Set-Location '$WorkingDirectory'") | Out-Null}
 $Command = ". '$FilePath'"
 if ($ArgumentList -ne "") {$Command += " $ArgumentList"}
-$PowerShell.AddScript("$Command | Write-Verbose -Verbose") | Out-Null
+$PowerShell.AddScript("$Command 2>&1 | Write-Verbose -Verbose") | Out-Null
 $Result = $PowerShell.BeginInvoke()
 
 Write-Host "MultiPoolMiner Wrapper Started" -BackgroundColor Yellow -ForegroundColor Black
