@@ -61,4 +61,42 @@ $MiningPoolHub_Request.return | ForEach-Object {
             }
         }
     }
+
+    if ($MiningPoolHub_Algorithm -eq "Ethash" -and $MiningPoolHub_Coin -NotLike "*ethereum*") {
+        $Locations | ForEach-Object {
+            $Location = $_
+        
+            if ($UserName) {
+                [PSCustomObject]@{
+                    Algorithm     = "$($MiningPoolHub_Algorithm)2gb"
+                    Info          = $MiningPoolHub_Coin
+                    Price         = $Stat.Live
+                    StablePrice   = $Stat.Week
+                    MarginOfError = $Stat.Week_Fluctuation
+                    Protocol      = "stratum+tcp"
+                    Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$Location*"} | Select-Object -First 1
+                    Port          = $MiningPoolHub_Port
+                    User          = "$UserName.$WorkerName"
+                    Pass          = "x"
+                    Location      = $Location
+                    SSL           = $false
+                }
+        
+                [PSCustomObject]@{
+                    Algorithm     = "$($MiningPoolHub_Algorithm)2gb"
+                    Info          = $MiningPoolHub_Coin
+                    Price         = $Stat.Live
+                    StablePrice   = $Stat.Week
+                    MarginOfError = $Stat.Week_Fluctuation
+                    Protocol      = "stratum+ssl"
+                    Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$Location*"} | Select-Object -First 1
+                    Port          = $MiningPoolHub_Port
+                    User          = "$UserName.$WorkerName"
+                    Pass          = "x"
+                    Location      = $Location
+                    SSL           = $true
+                }
+            }
+        }
+    }
 }

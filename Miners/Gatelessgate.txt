@@ -32,6 +32,16 @@
     {
         "Type":  ["AMD","NVIDIA"],
         "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
+        "Arguments":  "--api-listen -k ethash-new -o $($Pools.Ethash2gb.Protocol)://$($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -u $($Pools.Ethash2gb.User) -p $($Pools.Ethash2gb.Pass) --gpu-threads 2 --worksize 192 --xintensity 4608",
+        "HashRates":  {"Ethash2gb":  "$($Stats.Gatelessgate_Ethash2gb_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  4028,
+        "Wrap":  false,
+        "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
+    },
+    {
+        "Type":  ["AMD","NVIDIA"],
+        "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
         "Arguments":  "--api-listen -k neoscrypt -o $($Pools.NeoScrypt.Protocol)://$($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -u $($Pools.NeoScrypt.User) -p $($Pools.NeoScrypt.Pass) --gpu-threads 1 --worksize 256 --intensity 13",
         "HashRates":  {"NeoScrypt":  "$($Stats.Gatelessgate_NeoScrypt_HashRate.Week)"},
         "API":  "Xgminer",

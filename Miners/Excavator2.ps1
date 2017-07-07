@@ -8,6 +8,7 @@ $Uri = "https://github.com/nicehash/excavator/releases/"
 
 $Commands = [PSCustomObject]@{
     "decred" = @() #Decred
+    "daggerhashimoto" = @() #Ethash
     "equihash" = @() #Equihash
     "pascal" = @() #Pascal
     "sia" = @() #Sia
@@ -26,10 +27,24 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         Path = $Path
         Arguments = "-p $Port -c $_$ThreadIndex.json"
         HashRates = [PSCustomObject]@{(Get-Algorithm($_)) = $Stats."$($Name)_$(Get-Algorithm($_))_HashRate".Week}
-        API = 'NiceHash'
+        API = "NiceHash"
         Port = $Port
         Wrap = $false
         URI = $Uri
-        Device = 'GPU#{0:d2}' -f $ThreadIndex
+        Device = "GPU#{0:d2}" -f $ThreadIndex
+    }
+
+    if ($_ -eq "daggerhashimoto") {
+        [PSCustomObject]@{
+            Type = "AMD", "NVIDIA"
+            Path = $Path
+            Arguments = "-p $Port -c $_$ThreadIndex.json"
+            HashRates = [PSCustomObject]@{"$(Get-Algorithm($_))2gb" = $Stats."$($Name)_$(Get-Algorithm($_))2gb_HashRate".Week}
+            API = "NiceHash"
+            Port = $Port
+            Wrap = $false
+            URI = $Uri
+            Device = "GPU#{0:d2}" -f $ThreadIndex
+        }
     }
 }
