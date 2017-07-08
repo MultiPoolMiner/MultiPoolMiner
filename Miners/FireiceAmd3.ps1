@@ -30,6 +30,7 @@ $Port = 3336 + ($ThreadIndex * 10000)
         output_file      = ""
         httpd_port       = $Port
         prefer_ipv4      = $true
+        daemon_mode      = $false
     } | ConvertTo-Json -Depth 10) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt" -Force -ErrorAction SilentlyContinue
 
 [PSCustomObject]@{
