@@ -5,6 +5,7 @@
     "blakecoin":  "Blakecoin",
     "blakevanilla":  "BlakeVanilla",
     "cryptonight":  "Cryptonight",
+    "daggerhashimoto":  "Ethash",
     "darkcoinmod":  "X11",
     "decred":  "Decred",
     "equihash":  "Equihash",
