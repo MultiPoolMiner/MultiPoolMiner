@@ -224,7 +224,7 @@ while ($true) {
                 Wrap                 = $Miner.Wrap
                 API                  = $Miner.API
                 Port                 = $Miner.Port
-                Algorithm            = $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name
+                Algorithm            = $Miner.HashRates.PSObject.Properties.Name #temp fix, must use 'PSObject.Properties' to preserve order
                 Type                 = $Miner.Type
                 Index                = $Miner.Index
                 Device               = $Miner.Device
