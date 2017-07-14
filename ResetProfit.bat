@@ -1,1 +1,1 @@
-del "Stats\*_Profit.txt"
+del "Stats\*Profit.txt"
