@@ -182,7 +182,7 @@ while ($true) {
         $Miner = $_
         $Miner_Devices = $Miner.Device | Select-Object -Unique
         if ($Miner_Devices -eq $null) {$Miner_Devices = ($Miners | Where-Object {(Compare-Object $Miner.Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}).Device | Select-Object -Unique}
-        if ($Miner_Devices -eq $null) {$Miner_Devices = $Miner.Type}
+        if ($Miner_Devices -eq $null) {$Miner_Devices = ($Miners | Where-Object {(Compare-Object $Miner.Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}).Type | Select-Object -Unique}
         $Miner | Add-Member Device $Miner_Devices -Force
     }
 
