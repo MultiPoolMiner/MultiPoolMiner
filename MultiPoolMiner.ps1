@@ -173,8 +173,8 @@ while ($true) {
         $Miner | Add-Member Profit_MarginOfError $Miner_Profit_MarginOfError
         $Miner | Add-Member Profit_Bias $Miner_Profit_Bias
         
-        $Miner | Add-Member Type $Miner_Types -Force
-        $Miner | Add-Member Index $Miner_Indexes -Force
+        $Miner | Add-Member Type ($Miner_Types | Sort-Object) -Force
+        $Miner | Add-Member Index ($Miner_Indexes | Sort-Object) -Force
 
         $Miner.Path = Convert-Path $Miner.Path
     }
@@ -183,7 +183,7 @@ while ($true) {
         $Miner_Devices = $Miner.Device | Select-Object -Unique
         if ($Miner_Devices -eq $null) {$Miner_Devices = ($Miners | Where-Object {(Compare-Object $Miner.Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}).Device | Select-Object -Unique}
         if ($Miner_Devices -eq $null) {$Miner_Devices = ($Miners | Where-Object {(Compare-Object $Miner.Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}).Type | Select-Object -Unique}
-        $Miner | Add-Member Device $Miner_Devices -Force
+        $Miner | Add-Member Device ($Miner_Devices | Sort-Object) -Force
     }
 
     #Update the active miners
