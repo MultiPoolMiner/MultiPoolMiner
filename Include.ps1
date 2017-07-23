@@ -525,6 +525,38 @@ function Get-Algorithm {
 
     $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-", " " -replace "_", " ")) -replace " "
 
-    if ($Algorithms.$Algorithm) {$Algorithms.$Algorithm}
-    else {$Algorithm}
+    if($Algorithms.$Algorithm){$Algorithms.$Algorithm}
+    else{$Algorithm}
 }
+
+function Get-NvidiaStats {	
+	$NvidiaPath = "C:\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe"
+	$NvidiaArguments = "--query --xml-format --filename=.\nvidia-smi.xml"
+	$NvidiaWorkingDirectory = $BasePath
+	
+	Start-Process -FilePath $NvidiaPath -ArgumentList $NvidiaArguments -WorkingDirectory $NvidiaWorkingDirectory -WindowStyle Minimized -Wait
+	
+	$NvidiaStats = [xml](Get-Content ".\nvidia-smi.xml")
+
+	$GPUs = $NvidiaStats.SelectNodes("//*[@id]")
+
+	foreach ($GPU in $GPUs) {
+		[PSCustomObject]@{
+			id					=	$GPU.id
+			product_name		=	$GPU.product_name
+			fan_speed			=	$GPU.fan_speed
+			performance_state	=	$GPU.performance_state
+			memory_total		=	$GPU.fb_memory_usage.total
+			memory_used			=	$GPU.fb_memory_usage.used
+			memory_free			=	$GPU.fb_memory_usage.free
+			GPU_util			=	$GPU.utilization.gpu_util
+			memory_util			=	$GPU.utilization.memory_util
+			GPU_temp			=	$GPU.temperature.gpu_temp
+			power_draw			=	$GPU.power_readings.power_draw
+			power_limit			=	$GPU.power_readings.power_limit
+			graphics_clocks		=	$GPU.clocks.graphics_clock
+			sm_clock			=	$GPU.clocks.sm_clock
+			mem_clock			=	$GPU.clocks.mem_clock
+			video_clock			=	$GPU.clocks.video_clock
+		}
+	}
