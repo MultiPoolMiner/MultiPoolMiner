@@ -1,7 +1,7 @@
 ﻿. .\Include.ps1
 
 $Path = ".\Bin\Lyra2z-AMD\sgminer.exe"
-$Uri = "https://github.com/djm34/sgminer-msvc2015/releases/download/v0.2-pre/sgminer.exe"
+$Uri = "https://github.com/djm34/sgminer-msvc2015/releases/download/v0.1-pre/sgminer-msvc2015.rar"
 
 $Commands = [PSCustomObject]@{
     "lyra2z" = " --worksize 32 --intensity 18" #Lyra2z
@@ -9,7 +9,7 @@ $Commands = [PSCustomObject]@{
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Commands | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
+$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     [PSCustomObject]@{
         Type = "AMD"
         Path = $Path

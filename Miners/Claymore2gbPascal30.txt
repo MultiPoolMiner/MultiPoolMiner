@@ -1,0 +1,11 @@
+[
+    {
+        "Type":  ["AMD","NVIDIA"],
+        "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "Arguments":  "-epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools.Pascal.Host):$($Pools.Pascal.Port) -dwal $($Pools.Pascal.User) -dpsw $($Pools.Pascal.Pass) -dcoin pasc -dcri 30",
+        "HashRates":  {"Ethash2gb":  "$($Stats.Claymore2gbPascal30_Ethash2gb_HashRate.Week)","Pascal":  "$($Stats.Claymore2gbPascal30_Pascal_HashRate.Week)"},
+        "API":  "Claymore",
+        "Port":  "3333",
+        "Wrap":  false
+    }
+]

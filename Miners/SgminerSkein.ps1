@@ -4,12 +4,12 @@ $Path = ".\Bin\Skein-AMD\sgminer.exe"
 $Uri = "https://github.com/miningpoolhub/sgminer/releases/download/5.3.1/Release.zip"
 
 $Commands = [PSCustomObject]@{
-    "skeincoin" = " --gpu-threads 2 --worksize 256 --intensity 23" #Skein
+    "skeincoin" = " --gpu-threads 2 --worksize 256 --intensity d" #Skein
 }
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Commands | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
+$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     [PSCustomObject]@{
         Type = "AMD"
         Path = $Path

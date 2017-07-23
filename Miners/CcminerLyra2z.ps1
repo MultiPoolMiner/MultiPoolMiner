@@ -1,7 +1,7 @@
 ﻿. .\Include.ps1
 
 $Path = ".\Bin\Lyra2z-NVIDIA\ccminer.exe"
-$Uri = "https://github.com/djm34/ccminer-msvc2015/releases/download/v0.0.2/ccminer.rar"
+$Uri = "https://github.com/djm34/ccminer-msvc2015/releases/download/v0.0.3/ccminer.exe"
 
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore
@@ -36,7 +36,7 @@ $Commands = [PSCustomObject]@{
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Commands | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
+$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     [PSCustomObject]@{
         Type = "NVIDIA"
         Path = $Path

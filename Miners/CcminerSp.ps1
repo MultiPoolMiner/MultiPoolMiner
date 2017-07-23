@@ -30,21 +30,21 @@ $Commands = [PSCustomObject]@{
     #"timetravel" = "" #Timetravel
     #"x11" = "" #X11
     #"x11evo" = "" #X11evo
-    #"x17" = "" #X17
+    "x17" = "" #X17
     #"yescrypt" = "" #Yescrypt
 }
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Commands | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
+$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     [PSCustomObject]@{
         Type = "NVIDIA"
         Path = $Path
         Arguments = "-a $_ -o stratum+tcp://$($Pools.(Get-Algorithm($_)).Host):$($Pools.(Get-Algorithm($_)).Port) -u $($Pools.(Get-Algorithm($_)).User) -p $($Pools.(Get-Algorithm($_)).Pass)$($Commands.$_)"
         HashRates = [PSCustomObject]@{(Get-Algorithm($_)) = $Stats."$($Name)_$(Get-Algorithm($_))_HashRate".Week}
-        API = "Ccminer"
+        API = "Wrapper"
         Port = 4068
-        Wrap = $false
+        Wrap = $true
         URI = $Uri
     }
 }

@@ -1,7 +1,7 @@
 ﻿. .\Include.ps1
 
 $Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.06/ccminer-806-x64.zip"
+$Uri = "https://github.com/KlausT/ccminer/releases/download/8.08/ccminer-808-x64.zip"
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
@@ -38,7 +38,7 @@ $Commands = [PSCustomObject]@{
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Commands | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
+$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     [PSCustomObject]@{
         Type = "NVIDIA"
         Path = $Path

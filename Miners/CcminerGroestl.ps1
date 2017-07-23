@@ -12,7 +12,7 @@ $Commands = [PSCustomObject]@{
     #"decred" = "" #Decred
     #"equihash" = "" #Equihash
     #"ethash" = "" #Ethash
-    "groestl" = "" #Groestl
+    #"groestl" = "" #Groestl
     #"hmq1725" = "" #hmq1725
     #"keccak" = "" #Keccak
     #"lbry" = "" #Lbry
@@ -25,7 +25,7 @@ $Commands = [PSCustomObject]@{
     #"qubit" = "" #Qubit
     #"scrypt" = "" #Scrypt
     #"sia" = "" #Sia
-    #"sib" = "" #Sib
+    "sib" = "" #Sib
     #"skein" = "" #Skein
     #"timetravel" = "" #Timetravel
     #"x11" = "" #X11
@@ -36,7 +36,7 @@ $Commands = [PSCustomObject]@{
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Commands | Get-Member -MemberType NoteProperty | Select -ExpandProperty Name | ForEach {
+$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     [PSCustomObject]@{
         Type = "NVIDIA"
         Path = $Path
