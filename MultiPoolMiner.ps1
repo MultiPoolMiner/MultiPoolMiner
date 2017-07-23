@@ -123,6 +123,7 @@ while ($true) {
 
         $Miner_Types = $Miner.Type | Select-Object -Unique
         $Miner_Indexes = $Miner.Index | Select-Object -Unique
+        $Miner_Devices = $Miner.Device | Select-Object -Unique
 
         $Miner.HashRates.PSObject.Properties.Name | ForEach-Object { #temp fix, must use 'PSObject.Properties' to preserve order
             $Miner_HashRates | Add-Member $_ ([Double]$Miner.HashRates.$_)
@@ -176,14 +177,10 @@ while ($true) {
         $Miner | Add-Member Type ($Miner_Types | Sort-Object) -Force
         $Miner | Add-Member Index ($Miner_Indexes | Sort-Object) -Force
 
-        $Miner.Path = Convert-Path $Miner.Path
-    }
-    $Miners | ForEach-Object {
-        $Miner = $_
-        $Miner_Devices = $Miner.Device | Select-Object -Unique
-        if ($Miner_Devices -eq $null) {$Miner_Devices = ($Miners | Where-Object {(Compare-Object $Miner.Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}).Device | Select-Object -Unique}
-        if ($Miner_Devices -eq $null) {$Miner_Devices = ($Miners | Where-Object {(Compare-Object $Miner.Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}).Type | Select-Object -Unique}
         $Miner | Add-Member Device ($Miner_Devices | Sort-Object) -Force
+        $Miner | Add-Member Device_Auto (($Miner_Devices -eq $null) | Sort-Object) -Force
+
+        $Miner.Path = Convert-Path $Miner.Path
     }
 
     #Update the active miners
@@ -210,6 +207,7 @@ while ($true) {
             $ActiveMiner.Type = $Miner.Type
             $ActiveMiner.Index = $Miner.Index
             $ActiveMiner.Device = $Miner.Device
+            $ActiveMiner.Device_Auto = $Miner.Device_Auto
             $ActiveMiner.Profit = $Miner.Profit
             $ActiveMiner.Profit_Comparison = $Miner.Profit_Comparison
             $ActiveMiner.Profit_MarginOfError = $Miner.Profit_MarginOfError
@@ -228,6 +226,7 @@ while ($true) {
                 Type                 = $Miner.Type
                 Index                = $Miner.Index
                 Device               = $Miner.Device
+                Device_Auto          = $Miner.Device_Auto
                 Profit               = $Miner.Profit
                 Profit_Comparison    = $Miner.Profit_Comparison
                 Profit_MarginOfError = $Miner.Profit_MarginOfError
@@ -245,6 +244,11 @@ while ($true) {
                 Benchmarked          = 0
             }
         }
+    }
+    $ActiveMiners | Where-Object Device_Auto | ForEach-Object {
+        $Miner = $_
+        if ($Miner.Device -eq $null) {$Miner.Device = ($Miners | Where-Object {(Compare-Object $Miner.Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}).Device | Select-Object -Unique | Sort-Object}
+        if ($Miner.Device -eq $null) {$Miner.Device = ($Miners | Where-Object {(Compare-Object $Miner.Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}).Type | Select-Object -Unique | Sort-Object}
     }
 
     #Don't penalize active miners
