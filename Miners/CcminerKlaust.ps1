@@ -1,7 +1,7 @@
 ﻿. .\Include.ps1
 
 $Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.08/ccminer-808-x64.zip"
+$Uri = "https://github.com/KlausT/ccminer/releases/download/8.09/ccminer-809-x64.zip"
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
