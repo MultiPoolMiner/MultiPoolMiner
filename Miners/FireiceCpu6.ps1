@@ -4,7 +4,7 @@ $Threads = 6
 $Path_Threads = ".\Bin\Cryptonight-CPU$Threads\xmr-stak-cpu.exe"
 
 $Path = ".\Bin\Cryptonight-CPU\xmr-stak-cpu.exe"
-$Uri = "https://github.com/fireice-uk/xmr-stak-cpu/releases/download/v1.2.0-1.4.1/xmr-stak-cpu-win64.zip"
+$Uri = "https://github.com/fireice-uk/xmr-stak-cpu/releases/download/v1.3.0-1.5.0/xmr-stak-cpu-win64.zip"
 
 if ((Test-Path $Path) -eq $false) {Expand-WebRequest $Uri (Split-Path $Path) -ErrorAction SilentlyContinue}
 if ((Test-Path $Path_Threads) -eq $false) {Copy-Item (Split-Path $Path) (Split-Path $Path_Threads) -Recurse -Force -ErrorAction SilentlyContinue}
