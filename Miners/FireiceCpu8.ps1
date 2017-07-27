@@ -16,6 +16,7 @@ $Port = 3334 + ($ThreadIndex * 10000)
         cpu_threads_conf = @([PSCustomObject]@{low_power_mode = $false; no_prefetch = $true; affine_to_cpu = $false}) * $Threads
         use_slow_memory  = "warn"
         nicehash_nonce   = $true
+        aes_override     = $null
         use_tls          = $false
         tls_secure_algo  = $true
         tls_fingerprint  = ""
@@ -27,6 +28,7 @@ $Port = 3334 + ($ThreadIndex * 10000)
         giveup_limit     = 0
         verbose_level    = 3
         h_print_time     = 60
+        daemon_mode      = $false
         output_file      = ""
         httpd_port       = $Port
         prefer_ipv4      = $true
