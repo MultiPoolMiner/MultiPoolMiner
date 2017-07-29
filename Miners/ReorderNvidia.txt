@@ -1,0 +1,20 @@
+[
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\Reorder\\cgminer.exe",
+        "Arguments":  "--api-port 24028 --api-listen --skein -o $($Pools.Skein.Protocol)://$($Pools.Skein.Host):$($Pools.Skein.Port) -u $($Pools.Skein.User) -p $($Pools.Skein.Pass) --gpu-threads 2 --worksize 64 --intensity 11 --gpu-platform $([array]::IndexOf((Get-WmiObject -class CIM_VideoController | Select-Object -ExpandProperty AdapterCompatibility), 'NVIDIA'))",
+        "HashRates":  {"Skein":  "$($Stats.ReorderNvidia_Skein_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  "24028",
+        "Wrap":  false
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\Reorder\\cgminer.exe",
+        "Arguments":  "--api-port 24028 --api-listen --keccak -o $($Pools.Keccak.Protocol)://$($Pools.Keccak.Host):$($Pools.Keccak.Port) -u $($Pools.Keccak.User) -p $($Pools.Keccak.Pass) --gpu-platform $([array]::IndexOf((Get-WmiObject -class CIM_VideoController | Select-Object -ExpandProperty AdapterCompatibility), 'NVIDIA'))",
+        "HashRates":  {"Keccak":  "$($Stats.ReorderNvidia_Keccak_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  "24028",
+        "Wrap":  false
+    }
+]
