@@ -35,8 +35,8 @@
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 
-Get-ChildItem . -Recurse | Unblock-File
-try {if ((Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {Start-Process powershell -Verb runAs -ArgumentList "Add-MpPreference -ExclusionPath '$(Convert-Path .)'"}}catch {}
+if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -Recurse | Unblock-File}
+if (Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) {if ((Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {Start-Process powershell -Verb runAs -ArgumentList "Add-MpPreference -ExclusionPath '$(Convert-Path .)'"}}
 
 if ($Proxy -eq "") {$PSDefaultParameterValues.Remove("*:Proxy")}
 else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
@@ -99,18 +99,13 @@ while ($true) {
 
     #Load information about the Miners
     #Messy...?
-    $Miners = if (Test-Path "Miners") {
+    $AllMiners = if (Test-Path "Miners") {
         Get-ChildItemContent "Miners" | ForEach-Object {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | 
             Where-Object {$Type.Count -eq 0 -or (Compare-Object $Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
             Where-Object {($Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.HashRates.PSObject.Properties.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0) -and ((Compare-Object $Pools.PSObject.Properties.Name $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0)} | 
             Where-Object {$MinerName.Count -eq 0 -or (Compare-Object $MinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}
     }
-    if (-not (Get-Job -State Running)) {
-        Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Miners | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($Miners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}} -Unique) -FilePath .\Downloader.ps1 | Out-Null
-    }
-    $Miners = $Miners | Where-Object {Test-Path $_.Path}
-    if ($Miners.Count -eq 0) {"No Miners!" | Out-Host; Start-Sleep $Interval; continue}
-    $Miners | ForEach-Object {
+    $AllMiners | ForEach-Object {
         $Miner = $_
 
         $Miner_HashRates = [PSCustomObject]@{}
@@ -157,8 +152,8 @@ while ($true) {
             }
         }
         
-        if ($Miner_Types -eq $null) {$Miner_Types = $Miners.Type | Select-Object -Unique}
-        if ($Miner_Indexes -eq $null) {$Miner_Indexes = $Miners.Index | Select-Object -Unique}
+        if ($Miner_Types -eq $null) {$Miner_Types = $AllMiners.Type | Select-Object -Unique}
+        if ($Miner_Indexes -eq $null) {$Miner_Indexes = $AllMiners.Index | Select-Object -Unique}
         
         if ($Miner_Types -eq $null) {$Miner_Types = ""}
         if ($Miner_Indexes -eq $null) {$Miner_Indexes = 0}
@@ -180,8 +175,18 @@ while ($true) {
         $Miner | Add-Member Device ($Miner_Devices | Sort-Object) -Force
         $Miner | Add-Member Device_Auto (($Miner_Devices -eq $null) | Sort-Object) -Force
 
-        $Miner.Path = Convert-Path $Miner.Path
+        $Miner.Path = [System.IO.Path]::GetFullPath($Miner.Path)
     }
+    $Miners = $AllMiners | Where-Object {Test-Path $_.Path}
+    if (-not (Get-Job -State Running)) {
+        Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($AllMiners | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($AllMiners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}} -Unique) -FilePath .\Downloader.ps1 | Out-Null
+    }
+    if (Get-Command "Get-NetFirewallRule" -ErrorAction SilentlyContinue) {
+        if (@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @(Get-NetFirewallRule | Where-Object DisplayName -EQ "MultiPoolMiner" | Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program) | Where-Object SideIndicator -EQ "=>") {
+            Start-Process powershell ("('$(@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @(Get-NetFirewallRule | Where-Object DisplayName -EQ 'MultiPoolMiner' | Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program) | Where-Object SideIndicator -EQ '=>' | Select-Object -ExpandProperty InputObject | ConvertTo-Json -Compress)' | ConvertFrom-Json) | ForEach {New-NetFirewallRule -DisplayName 'MultiPoolMiner' -Program `$_}" -replace '"', '\"') -Verb runAs
+        }
+    }
+    if ($Miners.Count -eq 0) {"No Miners!" | Out-Host; Start-Sleep $Interval; continue}
 
     #Update the active miners
     $ActiveMiners | ForEach-Object {
