@@ -17,7 +17,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProp
     $Zpool_Host = "mine.zpool.ca"
     $Zpool_Port = $Zpool_Request.$_.port
     $Zpool_Algorithm = Get-Algorithm $Zpool_Request.$_.name
-    $Zpool_Coin = "Unknown"
+    $Zpool_Coin = ""
 
     $Divisor = 1000000
 	
