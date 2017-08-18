@@ -528,3 +528,17 @@ function Get-Algorithm {
     if ($Algorithms.$Algorithm) {$Algorithms.$Algorithm}
     else {$Algorithm}
 }
+
+function Get-Location {
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]$Location
+    )
+    
+    $Locations = Get-Content "Locations.txt" | ConvertFrom-Json
+
+    $Location = (Get-Culture).TextInfo.ToTitleCase(($Location -replace "-", " " -replace "_", " ")) -replace " "
+
+    if ($Locations.$Location) {$Locations.$Location}
+    else {$Location}
+}

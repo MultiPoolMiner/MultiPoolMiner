@@ -11,7 +11,7 @@ if (-not $Hashrefinery_Request) {return}
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Location = "US"
+$Hashrefinery_Location = "us"
 
 $Hashrefinery_Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     $Hashrefinery_Host = "$_.us.hashrefinery.com"
@@ -43,7 +43,7 @@ $Hashrefinery_Request | Get-Member -MemberType NoteProperty | Select-Object -Exp
             Port          = $Hashrefinery_Port
             User          = $Wallet 
             Pass          = "$WorkerName,c=BTC" 
-            Location      = $Location
+            Location      = Get-Location $Hashrefinery_Location
             SSL           = $false
         }
     }

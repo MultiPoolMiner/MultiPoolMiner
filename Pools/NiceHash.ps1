@@ -11,16 +11,10 @@ if (-not $NiceHash_Request) {return}
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Locations = "eu", "usa", "hk", "jp", "in", "br"
+$NiceHash_Locations = "eu", "usa", "hk", "jp", "in", "br"
 
-$Locations | ForEach-Object {
+$NiceHash_Locations | ForEach-Object {
     $NiceHash_Location = $_
-    
-    switch ($NiceHash_Location) {
-        "eu" {$Location = "Europe"}
-        "usa" {$Location = "US"}
-        default {$Location = "Asia"}
-    }
     
     $NiceHash_Request.result.simplemultialgo | ForEach-Object {
         $NiceHash_Host = "$($_.name).$NiceHash_Location.nicehash.com"
@@ -44,7 +38,7 @@ $Locations | ForEach-Object {
                 Port          = $NiceHash_Port
                 User          = "$Wallet.$WorkerName"
                 Pass          = "x"
-                Location      = $Location
+                Location      = Get-Location $NiceHash_Location
                 SSL           = $false
             }
 
@@ -59,7 +53,7 @@ $Locations | ForEach-Object {
                 Port          = $NiceHash_Port
                 User          = "$Wallet.$WorkerName"
                 Pass          = "x"
-                Location      = $Location
+                Location      = Get-Location $NiceHash_Location
                 SSL           = $true
             }
         }

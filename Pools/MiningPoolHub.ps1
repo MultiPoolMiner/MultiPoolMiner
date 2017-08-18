@@ -11,7 +11,7 @@ if (-not $MiningPoolHub_Request.success) {return}
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Locations = "Europe", "US", "Asia"
+$MiningPoolHub_Locations = "europe", "us", "asia"
 
 $MiningPoolHub_Request.return | ForEach-Object {
     $MiningPoolHub_Hosts = $_.all_host_list.split(";")
@@ -25,8 +25,8 @@ $MiningPoolHub_Request.return | ForEach-Object {
 
     $Stat = Set-Stat -Name "$($Name)_$($MiningPoolHub_Algorithm)_Profit" -Value ([Double]$_.profit / $Divisor)
 
-    $Locations | ForEach-Object {
-        $Location = $_
+    $MiningPoolHub_Locations | ForEach-Object {
+        $MiningPoolHub_Location = $_
 
         if ($UserName) {
             [PSCustomObject]@{
@@ -36,11 +36,11 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$Location*"} | Select-Object -First 1
+                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Location*"} | Select-Object -First 1
                 Port          = $MiningPoolHub_Port
                 User          = "$UserName.$WorkerName"
                 Pass          = "x"
-                Location      = $Location
+                Location      = Get-Location $MiningPoolHub_Location
                 SSL           = $false
             }
         
@@ -51,11 +51,11 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+ssl"
-                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$Location*"} | Select-Object -First 1
+                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Location*"} | Select-Object -First 1
                 Port          = $MiningPoolHub_Port
                 User          = "$UserName.$WorkerName"
                 Pass          = "x"
-                Location      = $Location
+                Location      = Get-Location $MiningPoolHub_Location
                 SSL           = $true
             }
         }
