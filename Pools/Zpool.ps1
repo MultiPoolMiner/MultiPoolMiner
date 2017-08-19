@@ -43,7 +43,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProp
             Port          = $Zpool_Port
             User          = $Wallet
             Pass          = "$WorkerName,c=BTC"
-            Location      = Get-Location $Zpool_Location
+            Location      = Get-GeoLocation $Zpool_Location
             SSL           = $false
         }
     }
