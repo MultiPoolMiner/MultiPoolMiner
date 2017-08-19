@@ -1,0 +1,62 @@
+[
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
+        "Arguments":  "--api-port 24028 --api-listen -k cryptonight -o $($Pools.Cryptonight.Protocol)://$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port) -u $($Pools.Cryptonight.User) -p $($Pools.Cryptonight.Pass) --gpu-threads 1 --worksize 4 --rawintensity 720 --gpu-platform $([array]::IndexOf((Get-WmiObject -class CIM_VideoController | Select-Object -ExpandProperty AdapterCompatibility), 'NVIDIA'))",
+        "HashRates":  {"Cryptonight":  "$($Stats.GatelessgateNvidia_Cryptonight_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  24028,
+        "Wrap":  false,
+        "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
+        "Arguments":  "--api-port 24028 --api-listen -k equihash -o $($Pools.Equihash.Protocol)://$($Pools.Equihash.Host):$($Pools.Equihash.Port) -u $($Pools.Equihash.User) -p $($Pools.Equihash.Pass) --gpu-threads 2 --worksize 256 --gpu-platform $([array]::IndexOf((Get-WmiObject -class CIM_VideoController | Select-Object -ExpandProperty AdapterCompatibility), 'NVIDIA'))",
+        "HashRates":  {"Equihash":  "$($Stats.GatelessgateNvidia_Equihash_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  24028,
+        "Wrap":  false,
+        "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
+        "Arguments":  "--api-port 24028 --api-listen -k ethash-new -o $($Pools.Ethash.Protocol)://$($Pools.Ethash.Host):$($Pools.Ethash.Port) -u $($Pools.Ethash.User) -p $($Pools.Ethash.Pass) --gpu-threads 2 --worksize 192 --xintensity 4608 --gpu-platform $([array]::IndexOf((Get-WmiObject -class CIM_VideoController | Select-Object -ExpandProperty AdapterCompatibility), 'NVIDIA'))",
+        "HashRates":  {"Ethash":  "$($Stats.GatelessgateNvidia_Ethash_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  24028,
+        "Wrap":  false,
+        "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
+        "Arguments":  "--api-port 24028 --api-listen -k ethash-new -o $($Pools.Ethash2gb.Protocol)://$($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -u $($Pools.Ethash2gb.User) -p $($Pools.Ethash2gb.Pass) --gpu-threads 2 --worksize 192 --xintensity 4608 --gpu-platform $([array]::IndexOf((Get-WmiObject -class CIM_VideoController | Select-Object -ExpandProperty AdapterCompatibility), 'NVIDIA'))",
+        "HashRates":  {"Ethash2gb":  "$($Stats.GatelessgateNvidia_Ethash2gb_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  24028,
+        "Wrap":  false,
+        "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
+        "Arguments":  "--api-port 24028 --api-listen -k neoscrypt -o $($Pools.NeoScrypt.Protocol)://$($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -u $($Pools.NeoScrypt.User) -p $($Pools.NeoScrypt.Pass) --gpu-threads 1 --worksize 256 --intensity 13 --gpu-platform $([array]::IndexOf((Get-WmiObject -class CIM_VideoController | Select-Object -ExpandProperty AdapterCompatibility), 'NVIDIA'))",
+        "HashRates":  {"NeoScrypt":  "$($Stats.GatelessgateNvidia_NeoScrypt_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  24028,
+        "Wrap":  false,
+        "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
+        "Arguments":  "--api-port 24028 --api-listen -k pascal -o $($Pools.Pascal.Protocol)://$($Pools.Pascal.Host):$($Pools.Pascal.Port) -u $($Pools.Pascal.User) -p $($Pools.Pascal.Pass) --gpu-threads 1 --worksize 64 --intensity 21",
+        "HashRates":  {"Pascal":  "$($Stats.GatelessgateNvidia_Pascal_HashRate.Week)"},
+        "API":  "Xgminer",
+        "Port":  24028,
+        "Wrap":  false,
+        "URI":  "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/gatelessgate-0.1.3-pre6b-win64.zip"
+    }
+]

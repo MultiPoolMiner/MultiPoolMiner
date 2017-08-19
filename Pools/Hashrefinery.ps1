@@ -11,10 +11,10 @@ if (-not $Hashrefinery_Request) {return}
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-
+$Hashrefinery_Location = "us"
 
 $Hashrefinery_Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
-    $Hashrefinery_Host = "us.hashrefinery.com"
+    $Hashrefinery_Host = "$_.us.hashrefinery.com"
     $Hashrefinery_Port = $Hashrefinery_Request.$_.port
     $Hashrefinery_Algorithm = Get-Algorithm $Hashrefinery_Request.$_.name
     $Hashrefinery_Coin = ""
@@ -39,10 +39,11 @@ $Hashrefinery_Request | Get-Member -MemberType NoteProperty | Select-Object -Exp
             StablePrice   = $Stat.Week
             MarginOfError = $Stat.Week_Fluctuation
             Protocol      = "stratum+tcp"
-            Host          = "$Hashrefinery_Algorithm.$Hashrefinery_Host"
+            Host          = $Hashrefinery_Host
             Port          = $Hashrefinery_Port
             User          = $Wallet 
             Pass          = "$WorkerName,c=BTC" 
+            Location      = Get-GeoLocation $Hashrefinery_Location
             SSL           = $false
         }
     }

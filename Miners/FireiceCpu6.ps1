@@ -4,7 +4,7 @@ $Threads = 6
 $Path_Threads = ".\Bin\Cryptonight-CPU$Threads\xmr-stak-cpu.exe"
 
 $Path = ".\Bin\Cryptonight-CPU\xmr-stak-cpu.exe"
-$Uri = "https://github.com/fireice-uk/xmr-stak-cpu/releases/download/v1.2.0-1.4.1/xmr-stak-cpu-win64.zip"
+$Uri = "https://github.com/fireice-uk/xmr-stak-cpu/releases/download/v1.3.0-1.5.0/xmr-stak-cpu-win64.zip"
 
 if ((Test-Path $Path) -eq $false) {Expand-WebRequest $Uri (Split-Path $Path) -ErrorAction SilentlyContinue}
 if ((Test-Path $Path_Threads) -eq $false) {Copy-Item (Split-Path $Path) (Split-Path $Path_Threads) -Recurse -Force -ErrorAction SilentlyContinue}
@@ -16,6 +16,7 @@ $Port = 3334 + ($ThreadIndex * 10000)
         cpu_threads_conf = @([PSCustomObject]@{low_power_mode = $false; no_prefetch = $true; affine_to_cpu = $false}) * $Threads
         use_slow_memory  = "warn"
         nicehash_nonce   = $true
+        aes_override     = $null
         use_tls          = $false
         tls_secure_algo  = $true
         tls_fingerprint  = ""
@@ -27,6 +28,7 @@ $Port = 3334 + ($ThreadIndex * 10000)
         giveup_limit     = 0
         verbose_level    = 3
         h_print_time     = 60
+        daemon_mode      = $false
         output_file      = ""
         httpd_port       = $Port
         prefer_ipv4      = $true

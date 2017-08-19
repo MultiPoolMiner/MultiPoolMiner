@@ -1,4 +1,4 @@
-$DownloadList = $args
+﻿$DownloadList = $args
 
 if ($script:MyInvocation.MyCommand.Path) {Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)}
 

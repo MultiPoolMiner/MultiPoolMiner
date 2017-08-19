@@ -1,7 +1,7 @@
 ﻿. .\Include.ps1
 
 $Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.08/ccminer-808-x64.zip"
+$Uri = "https://github.com/KlausT/ccminer/releases/download/8.11/ccminer-811-x64.zip"
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
@@ -10,12 +10,14 @@ $Commands = [PSCustomObject]@{
     #"blake2s" = "" #Blake2s
     #"blakecoin" = "" #Blakecoin
     #"vanilla" = "" #BlakeVanilla
+    #"c11" = "" #C11
     #"cryptonight" = "" #Cryptonight
     #"decred" = "" #Decred
     #"equihash" = "" #Equihash
     #"ethash" = "" #Ethash
     "groestl" = "" #Groestl
-    #"hmq1725" = "" #hmq1725
+    #"hmq1725" = "" #HMQ1725
+    #"jha" = "" #JHA
     #"keccak" = "" #Keccak
     #"lbry" = "" #Lbry
     #"lyra2v2" = "" #Lyra2RE2
@@ -24,12 +26,16 @@ $Commands = [PSCustomObject]@{
     "neoscrypt" = "" #NeoScrypt
     #"nist5" = "" #Nist5
     #"pascal" = "" #Pascal
+    #"quark" = "" #Quark
     #"qubit" = "" #Qubit
     #"scrypt" = "" #Scrypt
     #"sia" = "" #Sia
     #"sib" = "" #Sib
     #"skein" = "" #Skein
+    #"skunk" = "" #Skunk
     #"timetravel" = "" #Timetravel
+    #"tribus" = "" #Tribus
+    #"veltor" = "" #Veltor
     #"x11" = "" #X11
     #"x11evo" = "" #X11evo
     #"x17" = "" #X17

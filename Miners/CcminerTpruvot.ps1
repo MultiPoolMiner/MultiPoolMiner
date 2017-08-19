@@ -1,19 +1,21 @@
-. .\Include.ps1
+﻿. .\Include.ps1
 
 $Path = ".\Bin\NVIDIA-TPruvot\ccminer-x64.exe"
-$Uri = "https://github.com/tpruvot/ccminer/releases/download/v2.0-tpruvot/ccminer-2.0-release-x64-cuda-8.0.7z"
+$Uri = "https://github.com/tpruvot/ccminer/releases/download/v2.2-tpruvot/ccminer-x64-2.2.7z"
 
 $Commands = [PSCustomObject]@{
     "bitcore" = "" #Bitcore
     "blake2s" = "" #Blake2s
     "blakecoin" = "" #Blakecoin
     "vanilla" = "" #BlakeVanilla
+    "c11" = "" #C11
     "cryptonight" = "" #Cryptonight
     "decred" = "" #Decred
     "equihash" = "" #Equihash
     #"ethash" = "" #Ethash
     "groestl" = "" #Groestl
-    "hmq1725" = "" #hmq1725
+    "hmq1725" = "" #HMQ1725
+    "jha" = "" #JHA
     "keccak" = "" #Keccak
     "lbry" = "" #Lbry
     "lyra2v2" = "" #Lyra2RE2
@@ -22,12 +24,16 @@ $Commands = [PSCustomObject]@{
     "neoscrypt" = "" #NeoScrypt
     "nist5" = "" #Nist5
     "pascal" = "" #Pascal
+    "quark" = "" #Quark
     "qubit" = "" #Qubit
     "scrypt" = "" #Scrypt
     "sia" = "" #Sia
     "sib" = "" #Sib
     "skein" = "" #Skein
+    "skunk" = "" #Skunk
     "timetravel" = "" #Timetravel
+    "tribus" = "" #Tribus
+    "veltor" = "" #Veltor
     "x11" = "" #X11
     "x11evo" = "" #X11evo
     "x17" = "" #X17
