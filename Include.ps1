@@ -529,7 +529,7 @@ function Get-Algorithm {
     else {$Algorithm}
 }
 
-function Get-Location {
+function Get-GeoLocation {
     param(
         [Parameter(Mandatory = $true)]
         [String]$Location

@@ -43,7 +43,7 @@ $Hashrefinery_Request | Get-Member -MemberType NoteProperty | Select-Object -Exp
             Port          = $Hashrefinery_Port
             User          = $Wallet 
             Pass          = "$WorkerName,c=BTC" 
-            Location      = Get-Location $Hashrefinery_Location
+            Location      = Get-GeoLocation $Hashrefinery_Location
             SSL           = $false
         }
     }

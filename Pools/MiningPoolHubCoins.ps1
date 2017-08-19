@@ -41,7 +41,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 Port          = $MiningPoolHub_Port
                 User          = "$UserName.$WorkerName"
                 Pass          = "x"
-                Location      = Get-Location $MiningPoolHub_Location
+                Location      = Get-GeoLocation $MiningPoolHub_Location
                 SSL           = $false
             }
         
@@ -56,7 +56,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 Port          = $MiningPoolHub_Port
                 User          = "$UserName.$WorkerName"
                 Pass          = "x"
-                Location      = Get-Location $MiningPoolHub_Location
+                Location      = Get-GeoLocation $MiningPoolHub_Location
                 SSL           = $true
             }
         }
@@ -78,7 +78,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                     Port          = $MiningPoolHub_Port
                     User          = "$UserName.$WorkerName"
                     Pass          = "x"
-                    Location      = Get-Location $MiningPoolHub_Location
+                    Location      = Get-GeoLocation $MiningPoolHub_Location
                     SSL           = $false
                 }
         
@@ -93,7 +93,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                     Port          = $MiningPoolHub_Port
                     User          = "$UserName.$WorkerName"
                     Pass          = "x"
-                    Location      = Get-Location $MiningPoolHub_Location
+                    Location      = Get-GeoLocation $MiningPoolHub_Location
                     SSL           = $true
                 }
             }
