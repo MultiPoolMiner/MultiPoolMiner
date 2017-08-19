@@ -7,5 +7,5 @@
     "in":  "Asia",
     "jp":  "Asia",
     "us":  "US",
-    "usa":  "US",
+    "usa":  "US"
 }
