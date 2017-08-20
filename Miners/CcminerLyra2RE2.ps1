@@ -1,12 +1,12 @@
 ﻿. .\Include.ps1
 
-$Path = ".\Bin\NVIDIA-Palgin\ccminer.exe"
-$Uri = "https://github.com/palginpav/ccminer/releases/download/1.1.1/palginmod_1.1_x64.zip"
+$Path = ".\Bin\Lyra2RE2-NVIDIA\ccminer.exe"
+$Uri = "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip"
 
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore
-    "blake2s" = "" #Blake2s
-    "blakecoin" = "" #Blakecoin
+    #"blake2s" = "" #Blake2s
+    #"blakecoin" = "" #Blakecoin
     #"vanilla" = "" #BlakeVanilla
     #"c11" = "" #C11
     #"cryptonight" = "" #Cryptonight
@@ -16,27 +16,27 @@ $Commands = [PSCustomObject]@{
     #"groestl" = "" #Groestl
     #"hmq1725" = "" #HMQ1725
     #"jha" = "" #JHA
-    "keccak" = "" #Keccak
-    "lbry" = "" #Lbry
+    #"keccak" = "" #Keccak
+    #"lbry" = "" #Lbry
     "lyra2v2" = "" #Lyra2RE2
     #"lyra2z" = "" #Lyra2z
-    "myr-gr" = "" #MyriadGroestl
+    #"myr-gr" = "" #MyriadGroestl
     #"neoscrypt" = "" #NeoScrypt
-    "nist5" = "" #Nist5
+    #"nist5" = "" #Nist5
     #"pascal" = "" #Pascal
     #"quark" = "" #Quark
     #"qubit" = "" #Qubit
     #"scrypt" = "" #Scrypt
     #"sia" = "" #Sia
-    "sib" = "" #Sib
-    "skein" = "" #Skein
+    #"sib" = "" #Sib
+    #"skein" = "" #Skein
     #"skunk" = "" #Skunk
     #"timetravel" = "" #Timetravel
     #"tribus" = "" #Tribus
-    "veltor" = "" #Veltor
+    #"veltor" = "" #Veltor
     #"x11" = "" #X11
-    "x11evo" = "" #X11evo
-    "x17" = "" #X17
+    #"x11evo" = "" #X11evo
+    #"x17" = "" #X17
     #"yescrypt" = "" #Yescrypt
 }
 

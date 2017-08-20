@@ -1,7 +1,7 @@
 ﻿. .\Include.ps1
 
 $Path = ".\Bin\NVIDIA-Nanashi\ccminer.exe"
-$Uri = "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip"
+$URI = "https://github.com/Nanashi-Meiyo-Meijin/ccminer/releases/download/v2.2-mod-r2/2.2-mod-r2-CUDA9.binary.zip"
 
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore
@@ -15,13 +15,13 @@ $Commands = [PSCustomObject]@{
     #"ethash" = "" #Ethash
     #"groestl" = "" #Groestl
     #"hmq1725" = "" #HMQ1725
-    #"jha" = "" #JHA
+    "jha" = "" #JHA
     #"keccak" = "" #Keccak
     #"lbry" = "" #Lbry
-    "lyra2v2" = "" #Lyra2RE2
-    #"lyra2z" = "" #Lyra2z
+    #"lyra2v2" = "" #Lyra2RE2
+    "lyra2z" = "" #Lyra2z
     #"myr-gr" = "" #MyriadGroestl
-    #"neoscrypt" = "" #NeoScrypt
+    "neoscrypt" = "" #NeoScrypt
     #"nist5" = "" #Nist5
     #"pascal" = "" #Pascal
     #"quark" = "" #Quark
