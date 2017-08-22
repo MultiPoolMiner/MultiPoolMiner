@@ -182,8 +182,10 @@ while ($true) {
         Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($AllMiners | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($AllMiners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}} -Unique) -FilePath .\Downloader.ps1 | Out-Null
     }
     if (Get-Command "Get-NetFirewallRule" -ErrorAction SilentlyContinue) {
-        if (@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @(Get-NetFirewallRule | Where-Object DisplayName -EQ "MultiPoolMiner" | Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program) | Where-Object SideIndicator -EQ "=>") {
-            Start-Process powershell ("('$(@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @(Get-NetFirewallRule | Where-Object DisplayName -EQ 'MultiPoolMiner' | Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program) | Where-Object SideIndicator -EQ '=>' | Select-Object -ExpandProperty InputObject | ConvertTo-Json -Compress)' | ConvertFrom-Json) | ForEach {New-NetFirewallRule -DisplayName 'MultiPoolMiner' -Program `$_}" -replace '"', '\"') -Verb runAs
+        if ($MinerFirewalls -eq $null) {$MinerFirewalls = Get-NetFirewallRule | Where-Object DisplayName -EQ "MultiPoolMiner" | Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program}
+        if (@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ "=>") {
+            Start-Process powershell ("('$(@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ '=>' | Select-Object -ExpandProperty InputObject | ConvertTo-Json -Compress)' | ConvertFrom-Json) | ForEach {New-NetFirewallRule -DisplayName 'MultiPoolMiner' -Program `$_}" -replace '"', '\"') -Verb runAs
+            $MinerFirewalls = $null
         }
     }
     if ($Miners.Count -eq 0) {"No Miners!" | Out-Host; Start-Sleep $Interval; continue}
