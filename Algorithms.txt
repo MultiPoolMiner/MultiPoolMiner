@@ -10,6 +10,7 @@
     "darkcoinmod":  "X11",
     "decred":  "Decred",
     "equihash":  "Equihash",
+    "eth":  "Ethash",
     "ethash":  "Ethash",
     "groestl":  "Groestl",
     "groestlcoin":  "Groestl",
@@ -37,6 +38,7 @@
     "sia":  "Sia",
     "sib":  "Sib",
     "sibcoinmod":  "Sib",
+    "sigt":  "Skunk",
     "skein":  "Skein",
     "skeincoin":  "Skein",
     "skunk":  "Skunk",
@@ -48,6 +50,7 @@
     "x11gost":  "Sib",
     "x11evo":  "X11evo",
     "x17":  "X17",
+    "xmr":  "CryptoNight",
     "yescrypt":  "Yescrypt",
     "zuikkis":  "Scrypt"
 }

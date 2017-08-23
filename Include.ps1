@@ -373,6 +373,23 @@ function Get-HashRate {
                     Start-Sleep $Interval
                 } while ($HashRates.Count -lt 6)
             }
+            "prospector" {
+                do {
+                    $Request = Invoke-WebRequest "http://$($Server):$Port/api/v0/hashrates" -UseBasicParsing
+                    
+                    $Data = $Request | ConvertFrom-Json
+                    
+                    $HashRate = $Data.rate
+
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
+
+                    $HashRates += [Double]($HashRate | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
+
+                    if (-not $Safe) {break}
+
+                    Start-Sleep $Interval
+                } while ($HashRates.Count -lt 6)
+            }
             "wrapper" {
                 do {
                     $HashRate = Get-Content ".\Wrapper_$Port.txt"
