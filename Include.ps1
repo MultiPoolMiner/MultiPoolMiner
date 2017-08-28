@@ -392,9 +392,9 @@ function Get-HashRate {
             }
             "wrapper" {
                 do {
-                    $HashRate = Get-Content ".\Wrapper_$Port.txt"
+                    $HashRate = Get-Content ".\Wrapper_$Port.txt" | ConvertFrom-Json
                 
-                    if ($HashRate -eq $null) {Start-Sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.txt"}
+                    if ($HashRate -eq $null) {Start-Sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.txt" | ConvertFrom-Json}
 
                     if ($HashRate -eq $null) {$HashRates = @(); break}
 

@@ -54,7 +54,7 @@ do {
                 "ph/s" {$HashRate *= [Math]::Pow(1000, 5)}
             }
 
-            $HashRate | Set-Content ".\Wrapper_$Id.txt"
+            $HashRate | ConvertTo-Json | Set-Content ".\Wrapper_$Id.txt"
         }
 
         Write-Host $Line -NoNewline
