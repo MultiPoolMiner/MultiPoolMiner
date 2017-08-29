@@ -11,7 +11,7 @@ if (-not $MiningPoolHub_Request.success) {return}
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$MiningPoolHub_Locations = "europe", "us", "asia"
+$MiningPoolHub_Regions = "europe", "us", "asia"
 
 $MiningPoolHub_Request.return | ForEach-Object {
     $MiningPoolHub_Hosts = $_.host_list.split(";")
@@ -26,8 +26,8 @@ $MiningPoolHub_Request.return | ForEach-Object {
     if ((Get-Stat -Name "MiningPoolHubCoins_$($MiningPoolHub_Coin)_Profit") -eq $null) {$Stat = Set-Stat -Name "MiningPoolHubCoins_$($MiningPoolHub_Coin)_Profit" -Value ([Double]$_.profit / $Divisor * (1 - 0.05))}
     else {$Stat = Set-Stat -Name "$($Name)_$($MiningPoolHub_Coin)_Profit" -Value ([Double]$_.profit / $Divisor)}
 
-    $MiningPoolHub_Locations | ForEach-Object {
-        $MiningPoolHub_Location = $_
+    $MiningPoolHub_Regions | ForEach-Object {
+        $MiningPoolHub_Region = $_
         
         if ($UserName) {
             [PSCustomObject]@{
@@ -37,11 +37,11 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Location*"} | Select-Object -First 1
+                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Region*"} | Select-Object -First 1
                 Port          = $MiningPoolHub_Port
                 User          = "$UserName.$WorkerName"
                 Pass          = "x"
-                Location      = Get-GeoLocation $MiningPoolHub_Location
+                Region        = Get-Region $MiningPoolHub_Region
                 SSL           = $false
             }
         
@@ -52,19 +52,19 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+ssl"
-                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Location*"} | Select-Object -First 1
+                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Region*"} | Select-Object -First 1
                 Port          = $MiningPoolHub_Port
                 User          = "$UserName.$WorkerName"
                 Pass          = "x"
-                Location      = Get-GeoLocation $MiningPoolHub_Location
+                Region        = Get-Region $MiningPoolHub_Region
                 SSL           = $true
             }
         }
     }
 
     if ($MiningPoolHub_Algorithm -eq "Ethash" -and $MiningPoolHub_Coin -NotLike "*ethereum*") {
-        $MiningPoolHub_Locations | ForEach-Object {
-            $MiningPoolHub_Location = $_
+        $MiningPoolHub_Regions | ForEach-Object {
+            $MiningPoolHub_Region = $_
         
             if ($UserName) {
                 [PSCustomObject]@{
@@ -74,11 +74,11 @@ $MiningPoolHub_Request.return | ForEach-Object {
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+tcp"
-                    Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Location*"} | Select-Object -First 1
+                    Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Region*"} | Select-Object -First 1
                     Port          = $MiningPoolHub_Port
                     User          = "$UserName.$WorkerName"
                     Pass          = "x"
-                    Location      = Get-GeoLocation $MiningPoolHub_Location
+                    Region        = Get-Region $MiningPoolHub_Region
                     SSL           = $false
                 }
         
@@ -89,11 +89,11 @@ $MiningPoolHub_Request.return | ForEach-Object {
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+ssl"
-                    Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Location*"} | Select-Object -First 1
+                    Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Region*"} | Select-Object -First 1
                     Port          = $MiningPoolHub_Port
                     User          = "$UserName.$WorkerName"
                     Pass          = "x"
-                    Location      = Get-GeoLocation $MiningPoolHub_Location
+                    Region        = Get-Region $MiningPoolHub_Region
                     SSL           = $true
                 }
             }

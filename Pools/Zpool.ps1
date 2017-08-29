@@ -11,7 +11,7 @@ if (-not $Zpool_Request) {return}
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$Zpool_Location = "us"
+$Zpool_Region = "us"
 
 $Zpool_Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     $Zpool_Host = "$_.mine.zpool.ca"
@@ -46,7 +46,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProp
             Port          = $Zpool_Port
             User          = $Wallet
             Pass          = "$WorkerName,c=BTC"
-            Location      = Get-GeoLocation $Zpool_Location
+            Region        = Get-Region $Zpool_Region
             SSL           = $false
         }
     }

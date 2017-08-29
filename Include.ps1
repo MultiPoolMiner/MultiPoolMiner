@@ -546,13 +546,13 @@ function Get-Algorithm {
     else {$Algorithm}
 }
 
-function Get-GeoLocation {
+function Get-Region {
     param(
         [Parameter(Mandatory = $true)]
         [String]$Location
     )
     
-    $Locations = Get-Content "Locations.txt" | ConvertFrom-Json
+    $Locations = Get-Content "Regions.txt" | ConvertFrom-Json
 
     $Location = (Get-Culture).TextInfo.ToTitleCase(($Location -replace "-", " " -replace "_", " ")) -replace " "
 

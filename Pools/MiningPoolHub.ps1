@@ -11,7 +11,7 @@ if (-not $MiningPoolHub_Request.success) {return}
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
-$MiningPoolHub_Locations = "europe", "us", "asia"
+$MiningPoolHub_Regions = "europe", "us", "asia"
 
 $MiningPoolHub_Request.return | ForEach-Object {
     $MiningPoolHub_Hosts = $_.all_host_list.split(";")
@@ -25,8 +25,8 @@ $MiningPoolHub_Request.return | ForEach-Object {
 
     $Stat = Set-Stat -Name "$($Name)_$($MiningPoolHub_Algorithm)_Profit" -Value ([Double]$_.profit / $Divisor)
 
-    $MiningPoolHub_Locations | ForEach-Object {
-        $MiningPoolHub_Location = $_
+    $MiningPoolHub_Regions | ForEach-Object {
+        $MiningPoolHub_Region = $_
 
         if ($UserName) {
             [PSCustomObject]@{
@@ -36,11 +36,11 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Location*"} | Select-Object -First 1
+                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Region*"} | Select-Object -First 1
                 Port          = $MiningPoolHub_Port
                 User          = "$UserName.$WorkerName"
                 Pass          = "x"
-                Location      = Get-GeoLocation $MiningPoolHub_Location
+                Region        = Get-Region $MiningPoolHub_Region
                 SSL           = $false
             }
         
@@ -51,11 +51,11 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+ssl"
-                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Location*"} | Select-Object -First 1
+                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Region*"} | Select-Object -First 1
                 Port          = $MiningPoolHub_Port
                 User          = "$UserName.$WorkerName"
                 Pass          = "x"
-                Location      = Get-GeoLocation $MiningPoolHub_Location
+                Region        = Get-Region $MiningPoolHub_Region
                 SSL           = $true
             }
         }
