@@ -15,7 +15,7 @@ $Port = 3336 + ($ThreadIndex * 10000)
 ([PSCustomObject]@{
         gpu_thread_num   = 1
         gpu_threads_conf = @([PSCustomObject]@{index = $ThreadIndex; intensity = 1000; worksize = 8; affine_to_cpu = $true})
-        platform_index   = 0
+        platform_index   = [array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'Advanced Micro Devices, Inc.')
         use_tls          = $false
         tls_secure_algo  = $true
         tls_fingerprint  = ""

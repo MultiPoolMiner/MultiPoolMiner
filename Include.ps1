@@ -1,4 +1,6 @@
-﻿function Set-Stat {
+﻿Add-Type -Path .\OpenCL\*.cs
+
+function Set-Stat {
     param(
         [Parameter(Mandatory = $true)]
         [String]$Name, 

@@ -2,7 +2,7 @@
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\Ethash-Ethminer\\ethminer.exe",
-        "Arguments":  "-S $($Pools.Ethash.Host):$($Pools.Ethash.Port) -O $($Pools.Ethash.User):$($Pools.Ethash.Pass) -SP 2 --opencl --opencl-platform $([array]::IndexOf((Get-WmiObject -class CIM_VideoController | Select-Object -ExpandProperty AdapterCompatibility), 'Advanced Micro Devices, Inc.'))",
+        "Arguments":  "-S $($Pools.Ethash.Host):$($Pools.Ethash.Port) -O $($Pools.Ethash.User):$($Pools.Ethash.Pass) -SP 2 --opencl --opencl-platform $([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'Advanced Micro Devices, Inc.'))",
         "HashRates":  {"Ethash":  "$($Stats.EthminerAmd_Ethash_HashRate.Week)"},
         "API":  "Wrapper",
         "Port":  "13333",
