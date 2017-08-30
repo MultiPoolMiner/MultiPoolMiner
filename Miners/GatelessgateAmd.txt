@@ -52,7 +52,7 @@
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\GatelessGate\\GatelessGate.exe",
-        "Arguments":  "--api-port 14028 --api-listen -k pascal -o $($Pools.Pascal.Protocol)://$($Pools.Pascal.Host):$($Pools.Pascal.Port) -u $($Pools.Pascal.User) -p $($Pools.Pascal.Pass) --gpu-threads 1 --worksize 64 --intensity 21",
+        "Arguments":  "--api-port 14028 --api-listen -k pascal -o $($Pools.Pascal.Protocol)://$($Pools.Pascal.Host):$($Pools.Pascal.Port) -u $($Pools.Pascal.User) -p $($Pools.Pascal.Pass) --gpu-threads 1 --worksize 64 --intensity 21 --gpu-platform $([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'Advanced Micro Devices, Inc.'))",
         "HashRates":  {"Pascal":  "$($Stats.GatelessgateAmd_Pascal_HashRate.Week)"},
         "API":  "Xgminer",
         "Port":  14028,
