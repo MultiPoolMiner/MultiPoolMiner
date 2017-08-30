@@ -17,6 +17,8 @@ $DownloadList | ForEach-Object {
         try {
             Write-Progress -Activity "Downloader" -Status $Path -CurrentOperation "Acquiring Online ($URI)" -PercentComplete $Progress
 
+            $ProgressPreferenceBackup = $ProgressPreference
+            $ProgressPreference = "SilentlyContinue"
             if ($URI -and (Split-Path $URI -Leaf) -eq (Split-Path $Path -Leaf)) {
                 New-Item (Split-Path $Path) -ItemType "Directory" | Out-Null
                 Invoke-WebRequest $URI -OutFile $Path -UseBasicParsing -ErrorAction Stop
@@ -24,6 +26,7 @@ $DownloadList | ForEach-Object {
             else {
                 Expand-WebRequest $URI (Split-Path $Path) -ErrorAction Stop
             }
+            $ProgressPreference = $ProgressPreferenceBackup
         }
         catch {
             Write-Progress -Activity "Downloader" -Status $Path -CurrentOperation "Acquiring Offline (Computer)" -PercentComplete $Progress
