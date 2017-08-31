@@ -14,10 +14,11 @@ $DownloadList | ForEach-Object {
     $Progress += 100 / $DownloadList.Count
 
     if (-not (Test-Path $Path)) {
+        $ProgressPreferenceBackup = $ProgressPreference
         try {
+            $ProgressPreference = $ProgressPreferenceBackup
             Write-Progress -Activity "Downloader" -Status $Path -CurrentOperation "Acquiring Online ($URI)" -PercentComplete $Progress
 
-            $ProgressPreferenceBackup = $ProgressPreference
             $ProgressPreference = "SilentlyContinue"
             if ($URI -and (Split-Path $URI -Leaf) -eq (Split-Path $Path -Leaf)) {
                 New-Item (Split-Path $Path) -ItemType "Directory" | Out-Null
@@ -26,13 +27,14 @@ $DownloadList | ForEach-Object {
             else {
                 Expand-WebRequest $URI (Split-Path $Path) -ErrorAction Stop
             }
-            $ProgressPreference = $ProgressPreferenceBackup
         }
         catch {
+            $ProgressPreference = $ProgressPreferenceBackup
             Write-Progress -Activity "Downloader" -Status $Path -CurrentOperation "Acquiring Offline (Computer)" -PercentComplete $Progress
             
             if ($URI) {Write-Host -BackgroundColor Yellow -ForegroundColor Black "Cannot download $($Path) distributed at $($URI). "}
             else {Write-Host -BackgroundColor Yellow -ForegroundColor Black "Cannot download $($Path). "}
+            $ProgressPreference = "SilentlyContinue"
             
             if ($Searchable) {
                 Write-Host -BackgroundColor Yellow -ForegroundColor Black "Searching for $($Path). "
@@ -50,6 +52,7 @@ $DownloadList | ForEach-Object {
                 else {Write-Host -BackgroundColor Yellow -ForegroundColor Black "Cannot find $($Path). "}
             }
         }
+        $ProgressPreference = $ProgressPreferenceBackup
     }
 }
 

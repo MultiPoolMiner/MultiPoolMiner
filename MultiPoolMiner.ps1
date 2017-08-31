@@ -398,7 +398,6 @@ while ($true) {
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
     for ($i = $Interval; $i -gt 0; $i -= $Interval / 10) {
-        Write-Host $i
         $i -= Measure-Command {Get-Job | Receive-Job} | Select-Object -ExpandProperty TotalSeconds
         Start-Sleep ($Interval / 10)
     }
