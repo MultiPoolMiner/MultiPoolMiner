@@ -32,12 +32,12 @@ $DownloadList | ForEach-Object {
             $ProgressPreference = $ProgressPreferenceBackup
             Write-Progress -Activity "Downloader" -Status $Path -CurrentOperation "Acquiring Offline (Computer)" -PercentComplete $Progress
             
-            if ($URI) {Write-Host -BackgroundColor Yellow -ForegroundColor Black "Cannot download $($Path) distributed at $($URI). "}
-            else {Write-Host -BackgroundColor Yellow -ForegroundColor Black "Cannot download $($Path). "}
             $ProgressPreference = "SilentlyContinue"
+            if ($URI) {Write-Warning "Cannot download $($Path) distributed at $($URI). "}
+            else {Write-Warning "Cannot download $($Path). "}
             
             if ($Searchable) {
-                Write-Host -BackgroundColor Yellow -ForegroundColor Black "Searching for $($Path). "
+                Write-Warning "Searching for $($Path). "
 
                 $Path_Old = Get-PSDrive -PSProvider FileSystem | ForEach-Object {Get-ChildItem -Path $_.Root -Include (Split-Path $Path -Leaf) -Recurse -ErrorAction Ignore} | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
                 $Path_New = $Path
@@ -48,8 +48,8 @@ $DownloadList | ForEach-Object {
                 (Split-Path $Path_Old) | Copy-Item -Destination (Split-Path $Path_New) -Recurse -Force
             }
             else {
-                if ($URI) {Write-Host -BackgroundColor Yellow -ForegroundColor Black "Cannot find $($Path) distributed at $($URI). "}
-                else {Write-Host -BackgroundColor Yellow -ForegroundColor Black "Cannot find $($Path). "}
+                if ($URI) {Write-Warning "Cannot find $($Path) distributed at $($URI). "}
+                else {Write-Warning "Cannot find $($Path). "}
             }
         }
         $ProgressPreference = $ProgressPreferenceBackup
