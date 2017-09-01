@@ -13,22 +13,22 @@ $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $MiningPoolHub_Regions = "europe", "us", "asia"
 
-$MiningPoolHub_Request.return | ForEach-Object {
-    $MiningPoolHub_Hosts = $_.host_list.split(";")
-    $MiningPoolHub_Port = $_.port
-    $MiningPoolHub_Algorithm = Get-Algorithm $_.algo
-    $MiningPoolHub_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.coin_name -replace "-", " " -replace "_", " ")) -replace " "
+$MiningPoolHub_Regions | ForEach-Object {
+    $MiningPoolHub_Region = $_
 
-    if ($MiningPoolHub_Algorithm -eq "Sia") {$MiningPoolHub_Algorithm = "SiaClaymore"} #temp fix
+    $MiningPoolHub_Request.return | ForEach-Object {
+        $MiningPoolHub_Hosts = $_.host_list.split(";")
+        $MiningPoolHub_Port = $_.port
+        $MiningPoolHub_Algorithm = Get-Algorithm $_.algo
+        $MiningPoolHub_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.coin_name -replace "-", " " -replace "_", " ")) -replace " "
 
-    $Divisor = 1000000000
+        if ($MiningPoolHub_Algorithm -eq "Sia") {$MiningPoolHub_Algorithm = "SiaClaymore"} #temp fix
 
-    if ((Get-Stat -Name "MiningPoolHubCoins_$($MiningPoolHub_Coin)_Profit") -eq $null) {$Stat = Set-Stat -Name "MiningPoolHubCoins_$($MiningPoolHub_Coin)_Profit" -Value ([Double]$_.profit / $Divisor * (1 - 0.05))}
-    else {$Stat = Set-Stat -Name "$($Name)_$($MiningPoolHub_Coin)_Profit" -Value ([Double]$_.profit / $Divisor)}
+        $Divisor = 1000000000
 
-    $MiningPoolHub_Regions | ForEach-Object {
-        $MiningPoolHub_Region = $_
-        
+        if ((Get-Stat -Name "MiningPoolHubCoins_$($MiningPoolHub_Coin)_Profit") -eq $null) {$Stat = Set-Stat -Name "MiningPoolHubCoins_$($MiningPoolHub_Coin)_Profit" -Value ([Double]$_.profit / $Divisor * (1 - 0.05))}
+        else {$Stat = Set-Stat -Name "$($Name)_$($MiningPoolHub_Coin)_Profit" -Value ([Double]$_.profit / $Divisor)}
+    
         if ($UserName) {
             [PSCustomObject]@{
                 Algorithm     = $MiningPoolHub_Algorithm
@@ -59,14 +59,8 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 Region        = Get-Region $MiningPoolHub_Region
                 SSL           = $true
             }
-        }
-    }
-
-    if ($MiningPoolHub_Algorithm -eq "Ethash" -and $MiningPoolHub_Coin -NotLike "*ethereum*") {
-        $MiningPoolHub_Regions | ForEach-Object {
-            $MiningPoolHub_Region = $_
         
-            if ($UserName) {
+            if ($MiningPoolHub_Algorithm -eq "Ethash" -and $MiningPoolHub_Coin -NotLike "*ethereum*") {
                 [PSCustomObject]@{
                     Algorithm     = "$($MiningPoolHub_Algorithm)2gb"
                     Info          = $MiningPoolHub_Coin

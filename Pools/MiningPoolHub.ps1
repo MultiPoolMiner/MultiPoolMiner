@@ -13,20 +13,20 @@ $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $MiningPoolHub_Regions = "europe", "us", "asia"
 
-$MiningPoolHub_Request.return | ForEach-Object {
-    $MiningPoolHub_Hosts = $_.all_host_list.split(";")
-    $MiningPoolHub_Port = $_.algo_switch_port
-    $MiningPoolHub_Algorithm = Get-Algorithm $_.algo
-    $MiningPoolHub_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.current_mining_coin -replace "-", " " -replace "_", " ")) -replace " "
+$MiningPoolHub_Regions | ForEach-Object {
+    $MiningPoolHub_Region = $_
 
-    if ($MiningPoolHub_Algorithm -eq "Sia") {$MiningPoolHub_Algorithm = "SiaClaymore"} #temp fix
+    $MiningPoolHub_Request.return | ForEach-Object {
+        $MiningPoolHub_Hosts = $_.all_host_list.split(";")
+        $MiningPoolHub_Port = $_.algo_switch_port
+        $MiningPoolHub_Algorithm = Get-Algorithm $_.algo
+        $MiningPoolHub_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.current_mining_coin -replace "-", " " -replace "_", " ")) -replace " "
 
-    $Divisor = 1000000000
+        if ($MiningPoolHub_Algorithm -eq "Sia") {$MiningPoolHub_Algorithm = "SiaClaymore"} #temp fix
 
-    $Stat = Set-Stat -Name "$($Name)_$($MiningPoolHub_Algorithm)_Profit" -Value ([Double]$_.profit / $Divisor)
+        $Divisor = 1000000000
 
-    $MiningPoolHub_Regions | ForEach-Object {
-        $MiningPoolHub_Region = $_
+        $Stat = Set-Stat -Name "$($Name)_$($MiningPoolHub_Algorithm)_Profit" -Value ([Double]$_.profit / $Divisor)
 
         if ($UserName) {
             [PSCustomObject]@{
