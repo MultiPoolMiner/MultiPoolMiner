@@ -186,6 +186,7 @@ function Get-HashRate {
     )
     
     $Server = "localhost"
+    $Timeout = 10 #seconds
     
     $Multiplier = 1000
     $Delta = 0.05
@@ -202,6 +203,8 @@ function Get-HashRate {
                     $Client = New-Object System.Net.Sockets.TcpClient $server, $port
                     $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
                     $Reader = New-Object System.IO.StreamReader $Client.GetStream()
+                    $client.SendTimeout = $Timeout * 1000
+                    $client.ReceiveTimeout = $Timeout * 1000
                     $Writer.AutoFlush = $true
 
                     $Writer.WriteLine($Message)
@@ -242,6 +245,8 @@ function Get-HashRate {
                     $Client = New-Object System.Net.Sockets.TcpClient $server, $port
                     $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
                     $Reader = New-Object System.IO.StreamReader $Client.GetStream()
+                    $client.SendTimeout = $Timeout * 1000
+                    $client.ReceiveTimeout = $Timeout * 1000
                     $Writer.AutoFlush = $true
 
                     $Writer.WriteLine($Message)
@@ -266,6 +271,8 @@ function Get-HashRate {
                 $Client = New-Object System.Net.Sockets.TcpClient $server, $port
                 $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
                 $Reader = New-Object System.IO.StreamReader $Client.GetStream()
+                $client.SendTimeout = $Timeout * 1000
+                $client.ReceiveTimeout = $Timeout * 1000
                 $Writer.AutoFlush = $true
 
                 do {
@@ -293,6 +300,8 @@ function Get-HashRate {
                 $Client = New-Object System.Net.Sockets.TcpClient $server, $port
                 $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
                 $Reader = New-Object System.IO.StreamReader $Client.GetStream()
+                $client.SendTimeout = $Timeout * 1000
+                $client.ReceiveTimeout = $Timeout * 1000
                 $Writer.AutoFlush = $true
 
                 do {
@@ -318,6 +327,8 @@ function Get-HashRate {
                 $Client = New-Object System.Net.Sockets.TcpClient $server, $port
                 $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
                 $Reader = New-Object System.IO.StreamReader $Client.GetStream()
+                $client.SendTimeout = $Timeout * 1000
+                $client.ReceiveTimeout = $Timeout * 1000
                 $Writer.AutoFlush = $true
 
                 do {
@@ -339,7 +350,7 @@ function Get-HashRate {
             }
             "claymore" {
                 do {
-                    $Request = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing
+                    $Request = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing -TimeoutSec $Timeout
                     
                     $Data = $Request.Content.Substring($Request.Content.IndexOf("{"), $Request.Content.LastIndexOf("}") - $Request.Content.IndexOf("{") + 1) | ConvertFrom-Json
                     
@@ -358,7 +369,7 @@ function Get-HashRate {
             }
             "fireice" {
                 do {
-                    $Request = Invoke-WebRequest "http://$($Server):$Port/h" -UseBasicParsing
+                    $Request = Invoke-WebRequest "http://$($Server):$Port/h" -UseBasicParsing -TimeoutSec $Timeout
                     
                     $Data = $Request.Content -split "</tr>" -match "total*" -split "<td>" -replace "<[^>]*>", ""
                     
@@ -377,7 +388,7 @@ function Get-HashRate {
             }
             "prospector" {
                 do {
-                    $Request = Invoke-WebRequest "http://$($Server):$Port/api/v0/hashrates" -UseBasicParsing
+                    $Request = Invoke-WebRequest "http://$($Server):$Port/api/v0/hashrates" -UseBasicParsing -TimeoutSec $Timeout
                     
                     $Data = $Request | ConvertFrom-Json
                     
