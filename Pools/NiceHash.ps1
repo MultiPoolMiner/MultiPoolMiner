@@ -22,6 +22,8 @@ $NiceHash_Regions | ForEach-Object {
         $NiceHash_Algorithm = Get-Algorithm $_.name
         $NiceHash_Coin = ""
 
+        if ($NiceHash_Algorithm -eq "Sia") {$NiceHash_Algorithm = "SiaNiceHash"} #temp fix
+
         $Divisor = 1000000000
 
         $Stat = Set-Stat -Name "$($Name)_$($NiceHash_Algorithm)_Profit" -Value ([Double]$_.paying / $Divisor)
