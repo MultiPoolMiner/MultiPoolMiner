@@ -4,7 +4,7 @@ $Path = ".\Bin\Prospector\prospector.exe"
 $Uri = "https://github.com/semtexzv/Prospector/releases/download/0.0.10-ALPHA/prospector-0.0.10-ALPHA-win64.zip"
 
 $Commands = [PSCustomObject]@{
-    "xmr" = @() #CryptoNight
+    #"xmr" = @() #CryptoNight
     "eth" = @() #Ethash
     "sia" = @() #Sia
     "sigt" = @() #Skunk
@@ -14,7 +14,7 @@ $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 $Port = 42000
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
-"[general]
+    "[general]
 gpu-coin = ""$_""
 [pools.$_]
 url = ""stratum+tcp://$($Pools.$(Get-Algorithm($_)).Host):$($Pools.$(Get-Algorithm($_)).Port)/""
