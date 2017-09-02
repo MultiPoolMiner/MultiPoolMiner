@@ -1,6 +1,6 @@
 ﻿. .\Include.ps1
 
-$Threads = 2
+$Threads = 4
 
 $Path = ".\Bin\Excavator\excavator.exe"
 $Uri = "https://github.com/nicehash/excavator/releases/"
