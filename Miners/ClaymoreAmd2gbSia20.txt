@@ -1,0 +1,21 @@
+[
+    {
+        "Type":  "AMD",
+        "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "Arguments":  "-r -1 -mport 13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools.Sia.Host):$($Pools.Sia.Port) -dwal $($Pools.Sia.User) -dpsw $($Pools.Sia.Pass) -dcoin sc -dcri 20 -platform 1",
+        "HashRates":  {"Ethash2gb":  "$($Stats.ClaymoreAmd2gbSia20_Ethash2gb_HashRate.Week)","Sia":  "$($Stats.ClaymoreAmd2gbSia20_Sia_HashRate.Week)"},
+        "API":  "Claymore",
+        "Port":  "13333",
+        "Wrap":  false
+    },
+    {
+        "Type":  "AMD",
+        "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "Arguments":  "-r -1 -mport 13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools.SiaClaymore.Host):$($Pools.SiaClaymore.Port) -dwal $($Pools.SiaClaymore.User) -dpsw $($Pools.SiaClaymore.Pass) -dcoin sc -dcri 20 -platform 1",
+        "HashRates":  {"Ethash2gb":  "$($Stats.ClaymoreAmd2gbSia20_Ethash2gb_HashRate.Week)","SiaClaymore":  "$($Stats.ClaymoreAmd2gbSia20_SiaClaymore_HashRate.Week)"},
+        "API":  "Claymore",
+        "Port":  "13333",
+        "Wrap":  false
+    }
+]
+

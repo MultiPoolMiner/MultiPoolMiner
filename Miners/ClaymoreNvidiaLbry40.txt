@@ -1,0 +1,12 @@
+[
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "Arguments":  "-r -1 -mport 23333 -epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -allcoins 1 -dpool $($Pools.Lbry.Host):$($Pools.Lbry.Port) -dwal $($Pools.Lbry.User) -dpsw $($Pools.Lbry.Pass) -dcoin lbc -dcri 40 -platform 2",
+        "HashRates":  {"Ethash":  "$($Stats.ClaymoreNvidiaLbry40_Ethash_HashRate.Week)","Lbry":  "$($Stats.ClaymoreNvidiaLbry40_Lbry_HashRate.Week)"},
+        "API":  "Claymore",
+        "Port":  "23333",
+        "Wrap":  false
+    }
+]
+
