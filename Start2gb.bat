@@ -1,7 +1,0 @@
-setx GPU_FORCE_64BIT_PTR 1
-setx GPU_MAX_HEAP_SIZE 100
-setx GPU_USE_SYNC_OBJECTS 1
-setx GPU_MAX_ALLOC_PERCENT 100
-setx GPU_SINGLE_ALLOC_PERCENT 100
-
-powershell -version 5.0 -noexit -executionpolicy bypass -windowstyle maximized -command "&.\multipoolminer.ps1 -wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -username aaronsace -workername multipoolminer -interval 60 -region europe -ssl -type amd,nvidia,cpu -algorithm cryptonight,decred,ethash2gb,equihash,groestl,lbry,lyra2z,neoscrypt,pascal,sia,sib -poolname miningpoolhubcoins -currency btc,usd -donate 10"

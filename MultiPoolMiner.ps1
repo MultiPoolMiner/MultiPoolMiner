@@ -1,7 +1,7 @@
 ﻿param(
     [Parameter(Mandatory = $false)]
     [String]$Wallet, 
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [String]$UserName, 
     [Parameter(Mandatory = $false)]
     [String]$WorkerName = "multipoolminer", 
