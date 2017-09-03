@@ -22,15 +22,45 @@ $NiceHash_Regions | ForEach-Object {
         $NiceHash_Algorithm = Get-Algorithm $_.name
         $NiceHash_Coin = ""
 
-        if ($NiceHash_Algorithm -eq "Sia") {$NiceHash_Algorithm = "SiaNiceHash"} #temp fix
-
         $Divisor = 1000000000
 
         $Stat = Set-Stat -Name "$($Name)_$($NiceHash_Algorithm)_Profit" -Value ([Double]$_.paying / $Divisor)
         
         if ($Wallet) {
+            if ($NiceHash_Algorithm -ne "Sia") {
+                [PSCustomObject]@{
+                    Algorithm     = $NiceHash_Algorithm
+                    Info          = $NiceHash_Coin
+                    Price         = $Stat.Live
+                    StablePrice   = $Stat.Week
+                    MarginOfError = $Stat.Week_Fluctuation
+                    Protocol      = "stratum+tcp"
+                    Host          = $NiceHash_Host
+                    Port          = $NiceHash_Port
+                    User          = "$Wallet.$WorkerName"
+                    Pass          = "x"
+                    Region        = Get-Region $NiceHash_Region
+                    SSL           = $false
+                }
+
+                [PSCustomObject]@{
+                    Algorithm     = $NiceHash_Algorithm
+                    Info          = $NiceHash_Coin
+                    Price         = $Stat.Live
+                    StablePrice   = $Stat.Week
+                    MarginOfError = $Stat.Week_Fluctuation
+                    Protocol      = "stratum+ssl"
+                    Host          = $NiceHash_Host
+                    Port          = $NiceHash_Port
+                    User          = "$Wallet.$WorkerName"
+                    Pass          = "x"
+                    Region        = Get-Region $NiceHash_Region
+                    SSL           = $true
+                }
+            }
+
             [PSCustomObject]@{
-                Algorithm     = $NiceHash_Algorithm
+                Algorithm     = "$($NiceHash_Algorithm)NiceHash"
                 Info          = $NiceHash_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
@@ -45,7 +75,7 @@ $NiceHash_Regions | ForEach-Object {
             }
 
             [PSCustomObject]@{
-                Algorithm     = $NiceHash_Algorithm
+                Algorithm     = "$($NiceHash_Algorithm)NiceHash"
                 Info          = $NiceHash_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week

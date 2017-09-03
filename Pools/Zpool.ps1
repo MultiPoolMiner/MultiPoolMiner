@@ -49,5 +49,22 @@ $Zpool_Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProp
             Region        = Get-Region $Zpool_Region
             SSL           = $false
         }
+
+        if ($Zpool_Algorithm -ne "Decred") {
+            [PSCustomObject]@{
+                Algorithm     = "$($Zpool_Algorithm)NiceHash"
+                Info          = $Zpool_Coin
+                Price         = $Stat.Live
+                StablePrice   = $Stat.Week
+                MarginOfError = $Stat.Week_Fluctuation
+                Protocol      = "stratum+tcp"
+                Host          = $Zpool_Host
+                Port          = $Zpool_Port
+                User          = $Wallet
+                Pass          = "$WorkerName,c=BTC"
+                Region        = Get-Region $Zpool_Region
+                SSL           = $false
+            }
+        }
     }
 }
