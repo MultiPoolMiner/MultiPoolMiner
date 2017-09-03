@@ -13,24 +13,26 @@ $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $MiningPoolHub_Regions = "europe", "us", "asia"
 
-$MiningPoolHub_Regions | ForEach-Object {
-    $MiningPoolHub_Region = $_
+$MiningPoolHub_Request.return | ForEach-Object {
+    $MiningPoolHub_Hosts = $_.all_host_list.split(";")
+    $MiningPoolHub_Port = $_.algo_switch_port
+    $MiningPoolHub_Algorithm = $_.algo
+    $MiningPoolHub_Algorithm_Norm = Get-Algorithm $MiningPoolHub_Algorithm
+    $MiningPoolHub_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.current_mining_coin -replace "-", " " -replace "_", " ")) -replace " "
 
-    $MiningPoolHub_Request.return | ForEach-Object {
-        $MiningPoolHub_Hosts = $_.all_host_list.split(";")
-        $MiningPoolHub_Port = $_.algo_switch_port
-        $MiningPoolHub_Algorithm = Get-Algorithm $_.algo
-        $MiningPoolHub_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.current_mining_coin -replace "-", " " -replace "_", " ")) -replace " "
+    if ($MiningPoolHub_Algorithm_Norm -eq "Sia") {$MiningPoolHub_Algorithm_Norm = "SiaClaymore"} #temp fix
 
-        if ($MiningPoolHub_Algorithm -eq "Sia") {$MiningPoolHub_Algorithm = "SiaClaymore"} #temp fix
+    $Divisor = 1000000000
 
-        $Divisor = 1000000000
+    $Stat = Set-Stat -Name "$($Name)_$($MiningPoolHub_Algorithm_Norm)_Profit" -Value ([Double]$_.profit / $Divisor)
 
-        $Stat = Set-Stat -Name "$($Name)_$($MiningPoolHub_Algorithm)_Profit" -Value ([Double]$_.profit / $Divisor)
+    $MiningPoolHub_Regions | ForEach-Object {
+        $MiningPoolHub_Region = $_
+        $MiningPoolHub_Region_Norm = Get-Region $MiningPoolHub_Region
 
         if ($UserName) {
             [PSCustomObject]@{
-                Algorithm     = $MiningPoolHub_Algorithm
+                Algorithm     = $MiningPoolHub_Algorithm_Norm
                 Info          = $MiningPoolHub_Coin
                 Price         = $Stat.Day #temp fix
                 StablePrice   = $Stat.Week
@@ -40,12 +42,12 @@ $MiningPoolHub_Regions | ForEach-Object {
                 Port          = $MiningPoolHub_Port
                 User          = "$UserName.$WorkerName"
                 Pass          = "x"
-                Region        = Get-Region $MiningPoolHub_Region
+                Region        = $MiningPoolHub_Region_Norm
                 SSL           = $false
             }
         
             [PSCustomObject]@{
-                Algorithm     = $MiningPoolHub_Algorithm
+                Algorithm     = $MiningPoolHub_Algorithm_Norm
                 Info          = $MiningPoolHub_Coin
                 Price         = $Stat.Day #temp fix
                 StablePrice   = $Stat.Week
@@ -55,7 +57,7 @@ $MiningPoolHub_Regions | ForEach-Object {
                 Port          = $MiningPoolHub_Port
                 User          = "$UserName.$WorkerName"
                 Pass          = "x"
-                Region        = Get-Region $MiningPoolHub_Region
+                Region        = $MiningPoolHub_Region_Norm
                 SSL           = $true
             }
         }

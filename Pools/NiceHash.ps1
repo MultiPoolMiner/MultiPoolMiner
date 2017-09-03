@@ -12,80 +12,82 @@ if (-not $NiceHash_Request) {return}
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $NiceHash_Regions = "eu", "usa", "hk", "jp", "in", "br"
-
-$NiceHash_Regions | ForEach-Object {
-    $NiceHash_Region = $_
     
-    $NiceHash_Request.result.simplemultialgo | ForEach-Object {
-        $NiceHash_Host = "$($_.name).$NiceHash_Region.nicehash.com"
-        $NiceHash_Port = $_.port
-        $NiceHash_Algorithm = Get-Algorithm $_.name
-        $NiceHash_Coin = ""
+$NiceHash_Request.result.simplemultialgo | ForEach-Object {
+    $NiceHash_Host = "nicehash.com"
+    $NiceHash_Port = $_.port
+    $NiceHash_Algorithm = $_.name
+    $NiceHash_Algorithm_Norm = Get-Algorithm $NiceHash_Algorithm
+    $NiceHash_Coin = ""
 
-        $Divisor = 1000000000
+    $Divisor = 1000000000
 
-        $Stat = Set-Stat -Name "$($Name)_$($NiceHash_Algorithm)_Profit" -Value ([Double]$_.paying / $Divisor)
+    $Stat = Set-Stat -Name "$($Name)_$($NiceHash_Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor)
+
+    $NiceHash_Regions | ForEach-Object {
+        $NiceHash_Region = $_
+        $NiceHash_Region_Norm = Get-Region $NiceHash_Region
         
         if ($Wallet) {
-            if ($NiceHash_Algorithm -ne "Sia") {
+            if (($NiceHash_Algorithm_Norm) -ne "Sia") {
                 [PSCustomObject]@{
-                    Algorithm     = $NiceHash_Algorithm
+                    Algorithm     = $NiceHash_Algorithm_Norm
                     Info          = $NiceHash_Coin
                     Price         = $Stat.Live
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+tcp"
-                    Host          = $NiceHash_Host
+                    Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
                     Port          = $NiceHash_Port
                     User          = "$Wallet.$WorkerName"
                     Pass          = "x"
-                    Region        = Get-Region $NiceHash_Region
+                    Region        = $NiceHash_Region_Norm
                     SSL           = $false
                 }
 
                 [PSCustomObject]@{
-                    Algorithm     = $NiceHash_Algorithm
+                    Algorithm     = $NiceHash_Algorithm_Norm
                     Info          = $NiceHash_Coin
                     Price         = $Stat.Live
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+ssl"
-                    Host          = $NiceHash_Host
+                    Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
                     Port          = $NiceHash_Port
                     User          = "$Wallet.$WorkerName"
                     Pass          = "x"
-                    Region        = Get-Region $NiceHash_Region
+                    Region        = $NiceHash_Region_Norm
                     SSL           = $true
                 }
             }
 
             [PSCustomObject]@{
-                Algorithm     = "$($NiceHash_Algorithm)NiceHash"
+                Algorithm     = "$($NiceHash_Algorithm_Norm)NiceHash"
                 Info          = $NiceHash_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = $NiceHash_Host
+                Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
                 Port          = $NiceHash_Port
                 User          = "$Wallet.$WorkerName"
                 Pass          = "x"
-                Region        = Get-Region $NiceHash_Region
+                Region        = $NiceHash_Region_Norm
                 SSL           = $false
             }
 
             [PSCustomObject]@{
-                Algorithm     = "$($NiceHash_Algorithm)NiceHash"
+                Algorithm     = "$($NiceHash_Algorithm_Norm)NiceHash"
                 Info          = $NiceHash_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+ssl"
-                Host          = $NiceHash_Host
+                Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
                 Port          = $NiceHash_Port
                 User          = "$Wallet.$WorkerName"
                 Pass          = "x"
-                Region        = Get-Region $NiceHash_Region
+                Region        = $NiceHash_Region_Norm
                 SSL           = $true
             }
         }
