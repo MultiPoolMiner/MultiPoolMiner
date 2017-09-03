@@ -32,7 +32,7 @@ $MiningPoolHub_Regions | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $MiningPoolHub_Algorithm
                 Info          = $MiningPoolHub_Coin
-                Price         = $Stat.Live
+                Price         = $Stat.Day #temp fix
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
@@ -47,7 +47,7 @@ $MiningPoolHub_Regions | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $MiningPoolHub_Algorithm
                 Info          = $MiningPoolHub_Coin
-                Price         = $Stat.Live
+                Price         = $Stat.Day #temp fix
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+ssl"
