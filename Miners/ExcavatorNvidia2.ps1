@@ -17,7 +17,7 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
-$Port = 3456 + (2 * 1000)
+$Port = 3456 + (2 * 10000)
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     [PSCustomObject]@{time = 0; commands = @([PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$_", "$($Pools."$(Get-Algorithm($_))NiceHash".Host):$($Pools."$(Get-Algorithm($_))NiceHash".Port)", "$($Pools."$(Get-Algorithm($_))NiceHash".User):$($Pools."$(Get-Algorithm($_))NiceHash".Pass)")})},
