@@ -10,7 +10,7 @@ if ((Test-Path $Path) -eq $false) {Expand-WebRequest $Uri (Split-Path $Path) -Er
 if ((Test-Path $Path_Threads) -eq $false) {Copy-Item (Split-Path $Path) (Split-Path $Path_Threads) -Recurse -Force -ErrorAction SilentlyContinue}
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
-$Port = 3334 + ($ThreadIndex * 10000)
+$Port = 3334 + (0 * 10000)
 
 ([PSCustomObject]@{
         cpu_threads_conf = @([PSCustomObject]@{low_power_mode = $false; no_prefetch = $true; affine_to_cpu = $false}) * $Threads
