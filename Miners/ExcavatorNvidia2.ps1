@@ -33,7 +33,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         Type = "NVIDIA"
         Path = $Path
         Arguments = "-p $Port -c $($Pools."$(Get-Algorithm($_))NiceHash".Name)_$(Get-Algorithm($_))_$($Threads)_Nvidia.json -na"
-        HashRates = [PSCustomObject]@{(Get-Algorithm($_)) = $Stats."$($Name)_$(Get-Algorithm($_))NiceHash_HashRate".Week}
+        HashRates = [PSCustomObject]@{"$(Get-Algorithm($_))NiceHash" = $Stats."$($Name)_$(Get-Algorithm($_))NiceHash_HashRate".Week}
         API = "NiceHash"
         Port = $Port
         Wrap = $false
