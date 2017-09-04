@@ -13,7 +13,7 @@ $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 $Port = 3335 + ($ThreadIndex * 10000)
 
 ([PSCustomObject]@{
-        gpu_threads_conf = @([PSCustomObject]@{index = $ThreadIndex; threads = 17; blocks = 60; bfactor = 0; bsleep = 0; affine_to_cpu = $true})
+        gpu_threads_conf = @([PSCustomObject]@{index = $ThreadIndex; threads = 32; blocks = 84; bfactor = 6; bsleep = 25; affine_to_cpu = $true})
         use_tls          = $false
         tls_secure_algo  = $true
         tls_fingerprint  = ""
