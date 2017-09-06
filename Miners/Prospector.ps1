@@ -17,9 +17,9 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     "[general]
 gpu-coin = ""$_""
 [pools.$_]
-url = ""stratum+tcp://$($Pools.$(Get-Algorithm($_)).Host):$($Pools.$(Get-Algorithm($_)).Port)/""
-username = ""$($Pools.$(Get-Algorithm($_)).User)""
-password = ""$($Pools.$(Get-Algorithm($_)).Pass)""
+url = ""stratum+tcp://$($Pools.$(Get-Algorithm $_).Host):$($Pools.$(Get-Algorithm $_).Port)/""
+username = ""$($Pools.$(Get-Algorithm $_).User)""
+password = ""$($Pools.$(Get-Algorithm $_).Pass)""
 [gpus.$([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'Advanced Micro Devices, Inc.'))-0]
 enabled = true
 [gpus.$([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'Advanced Micro Devices, Inc.'))-1]
@@ -45,13 +45,13 @@ enabled = true
 [gpus.$([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'NVIDIA Corporation'))-5]
 enabled = true
 [cpu]
-enabled = false" | Set-Content "$(Split-Path $Path)\$($Pools.$(Get-Algorithm($_)).Name)_$(Get-Algorithm($_)).toml" -Force -ErrorAction SilentlyContinue
+enabled = false" | Set-Content "$(Split-Path $Path)\$($Pools.$(Get-Algorithm $_).Name)_$(Get-Algorithm $_).toml" -Force -ErrorAction SilentlyContinue
     
     [PSCustomObject]@{
         Type = "AMD", "NVIDIA"
         Path = $Path
-        Arguments = "-c $($Pools.$(Get-Algorithm($_)).Name)_$(Get-Algorithm($_)).toml"
-        HashRates = [PSCustomObject]@{(Get-Algorithm($_)) = $Stats."$($Name)_$(Get-Algorithm($_))_HashRate".Week}
+        Arguments = "-c $($Pools.$(Get-Algorithm $_).Name)_$(Get-Algorithm $_).toml"
+        HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Prospector"
         Port = $Port
         Wrap = $false
@@ -62,8 +62,8 @@ enabled = false" | Set-Content "$(Split-Path $Path)\$($Pools.$(Get-Algorithm($_)
         [PSCustomObject]@{
             Type = "AMD", "NVIDIA"
             Path = $Path
-            Arguments = "-c $($Pools.$(Get-Algorithm($_)).Name)_$(Get-Algorithm($_))2gb.toml"
-            HashRates = [PSCustomObject]@{"$(Get-Algorithm($_))2gb" = $Stats."$($Name)_$(Get-Algorithm($_))2gb_HashRate".Week}
+            Arguments = "-c $($Pools.$(Get-Algorithm $_).Name)_$(Get-Algorithm $_)2gb.toml"
+            HashRates = [PSCustomObject]@{"$(Get-Algorithm $_)2gb" = $Stats."$($Name)_$(Get-Algorithm $_)2gb_HashRate".Week}
             API = "Prospector"
             Port = $Port
             Wrap = $false
