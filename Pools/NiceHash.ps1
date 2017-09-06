@@ -20,6 +20,9 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
     $NiceHash_Algorithm_Norm = Get-Algorithm $NiceHash_Algorithm
     $NiceHash_Coin = ""
 
+    if ($NiceHash_Algorithm_Norm -eq "Sia") {$NiceHash_Algorithm_Norm = "SiaNiceHash"} #temp fix
+    if ($NiceHash_Algorithm_Norm -eq "Decred") {$NiceHash_Algorithm_Norm = "DecredNiceHash"} #temp fix
+    
     $Divisor = 1000000000
 
     $Stat = Set-Stat -Name "$($Name)_$($NiceHash_Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor)
@@ -29,40 +32,8 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
         $NiceHash_Region_Norm = Get-Region $NiceHash_Region
         
         if ($Wallet) {
-            if (($NiceHash_Algorithm_Norm) -ne "Sia") {
-                [PSCustomObject]@{
-                    Algorithm     = $NiceHash_Algorithm_Norm
-                    Info          = $NiceHash_Coin
-                    Price         = $Stat.Live
-                    StablePrice   = $Stat.Week
-                    MarginOfError = $Stat.Week_Fluctuation
-                    Protocol      = "stratum+tcp"
-                    Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
-                    Port          = $NiceHash_Port
-                    User          = "$Wallet.$WorkerName"
-                    Pass          = "x"
-                    Region        = $NiceHash_Region_Norm
-                    SSL           = $false
-                }
-
-                [PSCustomObject]@{
-                    Algorithm     = $NiceHash_Algorithm_Norm
-                    Info          = $NiceHash_Coin
-                    Price         = $Stat.Live
-                    StablePrice   = $Stat.Week
-                    MarginOfError = $Stat.Week_Fluctuation
-                    Protocol      = "stratum+ssl"
-                    Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
-                    Port          = $NiceHash_Port
-                    User          = "$Wallet.$WorkerName"
-                    Pass          = "x"
-                    Region        = $NiceHash_Region_Norm
-                    SSL           = $true
-                }
-            }
-
             [PSCustomObject]@{
-                Algorithm     = "$($NiceHash_Algorithm_Norm)NiceHash"
+                Algorithm     = $NiceHash_Algorithm_Norm
                 Info          = $NiceHash_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
@@ -77,7 +48,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
             }
 
             [PSCustomObject]@{
-                Algorithm     = "$($NiceHash_Algorithm_Norm)NiceHash"
+                Algorithm     = $NiceHash_Algorithm_Norm
                 Info          = $NiceHash_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
