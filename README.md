@@ -9,7 +9,7 @@ Available optional settings:
 -Location [Europe/US/Asia]
 -SSL
 -Type [i.e. AMD,NVIDIA,CPU]
--Algorithm [i.e. Cryptonight,Ethash,Equihash,Lyra2z]
+-Algorithm [i.e. CryptoNight,Ethash,Equihash,Lyra2z]
 -Currency [i.e. BTC,USD]
 -Donate [Minutes per Day]
 

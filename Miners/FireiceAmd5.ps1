@@ -1,9 +1,9 @@
 ﻿. .\Include.ps1
 
 $ThreadIndex = 5
-$Path_Threads = ".\Bin\Cryptonight-AMD$ThreadIndex\xmr-stak-amd.exe"
+$Path_Threads = ".\Bin\CryptoNight-AMD$ThreadIndex\xmr-stak-amd.exe"
 
-$Path = ".\Bin\Cryptonight-AMD\xmr-stak-amd.exe"
+$Path = ".\Bin\CryptoNight-AMD\xmr-stak-amd.exe"
 $Uri = "https://github.com/fireice-uk/xmr-stak-amd/releases/download/v1.1.0-1.4.0/xmr-stak-amd-win64.zip"
 
 if ((Test-Path $Path) -eq $false) {Expand-WebRequest $Uri (Split-Path $Path) -ErrorAction SilentlyContinue}
@@ -19,9 +19,9 @@ $Port = 3336 + ($ThreadIndex * 10000)
         use_tls          = $false
         tls_secure_algo  = $true
         tls_fingerprint  = ""
-        pool_address     = "$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)"
-        wallet_address   = "$($Pools.Cryptonight.User)"
-        pool_password    = "$($Pools.Cryptonight.Pass)"
+        pool_address     = "$($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port)"
+        wallet_address   = "$($Pools.CryptoNight.User)"
+        pool_password    = "$($Pools.CryptoNight.Pass)"
         call_timeout     = 10
         retry_time       = 10
         giveup_limit     = 0
@@ -37,7 +37,7 @@ $Port = 3336 + ($ThreadIndex * 10000)
     Type      = "AMD"
     Path      = $Path_Threads
     Arguments = ''
-    HashRates = [PSCustomObject]@{Cryptonight = $Stats."$($Name)_Cryptonight_HashRate".Week}
+    HashRates = [PSCustomObject]@{CryptoNight = $Stats."$($Name)_CryptoNight_HashRate".Week}
     API       = "FireIce"
     Port      = $Port
     Wrap      = $false

@@ -18,7 +18,7 @@
     [Parameter(Mandatory = $false)]
     [Array]$Type = $null, #AMD/NVIDIA/CPU
     [Parameter(Mandatory = $false)]
-    [Array]$Algorithm = $null, #i.e. Ethash,Equihash,Cryptonight ect.
+    [Array]$Algorithm = $null, #i.e. Ethash,Equihash,CryptoNight ect.
     [Parameter(Mandatory = $false)]
     [Array]$MinerName = $null, 
     [Parameter(Mandatory = $false)]

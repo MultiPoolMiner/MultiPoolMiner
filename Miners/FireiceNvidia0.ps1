@@ -1,9 +1,9 @@
 ﻿. .\Include.ps1
 
 $ThreadIndex = 0
-$Path_Threads = ".\Bin\Cryptonight-NVIDIA$ThreadIndex\xmr-stak-nvidia.exe"
+$Path_Threads = ".\Bin\CryptoNight-NVIDIA$ThreadIndex\xmr-stak-nvidia.exe"
 
-$Path = ".\Bin\Cryptonight-NVIDIA\xmr-stak-nvidia.exe"
+$Path = ".\Bin\CryptoNight-NVIDIA\xmr-stak-nvidia.exe"
 $Uri = "https://github.com/fireice-uk/xmr-stak-nvidia/releases/download/v1.1.1-1.4.0/xmr-stak-nvidia.zip"
 
 if ((Test-Path $Path) -eq $false) {Expand-WebRequest $Uri (Split-Path $Path) -ErrorAction SilentlyContinue}
@@ -17,9 +17,9 @@ $Port = 3335 + ($ThreadIndex * 10000)
         use_tls          = $false
         tls_secure_algo  = $true
         tls_fingerprint  = ""
-        pool_address     = "$($Pools.Cryptonight.Host):$($Pools.Cryptonight.Port)"
-        wallet_address   = "$($Pools.Cryptonight.User)"
-        pool_password    = "$($Pools.Cryptonight.Pass)"
+        pool_address     = "$($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port)"
+        wallet_address   = "$($Pools.CryptoNight.User)"
+        pool_password    = "$($Pools.CryptoNight.Pass)"
         call_timeout     = 10
         retry_time       = 10
         giveup_limit     = 0
@@ -34,7 +34,7 @@ $Port = 3335 + ($ThreadIndex * 10000)
     Type      = "NVIDIA"
     Path      = $Path_Threads
     Arguments = ''
-    HashRates = [PSCustomObject]@{Cryptonight = $Stats."$($Name)_Cryptonight_HashRate".Week}
+    HashRates = [PSCustomObject]@{CryptoNight = $Stats."$($Name)_CryptoNight_HashRate".Week}
     API       = "FireIce"
     Port      = $Port
     Wrap      = $false
