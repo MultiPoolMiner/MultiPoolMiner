@@ -43,6 +43,8 @@ else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
 
 . .\Include.ps1
 
+$StatEnd = (Get-Date).ToUniversalTime()
+
 $DecayStart = (Get-Date).ToUniversalTime()
 $DecayPeriod = 60 #seconds
 $DecayBase = 1 - 0.1 #decimal percentage
@@ -51,9 +53,6 @@ $ActiveMiners = @()
 
 #Start the log
 Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
-
-#Update stats with missing data and set to today's date/time
-if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {Set-Stat $_.Name $_.Content.Week | Out-Null}}
 
 #Set donation parameters
 $LastDonated = (Get-Date).ToUniversalTime().AddDays(-1).AddHours(1)
@@ -65,6 +64,10 @@ $UserNameBackup = $UserName
 $WorkerNameBackup = $WorkerName
 
 while ($true) {
+    $StatStart = $StatEnd
+    $StatEnd = (Get-Date).ToUniversalTime().AddSeconds($Interval)
+    $StatSpan = New-TimeSpan $StatStart $StatEnd
+
     $DecayExponent = [int](((Get-Date).ToUniversalTime() - $DecayStart).TotalSeconds / $DecayPeriod)
 
     #Activate or deactivate donation
@@ -377,7 +380,7 @@ while ($true) {
         [PSCustomObject]@{"Miner" = "MultiPoolMiner"}, 
         [PSCustomObject]@{"Miner" = $BestMiners_Combo_Comparison | ForEach-Object {"$($_.Name)-$($_.Algorithm -join "/")"}}
             
-        $BestMiners_Combo_Stat = Set-Stat -Name "Profit" -Value ($BestMiners_Combo | Measure-Object Profit -Sum).Sum
+        $BestMiners_Combo_Stat = Set-Stat -Name "Profit" -Value ($BestMiners_Combo | Measure-Object Profit -Sum).Sum -Duration $StatSpan
 
         $MinerComparisons_Profit = $BestMiners_Combo_Stat.Week, ($BestMiners_Combo_Comparison | Measure-Object Profit_Comparison -Sum).Sum
 
@@ -397,10 +400,10 @@ while ($true) {
     }
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
-    for ($i = $Interval; $i -gt 0; $i -= $Interval / 10) {
-        $i -= Measure-Command {Get-Job | Receive-Job} | Select-Object -ExpandProperty TotalSeconds
-        Start-Sleep ($Interval / 10)
-    }
+    do {
+        Get-Job | Receive-Job
+        Start-Sleep 10
+    }while ((Get-Date).ToUniversalTime() -lt $StatEnd)
 
     #Save current hash rates
     $ActiveMiners | ForEach-Object {
@@ -419,7 +422,7 @@ while ($true) {
             
             if ($Miner_HashRates.Count -ge $_.Algorithm.Count) {
                 for ($i = 0; $i -lt $_.Algorithm.Count; $i++) {
-                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate" -Value ($Miner_HashRates | Select-Object -Index $i)
+                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate" -Value ($Miner_HashRates | Select-Object -Index $i) -Duration $StatSpan
                 }
 
                 $_.New = $false
@@ -430,7 +433,7 @@ while ($true) {
         if ($_.Benchmarked -ge 6 -or ($_.Benchmarked -ge 2 -and $_.Activated -ge 2)) {
             for ($i = $Miner_HashRates.Count; $i -lt $_.Algorithm.Count; $i++) {
                 if ((Get-Stat "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate") -eq $null) {
-                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate" -Value 0
+                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate" -Value 0 -Duration $StatSpan
                 }
             }
         }
