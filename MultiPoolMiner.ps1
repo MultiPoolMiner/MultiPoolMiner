@@ -43,7 +43,7 @@ else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
 
 . .\Include.ps1
 
-$DecayStart = Get-Date
+$DecayStart = (Get-Date).ToUniversalTime()
 $DecayPeriod = 60 #seconds
 $DecayBase = 1 - 0.1 #decimal percentage
 
@@ -56,7 +56,7 @@ Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
 if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {Set-Stat $_.Name $_.Content.Week | Out-Null}}
 
 #Set donation parameters
-$LastDonated = (Get-Date).AddDays(-1).AddHours(1)
+$LastDonated = (Get-Date).ToUniversalTime().AddDays(-1).AddHours(1)
 $WalletDonate = "1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb"
 $UserNameDonate = "aaronsace"
 $WorkerNameDonate = "multipoolminer"
@@ -65,19 +65,19 @@ $UserNameBackup = $UserName
 $WorkerNameBackup = $WorkerName
 
 while ($true) {
-    $DecayExponent = [int](((Get-Date) - $DecayStart).TotalSeconds / $DecayPeriod)
+    $DecayExponent = [int](((Get-Date).ToUniversalTime() - $DecayStart).TotalSeconds / $DecayPeriod)
 
     #Activate or deactivate donation
-    if ((Get-Date).AddDays(-1).AddMinutes($Donate) -ge $LastDonated) {
+    if ((Get-Date).ToUniversalTime().AddDays(-1).AddMinutes($Donate) -ge $LastDonated) {
         $Wallet = $WalletDonate
         $UserName = $UserNameDonate
         $WorkerName = $WorkerNameDonate
     }
-    if ((Get-Date).AddDays(-1) -ge $LastDonated) {
+    if ((Get-Date).ToUniversalTime().AddDays(-1) -ge $LastDonated) {
         $Wallet = $WalletBackup
         $UserName = $UserNameBackup
         $WorkerName = $WorkerNameBackup
-        $LastDonated = Get-Date
+        $LastDonated = (Get-Date).ToUniversalTime()
     }
 
     $Rates = [PSCustomObject]@{}
@@ -341,7 +341,7 @@ while ($true) {
     Start-Sleep $Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
-            $DecayStart = Get-Date
+            $DecayStart = (Get-Date).ToUniversalTime()
             $_.New = $true
             $_.Activated++
             if ($_.Process -ne $null) {$_.Active += $_.Process.ExitTime - $_.Process.StartTime}
