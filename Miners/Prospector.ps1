@@ -15,7 +15,8 @@ $Port = 42000
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     try {
-        "[general]
+        if (Test-Path (Split-Path $Path)) {
+            "[general]
 gpu-coin = ""$_""
 [pools.$_]
 url = ""stratum+tcp://$($Pools.$(Get-Algorithm $_).Host):$($Pools.$(Get-Algorithm $_).Port)/""
@@ -47,7 +48,8 @@ enabled = true
 enabled = true
 [cpu]
 enabled = false" | Set-Content "$(Split-Path $Path)\$($Pools.$(Get-Algorithm $_).Name)_$(Get-Algorithm $_).toml" -Force -ErrorAction Stop
-    
+        }
+        
         [PSCustomObject]@{
             Type = "AMD", "NVIDIA"
             Path = $Path
