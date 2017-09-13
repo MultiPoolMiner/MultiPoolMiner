@@ -7,7 +7,9 @@ function Set-Stat {
         [Parameter(Mandatory = $true)]
         [Double]$Value, 
         [Parameter(Mandatory = $true)]
-        [TimeSpan]$Duration
+        [TimeSpan]$Duration, 
+        [Parameter(Mandatory = $false)]
+        [Bool]$FaultDetection = $false
     )
 
     $Path = "Stats\$Name.txt"
@@ -15,10 +17,6 @@ function Set-Stat {
     
     try {
         $Stat = Get-Content $Path -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-
-        if ($Stat.Updated) {
-            $Stat | Add-Member @{Duration = New-TimeSpan -Hours 1} -ErrorAction Stop #temp fix
-        }
 
         $Stat = [PSCustomObject]@{
             Live = [Double]$Stat.Live
@@ -35,57 +33,73 @@ function Set-Stat {
             Week = [Double]$Stat.Week
             Week_Fluctuation = [Double]$Stat.Week_Fluctuation
             Duration = [TimeSpan]$Stat.Duration
+            Updated = [DateTime]$Stat.Updated
+        }
+
+        $ToleranceMin = $Value
+        $ToleranceMax = $Value
+
+        if ($FaultDetection) {
+            $ToleranceMin = $Stat.Week * (1 - [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1 / 2), 0.9 / 2))
+            $ToleranceMax = $Stat.Week * (1 + [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1 / 2), 0.9 / 2))
+        }
+        
+        if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
+            Write-Warning "Stat file ($Name) was not updated because the value ($Value) is outside fault tolerance. "
+        }
+        else {
+            $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
+            $Span_Minute_5 = [Math]::Min(($Duration.TotalMinutes / 5) / [Math]::Min(($Stat.Duration.TotalMinutes / 5), 1), 1)
+            $Span_Minute_10 = [Math]::Min(($Duration.TotalMinutes / 10) / [Math]::Min(($Stat.Duration.TotalMinutes / 10), 1), 1)
+            $Span_Hour = [Math]::Min($Duration.TotalHours / [Math]::Min($Stat.Duration.TotalHours, 1), 1)
+            $Span_Day = [Math]::Min($Duration.TotalDays / [Math]::Min($Stat.Duration.TotalDays, 1), 1)
+            $Span_Week = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
+        
+            $Stat = [PSCustomObject]@{
+                Live = $Value
+                Minute = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
+                Minute_Fluctuation = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + 
+                ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
+                Minute_5 = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
+                Minute_5_Fluctuation = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + 
+                ($Span_Minute_5 * ([Math]::Abs($Value - $Stat.Minute_5) / [Math]::Max([Math]::Abs($Stat.Minute_5), $SmallestValue)))
+                Minute_10 = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
+                Minute_10_Fluctuation = ((1 - $Span_Minute_10) * $Stat.Minute_10_Fluctuation) + 
+                ($Span_Minute_10 * ([Math]::Abs($Value - $Stat.Minute_10) / [Math]::Max([Math]::Abs($Stat.Minute_10), $SmallestValue)))
+                Hour = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
+                Hour_Fluctuation = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + 
+                ($Span_Hour * ([Math]::Abs($Value - $Stat.Hour) / [Math]::Max([Math]::Abs($Stat.Hour), $SmallestValue)))
+                Day = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
+                Day_Fluctuation = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + 
+                ($Span_Day * ([Math]::Abs($Value - $Stat.Day) / [Math]::Max([Math]::Abs($Stat.Day), $SmallestValue)))
+                Week = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
+                Week_Fluctuation = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + 
+                ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
+                Duration = $Stat.Duration + $Duration
+                Updated = (Get-Date).ToUniversalTime()
+            }
         }
     }
     catch {
         if (Test-Path $Path) {Write-Warning "Stat file ($Name) is corrupt and will be reset. "}
 
         $Stat = [PSCustomObject]@{
-            Live = [Double]0
-            Minute = [Double]0
-            Minute_Fluctuation = [Double]0
-            Minute_5 = [Double]0
-            Minute_5_Fluctuation = [Double]0
-            Minute_10 = [Double]0
-            Minute_10_Fluctuation = [Double]0
-            Hour = [Double]0
-            Hour_Fluctuation = [Double]0
-            Day = [Double]0
-            Day_Fluctuation = [Double]0
-            Week = [Double]0
-            Week_Fluctuation = [Double]0
-            Duration = [TimeSpan]0
+            Live = $Value
+            Minute = $Value
+            Minute_Fluctuation = 1 / 2
+            Minute_5 = $Value
+            Minute_5_Fluctuation = 1 / 2
+            Minute_10 = $Value
+            Minute_10_Fluctuation = 1 / 2
+            Hour = $Value
+            Hour_Fluctuation = 1 / 2
+            Day = $Value
+            Day_Fluctuation = 1 / 2
+            Week = $Value
+            Week_Fluctuation = 1 / 2
+            Duration = $Duration
+            Updated = (Get-Date).ToUniversalTime()
         }
-    }
-    
-    $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
-    $Span_Minute_5 = [Math]::Min(($Duration.TotalMinutes / 5) / [Math]::Min(($Stat.Duration.TotalMinutes / 5), 1), 1)
-    $Span_Minute_10 = [Math]::Min(($Duration.TotalMinutes / 10) / [Math]::Min(($Stat.Duration.TotalMinutes / 10), 1), 1)
-    $Span_Hour = [Math]::Min($Duration.TotalHours / [Math]::Min($Stat.Duration.TotalHours, 1), 1)
-    $Span_Day = [Math]::Min($Duration.TotalDays / [Math]::Min($Stat.Duration.TotalDays, 1), 1)
-    $Span_Week = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
-    
-    $Stat = [PSCustomObject]@{
-        Live = $Value
-        Minute = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
-        Minute_Fluctuation = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + 
-        ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
-        Minute_5 = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
-        Minute_5_Fluctuation = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + 
-        ($Span_Minute_5 * ([Math]::Abs($Value - $Stat.Minute_5) / [Math]::Max([Math]::Abs($Stat.Minute_5), $SmallestValue)))
-        Minute_10 = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
-        Minute_10_Fluctuation = ((1 - $Span_Minute_10) * $Stat.Minute_10_Fluctuation) + 
-        ($Span_Minute_10 * ([Math]::Abs($Value - $Stat.Minute_10) / [Math]::Max([Math]::Abs($Stat.Minute_10), $SmallestValue)))
-        Hour = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
-        Hour_Fluctuation = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + 
-        ($Span_Hour * ([Math]::Abs($Value - $Stat.Hour) / [Math]::Max([Math]::Abs($Stat.Hour), $SmallestValue)))
-        Day = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
-        Day_Fluctuation = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + 
-        ($Span_Day * ([Math]::Abs($Value - $Stat.Day) / [Math]::Max([Math]::Abs($Stat.Day), $SmallestValue)))
-        Week = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
-        Week_Fluctuation = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + 
-        ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
-        Duration = $Stat.Duration + $Duration
     }
 
     if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory"}
@@ -104,6 +118,7 @@ function Set-Stat {
         Week = [Decimal]$Stat.Week
         Week_Fluctuation = [Double]$Stat.Week_Fluctuation
         Duration = [String]$Stat.Duration
+        Updated = [DateTime]$Stat.Updated
     } | ConvertTo-Json | Set-Content $Path
 
     $Stat
