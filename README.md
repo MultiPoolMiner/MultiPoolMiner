@@ -4,14 +4,22 @@ Monitors crypto mining pools in real-time in order to find the most profitable f
 Any bitcoin donations are greatly appreciated: **1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH**
 Integrated donation option is available.
 
-Available optional settings:
+**Available optional settings:**
+
 -region [Europe/US/Asia]
+
 -poolname [miningpoolhubcoins,zpool,nicehash]
+
 -SSL
+
 -type [AMD,NVIDIA,CPU]
+
 -algorithm [i.e. CryptoNight,Ethash,Equihash,Lyra2z etc. See all available algorithms in the Algorithms.txt]
+
 -currency [i.e. BTC,USD,EUR,ETH]
+
 -interval [in seconds, default is 60]
+
 -donate [Minutes per Day]
 
 
