@@ -1,23 +1,22 @@
 # MultiPoolMiner - developed by aaronsace
 Monitors crypto mining pools in real-time in order to find the most profitable for your machine. Controls any miner that is available via command line. Supports benchmarking and multi-chip support (AMD, NVIDIA and CPU).
 
-Bitcoin Donations: **1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH**
+Any bitcoin donations are greatly appreciated: **1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH**
 Integrated donation option is available.
 
 Available optional settings:
--Interval [Seconds]
--Location [Europe/US/Asia]
+-region [Europe/US/Asia]
+-poolname [miningpoolhubcoins,zpool,nicehash]
 -SSL
--Type [i.e. AMD,NVIDIA,CPU]
--Algorithm [i.e. CryptoNight,Ethash,Equihash,Lyra2z]
--Currency [i.e. BTC,USD]
--Donate [Minutes per Day]
+-type [AMD,NVIDIA,CPU]
+-algorithm [i.e. CryptoNight,Ethash,Equihash,Lyra2z etc. See all available algorithms in the Algorithms.txt]
+-currency [i.e. BTC,USD,EUR,ETH]
+-interval [in seconds, default is 60]
+-donate [Minutes per Day]
 
 
 Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/aaronsace/MultiPoolMiner/issues
 Logs and Stats are produced in text format; use them when submitting issues.
-
-Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH
 
 **Notes**
 - It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'stats' folder.
@@ -31,13 +30,11 @@ https://www.microsoft.com/en-us/download/details.aspx?id=48145
 https://github.com/nicehash/excavator/releases
 
 
-Frequently Asked Questions (v1.9b):
+Frequently Asked Questions (v1.11b):
 
 Q1. How do I start using MultiPoolMiner?
 
-A2. The 'start.bat' file is an example that shows how to run the script without prompting for a username. Amend it with your username/address/workername and other relevant details. Ensure it is run as Administrator to prevent errors.
-
-(The 'start2gb.bat' file is specifically created for users using older cards with 2GB or less video memory (VRAM). These cards can no longer mine coins utilising the dagger hashimoto (ethash) algorithm with higher DAG file sizes (ie. Ethereum) which needs to be loaded into memory before mining can begin. The DAG file grows in size roughly every 5 days and now larger than some cards can handle (in Ethereum's case). Due to this algorithm being used by other coins, there are still coins that were launched at later dates therefore have not yet reached this DAG file size. The 'start2gb.bat' is designed to filter to these coins and overcome the downtime caused by coins that older cards simply cannot mine any longer.)
+A2. The 'start.bat' file is an example that shows how to run the script without prompting for a username. Amend it with your username/address/workername and other relevant details such as region. Ensure it is run as Administrator to prevent errors.
 
 Q2. A miner crashes my computer or does not work correctly. I want to exclude it from mining/benchmarking. What should I do?
 
