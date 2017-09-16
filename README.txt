@@ -109,7 +109,7 @@ SAMPLE USAGE (check the "start.bat" file in root folder):
 FREQUENTLY ASKED QUESTIONS:
 
 Q1. How do I start using MultiPoolMiner?
-A2. The 'start.bat' file is an example that shows how to run the script without prompting for a username. Amend it with your username/address/workername and other relevant details such as region. Ensure it is run as Administrator to prevent errors.
+A1. The 'start.bat' file is an example that shows how to run the script without prompting for a username. Amend it with your username/address/workername and other relevant details such as region. Ensure it is run as Administrator to prevent errors.
 
 Q2. A miner crashes my computer or does not work correctly. I want to exclude it from mining/benchmarking. What should I do?
 A2. Simply locate the configuration file for that particular miner in the /Miners folder and delete the file or exclude that algorithm entirely (see Q3 below). These have either .txt or .ps1 file extensions. Please note that some of the miners have multiple config files and/or can mine multiple coins/algorithms. (Planned enhancement for V3)
