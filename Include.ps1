@@ -504,9 +504,14 @@ function Start-SubProcess {
         [Parameter(Mandatory = $false)]
         [String]$ArgumentList = "", 
         [Parameter(Mandatory = $false)]
-        [String]$WorkingDirectory = ""
+        [String]$WorkingDirectory = "", 
+        [ValidateRange(-2, 3)]
+        [Parameter(Mandatory = $false)]
+        [Int]$Priority = 0
     )
-
+    
+    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
+    
     $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory {
         param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory)
 
@@ -539,6 +544,8 @@ function Start-SubProcess {
     $Process = Get-Process | Where-Object Id -EQ $JobOutput.ProcessId
     $Process.Handle | Out-Null
     $Process
+
+    $Process.PriorityClass = $PriorityNames.$Priority
 }
 
 function Expand-WebRequest {
