@@ -13,7 +13,7 @@ LINK: https://github.com/aaronsace/MultiPoolMiner/
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 16/09/2017 - v1.11d
+README.txt - updated on 17/09/2017 - v1.11f
 
 ====================================================================
 
@@ -33,15 +33,15 @@ Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLaz
 
 IMPORTANT NOTES:
 
-	- It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
-	- If you are using Windows 7, please update PowerShell: https://www.microsoft.com/en-us/download/details.aspx?id=50395
-	- CCMiner (NVIDIA cards only) may need 'MSVCR120.dll' if you don't already have it: https://www.microsoft.com/en-gb/download/details.aspx?id=40784
-	- CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145
-	- You may need 'excavator.exe' if you don't already have it: https://github.com/nicehash/excavator/releases
-	- It is highly recommended to set Virtual Memory size in Windows to at least 16 GB in multi-GPU systems: Computer Properties -> Advanced System Settings -> Performance -> Advanced -> Virtual Memory
-	- Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/aaronsace/MultiPoolMiner/issues 
-	- Logs and Stats are produced in text format; use them when submitting issues.
-	- Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional miner files to support mining with more than 6 graphics cards.
+- It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
+- If you are using Windows 7, please update PowerShell: https://www.microsoft.com/en-us/download/details.aspx?id=50395
+- CCMiner (NVIDIA cards only) may need 'MSVCR120.dll' if you don't already have it: https://www.microsoft.com/en-gb/download/details.aspx?id=40784
+- CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145
+- You may need 'excavator.exe' if you don't already have it: https://github.com/nicehash/excavator/releases
+- It is highly recommended to set Virtual Memory size in Windows to at least 16 GB in multi-GPU systems: Computer Properties -> Advanced System Settings -> Performance -> Advanced -> Virtual Memory
+- Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/aaronsace/MultiPoolMiner/issues 
+- Logs and Stats are produced in text format; use them when submitting issues.
+- Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional miner files to support mining with more than 6 graphics cards.
 
 	
 ====================================================================
