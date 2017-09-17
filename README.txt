@@ -13,7 +13,7 @@ LINK: https://github.com/aaronsace/MultiPoolMiner/
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 17/09/2017 - v1.11e
+README.txt - updated on 17/09/2017 - v1.11f
 
 ====================================================================
 
@@ -33,15 +33,15 @@ Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLaz
 
 IMPORTANT NOTES:
 
-	- It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
-	- If you are using Windows 7, please update PowerShell: https://www.microsoft.com/en-us/download/details.aspx?id=50395
-	- CCMiner (NVIDIA cards only) may need 'MSVCR120.dll' if you don't already have it: https://www.microsoft.com/en-gb/download/details.aspx?id=40784
-	- CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145
-	- You may need 'excavator.exe' if you don't already have it: https://github.com/nicehash/excavator/releases
-	- It is highly recommended to set Virtual Memory size in Windows to at least 16 GB in multi-GPU systems: Computer Properties -> Advanced System Settings -> Performance -> Advanced -> Virtual Memory
-	- Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/aaronsace/MultiPoolMiner/issues 
-	- Logs and Stats are produced in text format; use them when submitting issues.
-	- Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional miner files to support mining with more than 6 graphics cards.
+- It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
+- If you are using Windows 7, please update PowerShell: https://www.microsoft.com/en-us/download/details.aspx?id=50395
+- CCMiner (NVIDIA cards only) may need 'MSVCR120.dll' if you don't already have it: https://www.microsoft.com/en-gb/download/details.aspx?id=40784
+- CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145
+- You may need 'excavator.exe' if you don't already have it: https://github.com/nicehash/excavator/releases
+- It is highly recommended to set Virtual Memory size in Windows to at least 16 GB in multi-GPU systems: Computer Properties -> Advanced System Settings -> Performance -> Advanced -> Virtual Memory
+- Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/aaronsace/MultiPoolMiner/issues 
+- Logs and Stats are produced in text format; use them when submitting issues.
+- Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional miner files to support mining with more than 6 graphics cards.
 
 	
 ====================================================================
@@ -92,15 +92,15 @@ COMMAND LINE OPTIONS (not case-sensitive, see Sample Usage section below for an 
 ====================================================================
 	
 	
-SAMPLE USAGE (check the "start.bat" file in root folder):
+SAMPLE USAGE (check "start.bat" file in root folder):
 
-	setx GPU_FORCE_64BIT_PTR 1
-	setx GPU_MAX_HEAP_SIZE 100
-	setx GPU_USE_SYNC_OBJECTS 1
-	setx GPU_MAX_ALLOC_PERCENT 100
-	setx GPU_SINGLE_ALLOC_PERCENT 100
+setx GPU_FORCE_64BIT_PTR 1
+setx GPU_MAX_HEAP_SIZE 100
+setx GPU_USE_SYNC_OBJECTS 1
+setx GPU_MAX_ALLOC_PERCENT 100
+setx GPU_SINGLE_ALLOC_PERCENT 100
 
-	powershell -version 5.0 -noexit -executionpolicy bypass -windowstyle maximized -command "&.\multipoolminer.ps1 -wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -username aaronsace -workername multipoolminer -ssl -region europe -currency btc,usd,eur -type amd,nvidia,cpu -poolname miningpoolhub,miningpoolhubcoins,zpool,nicehash -algorithm cryptonight,decred,decrednicehash,ethash,ethash2gb,equihash,groestl,lbry,lyra2z,neoscrypt,pascal,sia,siaclaymore,sianicehash,sib -donate 10"
+powershell -version 5.0 -noexit -executionpolicy bypass -windowstyle maximized -command "&.\multipoolminer.ps1 -wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -username aaronsace -workername multipoolminer -ssl -region europe -currency btc,usd,eur -type amd,nvidia,cpu -poolname miningpoolhub,miningpoolhubcoins,zpool,nicehash -algorithm cryptonight,decred,decrednicehash,ethash,ethash2gb,equihash,groestl,lbry,lyra2z,neoscrypt,pascal,sia,siaclaymore,sianicehash,sib -donate 10"
 
 
 ====================================================================
@@ -120,8 +120,8 @@ A3. You most likely have NVIDIA cards in your rig. Open the start.bat in a text 
 Q4. I only want to mine certain algorithms even if they are not the most profitable. I want to exclude algorithms. How do I do that?
 A4. Open the start.bat in a text editor and look for ‘-algorithm cryptonight,ethash,equihash,groestl,lyra2z,neoscrypt,pascal,sia’. Delete the algorithms you don't want to mine. This can save you some time when benchmarking. For a full list of supported algorithms, check the Algorithms.txt. You can include any of these or even all of them if you please.
 
-Q5. MultiPoolMiner is XX% more profitable than conventional mining. What does this mean?
-A5. It is showing you the stat for MultiPoolMiner vs the one miner. It means that the calculated earnings of MultiPoolMiner switching to different algorithms would be that much more profitable than if it had just mined that one particular algorithm the whole time. The number is still only an estimate of your earnings on the pool and may not directly reflect what you actually get paid. On MiningPoolHub and other multiple algorithm pools, coins have fluctuating values and MultiPoolMiner switches to the one that is the most profitable at that time. Because each pool has different delays in exchange and payout, the amount you actually earn may be very different. If there is a significant difference in percentage, you might want to reset the profitability stats by running the 'ResetProfit.bat' script. Your actual (but still estimated) earning is shown in the second row.
+Q5. MultiPoolMiner is XX% more profitable. What does this mean?
+A5. It is showing you the stat for MultiPoolMiner vs the one miner. It means that the calculated earnings of MultiPoolMiner switching to different algorithms would be that much more profitable than if it had just mined that one particular algorithm the whole time. The number is still only an estimate of your earnings on the pool and may not directly reflect what you actually get paid. On MiningPoolHub and other multiple algorithm pools, coins have fluctuating values and MultiPoolMiner switches to the one that is the most profitable at that time. Because each pool has different delays in exchange and payout, the amount you actually earn my be very different. If there is a significant difference in percentage, you might want to reset the profitability stats by running the ResetProfit.bat file. Your actual (but still estimated) earning is shown in the second row.
 
 Q6. I want to re-run the benchmarks (changed OC settings, added new cards, etc.)
 A6. Simply run 'ResetBenchmark.bat' This deletes all files in the /Stats folder. This will force MultiPoolMiner to run the benchmarks again. If you only want to re-run a single benchmark for a coin or algorithm, locate the appropriate stat file for that particular coin or algorithm and delete it. Please note some of the miners can do multiple algorithms therefore have multiple stat files for the same miner and some of them create multiple stat files for the different configuration files they use.
