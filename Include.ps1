@@ -14,7 +14,7 @@ function Set-Stat {
 
     $Path = "Stats\$Name.txt"
     $SmallestValue = 1E-20
-    
+
     try {
         $Stat = Get-Content $Path -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
 
@@ -43,7 +43,7 @@ function Set-Stat {
             $ToleranceMin = $Stat.Week * (1 - [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1 / 2), 0.9 / 2))
             $ToleranceMax = $Stat.Week * (1 + [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1 / 2), 0.9 / 2))
         }
-        
+
         if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
             Write-Warning "Stat file ($Name) was not updated because the value ($Value) is outside fault tolerance. "
         }
@@ -54,7 +54,7 @@ function Set-Stat {
             $Span_Hour = [Math]::Min($Duration.TotalHours / [Math]::Min($Stat.Duration.TotalHours, 1), 1)
             $Span_Day = [Math]::Min($Duration.TotalDays / [Math]::Min($Stat.Duration.TotalDays, 1), 1)
             $Span_Week = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
-        
+
             $Stat = [PSCustomObject]@{
                 Live = $Value
                 Minute = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
@@ -129,7 +129,7 @@ function Get-Stat {
         [Parameter(Mandatory = $true)]
         [String]$Name
     )
-    
+
     if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory"}
     Get-ChildItem "Stats" | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
 }
@@ -153,7 +153,7 @@ function Get-ChildItemContent {
             [PSCustomObject]@{Name = $Name; Content = $_}
         }
     }
-    
+
     $ChildItems | ForEach-Object {
         $Item = $_
         $ItemKeys = $Item.Content.PSObject.Properties.Name.Clone()
@@ -172,30 +172,10 @@ function Get-ChildItemContent {
             }
         }
     }
-    
+
     $ChildItems
 }
-<#
-function Set-Algorithm {
-    param(
-        [Parameter(Mandatory=$true)]
-        [String]$API, 
-        [Parameter(Mandatory=$true)]
-        [Int]$Port, 
-        [Parameter(Mandatory=$false)]
-        [Array]$Parameters = @()
-    )
-    
-    $Server = "localhost"
-    
-    switch($API)
-    {
-        "nicehash"
-        {
-        }
-    }
-}
-#>
+
 function Get-HashRate {
     param(
         [Parameter(Mandatory = $true)]
@@ -207,10 +187,10 @@ function Get-HashRate {
         [Parameter(Mandatory = $false)]
         [Bool]$Safe = $false
     )
-    
+
     $Server = "localhost"
     $Timeout = 10 #seconds
-    
+
     $Multiplier = 1000
     $Delta = 0.05
     $Interval = 5
@@ -221,7 +201,7 @@ function Get-HashRate {
         switch ($API) {
             "xgminer" {
                 $Message = @{command = "summary"; parameter = ""} | ConvertTo-Json -Compress
-            
+
                 do {
                     $Client = New-Object System.Net.Sockets.TcpClient $server, $port
                     $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
@@ -303,9 +283,9 @@ function Get-HashRate {
                     $Request = $Reader.ReadLine()
 
                     $Data = $Request | ConvertFrom-Json
-                
+
                     $HashRate = $Data.result.speed_hps
-                    
+
                     if ($HashRate -eq $null) {$HashRate = $Data.result.speed_sps}
 
                     if ($HashRate -eq $null) {$HashRates = @(); break}
@@ -332,7 +312,7 @@ function Get-HashRate {
                     $Request = $Reader.ReadLine()
 
                     $Data = $Request | ConvertFrom-Json
-                
+
                     $HashRate = $Data.algorithms.workers.speed
 
                     if ($HashRate -eq $null) {$HashRates = @(); break}
@@ -359,7 +339,7 @@ function Get-HashRate {
                     $Request = $Reader.ReadLine()
 
                     $Data = $Request | ConvertFrom-Json
-                
+
                     $HashRate = $Data.result.speed_sps
 
                     if ($HashRate -eq $null) {$HashRates = @(); break}
@@ -374,9 +354,9 @@ function Get-HashRate {
             "claymore" {
                 do {
                     $Request = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing -TimeoutSec $Timeout
-                    
+
                     $Data = $Request.Content.Substring($Request.Content.IndexOf("{"), $Request.Content.LastIndexOf("}") - $Request.Content.IndexOf("{") + 1) | ConvertFrom-Json
-                    
+
                     $HashRate = $Data.result[2].Split(";")[0]
                     $HashRate_Dual = $Data.result[4].Split(";")[0]
 
@@ -393,9 +373,9 @@ function Get-HashRate {
             "fireice" {
                 do {
                     $Request = Invoke-WebRequest "http://$($Server):$Port/h" -UseBasicParsing -TimeoutSec $Timeout
-                    
+
                     $Data = $Request.Content -split "</tr>" -match "total*" -split "<td>" -replace "<[^>]*>", ""
-                    
+
                     $HashRate = $Data[1]
                     if ($HashRate -eq "") {$HashRate = $Data[2]}
                     if ($HashRate -eq "") {$HashRate = $Data[3]}
@@ -412,9 +392,9 @@ function Get-HashRate {
             "prospector" {
                 do {
                     $Request = Invoke-WebRequest "http://$($Server):$Port/api/v0/hashrates" -UseBasicParsing -TimeoutSec $Timeout
-                    
+
                     $Data = $Request | ConvertFrom-Json
-                    
+
                     $HashRate = $Data.rate
 
                     if ($HashRate -eq $null) {$HashRates = @(); break}
@@ -429,7 +409,7 @@ function Get-HashRate {
             "wrapper" {
                 do {
                     $HashRate = Get-Content ".\Wrapper_$Port.txt" -ErrorAction Ignore | ConvertFrom-Json
-                
+
                     if ($HashRate -eq $null) {Start-Sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.txt" | ConvertFrom-Json}
 
                     if ($HashRate -eq $null) {$HashRates = @(); break}
@@ -509,9 +489,9 @@ function Start-SubProcess {
         [Parameter(Mandatory = $false)]
         [Int]$Priority = 0
     )
-    
+
     $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
-    
+
     $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory {
         param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory)
 
@@ -530,7 +510,7 @@ function Start-SubProcess {
         }
 
         [PSCustomObject]@{ProcessId = $Process.Id; ProcessHandle = $Process.Handle}
-        
+
         $ControllerProcess.Handle | Out-Null
         $Process.Handle | Out-Null
 
@@ -580,7 +560,7 @@ function Get-Algorithm {
         [Parameter(Mandatory = $true)]
         [String]$Algorithm
     )
-    
+
     $Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
 
     $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-", " " -replace "_", " ")) -replace " "
@@ -594,7 +574,7 @@ function Get-Region {
         [Parameter(Mandatory = $true)]
         [String]$Location
     )
-    
+
     $Locations = Get-Content "Regions.txt" | ConvertFrom-Json
 
     $Location = (Get-Culture).TextInfo.ToTitleCase(($Location -replace "-", " " -replace "_", " ")) -replace " "
