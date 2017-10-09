@@ -40,12 +40,12 @@ function Set-Stat {
         $ToleranceMax = $Value
 
         if ($FaultDetection) {
-            $ToleranceMin = $Stat.Week * (1 - [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1 / 2), 0.9 / 2))
-            $ToleranceMax = $Stat.Week * (1 + [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1 / 2), 0.9 / 2))
+            $ToleranceMin = $Stat.Week * (1 - [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
+            $ToleranceMax = $Stat.Week * (1 + [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
         }
 
         if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
-            Write-Warning "Stat file ($Name) was not updated because the value ($Value) is outside fault tolerance. "
+            Write-Warning "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance. "
         }
         else {
             $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
@@ -86,17 +86,17 @@ function Set-Stat {
         $Stat = [PSCustomObject]@{
             Live = $Value
             Minute = $Value
-            Minute_Fluctuation = 1 / 2
+            Minute_Fluctuation = 1
             Minute_5 = $Value
-            Minute_5_Fluctuation = 1 / 2
+            Minute_5_Fluctuation = 1
             Minute_10 = $Value
-            Minute_10_Fluctuation = 1 / 2
+            Minute_10_Fluctuation = 1
             Hour = $Value
-            Hour_Fluctuation = 1 / 2
+            Hour_Fluctuation = 1
             Day = $Value
-            Day_Fluctuation = 1 / 2
+            Day_Fluctuation = 1
             Week = $Value
-            Week_Fluctuation = 1 / 2
+            Week_Fluctuation = 1
             Duration = $Duration
             Updated = (Get-Date).ToUniversalTime()
         }
