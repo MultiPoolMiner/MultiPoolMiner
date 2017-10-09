@@ -43,9 +43,11 @@ else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
 
 . .\Include.ps1
 
-$StatEnd = (Get-Date).ToUniversalTime()
+$Timer = (Get-Date).ToUniversalTime()
 
-$DecayStart = (Get-Date).ToUniversalTime()
+$StatEnd = $Timer
+
+$DecayStart = $Timer
 $DecayPeriod = 60 #seconds
 $DecayBase = 1 - 0.1 #decimal percentage
 
@@ -55,7 +57,7 @@ $ActiveMiners = @()
 Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
 
 #Set donation parameters
-$LastDonated = (Get-Date).ToUniversalTime().AddDays(-1).AddHours(1)
+$LastDonated = $Timer.AddDays(-1).AddHours(1)
 $WalletDonate = "1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb"
 $UserNameDonate = "aaronsace"
 $WorkerNameDonate = "multipoolminer"
@@ -64,23 +66,25 @@ $UserNameBackup = $UserName
 $WorkerNameBackup = $WorkerName
 
 while ($true) {
+    $Timer = (Get-Date).ToUniversalTime()
+
     $StatStart = $StatEnd
-    $StatEnd = (Get-Date).ToUniversalTime().AddSeconds($Interval)
+    $StatEnd = $Timer.AddSeconds($Interval)
     $StatSpan = New-TimeSpan $StatStart $StatEnd
 
-    $DecayExponent = [int](((Get-Date).ToUniversalTime() - $DecayStart).TotalSeconds / $DecayPeriod)
+    $DecayExponent = [int](($Timer - $DecayStart).TotalSeconds / $DecayPeriod)
 
     #Activate or deactivate donation
-    if ((Get-Date).ToUniversalTime().AddDays(-1).AddMinutes($Donate) -ge $LastDonated) {
+    if ($Timer.AddDays(-1).AddMinutes($Donate) -ge $LastDonated) {
         $Wallet = $WalletDonate
         $UserName = $UserNameDonate
         $WorkerName = $WorkerNameDonate
     }
-    if ((Get-Date).ToUniversalTime().AddDays(-1) -ge $LastDonated) {
+    if ($Timer.AddDays(-1) -ge $LastDonated) {
         $Wallet = $WalletBackup
         $UserName = $UserNameBackup
         $WorkerName = $WorkerNameBackup
-        $LastDonated = (Get-Date).ToUniversalTime()
+        $LastDonated = $Timer
     }
 
     $Rates = [PSCustomObject]@{}
@@ -359,7 +363,7 @@ while ($true) {
     Start-Sleep $Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
-            $DecayStart = (Get-Date).ToUniversalTime()
+            $DecayStart = $Timer
             $_.New = $true
             $_.Activated++
             if ($_.Process -ne $null) {$_.Active += $_.Process.ExitTime - $_.Process.StartTime}
@@ -418,7 +422,8 @@ while ($true) {
     do {
         Get-Job | Receive-Job
         Start-Sleep 10
-    }while ((Get-Date).ToUniversalTime() -lt $StatEnd)
+        $Timer = (Get-Date).ToUniversalTime()
+    }while ($Timer -lt $StatEnd)
 
     #Save current hash rates
     $ActiveMiners | ForEach-Object {
