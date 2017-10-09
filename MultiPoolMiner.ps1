@@ -195,7 +195,7 @@ while ($true) {
             $MinerFirewalls = $null
         }
     }
-    if ($Miners.Count -eq 0) {"No Miners!" | Out-Host; Start-Sleep $Interval; continue}
+    if ($Miners.Count -eq 0) {Write-Warning "No miners available. "; Start-Sleep $Interval; continue}
 
     #Update the active miners
     $ActiveMiners | ForEach-Object {
