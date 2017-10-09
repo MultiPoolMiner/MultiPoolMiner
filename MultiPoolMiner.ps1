@@ -91,13 +91,18 @@ while ($true) {
     if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
 
     #Load information about the Pools
-    $AllPools = if (Test-Path "Pools") {
-        Get-ChildItemContent "Pools" | ForEach-Object {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | 
-            Where-Object {$Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}
+    $NewPools = if (Test-Path "Pools") {
+        Get-ChildItemContent "Pools" | ForEach-Object {$_.Content | Add-Member @{Name = $_.Name} -PassThru}
     }
-    if ($AllPools.Count -eq 0) {"No Pools!" | Out-Host; Start-Sleep $Interval; continue}
+    $AllPools = $NewPools + (Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object {$AllPools | Where-Object Name -EQ $_}) | 
+        Where-Object {$Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}
+    if ($AllPools.Count -eq 0) {Write-Warning "No pools available. "; Start-Sleep $Interval; continue}
     $Pools = [PSCustomObject]@{}
     $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Sort-Object -Descending {$PoolName.Count -eq 0 -or (Compare-Object $PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}, StablePrice, {$_.Region -EQ $Region}, {$_.SSL -EQ $SSL} | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
+    if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_} | Measure-Object Updated -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalSeconds) -gt $Interval) {
+        Write-Warning "Pool prices are out of sync. "
+        $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_.Price = $Pools.$_.StablePrice}
+    }
 
     #Load information about the Miners
     #Messy...?

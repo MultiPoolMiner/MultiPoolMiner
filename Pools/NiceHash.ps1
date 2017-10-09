@@ -1,18 +1,18 @@
 ﻿. .\Include.ps1
 
-try {
-    $NiceHash_Request = Invoke-WebRequest "https://api.nicehash.com/api?method=simplemultialgo.info" -UseBasicParsing | ConvertFrom-Json
-}
-catch {
-    return
-}
-
-if (-not $NiceHash_Request) {return}
-
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
+$NiceHash_Request = $null
+
+try {
+    $NiceHash_Request = Invoke-RestMethod "https://api.nicehash.com/api?method=simplemultialgo.info" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+}
+catch {
+    Write-Warning "Pool API ($Name) has failed. "
+}
+
 $NiceHash_Regions = "eu", "usa", "hk", "jp", "in", "br"
-    
+
 $NiceHash_Request.result.simplemultialgo | ForEach-Object {
     $NiceHash_Host = "nicehash.com"
     $NiceHash_Port = $_.port
@@ -22,7 +22,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
 
     if ($NiceHash_Algorithm_Norm -eq "Sia") {$NiceHash_Algorithm_Norm = "SiaNiceHash"} #temp fix
     if ($NiceHash_Algorithm_Norm -eq "Decred") {$NiceHash_Algorithm_Norm = "DecredNiceHash"} #temp fix
-    
+
     $Divisor = 1000000000
 
     $Stat = Set-Stat -Name "$($Name)_$($NiceHash_Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor) -Duration $StatSpan
@@ -30,7 +30,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
     $NiceHash_Regions | ForEach-Object {
         $NiceHash_Region = $_
         $NiceHash_Region_Norm = Get-Region $NiceHash_Region
-        
+
         if ($Wallet) {
             [PSCustomObject]@{
                 Algorithm     = $NiceHash_Algorithm_Norm
@@ -45,6 +45,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
                 Pass          = "x"
                 Region        = $NiceHash_Region_Norm
                 SSL           = $false
+                Updated       = $Stat.Updated
             }
 
             [PSCustomObject]@{
@@ -60,6 +61,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
                 Pass          = "x"
                 Region        = $NiceHash_Region_Norm
                 SSL           = $true
+                Updated       = $Stat.Updated
             }
         }
     }

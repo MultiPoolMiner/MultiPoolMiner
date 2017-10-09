@@ -1,15 +1,15 @@
 ﻿. .\Include.ps1
 
+$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
+
+$MiningPoolHub_Request = $null
+
 try {
-    $MiningPoolHub_Request = Invoke-WebRequest "https://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics" -UseBasicParsing | ConvertFrom-Json
+    $MiningPoolHub_Request = Invoke-RestMethod "https://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
-    return
+    Write-Warning "Pool API ($Name) has failed. "
 }
-
-if (-not $MiningPoolHub_Request.success) {return}
-
-$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $MiningPoolHub_Regions = "europe", "us", "asia"
 
@@ -34,7 +34,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $MiningPoolHub_Algorithm_Norm
                 Info          = $MiningPoolHub_Coin
-                Price         = $Stat.Day #temp fix
+                Price         = $Stat.Live
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
@@ -44,8 +44,9 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 Pass          = "x"
                 Region        = $MiningPoolHub_Region_Norm
                 SSL           = $false
+                Updated       = $Stat.Updated
             }
-        
+
             [PSCustomObject]@{
                 Algorithm     = $MiningPoolHub_Algorithm_Norm
                 Info          = $MiningPoolHub_Coin
@@ -59,6 +60,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 Pass          = "x"
                 Region        = $MiningPoolHub_Region_Norm
                 SSL           = $true
+                Updated       = $Stat.Updated
             }
         }
     }

@@ -1,19 +1,19 @@
 ﻿. .\Include.ps1
 
+$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
+
+$Zpool_Request = $null
+
 try {
-    $Zpool_Request = Invoke-WebRequest "http://www.zpool.ca/api/status" -UseBasicParsing | ConvertFrom-Json
+    $Zpool_Request = Invoke-RestMethod "http://www.zpool.ca/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
-    return
+    Write-Warning "Pool API ($Name) has failed. "
 }
-
-if (-not $Zpool_Request) {return}
-
-$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 
 $Zpool_Regions = "us"
 
-$Zpool_Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
+$Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
     $Zpool_Host = "mine.zpool.ca"
     $Zpool_Port = $Zpool_Request.$_.port
     $Zpool_Algorithm = $Zpool_Request.$_.name
@@ -21,7 +21,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProp
     $Zpool_Coin = ""
 
     $Divisor = 1000000
-	
+
     switch ($Zpool_Algorithm_Norm) {
         "equihash" {$Divisor /= 1000}
         "blake2s" {$Divisor *= 1000}
@@ -34,11 +34,11 @@ $Zpool_Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProp
 
     if ((Get-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit" -Value ([Double]$Zpool_Request.$_.estimate_last24h / $Divisor) -Duration $StatSpan}
     else {$Stat = Set-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit" -Value ([Double]$Zpool_Request.$_.estimate_current / $Divisor) -Duration (New-TimeSpan -Days 1)}
-	
+
     $Zpool_Regions | ForEach-Object {
         $Zpool_Region = $_
         $Zpool_Region_Norm = Get-Region $Zpool_Region
-        
+
         if ($Wallet) {
             [PSCustomObject]@{
                 Algorithm     = $Zpool_Algorithm_Norm
@@ -53,6 +53,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty | Select-Object -ExpandProp
                 Pass          = "$WorkerName,c=BTC"
                 Region        = $Zpool_Region_Norm
                 SSL           = $false
+                Updated       = $Stat.Updated
             }
         }
     }
