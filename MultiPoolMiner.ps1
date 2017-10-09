@@ -215,24 +215,13 @@ while ($true) {
         $ActiveMiner = $ActiveMiners | Where-Object {
             $_.Name -eq $Miner.Name -and 
             $_.Path -eq $Miner.Path -and 
+            $_.Arguments -eq $Miner.Arguments -and 
             $_.Wrap -eq $Miner.Wrap -and 
             $_.API -eq $Miner.API -and 
             $_.Port -eq $Miner.Port -and 
             (Compare-Object $_.Algorithm ($Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name) | Measure-Object).Count -eq 0
         }
         if ($ActiveMiner) {
-            if ($ActiveMiner.Arguments -ne $Miner.Arguments) {
-                $ActiveMiner.Arguments = $Miner.Arguments
-    
-                if ($ActiveMiner.Process -eq $null) {
-                    $ActiveMiner.Status = "Failed"
-                }
-                elseif ($ActiveMiner.Process.HasExited -eq $false) {
-                    $ActiveMiner.Process.CloseMainWindow() | Out-Null
-                    $ActiveMiner.Status = "Idle"
-                }
-            }
-            
             $ActiveMiner.Type = $Miner.Type
             $ActiveMiner.Index = $Miner.Index
             $ActiveMiner.Device = $Miner.Device
