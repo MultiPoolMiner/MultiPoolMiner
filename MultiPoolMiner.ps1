@@ -428,9 +428,6 @@ while ($true) {
             $Miner_HashRates = Get-HashRate $_.API $_.Port ($_.New -and $_.Benchmarked -lt 3)
             $_.Speed_Live = $Miner_HashRates | Select-Object -First $_.Algorithm.Count
 
-            $Miner_StatSpan = $StatSpan
-            if ($_.New) {$Miner_StatSpan = New-TimeSpan -Seconds ($StatSpan.TotalSeconds * 100)}
-            
             if ($Miner_HashRates.Count -ge $_.Algorithm.Count) {
                 for ($i = 0; $i -lt $_.Algorithm.Count; $i++) {
                     $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate" -Value ($Miner_HashRates | Select-Object -Index $i) -Duration $StatSpan -FaultDetection $true
