@@ -10,7 +10,7 @@
     [Parameter(Mandatory = $false)]
     [String]$API_Key = "", 
     [Parameter(Mandatory = $false)]
-    [Int]$Interval = 60, #seconds before reading hash rate from miners
+    [Int]$Interval = 60 * 2, #seconds before reading hash rate from miners
     [Parameter(Mandatory = $false)]
     [String]$Region = "europe", #europe/us/asia
     [Parameter(Mandatory = $false)]
