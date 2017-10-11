@@ -230,7 +230,7 @@ while ($true) {
             $ActiveMiner.Profit_Comparison = $Miner.Profit_Comparison
             $ActiveMiner.Profit_MarginOfError = $Miner.Profit_MarginOfError
             $ActiveMiner.Profit_Bias = $Miner.Profit_Bias
-            $ActiveMiner.Speed = $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Miner.HashRates.$_}
+            $ActiveMiner.Speed = $Miner.HashRates.PSObject.Properties.Value #temp fix, must use 'PSObject.Properties' to preserve order
         }
         else {
             $ActiveMiners += [PSCustomObject]@{
@@ -249,7 +249,7 @@ while ($true) {
                 Profit_Comparison    = $Miner.Profit_Comparison
                 Profit_MarginOfError = $Miner.Profit_MarginOfError
                 Profit_Bias          = $Miner.Profit_Bias
-                Speed                = $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Miner.HashRates.$_}
+                Speed                = $Miner.HashRates.PSObject.Properties.Value #temp fix, must use 'PSObject.Properties' to preserve order
                 Speed_Live           = 0
                 Best                 = $false
                 Best_Comparison      = $false
