@@ -30,7 +30,13 @@
     [Parameter(Mandatory = $false)]
     [String]$Proxy = "", #i.e http://192.0.0.1:8080
     [Parameter(Mandatory = $false)]
-    [Int]$Delay = 0 #seconds before opening each miner
+    [Int]$Delay = 0, #seconds before opening each miner
+    [Parameter(Mandatory = $false)]
+    [Int]$Temp_NVIDIA = 80, #max temp nvidia cards
+    [Parameter(Mandatory = $false)]
+    [Int]$Temp_CPU = 80, #max temp cpu,
+    [Parameter(Mandatory = $false)]
+    [Int]$Temp_AMD = 80 #max temp AMD cards    
 )
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
