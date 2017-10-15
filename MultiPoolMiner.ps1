@@ -30,7 +30,9 @@
     [Parameter(Mandatory = $false)]
     [String]$Proxy = "", #i.e http://192.0.0.1:8080
     [Parameter(Mandatory = $false)]
-    [Int]$Delay = 0 #seconds before opening each miner
+    [Int]$Delay = 0, #seconds before opening each miner
+    [Parameter(Mandatory = $false)]
+    [Switch]$Watchdog = $false
 )
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
@@ -52,6 +54,10 @@ $DecayPeriod = 60 #seconds
 $DecayBase = 1 - 0.1 #decimal percentage
 
 $ActiveMiners = @()
+
+$WatchdogInterval = $Interval * 2
+$WatchdogReset = $WatchdogInterval * 10
+$WatchdogTimers = @()
 
 #Start the log
 Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
@@ -102,6 +108,15 @@ while ($true) {
     $AllPools = @($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object {$AllPools | Where-Object Name -EQ $_}) | 
         Where-Object {$Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}
     if ($AllPools.Count -eq 0) {Write-Warning "No pools available. "; Start-Sleep $Interval; continue}
+
+    #Apply watchdog to pools
+    $AllPools = $AllPools | Where-Object {
+        $Pool = $_
+        $Pool_WatchdogTimers = $WatchdogTimers | Where-Object PoolName -EQ $Pool.PoolName | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset)
+        ($Pool_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt 2 -and ($Pool_WatchdogTimers | Where-Object {$Pool.Algorithm -contains $_.Algorithm} | Measure-Object | Select-Object -ExpandProperty Count) -lt 1
+    }
+
+    #Update the active pools
     $Pools = [PSCustomObject]@{}
     $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Sort-Object -Descending {$PoolName.Count -eq 0 -or (Compare-Object $PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}, StablePrice, {$_.Region -EQ $Region}, {$_.SSL -EQ $SSL} | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
     if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_} | Measure-Object Updated -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalSeconds) -gt $Interval) {
@@ -201,6 +216,13 @@ while ($true) {
         }
     }
     if ($Miners.Count -eq 0) {Write-Warning "No miners available. "; Start-Sleep $Interval; continue}
+
+    #Apply watchdog to miners
+    $Miners = $Miners | Where-Object {
+        $Miner = $_
+        $Miner_WatchdogTimers = $WatchdogTimers | Where-Object MinerName -EQ $Miner.MinerName | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset)
+        ($Miner_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt 2 -and ($Miner_WatchdogTimers | Where-Object {$Miner.HashRates.PSObject.Properties.Name -contains $_.Algorithm} | Measure-Object | Select-Object -ExpandProperty Count) -lt 1
+    }
 
     #Update the active miners
     $ActiveMiners | ForEach-Object {
@@ -342,12 +364,29 @@ while ($true) {
 
     #Stop or start miners in the active list depending on if they are the most profitable
     $ActiveMiners | Where-Object Activated -GT 0 | Where-Object Best -EQ $false | ForEach-Object {
-        if ($_.Process -eq $null) {
-            $_.Status = "Failed"
+        $Miner = $_
+
+        if ($Miner.Process -eq $null) {
+            $Miner.Status = "Failed"
         }
-        elseif ($_.Process.HasExited -eq $false) {
-            $_.Process.CloseMainWindow() | Out-Null
-            $_.Status = "Idle"
+        elseif ($Miner.Process.HasExited -eq $false) {
+            $Miner.Process.CloseMainWindow() | Out-Null
+            $Miner.Status = "Idle"
+
+            #Remove watchdog timer
+            $Miner_Name = $Miner.Name
+            $Miner.Algorithm | ForEach-Object {
+                $Miner_Algorithm = $_
+                $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
+                if ($WatchdogTimer) {
+                    if ($WatchdogTimer.Kicked -lt $Timer.AddSeconds( - $WatchdogInterval)) {
+                        $Miner.Status = "Failed"
+                    }
+                    else {
+                        $WatchdogTimers = $WatchdogTimers -notmatch $WatchdogTimer
+                    }
+                }
+            }
         }
     }
     Start-Sleep $Delay #Wait to prevent BSOD
@@ -361,6 +400,23 @@ while ($true) {
             else {$_.Process = Start-SubProcess -FilePath $_.Path -ArgumentList $_.Arguments -WorkingDirectory (Split-Path $_.Path) -Priority ($_.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)}
             if ($_.Process -eq $null) {$_.Status = "Failed"}
             else {$_.Status = "Running"}
+
+            #Add watchdog timer
+            if ($Watchdog) {
+                $Miner_Name = $_.Name
+                $_.Algorithm | ForEach-Object {
+                    $Miner_Algorithm = $_
+                    $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
+                    if (-not $WatchdogTimer) {
+                        $WatchdogTimers += [PSCustomObject]@{
+                            MinerName = $Miner_Name
+                            PoolName  = $Pools.$Miner_Algorithm.Name
+                            Algorithm = $Miner_Algorithm
+                            Kicked    = $Timer
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -381,6 +437,14 @@ while ($true) {
         @{Label = "Active"; Expression = {"{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f $(if ($_.Process -eq $null) {$_.Active}else {if ($_.Process.ExitTime -gt $_.Process.StartTime) {($_.Active + ($_.Process.ExitTime - $_.Process.StartTime))}else {($_.Active + ((Get-Date) - $_.Process.StartTime))}})}}, 
         @{Label = "Launched"; Expression = {Switch ($_.Activated) {0 {"Never"} 1 {"Once"} Default {"$_ Times"}}}}, 
         @{Label = "Command"; Expression = {"$($_.Path.TrimStart((Convert-Path ".\"))) $($_.Arguments)"}}
+    ) | Out-Host
+
+    #Display watchdog timers
+    $WatchdogTimers | Format-Table -Wrap (
+        @{Label = "Miner"; Expression = {$_.MinerName}}, 
+        @{Label = "Pool"; Expression = {$_.PoolName}}, 
+        @{Label = "Algorithm"; Expression = {$_.Algorithm}}, 
+        @{Label = "Watchdog Timer"; Expression = {"{0:n0} Seconds" -f ($Timer - $_.Kicked | Select-Object -ExpandProperty TotalSeconds)}; Align = 'right'}
     ) | Out-Host
 
     #Display profit comparison
@@ -422,16 +486,21 @@ while ($true) {
 
         if ($_.New) {$_.Benchmarked++}
 
-        if ($_.Process -eq $null -or $_.Process.HasExited) {
-            if ($_.Status -eq "Running") {$_.Status = "Failed"}
-        }
-        else {
+        if ($_.Process -and -not $_.Process.HasExited) {
             $Miner_HashRates = Get-HashRate $_.API $_.Port ($_.New -and $_.Benchmarked -lt 3)
             $_.Speed_Live = $Miner_HashRates | Select-Object -First $_.Algorithm.Count
 
             if ($Miner_HashRates.Count -ge $_.Algorithm.Count) {
                 for ($i = 0; $i -lt $_.Algorithm.Count; $i++) {
                     $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate" -Value ($Miner_HashRates | Select-Object -Index $i) -Duration $StatSpan -FaultDetection $true
+
+                    #Update watchdog timer
+                    $Miner_Name = $_.Name
+                    $Miner_Algorithm = $_.Algorithm | Select-Object -Index $i
+                    $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
+                    if ($Stat -and $WatchdogTimer -and $Stat.Updated -gt $WatchdogTimer.Kicked) {
+                        $WatchdogTimer.Kicked = $Stat.Updated
+                    }
                 }
 
                 $_.New = $false
