@@ -45,6 +45,9 @@ else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
 
 . .\Include.ps1
 
+$Algorithm = $Algorithm | ForEach-Object {Get-Algorithm $_}
+$Region = $Region | ForEach-Object {Get-Region $_}
+
 $Timer = (Get-Date).ToUniversalTime()
 
 $StatEnd = $Timer
