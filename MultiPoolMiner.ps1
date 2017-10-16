@@ -16,13 +16,13 @@
     [Parameter(Mandatory = $false)]
     [Switch]$SSL = $false, 
     [Parameter(Mandatory = $false)]
-    [Array]$Type = $null, #AMD/NVIDIA/CPU
+    [Array]$Type = @(), #AMD/NVIDIA/CPU
     [Parameter(Mandatory = $false)]
-    [Array]$Algorithm = $null, #i.e. Ethash,Equihash,CryptoNight ect.
+    [Array]$Algorithm = @(), #i.e. Ethash,Equihash,CryptoNight ect.
     [Parameter(Mandatory = $false)]
-    [Array]$MinerName = $null, 
+    [Array]$MinerName = @(), 
     [Parameter(Mandatory = $false)]
-    [Array]$PoolName = $null, 
+    [Array]$PoolName = @(), 
     [Parameter(Mandatory = $false)]
     [Array]$Currency = ("BTC", "USD"), #i.e. GBP,EUR,ZEC,ETH ect.
     [Parameter(Mandatory = $false)]
