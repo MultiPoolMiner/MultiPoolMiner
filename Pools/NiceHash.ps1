@@ -25,7 +25,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
 
     $Divisor = 1000000000
 
-    $Stat = Set-Stat -Name "$($Name)_$($NiceHash_Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor) -Duration $StatSpan
+    $Stat = Set-Stat -Name "$($Name)_$($NiceHash_Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
     $NiceHash_Regions | ForEach-Object {
         $NiceHash_Region = $_

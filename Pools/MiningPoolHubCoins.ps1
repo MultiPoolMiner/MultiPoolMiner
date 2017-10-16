@@ -24,7 +24,7 @@ $MiningPoolHubCoins_Request.return | ForEach-Object {
 
     $Divisor = 1000000000
 
-    $Stat = Set-Stat -Name "$($Name)_$($MiningPoolHubCoins_Coin)_Profit" -Value ([Double]$_.profit / $Divisor) -Duration $StatSpan
+    $Stat = Set-Stat -Name "$($Name)_$($MiningPoolHubCoins_Coin)_Profit" -Value ([Double]$_.profit / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
     $MiningPoolHubCoins_Regions | ForEach-Object {
         $MiningPoolHubCoins_Region = $_

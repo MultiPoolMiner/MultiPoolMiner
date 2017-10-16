@@ -6,11 +6,17 @@ function Set-Stat {
         [String]$Name, 
         [Parameter(Mandatory = $true)]
         [Double]$Value, 
+        [Parameter(Mandatory = $false)]
+        [DateTime]$Updated = (Get-Date).ToUniversalTime(), 
         [Parameter(Mandatory = $true)]
         [TimeSpan]$Duration, 
         [Parameter(Mandatory = $false)]
-        [Bool]$FaultDetection = $false
+        [Bool]$FaultDetection = $false, 
+        [Parameter(Mandatory = $false)]
+        [Bool]$ChangeDetection = $false
     )
+
+    $Updated = $Updated.ToUniversalTime()
 
     $Path = "Stats\$Name.txt"
     $SmallestValue = 1E-20
@@ -43,6 +49,8 @@ function Set-Stat {
             $ToleranceMin = $Stat.Week * (1 - [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
             $ToleranceMax = $Stat.Week * (1 + [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
         }
+
+        if ($ChangeDetection -and $Value -eq $Stat.Live) {$Updated -eq $Stat.updated}
 
         if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
             Write-Warning "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance. "
