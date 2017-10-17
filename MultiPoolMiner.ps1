@@ -102,11 +102,11 @@ while ($true) {
     $NewRates = Invoke-RestMethod "https://api.coinbase.com/v2/exchange-rates?currency=BTC" -UseBasicParsing | Select-Object -ExpandProperty data | Select-Object -ExpandProperty rates
     $Currency | Where-Object {$NewRates.$_} | ForEach-Object {$Rates | Add-Member $_ ([Double]$NewRates.$_) -Force}
 
-    #Load the Stats
+    #Load the stats
     $Stats = [PSCustomObject]@{}
     if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
 
-    #Load information about the Pools
+    #Load information about the pools
     $NewPools = @()
     if (Test-Path "Pools") {
         $NewPools = Get-ChildItemContent "Pools" | ForEach-Object {$_.Content | Add-Member @{Name = $_.Name} -PassThru}
@@ -130,7 +130,7 @@ while ($true) {
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_.Price = $Pools.$_.StablePrice}
     }
 
-    #Load information about the Miners
+    #Load information about the miners
     #Messy...?
     $AllMiners = if (Test-Path "Miners") {
         Get-ChildItemContent "Miners" | ForEach-Object {$_.Content | Add-Member @{Name = $_.Name} -PassThru} | 
