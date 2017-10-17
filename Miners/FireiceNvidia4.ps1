@@ -12,6 +12,8 @@ if ((Test-Path $Path_Threads) -eq $false) {Copy-Item (Split-Path $Path) (Split-P
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 $Port = 3335 + ($ThreadIndex * 10000)
 
+if ($Pools.CryptoNight.Name -eq "NiceHash") {return} #temp fix
+
 ([PSCustomObject]@{
         gpu_threads_conf = @([PSCustomObject]@{index = $ThreadIndex; threads = 32; blocks = 84; bfactor = 6; bsleep = 25; affine_to_cpu = $true})
         use_tls          = $false
