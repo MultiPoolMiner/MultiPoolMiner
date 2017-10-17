@@ -62,6 +62,8 @@ $WatchdogInterval = $Interval * 2
 $WatchdogReset = $WatchdogInterval * 10
 $WatchdogTimers = @()
 
+$Rates = [PSCustomObject]@{BTC = [Double]1}
+
 #Start the log
 Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
 
@@ -96,8 +98,9 @@ while ($true) {
         $LastDonated = $Timer
     }
 
-    $Rates = [PSCustomObject]@{}
-    $Currency | ForEach-Object {$Rates | Add-Member $_ (Invoke-WebRequest "https://api.cryptonator.com/api/ticker/btc-$_" -UseBasicParsing | ConvertFrom-Json).ticker.price}
+    #Update the exchange rates
+    $NewRates = Invoke-RestMethod "https://api.coinbase.com/v2/exchange-rates?currency=BTC" -UseBasicParsing | Select-Object -ExpandProperty data | Select-Object -ExpandProperty rates
+    $Currency | Where-Object {$NewRates.$_} | ForEach-Object {$Rates | Add-Member $_ ([Double]$NewRates.$_) -Force}
 
     #Load the Stats
     $Stats = [PSCustomObject]@{}
