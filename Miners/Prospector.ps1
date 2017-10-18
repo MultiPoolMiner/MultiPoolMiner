@@ -1,10 +1,10 @@
 ﻿. .\Include.ps1
 
 $Path = ".\Bin\Prospector\prospector.exe"
-$Uri = "https://github.com/semtexzv/Prospector/releases/download/0.0.10-ALPHA/prospector-0.0.10-ALPHA-win64.zip"
+$Uri = "https://github.com/semtexzv/Prospector/releases/download/0.0.13-ALPHA/prospector-0.0.13-ALPHA-win64.zip"
 
 $Commands = [PSCustomObject]@{
-    #"xmr" = @() #CryptoNight
+    "xmr" = @() #CryptoNight
     "eth" = @() #Ethash
     "sia" = @() #Sia
     "sigt" = @() #Skunk
