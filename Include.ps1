@@ -544,9 +544,11 @@ function Expand-WebRequest {
         [String]$Path
     )
 
+    if (-not (Test-Path $Path)) {New-Item $Path -ItemType "directory"}
+
     $FolderName_Old = ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName
     $FolderName_New = Split-Path $Path -Leaf
-    $FileName = "$FolderName_New$(([IO.FileInfo](Split-Path $Uri -Leaf)).Extension)"
+    $FileName = "$Path$(([IO.FileInfo](Split-Path $Uri -Leaf)).Extension)"
 
     if (Test-Path $FileName) {Remove-Item $FileName}
     if (Test-Path "$(Split-Path $Path)\$FolderName_New") {Remove-Item "$(Split-Path $Path)\$FolderName_New" -Recurse}
