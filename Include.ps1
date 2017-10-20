@@ -110,7 +110,7 @@ function Set-Stat {
         }
     }
 
-    if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory"}
+    if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
     [PSCustomObject]@{
         Live = [Decimal]$Stat.Live
         Minute = [Decimal]$Stat.Minute
@@ -138,7 +138,7 @@ function Get-Stat {
         [String]$Name
     )
 
-    if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory"}
+    if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
     Get-ChildItem "Stats" | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
 }
 
@@ -544,7 +544,7 @@ function Expand-WebRequest {
         [String]$Path
     )
 
-    if (-not (Test-Path $Path)) {New-Item $Path -ItemType "directory"}
+    if (-not (Test-Path $Path)) {New-Item $Path -ItemType "directory" | Out-Null}
 
     $FolderName_Old = ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName
     $FolderName_New = Split-Path $Path -Leaf
