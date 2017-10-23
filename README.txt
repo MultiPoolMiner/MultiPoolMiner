@@ -13,7 +13,7 @@ LINK: https://github.com/aaronsace/MultiPoolMiner/
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 17/09/2017 - v1.13a
+README.txt - updated on 23/10/2017 - v1.13b
 
 ====================================================================
 
@@ -83,7 +83,7 @@ COMMAND LINE OPTIONS (not case-sensitive, see Sample Usage section below for an 
 	Choose the default currency or currencies your profit stats will be shown in.
 
 -interval
-	MultiPoolMiner's update interval in seconds. Default is 60.
+	MultiPoolMiner's update interval in seconds. It also determines how long a benchmark is running for each miner file (miner/algorithm/coin). Default is 60.
 
 -donate
 	Donation of mining time in minutes per day to aaronsace. Default is 10. The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
