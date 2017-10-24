@@ -13,7 +13,7 @@ LINK: https://github.com/aaronsace/MultiPoolMiner/
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 23/10/2017 - v1.13b
+README.txt - updated on 24/10/2017 - v1.13c
 
 ====================================================================
 
@@ -57,7 +57,7 @@ COMMAND LINE OPTIONS (not case-sensitive, see Sample Usage section below for an 
 	MiningPoolHub https://miningpoolhub.com/ 
 	Zpool http://www.zpool.ca/ 
 	Nicehash https://www.nicehash.com/
-	Selecting multiple pools is allowed and will be used as failovers. A registered account is required when mining on MiningPoolHub.
+	The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example. A registered account is required when mining on MiningPoolHub.
 
 -username 
 	Your username you use to login to MiningPoolHub.
@@ -77,7 +77,7 @@ COMMAND LINE OPTIONS (not case-sensitive, see Sample Usage section below for an 
 -algorithm
 	The following algorithms are currently supported: 
 	Bitcore, Blakecoin, Blake2s, BlakeVanilla, C11, CryptoNight, Ethash, X11, Decred, Equihash, Groestl, HMQ1725, JHA, Keccak, Lbry, Lyra2RE2, Lyra2z, MyriadGroestl, NeoScrypt, Nist5, Pascal, Quark, Qubit, Scrypt, SHA256, Sia, Sib, Skunk, Skein, Timetravel, Tribus, BlakeVanilla, Veltor, X11, X11evo, X17, Yescrypt
-	Note that the pool used also has to support the required algorithm(s).
+	Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool).
 	
 -currency [BTC,USD,EUR,ETH ...]
 	Choose the default currency or currencies your profit stats will be shown in.
