@@ -1,4 +1,4 @@
-﻿. .\Include.ps1
+﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-Nanashi\ccminer.exe"
 $URI = "https://github.com/Nanashi-Meiyo-Meijin/ccminer/releases/download/v2.2-mod-r2/2.2-mod-r2-CUDA9.binary.zip"

@@ -1,8 +1,8 @@
-﻿$DownloadList = $args
+﻿using module .\Include.psm1
+
+$DownloadList = $args
 
 if ($script:MyInvocation.MyCommand.Path) {Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)}
-
-. .\Include.ps1
 
 $Progress = 0
 

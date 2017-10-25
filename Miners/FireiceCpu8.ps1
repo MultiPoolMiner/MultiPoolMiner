@@ -1,4 +1,4 @@
-﻿. .\Include.ps1
+﻿using module ..\Include.psm1
 
 $Threads = 8
 $Path_Threads = ".\Bin\CryptoNight-CPU$Threads\xmr-stak-cpu.exe"

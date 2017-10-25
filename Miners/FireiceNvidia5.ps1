@@ -1,4 +1,4 @@
-﻿. .\Include.ps1
+﻿using module ..\Include.psm1
 
 $ThreadIndex = 5
 $Path_Threads = ".\Bin\CryptoNight-NVIDIA$ThreadIndex\xmr-stak-nvidia.exe"

@@ -1,4 +1,4 @@
-﻿. .\Include.ps1
+﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
 $Uri = "https://github.com/KlausT/ccminer/releases/download/8.13/ccminer-813-x64.zip"

@@ -1,4 +1,4 @@
-﻿. .\Include.ps1
+﻿using module ..\Include.psm1
 
 $Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
 

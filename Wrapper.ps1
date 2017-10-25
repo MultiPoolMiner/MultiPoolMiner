@@ -1,4 +1,6 @@
-﻿param(
+﻿using module .\Include.psm1
+
+param(
     [Parameter(Mandatory = $true)]
     [Int]$ControllerProcessID, 
     [Parameter(Mandatory = $true)]
@@ -12,8 +14,6 @@
 )
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
-
-. .\Include.ps1
 
 Remove-Item ".\Wrapper_$Id.txt" -ErrorAction Ignore
 

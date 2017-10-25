@@ -1,4 +1,4 @@
-﻿. .\Include.ps1
+﻿using module ..\Include.psm1
 
 $ThreadIndex = 2
 $Path_Threads = ".\Bin\CryptoNight-AMD$ThreadIndex\xmr-stak-amd.exe"

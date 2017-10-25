@@ -1,4 +1,4 @@
-﻿. .\Include.ps1
+﻿using module ..\Include.psm1
 
 $Path = ".\Bin\Skein-AMD\sgminer.exe"
 $Uri = "https://github.com/miningpoolhub/sgminer/releases/download/5.3.1/Release.zip"
