@@ -208,20 +208,12 @@ function Get-HashRate {
     try {
         switch ($API) {
             "xgminer" {
-                $Message = @{command = "summary"; parameter = ""} | ConvertTo-Json -Compress
+                $Request = @{command = "summary"; parameter = ""} | ConvertTo-Json -Compress
 
                 do {
-                    $Client = New-Object System.Net.Sockets.TcpClient $server, $port
-                    $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
-                    $Reader = New-Object System.IO.StreamReader $Client.GetStream()
-                    $client.SendTimeout = $Timeout * 1000
-                    $client.ReceiveTimeout = $Timeout * 1000
-                    $Writer.AutoFlush = $true
+                    $Response = Invoke-TcpRequest $Server $Port $Request $Timeout
 
-                    $Writer.WriteLine($Message)
-                    $Request = $Reader.ReadLine()
-
-                    $Data = $Request.Substring($Request.IndexOf("{"), $Request.LastIndexOf("}") - $Request.IndexOf("{") + 1) -replace " ", "_" | ConvertFrom-Json
+                    $Data = $Response.Substring($Response.IndexOf("{"), $Response.LastIndexOf("}") - $Response.IndexOf("{") + 1) -replace " ", "_" | ConvertFrom-Json
 
                     $HashRate = if ($Data.SUMMARY.HS_5s -ne $null) {[Double]$Data.SUMMARY.HS_5s * [Math]::Pow($Multiplier, 0)}
                     elseif ($Data.SUMMARY.KHS_5s -ne $null) {[Double]$Data.SUMMARY.KHS_5s * [Math]::Pow($Multiplier, 1)}
@@ -250,20 +242,12 @@ function Get-HashRate {
                 } while ($HashRates.Count -lt 6)
             }
             "ccminer" {
-                $Message = "summary"
+                $Request = "summary"
 
                 do {
-                    $Client = New-Object System.Net.Sockets.TcpClient $server, $port
-                    $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
-                    $Reader = New-Object System.IO.StreamReader $Client.GetStream()
-                    $client.SendTimeout = $Timeout * 1000
-                    $client.ReceiveTimeout = $Timeout * 1000
-                    $Writer.AutoFlush = $true
+                    $Response = Invoke-TcpRequest $Server $Port $Request $Timeout
 
-                    $Writer.WriteLine($Message)
-                    $Request = $Reader.ReadLine()
-
-                    $Data = $Request -split ";" | ConvertFrom-StringData
+                    $Data = $Response -split ";" | ConvertFrom-StringData
 
                     $HashRate = if ([Double]$Data.KHS -ne 0 -or [Double]$Data.ACC -ne 0) {$Data.KHS}
 
@@ -277,20 +261,12 @@ function Get-HashRate {
                 } while ($HashRates.Count -lt 6)
             }
             "nicehashequihash" {
-                $Message = "status"
-
-                $Client = New-Object System.Net.Sockets.TcpClient $server, $port
-                $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
-                $Reader = New-Object System.IO.StreamReader $Client.GetStream()
-                $client.SendTimeout = $Timeout * 1000
-                $client.ReceiveTimeout = $Timeout * 1000
-                $Writer.AutoFlush = $true
+                $Request = "status"
 
                 do {
-                    $Writer.WriteLine($Message)
-                    $Request = $Reader.ReadLine()
+                    $Response = Invoke-TcpRequest $Server $Port $Request $Timeout
 
-                    $Data = $Request | ConvertFrom-Json
+                    $Data = $Response | ConvertFrom-Json
 
                     $HashRate = $Data.result.speed_hps
 
@@ -306,20 +282,12 @@ function Get-HashRate {
                 } while ($HashRates.Count -lt 6)
             }
             "nicehash" {
-                $Message = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
-
-                $Client = New-Object System.Net.Sockets.TcpClient $server, $port
-                $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
-                $Reader = New-Object System.IO.StreamReader $Client.GetStream()
-                $client.SendTimeout = $Timeout * 1000
-                $client.ReceiveTimeout = $Timeout * 1000
-                $Writer.AutoFlush = $true
+                $Request = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
 
                 do {
-                    $Writer.WriteLine($Message)
-                    $Request = $Reader.ReadLine()
+                    $Response = Invoke-TcpRequest $Server $Port $Request $Timeout
 
-                    $Data = $Request | ConvertFrom-Json
+                    $Data = $Response | ConvertFrom-Json
 
                     $HashRate = $Data.algorithms.workers.speed
 
@@ -333,20 +301,12 @@ function Get-HashRate {
                 } while ($HashRates.Count -lt 6)
             }
             "ewbf" {
-                $Message = @{id = 1; method = "getstat"} | ConvertTo-Json -Compress
-
-                $Client = New-Object System.Net.Sockets.TcpClient $server, $port
-                $Writer = New-Object System.IO.StreamWriter $Client.GetStream()
-                $Reader = New-Object System.IO.StreamReader $Client.GetStream()
-                $client.SendTimeout = $Timeout * 1000
-                $client.ReceiveTimeout = $Timeout * 1000
-                $Writer.AutoFlush = $true
+                $Request = @{id = 1; method = "getstat"} | ConvertTo-Json -Compress
 
                 do {
-                    $Writer.WriteLine($Message)
-                    $Request = $Reader.ReadLine()
+                    $Response = Invoke-TcpRequest $Server $Port $Request $Timeout
 
-                    $Data = $Request | ConvertFrom-Json
+                    $Data = $Response | ConvertFrom-Json
 
                     $HashRate = $Data.result.speed_sps
 
@@ -361,16 +321,16 @@ function Get-HashRate {
             }
             "claymore" {
                 do {
-                    $Request = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing -TimeoutSec $Timeout
+                    $Response = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing -TimeoutSec $Timeout
 
-                    $Data = $Request.Content.Substring($Request.Content.IndexOf("{"), $Request.Content.LastIndexOf("}") - $Request.Content.IndexOf("{") + 1) | ConvertFrom-Json
+                    $Data = $Response.Content.Substring($Response.Content.IndexOf("{"), $Response.Content.LastIndexOf("}") - $Response.Content.IndexOf("{") + 1) | ConvertFrom-Json
 
                     $HashRate = $Data.result[2].Split(";")[0]
                     $HashRate_Dual = $Data.result[4].Split(";")[0]
 
                     if ($HashRate -eq $null -or $HashRate_Dual -eq $null) {$HashRates = @(); $HashRate_Dual = @(); break}
 
-                    if ($Request.Content.Contains("ETH:")) {$HashRates += [Double]$HashRate * $Multiplier; $HashRates_Dual += [Double]$HashRate_Dual * $Multiplier}
+                    if ($Response.Content.Contains("ETH:")) {$HashRates += [Double]$HashRate * $Multiplier; $HashRates_Dual += [Double]$HashRate_Dual * $Multiplier}
                     else {$HashRates += [Double]$HashRate; $HashRates_Dual += [Double]$HashRate_Dual}
 
                     if (-not $Safe) {break}
@@ -380,9 +340,9 @@ function Get-HashRate {
             }
             "fireice" {
                 do {
-                    $Request = Invoke-WebRequest "http://$($Server):$Port/h" -UseBasicParsing -TimeoutSec $Timeout
+                    $Response = Invoke-WebRequest "http://$($Server):$Port/h" -UseBasicParsing -TimeoutSec $Timeout
 
-                    $Data = $Request.Content -split "</tr>" -match "total*" -split "<td>" -replace "<[^>]*>", ""
+                    $Data = $Response.Content -split "</tr>" -match "total*" -split "<td>" -replace "<[^>]*>", ""
 
                     $HashRate = $Data[1]
                     if ($HashRate -eq "") {$HashRate = $Data[2]}
@@ -399,9 +359,9 @@ function Get-HashRate {
             }
             "prospector" {
                 do {
-                    $Request = Invoke-WebRequest "http://$($Server):$Port/api/v0/hashrates" -UseBasicParsing -TimeoutSec $Timeout
+                    $Response = Invoke-WebRequest "http://$($Server):$Port/api/v0/hashrates" -UseBasicParsing -TimeoutSec $Timeout
 
-                    $Data = $Request | ConvertFrom-Json
+                    $Data = $Response | ConvertFrom-Json
 
                     $HashRate = $Data.rate
 
@@ -416,7 +376,9 @@ function Get-HashRate {
             }
             "wrapper" {
                 do {
-                    $HashRate = Get-Content ".\Wrapper_$Port.txt" -ErrorAction Ignore | ConvertFrom-Json
+                    $Response = Get-Content ".\Wrapper_$Port.txt" -ErrorAction Ignore
+
+                    $HashRate = $Response | ConvertFrom-Json
 
                     if ($HashRate -eq $null) {Start-Sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.txt" | ConvertFrom-Json}
 
@@ -563,6 +525,42 @@ function Expand-WebRequest {
         Get-ChildItem "$(Split-Path $Path)\$FolderName_Old" | Where-Object PSIsContainer -EQ $true | ForEach-Object {Move-Item "$(Split-Path $Path)\$FolderName_Old\$_" "$(Split-Path $Path)\$FolderName_New"}
         Remove-Item "$(Split-Path $Path)\$FolderName_Old"
     }
+}
+
+function Invoke-TcpRequest {
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]$Server = "localhost", 
+        [Parameter(Mandatory = $true)]
+        [String]$Port, 
+        [Parameter(Mandatory = $true)]
+        [String]$Request, 
+        [Parameter(Mandatory = $true)]
+        [String]$Timeout = 10 #seconds
+    )
+
+    try {
+        $Client = New-Object System.Net.Sockets.TcpClient $Server, $Port
+        $Stream = $Client.GetStream()
+        $Writer = New-Object System.IO.StreamWriter $Stream
+        $Reader = New-Object System.IO.StreamReader $Stream
+        $client.SendTimeout = $Timeout * 1000
+        $client.ReceiveTimeout = $Timeout * 1000
+        $Writer.AutoFlush = $true
+
+        $Writer.WriteLine($Request)
+        $Response = $Reader.ReadLine()
+    }
+    catch {
+    }
+    finally {
+        if ($Reader) {$Reader.Close()}
+        if ($Writer) {$Writer.Close()}
+        if ($Stream) {$Stream.Close()}
+        if ($Client) {$Client.Close()}
+    }
+
+    $Response
 }
 
 function Get-Algorithm {
