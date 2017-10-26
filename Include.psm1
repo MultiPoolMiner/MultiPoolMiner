@@ -1,4 +1,4 @@
-Add-Type -Path .\OpenCL\*.cs
+﻿Add-Type -Path .\OpenCL\*.cs
 
 function Set-Stat {
     param(
