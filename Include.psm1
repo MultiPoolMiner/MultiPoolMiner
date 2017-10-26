@@ -145,14 +145,16 @@ function Get-Stat {
 function Get-ChildItemContent {
     param(
         [Parameter(Mandatory = $true)]
-        [String]$Path
+        [String]$Path, 
+        [Parameter(Mandatory = $false)]
+        [Hashtable]$Parameters = @{}
     )
 
-    $ChildItems = Get-ChildItem $Path | ForEach-Object {
+    Get-ChildItem $Path | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
         if ($_.Extension -eq ".ps1") {
-            $Content = &$_.FullName
+            $Content = . $_.FullName @Parameters
         }
         else {
             $Content = $_ | Get-Content | ConvertFrom-Json
@@ -161,27 +163,6 @@ function Get-ChildItemContent {
             [PSCustomObject]@{Name = $Name; Content = $_}
         }
     }
-
-    $ChildItems | ForEach-Object {
-        $Item = $_
-        $ItemKeys = $Item.Content.PSObject.Properties.Name.Clone()
-        $ItemKeys | ForEach-Object {
-            if ($Item.Content.$_ -is [String]) {
-                $Item.Content.$_ = Invoke-Expression "`"$($Item.Content.$_)`""
-            }
-            elseif ($Item.Content.$_ -is [PSCustomObject]) {
-                $Property = $Item.Content.$_
-                $PropertyKeys = $Property.PSObject.Properties.Name
-                $PropertyKeys | ForEach-Object {
-                    if ($Property.$_ -is [String]) {
-                        $Property.$_ = Invoke-Expression "`"$($Property.$_)`""
-                    }
-                }
-            }
-        }
-    }
-
-    $ChildItems
 }
 
 filter ConvertTo-Hash { 
