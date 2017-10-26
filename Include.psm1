@@ -1,4 +1,4 @@
-﻿Add-Type -Path .\OpenCL\*.cs
+Add-Type -Path .\OpenCL\*.cs
 
 function Set-Stat {
     param(
@@ -182,225 +182,6 @@ function Get-ChildItemContent {
     }
 
     $ChildItems
-}
-
-function Get-HashRate {
-    param(
-        [Parameter(Mandatory = $true)]
-        [String]$API, 
-        [Parameter(Mandatory = $true)]
-        [Int]$Port, 
-        [Parameter(Mandatory = $false)]
-        [Object]$Parameters = @{}, 
-        [Parameter(Mandatory = $false)]
-        [Bool]$Safe = $false
-    )
-
-    $Server = "localhost"
-    $Timeout = 10 #seconds
-
-    $Multiplier = 1000
-    $Delta = 0.05
-    $Interval = 5
-    $HashRates = @()
-    $HashRates_Dual = @()
-
-    try {
-        switch ($API) {
-            "xgminer" {
-                $Request = @{command = "summary"; parameter = ""} | ConvertTo-Json -Compress
-
-                do {
-                    $Response = Invoke-TcpRequest $Server $Port $Request $Timeout
-
-                    $Data = $Response.Substring($Response.IndexOf("{"), $Response.LastIndexOf("}") - $Response.IndexOf("{") + 1) -replace " ", "_" | ConvertFrom-Json
-
-                    $HashRate = if ($Data.SUMMARY.HS_5s -ne $null) {[Double]$Data.SUMMARY.HS_5s * [Math]::Pow($Multiplier, 0)}
-                    elseif ($Data.SUMMARY.KHS_5s -ne $null) {[Double]$Data.SUMMARY.KHS_5s * [Math]::Pow($Multiplier, 1)}
-                    elseif ($Data.SUMMARY.MHS_5s -ne $null) {[Double]$Data.SUMMARY.MHS_5s * [Math]::Pow($Multiplier, 2)}
-                    elseif ($Data.SUMMARY.GHS_5s -ne $null) {[Double]$Data.SUMMARY.GHS_5s * [Math]::Pow($Multiplier, 3)}
-                    elseif ($Data.SUMMARY.THS_5s -ne $null) {[Double]$Data.SUMMARY.THS_5s * [Math]::Pow($Multiplier, 4)}
-                    elseif ($Data.SUMMARY.PHS_5s -ne $null) {[Double]$Data.SUMMARY.PHS_5s * [Math]::Pow($Multiplier, 5)}
-
-                    if ($HashRate -ne $null) {
-                        $HashRates += $HashRate
-                        if (-not $Safe) {break}
-                    }
-
-                    $HashRate = if ($Data.SUMMARY.HS_av -ne $null) {[Double]$Data.SUMMARY.HS_av * [Math]::Pow($Multiplier, 0)}
-                    elseif ($Data.SUMMARY.KHS_av -ne $null) {[Double]$Data.SUMMARY.KHS_av * [Math]::Pow($Multiplier, 1)}
-                    elseif ($Data.SUMMARY.MHS_av -ne $null) {[Double]$Data.SUMMARY.MHS_av * [Math]::Pow($Multiplier, 2)}
-                    elseif ($Data.SUMMARY.GHS_av -ne $null) {[Double]$Data.SUMMARY.GHS_av * [Math]::Pow($Multiplier, 3)}
-                    elseif ($Data.SUMMARY.THS_av -ne $null) {[Double]$Data.SUMMARY.THS_av * [Math]::Pow($Multiplier, 4)}
-                    elseif ($Data.SUMMARY.PHS_av -ne $null) {[Double]$Data.SUMMARY.PHS_av * [Math]::Pow($Multiplier, 5)}
-
-                    if ($HashRate -eq $null) {$HashRates = @(); break}
-                    $HashRates += $HashRate
-                    if (-not $Safe) {break}
-
-                    Start-Sleep $Interval
-                } while ($HashRates.Count -lt 6)
-            }
-            "ccminer" {
-                $Request = "summary"
-
-                do {
-                    $Response = Invoke-TcpRequest $Server $Port $Request $Timeout
-
-                    $Data = $Response -split ";" | ConvertFrom-StringData
-
-                    $HashRate = if ([Double]$Data.KHS -ne 0 -or [Double]$Data.ACC -ne 0) {$Data.KHS}
-
-                    if ($HashRate -eq $null) {$HashRates = @(); break}
-
-                    $HashRates += [Double]$HashRate * $Multiplier
-
-                    if (-not $Safe) {break}
-
-                    Start-Sleep $Interval
-                } while ($HashRates.Count -lt 6)
-            }
-            "nicehashequihash" {
-                $Request = "status"
-
-                do {
-                    $Response = Invoke-TcpRequest $Server $Port $Request $Timeout
-
-                    $Data = $Response | ConvertFrom-Json
-
-                    $HashRate = $Data.result.speed_hps
-
-                    if ($HashRate -eq $null) {$HashRate = $Data.result.speed_sps}
-
-                    if ($HashRate -eq $null) {$HashRates = @(); break}
-
-                    $HashRates += [Double]$HashRate
-
-                    if (-not $Safe) {break}
-
-                    Start-Sleep $Interval
-                } while ($HashRates.Count -lt 6)
-            }
-            "nicehash" {
-                $Request = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
-
-                do {
-                    $Response = Invoke-TcpRequest $Server $Port $Request $Timeout
-
-                    $Data = $Response | ConvertFrom-Json
-
-                    $HashRate = $Data.algorithms.workers.speed
-
-                    if ($HashRate -eq $null) {$HashRates = @(); break}
-
-                    $HashRates += [Double]($HashRate | Measure-Object -Sum).Sum
-
-                    if (-not $Safe) {break}
-
-                    Start-Sleep $Interval
-                } while ($HashRates.Count -lt 6)
-            }
-            "ewbf" {
-                $Request = @{id = 1; method = "getstat"} | ConvertTo-Json -Compress
-
-                do {
-                    $Response = Invoke-TcpRequest $Server $Port $Request $Timeout
-
-                    $Data = $Response | ConvertFrom-Json
-
-                    $HashRate = $Data.result.speed_sps
-
-                    if ($HashRate -eq $null) {$HashRates = @(); break}
-
-                    $HashRates += [Double]($HashRate | Measure-Object -Sum).Sum
-
-                    if (-not $Safe) {break}
-
-                    Start-Sleep $Interval
-                } while ($HashRates.Count -lt 6)
-            }
-            "claymore" {
-                do {
-                    $Response = Invoke-WebRequest "http://$($Server):$Port" -UseBasicParsing -TimeoutSec $Timeout
-
-                    $Data = $Response.Content.Substring($Response.Content.IndexOf("{"), $Response.Content.LastIndexOf("}") - $Response.Content.IndexOf("{") + 1) | ConvertFrom-Json
-
-                    $HashRate = $Data.result[2].Split(";")[0]
-                    $HashRate_Dual = $Data.result[4].Split(";")[0]
-
-                    if ($HashRate -eq $null -or $HashRate_Dual -eq $null) {$HashRates = @(); $HashRate_Dual = @(); break}
-
-                    if ($Response.Content.Contains("ETH:")) {$HashRates += [Double]$HashRate * $Multiplier; $HashRates_Dual += [Double]$HashRate_Dual * $Multiplier}
-                    else {$HashRates += [Double]$HashRate; $HashRates_Dual += [Double]$HashRate_Dual}
-
-                    if (-not $Safe) {break}
-
-                    Start-Sleep $Interval
-                } while ($HashRates.Count -lt 6)
-            }
-            "fireice" {
-                do {
-                    $Response = Invoke-WebRequest "http://$($Server):$Port/h" -UseBasicParsing -TimeoutSec $Timeout
-
-                    $Data = $Response.Content -split "</tr>" -match "total*" -split "<td>" -replace "<[^>]*>", ""
-
-                    $HashRate = $Data[1]
-                    if ($HashRate -eq "") {$HashRate = $Data[2]}
-                    if ($HashRate -eq "") {$HashRate = $Data[3]}
-
-                    if ($HashRate -eq $null) {$HashRates = @(); break}
-
-                    $HashRates += [Double]$HashRate
-
-                    if (-not $Safe) {break}
-
-                    Start-Sleep $Interval
-                } while ($HashRates.Count -lt 6)
-            }
-            "prospector" {
-                do {
-                    $Response = Invoke-WebRequest "http://$($Server):$Port/api/v0/hashrates" -UseBasicParsing -TimeoutSec $Timeout
-
-                    $Data = $Response | ConvertFrom-Json
-
-                    $HashRate = $Data.rate
-
-                    if ($HashRate -eq $null) {$HashRates = @(); break}
-
-                    $HashRates += [Double]($HashRate | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
-
-                    if (-not $Safe) {break}
-
-                    Start-Sleep $Interval
-                } while ($HashRates.Count -lt 6)
-            }
-            "wrapper" {
-                do {
-                    $Response = Get-Content ".\Wrapper_$Port.txt" -ErrorAction Ignore
-
-                    $HashRate = $Response | ConvertFrom-Json
-
-                    if ($HashRate -eq $null) {Start-Sleep $Interval; $HashRate = Get-Content ".\Wrapper_$Port.txt" | ConvertFrom-Json}
-
-                    if ($HashRate -eq $null) {$HashRates = @(); break}
-
-                    $HashRates += [Double]$HashRate
-
-                    if (-not $Safe) {break}
-
-                    Start-Sleep $Interval
-                } while ($HashRates.Count -lt 6)
-            }
-        }
-
-        $HashRates_Info = $HashRates | Measure-Object -Maximum -Minimum -Average
-        if ($HashRates_Info.Maximum - $HashRates_Info.Minimum -le $HashRates_Info.Average * $Delta) {$HashRates_Info.Maximum}
-
-        $HashRates_Info_Dual = $HashRates_Dual | Measure-Object -Maximum -Minimum -Average
-        if ($HashRates_Info_Dual.Maximum - $HashRates_Info_Dual.Minimum -le $HashRates_Info_Dual.Average * $Delta) {$HashRates_Info_Dual.Maximum}
-    }
-    catch {
-    }
 }
 
 filter ConvertTo-Hash { 
@@ -589,4 +370,241 @@ function Get-Region {
 
     if ($Locations.$Location) {$Locations.$Location}
     else {$Location}
+}
+
+class Miner {
+    $Name
+    $Path
+    $Arguments
+    $Wrap
+    $API
+    $Port
+    $Algorithm
+    $Type
+    $Index
+    $Device
+    $Device_Auto
+    $Profit
+    $Profit_Comparison
+    $Profit_MarginOfError
+    $Profit_Bias
+    $Speed
+    $Speed_Live
+    $Best
+    $Best_Comparison
+    $Process
+    $New
+    $Active
+    $Activated
+    $Status
+    $Benchmarked
+
+    [PSCustomObject]GetHashRate ([Bool]$Safe = $false) {
+        $Server = "localhost"
+        $Timeout = 10 #seconds
+
+        $Multiplier = 1000
+        $Delta = 0.05
+        $Interval = 5
+        $HashRates = @()
+        $HashRates_Dual = @()
+
+        $HashRate = $null
+        $HashRate_Dual = $null
+
+        switch ($this.API) {
+            "xgminer" {
+                $Request = @{command = "summary"; parameter = ""} | ConvertTo-Json -Compress
+
+                do {
+                    $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout
+
+                    $Data = $Response.Substring($Response.IndexOf("{"), $Response.LastIndexOf("}") - $Response.IndexOf("{") + 1) -replace " ", "_" | ConvertFrom-Json
+
+                    $HashRate = if ($Data.SUMMARY.HS_5s -ne $null) {[Double]$Data.SUMMARY.HS_5s * [Math]::Pow($Multiplier, 0)}
+                    elseif ($Data.SUMMARY.KHS_5s -ne $null) {[Double]$Data.SUMMARY.KHS_5s * [Math]::Pow($Multiplier, 1)}
+                    elseif ($Data.SUMMARY.MHS_5s -ne $null) {[Double]$Data.SUMMARY.MHS_5s * [Math]::Pow($Multiplier, 2)}
+                    elseif ($Data.SUMMARY.GHS_5s -ne $null) {[Double]$Data.SUMMARY.GHS_5s * [Math]::Pow($Multiplier, 3)}
+                    elseif ($Data.SUMMARY.THS_5s -ne $null) {[Double]$Data.SUMMARY.THS_5s * [Math]::Pow($Multiplier, 4)}
+                    elseif ($Data.SUMMARY.PHS_5s -ne $null) {[Double]$Data.SUMMARY.PHS_5s * [Math]::Pow($Multiplier, 5)}
+
+                    if ($HashRate -ne $null) {
+                        $HashRates += $HashRate
+                        if (-not $Safe) {break}
+                    }
+
+                    $HashRate = if ($Data.SUMMARY.HS_av -ne $null) {[Double]$Data.SUMMARY.HS_av * [Math]::Pow($Multiplier, 0)}
+                    elseif ($Data.SUMMARY.KHS_av -ne $null) {[Double]$Data.SUMMARY.KHS_av * [Math]::Pow($Multiplier, 1)}
+                    elseif ($Data.SUMMARY.MHS_av -ne $null) {[Double]$Data.SUMMARY.MHS_av * [Math]::Pow($Multiplier, 2)}
+                    elseif ($Data.SUMMARY.GHS_av -ne $null) {[Double]$Data.SUMMARY.GHS_av * [Math]::Pow($Multiplier, 3)}
+                    elseif ($Data.SUMMARY.THS_av -ne $null) {[Double]$Data.SUMMARY.THS_av * [Math]::Pow($Multiplier, 4)}
+                    elseif ($Data.SUMMARY.PHS_av -ne $null) {[Double]$Data.SUMMARY.PHS_av * [Math]::Pow($Multiplier, 5)}
+
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
+                    $HashRates += $HashRate
+                    if (-not $Safe) {break}
+
+                    Start-Sleep $Interval
+                } while ($HashRates.Count -lt 6)
+            }
+            "ccminer" {
+                $Request = "summary"
+
+                do {
+                    $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout
+
+                    $Data = $Response -split ";" | ConvertFrom-StringData
+
+                    $HashRate = if ([Double]$Data.KHS -ne 0 -or [Double]$Data.ACC -ne 0) {$Data.KHS}
+
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
+
+                    $HashRates += [Double]$HashRate * $Multiplier
+
+                    if (-not $Safe) {break}
+
+                    Start-Sleep $Interval
+                } while ($HashRates.Count -lt 6)
+            }
+            "nicehashequihash" {
+                $Request = "status"
+
+                do {
+                    $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout
+
+                    $Data = $Response | ConvertFrom-Json
+
+                    $HashRate = $Data.result.speed_hps
+
+                    if ($HashRate -eq $null) {$HashRate = $Data.result.speed_sps}
+
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
+
+                    $HashRates += [Double]$HashRate
+
+                    if (-not $Safe) {break}
+
+                    Start-Sleep $Interval
+                } while ($HashRates.Count -lt 6)
+            }
+            "nicehash" {
+                $Request = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
+
+                do {
+                    $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout
+
+                    $Data = $Response | ConvertFrom-Json
+
+                    $HashRate = $Data.algorithms.workers.speed
+
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
+
+                    $HashRates += [Double]($HashRate | Measure-Object -Sum).Sum
+
+                    if (-not $Safe) {break}
+
+                    Start-Sleep $Interval
+                } while ($HashRates.Count -lt 6)
+            }
+            "ewbf" {
+                $Request = @{id = 1; method = "getstat"} | ConvertTo-Json -Compress
+
+                do {
+                    $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout
+
+                    $Data = $Response | ConvertFrom-Json
+
+                    $HashRate = $Data.result.speed_sps
+
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
+
+                    $HashRates += [Double]($HashRate | Measure-Object -Sum).Sum
+
+                    if (-not $Safe) {break}
+
+                    Start-Sleep $Interval
+                } while ($HashRates.Count -lt 6)
+            }
+            "claymore" {
+                do {
+                    $Response = Invoke-WebRequest "http://$($Server):$($this.Port)" -UseBasicParsing -TimeoutSec $Timeout
+
+                    $Data = $Response.Content.Substring($Response.Content.IndexOf("{"), $Response.Content.LastIndexOf("}") - $Response.Content.IndexOf("{") + 1) | ConvertFrom-Json
+
+                    $HashRate = $Data.result[2].Split(";")[0]
+                    $HashRate_Dual = $Data.result[4].Split(";")[0]
+
+                    if ($HashRate -eq $null -or $HashRate_Dual -eq $null) {$HashRates = @(); $HashRate_Dual = @(); break}
+
+                    if ($Response.Content.Contains("ETH:")) {$HashRates += [Double]$HashRate * $Multiplier; $HashRates_Dual += [Double]$HashRate_Dual * $Multiplier}
+                    else {$HashRates += [Double]$HashRate; $HashRates_Dual += [Double]$HashRate_Dual}
+
+                    if (-not $Safe) {break}
+
+                    Start-Sleep $Interval
+                } while ($HashRates.Count -lt 6)
+            }
+            "fireice" {
+                do {
+                    $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/h" -UseBasicParsing -TimeoutSec $Timeout
+
+                    $Data = $Response.Content -split "</tr>" -match "total*" -split "<td>" -replace "<[^>]*>", ""
+
+                    $HashRate = $Data[1]
+                    if ($HashRate -eq "") {$HashRate = $Data[2]}
+                    if ($HashRate -eq "") {$HashRate = $Data[3]}
+
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
+
+                    $HashRates += [Double]$HashRate
+
+                    if (-not $Safe) {break}
+
+                    Start-Sleep $Interval
+                } while ($HashRates.Count -lt 6)
+            }
+            "prospector" {
+                do {
+                    $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/api/v0/hashrates" -UseBasicParsing -TimeoutSec $Timeout
+
+                    $Data = $Response | ConvertFrom-Json
+
+                    $HashRate = $Data.rate
+
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
+
+                    $HashRates += [Double]($HashRate | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
+
+                    if (-not $Safe) {break}
+
+                    Start-Sleep $Interval
+                } while ($HashRates.Count -lt 6)
+            }
+            "wrapper" {
+                do {
+                    $Response = Get-Content ".\Wrapper_$($this.Port).txt" -ErrorAction Ignore
+
+                    $HashRate = $Response | ConvertFrom-Json
+
+                    if ($HashRate -eq $null) {Start-Sleep $Interval; $HashRate = Get-Content ".\Wrapper_$($this.Port).txt" | ConvertFrom-Json}
+
+                    if ($HashRate -eq $null) {$HashRates = @(); break}
+
+                    $HashRates += [Double]$HashRate
+
+                    if (-not $Safe) {break}
+
+                    Start-Sleep $Interval
+                } while ($HashRates.Count -lt 6)
+            }
+        }
+
+        $HashRates_Info = $HashRates | Measure-Object -Maximum -Minimum -Average
+        $HashRate = if ($HashRates_Info.Maximum - $HashRates_Info.Minimum -le $HashRates_Info.Average * $Delta) {$HashRates_Info.Maximum}
+
+        $HashRates_Info_Dual = $HashRates_Dual | Measure-Object -Maximum -Minimum -Average
+        $HashRate_Dual = if ($HashRates_Info_Dual.Maximum - $HashRates_Info_Dual.Minimum -le $HashRates_Info_Dual.Average * $Delta) {$HashRates_Info_Dual.Maximum}
+
+        return $HashRate, $HashRates_Dual
+    }
 }

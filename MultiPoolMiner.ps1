@@ -262,7 +262,7 @@ while ($true) {
             $ActiveMiner.Speed = $Miner.HashRates.PSObject.Properties.Value #temp fix, must use 'PSObject.Properties' to preserve order
         }
         else {
-            $ActiveMiners += [PSCustomObject]@{
+            $ActiveMiners += New-Object "Miner" -Property @{
                 Name                 = $Miner.Name
                 Path                 = $Miner.Path
                 Arguments            = $Miner.Arguments
@@ -287,7 +287,6 @@ while ($true) {
                 Active               = [TimeSpan]0
                 Activated            = 0
                 Status               = ""
-                HashRate             = 0
                 Benchmarked          = 0
             }
         }
@@ -493,7 +492,7 @@ while ($true) {
         if ($_.New) {$_.Benchmarked++}
 
         if ($_.Process -and -not $_.Process.HasExited) {
-            $Miner_HashRates = Get-HashRate $_.API $_.Port ($_.New -and $_.Benchmarked -lt 3)
+            $Miner_HashRates = $_.GetHashRate($_.New -and $_.Benchmarked -lt 3)
             $_.Speed_Live = $Miner_HashRates | Select-Object -First $_.Algorithm.Count
 
             if ($Miner_HashRates.Count -ge $_.Algorithm.Count) {
