@@ -179,6 +179,7 @@ function Get-ChildItemContent {
                             }
                         }
                     }
+                    $Item
                 }
             }
         }
