@@ -322,7 +322,7 @@ function Invoke-TcpRequest {
         [Parameter(Mandatory = $true)]
         [String]$Request, 
         [Parameter(Mandatory = $true)]
-        [String]$Timeout = 10 #seconds
+        [Int]$Timeout = 10 #seconds
     )
 
     try {
