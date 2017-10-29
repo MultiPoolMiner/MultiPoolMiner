@@ -9,7 +9,7 @@ $Uri = "https://github.com/fireice-uk/xmr-stak-amd/releases/download/v1.1.0-1.4.
 if ((Test-Path $Path) -eq $false) {Expand-WebRequest $Uri (Split-Path $Path) -ErrorAction SilentlyContinue}
 if ((Test-Path $Path_Threads) -eq $false) {Copy-Item (Split-Path $Path) (Split-Path $Path_Threads) -Recurse -Force -ErrorAction SilentlyContinue}
 
-$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 3336 + ($ThreadIndex * 10000)
 
 if ($Pools.CryptoNight.Name -eq "NiceHash") {return} #temp fix

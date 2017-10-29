@@ -10,7 +10,7 @@ $Commands = [PSCustomObject]@{
     "sigt" = @() #Skunk
 }
 
-$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 42000
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {

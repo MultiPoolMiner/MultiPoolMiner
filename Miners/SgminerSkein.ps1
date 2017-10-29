@@ -7,7 +7,7 @@ $Commands = [PSCustomObject]@{
     "skeincoin" = " --gpu-threads 2 --worksize 256 --intensity d" #Skein
 }
 
-$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     [PSCustomObject]@{

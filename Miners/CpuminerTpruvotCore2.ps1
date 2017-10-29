@@ -40,7 +40,7 @@ $Commands = [PSCustomObject]@{
     "yescrypt" = "" #Yescrypt
 }
 
-$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     [PSCustomObject]@{

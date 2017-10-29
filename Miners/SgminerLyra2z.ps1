@@ -7,7 +7,7 @@ $Commands = [PSCustomObject]@{
     "lyra2z" = " --worksize 32 --intensity 18" #Lyra2z
 }
 
-$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     [PSCustomObject]@{

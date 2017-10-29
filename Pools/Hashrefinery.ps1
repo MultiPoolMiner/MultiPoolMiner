@@ -1,6 +1,6 @@
 ﻿using module ..\Include.psm1
 
-$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $HashRefinery_Request = $null
 

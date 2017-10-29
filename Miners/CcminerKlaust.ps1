@@ -3,8 +3,6 @@
 $Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
 $Uri = "https://github.com/KlausT/ccminer/releases/download/8.13/ccminer-813-x64.zip"
 
-$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
-
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore
     #"blake2s" = "" #Blake2s
@@ -42,7 +40,7 @@ $Commands = [PSCustomObject]@{
     #"yescrypt" = "" #Yescrypt
 }
 
-$Name = (Get-Item $script:MyInvocation.MyCommand.Path).BaseName
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
     [PSCustomObject]@{
