@@ -145,43 +145,47 @@ function Get-Stat {
 function Get-ChildItemContent {
     param(
         [Parameter(Mandatory = $true)]
-        [String]$Path
+        [String]$Path, 
+        [Parameter(Mandatory = $false)]
+        [Hashtable]$Parameters = @{}
     )
 
-    $ChildItems = Get-ChildItem $Path | ForEach-Object {
+    Get-ChildItem $Path | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
         if ($_.Extension -eq ".ps1") {
-            $Content = &$_.FullName
+            $Content = & {
+                $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters[$_]}
+                & $_.FullName @Parameters
+            }
         }
         else {
-            $Content = $_ | Get-Content | ConvertFrom-Json
+            $Content = & {
+                $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters[$_]}
+                $_ | Get-Content | ConvertFrom-Json | ForEach-Object {
+                    $Item = $_
+                    $ItemKeys = $Item.PSObject.Properties.Name.Clone()
+                    $ItemKeys | ForEach-Object {
+                        if ($Item.$_ -is [String]) {
+                            $Item.$_ = Invoke-Expression "`"$($Item.$_)`""
+                        }
+                        elseif ($Item.$_ -is [PSCustomObject]) {
+                            $Property = $Item.$_
+                            $PropertyKeys = $Property.PSObject.Properties.Name
+                            $PropertyKeys | ForEach-Object {
+                                if ($Property.$_ -is [String]) {
+                                    $Property.$_ = Invoke-Expression "`"$($Property.$_)`""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         $Content | ForEach-Object {
             [PSCustomObject]@{Name = $Name; Content = $_}
         }
     }
-
-    $ChildItems | ForEach-Object {
-        $Item = $_
-        $ItemKeys = $Item.Content.PSObject.Properties.Name.Clone()
-        $ItemKeys | ForEach-Object {
-            if ($Item.Content.$_ -is [String]) {
-                $Item.Content.$_ = Invoke-Expression "`"$($Item.Content.$_)`""
-            }
-            elseif ($Item.Content.$_ -is [PSCustomObject]) {
-                $Property = $Item.Content.$_
-                $PropertyKeys = $Property.PSObject.Properties.Name
-                $PropertyKeys | ForEach-Object {
-                    if ($Property.$_ -is [String]) {
-                        $Property.$_ = Invoke-Expression "`"$($Property.$_)`""
-                    }
-                }
-            }
-        }
-    }
-
-    $ChildItems
 }
 
 filter ConvertTo-Hash { 
