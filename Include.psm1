@@ -162,7 +162,7 @@ function Get-ChildItemContent {
         else {
             $Content = & {
                 $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters[$_]}
-                $_ | Get-Content | ConvertFrom-Json | ForEach-Object {
+                ($_ | Get-Content | ConvertFrom-Json) | ForEach-Object {
                     $Item = $_
                     $ItemKeys = $Item.PSObject.Properties.Name.Clone()
                     $ItemKeys | ForEach-Object {
