@@ -2,7 +2,7 @@
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$HashRefinery_Request = $null
+$HashRefinery_Request = [PSCustomObject]@{}
 
 try {
     $HashRefinery_Request = Invoke-RestMethod "http://pool.hashrefinery.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop

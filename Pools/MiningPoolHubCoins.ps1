@@ -2,7 +2,7 @@
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$MiningPoolHubCoins_Request = $null
+$MiningPoolHubCoins_Request = [PSCustomObject]@{}
 
 try {
     $MiningPoolHubCoins_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getminingandprofitsstatistics" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop

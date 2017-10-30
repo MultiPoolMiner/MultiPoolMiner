@@ -2,10 +2,10 @@
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$MiningPoolHub_Request = $null
+$MiningPoolHub_Request = [PSCustomObject]@{}
 
 try {
-    $MiningPoolHub_Request = Invoke-RestMethod "https://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $MiningPoolHub_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
     Write-Warning "Pool API ($Name) has failed. "
