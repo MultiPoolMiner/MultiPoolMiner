@@ -37,7 +37,7 @@ param(
     [Switch]$Watchdog = $false
 )
 
-Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
+Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -Recurse | Unblock-File}
 if (Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) {if ((Get-MpComputerStatus -ErrorAction SilentlyContinue) -and (Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {Start-Process powershell -Verb runAs -ArgumentList "Add-MpPreference -ExclusionPath '$(Convert-Path .)'"}}
