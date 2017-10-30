@@ -77,6 +77,8 @@ $UserNameBackup = $UserName
 $WorkerNameBackup = $WorkerName
 
 while ($true) {
+    Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
+
     $Timer = (Get-Date).ToUniversalTime()
 
     $StatStart = $StatEnd
@@ -262,7 +264,7 @@ while ($true) {
             $ActiveMiner.Speed = $Miner.HashRates.PSObject.Properties.Value #temp fix, must use 'PSObject.Properties' to preserve order
         }
         else {
-            $ActiveMiners += New-Object "Miner" -Property @{
+            $ActiveMiners += New-Object $Miner.API -Property @{
                 Name                 = $Miner.Name
                 Path                 = $Miner.Path
                 Arguments            = $Miner.Arguments
