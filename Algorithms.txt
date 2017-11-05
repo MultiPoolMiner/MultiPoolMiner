@@ -52,5 +52,6 @@
     "x17":  "X17",
     "xmr":  "CryptoNight",
     "yescrypt":  "Yescrypt",
+    "zec":  "Equihash",
     "zuikkis":  "Scrypt"
 }

@@ -1,43 +1,48 @@
 ﻿using module ..\Include.psm1
 
 class Nicehash : Miner {
-    [PSCustomObject]GetHashRate ([Bool]$Safe = $false) {
+    [PSCustomObject]GetHashRate ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
-        $Multiplier = 1000
         $Delta = 0.05
         $Interval = 5
         $HashRates = @()
-        $HashRates_Dual = @()
-
-        $HashRate = $null
-        $HashRate_Dual = $null
 
         $Request = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
 
         do {
+            $HashRate = [PSCustomObject]@{}
+            $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = $null}}
+            $HashRates += $HashRate
+
             $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout
 
             $Data = $Response | ConvertFrom-Json
 
-            $HashRate = $Data.algorithms.workers.speed
+            $Data.algorithms.name | Select-Object -Unique | ForEach-Object {
+                $HashRate_Name = $_
+                $HashRate_Value = ($Data.algorithms | Where-Object name -EQ $_).workers.speed
 
-            if ($HashRate -eq $null) {$HashRates = @(); break}
+                if ($HashRate_Name -and ($HashRate | Get-Member -MemberType NoteProperty | Where-Object Name -EQ (Get-Algorithm $HashRate_Name) | Measure-Object).Count -eq 1) {
+                    if ($HashRate_Value -ne $null) {$HashRate.(Get-Algorithm $HashRate_Name) = [Double]($HashRate_Value | Measure-Object -Sum).Sum}
+                }
+            }
 
-            $HashRates += [Double]($HashRate | Measure-Object -Sum).Sum
+            $HashRate | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
+                if ($HashRate.$_ -eq $null) {$HashRates = @(); break}
+            }
 
             if (-not $Safe) {break}
 
             Start-Sleep $Interval
         } while ($HashRates.Count -lt 6)
 
-        $HashRates_Info = $HashRates | Measure-Object -Maximum -Minimum -Average
-        $HashRate = if ($HashRates_Info.Maximum - $HashRates_Info.Minimum -le $HashRates_Info.Average * $Delta) {$HashRates_Info.Maximum}
+        $HashRates_Info = [PSCustomObject]@{}
+        $Algorithm | ForEach-Object {$HashRates_Info | Add-Member @{$_ = $HashRates | Measure-Object $_ -Maximum -Minimum -Average}}
+        $HashRate = [PSCustomObject]@{}
+        $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = if ($HashRates_Info.$_.Maximum - $HashRates_Info.$_.Minimum -le $HashRates_Info.$_.Average * $Delta) {$HashRates_Info.$_.Maximum}}}
 
-        $HashRates_Info_Dual = $HashRates_Dual | Measure-Object -Maximum -Minimum -Average
-        $HashRate_Dual = if ($HashRates_Info_Dual.Maximum - $HashRates_Info_Dual.Minimum -le $HashRates_Info_Dual.Average * $Delta) {$HashRates_Info_Dual.Maximum}
-
-        return $HashRate, $HashRates_Dual
+        return $HashRate
     }
 }

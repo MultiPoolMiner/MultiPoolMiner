@@ -488,37 +488,36 @@ while ($true) {
 
     #Save current hash rates
     $ActiveMiners | ForEach-Object {
-        $_.Speed_Live = 0
-        $Miner_HashRates = $null
+        $Miner = $_
+        $Miner.Speed_Live = 0
+        $Miner_HashRate = [PSCustomObject]@{}
 
-        if ($_.New) {$_.Benchmarked++}
+        if ($Miner.New) {$Miner.Benchmarked++}
 
-        if ($_.Process -and -not $_.Process.HasExited) {
-            $Miner_HashRates = $_.GetHashRate($_.New -and $_.Benchmarked -lt 3)
-            $_.Speed_Live = $Miner_HashRates | Select-Object -First $_.Algorithm.Count
+        if ($Miner.Process -and -not $Miner.Process.HasExited) {
+            $Miner_HashRate = $Miner.GetHashRate($Miner.Algorithm, ($Miner.New -and $Miner.Benchmarked -lt 3))
+            $Miner.Speed_Live = $Miner_HashRate.PSObject.Properties.Value
 
-            if ($Miner_HashRates.Count -ge $_.Algorithm.Count) {
-                for ($i = 0; $i -lt $_.Algorithm.Count; $i++) {
-                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate" -Value ($Miner_HashRates | Select-Object -Index $i) -Duration $StatSpan -FaultDetection $true
+            $Miner.Algorithm | Where-Object {$Miner_HashRate.$_ -ne $null} | ForEach-Object {
+                $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_HashRate.$_ -Duration $StatSpan -FaultDetection $true
 
-                    #Update watchdog timer
-                    $Miner_Name = $_.Name
-                    $Miner_Algorithm = $_.Algorithm | Select-Object -Index $i
-                    $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
-                    if ($Stat -and $WatchdogTimer -and $Stat.Updated -gt $WatchdogTimer.Kicked) {
-                        $WatchdogTimer.Kicked = $Stat.Updated
-                    }
+                #Update watchdog timer
+                $Miner_Name = $Miner.Name
+                $Miner_Algorithm = $_
+                $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
+                if ($Stat -and $WatchdogTimer -and $Stat.Updated -gt $WatchdogTimer.Kicked) {
+                    $WatchdogTimer.Kicked = $Stat.Updated
                 }
 
-                $_.New = $false
+                $Miner.New = $false
             }
         }
 
         #Benchmark timeout
-        if ($_.Benchmarked -ge 6 -or ($_.Benchmarked -ge 2 -and $_.Activated -ge 2)) {
-            for ($i = $Miner_HashRates.Count; $i -lt $_.Algorithm.Count; $i++) {
-                if ((Get-Stat "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate") -eq $null) {
-                    $Stat = Set-Stat -Name "$($_.Name)_$($_.Algorithm | Select-Object -Index $i)_HashRate" -Value 0 -Duration $StatSpan
+        if ($Miner.Benchmarked -ge 6 -or ($Miner.Benchmarked -ge 2 -and $Miner.Activated -ge 2)) {
+            $Miner.Algorithm | Where-Object {$Miner_HashRate.$_ -eq $null} | ForEach-Object {
+                if ((Get-Stat "$($Miner.Name)_$($_)_HashRate") -eq $null) {
+                    $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value 0 -Duration $StatSpan
                 }
             }
         }
