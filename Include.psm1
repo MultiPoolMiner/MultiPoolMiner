@@ -1,4 +1,6 @@
-﻿Add-Type -Path .\OpenCL\*.cs
+﻿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+
+Add-Type -Path .\OpenCL\*.cs
 
 function Set-Stat {
     param(
