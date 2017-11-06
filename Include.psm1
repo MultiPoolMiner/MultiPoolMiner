@@ -164,26 +164,32 @@ function Get-ChildItemContent {
         else {
             $Content = & {
                 $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters[$_]}
-                ($_ | Get-Content | ConvertFrom-Json) | ForEach-Object {
-                    $Item = $_
-                    $ItemKeys = $Item.PSObject.Properties.Name.Clone()
-                    $ItemKeys | ForEach-Object {
-                        if ($Item.$_ -is [String]) {
-                            $Item.$_ = Invoke-Expression "`"$($Item.$_)`""
-                        }
-                        elseif ($Item.$_ -is [PSCustomObject]) {
-                            $Property = $Item.$_
-                            $PropertyKeys = $Property.PSObject.Properties.Name
-                            $PropertyKeys | ForEach-Object {
-                                if ($Property.$_ -is [String]) {
-                                    $Property.$_ = Invoke-Expression "`"$($Property.$_)`""
+                try {
+                    ($_ | Get-Content | ConvertFrom-Json) | ForEach-Object {
+                        $Item = $_
+                        $ItemKeys = $Item.PSObject.Properties.Name.Clone()
+                        $ItemKeys | ForEach-Object {
+                            if ($Item.$_ -is [String]) {
+                                $Item.$_ = Invoke-Expression "`"$($Item.$_)`""
+                            }
+                            elseif ($Item.$_ -is [PSCustomObject]) {
+                                $Property = $Item.$_
+                                $PropertyKeys = $Property.PSObject.Properties.Name
+                                $PropertyKeys | ForEach-Object {
+                                    if ($Property.$_ -is [String]) {
+                                        $Property.$_ = Invoke-Expression "`"$($Property.$_)`""
+                                    }
                                 }
                             }
                         }
+                        $Item
                     }
-                    $Item
+                }
+                catch [ArgumentException] {
+                    $null
                 }
             }
+            if ($Content -eq $null) {$Content = $_ | Get-Content}
         }
         $Content | ForEach-Object {
             [PSCustomObject]@{Name = $Name; Content = $_}
