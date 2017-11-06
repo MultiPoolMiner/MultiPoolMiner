@@ -16,7 +16,7 @@ class Claymore : Miner {
 
             $Response = Invoke-WebRequest "http://$($Server):$($this.Port)" -UseBasicParsing -TimeoutSec $Timeout
 
-            $Data = $Response.Content.Substring($Response.Content.IndexOf("{"), $Response.Content.LastIndexOf("}") - $Response.Content.IndexOf("{") + 1) | ConvertFrom-Json
+            $Data = $Response.Content.Substring($Response.Content.IndexOf("{"), $Response.Content.IndexOf("}") - $Response.Content.IndexOf("{") + 1) | ConvertFrom-Json
 
             $HashRate_Name = $Data.result[0] -split " - " | Select-Object -Index 1
             $HashRate_Value = $Data.result[2] -split ";" | Select-Object -Index 0
