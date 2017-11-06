@@ -21,15 +21,18 @@ class Claymore : Miner {
             $HashRate_Name = $Data.result[0] -split " - " | Select-Object -Index 1
             $HashRate_Value = $Data.result[2] -split ";" | Select-Object -Index 0
 
+            if ($HashRate_Name -eq "eth") {$Multiplier = 1000}
+            else {$Multiplier = 1}
+
             if ($HashRate_Name -and ($HashRate | Get-Member -MemberType NoteProperty | Where-Object Name -EQ (Get-Algorithm $HashRate_Name) | Measure-Object).Count -eq 1) {
-                if ($HashRate_Value -ne $null) {$HashRate.(Get-Algorithm $HashRate_Name) = [Double]$HashRate_Value * 1000}
+                if ($HashRate_Value -ne $null) {$HashRate.(Get-Algorithm $HashRate_Name) = [Double]$HashRate_Value * $Multiplier}
             }
 
             $HashRate_Name = $HashRate | Get-Member -MemberType NoteProperty | Where-Object Name -NE (Get-Algorithm $HashRate_Name) | Select-Object -First 1 -ExpandProperty Name
             $HashRate_Value = $Data.result[4] -split ";" | Select-Object -Index 0
 
             if ($HashRate_Name -and ($HashRate | Get-Member -MemberType NoteProperty | Where-Object Name -NE (Get-Algorithm $HashRate_Name) | Measure-Object).Count -eq 1) {
-                if ($HashRate_Value -ne $null) {$HashRate.(Get-Algorithm $HashRate_Name) = [Double]$HashRate_Value}
+                if ($HashRate_Value -ne $null) {$HashRate.(Get-Algorithm $HashRate_Name) = [Double]$HashRate_Value * $Multiplier}
             }
 
             $HashRate | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
