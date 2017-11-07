@@ -13,7 +13,7 @@ LINK: https://github.com/aaronsace/MultiPoolMiner/
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 06/11/2017 - v1.13g
+README.txt - updated on 06/11/2017 - v1.13h
 
 ====================================================================
 
@@ -54,7 +54,7 @@ COMMAND LINE OPTIONS (not case-sensitive, see Sample Usage section below for an 
 -poolname [miningpoolhub,miningpoolhubcoins,zpool,nicehash]
 	The following pools are currently supported: 
 	## MiningPoolHub https://miningpoolhub.com/
-	        The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (12xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. 
+	        The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. 
 	## Zpool http://www.zpool.ca/ 
 	## Nicehash https://www.nicehash.com/
 	The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example. A registered account is required when mining on MiningPoolHub.
