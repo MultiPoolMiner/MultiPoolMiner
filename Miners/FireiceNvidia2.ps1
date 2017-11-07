@@ -16,7 +16,7 @@ if ($Pools.CryptoNight.Name -eq "NiceHash") {return} #temp fix
 
 ([PSCustomObject]@{
         gpu_threads_conf = @([PSCustomObject]@{index = $ThreadIndex; threads = 32; blocks = 84; bfactor = 6; bsleep = 25; affine_to_cpu = $true})
-        use_tls          = $false
+        use_tls          = $Pools.CryptoNight.SSL
         tls_secure_algo  = $true
         tls_fingerprint  = ""
         pool_address     = "$($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port)"

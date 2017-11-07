@@ -18,7 +18,7 @@ if ($Pools.CryptoNight.Name -eq "NiceHash") {return} #temp fix
         gpu_thread_num   = 1
         gpu_threads_conf = @([PSCustomObject]@{index = $ThreadIndex; intensity = 1000; worksize = 8; affine_to_cpu = $true})
         platform_index   = [array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'Advanced Micro Devices, Inc.')
-        use_tls          = $false
+        use_tls          = $Pools.CryptoNight.SSL
         tls_secure_algo  = $true
         tls_fingerprint  = ""
         pool_address     = "$($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port)"
