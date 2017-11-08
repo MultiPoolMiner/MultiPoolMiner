@@ -47,20 +47,22 @@ $MiningPoolHubCoins_Request.return | ForEach-Object {
                 Updated       = $Stat.Updated
             }
 
-            [PSCustomObject]@{
-                Algorithm     = $MiningPoolHubCoins_Algorithm_Norm
-                Info          = $MiningPoolHubCoins_Coin
-                Price         = $Stat.Day #temp fix
-                StablePrice   = $Stat.Week
-                MarginOfError = $Stat.Week_Fluctuation
-                Protocol      = "stratum+ssl"
-                Host          = $MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHubCoins_Region*"} | Select-Object -First 1
-                Port          = $MiningPoolHubCoins_Port
-                User          = "$UserName.$WorkerName"
-                Pass          = "x"
-                Region        = $MiningPoolHubCoins_Region_Norm
-                SSL           = $true
-                Updated       = $Stat.Updated
+            if ($MiningPoolHubCoins_Algorithm_Norm -eq "Cryptonight" -or $MiningPoolHubCoins_Algorithm_Norm -eq "Equihash") {
+                [PSCustomObject]@{
+                    Algorithm     = $MiningPoolHubCoins_Algorithm_Norm
+                    Info          = $MiningPoolHubCoins_Coin
+                    Price         = $Stat.Day #temp fix
+                    StablePrice   = $Stat.Week
+                    MarginOfError = $Stat.Week_Fluctuation
+                    Protocol      = "stratum+ssl"
+                    Host          = $MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHubCoins_Region*"} | Select-Object -First 1
+                    Port          = $MiningPoolHubCoins_Port
+                    User          = "$UserName.$WorkerName"
+                    Pass          = "x"
+                    Region        = $MiningPoolHubCoins_Region_Norm
+                    SSL           = $true
+                    Updated       = $Stat.Updated
+                }
             }
 
             if ($MiningPoolHubCoins_Algorithm_Norm -eq "Ethash" -and $MiningPoolHubCoins_Coin -NotLike "*ethereum*") {
@@ -80,20 +82,22 @@ $MiningPoolHubCoins_Request.return | ForEach-Object {
                     Updated       = $Stat.Updated
                 }
 
-                [PSCustomObject]@{
-                    Algorithm     = "$($MiningPoolHubCoins_Algorithm_Norm)2gb"
-                    Info          = $MiningPoolHubCoins_Coin
-                    Price         = $Stat.Day #temp fix
-                    StablePrice   = $Stat.Week
-                    MarginOfError = $Stat.Week_Fluctuation
-                    Protocol      = "stratum+ssl"
-                    Host          = $MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHubCoins_Region*"} | Select-Object -First 1
-                    Port          = $MiningPoolHubCoins_Port
-                    User          = "$UserName.$WorkerName"
-                    Pass          = "x"
-                    Region        = $MiningPoolHubCoins_Region_Norm
-                    SSL           = $true
-                    Updated       = $Stat.Updated
+                if ($MiningPoolHubCoins_Algorithm_Norm -eq "Cryptonight" -or $MiningPoolHubCoins_Algorithm_Norm -eq "Equihash") {
+                    [PSCustomObject]@{
+                        Algorithm     = "$($MiningPoolHubCoins_Algorithm_Norm)2gb"
+                        Info          = $MiningPoolHubCoins_Coin
+                        Price         = $Stat.Day #temp fix
+                        StablePrice   = $Stat.Week
+                        MarginOfError = $Stat.Week_Fluctuation
+                        Protocol      = "stratum+ssl"
+                        Host          = $MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHubCoins_Region*"} | Select-Object -First 1
+                        Port          = $MiningPoolHubCoins_Port
+                        User          = "$UserName.$WorkerName"
+                        Pass          = "x"
+                        Region        = $MiningPoolHubCoins_Region_Norm
+                        SSL           = $true
+                        Updated       = $Stat.Updated
+                    }
                 }
             }
         }
