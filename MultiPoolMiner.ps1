@@ -450,7 +450,7 @@ while ($true) {
     ) | Out-Host
 
     #Display watchdog timers
-    $WatchdogTimers | Format-Table -Wrap (
+    $WatchdogTimers | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset) | Format-Table -Wrap (
         @{Label = "Miner"; Expression = {$_.MinerName}}, 
         @{Label = "Pool"; Expression = {$_.PoolName}}, 
         @{Label = "Algorithm"; Expression = {$_.Algorithm}}, 
