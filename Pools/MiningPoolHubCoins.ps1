@@ -51,7 +51,7 @@ $MiningPoolHubCoins_Request.return | ForEach-Object {
                 [PSCustomObject]@{
                     Algorithm     = $MiningPoolHubCoins_Algorithm_Norm
                     Info          = $MiningPoolHubCoins_Coin
-                    Price         = $Stat.Day #temp fix
+                    Price         = $Stat.Live
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+ssl"
@@ -69,7 +69,7 @@ $MiningPoolHubCoins_Request.return | ForEach-Object {
                 [PSCustomObject]@{
                     Algorithm     = "$($MiningPoolHubCoins_Algorithm_Norm)2gb"
                     Info          = $MiningPoolHubCoins_Coin
-                    Price         = $Stat.Day #temp fix
+                    Price         = $Stat.Live
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+tcp"
@@ -86,7 +86,7 @@ $MiningPoolHubCoins_Request.return | ForEach-Object {
                     [PSCustomObject]@{
                         Algorithm     = "$($MiningPoolHubCoins_Algorithm_Norm)2gb"
                         Info          = $MiningPoolHubCoins_Coin
-                        Price         = $Stat.Day #temp fix
+                        Price         = $Stat.Live
                         StablePrice   = $Stat.Week
                         MarginOfError = $Stat.Week_Fluctuation
                         Protocol      = "stratum+ssl"

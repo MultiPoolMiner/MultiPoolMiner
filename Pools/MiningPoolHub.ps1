@@ -51,7 +51,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 [PSCustomObject]@{
                     Algorithm     = $MiningPoolHub_Algorithm_Norm
                     Info          = $MiningPoolHub_Coin
-                    Price         = $Stat.Day #temp fix
+                    Price         = $Stat.Live
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+ssl"
