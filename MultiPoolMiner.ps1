@@ -376,10 +376,10 @@ while ($true) {
     $ActiveMiners | Where-Object Activated -GT 0 | Where-Object Best -EQ $false | ForEach-Object {
         $Miner = $_
 
-        if ($Miner.Process -eq $null) {
-            $Miner.Status = "Failed"
+        if ($Miner.Process -eq $null -or $Miner.Process.HasExited) {
+            if ($Miner.Status = "Running") {$Miner.Status = "Failed"}
         }
-        elseif ($Miner.Process.HasExited -eq $false) {
+        else {
             $Miner.Process.CloseMainWindow() | Out-Null
             $Miner.Status = "Idle"
 
