@@ -57,7 +57,7 @@ do {
             $HashRate | ConvertTo-Json | Set-Content ".\Wrapper_$Id.txt"
         }
 
-        Write-Host $Line -NoNewline
+        Write-Host ($Line -replace "`n|`r", "")
     }
 
     if ((Get-Process | Where-Object Id -EQ $ControllerProcessID) -eq $null) {$PowerShell.Stop() | Out-Null}
