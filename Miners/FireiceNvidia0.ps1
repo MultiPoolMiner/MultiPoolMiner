@@ -1,13 +1,9 @@
 ﻿using module ..\Include.psm1
 
 $ThreadIndex = 0
-$Path_Threads = ".\Bin\CryptoNight-NVIDIA$ThreadIndex\xmr-stak-nvidia.exe"
 
 $Path = ".\Bin\CryptoNight-NVIDIA\xmr-stak-nvidia.exe"
 $Uri = "https://github.com/fireice-uk/xmr-stak-nvidia/releases/download/v1.1.1-1.4.0/xmr-stak-nvidia.zip"
-
-if ((Test-Path $Path) -eq $false) {Expand-WebRequest $Uri (Split-Path $Path) -ErrorAction SilentlyContinue}
-if ((Test-Path $Path_Threads) -eq $false) {Copy-Item (Split-Path $Path) (Split-Path $Path_Threads) -Recurse -Force -ErrorAction SilentlyContinue}
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 3335 + ($ThreadIndex * 10000)
@@ -30,12 +26,12 @@ if ($Pools.CryptoNight.Name -eq "NiceHash") {return} #temp fix
         output_file      = ""
         httpd_port       = $Port
         prefer_ipv4      = $true
-    } | ConvertTo-Json -Depth 10) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path_Threads)\config.txt" -Force -ErrorAction SilentlyContinue
+    } | ConvertTo-Json -Depth 10) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path)\$($Pools.CryptoNight.Name)_CryptoNight_$($ThreadIndex).txt" -Force -ErrorAction SilentlyContinue
 
 [PSCustomObject]@{
     Type      = "NVIDIA"
-    Path      = $Path_Threads
-    Arguments = ''
+    Path      = $Path
+    Arguments = "-c $($Pools.CryptoNight.Name)_CryptoNight_$($ThreadIndex).txt"
     HashRates = [PSCustomObject]@{CryptoNight = $Stats."$($Name)_CryptoNight_HashRate".Week}
     API       = "FireIce"
     Port      = $Port
