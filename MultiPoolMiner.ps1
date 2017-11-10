@@ -377,7 +377,7 @@ while ($true) {
         $Miner = $_
 
         if ($Miner.Process -eq $null -or $Miner.Process.HasExited) {
-            if ($Miner.Status = "Running") {$Miner.Status = "Failed"}
+            if ($Miner.Status -eq "Running") {$Miner.Status = "Failed"}
         }
         else {
             $Miner.Process.CloseMainWindow() | Out-Null
