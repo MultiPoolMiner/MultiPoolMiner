@@ -3,6 +3,7 @@
 Add-Type -Path .\OpenCL\*.cs
 
 function Set-Stat {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [String]$Name, 
@@ -135,6 +136,7 @@ function Set-Stat {
 }
 
 function Get-Stat {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [String]$Name
@@ -145,6 +147,7 @@ function Get-Stat {
 }
 
 function Get-ChildItemContent {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [String]$Path, 
@@ -198,6 +201,7 @@ function Get-ChildItemContent {
 }
 
 filter ConvertTo-Hash { 
+    [CmdletBinding()]
     $Hash = $_
     switch ([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1)))) {
         0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0))}
@@ -210,6 +214,7 @@ filter ConvertTo-Hash {
 }
 
 function Get-Combination {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [Array]$Value, 
@@ -242,6 +247,7 @@ function Get-Combination {
 }
 
 function Start-SubProcess {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [String]$FilePath, 
@@ -293,6 +299,7 @@ function Start-SubProcess {
 }
 
 function Expand-WebRequest {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [String]$Uri, 
@@ -322,6 +329,7 @@ function Expand-WebRequest {
 }
 
 function Invoke-TcpRequest {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [String]$Server = "localhost", 
@@ -345,8 +353,6 @@ function Invoke-TcpRequest {
         $Writer.WriteLine($Request)
         $Response = $Reader.ReadLine()
     }
-    catch {
-    }
     finally {
         if ($Reader) {$Reader.Close()}
         if ($Writer) {$Writer.Close()}
@@ -358,6 +364,7 @@ function Invoke-TcpRequest {
 }
 
 function Get-Algorithm {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [String]$Algorithm
@@ -372,6 +379,7 @@ function Get-Algorithm {
 }
 
 function Get-Region {
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [String]$Location

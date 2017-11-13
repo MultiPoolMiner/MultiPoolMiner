@@ -12,34 +12,34 @@ class Ewbf : Miner {
         $Request = @{id = 1; method = "getstat"} | ConvertTo-Json -Compress
 
         do {
-            $HashRate = [PSCustomObject]@{}
-            $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = $null}}
-            $HashRates += $HashRate
+            $HashRates += $HashRate = [PSCustomObject]@{}
 
-            $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout
-
-            $Data = $Response | ConvertFrom-Json
-
-            $HashRate_Name = $HashRate | Get-Member -MemberType NoteProperty | Select-Object -First 1 -ExpandProperty Name
-            $HashRate_Value = $Data.result.speed_sps
-
-            if ($HashRate_Name -and ($HashRate | Get-Member -MemberType NoteProperty | Measure-Object).Count -eq 1) {
-                if ($HashRate_Value -ne $null) {$HashRate.(Get-Algorithm $HashRate_Name) = [Double]($HashRate_Value | Measure-Object -Sum).Sum}
+            try {
+                $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
+                $Data = $Response | ConvertFrom-Json -ErrorAction Stop
+            }
+            catch {
+                Write-Warning "Failed to connect to miner ($($this.Name)). "
+                break
             }
 
-            $HashRate | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
-                if ($HashRate.$_ -eq $null) {$HashRates = @(); break}
+            $HashRate_Name = [String]$Algorithm[0]
+            $HashRate_Value = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum
+
+            if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
+                $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int]$HashRate_Value}
             }
+
+            $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
 
             if (-not $Safe) {break}
 
             Start-Sleep $Interval
         } while ($HashRates.Count -lt 6)
 
-        $HashRates_Info = [PSCustomObject]@{}
-        $Algorithm | ForEach-Object {$HashRates_Info | Add-Member @{$_ = $HashRates | Measure-Object $_ -Maximum -Minimum -Average}}
         $HashRate = [PSCustomObject]@{}
-        $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = if ($HashRates_Info.$_.Maximum - $HashRates_Info.$_.Minimum -le $HashRates_Info.$_.Average * $Delta) {$HashRates_Info.$_.Maximum}}}
+        $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
+        $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int]0}}
 
         return $HashRate
     }
