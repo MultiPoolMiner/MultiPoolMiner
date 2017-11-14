@@ -28,7 +28,7 @@ class Nicehash : Miner {
                 $HashRate_Value = [Double](($Data.algorithms | Where-Object name -EQ $_).workers.speed | Measure-Object -Sum).Sum
 
                 if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
-                    $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int]$HashRate_Value}
+                    $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
                 }
             }
 
@@ -40,8 +40,8 @@ class Nicehash : Miner {
         } while ($HashRates.Count -lt 6)
 
         $HashRate = [PSCustomObject]@{}
-        $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
-        $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int]0}}
+        $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
+        $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
 
         return $HashRate
     }
