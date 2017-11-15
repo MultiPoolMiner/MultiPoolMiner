@@ -17,7 +17,7 @@ class Fireice : Miner {
             try {
                 $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/api.json" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
                 try {$Data = $Response | ConvertFrom-Json -ErrorAction Stop}
-                catch {$Data = $Response.Content -split "</tr>" -match "total*" -split "<td>" -replace "<[^>]*>", ""}
+                catch {$Data = $Response.Content -split "</tr>" -like "*total*" -split "<td>" -replace "<[^>]*>", ""}
             }
             catch {
                 Write-Warning "Failed to connect to miner ($($this.Name)). "
