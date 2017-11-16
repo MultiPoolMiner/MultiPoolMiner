@@ -9,14 +9,14 @@ class Claymore : Miner {
         $Interval = 5
         $HashRates = @()
 
-        $Request = ""
+        $Request = @{id = 1; jsonrpc = "2.0"; method = "miner_getstat1"} | ConvertTo-Json -Compress
 
         do {
             $HashRates += $HashRate = [PSCustomObject]@{}
 
             try {
-                $Response = Invoke-WebRequest "http://$($Server):$($this.Port)" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
-                $Data = $Response.Content.Substring($Response.Content.IndexOf("{"), $Response.Content.IndexOf("}") - $Response.Content.IndexOf("{") + 1) | ConvertFrom-Json -ErrorAction Stop
+                $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
+                $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
             catch {
                 Write-Warning "Failed to connect to miner ($($this.Name)). "
@@ -25,14 +25,14 @@ class Claymore : Miner {
 
             $HashRate_Name = [String]($Data.result[0] -split " - ")[1]
             $HashRate_Value = [Double]($Data.result[2] -split ";")[0]
-            if (($Data.result[0] -split " - ")[1] -eq "eth") {$HashRate_Value *= 1000}
+            if ($Algorithm -contains "Ethash") {$HashRate_Value *= 1000}
 
             if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
                 $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
 
                 $HashRate_Name = [String]($Algorithm -notlike (Get-Algorithm ($Data.result[0] -split " - ")[1]))[0]
                 $HashRate_Value = [Double]($Data.result[4] -split ";")[0]
-                if (($Data.result[0] -split " - ")[1] -eq "eth") {$HashRate_Value *= 1000}
+                if ($Algorithm -contains "Ethash") {$HashRate_Value *= 1000}
 
                 if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
                     $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
