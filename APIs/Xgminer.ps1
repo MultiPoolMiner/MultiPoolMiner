@@ -39,7 +39,6 @@ class Xgminer : Miner {
 
             if (-not $Safe) {break}
 
-            $HashRate_Name = [String]$Algorithm[0]
             $HashRate_Value = if ($Data.SUMMARY.HS_av) {[Double]$Data.SUMMARY.HS_av * [Math]::Pow(1000, 0)}
             elseif ($Data.SUMMARY.KHS_av) {[Double]$Data.SUMMARY.KHS_av * [Math]::Pow(1000, 1)}
             elseif ($Data.SUMMARY.MHS_av) {[Double]$Data.SUMMARY.MHS_av * [Math]::Pow(1000, 2)}
@@ -47,8 +46,14 @@ class Xgminer : Miner {
             elseif ($Data.SUMMARY.THS_av) {[Double]$Data.SUMMARY.THS_av * [Math]::Pow(1000, 4)}
             elseif ($Data.SUMMARY.PHS_av) {[Double]$Data.SUMMARY.PHS_av * [Math]::Pow(1000, 5)}
 
-            if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
-                $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
+            if ($HashRate_Value) {
+                $HashRates += $HashRate = [PSCustomObject]@{}
+
+                if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
+                    $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
+                }
+
+                $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
             }
 
             Start-Sleep $Interval
