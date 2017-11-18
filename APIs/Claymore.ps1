@@ -25,7 +25,7 @@ class Claymore : Miner {
 
             $HashRate_Name = [String]($Data.result[0] -split " - ")[1]
             $HashRate_Value = [Double]($Data.result[2] -split ";")[0]
-            if (-not $HashRate_Name) {[string]$Algorithm[0]}
+            if (-not $HashRate_Name) {$HashRate_Name = [string]$Algorithm[0]}
             if ($Algorithm -contains "Ethash") {$HashRate_Value *= 1000}
 
             if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
