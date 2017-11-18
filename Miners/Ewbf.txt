@@ -1,0 +1,11 @@
+[
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\Equihash-EWBF\\miner.exe",
+        "Arguments":  "--eexit 1 --api --server $($Pools.Equihash.Host) --port $($Pools.Equihash.Port) --user $($Pools.Equihash.User) --pass $($Pools.Equihash.Pass) --fee 0 --intensity 64",
+        "HashRates":  {"Equihash":  "$(if ($Pools.Equihash.SSL) {0}else {$Stats.Ewbf_Equihash_HashRate.Week})"},
+        "API":  "DSTM",
+        "Port":  "42000",
+        "Wrap":  false
+    }
+]

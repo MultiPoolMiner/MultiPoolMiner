@@ -1,6 +1,6 @@
 ﻿using module ..\Include.psm1
 
-class Ewbf : Miner {
+class Dstm : Miner {
     [PSCustomObject]GetHashRate ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
@@ -24,7 +24,8 @@ class Ewbf : Miner {
             }
 
             $HashRate_Name = [String]$Algorithm[0]
-            $HashRate_Value = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum
+            $HashRate_Value = [Double]($Data.result.sol_ps | Measure-Object -Sum).Sum
+            if (-not $HashRate_Value) {$HashRate_Value = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum}
 
             if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
                 $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
@@ -33,6 +34,18 @@ class Ewbf : Miner {
             $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
 
             if (-not $Safe) {break}
+
+            $HashRate_Value = [Double]($Data.result.avg_sol_ps | Measure-Object -Sum).Sum
+
+            if ($HashRate_Value) {
+                $HashRates += $HashRate = [PSCustomObject]@{}
+
+                if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
+                    $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
+                }
+
+                $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
+            }
 
             Start-Sleep $Interval
         } while ($HashRates.Count -lt 6)

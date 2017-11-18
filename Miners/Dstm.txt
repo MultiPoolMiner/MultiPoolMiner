@@ -1,0 +1,11 @@
+[
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\Equihash-DSTM\\zm.exe",
+        "Arguments":  "--telemetry --server $(if ($Pools.Equihash.SSL) {'ssl://'})$($Pools.Equihash.Host) --port $($Pools.Equihash.Port) --user $($Pools.Equihash.User) --pass $($Pools.Equihash.Pass)",
+        "HashRates":  {"Equihash":  "$($Stats.Dstm_Equihash_HashRate.Week)"},
+        "API":  "DSTM",
+        "Port":  "2222",
+        "Wrap":  false
+    }
+]
