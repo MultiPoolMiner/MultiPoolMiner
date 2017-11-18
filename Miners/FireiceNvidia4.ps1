@@ -2,7 +2,7 @@
 
 $ThreadIndex = 4
 
-$Path = ".\Bin\CryptoNight-NVIDIA\xmr-stak-nvidia.exe"
+$Path = ".\Bin\CryptoNight-FireIceNVIDIA\xmr-stak-nvidia.exe"
 $Uri = "https://github.com/fireice-uk/xmr-stak-nvidia/releases/download/v1.1.1-1.4.0/xmr-stak-nvidia.zip"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -33,7 +33,7 @@ if ($Pools.CryptoNight.Name -eq "NiceHash") {return} #temp fix
     Path      = $Path
     Arguments = "-c $($Pools.CryptoNight.Name)_CryptoNight_$($ThreadIndex).txt"
     HashRates = [PSCustomObject]@{CryptoNight = $Stats."$($Name)_CryptoNight_HashRate".Week}
-    API       = "FireIce"
+    API       = "XMRig"
     Port      = $Port
     Wrap      = $false
     URI       = $Uri

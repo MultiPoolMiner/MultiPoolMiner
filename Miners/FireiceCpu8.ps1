@@ -2,7 +2,7 @@
 
 $Threads = 8
 
-$Path = ".\Bin\CryptoNight-CPU\xmr-stak-cpu.exe"
+$Path = ".\Bin\CryptoNight-FireIceCPU\xmr-stak-cpu.exe"
 $Uri = "https://github.com/fireice-uk/xmr-stak-cpu/releases/download/v1.3.0-1.5.0/xmr-stak-cpu-win64.zip"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -35,7 +35,7 @@ $Port = 3334 + (0 * 10000)
     Path      = $Path
     Arguments = "-c $($Pools.CryptoNight.Name)_CryptoNight_$($Threads).txt"
     HashRates = [PSCustomObject]@{CryptoNight = $Stats."$($Name)_CryptoNight_HashRate".Week}
-    API       = "FireIce"
+    API       = "XMRig"
     Port      = $Port
     Wrap      = $false
     URI       = $Uri
