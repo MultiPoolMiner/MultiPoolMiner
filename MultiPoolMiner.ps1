@@ -12,7 +12,7 @@ param(
     [Parameter(Mandatory = $false)]
     [String]$API_Key = "", 
     [Parameter(Mandatory = $false)]
-    [Int]$Interval = 60 * 2, #seconds before reading hash rate from miners
+    [Int]$Interval = 60, #seconds before reading hash rate from miners
     [Parameter(Mandatory = $false)]
     [String]$Region = "europe", #europe/us/asia
     [Parameter(Mandatory = $false)]
@@ -28,7 +28,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Array]$Currency = ("BTC", "USD"), #i.e. GBP,EUR,ZEC,ETH ect.
     [Parameter(Mandatory = $false)]
-    [Int]$Donate = 10, #Minutes per Day
+    [Int]$Donate = 24, #Minutes per Day
     [Parameter(Mandatory = $false)]
     [String]$Proxy = "", #i.e http://192.0.0.1:8080
     [Parameter(Mandatory = $false)]
