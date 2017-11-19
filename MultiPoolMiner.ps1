@@ -115,7 +115,7 @@ while ($true) {
     }
     $AllPools = @($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object {$AllPools | Where-Object Name -EQ $_}) | 
         Where-Object {$Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}
-    if ($AllPools.Count -eq 0) {Write-Warning "No pools available. "; Start-Sleep $Interval; continue}
+    if ($AllPools.Count -eq 0) {Write-Warning "No pools available. "; Get-Job | Receive-Job; Start-Sleep $Interval; continue}
 
     #Apply watchdog to pools
     $AllPools = $AllPools | Where-Object {
@@ -226,7 +226,7 @@ while ($true) {
             $MinerFirewalls = $null
         }
     }
-    if ($Miners.Count -eq 0) {Write-Warning "No miners available. "; Start-Sleep $Interval; continue}
+    if ($Miners.Count -eq 0) {Write-Warning "No miners available. "; Get-Job | Receive-Job; Start-Sleep $Interval; continue}
 
     #Apply watchdog to miners
     $Miners = $Miners | Where-Object {
@@ -399,6 +399,7 @@ while ($true) {
             }
         }
     }
+    Get-Job | Receive-Job
     Start-Sleep $Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
@@ -458,7 +459,7 @@ while ($true) {
     ) | Out-Host
 
     #Display profit comparison
-    if (($BestMiners_Combo | Where-Object Profit -EQ $null | Measure-Object).Count -eq 0) {
+    if (($BestMiners_Combo | Where-Object Profit -EQ $null | Measure-Object).Count -eq 0 -and -not (Get-Job -State Running)) {
         $MinerComparisons = 
         [PSCustomObject]@{"Miner" = "MultiPoolMiner"}, 
         [PSCustomObject]@{"Miner" = $BestMiners_Combo_Comparison | ForEach-Object {"$($_.Name)-$($_.Algorithm -join "/")"}}
