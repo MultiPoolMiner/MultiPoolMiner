@@ -68,6 +68,7 @@ $Rates = [PSCustomObject]@{BTC = [Double]1}
 Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
 
 #Set donation parameters
+if ($Donate -lt 10) {$Donate = 10}
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
 $WalletDonate = "1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb"
 $UserNameDonate = "aaronsace"
