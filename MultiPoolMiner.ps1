@@ -116,7 +116,6 @@ while ($true) {
     }
     $AllPools = @($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object {$AllPools | Where-Object Name -EQ $_}) | 
         Where-Object {$Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}
-    if ($AllPools.Count -eq 0) {Write-Warning "No pools available. "; Get-Job | Receive-Job; Start-Sleep $Interval; continue}
 
     #Apply watchdog to pools
     $AllPools = $AllPools | Where-Object {
@@ -126,6 +125,12 @@ while ($true) {
     }
 
     #Update the active pools
+    if ($AllPools.Count -eq 0) {
+        Write-Warning "No pools available. "
+        Get-Job | Receive-Job
+        Start-Sleep $Interval
+        continue
+    }
     $Pools = [PSCustomObject]@{}
     $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Sort-Object -Descending {$PoolName.Count -eq 0 -or (Compare-Object $PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}, StablePrice, {$_.Region -EQ $Region}, {$_.SSL -EQ $SSL} | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
     if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_} | Measure-Object Updated -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalSeconds) -gt $Interval) {
@@ -227,7 +232,6 @@ while ($true) {
             $MinerFirewalls = $null
         }
     }
-    if ($Miners.Count -eq 0) {Write-Warning "No miners available. "; Get-Job | Receive-Job; Start-Sleep $Interval; continue}
 
     #Apply watchdog to miners
     $Miners = $Miners | Where-Object {
@@ -237,6 +241,12 @@ while ($true) {
     }
 
     #Update the active miners
+    if ($Miners.Count -eq 0) {
+        Write-Warning "No miners available. "
+        Get-Job | Receive-Job
+        Start-Sleep $Interval
+        continue
+    }
     $ActiveMiners | ForEach-Object {
         $_.Profit = 0
         $_.Profit_Comparison = 0
