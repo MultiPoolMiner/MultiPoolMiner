@@ -220,6 +220,8 @@ while ($true) {
         $Miner | Add-Member Device_Auto (($Miner_Devices -eq $null) | Sort-Object) -Force
 
         $Miner.Path = [System.IO.Path]::GetFullPath($Miner.Path)
+
+        if (-not $Miner.API) {$Miner | Add-Member API "Miner" -Force}
     }
     $Miners = $AllMiners | Where-Object {Test-Path $_.Path}
     if (-not (Get-Job -State Running)) {
