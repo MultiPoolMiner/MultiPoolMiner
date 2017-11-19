@@ -31,9 +31,7 @@ class Xgminer : Miner {
             elseif ($Data.SUMMARY.THS_5s) {[Double]$Data.SUMMARY.THS_5s * [Math]::Pow(1000, 4)}
             elseif ($Data.SUMMARY.PHS_5s) {[Double]$Data.SUMMARY.PHS_5s * [Math]::Pow(1000, 5)}
 
-            if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
-                $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
-            }
+            $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
             $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
 
@@ -49,9 +47,7 @@ class Xgminer : Miner {
             if ($HashRate_Value) {
                 $HashRates += $HashRate = [PSCustomObject]@{}
 
-                if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
-                    $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
-                }
+                $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
                 $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
             }

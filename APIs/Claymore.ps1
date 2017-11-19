@@ -23,22 +23,19 @@ class Claymore : Miner {
                 break
             }
 
-            $HashRate_Name = [String]($Data.result[0] -split " - ")[1]
+            $HashRate_Name = [String]($Algorithm -like (Get-Algorithm ($Data.result[0] -split " - ")[1]))
+            if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm ($Data.result[0] -split " - ")[1])*")} #temp fix
+            if (-not $HashRate_Name) {$HashRate_Name = [String]$Algorithm[0]}
             $HashRate_Value = [Double]($Data.result[2] -split ";")[0]
-            if (-not $HashRate_Name) {$HashRate_Name = [string]$Algorithm[0]}
-            if ($Algorithm -contains "Ethash") {$HashRate_Value *= 1000}
+            if ($Algorithm -like "ethash*") {$HashRate_Value *= 1000}
 
-            if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
-                $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
+            $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
-                $HashRate_Name = [String]($Algorithm -notlike (Get-Algorithm $HashRate_Name))[0]
-                $HashRate_Value = [Double]($Data.result[4] -split ";")[0]
-                if ($Algorithm -contains "Ethash") {$HashRate_Value *= 1000}
+            $HashRate_Name = if ($HashRate_Name) {[String]($Algorithm -notlike $HashRate_Name)}
+            $HashRate_Value = [Double]($Data.result[4] -split ";")[0]
+            if ($Algorithm -like "ethash*") {$HashRate_Value *= 1000}
 
-                if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
-                    $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
-                }
-            }
+            $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}                
 
             $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
 

@@ -366,8 +366,8 @@ function Invoke-TcpRequest {
 function Get-Algorithm {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $true)]
-        [String]$Algorithm
+        [Parameter(Mandatory = $false)]
+        [String]$Algorithm = ""
     )
 
     $Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
@@ -381,8 +381,8 @@ function Get-Algorithm {
 function Get-Region {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $true)]
-        [String]$Location
+        [Parameter(Mandatory = $false)]
+        [String]$Location = ""
     )
 
     $Locations = Get-Content "Regions.txt" | ConvertFrom-Json

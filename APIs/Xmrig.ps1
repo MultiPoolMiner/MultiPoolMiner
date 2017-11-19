@@ -17,21 +17,20 @@ class Xmrig : Miner {
             try {
                 $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/api.json" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
                 try {$Data = $Response | ConvertFrom-Json -ErrorAction Stop}
-                catch {$Data = $Response.Content -split "</tr>" -like "*total*" -split "<td>" -replace "<[^>]*>", ""}
+                catch {$Data = $Response.Content -split "</tr>" -like "*total*" -split "<td>" -replace "<[^>]*>", ""} #temp fix
             }
             catch {
                 Write-Warning "Failed to connect to miner ($($this.Name)). "
                 break
             }
 
-            $HashRate_Name = [String]$Data.algo
+            $HashRate_Name = [String]($Algorithm -like (Get-Algorithm $Data.algo))
+            if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
+            if (-not $HashRate_Name) {$HashRate_Name = [String]$Algorithm[0]} #fireice fix
             $HashRate_Value = [Double]$Data.hashrate.total[0]
-            if (-not $HashRate_Name) {$HashRate_Name = [String]$Algorithm[0]}
-            if (-not $HashRate_Value) {[Double]$HashRate_Value = $Data[1]}
+            if (-not $HashRate_Value) {[Double]$HashRate_Value = $Data[1]} #temp fix
 
-            if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
-                $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
-            }
+            $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
             $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
 
@@ -39,15 +38,13 @@ class Xmrig : Miner {
 
             $HashRate_Value = [Double]$Data.hashrate.total[1]
             if (-not $HashRate_Value) {$HashRate_Value = [Double]$Data.hashrate.total[2]}
-            if (-not $HashRate_Value) {[Double]$HashRate_Value = $Data[2]}
-            elseif (-not $HashRate_Value) {[Double]$HashRate_Value = $Data[3]}
+            if (-not $HashRate_Value) {[Double]$HashRate_Value = $Data[2]} #temp fix
+            if (-not $HashRate_Value) {[Double]$HashRate_Value = $Data[3]} #temp fix
 
             if ($HashRate_Value) {
                 $HashRates += $HashRate = [PSCustomObject]@{}
 
-                if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
-                    $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
-                }
+                $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
                 $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
             }

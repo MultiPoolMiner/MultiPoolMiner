@@ -23,12 +23,11 @@ class Ccminer : Miner {
                 break
             }
 
-            $HashRate_Name = [String]$Data.algo
+            $HashRate_Name = [String]($Algorithm -like (Get-Algorithm $Data.algo))
+            if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
             $HashRate_Value = [Double]$Data.KHS * 1000
 
-            if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
-                $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
-            }
+            $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
             $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
 

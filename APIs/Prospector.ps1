@@ -23,11 +23,12 @@ class Prospector : Miner {
                 break
             }
 
-            $HashRate_Name = [String]$Data.coin
-            $HashRate_Value = [Double]($Data.rate | Measure-Object -Sum).Sum
+            $Data.coin | Select-Object -Unique | ForEach-Object {
+                $HashRate_Name = [String]($Algorithm -like (Get-Algorithm $_))
+                if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $_)*")} #temp fix
+                $HashRate_Value = [Double](($Data | Where-Object coin -EQ $_).rate | Measure-Object -Sum).Sum
 
-            if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
-                $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
+                $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
             }
 
             $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
