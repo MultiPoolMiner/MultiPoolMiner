@@ -6,7 +6,7 @@ $Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/v2.0.0/xmr-stak
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 3335
 
-New-Item -Path "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" -Force | New-ItemProperty -Name ([System.IO.Path]::GetFullPath($Path)) -Value "RunAsInvoker" -Force #temp fix
+New-Item -Path "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" -Force | New-ItemProperty -Name ([System.IO.Path]::GetFullPath($Path)) -Value "RunAsInvoker" -Force | Out-Null #temp fix
 
 ([PSCustomObject]@{
         pool_list       = @([PSCustomObject]@{
