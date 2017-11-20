@@ -35,13 +35,13 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
 	$Algorithm = Get-Algorithm($_)
 
 	[PSCustomObject]@{
-		Type       	= "NVIDIA"
-		Path        = $Path
-		Arguments   = "-a $_ -o stratum+tcp://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass)$($Commands.$_)"
-		HashRates   = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
-		API         = "Ccminer"
-		Port        = 4068
-		Wrap        = $false
-		URI         = $Uri
+		Type		= "NVIDIA"
+		Path		= $Path
+		Arguments	= "-a $_ -o stratum+tcp://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass)$($Commands.$_)"
+		HashRates	= [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
+		API			= "Ccminer"
+		Port		= 4068
+		Wrap		= $false
+		URI			= $Uri
 	}
 }
