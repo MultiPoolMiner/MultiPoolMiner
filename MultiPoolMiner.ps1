@@ -59,7 +59,7 @@ $DecayBase = 1 - 0.1 #decimal percentage
 $ActiveMiners = @()
 
 $WatchdogInterval = $Interval * 3
-$WatchdogReset = $WatchdogInterval * 3
+$WatchdogReset = $WatchdogInterval * 3 * 3
 $WatchdogTimers = @()
 
 $Rates = [PSCustomObject]@{BTC = [Double]1}
