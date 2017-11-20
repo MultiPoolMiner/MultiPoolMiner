@@ -4,7 +4,7 @@ $Path = ".\Bin\Xevan-AMD\sgminer.exe"
 $Uri = "https://github.com/LIMXTEC/Xevan-GPU-Miner/releases/download/1/sgminer-xevan-5.5.0-nicehash-1-windows-amd64.zip"
 
 $Commands = [PSCustomObject]@{
-    "xevan" = "" #Xevan
+    "xevan-mod" = " --intensity 15" #Xevan
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName

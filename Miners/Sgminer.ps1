@@ -38,6 +38,7 @@ $Commands = [PSCustomObject]@{
     #"x11evo" = "" #X11evo
     #"x17" = "" #X17
     "yescrypt" = " --worksize 4 --rawintensity 256" #Yescrypt
+    #"xevan-mod" = " --intensity 15" #Xevan
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
