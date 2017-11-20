@@ -16,8 +16,7 @@ class Xmrig : Miner {
 
             try {
                 $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/api.json" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
-                try {$Data = $Response | ConvertFrom-Json -ErrorAction Stop}
-                catch {$Data = $Response.Content -split "</tr>" -like "*total*" -split "<td>" -replace "<[^>]*>", ""} #temp fix
+                $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
             catch {
                 Write-Warning "Failed to connect to miner ($($this.Name)). "
@@ -28,7 +27,6 @@ class Xmrig : Miner {
             if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
             if (-not $HashRate_Name) {$HashRate_Name = [String]$Algorithm[0]} #fireice fix
             $HashRate_Value = [Double]$Data.hashrate.total[0]
-            if (-not $HashRate_Value) {[Double]$HashRate_Value = $Data[1]} #temp fix
 
             $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
@@ -38,8 +36,6 @@ class Xmrig : Miner {
 
             $HashRate_Value = [Double]$Data.hashrate.total[1]
             if (-not $HashRate_Value) {$HashRate_Value = [Double]$Data.hashrate.total[2]}
-            if (-not $HashRate_Value) {[Double]$HashRate_Value = $Data[2]} #temp fix
-            if (-not $HashRate_Value) {[Double]$HashRate_Value = $Data[3]} #temp fix
 
             if ($HashRate_Value) {
                 $HashRates += $HashRate = [PSCustomObject]@{}
