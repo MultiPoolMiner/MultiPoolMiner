@@ -58,8 +58,8 @@ $DecayBase = 1 - 0.1 #decimal percentage
 
 $ActiveMiners = @()
 
-$WatchdogInterval = $Interval * 2
-$WatchdogReset = $WatchdogInterval * 10
+$WatchdogInterval = $Interval * 3
+$WatchdogReset = $WatchdogInterval * 3
 $WatchdogTimers = @()
 
 $Rates = [PSCustomObject]@{BTC = [Double]1}
@@ -426,7 +426,7 @@ while ($true) {
             else {$_.Status = "Running"}
 
             #Add watchdog timer
-            if ($Watchdog) {
+            if ($Watchdog -and $_.Profit -ne $null) {
                 $Miner_Name = $_.Name
                 $_.Algorithm | ForEach-Object {
                     $Miner_Algorithm = $_
@@ -531,7 +531,7 @@ while ($true) {
         }
 
         #Benchmark timeout
-        if ($Miner.Benchmarked -ge 6 -or ($Miner.Benchmarked -ge 2 -and $Miner.Activated -ge 2)) {
+        if ($Miner.Benchmarked -ge 9 -or ($Miner.Benchmarked -ge 3 -and $Miner.Activated -ge 3)) {
             $Miner.Algorithm | Where-Object {-not $Miner_HashRate.$_} | ForEach-Object {
                 if ((Get-Stat "$($Miner.Name)_$($_)_HashRate") -eq $null) {
                     $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value 0 -Duration $StatSpan
