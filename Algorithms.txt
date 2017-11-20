@@ -50,6 +50,7 @@
     "x11gost":  "Sib",
     "x11evo":  "X11evo",
     "x17":  "X17",
+    "xevan":  "Xevan",
     "xmr":  "CryptoNight",
     "yescrypt":  "Yescrypt",
     "zec":  "Equihash",
