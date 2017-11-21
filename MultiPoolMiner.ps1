@@ -127,7 +127,7 @@ while ($true) {
     #Update the active pools
     if ($AllPools.Count -eq 0) {
         Write-Warning "No pools available. "
-        Get-Job | Receive-Job
+        $Downloader | Receive-Job
         Start-Sleep $Interval
         continue
     }
@@ -224,8 +224,8 @@ while ($true) {
         if (-not $Miner.API) {$Miner | Add-Member API "Miner" -Force}
     }
     $Miners = $AllMiners | Where-Object {Test-Path $_.Path}
-    if (-not (Get-Job -State Running)) {
-        Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($AllMiners | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($AllMiners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}} -Unique) -FilePath .\Downloader.ps1 | Out-Null
+    if ($Downloader.State -ne "Running") {
+        $Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($AllMiners | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($AllMiners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}} -Unique) -FilePath .\Downloader.ps1
     }
     if (Get-Command "Get-NetFirewallRule" -ErrorAction SilentlyContinue) {
         if ($MinerFirewalls -eq $null) {$MinerFirewalls = Get-NetFirewallRule | Where-Object DisplayName -EQ "MultiPoolMiner" | Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program}
@@ -245,7 +245,7 @@ while ($true) {
     #Update the active miners
     if ($Miners.Count -eq 0) {
         Write-Warning "No miners available. "
-        Get-Job | Receive-Job
+        $Downloader | Receive-Job
         Start-Sleep $Interval
         continue
     }
@@ -412,7 +412,7 @@ while ($true) {
             }
         }
     }
-    Get-Job | Receive-Job
+    $Downloader | Receive-Job
     Start-Sleep $Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
@@ -472,7 +472,7 @@ while ($true) {
     ) | Out-Host
 
     #Display profit comparison
-    if (($BestMiners_Combo | Where-Object Profit -EQ $null | Measure-Object).Count -eq 0 -and -not (Get-Job -State Running)) {
+    if (($BestMiners_Combo | Where-Object Profit -EQ $null | Measure-Object).Count -eq 0 -and $Downloader.State -ne "Running") {
         $MinerComparisons = 
         [PSCustomObject]@{"Miner" = "MultiPoolMiner"}, 
         [PSCustomObject]@{"Miner" = $BestMiners_Combo_Comparison | ForEach-Object {"$($_.Name)-$($_.Algorithm -join "/")"}}
@@ -498,7 +498,7 @@ while ($true) {
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
     do {
-        Get-Job | Receive-Job
+        $Downloader | Receive-Job
         Start-Sleep 10
         $Timer = (Get-Date).ToUniversalTime()
     }while ($Timer -lt $StatEnd)
