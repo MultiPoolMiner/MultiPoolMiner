@@ -46,7 +46,7 @@ IMPORTANT NOTES:
 ====================================================================
 
 
-COMMAND LINE OPTIONS (not case-sensitive, see Sample Usage section below for an example):
+COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an example):
 
 -region [Europe/US/Asia]
 	Choose your region or the region closest to you.
