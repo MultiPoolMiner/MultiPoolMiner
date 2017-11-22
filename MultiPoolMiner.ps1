@@ -70,8 +70,8 @@ Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
 #Set donation parameters
 if ($Donate -lt 10) {$Donate = 10}
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
-$WalletDonate = "1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb"
-$UserNameDonate = "aaronsace"
+$WalletDonate = "1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHhGkCuNrFt6v9"
+$UserNameDonate = "aaronsace", "fonyo"
 $WorkerNameDonate = "multipoolminer"
 $WalletBackup = $Wallet
 $UserNameBackup = $UserName
@@ -90,8 +90,8 @@ while ($true) {
 
     #Activate or deactivate donation
     if ($Timer.AddDays(-1).AddMinutes($Donate) -ge $LastDonated) {
-        $Wallet = $WalletDonate
-        $UserName = $UserNameDonate
+        $Wallet = $WalletDonate[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
+        $UserName = $UserNameDonate[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
         $WorkerName = $WorkerNameDonate
     }
     if ($Timer.AddDays(-1) -ge $LastDonated) {
