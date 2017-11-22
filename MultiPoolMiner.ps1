@@ -439,6 +439,9 @@ while ($true) {
                             Kicked    = $Timer
                         }
                     }
+                    elseif (-not ($WatchdogTimer.Kicked -GT $Timer.AddSeconds( - $WatchdogReset))) {
+                        $WatchdogTimer.Kicked = $Timer
+                    }
                 }
             }
         }
