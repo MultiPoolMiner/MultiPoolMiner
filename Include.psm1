@@ -291,11 +291,13 @@ function Start-SubProcess {
     do {Start-Sleep 1; $JobOutput = Receive-Job $Job}
     while ($JobOutput -eq $null)
 
+    $Job | Remove-Job
+
     $Process = Get-Process | Where-Object Id -EQ $JobOutput.ProcessId
     $Process.Handle | Out-Null
     $Process
 
-    $Process.PriorityClass = $PriorityNames.$Priority
+    if ($Process) {$Process.PriorityClass = $PriorityNames.$Priority}
 }
 
 function Expand-WebRequest {
