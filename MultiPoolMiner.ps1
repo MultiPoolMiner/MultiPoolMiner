@@ -127,7 +127,7 @@ while ($true) {
     #Update the active pools
     if ($AllPools.Count -eq 0) {
         Write-Warning "No pools available. "
-        $Downloader | Receive-Job
+        if ($Downloader) {$Downloader | Receive-Job}
         Start-Sleep $Interval
         continue
     }
@@ -245,7 +245,7 @@ while ($true) {
     #Update the active miners
     if ($Miners.Count -eq 0) {
         Write-Warning "No miners available. "
-        $Downloader | Receive-Job
+        if ($Downloader) {$Downloader | Receive-Job}
         Start-Sleep $Interval
         continue
     }
@@ -412,7 +412,7 @@ while ($true) {
             }
         }
     }
-    $Downloader | Receive-Job
+    if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
@@ -501,7 +501,7 @@ while ($true) {
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
     do {
-        $Downloader | Receive-Job
+        if ($Downloader) {$Downloader | Receive-Job}
         Start-Sleep 10
         $Timer = (Get-Date).ToUniversalTime()
     }while ($Timer -lt $StatEnd)
