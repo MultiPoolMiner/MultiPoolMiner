@@ -499,6 +499,10 @@ while ($true) {
         $MinerComparisons | Out-Host
     }
 
+    #Reduce Memory
+    Get-Job -State Completed | Remove-Job
+    [GC]::Collect()
+
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
     do {
         if ($Downloader) {$Downloader | Receive-Job}
