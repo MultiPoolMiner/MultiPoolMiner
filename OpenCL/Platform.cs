@@ -1,8 +1,8 @@
-using System;
-using System.Runtime.InteropServices;
-
 namespace OpenCl
 {
+    using System;
+    using System.Runtime.InteropServices;
+
     public sealed class Platform : HandleObject
     {
 		private const uint CL_PLATFORM_PROFILE               = 0x0900;

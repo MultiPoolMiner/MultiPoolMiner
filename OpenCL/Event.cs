@@ -1,8 +1,8 @@
-using System;
-using System.Runtime.InteropServices;
-
 namespace OpenCl
 {
+    using System;
+    using System.Runtime.InteropServices;
+
     public enum ExecutionStatus : int
     {
         Complete  = 0x0,

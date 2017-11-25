@@ -1,8 +1,8 @@
-using System;
-using System.Runtime.InteropServices;
-
 namespace OpenCl
 {
+    using System;
+    using System.Runtime.InteropServices;
+
     public class Device : HandleObject
     {
         private const uint CL_DEVICE_TYPE =                                   0x1000;

@@ -1,8 +1,8 @@
-using System;
-using System.Runtime.InteropServices;
-
 namespace OpenCl
 {
+    using System;
+    using System.Runtime.InteropServices;
+
     public delegate void ContextNotify(string errInfo, object userData);
 
     internal delegate void ContextNotifyInternal(IntPtr errInfo, IntPtr privateData, IntPtr cb, IntPtr userData);

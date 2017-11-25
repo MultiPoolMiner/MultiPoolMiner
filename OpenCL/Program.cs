@@ -1,10 +1,10 @@
-using System;
-using System.Runtime.InteropServices;
-using System.Linq.Expressions;
-using System.Text;
-
 namespace OpenCl
 {
+    using System;
+    using System.Runtime.InteropServices;
+    using System.Linq.Expressions;
+    using System.Text;
+
     public delegate void ProgramNotify(Program program, object userData);
 
     internal delegate void ProgramNotifyInternal(IntPtr program, IntPtr userData);

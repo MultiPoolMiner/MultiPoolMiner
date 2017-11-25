@@ -1,8 +1,8 @@
-﻿using System;
-using System.Runtime.Serialization;
-
-namespace OpenCl
+﻿namespace OpenCl
 {
+    using System;
+    using System.Runtime.Serialization;
+
 	[Serializable]
 	public class OpenClException : System.Exception
 	{

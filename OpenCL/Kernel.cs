@@ -1,8 +1,8 @@
-using System;
-using System.Runtime.InteropServices;
-
 namespace OpenCl
 {
+    using System;
+    using System.Runtime.InteropServices;
+
     public sealed class Kernel : RefCountedObject
     {
 		internal Kernel(IntPtr handle) : base(handle) { }

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Runtime.InteropServices;
-
-namespace OpenCl
+﻿namespace OpenCl
 {
+    using System;
+    using System.Runtime.InteropServices;
+
     [Flags]
     public enum FpConfig : ulong
     {

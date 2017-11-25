@@ -1,7 +1,7 @@
-using System;
-
 namespace OpenCl
 {
+    using System;
+
 	public abstract class RefCountedObject : HandleObject, IDisposable
     {
 		protected RefCountedObject(IntPtr handle) : base(handle) { }

@@ -7,11 +7,11 @@
 //  Copyright 2011 Markus Uhr. All rights reserved.
 //
 
-using System;
-using System.Runtime.InteropServices;
-
 namespace OpenCl
 {
+    using System;
+    using System.Runtime.InteropServices;
+
     internal class NativeMethods
     {
         private NativeMethods()
@@ -188,7 +188,7 @@ namespace OpenCl
             IntPtr ptr,
             uint numEventsInWaitList,
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt, SizeParamIndex = 6)] Event[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out Event e);
+            [Out] out Event e);
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueCopyBuffer(IntPtr commandQueue,
@@ -199,7 +199,7 @@ namespace OpenCl
             IntPtr cb,
             uint numEventsInWaitList,
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt, SizeParamIndex = 6)] Event[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out Event e);
+            [Out] out Event e);
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueReadImage(IntPtr commandQueue,
@@ -212,7 +212,7 @@ namespace OpenCl
             IntPtr ptr,
             uint numEventsIntWaitList,
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt, SizeParamIndex = 8)] Event[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out Event e);
+            [Out] out Event e);
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueWriteImage(IntPtr commandQueue,
@@ -225,7 +225,7 @@ namespace OpenCl
             IntPtr ptr,
             uint numEventsIntWaitList,
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt, SizeParamIndex = 8)] Event[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out Event e);
+            [Out] out Event e);
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueCopyImage(IntPtr commandQueue,
@@ -236,7 +236,7 @@ namespace OpenCl
             [In] [MarshalAs(UnmanagedType.LPArray, SizeConst = 3)] IntPtr[] region,
             uint numEventsInWaitList,
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt, SizeParamIndex = 6)] Event[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out Event e);
+            [Out] out Event e);
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueCopyImageToBuffer(IntPtr commandQueue,
@@ -247,7 +247,7 @@ namespace OpenCl
             IntPtr dstOffset,
             uint numEventsInWaitList,
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt, SizeParamIndex = 6)] Event[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out Event e);
+            [Out] out Event e);
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueCopyBufferToImage(IntPtr commandQueue,
@@ -258,7 +258,7 @@ namespace OpenCl
             [In] [MarshalAs(UnmanagedType.LPArray, SizeConst = 3)] IntPtr[] region,
             uint numEventsInWaitList,
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt, SizeParamIndex = 6)] Event[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out Event e);
+            [Out] out Event e);
 
         [DllImport("opencl.dll")]
         internal static extern IntPtr clEnqueueMapBuffer(IntPtr commandQueue,
@@ -269,7 +269,7 @@ namespace OpenCl
             IntPtr cb,
             uint numEventsInWaitList,
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt, SizeParamIndex = 6)] Event[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out Event e,
+            [Out] out Event e,
             out ErrorCode errCodeRet);
 
         [DllImport("opencl.dll")]
@@ -283,7 +283,7 @@ namespace OpenCl
             out IntPtr imageSlicePitch,
             uint numEventsInWaitList,
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt, SizeParamIndex = 8)] Event[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out Event e,
+            [Out] out Event e,
             out ErrorCode errCodeRet);
 
         [DllImport("opencl.dll")]
@@ -292,7 +292,7 @@ namespace OpenCl
             IntPtr mappedPtr,
             uint numEventsInWaitList,
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt, SizeParamIndex = 3)] Event[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out Event e);
+            [Out] out Event e);
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueNDRangeKernel(
@@ -304,7 +304,7 @@ namespace OpenCl
             [In] [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] IntPtr[] localWorkSize,
             uint numEventsInWaitList,
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt, SizeParamIndex = 6)] Event[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out IntPtr e);
+            [Out] out IntPtr e);
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueNDRangeKernel(
@@ -316,7 +316,7 @@ namespace OpenCl
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt)] uint[] localWorkSize,
             uint numEventsInWaitList,
             IntPtr[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out IntPtr e);
+            [Out] out IntPtr e);
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueNDRangeKernel(
@@ -328,7 +328,7 @@ namespace OpenCl
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt)] int[] localWorkSize,
             int numEventsInWaitList,
             IntPtr[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out IntPtr e);
+            [Out] out IntPtr e);
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueTask(
@@ -336,12 +336,12 @@ namespace OpenCl
             IntPtr kernel,
             uint numEventsInWaitList,
             [In] [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.SysUInt, SizeParamIndex = 2)] Event[] eventWaitList,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out Event e);
+            [Out] out Event e);
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueMarker(
             IntPtr commandQueue,
-            [Out] [MarshalAs(UnmanagedType.Struct)] out Event e);
+            [Out] out Event e);
 
         [DllImport("opencl.dll")]
         internal static extern ErrorCode clEnqueueWaitForEvents(
