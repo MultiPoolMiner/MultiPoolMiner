@@ -17,22 +17,22 @@ Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 
 Remove-Item ".\Wrapper_$Id.txt" -ErrorAction Ignore
 
-$PowerShell = [PowerShell]::Create()
-if ($WorkingDirectory -ne "") {$PowerShell.AddScript("Set-Location '$WorkingDirectory'") | Out-Null}
-$Command = ". '$FilePath'"
-if ($ArgumentList -ne "") {$Command += " $ArgumentList"}
-$PowerShell.AddScript("$Command 2>&1 | Write-Verbose -Verbose") | Out-Null
-$Result = $PowerShell.BeginInvoke()
+$Job = Start-Job -ArgumentList $FilePath, $ArgumentList, $WorkingDirectory {
+    param($FilePath, $ArgumentList, $WorkingDirectory)
+    if ($WorkingDirectory) {Set-Location $WorkingDirectory}
+    if ($ArgumentList) {& $FilePath $ArgumentList 2>&1}
+    else {& $FilePath 2>&1}
+}
 
 Write-Host "MultiPoolMiner Wrapper Started" -BackgroundColor Yellow -ForegroundColor Black
 
 do {
     Start-Sleep 1
 
-    $PowerShell.Streams.Verbose.ReadAll() | ForEach-Object {
+    $Job | Receive-Job | ForEach-Object {
         $Line = $_
 
-        if ($Line -like "*total speed:*" -or $Line -like "*accepted:*" -or $Line -like "*mining *:*") {
+        if ($Line -like "*total*" -or $Line -like "*accepted*") {
             $Words = $Line -split " "
 
             $matches = $null
@@ -60,8 +60,8 @@ do {
         Write-Host ($Line -replace "`n|`r", "")
     }
 
-    if ((Get-Process | Where-Object Id -EQ $ControllerProcessID) -eq $null) {$PowerShell.Stop() | Out-Null}
+    if (-not (Get-Process | Where-Object Id -EQ $ControllerProcessID)) {$Job | Stop-Job}
 }
-until($Result.IsCompleted)
+while ($Job.State -eq "Running")
 
 Remove-Item ".\Wrapper_$Id.txt" -ErrorAction Ignore
