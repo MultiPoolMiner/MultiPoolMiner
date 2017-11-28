@@ -1,4 +1,5 @@
 ﻿Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore
+Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1" -ErrorAction Ignore
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 

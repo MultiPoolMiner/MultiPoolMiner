@@ -40,7 +40,8 @@ param(
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -Recurse | Unblock-File}
-if (Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) {if ((Get-MpComputerStatus -ErrorAction SilentlyContinue) -and (Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) -Verb runAs -ArgumentList "Add-MpPreference -ExclusionPath '$(Convert-Path .)'"}
+if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue) -and (Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {
+    Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) "-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1'; Add-MpPreference -ExclusionPath '$(Convert-Path .)'" -Verb runAs
 }
 
 if ($Proxy -eq "") {$PSDefaultParameterValues.Remove("*:Proxy")}
