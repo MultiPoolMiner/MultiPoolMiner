@@ -58,11 +58,11 @@ $DecayStart = $Timer
 $DecayPeriod = 60 #seconds
 $DecayBase = 1 - 0.1 #decimal percentage
 
-$ActiveMiners = @()
-
 $WatchdogInterval = $Interval * 3
-$WatchdogReset = $WatchdogInterval * 3 * 3
+
 $WatchdogTimers = @()
+
+$ActiveMiners = @()
 
 $Rates = [PSCustomObject]@{BTC = [Double]1}
 
@@ -89,6 +89,9 @@ while ($true) {
     $StatSpan = New-TimeSpan $StatStart $StatEnd
 
     $DecayExponent = [int](($Timer - $DecayStart).TotalSeconds / $DecayPeriod)
+
+    $WatchdogInterval = ($WatchdogInterval / 3 * 2) + $StatSpan.TotalSeconds
+    $WatchdogReset = $WatchdogInterval * 3 * 3
 
     #Activate or deactivate donation
     if ($Timer.AddDays(-1).AddMinutes($Donate) -ge $LastDonated) {
@@ -507,11 +510,11 @@ while ($true) {
     [GC]::Collect()
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
-    do {
+    for ($i = 3; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
         Start-Sleep 10
         $Timer = (Get-Date).ToUniversalTime()
-    }while ($Timer -lt $StatEnd)
+    }
 
     #Save current hash rates
     $ActiveMiners | ForEach-Object {
