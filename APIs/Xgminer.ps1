@@ -12,8 +12,6 @@ class Xgminer : Miner {
         $Request = @{command = "summary"; parameter = ""} | ConvertTo-Json -Compress
 
         do {
-            $HashRates += $HashRate = [PSCustomObject]@{}
-
             try {
                 $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
                 $Data = $Response.Substring($Response.IndexOf("{"), $Response.LastIndexOf("}") - $Response.IndexOf("{") + 1) -replace " ", "_" | ConvertFrom-Json -ErrorAction Stop
@@ -31,11 +29,15 @@ class Xgminer : Miner {
             elseif ($Data.SUMMARY.THS_5s) {[Double]$Data.SUMMARY.THS_5s * [Math]::Pow(1000, 4)}
             elseif ($Data.SUMMARY.PHS_5s) {[Double]$Data.SUMMARY.PHS_5s * [Math]::Pow(1000, 5)}
 
-            $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
+            if ($HashRate_Value) {
+                $HashRates += $HashRate = [PSCustomObject]@{}
 
-            $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
+                $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
-            if (-not $Safe) {break}
+                $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
+
+                if (-not $Safe) {break}
+            }
 
             $HashRate_Value = if ($Data.SUMMARY.HS_av) {[Double]$Data.SUMMARY.HS_av * [Math]::Pow(1000, 0)}
             elseif ($Data.SUMMARY.KHS_av) {[Double]$Data.SUMMARY.KHS_av * [Math]::Pow(1000, 1)}
@@ -51,6 +53,8 @@ class Xgminer : Miner {
 
                 $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
             }
+
+            if (-not $Safe) {break}
 
             Start-Sleep $Interval
         } while ($HashRates.Count -lt 6)
