@@ -11,6 +11,11 @@ catch {
     Write-Warning "Pool API ($Name) has failed. "
 }
 
+if (($MiningPoolHubCoins_Request.return | Measure-Object Name).Count -le 1) {
+    Write-Warning "Pool API ($Name) returned nothing. "
+    return
+}
+
 $MiningPoolHubCoins_Regions = "europe", "us", "asia"
 
 $MiningPoolHubCoins_Request.return | ForEach-Object {

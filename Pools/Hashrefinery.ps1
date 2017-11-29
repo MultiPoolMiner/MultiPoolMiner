@@ -11,6 +11,11 @@ catch {
     Write-Warning "Pool API ($Name) has failed. "
 }
 
+if (($HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
+    Write-Warning "Pool API ($Name) returned nothing. "
+    return
+}
+
 $HashRefinery_Regions = "us"
 
 $HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
