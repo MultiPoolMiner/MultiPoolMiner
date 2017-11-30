@@ -1,0 +1,12 @@
+[
+    {
+        "Type":  "AMD",
+        "Path":  ".\\Bin\\CryptoNight-Cast\\cast_xmr-vega.exe",
+        "Arguments":  "--remoteaccess -S $($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port) -u $($Pools.CryptoNight.User) -p $($Pools.CryptoNight.Pass) --nicehash --opencl $([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'Advanced Micro Devices, Inc.'))",
+        "HashRates":  {"CryptoNight":  "$(if ($Pools.CryptoNight.SSL) {0}else {$Stats.Cast_CryptoNight_HashRate.Week})"},
+        "API":  "Cast",
+        "Port":  "7777",
+        "Wrap":  false,
+        "URI":  "http://www.gandalph3000.com/download/cast_xmr-vega-win64_070.zip"
+    }
+]
