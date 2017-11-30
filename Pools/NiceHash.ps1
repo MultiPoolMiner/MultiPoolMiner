@@ -11,11 +11,6 @@ catch {
     Write-Warning "Pool API ($Name) has failed. "
 }
 
-if (($NiceHash_Request.result.simplemultialgo | Measure-Object Name).Count -le 1) {
-    Write-Warning "Pool API ($Name) returned nothing. "
-    return
-}
-
 $NiceHash_Regions = "eu", "usa", "hk", "jp", "in", "br"
 
 $NiceHash_Request.result.simplemultialgo | ForEach-Object {
