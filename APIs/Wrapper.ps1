@@ -16,12 +16,12 @@ class Wrapper : Miner {
 
             try {
                 try {
-                    $Response = Get-Content ".\Wrapper_$($this.Port).txt" -ErrorAction Stop
+                    $Response = Get-Content ".\Wrapper\$($this.Port).txt" -Force -ErrorAction Stop
                     $Data = $Response | ConvertFrom-Json -ErrorAction Stop
                 }
                 catch {
                     Start-Sleep $Interval
-                    $Response = Get-Content ".\Wrapper_$($this.Port).txt" -ErrorAction Stop
+                    $Response = Get-Content ".\Wrapper\$($this.Port).txt" -Force -ErrorAction Stop
                     $Data = $Response | ConvertFrom-Json -ErrorAction Stop
                 }
             }

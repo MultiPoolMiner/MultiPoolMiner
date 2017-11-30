@@ -15,7 +15,7 @@ param(
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 
-Remove-Item ".\Wrapper_$Id.txt" -ErrorAction Ignore
+Remove-Item ".\Wrapper\$Id.txt" -Force -ErrorAction Ignore
 
 $Job = Start-Job -ArgumentList $FilePath, $ArgumentList, $WorkingDirectory {
     param($FilePath, $ArgumentList, $WorkingDirectory)
@@ -54,7 +54,8 @@ do {
                 "ph/s" {$HashRate *= [Math]::Pow(1000, 5)}
             }
 
-            $HashRate | ConvertTo-Json | Set-Content ".\Wrapper_$Id.txt"
+            if (-not (Test-Path "Wrapper")) {New-Item "Wrapper" -ItemType "directory" -Force | Out-Null}
+            $HashRate | ConvertTo-Json | Set-Content ".\Wrapper\$Id.txt" -Force -ErrorAction Ignore
         }
 
         Write-Host ($Line -replace "`n|`r", "")
@@ -64,4 +65,4 @@ do {
 }
 while ($Job.State -eq "Running")
 
-Remove-Item ".\Wrapper_$Id.txt" -ErrorAction Ignore
+Remove-Item ".\Wrapper\$Id.txt" -Force -ErrorAction Ignore
