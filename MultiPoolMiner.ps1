@@ -50,6 +50,8 @@ else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
 $Algorithm = $Algorithm | ForEach-Object {Get-Algorithm $_}
 $Region = $Region | ForEach-Object {Get-Region $_}
 
+$Strikes = 3
+
 $Timer = (Get-Date).ToUniversalTime()
 
 $StatEnd = $Timer
@@ -58,7 +60,8 @@ $DecayStart = $Timer
 $DecayPeriod = 60 #seconds
 $DecayBase = 1 - 0.1 #decimal percentage
 
-$WatchdogInterval = $Interval * 3
+$WatchdogInterval = $Interval * $Strikes
+$WatchdogReset = $Interval * $Strikes * $Strikes * $Strikes
 
 $WatchdogTimers = @()
 
@@ -90,8 +93,8 @@ while ($true) {
 
     $DecayExponent = [int](($Timer - $DecayStart).TotalSeconds / $DecayPeriod)
 
-    $WatchdogInterval = ($WatchdogInterval / 3 * 2) + $StatSpan.TotalSeconds
-    $WatchdogReset = $WatchdogInterval * 3 * 3
+    $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
+    $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
 
     #Activate or deactivate donation
     if ($Timer.AddDays(-1).AddMinutes($Donate) -ge $LastDonated) {
@@ -126,7 +129,7 @@ while ($true) {
     $AllPools = $AllPools | Where-Object {
         $Pool = $_
         $Pool_WatchdogTimers = $WatchdogTimers | Where-Object PoolName -EQ $Pool.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset)
-        ($Pool_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt 3 -and ($Pool_WatchdogTimers | Where-Object {$Pool.Algorithm -contains $_.Algorithm} | Measure-Object | Select-Object -ExpandProperty Count) -lt 2
+        ($Pool_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>3 -and ($Pool_WatchdogTimers | Where-Object {$Pool.Algorithm -contains $_.Algorithm} | Measure-Object | Select-Object -ExpandProperty Count) -lt <#statge#>2
     }
 
     #Update the active pools
@@ -138,7 +141,7 @@ while ($true) {
     }
     $Pools = [PSCustomObject]@{}
     $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Sort-Object -Descending {$PoolName.Count -eq 0 -or (Compare-Object $PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}, StablePrice, {$_.Region -EQ $Region}, {$_.SSL -EQ $SSL} | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
-    if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_} | Measure-Object Updated -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalSeconds) -gt $Interval) {
+    if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_} | Measure-Object Updated -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalSeconds) -gt $Interval * $Strikes) {
         Write-Warning "Pool prices are out of sync. "
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.StablePrice * (1 - ($Pools.$_.MarginOfError * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
     }
@@ -244,7 +247,7 @@ while ($true) {
     $Miners = $Miners | Where-Object {
         $Miner = $_
         $Miner_WatchdogTimers = $WatchdogTimers | Where-Object MinerName -EQ $Miner.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset)
-        ($Miner_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt 2 -and ($Miner_WatchdogTimers | Where-Object {$Miner.HashRates.PSObject.Properties.Name -contains $_.Algorithm} | Measure-Object | Select-Object -ExpandProperty Count) -lt 1
+        ($Miner_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>2 -and ($Miner_WatchdogTimers | Where-Object {$Miner.HashRates.PSObject.Properties.Name -contains $_.Algorithm} | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>1
     }
 
     #Update the active miners
@@ -510,7 +513,7 @@ while ($true) {
     [GC]::Collect()
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
-    for ($i = 3; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
+    for ($i = $Strikes; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
         Start-Sleep 10
         $Timer = (Get-Date).ToUniversalTime()
@@ -525,7 +528,7 @@ while ($true) {
         if ($Miner.New) {$Miner.Benchmarked++}
 
         if ($Miner.Process -and -not $Miner.Process.HasExited) {
-            $Miner_HashRate = $Miner.GetHashRate($Miner.Algorithm, ($Miner.New -and $Miner.Benchmarked -lt 3))
+            $Miner_HashRate = $Miner.GetHashRate($Miner.Algorithm, ($Miner.New -and $Miner.Benchmarked -lt $Strikes))
             $Miner.Speed_Live = $Miner_HashRate.PSObject.Properties.Value
 
             $Miner.Algorithm | Where-Object {$Miner_HashRate.$_} | ForEach-Object {
@@ -544,7 +547,7 @@ while ($true) {
         }
 
         #Benchmark timeout
-        if ($Miner.Benchmarked -ge 9 -or ($Miner.Benchmarked -ge 3 -and $Miner.Activated -ge 3)) {
+        if ($Miner.Benchmarked -ge ($Strikes * $Strikes) -or ($Miner.Benchmarked -ge $Strikes -and $Miner.Activated -ge $Strikes)) {
             $Miner.Algorithm | Where-Object {-not $Miner_HashRate.$_} | ForEach-Object {
                 if ((Get-Stat "$($Miner.Name)_$($_)_HashRate") -eq $null) {
                     $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value 0 -Duration $StatSpan
