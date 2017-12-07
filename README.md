@@ -2,10 +2,10 @@
 ###### created by aaronsace 
 LINK: https://github.com/aaronsace/MultiPoolMiner/
 
-Licensed under the GNU General Public License v3.0
-Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
+###### Licensed under the GNU General Public License v3.0
+###### Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 7/12/2017 - v1.15.1a
+README.md is based on README.txt - updated on 7/12/2017 - v1.15.2draft5
 
 ====================================================================
 
@@ -24,7 +24,7 @@ Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLaz
 
 ## IMPORTANT NOTES
 
-- As of 6/12/2017, Nicehash is closed down until further notice due to a hack involving 4800 missing Bitcoins. Please remove the "nicehash" parameter from the -poolname command (your chosen list of pools used) in the start.bat file and also remove the Nicehash-only parameters (algorithms) from the -algorithm command such as sianicehash, decrednicehash, pascal.
+- **As of 6/12/2017, Nicehash is closed down until further notice due to a hack involving 4800 missing Bitcoins. Please remove the "nicehash" parameter from the *-poolname* command (your chosen list of pools used) in the start.bat file and also remove the Nicehash-only parameters (algorithms) from the *-algorithm* command such as *sianicehash*, *decrednicehash*, *pascal*.**
 
 - It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
 - If you are using Windows 7, please update PowerShell: https://www.microsoft.com/en-us/download/details.aspx?id=50395
@@ -50,12 +50,14 @@ Choose your region or the region closest to you.
 
 The following pools are currently supported:
 - MiningPoolHub https://miningpoolhub.com/ 
+
 The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
+
 - Zpool http://www.zpool.ca/ (Bitcoin address must be provided using the -address command, see below)
 - Hash Refinery http://pool.hashrefinery.com (Bitcoin address must be provided using the -address command, see below)
 - Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -address command, see below)
 
-IMPORTANT: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.
+*IMPORTANT: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
 
 **-username**
 Your username you use to login to MiningPoolHub.
@@ -75,14 +77,15 @@ Choose the relevant GPU(s) and/or CPU mining.
 **-algorithm**
 
 The following algorithms are currently supported: 
-     Bitcore, Blakecoin, Blake2s, BlakeVanilla, C11, CryptoNight, Ethash, X11, Decred, Equihash, Groestl, HMQ1725, JHA, Keccak, Lbry, Lyra2RE2, Lyra2z, MyriadGroestl, NeoScrypt, Nist5, Pascal, Quark, Qubit, Scrypt, SHA256, Sia, Sib, Skunk, Skein, Timetravel, Tribus, BlakeVanilla, Veltor, X11, X11evo, X17, Yescrypt
 
-Special parameters: 
+    Bitcore, Blakecoin, Blake2s, BlakeVanilla, C11, CryptoNight, Ethash, X11, Decred, Equihash, Groestl, HMQ1725, JHA, Keccak, Lbry, Lyra2RE2, Lyra2z, MyriadGroestl, NeoScrypt, Nist5, Pascal, Quark, Qubit, Scrypt, SHA256, Sia, Sib, Skunk, Skein, Timetravel, Tribus, BlakeVanilla, Veltor, X11, X11evo, X17, Yescrypt
+
+###### Special parameters: 
 - ethash2gb - can be profitable for older GPUs that have 2GB or less GDDR memory. It includes ethash coins that have a DAG file size of less than 2GB (and will be mined when most profitable). Ethereum and a few other coins have surpassed this size therefore cannot be mined with older cards.
 - sianicehash and decrednicehash - if you want to include non-dual, non-Claymore Sia and Decred mining on Nicehash. NH created their own implementation of Sia and Decred mining protocol.
 - siaclaymore - enable mining Sia as a secondary coin with Claymore Dual ethash miner on MiningPoolHub
 
-Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). WARNING! If you add all algorithms listed above, you may find your earnings spread across 3 different pools regardless what pool(s) you specified with the -poolname command.
+*Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). **WARNING!** If you add all algorithms listed above, you may find your earnings spread across 3 different pools regardless what pool(s) you specified with the -poolname command.*
 	
 **-currency [BTC,USD,EUR,GBP,ETH ...]**
 Choose the default currency or currencies your profit stats will be shown in.
