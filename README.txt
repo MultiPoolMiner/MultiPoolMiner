@@ -36,7 +36,7 @@ IMPORTANT NOTES:
 - As of 6/12/2017, Nicehash is closed down until further notice due to a hack involving 4800 missing Bitcoins. Please remove the "nicehash" parameter from the -poolname command (your chosen list of pools used) in the start.bat file and also remove the Nicehash-only parameters (algorithms) from the -algorithm command such as sianicehash, decrednicehash, pascal.
 
 - It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
-- If you are using Windows 7, please update PowerShell: https://www.microsoft.com/en-us/download/details.aspx?id=50395
+- If you are using Windows 7 or 8, please update PowerShell: https://www.microsoft.com/en-us/download/details.aspx?id=50395
 - CCMiner (NVIDIA cards only) may need 'MSVCR120.dll' if you don't already have it: https://www.microsoft.com/en-gb/download/details.aspx?id=40784
 - CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145
 - You may need 'excavator.exe' if you don't already have it: https://github.com/nicehash/excavator/releases
