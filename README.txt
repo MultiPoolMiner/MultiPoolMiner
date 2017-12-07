@@ -13,7 +13,7 @@ LINK: https://github.com/aaronsace/MultiPoolMiner/
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 7/12/2017 - v1.15.1
+README.txt - updated on 7/12/2017 - v1.15.3
 
 ====================================================================
 
@@ -42,7 +42,7 @@ IMPORTANT NOTES:
 - It is highly recommended to set Virtual Memory size in Windows to at least 16 GB in multi-GPU systems: Computer Properties -> Advanced System Settings -> Performance -> Advanced -> Virtual Memory
 - Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/aaronsace/MultiPoolMiner/issues 
 - Logs and Stats are produced in text format; use them when submitting issues.
-- Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional miner files to support mining with more than 6 graphics cards.
+- Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional or amend current miner files to support mining with more than 6 graphics cards.
 
 	
 ====================================================================
