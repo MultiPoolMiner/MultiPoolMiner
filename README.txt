@@ -13,7 +13,7 @@ LINK: https://github.com/aaronsace/MultiPoolMiner/
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 21/11/2017 - v1.13.11
+README.txt - updated on 7/12/2017 - v1.13.12
 
 ====================================================================
 
@@ -31,6 +31,8 @@ Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLaz
 
 
 IMPORTANT NOTES:
+
+- As of 6/12/2017, Nicehash is closed down until further notice due to a hack involving 4800 missing Bitcoins. Please remove the "nicehash" parameter from the -poolname command (your chosen list of pools used) in the start.bat file and also remove the Nicehash-only parameters (algorithms) from the -algorithm command such as sianicehash, decrednicehash, pascal.
 
 - It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
 - If you are using Windows 7, please update PowerShell: https://www.microsoft.com/en-us/download/details.aspx?id=50395
@@ -51,13 +53,15 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 -region [Europe/US/Asia]
 	Choose your region or the region closest to you.
 
--poolname [miningpoolhub,miningpoolhubcoins,zpool,nicehash]
+-poolname [miningpoolhub,miningpoolhubcoins,zpool,hashrefinery,nicehash]
 	The following pools are currently supported: 
-	## MiningPoolHub https://miningpoolhub.com/
-	        The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. 
-	## Zpool http://www.zpool.ca/ 
-	## Nicehash https://www.nicehash.com/
-	The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example. A registered account is required when mining on MiningPoolHub.
+	## MiningPoolHub https://miningpoolhub.com/ 
+	        The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
+	## Zpool http://www.zpool.ca/ (Bitcoin address must be provided using the -address command, see below)
+	## Hash Refinery http://pool.hashrefinery.com (Bitcoin address must be provided using the -address command, see below)
+	## Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -address command, see below)
+	
+	IMPORTANT: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.
 
 -username 
 	Your username you use to login to MiningPoolHub.
@@ -66,7 +70,7 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	To identify your mining rig.
 
 -wallet
-	Your Bitcoin payout address. Required when mining on Zpool and Nicehash.
+	Your Bitcoin payout address. Required when mining on Zpool, Hash Refinery and Nicehash.
 	
 -SSL
 	Secure connection option.
@@ -83,14 +87,14 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	siaclaymore - enable mining Sia as a secondary coin with Claymore Dual ethash miner on MiningPoolHub
 	Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). WARNING! If you add all algorithms listed above, you may find your earnings spread across 3 different pools regardless what pool(s) you specified with the -poolname command.
 	
--currency [BTC,USD,EUR,ETH ...]
+-currency [BTC,USD,EUR,GBP,ETH ...]
 	Choose the default currency or currencies your profit stats will be shown in.
 
 -interval
 	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
 
 -donate
-	Donation of mining time in minutes per day to aaronsace. Default is 10. The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
+	Donation of mining time in minutes per day to aaronsace. Default is 24. The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
 
 	
 ====================================================================
