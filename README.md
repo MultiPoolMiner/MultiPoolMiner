@@ -4,7 +4,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 7/12/2017 - v1.15.4draft13 - latest version can be found here: https://github.com/aaronsace/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 7/12/2017 - v1.15.5 draft14 - latest version can be found here: https://github.com/aaronsace/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -14,7 +14,7 @@ README.md is based on README.txt - updated on 7/12/2017 - v1.15.4draft13 - lates
 - **Monitors crypto mining pools and coins in real-time and finds the most profitable for your machine**
 - **Controls any miner that is available via command line**
 - **Supports benchmarking and multiple platforms (AMD, NVIDIA and CPU)**
-- **Includes Watchdog Timer**
+- **Includes Watchdog Timer to detect and handle miner failures**
 
 *Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH*
 
