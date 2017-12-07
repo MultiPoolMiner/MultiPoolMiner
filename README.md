@@ -160,7 +160,8 @@ Include this command to enable the watchdog feature which detects and handles mi
 
 ###### Q15. How do I customise miners to better work with my cards?
 ###### A15. Some cards may require special parameters to be used in order to make them (more) stable, such as setting intensity for specific miners/algos/GPUs. This can be done by heading to the /Miners folder and editing the relevant miner files. For example, for CcminerTpruvot.ps1 you can replace (mind the spaces!)
-      "x17" = "" # X17
-with:
-      "x17" = " -i 20" # X17 
-to add intensity setting for that specific algorithm while used in conjuction with tpruvot's ccminer fork. This will result this specific miner on that specific algorithm will use the intensity setting of 20 which may help if you are experiencing driver crashes when using certain cards. Please search relevant forums for correct and recommended settings before changing anything!
+    "x17" = "" # X17
+###### with:
+
+    "x17" = " -i 20" # X17 
+###### to add intensity setting for that specific algorithm while used in conjuction with tpruvot's ccminer fork. This will result this specific miner on that specific algorithm will use the intensity setting of 20 which may help if you are experiencing driver crashes when using certain cards. Please search relevant forums for correct and recommended settings before changing anything!
