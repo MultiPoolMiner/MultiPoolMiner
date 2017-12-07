@@ -37,12 +37,12 @@ New-Item -Path "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlag
         http_pass       = ""
         prefer_ipv4     = $true
     } | ConvertTo-Json -Depth 10
-) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path)\$($Pools.CryptoNight.Name)_CryptoNight_Amd.txt" -Force -ErrorAction SilentlyContinue
+) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path)\$($Pools.CryptoNight.Name)_CryptoNight_$($Pools.CryptoNight.User)_Amd.txt" -Force -ErrorAction SilentlyContinue
 
 [PSCustomObject]@{
     Type      = "AMD"
     Path      = $Path
-    Arguments = "-c $($Pools.CryptoNight.Name)_CryptoNight_Amd.txt --noCPU --noNVIDIA"
+    Arguments = "-c $($Pools.CryptoNight.Name)_CryptoNight_$($Pools.CryptoNight.User)_Amd.txt --noCPU --noNVIDIA"
     HashRates = [PSCustomObject]@{CryptoNight = $Stats."$($Name)_CryptoNight_HashRate".Week}
     API       = "XMRig"
     Port      = $Port
