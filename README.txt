@@ -96,6 +96,9 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 -donate
 	Donation of mining time in minutes per day to aaronsace. Default is 24. The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
 
+-watchdog
+        Include this command to enable the watchdog feature which detects and handles miner and other related failures.
+	
 	
 ====================================================================
 	
