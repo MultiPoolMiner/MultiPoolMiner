@@ -136,7 +136,7 @@ while ($true) {
     if ($AllPools.Count -eq 0) {
         Write-Warning "No pools available. "
         if ($Downloader) {$Downloader | Receive-Job}
-        Start-Sleep $Interval
+        Start-Sleep -s $Interval
         continue
     }
     $Pools = [PSCustomObject]@{}
@@ -254,7 +254,7 @@ while ($true) {
     if ($Miners.Count -eq 0) {
         Write-Warning "No miners available. "
         if ($Downloader) {$Downloader | Receive-Job}
-        Start-Sleep $Interval
+        Start-Sleep -s $Interval
         continue
     }
     $ActiveMiners | ForEach-Object {
@@ -515,7 +515,7 @@ while ($true) {
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
     for ($i = $Strikes; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
-        Start-Sleep 10
+        Start-Sleep -s 10
         $Timer = (Get-Date).ToUniversalTime()
     }
 

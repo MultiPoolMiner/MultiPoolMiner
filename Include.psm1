@@ -291,7 +291,7 @@ function Start-SubProcess {
         while ($Process.HasExited -eq $false)
     }
 
-    do {Start-Sleep 1; $JobOutput = Receive-Job $Job}
+    do {Start-Sleep -s 1; $JobOutput = Receive-Job $Job}
     while ($JobOutput -eq $null)
 
     $Process = Get-Process | Where-Object Id -EQ $JobOutput.ProcessId
