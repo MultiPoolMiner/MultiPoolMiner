@@ -306,28 +306,35 @@ function Expand-WebRequest {
     param(
         [Parameter(Mandatory = $true)]
         [String]$Uri, 
-        [Parameter(Mandatory = $true)]
-        [String]$Path
+        [Parameter(Mandatory = $false)]
+        [String]$Path = ""
     )
 
-    if (-not (Test-Path $Path)) {New-Item $Path -ItemType "directory" | Out-Null}
-
-    $FolderName_Old = ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName
-    $FolderName_New = Split-Path $Path -Leaf
-    $FileName = "$Path$(([IO.FileInfo](Split-Path $Uri -Leaf)).Extension)"
+    if (-not $Path) {$Path = Join-Path ".\Downloads" ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName}
+    if (-not (Test-Path ".\Downloads")) {New-Item "Downloads" -ItemType "directory" | Out-Null}
+    $FileName = Join-Path ".\Downloads" (Split-Path $Uri -Leaf)
 
     if (Test-Path $FileName) {Remove-Item $FileName}
-    if (Test-Path "$(Split-Path $Path)\$FolderName_New") {Remove-Item "$(Split-Path $Path)\$FolderName_New" -Recurse}
-    if (Test-Path "$(Split-Path $Path)\$FolderName_Old") {Remove-Item "$(Split-Path $Path)\$FolderName_Old" -Recurse}
-
     Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
-    Start-Process "7z" "x `"$FileName`" -o`"$(Split-Path $Path)\$FolderName_Old`" -y -spe" -Wait
-    if (Get-ChildItem "$(Split-Path $Path)\$FolderName_Old" | Where-Object PSIsContainer -EQ $false) {
-        Rename-Item "$(Split-Path $Path)\$FolderName_Old" "$FolderName_New"
+
+    if (".msi", ".exe" -contains ([IO.FileInfo](Split-Path $Uri -Leaf)).Extension) {
+        Start-Process $FileName "-qb" -Wait
     }
     else {
-        Get-ChildItem "$(Split-Path $Path)\$FolderName_Old" | Where-Object PSIsContainer -EQ $true | ForEach-Object {Move-Item "$(Split-Path $Path)\$FolderName_Old\$_" "$(Split-Path $Path)\$FolderName_New"}
-        Remove-Item "$(Split-Path $Path)\$FolderName_Old"
+        $Path_Old = (Join-Path (Split-Path $Path) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
+        $Path_New = (Join-Path (Split-Path $Path) (Split-Path $Path -Leaf))
+
+        if (Test-Path $Path_Old) {Remove-Item $Path_Old -Recurse}
+        Start-Process "7z" "x `"$([IO.Path]::GetFullPath($FileName))`" -o`"$([IO.Path]::GetFullPath($Path_Old))`" -y -spe" -Wait
+
+        if (Test-Path $Path_New) {Remove-Item $Path_New -Recurse}
+        if (Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $false) {
+            Rename-Item $Path_Old (Split-Path $Path -Leaf)
+        }
+        else {
+            Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $true | ForEach-Object {Move-Item (Join-Path $Path_Old $_) $Path_New}
+            Remove-Item $Path_Old
+        }
     }
 }
 
