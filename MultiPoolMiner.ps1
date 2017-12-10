@@ -515,7 +515,7 @@ while ($true) {
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
     for ($i = $Strikes; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
-        Start-Sleep 10
+        Start-Sleep -s 10
         $Timer = (Get-Date).ToUniversalTime()
     }
 
