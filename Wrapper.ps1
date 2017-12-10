@@ -27,7 +27,7 @@ $Job = Start-Job -ArgumentList $FilePath, $ArgumentList, $WorkingDirectory {
 Write-Host "MultiPoolMiner Wrapper Started" -BackgroundColor Yellow -ForegroundColor Black
 
 do {
-    Start-Sleep 1
+    Start-Sleep -s 1
 
     $Job | Receive-Job | ForEach-Object {
         $Line = $_
