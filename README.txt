@@ -101,7 +101,7 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
         Include this command to enable the watchdog feature which detects and handles miner and other related failures.
 		
 -minervisibility
-		Miner programs will start minimized by default. Include this command, followed by "normal" or "minimized", to specify your preference. A "hidden" option may be added in the future
+		Miner programs will start minimized by default. Include this command, followed by "normal" or "minimized", to specify your preference. A "hidden" option may be added in the future.
 	
 	
 ====================================================================
