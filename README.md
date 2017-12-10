@@ -99,6 +99,9 @@ Donation of mining time in minutes per day to aaronsace. Default is 24. The down
 **-watchdog**
 Include this command to enable the watchdog feature which detects and handles miner and other related failures.
 
+**-minervisibility**
+Miner programs will start minimized by default. Include this command, followed by "normal" or "minimized", to specify your preference. A "hidden" option may be added in the future.
+
 	
 ====================================================================
 	
