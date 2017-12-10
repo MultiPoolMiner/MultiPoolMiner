@@ -260,23 +260,58 @@ function Start-SubProcess {
         [String]$WorkingDirectory = "", 
         [ValidateRange(-2, 3)]
         [Parameter(Mandatory = $false)]
-        [Int]$Priority = 0
+        [Int]$Priority = 0,
+		[Parameter(Mandatory = $false)]
+		[ValidateSet("normal", "minimized"<#, "hidden"#>)] #Don't offer a hidden option because the miner processes aren't properly killed when they are started in this mode
+		[String]$MinerVisibility = "minimized"
     )
 
     $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
 
-    $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory {
-        param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory)
+    $Job = Start-Job -ArgumentList $PID, (Resolve-Path ".\CreateProcess.cs"), $FilePath, $ArgumentList, $WorkingDirectory, $MinerVisibility {
+        param($ControllerProcessID, $CreateProcessPath, $FilePath, $ArgumentList, $WorkingDirectory, $MinerVisibility)
 
         $ControllerProcess = Get-Process -Id $ControllerProcessID
         if ($ControllerProcess -eq $null) {return}
 
-        $ProcessParam = @{}
-        $ProcessParam.Add("FilePath", $FilePath)
-        $ProcessParam.Add("WindowStyle", 'Minimized')
-        if ($ArgumentList -ne "") {$ProcessParam.Add("ArgumentList", $ArgumentList)}
-        if ($WorkingDirectory -ne "") {$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
-        $Process = Start-Process @ProcessParam -PassThru
+		#CreateProcess won't be usable inside this job if Add-Type is run outside the job
+		Add-Type -Path $CreateProcessPath
+		
+		$lpApplicationName = $FilePath;
+		
+		$lpCommandLine = '"' + $FilePath + '"' #Windows paths cannot contain ", so there is no need to escape
+		if ($ArgumentList -ne "") {$lpCommandLine += " " + $ArgumentList}
+		
+		$lpProcessAttributes = New-Object SECURITY_ATTRIBUTES
+		$lpProcessAttributes.Length = [System.Runtime.InteropServices.Marshal]::SizeOf($lpProcessAttributes)
+		
+		$lpThreadAttributes = New-Object SECURITY_ATTRIBUTES
+		$lpThreadAttributes.Length = [System.Runtime.InteropServices.Marshal]::SizeOf($lpThreadAttributes)
+		
+		$bInheritHandles = $false
+		
+		$dwCreationFlags = [CreationFlags]::CREATE_NEW_CONSOLE
+		
+		$lpEnvironment = [IntPtr]::Zero
+		
+		if ($WorkingDirectory -ne "") {$lpCurrentDirectory = $WorkingDirectory}
+		else {$lpCurrentDirectory = [IntPtr]::Zero}
+		
+		$lpStartupInfo = New-Object STARTUPINFO
+		$lpStartupInfo.cb = [System.Runtime.InteropServices.Marshal]::SizeOf($lpStartupInfo)
+		switch ($MinerVisibility)
+		{
+			"normal" {$lpStartupInfo.wShowWindow = [ShowWindow]::SW_SHOWNOACTIVATE}
+			"minimized" {$lpStartupInfo.wShowWindow = [ShowWindow]::SW_SHOWMINNOACTIVE}
+			#"hidden" {$lpStartupInfo.wShowWindow = [ShowWindow]::SW_HIDE} #When SW_HIDE is used, the mining processes aren't properly killed
+		}
+		$lpStartupInfo.dwFlags = [STARTF]::STARTF_USESHOWWINDOW
+		
+		$lpProcessInformation = New-Object PROCESS_INFORMATION
+	 
+		[Kernel32]::CreateProcess($lpApplicationName, $lpCommandLine, [ref] $lpProcessAttributes, [ref] $lpThreadAttributes, $bInheritHandles, $dwCreationFlags, $lpEnvironment, $lpCurrentDirectory, [ref] $lpStartupInfo, [ref] $lpProcessInformation)
+ 
+        $Process = Get-Process -Id $lpProcessInformation.dwProcessId #Start-Process @ProcessParam -PassThru
         if ($Process -eq $null) {
             [PSCustomObject]@{ProcessId = $null}
             return        

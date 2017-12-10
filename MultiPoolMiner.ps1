@@ -34,7 +34,10 @@ param(
     [Parameter(Mandatory = $false)]
     [Int]$Delay = 0, #seconds before opening each miner
     [Parameter(Mandatory = $false)]
-    [Switch]$Watchdog = $false
+    [Switch]$Watchdog = $false,
+	[Parameter(Mandatory = $false)]
+	[ValidateSet("normal", "minimized"<#, "hidden"#>)] #Don't offer a hidden option because the miner processes aren't properly killed when they are started in this mode
+    [String]$MinerVisibility = "minimized"
 )
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
@@ -430,7 +433,7 @@ while ($true) {
             if ($_.Process -ne $null) {$_.Active += $_.Process.ExitTime - $_.Process.StartTime}
             if ($_.Wrap) {$_.Process = Start-Process -FilePath (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) -ArgumentList "-executionpolicy bypass -command . '$(Convert-Path ".\Wrapper.ps1")' -ControllerProcessID $PID -Id '$($_.Port)' -FilePath '$($_.Path)' -ArgumentList '$($_.Arguments)' -WorkingDirectory '$(Split-Path $_.Path)'" -PassThru
             }
-            else {$_.Process = Start-SubProcess -FilePath $_.Path -ArgumentList $_.Arguments -WorkingDirectory (Split-Path $_.Path) -Priority ($_.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)}
+            else {$_.Process = Start-SubProcess -FilePath $_.Path -ArgumentList $_.Arguments -WorkingDirectory (Split-Path $_.Path) -Priority ($_.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -MinerVisibility $MinerVisibility}
             if ($_.Process -eq $null) {$_.Status = "Failed"}
             else {$_.Status = "Running"}
 
