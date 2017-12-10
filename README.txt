@@ -13,7 +13,7 @@ LINK: https://github.com/aaronsace/MultiPoolMiner/
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 21/11/2017 - v1.13.11
+README.txt - updated on 7/12/2017 - v1.15.6 - latest version can be found here: https://github.com/aaronsace/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -22,7 +22,8 @@ FEATURE SUMMARY:
 
 - Monitors crypto mining pools and coins in real-time and finds the most profitable for your machine
 - Controls any miner that is available via command line
-- Supports benchmarking and multiple platforms (AMD, NVIDIA and CPU)
+- Supports benchmarking, multiple platforms (AMD, NVIDIA and CPU) and mining on MiningPoolHub, Zpool, Hash Refinery and Nicehash (Ahashpool support is coming soon)
+- Includes Watchdog Timer to detect and handle miner failures
 
 Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH 
 
@@ -32,15 +33,17 @@ Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLaz
 
 IMPORTANT NOTES:
 
+- As of 6/12/2017, Nicehash is closed down until further notice due to a hack involving 4800 missing Bitcoins. Please remove the "nicehash" parameter from the -poolname command (your chosen list of pools used) in the start.bat file and also remove the Nicehash-only parameters (algorithms) from the -algorithm command such as sianicehash, decrednicehash, pascal.
+
 - It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
-- If you are using Windows 7, please update PowerShell: https://www.microsoft.com/en-us/download/details.aspx?id=50395
+- If you are using Windows 7, 8, or 8.1 please update PowerShell: https://www.microsoft.com/en-us/download/details.aspx?id=50395
 - CCMiner (NVIDIA cards only) may need 'MSVCR120.dll' if you don't already have it: https://www.microsoft.com/en-gb/download/details.aspx?id=40784
 - CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145
 - You may need 'excavator.exe' if you don't already have it: https://github.com/nicehash/excavator/releases
 - It is highly recommended to set Virtual Memory size in Windows to at least 16 GB in multi-GPU systems: Computer Properties -> Advanced System Settings -> Performance -> Advanced -> Virtual Memory
 - Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/aaronsace/MultiPoolMiner/issues 
 - Logs and Stats are produced in text format; use them when submitting issues.
-- Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional miner files to support mining with more than 6 graphics cards.
+- Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional or amend current miner files to support mining with more than 6 graphics cards.
 
 	
 ====================================================================
@@ -51,13 +54,15 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 -region [Europe/US/Asia]
 	Choose your region or the region closest to you.
 
--poolname [miningpoolhub,miningpoolhubcoins,zpool,nicehash]
+-poolname [miningpoolhub,miningpoolhubcoins,zpool,hashrefinery,nicehash]
 	The following pools are currently supported: 
-	## MiningPoolHub https://miningpoolhub.com/
-	        The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. 
-	## Zpool http://www.zpool.ca/ 
-	## Nicehash https://www.nicehash.com/
-	The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example. A registered account is required when mining on MiningPoolHub.
+	## MiningPoolHub https://miningpoolhub.com/ 
+	        The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
+	## Zpool http://www.zpool.ca/ (Bitcoin address must be provided using the -address command, see below)
+	## Hash Refinery http://pool.hashrefinery.com (Bitcoin address must be provided using the -address command, see below)
+	## Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -address command, see below)
+	
+	IMPORTANT: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.
 
 -username 
 	Your username you use to login to MiningPoolHub.
@@ -66,7 +71,7 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	To identify your mining rig.
 
 -wallet
-	Your Bitcoin payout address. Required when mining on Zpool and Nicehash.
+	Your Bitcoin payout address. Required when mining on Zpool, Hash Refinery and Nicehash.
 	
 -SSL
 	Secure connection option.
@@ -83,15 +88,18 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	siaclaymore - enable mining Sia as a secondary coin with Claymore Dual ethash miner on MiningPoolHub
 	Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). WARNING! If you add all algorithms listed above, you may find your earnings spread across 3 different pools regardless what pool(s) you specified with the -poolname command.
 	
--currency [BTC,USD,EUR,ETH ...]
+-currency [BTC,USD,EUR,GBP,ETH ...]
 	Choose the default currency or currencies your profit stats will be shown in.
 
 -interval
 	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
 
 -donate
-	Donation of mining time in minutes per day to aaronsace. Default is 10. The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
+	Donation of mining time in minutes per day to aaronsace. Default is 24. The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
 
+-watchdog
+        Include this command to enable the watchdog feature which detects and handles miner and other related failures.
+	
 	
 ====================================================================
 	
@@ -149,4 +157,14 @@ Q12. Why does MultiPoolMiner open multiple miners of the same type?
 A12. Not all miners support multiple GPUs and this is a workaround to resolve this issue. MultiPoolMiner will try to open upto 6 instances of some of the miners to support systems with upto 6 GPUs or to overcome other problems found while testing. Doing so makes no difference in performance and donation amount to the miner sw developer (if applicable) will be the same percentage as if it was a single instance run for multiple GPUs ie. if one instance is run for five cards or five instances, one for each of the the five cards, that is still the same 1% donation NOT 5x1%.
 
 Q13. MultiPoolMiner does not close miners properly (2 or more instances of the same miner accumulate over time)
-A13. This is due to miner failure most likely caused by too much OVERCLOCKING. When miner fails it tries to recover which usually means restarting itself in the same window. This causes issues with the API connection to the miner and MultiPoolMiner thinks miner quit and launches another instance as a result. Due to default API port still being used by the first launched but failed miner, MPM can launch many instances of the same miner over time. This behaviour will be improved upon in the future but can only be completely solved by the user by lowering overclock to keep miners and the system stable.   
+A13. This is due to miner failure most likely caused by too much OVERCLOCKING. When miner fails it tries to recover which usually means restarting itself in the same window. This causes issues with the API connection to the miner and MultiPoolMiner thinks miner quit and launches another instance as a result. Due to default API port still being used by the first launched but failed miner, MPM can launch many instances of the same miner over time. This behaviour will be improved upon in the future but can only be completely solved by the user by lowering overclock to keep miners and the system stable.  
+
+Q14. Is it possible to change the payout currency from BTC to something else when mining on yiimp-based pools such as Zpool, Hash Refinery, etc?
+A14. Yes, advanced users can edit the currency settings in each pool file by amending the password field (c=BTC), however, this is not recommended as your payout will become uncertain as all other payout currencies are internally exchanged therefore you may end up losing your earnings due to pool never having enough coins to pay you!
+
+Q15. How do I customise miners to better work with my cards?
+A15. Some cards may require special parameters to be used in order to make them (more) stable, such as setting intensity for specific miners/algos/GPUs. This can be done by heading to the /Miners folder and editing the relevant miner files. For example, for CcminerTpruvot.ps1 you can replace
+"x17" = "" # X17
+with:
+"x17" = " -i 20" # X17 (mind the spaces! " -i 20")
+to add intensity setting for that specific algorithm while used in conjuction with tpruvot's ccminer fork. This will result this specific miner on that specific algorithm will use the intensity setting of 20 which may help if you are experiencing driver crashes when using certain cards. Please search relevant forums for correct and recommended settings before changing anything!
