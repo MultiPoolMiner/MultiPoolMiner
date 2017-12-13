@@ -12,6 +12,7 @@ $Commands = [PSCustomObject]@{
     "equihash" = @() #Equihash
     #"lbry" = @() #Lbry
     #"lyra2rev2" = @() #Lyra2RE2
+    #"neoscrypt" = @() #NeoScrypt
     "pascal" = @() #Pascal
     "sia" = @() #Sia
 }

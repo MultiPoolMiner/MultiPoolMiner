@@ -35,6 +35,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Selec
         "x11" {$Divisor *= 1000}
         "quark" {$Divisor *= 1000}
         "qubit" {$Divisor *= 1000}
+        "scrypt" {$Divisor *= 1000}
     }
 
     if ((Get-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit" -Value ([Double]$Zpool_Request.$_.estimate_last24h / $Divisor) -Duration $StatSpan -ChangeDetection $true}
