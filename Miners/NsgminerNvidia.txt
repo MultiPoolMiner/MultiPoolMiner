@@ -2,11 +2,11 @@
     {
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\Nsgminer\\nsgminer.exe",
-        "Arguments":  "--api-port 24028 --api-listen --neoscrypt -o stratum+tcp://$($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -u $($Pools.NeoScrypt.User) -p $($Pools.NeoScrypt.Pass) --gpu-threads 1 --worksize 64 --intensity 11 --thread-concurrency 64 --gpu-platform $([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'NVIDIA Corporation'))",
+        "Arguments":  "--api-port 24028 --api-listen --neoscrypt -o stratum+tcp://$($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -u $($Pools.NeoScrypt.User) -p $($Pools.NeoScrypt.Pass) --gpu-threads 1 --worksize 64 --intensity 15 --gpu-platform $([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'NVIDIA Corporation'))",
         "HashRates":  {"NeoScrypt":  "$($Stats.NsgminerNvidia_NeoScrypt_HashRate.Week)"},
         "API":  "Xgminer",
         "Port":  "24028",
         "Wrap":  false,
-        "URI":  "https://github.com/ghostlander/nsgminer/releases/download/nsgminer-v0.9.2/nsgminer-win64-0.9.2.zip"
+        "URI":  "https://github.com/ghostlander/nsgminer/releases/download/nsgminer-v0.9.3/nsgminer-win64-0.9.3.zip"
     }
 ]

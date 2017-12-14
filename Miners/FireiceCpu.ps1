@@ -1,12 +1,10 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\CryptoNight-FireIce\xmr-stak.exe"
-$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/v2.0.0/xmr-stak-win64.zip"
+$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/v2.1.0/xmr-stak-win64.zip"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 3334
-
-New-Item -Path "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" -Force | New-ItemProperty -Name ([System.IO.Path]::GetFullPath($Path)) -Value "RunAsInvoker" -Force | Out-Null #temp fix
 
 ([PSCustomObject]@{
         pool_list       = @([PSCustomObject]@{
@@ -42,7 +40,7 @@ New-Item -Path "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlag
 [PSCustomObject]@{
     Type      = "CPU"
     Path      = $Path
-    Arguments = "-c $($Pools.CryptoNight.Name)_CryptoNight_$($Pools.CryptoNight.User)_Cpu.txt --noAMD --noNVIDIA"
+    Arguments = "-c $($Pools.CryptoNight.Name)_CryptoNight_$($Pools.CryptoNight.User)_Cpu.txt --noUAC --noAMD --noNVIDIA"
     HashRates = [PSCustomObject]@{CryptoNight = $Stats."$($Name)_CryptoNight_HashRate".Week}
     API       = "XMRig"
     Port      = $Port
