@@ -1,0 +1,17 @@
+{
+  "Live": 0.0,
+  "Minute": 0.0,
+  "Minute_Fluctuation": 0.0,
+  "Minute_5": 0.0,
+  "Minute_5_Fluctuation": 0.0,
+  "Minute_10": 0.0,
+  "Minute_10_Fluctuation": 0.0,
+  "Hour": 0.0,
+  "Hour_Fluctuation": 0.0,
+  "Day": 0.0,
+  "Day_Fluctuation": 0.0,
+  "Week": 0.0,
+  "Week_Fluctuation": 0.0,
+  "Duration": "00:10:07.9856267",
+  "Updated": "2017-12-14T23:21:13.5029129Z"
+}
