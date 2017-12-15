@@ -1,6 +1,6 @@
 ﻿using module ..\Include.psm1
 
-$Threads = 3
+$Threads = 1
 
 $Path = ".\Bin\Excavator\excavator.exe"
 $Uri = "https://github.com/nicehash/excavator/releases/"
