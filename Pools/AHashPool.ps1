@@ -9,6 +9,7 @@ try {
 }
 catch {
     Write-Warning "Pool API ($Name) has failed. "
+    return
 }
 
 if (($AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {

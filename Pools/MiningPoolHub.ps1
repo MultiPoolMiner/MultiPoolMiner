@@ -9,6 +9,7 @@ try {
 }
 catch {
     Write-Warning "Pool API ($Name) has failed. "
+    return
 }
 
 if (($MiningPoolHub_Request.return | Measure-Object).Count -le 1) {

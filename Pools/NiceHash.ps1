@@ -9,6 +9,7 @@ try {
 }
 catch {
     Write-Warning "Pool API ($Name) has failed. "
+    return
 }
 
 if (($NiceHash_Request.result.simplemultialgo | Measure-Object).Count -le 1) {
