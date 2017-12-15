@@ -108,9 +108,9 @@ while ($true) {
 
     #Activate or deactivate donation
     if ($Timer.AddDays(-1).AddMinutes($Donate) -ge $LastDonated) {
-        $Wallet = $WalletDonate
-        $UserName = $UserNameDonate
-        $WorkerName = $WorkerNameDonate
+        if ($Wallet) {$Wallet = $WalletDonate}
+        if ($UserName) {$UserName = $UserNameDonate}
+        if ($WorkerName) {$WorkerName = $WorkerNameDonate}
     }
     if ($Timer.AddDays(-1) -ge $LastDonated) {
         $Wallet = $WalletBackup
