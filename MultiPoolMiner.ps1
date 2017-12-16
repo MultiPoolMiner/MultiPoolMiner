@@ -240,8 +240,8 @@ while ($true) {
         $Miner | Add-Member Device ($Miner_Devices | Sort-Object) -Force
         $Miner | Add-Member Device_Auto (($Miner_Devices -eq $null) | Sort-Object) -Force
 
-        $Miner.Path = [System.IO.Path]::GetFullPath($Miner.Path)
-        if ($Miner.PrerequisitePath) {$Miner.PrerequisitePath = [System.IO.Path]::GetFullPath($Miner.PrerequisitePath)}
+        $Miner.Path = (Resolve-Path $Miner.Path).Path
+        if ($Miner.PrerequisitePath) {$Miner.PrerequisitePath = (Resolve-Path $Miner.PrerequisitePath).Path}
 
         if (-not $Miner.API) {$Miner | Add-Member API "Miner" -Force}
     }
