@@ -29,8 +29,6 @@
     "neoscrypt":  "NeoScrypt",
     "nist5":  "Nist5",
     "pascal":  "Pascal",
-    "polytimos":  "Polytimos",
-    "poly":  "Polytimos",
     "quark":  "Quark",
     "quarkcoin":  "Quark",
     "qubit":  "Qubit",
