@@ -190,6 +190,7 @@ Watchdog timers reset after three times the number of seconds it takes to get to
 ###### Q18. How to change fault tolerance limit to a higher percentage?
 ###### A18. Fault tolerance limit was implemented to detect unwanted negative or positive spikes in your hashrate caused by faulty miners or GPUs and prevent these statistics to be recorded to keep your benchmark data correct in these unfortunate events. You should not feel the need to change this but first try to resolve the issues with your miners and/or devices. That said, if you are absolutely certain you want to change this, you can do so by amending the following line in Include.ps1:
     [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9)
+
 ###### TO:
     0.3
 
