@@ -99,6 +99,12 @@ Donation of mining time in minutes per day to aaronsace. Default is 24. The down
 
 **-watchdog**
 Include this command to enable the watchdog feature which detects and handles miner and other related failures.
+It works on a unified interval that is defaulted to 60 seconds. Watchdog timers expire if three of those intervals pass without being kicked. There are three stages as to what action is taken when watchdog timers expire and is determined by the number of related expired timers.
+- Stage 1: when 1 timer expires relating to one miner/algorithm combination, the one miner/algorithm combination is kicked
+- Stage 2: when 2 timers expire relating to one miner file, the one miner file is kicked
+- Stage 3: when 3 timers expire relating to one pool, the pool is kicked
+Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
+	
 
 	
 ====================================================================
