@@ -8,7 +8,7 @@ set region=europe
 set currency=btc,usd,eur
 set type=amd,nvidia,cpu
 set poolname=miningpoolhub,miningpoolhubcoins,zpool,nicehash
-set algorithm=equihash,skunk,decred,sia,lbry,pascal,ethash,siaclaymore,keccak,lyra2re2,hsr,phi,jha,timetravel,tribus,x11evo,polytimos,x17,c11,skein,sib,nist5,myr-gr,blakecoin,blake2s,veltor,cryptonight,groestl,lyra2z,neoscrypt,yescrypt,xevan,vanilla,keccakc,jha,blakevanilla,blakevanilla
+set algorithm=equihash,skunk,decred,sia,lbry,pascal,ethash,siaclaymore,keccak,lyra2re2,hsr,phi,jha,timetravel,tribus,x11evo,polytimos,x17,c11,skein,sib,nist5,myr-gr,blakecoin,blake2s,veltor,cryptonight,groestl,lyra2z,neoscrypt,yescrypt,xevan,vanilla,keccakc,jha,blakevanilla,blakevanilla,ethash2gb,hmq1725
 set donate=24
 
 setx GPU_FORCE_64BIT_PTR 1
