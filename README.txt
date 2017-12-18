@@ -13,7 +13,7 @@ LINK: https://github.com/aaronsace/MultiPoolMiner/
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 18/12/2017 - v1.17.0 - latest version can be found here: https://github.com/aaronsace/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 18/12/2017 - v1.18.0 - latest version can be found here: https://github.com/aaronsace/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -181,3 +181,9 @@ A16. Microsoft .NET Framework 4.5.1 or later is required for MultiPoolMiner to f
 Q17. Is there an option to split earnings? I want to mine 80% of the time to wallet A and 20% of the time to wallet B.
 A17. This feature is not implemented, however, there are external services you can use to achieve the same such as https://coinsplit.io/
 
+Q18. How to change fault tolerance limit to a higher percentage?
+A18. Fault tolerance limit was implemented to detect unwanted negative or positive spikes in your hashrate caused by faulty miners or GPUs and prevent these statistics to be recorded to keep your benchmark data correct in these unfortunate events. You should not feel the need to change this but first try to resolve the issues with your miners and/or devices. That said, if you are absolutely certain you want to change this, you can do so by amending the following line in Include.ps1:
+    [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9)
+    TO:
+    0.3
+This will change the fault tolerance limit to 30%.
