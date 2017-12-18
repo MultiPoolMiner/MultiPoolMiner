@@ -4,7 +4,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 18/12/2017 - v1.15.8 - latest version can be found here: https://github.com/aaronsace/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 18/12/2017 - v1.16.1 - latest version can be found here: https://github.com/aaronsace/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -178,3 +178,9 @@ Watchdog timers reset after three times the number of seconds it takes to get to
     "x17" = " -i 20" # X17 
 
 ###### to add intensity setting for that specific algorithm while used in conjuction with tpruvot's ccminer fork. This will result this specific miner on that specific algorithm will use the intensity setting of 20 which may help if you are experiencing driver crashes when using certain cards. Please search relevant forums for correct and recommended settings before changing anything!
+
+###### Q16. I am getting: 
+    ErrorCode error = method(handle, name, <IntPtr>Marshal.SizeOf<T>(),h.AddrOfPinnedObject(), out size);
+    
+###### A16. Microsoft .NET Framework 4.5.1 or later is required for MultiPoolMiner to function properly. [Web Installer](https://www.microsoft.com/en-us/download/details.aspx?id=40773)
+
