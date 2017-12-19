@@ -239,10 +239,10 @@
 
         internal static T GetInfo<T>(GetInfoDelegate method, IntPtr handle, uint name) where T: struct
         {
-            IntPtr size;
             object result = default(T);
             var h = GCHandle.Alloc(result, GCHandleType.Pinned);
             try {
+            	IntPtr size;
                 ErrorCode error = method(handle, name, (IntPtr)Marshal.SizeOf<T>(), h.AddrOfPinnedObject(), out size);
                 if (error != ErrorCode.Success) {
                     throw new OpenClException(error);
