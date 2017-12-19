@@ -1,4 +1,4 @@
-cd %~dp0
+cd /d %~dp0
 
 setx GPU_FORCE_64BIT_PTR 1
 setx GPU_MAX_HEAP_SIZE 100
