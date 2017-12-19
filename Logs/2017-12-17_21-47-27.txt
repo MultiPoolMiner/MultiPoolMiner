@@ -1,0 +1,297 @@
+**********************
+PowerShell transcript start
+Start time: 20171217214727
+Username: living-room-pc\i3luefire
+RunAs User: living-room-pc\i3luefire
+Configuration Name: 
+Machine: LIVING-ROOM-PC (Microsoft Windows NT 6.2.9200.0)
+Host Application: C:\Program Files\PowerShell\6.0.0-rc.2\pwsh.dll -noexit -executionpolicy bypass -windowstyle maximized -command & .\multipoolminer.ps1 -wallet 1HwfqeP5SjYasJAZJd5kQrKFrJGJyXvBuj -username i3luefire -workername tv -region us -currency btc,ltc,usd -type amd -poolname miningpoolhub,miningpoolhubcoins -algorithm cryptonight,ethash,ethash2gb,equihash,groestl,lyra2z,neoscrypt,siaclaymore,Lyra2RE2 -donate 12 -watchdog
+Process ID: 11060
+PSVersion: 6.0.0-rc.2
+PSEdition: Core
+GitCommitId: v6.0.0-rc.2
+OS: Microsoft Windows 10.0.16299 
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.10032.0, 6.0.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+Transcript started, output file is .\Logs\2017-12-17_21-47-27.txt
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Bitcore_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Blake2s_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Blakecoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_C11_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Groestl_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_HMQ1725_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Hsr_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Keccak_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Lbry_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Lyra2RE2_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_MyriadGroestl_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_NeoScrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Nist5_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Phi_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Scrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Sib_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Skein_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Skunk_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Timetravel_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Tribus_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_X17_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Xevan_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\AHashPool_Yescrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_Bitcore_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_Lyra2RE2_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_MyriadGroestl_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_NeoScrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_Nist5_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_Phi_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_Quark_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_Qubit_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_Scrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_Skein_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_Skunk_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_Tribus_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_X11_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_X13_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_X17_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_Xevan_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Hashrefinery_Yescrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_Lyra2z_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_CryptoNight_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_Equihash_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_SiaClaymore_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_Yescrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_Ethash_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_Lyra2RE2_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_Skein_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_Qubit_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_NeoScrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_X11_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_MyriadGroestl_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_Groestl_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_Keccak_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHub_Scrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_BitcoinGold_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Zclassic_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Zencash_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Zcash_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Monero_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_MyriadcoinYescrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Globalboosty_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Zcoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Feathercoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Ethereum_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Vertcoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_EthereumClassic_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Monacoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Expanse_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Musicoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_VergeScrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Groestlcoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Litecoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Gamecredits_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_DigibyteSkein_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_DigibyteGroestl_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_DigibyteQubit_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Geocoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_MyriadcoinSkein_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_AuroracoinQubit_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_MyriadcoinGroestl_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Maxcoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Startcoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Dash_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Siacoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Adzcoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_BitcoinCash_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Bitcoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Sexcoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\MiningPoolHubCoins_Electroneum_Profit.txt' because it does not exist."
+PS>TerminatingError(Invoke-RestMethod): "A task was canceled."
+WARNING: Pool API (NiceHash) has failed.
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Bitcore_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Blake2s_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Blakecoin_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_C11_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Decred_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Equihash_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Groestl_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Hsr_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Keccak_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Lbry_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Lyra2RE2_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_MyriadGroestl_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_NeoScrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Nist5_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Phi_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Polytimos_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Quark_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Qubit_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Scrypt_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_SHA256_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Sib_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Skein_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Skunk_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Timetravel_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Tribus_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Veltor_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_X11_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_X11evo_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_X13_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_X14_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_X17_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Xevan_Profit.txt' because it does not exist."
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\Zpool_Yescrypt_Profit.txt' because it does not exist."
+
+
+   Type: AMD
+
+Miner               Algorithm                                       Speed                      BTC/Day         BTC/GH/Day Pool
+-----               ---------                                       -----                      -------         ---------- ----
+ClaymoreAmd         CryptoNight                              Benchmarking                 Benchmarking          157.61476 MiningPoolHubCoins-Monero
+ClaymoreAmd         Equihash                                 Benchmarking                 Benchmarking          454.73547 MiningPoolHubCoins-BitcoinGold
+ClaymoreAmd         Ethash                                   Benchmarking                 Benchmarking            0.00560 MiningPoolHub-Ethereum
+ClaymoreAmd         Ethash2gb                                Benchmarking                 Benchmarking            0.00465 MiningPoolHubCoins-Expanse
+ClaymoreAmd2gbSia20 {Ethash2gb, SiaClaymore} {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00465, 0.00002} {MiningPoolHubCoins-Expanse, MiningPoolHubCoin...
+ClaymoreAmd2gbSia30 {Ethash2gb, SiaClaymore} {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00465, 0.00002} {MiningPoolHubCoins-Expanse, MiningPoolHubCoin...
+ClaymoreAmd2gbSia40 {Ethash2gb, SiaClaymore} {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00465, 0.00002} {MiningPoolHubCoins-Expanse, MiningPoolHubCoin...
+ClaymoreAmdSia20    {Ethash, SiaClaymore}    {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00560, 0.00002} {MiningPoolHub-Ethereum, MiningPoolHubCoins-Si...
+ClaymoreAmdSia30    {Ethash, SiaClaymore}    {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00560, 0.00002} {MiningPoolHub-Ethereum, MiningPoolHubCoins-Si...
+ClaymoreAmdSia40    {Ethash, SiaClaymore}    {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00560, 0.00002} {MiningPoolHub-Ethereum, MiningPoolHubCoins-Si...
+
+
+
+
+   Status: Running
+
+    Speed Active                      Launched Command
+    ----- ------                      -------- -------
+0.00 PH/s 00 Days 00 Hours 00 Minutes Once     Bin\CryptoNight-Claymore\NsGpuCNMiner.exe -r -1 -mport 13333 -xpool
+                                               stratum+tcp://us-east.cryptonight-hub.miningpoolhub.com:20580 -xwal i3luefire.tv -xpsw x
+
+
+PS>TerminatingError(Invoke-RestMethod): "A task was canceled."
+WARNING: Pool API (NiceHash) has failed.
+
+
+   Type: AMD
+
+Miner               Algorithm                                       Speed                      BTC/Day         BTC/GH/Day Pool
+-----               ---------                                       -----                      -------         ---------- ----
+Cast                CryptoNight                              Benchmarking                 Benchmarking          157.61476 MiningPoolHubCoins-Monero
+ClaymoreAmd         CryptoNight                              Benchmarking                 Benchmarking          157.61476 MiningPoolHubCoins-Monero
+ClaymoreAmd         Equihash                                 Benchmarking                 Benchmarking          454.73547 MiningPoolHubCoins-BitcoinGold
+ClaymoreAmd         Ethash                                   Benchmarking                 Benchmarking            0.00560 MiningPoolHub-Ethereum
+ClaymoreAmd         Ethash2gb                                Benchmarking                 Benchmarking            0.00465 MiningPoolHubCoins-Expanse
+ClaymoreAmd2gbSia20 {Ethash2gb, SiaClaymore} {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00465, 0.00002} {MiningPoolHubCoins-Expanse, MiningPoolHubCoin...
+ClaymoreAmd2gbSia30 {Ethash2gb, SiaClaymore} {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00465, 0.00002} {MiningPoolHubCoins-Expanse, MiningPoolHubCoin...
+ClaymoreAmd2gbSia40 {Ethash2gb, SiaClaymore} {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00465, 0.00002} {MiningPoolHubCoins-Expanse, MiningPoolHubCoin...
+ClaymoreAmdSia20    {Ethash, SiaClaymore}    {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00560, 0.00002} {MiningPoolHub-Ethereum, MiningPoolHubCoins-Si...
+ClaymoreAmdSia30    {Ethash, SiaClaymore}    {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00560, 0.00002} {MiningPoolHub-Ethereum, MiningPoolHubCoins-Si...
+ClaymoreAmdSia40    {Ethash, SiaClaymore}    {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00560, 0.00002} {MiningPoolHub-Ethereum, MiningPoolHubCoins-Si...
+
+
+
+
+   Status: Running
+
+    Speed Active                      Launched Command
+    ----- ------                      -------- -------
+0.00 PH/s 00 Days 00 Hours 01 Minutes Once     Bin\CryptoNight-Claymore\NsGpuCNMiner.exe -r -1 -mport 13333 -xpool
+                                               stratum+tcp://us-east.cryptonight-hub.miningpoolhub.com:20580 -xwal i3luefire.tv -xpsw x
+
+
+PS>TerminatingError(Invoke-RestMethod): "A task was canceled."
+WARNING: Pool API (NiceHash) has failed.
+
+
+   Type: {AMD, NVIDIA}
+
+Miner  Algorithm        Speed      BTC/Day BTC/GH/Day Pool
+-----  ---------        -----      ------- ---------- ----
+Eminer Ethash    Benchmarking Benchmarking    0.00560 MiningPoolHub-Ethereum
+Eminer Ethash2gb Benchmarking Benchmarking    0.00465 MiningPoolHubCoins-Expanse
+
+
+   Type: AMD
+
+Miner               Algorithm                                       Speed                      BTC/Day         BTC/GH/Day Pool
+-----               ---------                                       -----                      -------         ---------- ----
+Cast                CryptoNight                              Benchmarking                 Benchmarking          157.61476 MiningPoolHubCoins-Monero
+ClaymoreAmd         CryptoNight                              Benchmarking                 Benchmarking          157.61476 MiningPoolHubCoins-Monero
+ClaymoreAmd         Equihash                                 Benchmarking                 Benchmarking          454.73547 MiningPoolHubCoins-BitcoinGold
+ClaymoreAmd         Ethash                                   Benchmarking                 Benchmarking            0.00560 MiningPoolHub-Ethereum
+ClaymoreAmd         Ethash2gb                                Benchmarking                 Benchmarking            0.00465 MiningPoolHubCoins-Expanse
+ClaymoreAmd2gbSia20 {Ethash2gb, SiaClaymore} {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00465, 0.00002} {MiningPoolHubCoins-Expanse, MiningPoolHubCoin...
+ClaymoreAmd2gbSia30 {Ethash2gb, SiaClaymore} {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00465, 0.00002} {MiningPoolHubCoins-Expanse, MiningPoolHubCoin...
+ClaymoreAmd2gbSia40 {Ethash2gb, SiaClaymore} {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00465, 0.00002} {MiningPoolHubCoins-Expanse, MiningPoolHubCoin...
+ClaymoreAmdSia20    {Ethash, SiaClaymore}    {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00560, 0.00002} {MiningPoolHub-Ethereum, MiningPoolHubCoins-Si...
+ClaymoreAmdSia30    {Ethash, SiaClaymore}    {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00560, 0.00002} {MiningPoolHub-Ethereum, MiningPoolHubCoins-Si...
+ClaymoreAmdSia40    {Ethash, SiaClaymore}    {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00560, 0.00002} {MiningPoolHub-Ethereum, MiningPoolHubCoins-Si...
+
+
+
+
+   Status: Running
+
+    Speed Active                      Launched Command
+    ----- ------                      -------- -------
+0.00 PH/s 00 Days 00 Hours 01 Minutes 2 Times  Bin\CryptoNight-Claymore\NsGpuCNMiner.exe -r -1 -mport 13333 -xpool
+                                               stratum+tcp://us-east.cryptonight-hub.miningpoolhub.com:20580 -xwal i3luefire.tv -xpsw x
+
+
+PS>TerminatingError(Get-Content): "The running command stopped because the preference variable "ErrorActionPreference" or common parameter is set to Stop: Cannot find path 'C:\Users\Casey\Documents\mining\MultiPoolMinerV2.7.1.1\Stats\ClaymoreAmd_CryptoNight_HashRate.txt' because it does not exist."
+PS>TerminatingError(Invoke-RestMethod): "A task was canceled."
+WARNING: Pool API (NiceHash) has failed.
+
+
+   Type: {AMD, NVIDIA}
+
+Miner  Algorithm        Speed      BTC/Day BTC/GH/Day Pool
+-----  ---------        -----      ------- ---------- ----
+Eminer Ethash    Benchmarking Benchmarking    0.00560 MiningPoolHub-Ethereum
+Eminer Ethash2gb Benchmarking Benchmarking    0.00465 MiningPoolHubCoins-Expanse
+
+
+   Type: AMD
+
+Miner               Algorithm                                       Speed                      BTC/Day         BTC/GH/Day Pool
+-----               ---------                                       -----                      -------         ---------- ----
+ClaymoreAmd         CryptoNight                               312.00  H/s                      0.00005          157.61476 MiningPoolHubCoins-Monero
+Cast                CryptoNight                              Benchmarking                 Benchmarking          157.61476 MiningPoolHubCoins-Monero
+ClaymoreAmd         Equihash                                 Benchmarking                 Benchmarking          454.73547 MiningPoolHubCoins-BitcoinGold
+ClaymoreAmd         Ethash                                   Benchmarking                 Benchmarking            0.00560 MiningPoolHub-Ethereum
+ClaymoreAmd         Ethash2gb                                Benchmarking                 Benchmarking            0.00465 MiningPoolHubCoins-Expanse
+ClaymoreAmd2gbSia20 {Ethash2gb, SiaClaymore} {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00465, 0.00002} {MiningPoolHubCoins-Expanse, MiningPoolHubCoin...
+ClaymoreAmd2gbSia30 {Ethash2gb, SiaClaymore} {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00465, 0.00002} {MiningPoolHubCoins-Expanse, MiningPoolHubCoin...
+ClaymoreAmd2gbSia40 {Ethash2gb, SiaClaymore} {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00465, 0.00002} {MiningPoolHubCoins-Expanse, MiningPoolHubCoin...
+ClaymoreAmdSia20    {Ethash, SiaClaymore}    {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00560, 0.00002} {MiningPoolHub-Ethereum, MiningPoolHubCoins-Si...
+ClaymoreAmdSia30    {Ethash, SiaClaymore}    {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00560, 0.00002} {MiningPoolHub-Ethereum, MiningPoolHubCoins-Si...
+ClaymoreAmdSia40    {Ethash, SiaClaymore}    {Benchmarking, Benchmarking} {Benchmarking, Benchmarking} {0.00560, 0.00002} {MiningPoolHub-Ethereum, MiningPoolHubCoins-Si...
+EthminerAmd         Ethash                                   Benchmarking                 Benchmarking            0.00560 MiningPoolHub-Ethereum
+EthminerAmd         Ethash2gb                                Benchmarking                 Benchmarking            0.00465 MiningPoolHubCoins-Expanse
+
+
+
+
+   Status: Running
+
+    Speed Active                      Launched Command
+    ----- ------                      -------- -------
+0.00 PH/s 00 Days 00 Hours 00 Minutes Once     Bin\Equihash-Claymore\ZecMiner64.exe -r -1 -mport 13333 -zpool stratum+tcp://us-east.equihash-hub.miningpoolhub.com:20595
+                                               -zwal i3luefire.tv -zpsw x -allpools 1
+
+
+   Status: Idle
+
+      Speed Active                      Launched Command
+      ----- ------                      -------- -------
+312.00  H/s 00 Days 00 Hours 02 Minutes 2 Times  Bin\CryptoNight-Claymore\NsGpuCNMiner.exe -r -1 -mport 13333 -xpool
+                                                 stratum+tcp://us-east.cryptonight-hub.miningpoolhub.com:20580 -xwal i3luefire.tv -xpsw x
+
+
+PS>TerminatingError(): "The pipeline has been stopped."
+>> TerminatingError(): "The pipeline has been stopped."
+>> TerminatingError(): "The pipeline has been stopped."
+>> TerminatingError(): "The pipeline has been stopped."
