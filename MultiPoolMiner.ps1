@@ -42,6 +42,7 @@ $Rates = [PSCustomObject]@{BTC = [Double]1}
 
 # Make sure necessary directories exist
 if (-not (Test-Path "Cache")) {New-Item "Cache" -ItemType "directory" | Out-Null}
+if (-not (Test-Path "Data")) {New-Item "Data" -ItemType "directory" | Out-Null}
 
 #Start the log
 Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
@@ -539,6 +540,12 @@ while ($true) {
     $Rates.PsObject.Properties.Name | Foreach-Object {
         Write-Host -ForegroundColor Green "Total $_ :" ($Balances | Measure-Object -sum "Total_$_").sum
     }
+
+	# Export data to files - this can be used by an external process to get status information
+	$ActiveMiners | Export-Clixml -Path 'Data\ActiveMiners.xml'
+	$Miners | Export-Clixml -Path 'Data\Miners.xml'
+	$Pools | Export-Clixml -Path 'Data\Pools.xml'
+	$AllPools | Export-Clixml -Path 'Data\AllPools.xml'
 
     #Reduce Memory
     Get-Job -State Completed | Remove-Job
