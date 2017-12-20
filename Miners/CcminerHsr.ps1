@@ -4,7 +4,7 @@ $Path = ".\Bin\NVIDIA-Alexis78hsr\ccminer-alexis.exe"
 $Uri = "https://github.com/nemosminer/ccminer-hcash/releases/download/alexishsr/ccminer-hsr-alexis-x86-cuda8.7z"
 
 $Commands = [PSCustomObject]@{
-    "hsr" = "" #hsr
+    "hsr" = "" #HSR
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
