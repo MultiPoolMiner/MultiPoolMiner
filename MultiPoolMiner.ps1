@@ -402,6 +402,18 @@ while ($true) {
         else {
 			Write-Log "Closing $($Miner.Type) miner $($Miner.Name) because it is no longer the most profitable"
             $Miner.Process.CloseMainWindow() | Out-Null
+            # Wait up to 10 seconds for the miner to close gracefully
+            $closedgracefully = $Miner.Process.WaitForExit(10000)
+            if($closedgracefully) { 
+                Write-Log "$($Miner.Type) miner $($Miner.Name) closed gracefully" 
+            } else {
+                Write-Log -Level Error "$($Miner.Type) miner $($Miner.Name) failed to close within 10 seconds"
+                if(!$Miner.Process.HasExited) {
+                    Write-Log -Level Error "Attempting to kill $($Miner.Type) miner $($Miner.Name) PID $($Miner.Process.Id)"
+                    $Miner.Process.Kill()
+                }
+            }
+
             $Miner.Status = "Idle"
 
             #Remove watchdog timer
