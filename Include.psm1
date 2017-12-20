@@ -5,6 +5,39 @@ Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
 
+Function Write-Log {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
+        [Parameter(Mandatory=$false)][ValidateSet("Error","Warn","Info")][string]$Level = "Info"
+    )
+
+    Begin {
+        $VerbosePreference = 'Continue'
+    }
+    Process {
+        $filename = ".\Logs\MultiPoolMiner-$(Get-Date -Format "yyyy-MM-dd").txt"
+        $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+        switch($Level) {
+            'Error' {
+                $LevelText = 'ERROR:'
+                Write-Host -ForegroundColor Red -Object "$date $LevelText $Message"
+            }
+            'Warn' {
+                $LevelText = 'WARNING:'
+                Write-Host -ForegroundColor Yellow -Object "$date $LevelText $Message"
+            }
+            'Info' {
+                $LevelText = 'INFO:'
+                Write-Host -ForegroundColor DarkCyan -Object "$date $LevelText $Message"
+            }
+        }
+        "$date $LevelText $Message" | Out-File -FilePath $filename -Append
+    }
+    End {}
+}
+
 function Set-Stat {
     [CmdletBinding()]
     param(
@@ -59,7 +92,7 @@ function Set-Stat {
         if ($ChangeDetection -and $Value -eq $Stat.Live) {$Updated -eq $Stat.updated}
 
         if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
-            Write-Warning "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance. "
+            Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance. "
         }
         else {
             $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
@@ -95,7 +128,7 @@ function Set-Stat {
         }
     }
     catch {
-        if (Test-Path $Path) {Write-Warning "Stat file ($Name) is corrupt and will be reset. "}
+        if (Test-Path $Path) {Write-Log -Level Warn "Stat file ($Name) is corrupt and will be reset. "}
 
         $Stat = [PSCustomObject]@{
             Live = $Value
