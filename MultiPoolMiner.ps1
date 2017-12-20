@@ -40,6 +40,9 @@ $ActiveMiners = @()
 
 $Rates = [PSCustomObject]@{BTC = [Double]1}
 
+# Make sure necessary directories exist
+if (-not (Test-Path "Cache")) {New-Item "Cache" -ItemType "directory" | Out-Null}
+
 #Start the log
 Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
 
@@ -505,6 +508,24 @@ while ($true) {
         }
 
         $MinerComparisons | Out-Host
+    }
+	
+    # Display miner current profit
+	Write-Host -ForegroundColor Green "Running Miners: Estimated Profit"
+    $ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Format-Table -Wrap (
+        @{Label = "Name"; Expression = {$_.Name}},
+        @{Label = "Current Speed"; Expression = {$_.Speed_Live | Foreach-Object {"$($_ | ConvertTo-Hash)/s"}}; Align = 'right'},
+        @{Label = "Estimated Speed"; Expression = {$_.Speed | Foreach-Object {"$($_ | ConvertTo-Hash)/s"}}; Align = 'right'},
+        @{Label = "Estimated BTC/day"; Expression = {"{0:N8}" -f $_.Profit}; Align='right'},
+        @{Label = "Estimated CAD/day"; Expression = {"{0:N4}" -f ($_.Profit*$Rates.CAD)}; Align='right'}
+
+    ) | Out-Host
+
+    # Print Balances
+    $Balances = Get-Balances -Wallet $WalletBackup -API_Key $API_Key -Rates $Rates
+    $Balances | ft *
+    $Rates.PsObject.Properties.Name | Foreach-Object {
+        Write-Host -ForegroundColor Green "Total $_ :" ($Balances | Measure-Object -sum "Total_$_").sum
     }
 
     #Reduce Memory
