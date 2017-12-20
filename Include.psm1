@@ -409,19 +409,48 @@ function Start-SubProcess {
 
     $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
 
-    $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory {
-        param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory)
+    $Job = Start-Job -ArgumentList $PID, (Resolve-Path ".\CreateProcess.cs"), $FilePath, $ArgumentList, $WorkingDirectory {
+        param($ControllerProcessID, $CreateProcessPath, $FilePath, $ArgumentList, $WorkingDirectory)
 
         $ControllerProcess = Get-Process -Id $ControllerProcessID
         if ($ControllerProcess -eq $null) {return}
 
-        $ProcessParam = @{}
-        $ProcessParam.Add("FilePath", $FilePath)
-        $ProcessParam.Add("WindowStyle", 'Minimized')
-        if ($ArgumentList -ne "") {$ProcessParam.Add("ArgumentList", $ArgumentList)}
-        if ($WorkingDirectory -ne "") {$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
-        $Process = Start-Process @ProcessParam -PassThru
+        #CreateProcess won't be usable inside this job if Add-Type is run outside the job
+        Add-Type -Path $CreateProcessPath
+		
+        $lpApplicationName = $FilePath;
+		
+        $lpCommandLine = ""
+        #$lpCommandLine = '"' + $FilePath + '"' #Windows paths cannot contain ", so there is no need to escape
+        if ($ArgumentList -ne "") {$lpCommandLine += " " + $ArgumentList}
+		
+        $lpProcessAttributes = New-Object SECURITY_ATTRIBUTES
+        $lpProcessAttributes.Length = [System.Runtime.InteropServices.Marshal]::SizeOf($lpProcessAttributes)
+		
+        $lpThreadAttributes = New-Object SECURITY_ATTRIBUTES
+        $lpThreadAttributes.Length = [System.Runtime.InteropServices.Marshal]::SizeOf($lpThreadAttributes)
+		
+        $bInheritHandles = $false
+		
+        $dwCreationFlags = [CreationFlags]::CREATE_NEW_CONSOLE
+		
+        $lpEnvironment = [IntPtr]::Zero
+		
+        if ($WorkingDirectory -ne "") {$lpCurrentDirectory = $WorkingDirectory} else {$lpCurrentDirectory = [IntPtr]::Zero}
+
+        $lpStartupInfo = New-Object STARTUPINFO
+        $lpStartupInfo.cb = [System.Runtime.InteropServices.Marshal]::SizeOf($lpStartupInfo)
+        $lpStartupInfo.wShowWindow = [ShowWindow]::SW_SHOWMINNOACTIVE
+        $lpStartupInfo.dwFlags = [STARTF]::STARTF_USESHOWWINDOW
+		
+        $lpProcessInformation = New-Object PROCESS_INFORMATION
+
+        [Kernel32]::CreateProcess($lpApplicationName, $lpCommandLine, [ref] $lpProcessAttributes, [ref] $lpThreadAttributes, $bInheritHandles, $dwCreationFlags, $lpEnvironment, $lpCurrentDirectory, [ref] $lpStartupInfo, [ref] $lpProcessInformation)
+ 
+        $Process = Get-Process -Id $lpProcessInformation.dwProcessId
+
         if ($Process -eq $null) {
+			Write-Log -Level Error "Did not get a process handle when starting miner"
             [PSCustomObject]@{ProcessId = $null}
             return        
         }
