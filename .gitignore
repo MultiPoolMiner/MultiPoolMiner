@@ -3,6 +3,8 @@ stats/
 logs/
 wrapper/
 downloads/
+cache/
 *.zip
 *.7z
 *.rar
+Config.ps1
