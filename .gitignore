@@ -4,6 +4,7 @@ logs/
 wrapper/
 downloads/
 cache/
+Data/
 *.zip
 *.7z
 *.rar
