@@ -1,51 +1,13 @@
 ﻿using module .\Include.psm1
 
-param(
-    [Parameter(Mandatory = $false)]
-    [String]$Wallet, 
-    [Parameter(Mandatory = $false)]
-    [String]$UserName, 
-    [Parameter(Mandatory = $false)]
-    [String]$WorkerName = "multipoolminer", 
-    [Parameter(Mandatory = $false)]
-    [Int]$API_ID = 0, 
-    [Parameter(Mandatory = $false)]
-    [String]$API_Key = "", 
-    [Parameter(Mandatory = $false)]
-    [Int]$Interval = 60, #seconds before reading hash rate from miners
-    [Parameter(Mandatory = $false)]
-    [String]$Region = "europe", #europe/us/asia
-    [Parameter(Mandatory = $false)]
-    [Switch]$SSL = $false, 
-    [Parameter(Mandatory = $false)]
-    [Array]$Type = @(), #AMD/NVIDIA/CPU
-    [Parameter(Mandatory = $false)]
-    [Array]$Algorithm = @(), #i.e. Ethash,Equihash,CryptoNight ect.
-    [Parameter(Mandatory = $false)]
-    [Array]$MinerName = @(), 
-    [Parameter(Mandatory = $false)]
-    [Array]$PoolName = @(), 
-    [Parameter(Mandatory = $false)]
-    [Array]$ExcludeAlgorithm = @(), #i.e. Ethash,Equihash,CryptoNight ect.
-    [Parameter(Mandatory = $false)]
-    [Array]$ExcludeMinerName = @(), 
-    [Parameter(Mandatory = $false)]
-    [Array]$ExcludePoolName = @(), 
-    [Parameter(Mandatory = $false)]
-    [Array]$Currency = ("BTC", "USD"), #i.e. GBP,EUR,ZEC,ETH ect.
-    [Parameter(Mandatory = $false)]
-    [Int]$Donate = 24, #Minutes per Day
-    [Parameter(Mandatory = $false)]
-    [String]$Proxy = "", #i.e http://192.0.0.1:8080
-    [Parameter(Mandatory = $false)]
-    [Int]$Delay = 0, #seconds before opening each miner
-    [Parameter(Mandatory = $false)]
-    [Switch]$Watchdog = $false, 
-    [Parameter(Mandatory = $false)]
-    [Int]$SwitchingPrevention = 1 #zero does not prevent miners switching
-)
-
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+
+# Get all configuration from Config.ps1
+If(!(Test-Path -Path '.\Config.ps1')) {
+    Throw "Configuration missing!  You must copy Config.sample.ps1 as Config.ps1 and edit the settings."  
+} else {
+    . .\Config.ps1
+}
 
 if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -Recurse | Unblock-File}
 if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue) -and (Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {
