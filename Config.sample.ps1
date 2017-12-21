@@ -39,6 +39,10 @@ $Interval = 60
 # How often to wait between closing the previous miners and opening new ones.  Increase this delay if you experience crashes or failed miners when they are switching.
 $Delay = 5
 
+########### MONITORING ############
+# Send mining status to a URL for monitoring.  The URL gets requested with ?address=<bitcoin address>&workername=<workername> on every loop
+$MinerStatusURL = $null
+
 ########### DISABLE ALGORITHM/MINER/POOL ############
 $ExcludeAlgorithm = @()
 $ExcludeMinerName = @()

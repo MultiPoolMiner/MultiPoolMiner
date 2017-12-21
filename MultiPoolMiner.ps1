@@ -61,6 +61,7 @@ $UserNameBackup = $UserName
 $WorkerNameBackup = $WorkerName
 
 while ($true) {
+
     Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
 
     $Timer = (Get-Date).ToUniversalTime()
@@ -86,6 +87,11 @@ while ($true) {
         $WorkerName = $WorkerNameBackup
         $LastDonated = $Timer
     }
+
+	if($MinerStatusURL) {
+		Write-Log "Pinging monitoring server..."
+		Invoke-RestMethod -Uri $MinerStatusURL -Body @{address = $Wallet; workername = $WorkerName} | Out-Null
+	}	
 
     #Update the exchange rates
 	Write-Log "Updating exchange rates from Coinbase..."
