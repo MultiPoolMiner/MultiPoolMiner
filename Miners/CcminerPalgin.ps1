@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-Palgin\ccminer.exe"
-$Uri = "https://github.com/palginpav/ccminer/releases/download/1.1.1/palginmod_1.1_x64.zip"
+$Uri = "https://github.com/palginpav/ccminer/releases/download/2.0-bitcore.v3/ccminer_timetravel_v3.zip"
 
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore
