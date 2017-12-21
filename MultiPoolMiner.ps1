@@ -138,13 +138,16 @@ while ($true) {
         Where-Object {$Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
         Where-Object {$ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $ExcludeAlgorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
 
-    #Apply watchdog to pools, remove non-present pools
-    $AllPools = $AllPools | Where-Object {Test-Path "Pools\$($_.Name).ps1"} | Where-Object {
+    #Remove non-present pools
+    $AllPools = $AllPools | Where-Object {Test-Path "Pools\$($_.Name).ps1"}
+
+    #Apply watchdog to pools
+    $AllPools = $AllPools | Where-Object {
         $Pool = $_
         $Pool_WatchdogTimers = $WatchdogTimers | Where-Object PoolName -EQ $Pool.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset)
         ($Pool_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>3 -and ($Pool_WatchdogTimers | Where-Object {$Pool.Algorithm -contains $_.Algorithm} | Measure-Object | Select-Object -ExpandProperty Count) -lt <#statge#>2
     }
-
+    
     #Update the active pools
     if ($AllPools.Count -eq 0) {
         Write-Warning "No pools available. "
