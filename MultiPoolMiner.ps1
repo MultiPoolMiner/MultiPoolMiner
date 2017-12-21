@@ -392,13 +392,15 @@ while ($true) {
         $Miner = $_
 
         if ($Miner.Process -eq $null -or $Miner.Process.HasExited) {
-			if($Miner.Process -eq $null) {
-				Write-Log -Level Warn "$($Miner.Type) miner $($Miner.Name) failed - process handle is missing"
-			}
-			if($Miner.Process.HasExited) {
-				Write-Log -Level Warn "$($Miner.Type) miner $($Miner.Name) failed - process exited on it's own"
-			}
-            if ($Miner.Status -eq "Running") {$Miner.Status = "Failed"}
+            if($Miner.Status -eq "Running") {
+                if($Miner.Process -eq $null) {
+				    Write-Log -Level Warn "$($Miner.Type) miner $($Miner.Name) failed - process handle is missing"
+			    }
+			    if($Miner.Process.HasExited) {
+    				Write-Log -Level Warn "$($Miner.Type) miner $($Miner.Name) failed - process exited on it's own"
+			    }
+                $Miner.Status = "Failed"
+            }
         }
         else {
 			Write-Log "Closing $($Miner.Type) miner $($Miner.Name) because it is no longer the most profitable"
