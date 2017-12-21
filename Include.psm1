@@ -451,6 +451,7 @@ function Start-SubProcess {
 
         if ($Process -eq $null) {
 			Write-Log -Level Error "Did not get a process handle when starting miner"
+			Write-Log -Level Error "Trying to find process " $lpProcessInformation.dwProcessId
             [PSCustomObject]@{ProcessId = $null}
             return        
         }
@@ -464,7 +465,7 @@ function Start-SubProcess {
         while ($Process.HasExited -eq $false)
     }
 
-    do {Start-Sleep 1; $JobOutput = Receive-Job $Job}
+    do {Start-Sleep 5; $JobOutput = Receive-Job $Job}
     while ($JobOutput -eq $null)
 
     $Process = Get-Process | Where-Object Id -EQ $JobOutput.ProcessId
