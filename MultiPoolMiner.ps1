@@ -88,11 +88,6 @@ while ($true) {
         $LastDonated = $Timer
     }
 
-	if($MinerStatusURL) {
-		Write-Log "Pinging monitoring server..."
-		Invoke-RestMethod -Uri $MinerStatusURL -Body @{address = $Wallet; workername = $WorkerName} | Out-Null
-	}	
-
     #Update the exchange rates
 	Write-Log "Updating exchange rates from Coinbase..."
     $NewRates = Invoke-RestMethod "https://api.coinbase.com/v2/exchange-rates?currency=BTC" -UseBasicParsing | Select-Object -ExpandProperty data | Select-Object -ExpandProperty rates
@@ -478,6 +473,20 @@ while ($true) {
             }
         }
     }
+	
+	if($MinerStatusURL) {
+		Write-Log "Pinging monitoring server..."
+		# Format the miner values for reporting.  Set relative path so the server doesn't store anything personal (like your system username, if running from somewhere in your profile)
+		$minerreport = $ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Select-Object Name, @{L='Path';E={Resolve-Path -Relative $_.Path}}, Arguments, Type, 
+			@{L='Active';E={"{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f ((Get-Date) - $_.Process.StartTime)}},
+			@{L='CurrentSpeed';E={$_.Speed_Live | Foreach-Object {"$($_ | ConvertTo-Hash)/s"}}},
+			@{L='EstimatedSpeed';E={$_.Speed | Foreach-Object {"$($_ | ConvertTo-Hash)/s"}}},
+			@{L='PID';E={$_.Process.Id}},
+			@{L='Pool';E={[regex]::Match($_.Arguments, '://(.*):').Groups[1].value}},
+			@{L="BTC/day"; E={"{0:N8}" -f $_.Profit}} | ConvertTo-Json
+		$profit = "{0:N8}" -f ($ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Measure-Object Profit -Sum).Sum
+		Invoke-RestMethod -Uri $MinerStatusURL -Body @{address = $Wallet; workername = $WorkerName; miners = $minerreport; profit = $profit} | Out-Null
+	}
 
     #Display mining information
     #Clear-Host
