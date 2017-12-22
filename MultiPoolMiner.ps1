@@ -477,13 +477,13 @@ while ($true) {
 	if($MinerStatusURL) {
 		Write-Log "Pinging monitoring server..."
 		# Format the miner values for reporting.  Set relative path so the server doesn't store anything personal (like your system username, if running from somewhere in your profile)
-		$minerreport = $ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Select-Object Name, @{L='Path';E={Resolve-Path -Relative $_.Path}}, Arguments, Type, 
+		$minerreport = ConvertTo-Json @($ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Select-Object Name, @{L='Path';E={Resolve-Path -Relative $_.Path}}, Arguments, Type, 
 			@{L='Active';E={"{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f ((Get-Date) - $_.Process.StartTime)}},
 			@{L='CurrentSpeed';E={$_.Speed_Live | Foreach-Object {"$($_ | ConvertTo-Hash)/s"}}},
 			@{L='EstimatedSpeed';E={$_.Speed | Foreach-Object {"$($_ | ConvertTo-Hash)/s"}}},
 			@{L='PID';E={$_.Process.Id}},
 			@{L='Pool';E={[regex]::Match($_.Arguments, '://(.*):').Groups[1].value}},
-			@{L="BTC/day"; E={"{0:N8}" -f $_.Profit}} | ConvertTo-Json
+			@{L="BTC/day"; E={"{0:N8}" -f $_.Profit}})
 		$profit = "{0:N8}" -f ($ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Measure-Object Profit -Sum).Sum
 		Invoke-RestMethod -Uri $MinerStatusURL -Body @{address = $WalletBackup; workername = $WorkerNameBackup; miners = $minerreport; profit = $profit} | Out-Null
 	}
