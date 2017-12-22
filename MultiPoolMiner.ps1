@@ -485,7 +485,7 @@ while ($true) {
 			@{L='Pool';E={[regex]::Match($_.Arguments, '://(.*):').Groups[1].value}},
 			@{L="BTC/day"; E={"{0:N8}" -f $_.Profit}} | ConvertTo-Json
 		$profit = "{0:N8}" -f ($ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Measure-Object Profit -Sum).Sum
-		Invoke-RestMethod -Uri $MinerStatusURL -Body @{address = $Wallet; workername = $WorkerName; miners = $minerreport; profit = $profit} | Out-Null
+		Invoke-RestMethod -Uri $MinerStatusURL -Body @{address = $WalletBackup; workername = $WorkerNameBackup; miners = $minerreport; profit = $profit} | Out-Null
 	}
 
     #Display mining information
