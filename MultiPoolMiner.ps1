@@ -89,9 +89,14 @@ while ($true) {
     }
 
     #Update the exchange rates
-	Write-Log "Updating exchange rates from Coinbase..."
-    $NewRates = Invoke-RestMethod "https://api.coinbase.com/v2/exchange-rates?currency=BTC" -UseBasicParsing | Select-Object -ExpandProperty data | Select-Object -ExpandProperty rates
-    $Currency | Where-Object {$NewRates.$_} | ForEach-Object {$Rates | Add-Member $_ ([Double]$NewRates.$_) -Force}
+    try {
+        Write-Log "Updating exchange rates from Coinbase..."
+        $NewRates = Invoke-RestMethod "https://api.coinbase.com/v2/exchange-rates?currency=BTC" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop | Select-Object -ExpandProperty data | Select-Object -ExpandProperty rates
+        $Currency | Where-Object {$NewRates.$_} | ForEach-Object {$Rates | Add-Member $_ ([Double]$NewRates.$_) -Force}
+    }
+    catch {
+        Write-Log -Level Warn "Coinbase is down. "
+    }
 
     #Load the stats
 	Write-Log "Loading saved statistics..."
