@@ -8,12 +8,12 @@ try {
     $MiningPoolHub_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
-    Write-Warning "Pool API ($Name) has failed. "
+    Write-Log -Level Warn "Pool API ($Name) has failed. "
     return
 }
 
 if (($MiningPoolHub_Request.return | Measure-Object).Count -le 1) {
-    Write-Warning "Pool API ($Name) returned nothing. "
+    Write-Log -Level Warn "Pool API ($Name) returned nothing. "
     return
 }
 
