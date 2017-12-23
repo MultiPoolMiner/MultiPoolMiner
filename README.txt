@@ -13,7 +13,7 @@ LINK: https://github.com/aaronsace/MultiPoolMiner/
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/aaronsace/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 18/12/2017 - v1.21.0 - latest version can be found here: https://github.com/aaronsace/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 18/12/2017 - v1.21.1 - latest version can be found here: https://github.com/aaronsace/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -96,7 +96,7 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
 
 -donate
-	Donation of mining time in minutes per day to aaronsace. Default is 24. The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
+	Donation of mining time in minutes per day to aaronsace. Default is 24, minimum is 10 minutes per day (less than 0.7% fee). The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
 
 -watchdog
         Include this command to enable the watchdog feature which detects and handles miner and other related failures.
