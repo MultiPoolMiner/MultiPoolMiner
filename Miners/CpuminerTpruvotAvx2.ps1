@@ -19,7 +19,6 @@ $Commands = [PSCustomObject]@{
     "keccak" = "" #Keccak
     "lbry" = "" #Lbry
     "lyra2v2" = "" #Lyra2RE2
-    "lyra2z" = "" #Lyra2z
     "myr-gr" = "" #MyriadGroestl
     "neoscrypt" = "" #NeoScrypt
     "nist5" = "" #Nist5
