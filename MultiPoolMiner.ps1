@@ -441,6 +441,18 @@ while ($true) {
             }
         }
     }
+
+    # Kill any miners that are running that aren't expected to be running right now. This is the sledgehammer approach to fixing multiple copies of the same miner running for no good reason.
+	# It's not a condition that should happen, but sometimes a PID doesn't get returned properly and a miner is left running without being accounted for.
+	$ExpectedPIDs = ($ActiveMiners | Where-Object {$_.Status -eq "Running"} | Select-Object -ExpandProperty process).id
+    $ActualPIDs = (Get-Process | Where-Object {$_.Path -like "$((Get-Location).Path)*" }).id
+	If($ExpectedPIDs -and $ActualPIDs) {
+		Compare-Object $ExpectedPIDs $ActualPIDs | Where-Object SideIndicator -eq "=>" | Select-Object -ExpandProperty InputObject | Foreach-Object {
+			Write-Log -Level Error "Killing PID $_ - it was not supposed to be running"
+			Stop-Process -Force -Id $_
+		}
+	}
+
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
