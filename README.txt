@@ -13,7 +13,7 @@ LINK: https://multipoolminer.io
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 18/12/2017 - v1.21.2 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 25/12/2017 - v1.21.3 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -36,7 +36,7 @@ IMPORTANT NOTES:
 - As of 6/12/2017, Nicehash is closed down until further notice due to a hack involving 4800 missing Bitcoins. Please remove the "nicehash" parameter from the -poolname command (your chosen list of pools used) in the start.bat file and also remove the Nicehash-only parameters (algorithms) from the -algorithm command such as sianicehash, decrednicehash, pascal.
 
 - It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
-- Having PowerShell 6 installed is now a requirement. Windows 64bit: https://github.com/PowerShell/PowerShell/releases/download/v6.0.0-rc.2/PowerShell-6.0.0-rc.2-win-x64.msi ALL OTHER VERSIONS: https://github.com/PowerShell/PowerShell/releases
+- Having PowerShell 6 installed is now a requirement. Windows 64bit: https://github.com/PowerShell/PowerShell/releases/download/v6.0.0-rc.2/PowerShell-6.0.0-rc.2-win-x64.msi, ALL OTHER VERSIONS: https://github.com/PowerShell/PowerShell/releases
 - Microsoft .NET Framework 4.5.1 or later is required for MultiPoolMiner to function properly. Please update from here: https://www.microsoft.com/en-us/download/details.aspx?id=40773
 - CCMiner (NVIDIA cards only) may need 'MSVCR120.dll' if you don't already have it: https://www.microsoft.com/en-gb/download/details.aspx?id=40784
 - CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145
