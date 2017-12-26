@@ -50,7 +50,7 @@ $ExcludePoolName = @()
 
 
 ######## ADVANCED ######## 
-
+$ReserveThreads = 1 # number of CPU threads to not use for mining, to allow some processing power for everything else to run
 $Watchdog = $True
 $SSL = $False
 $Proxy = ""
