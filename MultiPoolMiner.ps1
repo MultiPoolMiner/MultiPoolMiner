@@ -455,12 +455,19 @@ while ($true) {
 	# It's not a condition that should happen, but sometimes a PID doesn't get returned properly and a miner is left running without being accounted for.
 	$ExpectedPIDs = ($ActiveMiners | Where-Object {$_.Status -eq "Running"} | Select-Object -ExpandProperty process).id
     $ActualPIDs = (Get-Process | Where-Object {$_.Path -like "$((Get-Location).Path)*" }).id
-	If($ExpectedPIDs -and $ActualPIDs) {
-		Compare-Object $ExpectedPIDs $ActualPIDs | Where-Object SideIndicator -eq "=>" | Select-Object -ExpandProperty InputObject | Foreach-Object {
-			Write-Log -Level Error "Killing PID $_ - it was not supposed to be running"
-			Stop-Process -Force -Id $_
-		}
-	}
+    If($ExpectedPIDs -and $ActualPIDs) {
+        Compare-Object $ExpectedPIDs $ActualPIDs | Where-Object SideIndicator -eq "=>" | Select-Object -ExpandProperty InputObject | Foreach-Object {
+            # Check if it's parent is an expected PID - because it was launched by Wrapper.ps1
+			Write-Log -Level Error "Checking on PID $_"
+			Write-Log -Level Error "Allowed PIDS: $ExpectedPIDs"
+            $ParentPID = (gwmi win32_process -filter "processid='$_'").ParentProcessId
+			Write-Log -Level Error "Parent: $ParentPID"
+            if($ExpectedPIDs -notcontains $ParentPID) {
+                Write-Log -Level Error "Killing PID $_ - it was not supposed to be running"
+                Stop-Process -Force -Id $_
+            }
+        }
+    }
 
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Delay #Wait to prevent BSOD
