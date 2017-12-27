@@ -13,7 +13,7 @@ LINK: https://multipoolminer.io
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 25/12/2017 - v1.21.4 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 27/12/2017 - v1.21.5 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -59,9 +59,10 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	The following pools are currently supported: 
 	## MiningPoolHub https://miningpoolhub.com/ 
 	        The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
-	## Zpool http://www.zpool.ca/ (Bitcoin address must be provided using the -address command, see below)
-	## Hash Refinery http://pool.hashrefinery.com (Bitcoin address must be provided using the -address command, see below)
-	## Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -address command, see below)
+	## Zpool http://www.zpool.ca/ (Bitcoin address must be provided using the -wallet command, see below)
+	## Hash Refinery http://pool.hashrefinery.com (Bitcoin address must be provided using the -wallet command, see below)
+	## Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -wallet command, see below)
+	## Ahashpool https://www.ahashpool.com/ (Bitcoin address must be provided using the -wallet command, see below)
 	
 	IMPORTANT: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.
 
@@ -69,7 +70,7 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	Your username you use to login to MiningPoolHub.
 
 -workername
-	To identify your mining rig.
+	To identify your mining rig.	
 
 -wallet
 	Your Bitcoin payout address. Required when mining on Zpool, Hash Refinery and Nicehash.
@@ -81,7 +82,7 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	Choose the relevant GPU(s) and/or CPU mining.
 
 -algorithm
-        Supported algorithms sorted by pool: https://multipoolminer.io/algorithms.php
+        Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms.php
 	The following algorithms are currently supported: 
 	Bitcore, Blakecoin, Blake2s, BlakeVanilla, C11, CryptoNight, Ethash, X11, Decred, Equihash, Groestl, HMQ1725, JHA, Keccak, Lbry, Lyra2RE2, Lyra2z, MyriadGroestl, NeoScrypt, Nist5, Pascal, Polytimos, Quark, Qubit, Scrypt, SHA256, Sia, Sib, Skunk, Skein, Timetravel, Tribus, BlakeVanilla, Veltor, X11, X11evo, X17, Yescrypt
 	Special parameters: 
