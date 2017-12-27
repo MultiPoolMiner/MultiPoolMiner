@@ -4,7 +4,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 27/12/2017 - v1.21.6 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 27/12/2017 - v1.21.7 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -62,6 +62,9 @@ The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to 
 
 ***IMPORTANT**: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
 
+**-ExcludePoolName**
+Same as the *-poolname* command but it is used to exclude unwanted mining pools (please see above).
+
 **-username**
 Your username you use to login to MiningPoolHub.
 
@@ -89,6 +92,9 @@ The following algorithms are currently supported:
 - **siaclaymore** - enable mining Sia as a secondary coin with Claymore Dual ethash miner on MiningPoolHub
 
 *Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). **WARNING!** If you add all algorithms listed above, you may find your earnings spread across 3 different pools regardless what pool(s) you specified with the -poolname command.*
+
+**-ExcludeAlgorithm**
+Same as the *-algorithm* command but it is used to exclude unwanted algorithms (please see above).
 	
 **-currency [BTC,USD,EUR,GBP,ETH ...]**
 Choose the default currency or currencies your profit stats will be shown in.
