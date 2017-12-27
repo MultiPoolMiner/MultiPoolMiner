@@ -33,8 +33,6 @@ Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLaz
 
 IMPORTANT NOTES:
 
-- As of 6/12/2017, Nicehash is closed down until further notice due to a hack involving 4800 missing Bitcoins. Please remove the "nicehash" parameter from the -poolname command (your chosen list of pools used) in the start.bat file and also remove the Nicehash-only parameters (algorithms) from the -algorithm command such as sianicehash, decrednicehash, pascal.
-
 - It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
 - Having PowerShell 6 installed is now a requirement. Windows 64bit: https://github.com/PowerShell/PowerShell/releases/download/v6.0.0-rc.2/PowerShell-6.0.0-rc.2-win-x64.msi, ALL OTHER VERSIONS: https://github.com/PowerShell/PowerShell/releases
 - Microsoft .NET Framework 4.5.1 or later is required for MultiPoolMiner to function properly. Please update from here: https://www.microsoft.com/en-us/download/details.aspx?id=40773
