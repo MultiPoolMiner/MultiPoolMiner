@@ -1,14 +1,14 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.15/ccminer-815-cuda9-x64.zip"
+$Uri = "https://github.com/KlausT/ccminer/releases/download/8.17/ccminer-817-cuda91-x64.zip"
 
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore
     #"blake2s" = "" #Blake2s
-    #"blakecoin" = "" #Blakecoin
+    "blakecoin" = "" #Blakecoin
     #"vanilla" = "" #BlakeVanilla
-    #"c11" = "" #C11
+    "c11" = "" #C11
     #"cryptonight" = "" #CryptoNight
     #"decred" = "" #Decred
     #"equihash" = "" #Equihash
@@ -16,24 +16,27 @@ $Commands = [PSCustomObject]@{
     "groestl" = "" #Groestl
     #"hmq1725" = "" #HMQ1725
     #"jha" = "" #JHA
-    #"keccak" = "" #Keccak
+    "keccak" = "" #Keccak
     #"lbry" = "" #Lbry
     #"lyra2v2" = "" #Lyra2RE2
     #"lyra2z" = "" #Lyra2z
     "myr-gr" = "" #MyriadGroestl
     "neoscrypt" = "" #NeoScrypt
-    #"nist5" = "" #Nist5
+    "nist5" = "" #Nist5
     #"pascal" = "" #Pascal
     #"phi" = "" #PHI
     #"sia" = "" #Sia
     #"sib" = "" #Sib
-    #"skein" = "" #Skein
+    "skein" = "" #Skein
     #"skunk" = "" #Skunk
     #"timetravel" = "" #Timetravel
     #"tribus" = "" #Tribus
     #"veltor" = "" #Veltor
     #"x11evo" = "" #X11evo
-    #"x17" = "" #X17
+    "x13" = "" #X13
+    "x14" = "" #X14
+    "x15" = "" #X15
+    "x17" = "" #X17
     #"yescrypt" = "" #Yescrypt
     #"xevan" = "" #Xevan
 }
