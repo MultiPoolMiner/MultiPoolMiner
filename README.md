@@ -4,7 +4,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 27/12/2017 - v1.21.8 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 27/12/2017 - v1.21.10 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -22,9 +22,14 @@ README.md is based on README.txt - updated on 27/12/2017 - v1.21.8 - latest vers
 ====================================================================
 
 
-## IMPORTANT NOTES
+## INSTALLATION
 
-- **As of 6/12/2017, Nicehash is closed down until further notice due to a hack involving 4800 missing Bitcoins. Please remove the "nicehash" parameter from the *-poolname* command (your chosen list of pools used) in the start.bat file and also remove the Nicehash-only parameters (algorithms) from the *-algorithm* command such as *sianicehash*, *decrednicehash*, *pascal*.**
+
+
+====================================================================
+
+
+## IMPORTANT NOTES
 
 - It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
 - Having PowerShell 6 installed is now a requirement. [Windows 64bit](https://github.com/PowerShell/PowerShell/releases/download/v6.0.0-rc.2/PowerShell-6.0.0-rc.2-win-x64.msi), [ALL OTHER VERSIONS](https://github.com/PowerShell/PowerShell/releases)
