@@ -103,6 +103,9 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 
 -interval
 	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
+	
+-delay
+	Specify the number of seconds required to pass before opening each miner. It is useful if cards are sensitive to switching and need some extra time to recover (eg. clear DAG files from memory)
 
 -donate
 	Donation of mining time in minutes per day to aaronsace. Default is 24, minimum is 10 minutes per day (less than 0.7% fee). The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
