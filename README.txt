@@ -13,7 +13,7 @@ LINK: https://multipoolminer.io
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 27/12/2017 - v1.21.7 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 27/12/2017 - v1.21.8 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -80,7 +80,7 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	Your Bitcoin payout address. Required when mining on Zpool, Hash Refinery and Nicehash.
 	
 -SSL
-	Secure connection option.
+	Specifying the -ssl command (without a boolean value of true or false) will restrict the miner application list to include only the miners that support secure connection.
 
 -type [AMD,NVIDIA,CPU]
 	Choose the relevant GPU(s) and/or CPU mining.
