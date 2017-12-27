@@ -42,7 +42,10 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$Watchdog = $false, 
     [Parameter(Mandatory = $false)]
-    [Int]$SwitchingPrevention = 1 #zero does not prevent miners switching
+    [Int]$SwitchingPrevention = 1, #zero does not prevent miners switching
+    [Parameter(Mandatory = $false)]
+    [Switch]$IgnoreBias = $false # if true MPM will ignore historical price information and always mine highest paying algo
+
 )
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
@@ -238,12 +241,21 @@ while ($true) {
         $Miner | Add-Member Pools $Miner_Pools
         $Miner | Add-Member Profits $Miner_Profits
         $Miner | Add-Member Profits_Comparison $Miner_Profits_Comparison
-        $Miner | Add-Member Profits_Bias $Miner_Profits_Bias
         $Miner | Add-Member Profit $Miner_Profit
         $Miner | Add-Member Profit_Comparison $Miner_Profit_Comparison
-        $Miner | Add-Member Profit_MarginOfError $Miner_Profit_MarginOfError
-        $Miner | Add-Member Profit_Bias $Miner_Profit_Bias
 
+        # If true will always mine best paying
+        if ($IgnoreBias) {
+            $Miner | Add-Member Profits_Bias $Miner_Profits
+            $Miner | Add-Member Profit_MarginOfError 0
+            $Miner | Add-Member Profit_Bias $Miner_Profit
+        }
+        else {
+            $Miner | Add-Member Profits_Bias $Miner_Profits_Bias
+            $Miner | Add-Member Profit_MarginOfError $Miner_Profit_MarginOfError
+            $Miner | Add-Member Profit_Bias $Miner_Profit_Bias
+        }
+ 
         $Miner | Add-Member Type ($Miner_Types | Sort-Object) -Force
         $Miner | Add-Member Index ($Miner_Indexes | Sort-Object) -Force
 
