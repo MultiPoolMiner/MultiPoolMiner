@@ -86,7 +86,9 @@ Specifying the -ssl command (without a boolean value of true or false) will rest
 Choose the relevant GPU(s) and/or CPU mining.
 
 **-algorithm**
+
 Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms.php
+
 The following algorithms are currently supported: 
 
     Bitcore, Blakecoin, Blake2s, BlakeVanilla, C11, CryptoNight, Ethash, X11, Decred, Equihash, Groestl, HMQ1725, JHA, Keccak, Lbry, Lyra2RE2, Lyra2z, MyriadGroestl, NeoScrypt, Nist5, Pascal, Polytimos, Quark, Qubit, Scrypt, SHA256, Sia, Sib, Skunk, Skein, Timetravel, Tribus, BlakeVanilla, Veltor, X11, X11evo, X17, Yescrypt
