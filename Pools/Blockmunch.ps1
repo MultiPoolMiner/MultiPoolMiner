@@ -5,7 +5,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 $Blockmunch_Request = [PSCustomObject]@{}
 
 try {
-    $Blockmunch_Request = Invoke-RestMethod "http://www.Blockmunch.club/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $Blockmunch_Request = Invoke-RestMethod "http://www.blockmunch.club/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
     Write-Warning "Pool API ($Name) has failed. "
@@ -20,7 +20,7 @@ if (($Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Igno
 $Blockmunch_Regions = "us"
 
 $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
-    $Blockmunch_Host = "mine.Blockmunch.club"
+    $Blockmunch_Host = "mine.blockmunch.club"
     $Blockmunch_Port = $Blockmunch_Request.$_.port
     $Blockmunch_Algorithm = $Blockmunch_Request.$_.name
     $Blockmunch_Algorithm_Norm = Get-Algorithm $Blockmunch_Algorithm

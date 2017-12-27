@@ -20,7 +20,7 @@ if (($Unimining_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignor
 $Unimining_Regions = "us"
 
 $Unimining_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
-    $Unimining_Host = "mine.Unimining.net"
+    $Unimining_Host = "mine.unimining.net"
     $Unimining_Port = $Unimining_Request.$_.port
     $Unimining_Algorithm = $Unimining_Request.$_.name
     $Unimining_Algorithm_Norm = Get-Algorithm $Unimining_Algorithm

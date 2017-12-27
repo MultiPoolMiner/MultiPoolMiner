@@ -20,7 +20,7 @@ if (($ItalYiiMP_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignor
 $ItalYiiMP_Regions = "us"
 
 $ItalYiiMP_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
-    $ItalYiiMP_Host = "mine.ItalYiiMP.com"
+    $ItalYiiMP_Host = "mine.italyiimp.com"
     $ItalYiiMP_Port = $ItalYiiMP_Request.$_.port
     $ItalYiiMP_Algorithm = $ItalYiiMP_Request.$_.name
     $ItalYiiMP_Algorithm_Norm = Get-Algorithm $ItalYiiMP_Algorithm
