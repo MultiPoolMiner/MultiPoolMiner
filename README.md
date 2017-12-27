@@ -4,7 +4,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 27/12/2017 - v1.21.16 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 27/12/2017 - v1.21.17 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -72,7 +72,7 @@ The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to 
 - Hash Refinery http://pool.hashrefinery.com (Bitcoin address must be provided using the -wallet command, see below)
 - Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -wallet command, see below)
 - A Hash Pool https://www.ahashpool.com/ (Bitcoin address must be provided using the -wallet command, see below)
-- Upcoming pool support for: [BlockMunch](http://www.blockmunch.club/) | [ItalYiiMP](http://www.italyiimp.com/) | [UniMining](http://www.unimining.net)
+- Upcoming pool support for: [BlockMunch](http://www.blockmunch.club/) | [ItalYiiMP](http://www.italyiimp.com/)
 
 ***IMPORTANT**: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
 
