@@ -66,6 +66,9 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	## Upcoming pool support for: BlockMunch (http://www.blockmunch.club/) | ItalYiiMP (http://www.italyiimp.com/) | UniMining (http://www.unimining.net)
 	
 	IMPORTANT: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.
+	
+-ExcludePoolName
+	Same as the -poolname command but it is used to exclude unwanted mining pools.
 
 -username 
 	Your username you use to login to MiningPoolHub.
@@ -91,6 +94,9 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	sianicehash and decrednicehash - if you want to include non-dual, non-Claymore Sia and Decred mining on Nicehash. NH created their own implementation of Sia and Decred mining protocol.
 	siaclaymore - enable mining Sia as a secondary coin with Claymore Dual ethash miner on MiningPoolHub
 	Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). WARNING! If you add all algorithms listed above, you may find your earnings spread across 3 different pools regardless what pool(s) you specified with the -poolname command.
+	
+-ExcludeAlgorithm
+	Same as the -algorithm command but it is used to exclude unwanted algorithms.
 	
 -currency [BTC,USD,EUR,GBP,ETH ...]
 	Choose the default currency or currencies your profit stats will be shown in.
