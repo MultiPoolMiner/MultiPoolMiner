@@ -4,7 +4,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 28/12/2017 - v1.21.19 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 28/12/2017 - v1.21.20 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -113,10 +113,10 @@ The following algorithms are currently supported:
 Same as the *-algorithm* command but it is used to exclude unwanted algorithms (please see above). Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
 
 **-minername**
-Specify to only include (restrict to) certain miner applications. A full list of available miners can be found here: https://multipoolminer.io/miners
+Specify to only include (restrict to) certain miner applications. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
 
 **-ExcludeMinerName**
-Exclude certain miners you don't want to use. It is useful if a miner is causing issues with your machine. A full list of available miners can be found here: https://multipoolminer.io/miners
+Exclude certain miners you don't want to use. It is useful if a miner is causing issues with your machine. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
 	
 **-currency [BTC,USD,EUR,GBP,ETH ...]**
 Choose the default currency or currencies your profit stats will be shown in.
