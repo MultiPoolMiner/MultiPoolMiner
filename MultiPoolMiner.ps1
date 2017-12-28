@@ -40,7 +40,9 @@ param(
     [Parameter(Mandatory = $false)]
     [Int]$Delay = 0, #seconds before opening each miner
     [Parameter(Mandatory = $false)]
-    [Switch]$Watchdog = $false, 
+    [Switch]$Watchdog = $false,
+    [Parameter(Mandatory = $false)]
+    [String]$MinerStatusURL,
     [Parameter(Mandatory = $false)]
     [Int]$SwitchingPrevention = 1 #zero does not prevent miners switching
 )
@@ -479,6 +481,8 @@ while ($true) {
             }
         }
     }
+
+    if($MinerStatusURL) { .\ReportStatus.ps1 -Address $WalletBackup -WorkerName $WorkerNameBackup -ActiveMiners $ActiveMiners -Miners $Miners -MinerStatusURL $MinerStatusURL }
 
     #Display mining information
     Clear-Host
