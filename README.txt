@@ -240,9 +240,11 @@ A17. This feature is not implemented, however, there are external services you c
 Q18. How to change fault tolerance limit to a higher percentage?
 A18. Fault tolerance limit was implemented to detect unwanted negative or positive spikes in your hashrate caused by faulty miners or GPUs and prevent these statistics to be recorded to keep your benchmark data preserved in these unfortunate events. You should not feel the need to change this but first try to resolve the issues with your miners and/or devices. That said, if you are absolutely certain you want to change this, you can do so by amending the following line in Include.ps1:
     [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9)
-    TO:
+    From:
+    0.1
+    To:
     0.3
-This will change the fault tolerance limit to 30%.
+This will change the fault tolerance limit from +/-10% to +30/-10%.
 
 Q19. MultiPoolMiner is not mining the most profitable algorithm. Why?
 A19. MPM version 2.7 introduced a smarter spike resistance for both of your hashrate and coin difficulty/price ratio. This feature will detect and handle mining accordingly to prevent you losing time and profit. The usual case is, if an algorithm's price fluctuates a lot, then the short time profit might appear to be higher, but by the time you have mined it for a period of time, the coins will be exchanged for a much lower price and your mining will be less profitable. This is due to the PPLNS(+) nature implemented in the pools. To mitigate this effect MPM uses an 24h mean price (if provided by the pool) when determininig the most profitable algo. [#712] [#713] [query re NH to be resolved/omitted]
