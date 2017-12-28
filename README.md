@@ -27,7 +27,7 @@ README.md is based on README.txt - updated on 28/12/2017 - v1.21.20 - latest ver
 1. Download the latest RELEASE (.zip package) from https://github.com/MultiPoolMiner/MultiPoolMiner/releases
 2. Extract it to your Desktop (MultiPoolMiner will NOT work from folders such as "C:\Program Files\")
 3. Make sure you have all pre-requisites installed/updated from the IMPORTANT NOTES section below.
-4. Right-click on the (required) Star.bat file and open it with a Notepad application. Multiple start.bat files are included as examples.
+4. Right-click on the (required) Start.bat file and open it with a Notepad application. Multiple start.bat files are included as examples.
 5. Edit the Start.bat file with your details (such as YOUR username, wallet address, region, worker name, device type). New users should NOT edit anything else. Please see COMMAND LINE OPTIONS below for specification and further details.
 6. Save and close the Start.bat file you just edited.
 7. Launch the Start.bat file you just edited.
