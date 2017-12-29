@@ -392,15 +392,15 @@ function Get-Region {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String]$Location = ""
+        [String]$Region = ""
     )
 
-    $Locations = Get-Content "Regions.txt" | ConvertFrom-Json
+    $Regions = Get-Content "Regions.txt" | ConvertFrom-Json
 
-    $Location = (Get-Culture).TextInfo.ToTitleCase(($Location -replace "-", " " -replace "_", " ")) -replace " "
+    $Region = (Get-Culture).TextInfo.ToTitleCase(($Region -replace "-", " " -replace "_", " ")) -replace " "
 
-    if ($Locations.$Location) {$Locations.$Location}
-    else {$Location}
+    if ($Regions.$Region) {$Regions.$Region}
+    else {$Region}
 }
 
 class Miner {
