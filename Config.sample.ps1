@@ -1,65 +1,65 @@
-﻿# MultiPoolMiner Configuration
+﻿# MultiPoolMiner Configuration File
 #
 # Edit the values below and save file as "Config.ps1"
 #
-# Go to https://multipoolminer.io/docs for detailed information about each setting
 
 ######## USER INFORMATION ########
 
-# Your Bitcoin payout address. Required when mining on Zpool, Hash Refinery and Nicehash.
-$Wallet = "1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb"
+# Bitcoin wallet address used for payout in most pools
+$Wallet = "1BLXARB3GbKyEg8NTY56me5VXFsX2cixFB"
 
-# Your username to use to login to MiningPoolHub.
-$Username = "aaronsace"
-
-# MiningPoolHub API Key from https://miningpoolhub.com/?page=account&action=edit
+# Username on miningpoolhub.com
+$Username = "grantemsley"
+# API Key from https://miningpoolhub.com/?page=account&action=edit
 $API_Key = "YOUR_MININGPOOLHUB_API_KEY"
 
-# Choose the default currency or currencies your profit stats will be shown in.
-$Currency = @("BTC","USD","EUR")
+# Currencies to show profits and balances in.  eg. CAD, USD, ETH
+$Currency = @("BTC", "CAD")
 
-######## COMPUTER CONFIGURATION ######## 
+######## MINING CONFIGURATION ######## 
 
 # Worker name to show on the mining pools.  Defaults to hostname
 $WorkerName = $env:COMPUTERNAME -replace '[^a-zA-Z]', ''
 
-# [Europe/US/Asia] Choose your region or the region closest to you.
-$Region = "Europe"
-# [AMD,NVIDIA,CPU] Choose the relevant GPU(s) and/or CPU mining.
+# Region to mine in - europe, usa or asia
+$Region = "US"
+# Type(s) of mining to do - CPU, AMD, NVIDIA
 $Type = @("AMD","NVIDIA","CPU")
 
 # Pools which you prefer to mine on.  All pools are always used if your preferred ones don't support the most profitable algorithm, or your preferred ones are down.
-# If left empty, all pools will be treated equally, and it will mine to the most profitable pool at the moment.
+# The order specified does not matter.
 # If you really want to completely disable a specific pool, delete it's file from the Pools directory.
-$PoolName = @("miningpoolhub","miningpoolhubcoins","zpool","nicehash")
-# Pools you prefer not to mine on. These will be used only as an absolute last resort if your preferred pools are down.
+$PoolName = @("miningpoolhub","miningpoolhubcoins","zpool","ahashpool","hashrefinery")
+
+# By default 24 minutes per day of mining are directed toward's the authors' addresses.  This tiny donation helps me keep improving the software.
+$Donate = 24
+
+# How often, in seconds, to update profit calculations and switch miners. Setting this lower than 60 could get you blacklisted from some APIs for hitting them too often.
+$Interval = 60
+# How often to wait between closing the previous miners and opening new ones.  Increase this delay if you experience crashes or failed miners when they are switching.
+$Delay = 5
+
+########### MONITORING ############
+# Send mining status to a URL for monitoring.  The URL gets requested with ?address=<bitcoin address>&workername=<workername> on every loop
+$MinerStatusURL = $null
+
+########### DISABLE ALGORITHM/MINER/POOL ############
+$ExcludeAlgorithm = @()
+$ExcludeMinerName = @()
 $ExcludePoolName = @()
 
-# Algorithms to mine on this system.  If left empty, all supported algorithms will be used.
-# Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
-$Algorithm = @('cryptonight','decred','decrednicehash','ethash','ethash2gb','equihash','groestl','lbry','lyra2re2','lyra2z','neoscrypt','pascal','sia','siaclaymore','sianicehash','sib','skunk')
-# If $Algorithm is left empty, it will mine all algorithms EXCEPT the ones listed in $ExcludeAlgorithm
-$ExcludeAlgorithm = @()
-
-# Specify miners to only include (restrict to) certain miner applications. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
-$MinerName = @()
-# Exclude certain miners you don't want to use. It is useful if a miner is causing issues with your machine.
-$ExcludeMinerName = @()
 
 ######## ADVANCED ######## 
-# Donation of mining time in minutes per day to aaronsace. Default is 24, minimum is 10 minutes per day (less than 0.7% fee). The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
-$Donate = 24
-# Enable the watchdog feature which detects and handles miner and other related failures. It works on a unified interval that is defaulted to 60 seconds. Watchdog timers expire if three of those intervals pass without being kicked. There are three stages as to what action is taken when watchdog timers expire and is determined by the number of related expired timers.
+$ReserveThreads = 1 # number of CPU threads to not use for mining, to allow some processing power for everything else to run
 $Watchdog = $True
-# Enabling SSL will restrict the miner application list to include only the miners that support secure connection.
 $SSL = $False
-# Specify your proxy address if applicable, i.e http://192.0.0.1:8080
 $Proxy = ""
-# zero does not prevent miners switching
-$SwitchingPrevention = 2
-# MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc). It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
-$Interval = 60
-# Specify the number of seconds required to pass before opening each miner. It is useful when cards are more sensitive to switching and need some extra time to recover (eg. clear DAG files from memory)
-$Delay = 0
-# Send mining status to a URL for monitoring.  This sends information about the miners running on this worker to a remote monitoring web interface
-$MinerStatusURL = ""
+$Donate = 24
+$SwitchingPrevention = 1 #zero does not prevent miners switching
+
+# If $Algorithm is empty, all available algorithms are used.  Otherwise, only the ones specified will be mined.  Leave it empty to mine the most profitable options.
+$Algorithm = @()
+
+# If $MinerName is empty, all available mining programs are used.  If there are miners listed here, ONLY those ones will be used.
+$MinerName = @()
+
