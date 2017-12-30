@@ -8,7 +8,7 @@ If(Test-Path -Path '.\Config.sample.ps1') {
     . .\Config.Sample.ps1
     $config = Get-Content .\Config.sample.ps1
 } Else {
-    Throw "Config.sample.ps1 is missing.  Your installation is missing files.  Please reinstall."
+    Throw "Config.sample.ps1 is missing. Your installation is missing files. Please reinstall. "
 }
 
 # Now load any existing settings
@@ -24,13 +24,23 @@ $StatSpan = New-TimeSpan $StatStart $StatEnd
 
 # Load pool and miner information
 $Stats = @()
-Write-Host 'Loading available pools...'
-$Pools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; Username = $UserName; WorkerName = $WorkerName; StatSpan = $StatSpan} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
-$PoolList = $Pools | Select-Object -ExpandProperty Name -Unique
-Write-Host 'Loading available algorithms...'
-$AlgorithmList = $Pools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | Foreach-Object {Get-Algorithm $_} | Sort-Object
+Write-Host "Loading available pools... "
+$AllPools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; Username = $UserName; WorkerName = $WorkerName; StatSpan = $StatSpan} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru}
+if ($AllPools.Count -eq 0) {
+    Throw "No pools available. "
+}
+$PoolList = $AllPools | Select-Object -ExpandProperty Name -Unique
+$Pools = [PSCustomObject]@{}
+$AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
+
+Write-Host "Loading available algorithms... "
+$AlgorithmList = $AllPools.Algorithm | Foreach-Object {Get-Algorithm $_} | Select-Object -Unique | Sort-Object
+
 Write-Host 'Loading available miners...'
 $Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
+if ($Miners.Count -eq 0) {
+    Throw "No miners available. "
+}
 $MinerList = $Miners | Select-Object -ExpandProperty Name -Unique | Sort-Object
 
 # Get XAML and create a window
@@ -51,7 +61,6 @@ $i.StreamSource = [IO.MemoryStream][Convert]::FromBase64String("iVBORw0KGgoAAAAN
 $i.EndInit()
 $i.Freeze()
 $Controls.logo.Source = $i
-
 
 # Set control values based on values loaded from Config(.sample).ps1
 
