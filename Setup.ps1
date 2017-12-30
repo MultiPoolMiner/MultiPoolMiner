@@ -1,4 +1,4 @@
-using module .\Include.psm1
+﻿using module .\Include.psm1
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 Write-Host 'Preparing setup...'
@@ -8,7 +8,7 @@ If(Test-Path -Path '.\Config.sample.ps1') {
     . .\Config.Sample.ps1
     $config = Get-Content .\Config.sample.ps1
 } Else {
-    Throw "Config.sample.ps1 is missing. Your installation is missing files. Please reinstall. "
+    Throw "Config.sample.ps1 is missing.  Your installation is missing files.  Please reinstall."
 }
 
 # Now load any existing settings
@@ -21,26 +21,30 @@ $Region = $Region | ForEach-Object {Get-Region $_}
 $StatStart = (Get-Date).ToUniversalTime()
 $StatEnd = $StatStart.AddSeconds($Interval)
 $StatSpan = New-TimeSpan $StatStart $StatEnd
+$GPUs = (Get-GPUdevices $Type $False)
 
 # Load pool and miner information
 $Stats = @()
-Write-Host "Loading available pools... "
-$AllPools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; Username = $UserName; WorkerName = $WorkerName; StatSpan = $StatSpan} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru}
+Write-Host 'Loading available pools...'
+$AllPools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; Username = $UserName; WorkerName = $WorkerName; StatSpan = $StatSpan; Algorithm = $null} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru}
 if ($AllPools.Count -eq 0) {
     Throw "No pools available. "
 }
 $PoolList = $AllPools | Select-Object -ExpandProperty Name -Unique
+
+if ($PoolList.count -ne (Get-ChildItem "Pools" -File | Measure-Object ).Count) {
+    Throw "Could not get information from all configured pools. Cannot continue. "
+}
 $Pools = [PSCustomObject]@{}
 $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
 
-Write-Host "Loading available algorithms... "
+Write-Host 'Loading available algorithms...'
 $AlgorithmList = $AllPools.Algorithm | Foreach-Object {Get-Algorithm $_} | Select-Object -Unique | Sort-Object
 
 Write-Host 'Loading available miners...'
-$Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
-if ($Miners.Count -eq 0) {
-    Throw "No miners available. "
-}
+
+$Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; StatSpan = $StatSpan; GPUs = $GPUs} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru} 
+#$Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
 $MinerList = $Miners | Select-Object -ExpandProperty Name -Unique | Sort-Object
 
 # Get XAML and create a window
@@ -61,6 +65,7 @@ $i.StreamSource = [IO.MemoryStream][Convert]::FromBase64String("iVBORw0KGgoAAAAN
 $i.EndInit()
 $i.Freeze()
 $Controls.logo.Source = $i
+
 
 # Set control values based on values loaded from Config(.sample).ps1
 
