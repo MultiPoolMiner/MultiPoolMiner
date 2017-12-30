@@ -3,6 +3,7 @@ stats/
 logs/
 wrapper/
 downloads/
+miners/_Original
 *.zip
 *.7z
 *.rar

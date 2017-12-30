@@ -1,45 +1,34 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-SP\ccminer.exe"
-$Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z"
+$Path = ".\Bin\NVIDIA-Palgin_1_1-Nist5\ccminer.exe"
+$Uri = "https://github.com/palginpav/ccminer/releases/download/1.1-nist5/palginmod_1.1_nist5_x86.zip"
 
 $Port = 4068
 
 $CommonCommands = ""
 
+# Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    #"bitcore" = "" #Bitcore
-    #"blake2s" = "" #Blake2s
-    #"blakecoin" = "" #Blakecoin
-    #"vanilla" = "" #BlakeVanilla
-    "_c11" = "" #C11, beaten by Ccminer-x11gost
-    #"cryptonight" = "" #CryptoNight
-    #"decred" = "" #Decred
-    #"equihash" = "" #Equihash
-    #"ethash" = "" #Ethash
-    #"groestl" = "" #Groestl
-    #"hmq1725" = "" #HMQ1725
-    #"jha" = "" #JHA
-    #"keccak" = "" #Keccak
-    #"lbry" = "" #Lbry
-    #"lyra2v2" = "" #Lyra2RE2
-    #"lyra2z" = "" #Lyra2z
-    #"myr-gr" = "" #MyriadGroestl
-    #"neoscrypt" = "" #NeoScrypt
-    #"nist5" = "" #Nist5
-    #"pascal" = "" #Pascal
-    #"phi" = "" #PHI
-    #"sia" = "" #Sia
-    #"sib" = "" #Sib
-    "_skein" = "" #Skein, reports incorrect hashrate
-    #"skunk" = "" #Skunk
-    #"timetravel" = "" #Timetravel
-    #"tribus" = "" #Tribus
-    #"veltor" = "" #Veltor
-    #"x11evo" = "" #X11evo
-    "_x17" = "23,22.5,21.1" #X17, Beaten by CcminerAlexis78hsr
-    #"yescrypt" = "" #Yescrypt
-    #"xevan" = "" #Xevan
+	"_blake2s"   = " -i 26" # beaten by Ccminer Nanashi
+	"_blakecoin" = "","" #Blakecoin, has stratum connection timeouts - beaten by CcminerSp-mod
+	"_c11"       = " -i 21"
+	"_decred"    = "","" #boo!
+	"deep"       = "",""
+	"_keccak"    = " -i 31" #Beaten by Ccminer Klaust 8.15 CUDA9
+	"_lbry"      = "","" 
+	"luffa"      = "",""
+	"lyra2"      = "",""
+	"_lyra2v2"    = " -i 24,22,21" #Lyra2RE2 beaten by Ccminer-HSR-Alexis
+	"_myr-gr"    = "","" # beaten by CcminerAlexis78cuda8.0
+	"_neoscrypt" = "","" #NeoScrypt beaten by CcminerKlausT
+	"_nist5"     = " -i 27,26.25,25" # Nist5, generates 3% invalid shares
+	"s3"         = "" 
+	"sia"        = "" 
+	"_sib"       = " -i 21.5,20.5,20.5" # beaten by Ccminer-Hsr
+	"_skein"     = " -i 30,28,28" # Beaten by Ccminer-x11gost
+	"whirlpool"  = ""
+	"wildkeccak" = ""
+	"x11evo"     = " -i 21,18,18"
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -54,7 +43,7 @@ $Devices | ForEach-Object {
 
 		$Algorithm = Get-Algorithm($_)
 		$Command =  $Commands.$_
-		
+
 		if ($Devices.count -gt 1) {
 			$Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($Device.Device_Norm)"
 			$Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) -d $($Device.Devices -join ',')"
@@ -70,11 +59,11 @@ $Devices | ForEach-Object {
 			Path		= $Path
 			Arguments	= "-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) -b $Port$Command$CommonCommands"
 			HashRates	= [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
-			API			= "Wrapper"
+			API			= "Ccminer"
 			Port		= $Port
-			Wrap		= $true
+			Wrap		= $false
 			URI			= $Uri
-			PowerDraw   = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
+			PowerDraw	= $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
 			ComputeUsage= $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
 			Pool		= "$($Pools.$Algorithm.Name)"
 			Index		= $Index
@@ -82,4 +71,3 @@ $Devices | ForEach-Object {
 	}
 	if ($Port) {$Port ++}
 }
-Sleep 0

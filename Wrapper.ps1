@@ -1,4 +1,4 @@
-﻿using module .\Include.psm1
+using module .\Include.psm1
 
 param(
     [Parameter(Mandatory = $true)]
@@ -10,8 +10,17 @@ param(
     [Parameter(Mandatory = $false)]
     [String]$ArgumentList = "", 
     [Parameter(Mandatory = $false)]
-    [String]$WorkingDirectory = ""
+    [String]$WorkingDirectory = "",
+    [Parameter(Mandatory = $false)]
+    [String]$ShowWindow = "SW_SHOWNORMAL",
+    [Parameter(Mandatory = $false)]
+    [String]$CreationFlags = "CREATE_NEW_CONSOLE",
+    [Parameter(Mandatory = $false)]
+    [Int]$ForegroundWindowID
+    
 )
+
+if ($ForegroundWindowID -gt 0) {[Microsoft.VisualBasic.Interaction]::AppActivate($ForegroundWindowID)}
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 
@@ -20,8 +29,8 @@ Remove-Item ".\Wrapper\$Id.txt" -Force -ErrorAction Ignore
 $Job = Start-Job -ArgumentList $FilePath, $ArgumentList, $WorkingDirectory {
     param($FilePath, $ArgumentList, $WorkingDirectory)
     if ($WorkingDirectory) {Set-Location $WorkingDirectory}
-    if ($ArgumentList) {Invoke-Expression "& $FilePath $ArgumentList 2>&1"}
-    else {Invoke-Expression "& $FilePath 2>&1"}
+    if ($ArgumentList) {Invoke-Expression "& '$FilePath' $ArgumentList 2>&1"}
+    else {Invoke-Expression "& '$FilePath' 2>&1"}
 }
 
 Write-Host "MultiPoolMiner Wrapper Started" -BackgroundColor Yellow -ForegroundColor Black

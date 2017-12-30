@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 class Claymore : Miner {
-    [PSCustomObject]GetHashRate ([String[]]$Algorithm, [Bool]$Safe = $false) {
+    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
@@ -11,7 +11,18 @@ class Claymore : Miner {
 
         $Request = @{id = 1; jsonrpc = "2.0"; method = "miner_getstat1"} | ConvertTo-Json -Compress
 
+		$PowerDraws = @()
+        $ComputeUsages = @()
+        
+        $Response = ""
+        
         do {
+            # Read Data from hardware
+            $ComputeData = [PSCustomObject]@{}
+            $ComputeData = (Get-ComputeData -MinerType $this.type -Index $this.index)
+            $PowerDraws += $ComputeData.PowerDraw
+            $ComputeUsages += $ComputeData.ComputeUsage
+
             $HashRates += $HashRate = [PSCustomObject]@{}
 
             try {
@@ -47,7 +58,20 @@ class Claymore : Miner {
         $HashRate = [PSCustomObject]@{}
         $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
         $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
+		
+		$PowerDraws_Info = [PSCustomObject]@{}
+		$PowerDraws_Info = ($PowerDraws | Measure-Object -Maximum -Minimum -Average)
+		$PowerDraw = if ($PowerDraws_Info.Maximum - $PowerDraws_Info.Minimum -le $PowerDraws_Info.Average * $Delta) {$PowerDraws_Info.Maximum} else {$PowerDraws_Info.Average}
 
-        return $HashRate
+		$ComputeUsages_Info = [PSCustomObject]@{}
+		$ComputeUsages_Info = ($ComputeUsages | Measure-Object -Maximum -Minimum -Average)
+		$ComputeUsage = if ($ComputeUsages_Info.Maximum - $ComputeUsages_Info.Minimum -le $ComputeUsages_Info.Average * $Delta) {$ComputeUsages_Info.Maximum} else {$ComputeUsages_Info.Average}
+		
+		return [PSCustomObject]@{
+			HashRate     = $HashRate
+			PowerDraw    = $PowerDraw
+			ComputeUsage = $ComputeUsage
+            Response     = $Response
+        }
     }
 }

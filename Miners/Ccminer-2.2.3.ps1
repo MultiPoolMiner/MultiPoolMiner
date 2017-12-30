@@ -1,36 +1,44 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-xevan\ccminer_x86.exe"
-$Uri = "https://github.com/nemosminer/ccminer-xevan/releases/download/ccminer-xevan/ccminer_x86.7z"
+$Path = ".\Bin\NVIDIA-ccminer-2.2.3\ccminer.exe"
+$Uri = "https://github.com/tpruvot/ccminer/releases/download/2.2.3-tpruvot/ccminer-x64-2.2.3-cuda9.7z"
 
 $Port = 4068
 
-$CommonCommands = ""
+$CommonCommands = " --submit-stale"
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-	"_blake2s"   = "" # Beaten by CcminerNanashi
-	"_blakecoin" = " -i 31" # beaten by CcminerSp-mod
-	"_c11"       = " -i 21" # Stratum problem on mine.zpool.ca
-	"_decred"    = "" #broken, gives invalid share
-	"_keccak"    = " -i 31,28,28 -m 2" # beaten by Ccminer-2.2.3
-	"_lbry"      = "" # Beaten by ExcavatorNvidia5
-	"_lyra2v2"   = " -i 24" # Beaten by Excavator132Nvidia6
-	"_myr-gr"    = " -i 24" # No results on mine.zpool.ca
-	"_neoscrypt" = " -i 22" # slow. beaten by Ccminer Nanashi
-	"_nist5"     = "" # Beaten by CcminerPalgin-Nist5
-	"_quark"     = "" #Quark beaten by CcminerAlexis78cuda8.0
-	"_qubit"     = "" #Qubit beaten by CcminerPalgin-Nist5 
-	"sia"        = ""  
-	"_sib"       = " -i 21" # sib is broken 
-	"_skein"     = " -i 30" # Beaten by CcminerPalgin-Nist5 
-	"_veltor"    = " -i 22" # Broken
-	"_x11"       = " -i 21" 
-	"_x11evo"    = " -i 21" 
-	"_x13"       = "" 
-	"_x14"       = " -i 21" 
-	"_x15"       = " -i 20" 
-	"xevan"      = " -i 21.5,20,18"
+    #"bitcore"      = "" # Do not use, peaks and falls back to low earnings
+    "_blake2s"      = " -i 31" # beaten by Excavator136aNvidia4
+    "_blakecoin"   = " -i 31" 
+    "_c11"         = " -i 21" # Beaten by Ccminer-x11gost
+    "_cryptonight" = " -i 10.25,10.25,10.25 --bfactor=12"
+    "_decred"      = ""
+    "_equihash"    = ""
+    "_groestl"      = " -i 26.5" # beaten by Ccminer-Klaust814_CUDA9
+    "_hmq1725"     = ""
+	"_hsr"           = " -i 21,21,20.25"  #HSR, beaten by CcminerAlexis78hsr
+    "_keccak"      = " -i 31,30,30" #BROKEN!
+	"keccakc"      = "" # Keccak-256 (CreativeCoin)
+    "_lbry"        = ""
+    "_lyra2v2"     = "" # beaten by Ccminer-Palgin-Nist5
+    "_lyra2z"      = " -i 22,21,21" # Lyra2z for ZCash, Beaten by CcminerLyra2Z
+    "_myr-gr"       = " -i 24" # Beaten by CcminerAlexis78cuda8.0
+    "_neoscrypt"   = " -i 26" # beaten by Ccminer-Palgin-Nist5
+    "_nist5"       = " -i 22" # Beaten, beaten by CcminerKlaust817_CUDA91
+	"penta"        = "" # Pentablake hash (5x Blake 512)
+    "phi"          = " -i 25,24,24"
+	"_polytimos"    = " -i 25.5,25.5,25" # polytimos, beaten by CcminerPolytimos
+    "sia"          = " -i 31,31,31" #
+    "_sib"         = " -i 21"
+    "_skein"       = " -i 30,29,28.9" # beaten by others
+    "skunk"       = " -i 25.7,25.2,24.9" # Fastest
+#    "timetravel"   = " -i 24"
+    "_tribus"      = ""
+    "_vanilla"     = ""
+    "_veltor"      = " -i 23" # Fastest
+    "_x11evo"      = " -i 21"
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -44,7 +52,7 @@ $Devices | ForEach-Object {
 
 		$Algorithm = Get-Algorithm($_)
 		$Command =  $Commands.$_
-
+		
 		if ($Devices.count -gt 1) {
 			$Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($Device.Device_Norm)"
 			$Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) -d $($Device.Devices -join ',')"

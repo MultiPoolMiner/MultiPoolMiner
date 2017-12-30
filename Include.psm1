@@ -5,9 +5,298 @@ Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
 
+[void][System.Reflection.Assembly]::LoadWithPartialName("'Microsoft.VisualBasic")
+
+Add-Type -TypeDefinition @"
+  using System;
+  using System.Runtime.InteropServices;
+  public class Tricks {
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetForegroundWindow();
+}
+"@
+
+function Get-ForegroundWindow {
+    Get-Process | Where-Object {$_.MainWindowHandle -eq [tricks]::GetForegroundWindow()}
+}
+
+function Get-GPUdevices {
+
+#returns a data structure containing all found OpenCL devices like
+#
+#Type : AMD
+#Device : {}
+#Type : NVIDIA
+#Device : {@{Type=NVIDIA; Device=GeForce GTX 1080 Ti; Device_Norm=GeforceGTX1080Ti; Vendor=NVIDIA Corporation; Devices=System.Object[]}, @{Type=NVIDIA; Device=GeForce GTX 1060 3GB;
+#Device_Norm=GeforceGTX10603GB; Vendor=NVIDIA Corporation; Devices=System.Object[]}}
+
+[CmdletBinding()]
+	param(
+		[Parameter(Mandatory = $true)]
+		[string[]]$MinerType,
+		[Parameter(Mandatory = $false)]
+		[bool]$DeviceSubTypes = $false
+	)
+
+	$GPUs = @()
+
+	$MinerType | ForEach {
+
+		$Miner_Type = $_
+		$Devices = @()
+		$Device_ID = 0
+		$MinerType_Devices = @()
+		
+        if ($DeviceSubTypes) {
+			[OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
+				$Device = $_.Name
+				$GPU = [PSCustomObject]@{
+					Type = $Miner_Type
+					Device = $Device
+					Device_Norm = (Get-Culture).TextInfo.ToTitleCase(($Device -replace "-", " " -replace "_", " ")) -replace " "
+					Vendor = $_.Vendor
+					Devices = @("$Device_ID")
+				}			
+				if ($MinerType_Devices.Type -contains $Miner_Type -and $MinerType_Devices.Device -contains $Device) {
+					$MinerType_Devices | Where {$_.Type -eq $Miner_Type -and $_.Device -eq $Device} | ForEach {$_.Devices += $Device_ID}
+				}
+				else {
+					$MinerType_Devices += $GPU
+				}
+				$Device_ID++
+			}
+
+#			[OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
+#				$Device = $_.Name
+#				$GPU = [PSCustomObject]@{
+#					Type = $Miner_Type
+#					Device = $Device
+#					Device_Norm = (Get-Culture).TextInfo.ToTitleCase(($Device -replace "-", " " -replace "_", " ")) -replace " "
+#					Vendor = $_.Vendor
+#					Devices = @("$Device_ID")
+#				}			
+#				if ($MinerType_Devices.Type -contains $Miner_Type -and $MinerType_Devices.Device -contains $Device) {
+#					$MinerType_Devices | Where {$_.Type -eq $Miner_Type -and $_.Device -eq $Device} | ForEach {$_.Devices += $Device_ID}
+#				}
+#				else {
+#					$MinerType_Devices += $GPU
+#				}
+#				$Device_ID++
+#			}
+#			[OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
+#				$Device = $_.Name
+#				$GPU = [PSCustomObject]@{
+#					Type = "AMD$Miner_Type"
+#					Device = "AMD$Device"
+#					Device_Norm = (Get-Culture).TextInfo.ToTitleCase(($Device -replace "-", " " -replace "_", " ")) -replace " "
+#					Vendor = "AMD$($_.Vendor)"
+#					Devices = @("$Device_ID")
+#				}			
+#				if ($MinerType_Devices.Type -contains $Miner_Type -and $MinerType_Devices.Device -contains $Device) {
+#					$MinerType_Devices | Where {$_.Type -eq $Miner_Type -and $_.Device -eq $Device} | ForEach {$_.Devices += $Device_ID}
+#				}
+#				else {
+#					$MinerType_Devices += $GPU
+#				}
+#				$Device_ID++
+#			}
+		}
+		else {
+			[OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
+				$Devices += $Device_ID
+				$Device_ID++
+                $Vendor = $_.Vendor
+			}
+			if ($Devices) {
+				$MinerType_Devices += [PSCustomObject]@{
+					Type = $Miner_Type
+					Device = $Miner_Type
+					Device_Norm = $Miner_Type
+					Vendor = $Vendor
+					Devices = $Devices
+				}
+			}
+		}				
+
+		if ($MinerType_Devices) {
+			$GPUs += [PSCustomObject]@{
+				Type = $Miner_Type
+				Device = $MinerType_Devices
+			}
+		}
+	}
+	$GPUs
+}
+
+function Get-CommandPerDevice {
+# Split command into seprate command tokens, note: first letter of command string must be space
+# Supported parameter syntax:
+# -param-name[ value1[,value2[,..]]]
+# -param-name[=value1[,value2[,..]]]
+# --param-name[==value1[,value2[,..]]]
+# --param-name[=value1[,value2[,..]]]
+
+[CmdletBinding()]
+	param(
+		[Parameter(Mandatory = $true)]
+		[AllowEmptyString()]
+		[String]$Command,
+		[Parameter(Mandatory = $false)]
+		[Int[]]$Devices
+	)
+	
+	if ($Devices.count -gt 0) {
+		# Only required if more than one different card in system
+		$Tokens = @()
+
+		($Command + " ") -split "(?= --)" -split "(?= -)" | ForEach {
+			$Token = $_.Trim()
+			if ($Token.length -gt 0) {
+				if ($Token -match "^-[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}[\s]{1,}.*,") {
+					# -param-name[ value1[,value2[,..]]]
+					$Tokens += [PSCustomObject]@{
+						Parameter = $Token.Split(" ")[0]
+						ParamValueSeparator = " "
+						ValueSeparator = ","
+						Values = @($Token.Split(" ")[1].Split(","))
+					}
+				}
+				elseif ($Token -match "^-[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}=[^=].*,") {
+					# -param-name[=value1[,value2[,..]]]
+					$Tokens += [PSCustomObject]@{
+						Parameter = $Token.Split("=")[0]
+						ParamValueSeparator = "="
+						ValueSeparator = ","
+						Values = @($Token.Split("=")[1].Split(","))
+					}
+				}
+				elseif ($Token -match "^--[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}==[^=].*,") {
+					# --param-name[==value1[,value2[,..]]]
+					$Tokens += [PSCustomObject]@{
+						Parameter = $Token.Split("==")[0]
+						ParamValueSeparator = "=="
+						ValueSeparator = ","
+						Values = @($Token.Split("==")[2].Split(","))
+					}
+				}
+				elseif ($Token -match "^--[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}=[^=].*,") {
+					# --param-name[=value1[,value2[,..]]]
+					$Tokens += [PSCustomObject]@{
+						Parameter = $Token.Split("=")[0]
+						ParamValueSeparator = "="
+						ValueSeparator = ","
+						Values = @($Token.Split("=")[1].Split(","))
+					}
+				}
+				else {
+					$Tokens += [PSCustomObject]@{Parameter = $Token}
+				}
+
+			}
+		}
+		
+		# Build command token for selected gpu device
+		[String]$Command = ""
+		$Tokens | ForEach-Object {
+			if ($_.Values.Count) {
+				$Token = $_
+				$Values = @()
+				$Devices | ForEach {
+					if ($Token.Values[$_]) {$Values += $Token.Values[$_]}
+					else {$Values += ""}
+				}
+				if ($Values -match "\w") {$Command += " $($Token.Parameter)$($Token.ParamValueSeparator)$($Values -join $($Token.ValueSeparator))"}
+			}
+			else {
+				$Command += " $($_.Parameter)"
+			}
+		}
+	}
+	$Command
+}
+
+function Get-ComputeData {
+
+#reads current GPU compute usage and power draw and from device
+#returned values are:
+#		PowerDraw:    0 - max (in watts)
+#		ComputeUsage: 0 - 100 (percent)
+# Requirements for Nvidia:  nvidia-smi.exe (part of driver package)
+# Requirements for AMD:     unknown
+
+[CmdletBinding()]
+	param(
+        [Parameter(Mandatory = $true)]
+		[String[]]$MinerType,
+        [Parameter(Mandatory = $false)]
+		[Array]$Index
+	)
+	
+	$SystemDrive = (Get-WMIObject -class Win32_OperatingSystem | select-object SystemDrive).SystemDrive
+
+	$PowerDrawSum = 0
+	
+	$ComputerUsageSum = 0
+	$ComputeUsageCount = 0
+
+	switch ($MinerType) {
+		"NVIDIA" {
+			$NvidiaSMI = "$SystemDrive\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe"
+			if (Test-Path $NvidiaSMI) {
+                if ($Index -eq $null -or $Index[0] -lt 0) {
+                    $Index = ((&$NvidiaSMI -L) | ForEach {$_.Split(" ")[1].Split(":")[0]})
+                }
+				$Index | ForEach {
+                    $idx = $_
+                    $PowerDraw = 0
+                    $Loop = 0
+					do {
+						$Loop++
+                        $PowerDraw = [Decimal](&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=power.draw)
+						$PowerDrawSum += $PowerDraw
+					}
+                    until ($Loop -gt 2 -or $PowerDraw -gt 0)
+
+                    $ComputeUsage = 0
+                    $Counter = 0
+					do {
+                        $Loop++
+                        for ($i = 0; $i -lt (&$NvidiaSMI -L).Count; $i++) {
+                            $ComputeUsage = [Decimal](&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=utilization.gpu)
+    						if ($ComputeUsage -gt 0) {
+	    						$ComputeUsageSum += $ComputeUsage
+		    					$ComputeUsageCount++
+			    			}
+				    	}
+                    }
+                    until ($Loop -gt 2 -or $ComputeUsage -gt 0)
+                }
+			}
+		}
+#		"AMD" { # To be implemented
+#			for ($i = 0; $i -lt (&$NvidiaSMI -L).Count; $i++) {
+#				$PowerDraw =+ [Double](&$NvidiaSMI -i $i --format=csv,noheader,nounits --query-gpu=power.draw)
+#				$ComputeUsageSum =+ [Double](&$NvidiaSMI -i $i --format=csv,noheader,nounits --query-gpu=utilization.gpu)
+#			}
+#			$ComputeUsageCount += $i
+#		}
+		"CPU"  {
+			$PowerDrawSum += $CPU_PowerDraw
+			$ComputeUsageSum += 100
+			$ComputeUsageCount++
+		}
+	}
+	if ($ComputeUsageSum -gt 0 -and $ComputeUsageSum -gt 0) {$ComputeUsage = $ComputeUsageSum / $ComputeUsageCount} {else $ComputeUsage = 0}
+	
+	return [PSCustomObject]@{
+		PowerDraw    = $PowerDrawSum
+		ComputeUsage = $ComputeUsage
+	}
+}
+
 function Set-Stat {
-    [CmdletBinding()]
-    param(
+	[CmdletBinding()]
+	param(
         [Parameter(Mandatory = $true)]
         [String]$Name, 
         [Parameter(Mandatory = $true)]
@@ -52,14 +341,14 @@ function Set-Stat {
         $ToleranceMax = $Value
 
         if ($FaultDetection) {
-            $ToleranceMin = $Stat.Week * (1 - [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
+		    $ToleranceMin = $Stat.Week * (1 - [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
             $ToleranceMax = $Stat.Week * (1 + [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
         }
 
         if ($ChangeDetection -and $Value -eq $Stat.Live) {$Updated -eq $Stat.updated}
 
         if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
-            Write-Warning "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin) ... $([Int]$ToleranceMax)). "
+            Write-Warning "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin)...$([Int]$ToleranceMax)). "
         }
         else {
             $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
@@ -139,9 +428,9 @@ function Set-Stat {
 }
 
 function Get-Stat {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]
+	[CmdletBinding()]
+	param(
+		[Parameter(Mandatory = $true)]
         [String]$Name
     )
 
@@ -150,15 +439,15 @@ function Get-Stat {
 }
 
 function Get-ChildItemContent {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]
+	[CmdletBinding()]
+	param(
+		[Parameter(Mandatory = $true)]
         [String]$Path, 
         [Parameter(Mandatory = $false)]
         [Hashtable]$Parameters = @{}
     )
 
-    Get-ChildItem $Path | ForEach-Object {
+    Get-ChildItem $Path -Exclude "_*" | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
         if ($_.Extension -eq ".ps1") {
@@ -198,7 +487,12 @@ function Get-ChildItemContent {
             if ($Content -eq $null) {$Content = $_ | Get-Content}
         }
         $Content | ForEach-Object {
-            [PSCustomObject]@{Name = $Name; Content = $_}
+            if ($_.Name) {
+				[PSCustomObject]@{Name = $_.Name; Content = $_}
+			}
+			else {
+				[PSCustomObject]@{Name = $Name; Content = $_}
+			}
         }
     }
 }
@@ -207,7 +501,7 @@ filter ConvertTo-Hash {
     [CmdletBinding()]
     $Hash = $_
     switch ([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1)))) {
-        0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0))}
+        "-Infinity" {"0 H"}0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0))}
         1 {"{0:n2} KH" -f ($Hash / [Math]::Pow(1000, 1))}
         2 {"{0:n2} MH" -f ($Hash / [Math]::Pow(1000, 2))}
         3 {"{0:n2} GH" -f ($Hash / [Math]::Pow(1000, 3))}
@@ -217,9 +511,9 @@ filter ConvertTo-Hash {
 }
 
 function Get-Combination {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]
+	[CmdletBinding()]
+	param(
+		[Parameter(Mandatory = $true)]
         [Array]$Value, 
         [Parameter(Mandatory = $false)]
         [Int]$SizeMax = $Value.Count, 
@@ -250,9 +544,9 @@ function Get-Combination {
 }
 
 function Start-SubProcess {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]
+	[CmdletBinding()]
+	param(
+		[Parameter(Mandatory = $true)]
         [String]$FilePath, 
         [Parameter(Mandatory = $false)]
         [String]$ArgumentList = "", 
@@ -260,20 +554,22 @@ function Start-SubProcess {
         [String]$WorkingDirectory = "", 
         [ValidateRange(-2, 3)]
         [Parameter(Mandatory = $false)]
-        [Int]$Priority = 0
+        [Int]$Priority = 0,
+        [Parameter(Mandatory = $false)]
+        [String]$WindowStyle = "Normal"
     )
 
     $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
 
-    $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory {
-        param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory)
+    $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory, $WindowStyle {
+        param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory, $WindowStyle)
 
         $ControllerProcess = Get-Process -Id $ControllerProcessID
         if ($ControllerProcess -eq $null) {return}
 
         $ProcessParam = @{}
         $ProcessParam.Add("FilePath", $FilePath)
-        $ProcessParam.Add("WindowStyle", 'Minimized')
+        $ProcessParam.Add("WindowStyle", $WindowStyle)
         if ($ArgumentList -ne "") {$ProcessParam.Add("ArgumentList", $ArgumentList)}
         if ($WorkingDirectory -ne "") {$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
         $Process = Start-Process @ProcessParam -PassThru
@@ -302,9 +598,9 @@ function Start-SubProcess {
 }
 
 function Expand-WebRequest {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]
+	[CmdletBinding()]
+	param(
+		[Parameter(Mandatory = $true)]
         [String]$Uri, 
         [Parameter(Mandatory = $false)]
         [String]$Path = ""
@@ -339,9 +635,9 @@ function Expand-WebRequest {
 }
 
 function Invoke-TcpRequest {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]
+	[CmdletBinding()]
+	param(
+		[Parameter(Mandatory = $true)]
         [String]$Server = "localhost", 
         [Parameter(Mandatory = $true)]
         [String]$Port, 
@@ -362,6 +658,8 @@ function Invoke-TcpRequest {
 
         $Writer.WriteLine($Request)
         $Response = $Reader.ReadLine()
+    }
+    catch {
     }
     finally {
         if ($Reader) {$Reader.Close()}
@@ -394,7 +692,7 @@ function Get-Region {
         [Parameter(Mandatory = $false)]
         [String]$Region = ""
     )
-
+    
     $Regions = Get-Content "Regions.txt" | ConvertFrom-Json
 
     $Region = (Get-Culture).TextInfo.ToTitleCase(($Region -replace "-", " " -replace "_", " ")) -replace " "
@@ -415,7 +713,8 @@ class Miner {
     $Index
     $Device
     $Device_Auto
-    $Profit
+    $Earning
+    $Profit # = Earning - PowerCost
     $Profit_Comparison
     $Profit_MarginOfError
     $Profit_Bias
@@ -429,4 +728,9 @@ class Miner {
     $Activated
     $Status
     $Benchmarked
+    # Power measurement
+    $PowerDraw # Power consumption of all cards
+    $PowerCost # = Total power draw  * $PowerPricePerKW
+    $ComputeUsage
+    $Pool
 }

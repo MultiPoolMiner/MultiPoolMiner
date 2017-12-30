@@ -1,6 +1,6 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
-class Nicehash : Miner {
+class BMiner : Miner {
     [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
@@ -9,37 +9,51 @@ class Nicehash : Miner {
         $Interval = 5
         $HashRates = @()
 
-		$Request = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
-		
         $PowerDraws = @()
         $ComputeUsages = @()
         
+        if ($this.index -eq $null -or $this.index -le 0) {
+            $Index = @()
+            for ($i = 0; $i -le 15; $i++) {$Index += $i}               
+        }
+        else {
+            $Index = $this.index
+        }
+
+        $URI = "http://$($Server):$($this.Port)/api/status"
         $Response = ""
 
         do {
             # Read Data from hardware
             $ComputeData = [PSCustomObject]@{}
             $ComputeData = (Get-ComputeData -MinerType $this.type -Index $this.index)
+
             $PowerDraws += $ComputeData.PowerDraw
             $ComputeUsages += $ComputeData.ComputeUsage
-			
+
             $HashRates += $HashRate = [PSCustomObject]@{}
 
             try {
-                $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
+                $Response = Invoke-WebRequest $URI -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
                 $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
-            catch {
+                catch {
                 Write-Warning "Failed to connect to miner ($($this.Name)). "
                 break
             }
 
-            $Data.algorithms.name | Select-Object -Unique | ForEach-Object {
-                $HashRate_Name = [String]($Algorithm -like (Get-Algorithm $_))
-                if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $_)*")} #temp fix
-                $HashRate_Value = [Double](($Data.algorithms | Where-Object name -EQ $_).workers.speed | Measure-Object -Sum).Sum
+            $HashRate_Value = 0
+            $Index | Where  {$Data.miners.$_.solver} | ForEach {
+                $HashRate_Value += [Double]$Data.miners.$_.solver.solution_rate
+            }
 
-                $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}                
+            $HashRate_Name = [String]$Algorithm[0]
+            if ($Algorithm[0] -match ".+NiceHash") {
+                $HashRate_Name = "$($HashRate_Name)Nicehash"
+            }
+
+            if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
+                $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
             }
 
             $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
@@ -51,7 +65,7 @@ class Nicehash : Miner {
 
         $HashRate = [PSCustomObject]@{}
         $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
-        $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
+        $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int]0}}
 
         $PowerDraws_Info = [PSCustomObject]@{}
         $PowerDraws_Info = ($PowerDraws | Measure-Object -Maximum -Minimum -Average)
@@ -60,7 +74,7 @@ class Nicehash : Miner {
         $ComputeUsages_Info = [PSCustomObject]@{}
         $ComputeUsages_Info = ($ComputeUsages | Measure-Object -Maximum -Minimum -Average)
         $ComputeUsage = if ($ComputeUsages_Info.Maximum - $ComputeUsages_Info.Minimum -le $ComputeUsages_Info.Average * $Delta) {$ComputeUsages_Info.Maximum} else {$ComputeUsages_Info.Average}
-		
+
         return [PSCustomObject]@{
             HashRate     = $HashRate
             PowerDraw    = $PowerDraw

@@ -1,45 +1,74 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 class Ccminer : Miner {
-    [PSCustomObject]GetHashRate ([String[]]$Algorithm, [Bool]$Safe = $false) {
-        $Server = "localhost"
-        $Timeout = 10 #seconds
+	[PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
+		$Server = "localhost"
+		$Timeout = 10 #seconds
 
-        $Delta = 0.05
-        $Interval = 5
-        $HashRates = @()
+		$Delta = 0.05
+		$Interval = 5
+		$HashRates = @()
 
-        $Request = "summary"
+		$PowerDraws = @()
+		$ComputeUsages = @()
+			
+		$Request = "summary"
+        $Response = ""
 
-        do {
-            $HashRates += $HashRate = [PSCustomObject]@{}
+		do {
+			# Read Data from hardware
+			$ComputeData = [PSCustomObject]@{}
+			$ComputeData = (Get-ComputeData -MinerType $this.type -Index $this.index)
+			$PowerDraws += $ComputeData.PowerDraw
+			$ComputeUsages += $ComputeData.ComputeUsage
 
-            try {
-                $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
-                $Data = $Response -split ";" | ConvertFrom-StringData -ErrorAction Stop
-            }
-            catch {
-                Write-Warning "Failed to connect to miner ($($this.Name)). "
-                break
-            }
+			$HashRates += $HashRate = [PSCustomObject]@{}
 
-            $HashRate_Name = [String]($Algorithm -like (Get-Algorithm $Data.algo))
-            if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
-            $HashRate_Value = [Double]$Data.KHS * 1000
+			try {
+			    $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
+			    $Data = $Response -split ";" | ConvertFrom-StringData -ErrorAction Stop
+			}
+			catch {
+			    Write-Warning "Failed to connect to miner ($($this.Name)). "
+			    break
+			}
 
-            $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
+			$HashRate_Name = [String]$Data.algo
+			if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
+			$HashRate_Value = [Double]$Data.KHS * 1000
 
-            $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
+			if ($Algorithm[0] -match ".+NiceHash") {
+				$HashRate_Name = "$($HashRate_Name)Nicehash"
+			}
 
-            if (-not $Safe) {break}
+			if ($HashRate_Name -and ($Algorithm -like (Get-Algorithm $HashRate_Name)).Count -eq 1) {
+			    $HashRate | Add-Member @{(Get-Algorithm $HashRate_Name) = [Int64]$HashRate_Value}
+			}
 
-            Start-Sleep $Interval
-        } while ($HashRates.Count -lt 6)
+			$Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
 
-        $HashRate = [PSCustomObject]@{}
-        $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
-        $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
+			if (-not $Safe) {break}
 
-        return $HashRate
-    }
+			Start-Sleep $Interval
+		} while ($HashRates.Count -lt 6)
+
+		$HashRate = [PSCustomObject]@{}
+		$Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
+		$Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int]0}}
+
+		$PowerDraws_Info = [PSCustomObject]@{}
+		$PowerDraws_Info = ($PowerDraws | Measure-Object -Maximum -Minimum -Average)
+		$PowerDraw = if ($PowerDraws_Info.Maximum - $PowerDraws_Info.Minimum -le $PowerDraws_Info.Average * $Delta) {$PowerDraws_Info.Maximum} else {$PowerDraws_Info.Average}
+
+		$ComputeUsages_Info = [PSCustomObject]@{}
+		$ComputeUsages_Info = ($ComputeUsages | Measure-Object -Maximum -Minimum -Average)
+		$ComputeUsage = if ($ComputeUsages_Info.Maximum - $ComputeUsages_Info.Minimum -le $ComputeUsages_Info.Average * $Delta) {$ComputeUsages_Info.Maximum} else {$ComputeUsages_Info.Average}
+
+		return [PSCustomObject]@{
+			HashRate     = $HashRate
+			PowerDraw    = $PowerDraw
+			ComputeUsage = $ComputeUsage
+            Response     = $Response
+		}
+	}
 }

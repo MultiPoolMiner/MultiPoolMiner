@@ -1,36 +1,17 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-xevan\ccminer_x86.exe"
-$Uri = "https://github.com/nemosminer/ccminer-xevan/releases/download/ccminer-xevan/ccminer_x86.7z"
+$Path = ".\Bin\Ethash-Ethminer\ethminer.exe"
+$Uri = "https://github.com/ethereum-mining/ethminer/releases/download/v0.12.0/ethminer-0.12.0-Windows.zip"
 
-$Port = 4068
+$Port = 23333
 
+# Custom command to be applied to all algorithms
 $CommonCommands = ""
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-	"_blake2s"   = "" # Beaten by CcminerNanashi
-	"_blakecoin" = " -i 31" # beaten by CcminerSp-mod
-	"_c11"       = " -i 21" # Stratum problem on mine.zpool.ca
-	"_decred"    = "" #broken, gives invalid share
-	"_keccak"    = " -i 31,28,28 -m 2" # beaten by Ccminer-2.2.3
-	"_lbry"      = "" # Beaten by ExcavatorNvidia5
-	"_lyra2v2"   = " -i 24" # Beaten by Excavator132Nvidia6
-	"_myr-gr"    = " -i 24" # No results on mine.zpool.ca
-	"_neoscrypt" = " -i 22" # slow. beaten by Ccminer Nanashi
-	"_nist5"     = "" # Beaten by CcminerPalgin-Nist5
-	"_quark"     = "" #Quark beaten by CcminerAlexis78cuda8.0
-	"_qubit"     = "" #Qubit beaten by CcminerPalgin-Nist5 
-	"sia"        = ""  
-	"_sib"       = " -i 21" # sib is broken 
-	"_skein"     = " -i 30" # Beaten by CcminerPalgin-Nist5 
-	"_veltor"    = " -i 22" # Broken
-	"_x11"       = " -i 21" 
-	"_x11evo"    = " -i 21" 
-	"_x13"       = "" 
-	"_x14"       = " -i 21" 
-	"_x15"       = " -i 20" 
-	"xevan"      = " -i 21.5,20,18"
+     "Ethash"		= ""
+	 "Ethash2Gb"	= ""
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -44,10 +25,10 @@ $Devices | ForEach-Object {
 
 		$Algorithm = Get-Algorithm($_)
 		$Command =  $Commands.$_
-
+		
 		if ($Devices.count -gt 1) {
 			$Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($Device.Device_Norm)"
-			$Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) -d $($Device.Devices -join ',')"
+			$Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) --cuda-devices $($Device.Devices -join ' ')"
 			$Index = $Device.Devices -join ","
 		}
 
@@ -58,9 +39,9 @@ $Devices | ForEach-Object {
 			Type		= $Type
 			Device		= $Device.Device
 			Path		= $Path
-			Arguments	= "-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) -b $Port$Command$CommonCommands"
+			Arguments	= "--api-port $Port -S $($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -O $($Pools.$Algorithm.User):$($Pools.$Algorithm.Pass) -SP 2 --cuda$Command$CommonCommands"
 			HashRates	= [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
-			API			= "Ccminer"
+			API			= "Claymore"
 			Port		= $Port
 			Wrap		= $false
 			URI			= $Uri

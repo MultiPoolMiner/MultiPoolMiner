@@ -1,45 +1,17 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-SP\ccminer.exe"
-$Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z"
+$Path = ".\Bin\NeoScrypt-Palgin\hsrminer_neoscrypt.exe"
+$Uri = "https://github.com/palginpav/hsrminer/raw/master/Neoscrypt%20algo/Windows/hsrminer_neoscrypt.exe"
+$Fee = 0.99 # 1% miner fee
 
-$Port = 4068
+$Port = 23333 # Miner has currently no API port available, must use wrapper
 
+# Custom command to be applied to all algorithms
 $CommonCommands = ""
 
+# Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    #"bitcore" = "" #Bitcore
-    #"blake2s" = "" #Blake2s
-    #"blakecoin" = "" #Blakecoin
-    #"vanilla" = "" #BlakeVanilla
-    "_c11" = "" #C11, beaten by Ccminer-x11gost
-    #"cryptonight" = "" #CryptoNight
-    #"decred" = "" #Decred
-    #"equihash" = "" #Equihash
-    #"ethash" = "" #Ethash
-    #"groestl" = "" #Groestl
-    #"hmq1725" = "" #HMQ1725
-    #"jha" = "" #JHA
-    #"keccak" = "" #Keccak
-    #"lbry" = "" #Lbry
-    #"lyra2v2" = "" #Lyra2RE2
-    #"lyra2z" = "" #Lyra2z
-    #"myr-gr" = "" #MyriadGroestl
-    #"neoscrypt" = "" #NeoScrypt
-    #"nist5" = "" #Nist5
-    #"pascal" = "" #Pascal
-    #"phi" = "" #PHI
-    #"sia" = "" #Sia
-    #"sib" = "" #Sib
-    "_skein" = "" #Skein, reports incorrect hashrate
-    #"skunk" = "" #Skunk
-    #"timetravel" = "" #Timetravel
-    #"tribus" = "" #Tribus
-    #"veltor" = "" #Veltor
-    #"x11evo" = "" #X11evo
-    "_x17" = "23,22.5,21.1" #X17, Beaten by CcminerAlexis78hsr
-    #"yescrypt" = "" #Yescrypt
-    #"xevan" = "" #Xevan
+	"neoscrypt" = "" # neoscrypt, fastest!
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -47,7 +19,6 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {
-
 	$Device = $_
 
 	$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where {$_ -cnotmatch "^_.+" -and $Pools.$(Get-Algorithm($_)).Name -and {$Pools.$(Get-Algorithm($_)).Protocol -eq "stratum+tcp" <#temp fix#>}} | ForEach-Object {
@@ -68,8 +39,8 @@ $Devices | ForEach-Object {
 			Type		= $Type
 			Device		= $Device.Device
 			Path		= $Path
-			Arguments	= "-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) -b $Port$Command$CommonCommands"
-			HashRates	= [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
+			Arguments	= "-o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass)$Command$CommonCommands"
+			HashRates	= [PSCustomObject]@{$Algorithm = (($Stats."$($Name)_$($Algorithm)_HashRate".Week) * $Fee)}
 			API			= "Wrapper"
 			Port		= $Port
 			Wrap		= $true
@@ -82,4 +53,3 @@ $Devices | ForEach-Object {
 	}
 	if ($Port) {$Port ++}
 }
-Sleep 0
