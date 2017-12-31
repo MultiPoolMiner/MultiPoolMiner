@@ -59,10 +59,9 @@ enum Priority {
 }
 
 function Invoke-CreateProcess {
-
     param (
         [Parameter(Mandatory = $True)][string]$Binary,
-        [Parameter(Mandatory = $False)][string]$Args = $null,
+        [Parameter(Mandatory = $False)][string]$Args=$null,
         [CreationFlags][Parameter(Mandatory = $True)]$CreationFlags,
         [ShowWindow][Parameter(Mandatory = $True)]$ShowWindow,
         [StartF][Parameter(Mandatory = $True)]$StartF,
@@ -127,7 +126,7 @@ function Invoke-CreateProcess {
     }
 	
 	# Call CreateProcess
-	[Kernel32]::CreateProcess($Binary, $Args, [ref]$SecAttr, [ref]$SecAttr, $true, $CreationFlags, [IntPtr]::Zero, $WorkingDirectory, [ref]$StartupInfo, [ref]$ProcessInfo) | Out-Null
+	[Kernel32]::CreateProcess($Binary, $Args, [ref]$SecAttr, [ref]$SecAttr, $false, $CreationFlags, [IntPtr]::Zero, $WorkingDirectory, [ref]$StartupInfo, [ref]$ProcessInfo) | Out-Null
 
 	$Process = Get-Process -Id $ProcessInfo.dwProcessId
     $Process.Handle | Out-Null
@@ -136,15 +135,3 @@ function Invoke-CreateProcess {
     $Process.PriorityClass = "$Priority"
 }
 
-function Get-ForegroundWindow {
-    Add-Type -TypeDefinition @"
-  using System;
-  using System.Runtime.InteropServices;
-  public class Tricks {
-    [DllImport("user32.dll")]
-    public static extern IntPtr GetForegroundWindow();
-}
-"@
-
-    Get-Process | Where-Object {$_.MainWindowHandle -eq [tricks]::GetForegroundWindow()}
-}

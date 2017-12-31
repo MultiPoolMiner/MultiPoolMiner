@@ -2,7 +2,6 @@
 
 # Static values per pool, if set will override values from start.bat
 #$Wallet = "1GPSq8txFnyrYdXL8t6S94mYdF8cGqVQJF"
-$Wallet = "187r43tmnLXqwJzqz99jrCeMJmRgfKa9B8"
 #$WorkerName = "Blackbox"
 #$Password = "x"
 #$PayoutCurrency = "BTC" # mining earnings will be autoconverted and paid out in this currency

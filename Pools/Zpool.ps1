@@ -15,7 +15,7 @@ $ProfitLessFee = $true
 $ProfitFactor = 1 # 1 = 100%, use lower number to compensate for overoptimistic profit estimates sent by pool
 #$Fee = 0 # Default fee for all algos in %; if uncommented fee information from pool/algo is used
 
-$ShortPoolName = "ZPC" # Short pool name
+$ShortPoolName = "ZP" # Short pool name
 #End of user settable variables
 
 $Zpool_Regions = "US"
