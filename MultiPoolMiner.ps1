@@ -56,7 +56,18 @@ $UserNameBackup = $UserName
 $WorkerNameBackup = $WorkerName
 
 while ($true) {
-    Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
+    if ((Get-ChildItem "Config.ps1").LastWriteTime.ToUniversalTime() -gt $Timer) {
+        # File has changed since last loop; re-read config -  this allows for dynamic configration changes
+        Write-Log "Configuration data has been modified - applying configuration from Config.ps1..."
+        . .\Config.ps1
+        
+        if ($Proxy -eq "") {$PSDefaultParameterValues.Remove("*:Proxy")}
+        else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
+
+        $ExcludeAlgorithm = $ExcludeAlgorithm | ForEach-Object {Get-Algorithm $_}
+        $Region = $Region | ForEach-Object {Get-Region $_}
+        Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
+    }
 
     $Timer = (Get-Date).ToUniversalTime()
 
