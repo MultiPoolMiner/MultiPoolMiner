@@ -10,8 +10,8 @@ $CommonCommands = ""
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    "Ethash"	= ""
-    "Ethash2Gb"	= ""
+    "Ethash"    = ""
+    "Ethash2Gb" = ""
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -35,20 +35,20 @@ $Devices | ForEach-Object {
         {while (Get-NetTCPConnection -State "Listen" -LocalPort $($Port) -ErrorAction SilentlyContinue){$Port++}} | Out-Null
 
         [PSCustomObject]@{
-            Name        = $Name
-            Type		= $Type
-            Device		= $Device.Device
-            Path		= $Path
-            Arguments	= "--api-port $Port -S $($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -O $($Pools.$Algorithm.User):$($Pools.$Algorithm.Pass) -SP 2 --cuda$Command$CommonCommands"
-            HashRates	= [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
-            API			= "Claymore"
-            Port		= $Port
-            Wrap		= $false
-            URI			= $Uri
-            PowerDraw	= $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
-            ComputeUsage= $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
-            Pool		= "$($Pools.$Algorithm.Name)"
-            Index		= $Index
+            Name         = $Name
+            Type         = $Type
+            Device       = $Device.Device
+            Path         = $Path
+            Arguments    = "--api-port $Port -S $($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -O $($Pools.$Algorithm.User):$($Pools.$Algorithm.Pass) -SP 2 --cuda$Command$CommonCommands"
+            HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
+            API          = "Claymore"
+            Port         = $Port
+            Wrap         = $false
+            URI          = $Uri
+            PowerDraw    = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
+            ComputeUsage = $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
+            Pool         = "$($Pools.$Algorithm.Name)"
+            Index        = $Index
         }
     }
     if ($Port) {$Port ++}

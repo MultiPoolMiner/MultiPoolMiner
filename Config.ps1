@@ -101,12 +101,12 @@ $PayoutCurrency = "BTC"
 $DisplayComparison = $false
 
 # If $true MPM will display short pool names in summary
-$UseShortPoolNames = $false
+$UseShortPoolNames = $true
 
 ######## Power configuration (UselessGuru) ######## 
 # Power configuration & true profit calculation
 # Electricity price per kW (in $currency[0]), 0 will disable power cost calculation
-$PowerPricePerKW = 0
+$PowerPricePerKW = 0.3
 
 # Base power consumption of computer (in Watts) excluding GPUs or CPU mining
 $Computer_PowerDraw = 50

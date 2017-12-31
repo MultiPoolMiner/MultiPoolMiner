@@ -9,34 +9,34 @@ $Port = 2222
 $CommonCommands = " -nofee -polling"
 
 $Commands = [PSCustomObject]@{
-	#"bitcore" = "" #Bitcore
-	#"blake2s" = "" #Blake2s
-	#"blakecoin" = "" #Blakecoin
-	#"vanilla" = "" #BlakeVanilla
-	#"cryptonight" = "" #Cryptonight
-	#"decred" = "" #Decred
-	"equihash" = "" #Equihash
-	#"ethash" = "" #Ethash
-	#"groestl" = "" #Groestl
-	#"hmq1725" = "" #hmq1725
-	#"keccak" = "" #Keccak
-	#"lbry" = "" #Lbry
-	#"lyra2v2" = "" #Lyra2RE2
-	#"lyra2z" = "" #Lyra2z
-	#"myr-gr" = "" #MyriadGroestl
-	#"neoscrypt" = "" #NeoScrypt
-	#"nist5" = "" #Nist5
-	#"pascal" = "" #Pascal
-	#"qubit" = "" #Qubit
-	#"scrypt" = "" #Scrypt
-	#"sia" = "" #Sia
-	#"sib" = "" #Sib
-	#"skein" = "" #Skein
-	#"timetravel" = "" #Timetravel
-	#"x11" = "" #X11
-	#"x11evo" = "" #X11evo
-	#"x17" = "" #X17
-	#"yescrypt" = "" #Yescrypt
+	#"bitcore"      = "" #Bitcore
+	#"blake2s"      = "" #Blake2s
+	#"blakecoin"    = "" #Blakecoin
+	#"vanilla"      = "" #BlakeVanilla
+	#"cryptonight"  = "" #Cryptonight
+	#"decred"       = "" #Decred
+	"equihash"      = "" #Equihash
+	#"ethash"       = "" #Ethash
+	#"groestl"      = "" #Groestl
+	#"hmq1725"      = "" #hmq1725
+	#"keccak"       = "" #Keccak
+	#"lbry"         = "" #Lbry
+	#"lyra2v2"      = "" #Lyra2RE2
+	#"lyra2z"       = "" #Lyra2z
+	#"myr-gr"       = "" #MyriadGroestl
+	#"neoscrypt"    = "" #NeoScrypt
+	#"nist5"        = "" #Nist5
+	#"pascal"       = "" #Pascal
+	#"qubit"        = "" #Qubit
+	#"scrypt"       = "" #Scrypt
+	#"sia"          = "" #Sia
+	#"sib"          = "" #Sib
+	#"skein"        = "" #Skein
+	#"timetravel"   = "" #Timetravel
+	#"x11"          = "" #X11
+	#"x11evo"       = "" #X11evo
+	#"x17"          = "" #X17
+	#"yescrypt"     = "" #Yescrypt
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -60,20 +60,20 @@ $Devices | ForEach-Object {
 		{while (Get-NetTCPConnection -State "Listen" -LocalPort $($Port) -ErrorAction SilentlyContinue){$Port++}} | Out-Null
 
 		[PSCustomObject]@{
-			Name        = $Name
-			Type		= $Type
-			Device		= $Device.Device
-			Path        = $Path
-			Arguments   = "-api 127.0.0.1:$Port -uri stratum://$($Pools.$Algorithm.User).$($Pools.$Algorithm.Pass)@$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port)$Command$CommonCommands"
-			HashRates   = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
-			API         = "BMiner"
-			Port        = $Port
-			Wrap        = $false
-			URI         = $Uri
-			PowerDraw   = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
-			ComputeUsage= $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
-			Pool        = "$($Pools.$Algorithm.Name)"
-			Index		= $Index
+			Name         = $Name
+			Type         = $Type
+			Device       = $Device.Device
+			Path         = $Path
+			Arguments    = "-api 127.0.0.1:$Port -uri stratum://$($Pools.$Algorithm.User).$($Pools.$Algorithm.Pass)@$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port)$Command$CommonCommands"
+			HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
+			API          = "BMiner"
+			Port         = $Port
+			Wrap         = $false
+			URI          = $Uri
+			PowerDraw    = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
+			ComputeUsage = $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
+			Pool         = "$($Pools.$Algorithm.Name)"
+			Index        = $Index
 		}
 	}
 	if ($Port) {$Port ++}

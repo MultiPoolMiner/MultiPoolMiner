@@ -9,16 +9,16 @@ $Port = 3456
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    "_blake2s"			= @() #Blake2s, Beaten by Ccminer-x11gost
-    "_cryptonight"		= @() #Cryptonight, Beaten by XMRig Nvidia
-    #"decred"			= @() #Decred
-    "_daggerhashimoto"	= @() #Ethash, 4 threads out of memory, Beaten by EthMiner
-    "_equihash"			= @() #Equihash, Beaten by DSTM
-    "_neoscrypt"		= @() #NeoScrypt, 4 threads out of memory
-    "_keccak"			= @() #Keccak, Beaten by Excavator138aNvidia4
-    "_lbry"				= @() #Lbry, Beaten by Excavator138aNvidia4
-    "_lyra2rev2"		= @() #Lyra2RE2, Beaten by Ccminer-Palgin_Nist5
-    "_pascal"			= @() #Pascal, Beaten by Excavator138aNvidia4
+    "blake2s"           = @() #Blake2s, Beaten by Ccminer-x11gost
+    "cryptonight"       = @() #Cryptonight, Beaten by XMRig Nvidia
+    #"decred"           = @() #Decred
+    "daggerhashimoto"   = @() #Ethash, 4 threads out of memory, Beaten by EthMiner
+    "equihash"          = @() #Equihash, Beaten by DSTM
+    "neoscrypt"         = @() #NeoScrypt, 4 threads out of memory
+    "keccak"			= @() #Keccak, Beaten by Excavator138aNvidia4
+    "lbry"				= @() #Lbry, Beaten by Excavator138aNvidia4
+    "lyra2rev2"         = @() #Lyra2RE2, Beaten by Ccminer-Palgin_Nist5
+    "pascal"			= @() #Pascal, Beaten by Excavator138aNvidia4
     #"sia"				= @() #Sia
 }
 

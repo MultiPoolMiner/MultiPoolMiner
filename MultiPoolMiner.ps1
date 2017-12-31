@@ -514,7 +514,6 @@ while ($true) {
                 if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
                     $Miner_Command = "$(Split-Path $_.Path -leaf) $($_.Arguments)"
                     "$(Split-Path $_.Path -leaf) $($_.Arguments)" | Out-File "$(Split-Path $_.Path)\$($_.Name)_$($($_.Algorithm | ForEach-Object { (($_)+ "_" + $Pools.$_.Name)}) -join "-").cmd" -Encoding default
-                    Write-Log "Starting $($_.Type) miner $($_.Name): '$($_.Path) $($_.Arguments)'"
                     $DecayStart = $Timer
                     $_.New = $true
                     $_.Activated++
@@ -532,9 +531,11 @@ while ($true) {
                     }
                     if ($_.Wrap) {
                         if ($UseNewMinerLauncher) {
+                            Write-Log "Starting $($_.Type) miner $($_.Name) [Invoke-CreateProcess]: '$($_.Path) $($_.Arguments)'"
                             $_.Process = Invoke-CreateProcess -Binary ("$((Get-Command powershell.exe).Definition)") -Args ("-command . '$(Convert-Path ".\Wrapper.ps1")' -ControllerProcessID $PID -Id '$($_.Port)' -FilePath '$($_.Path)' -ArgumentList '$($_.Arguments)' -WorkingDirectory '$(Split-Path $_.Path)'") -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path (Get-Command powershell.exe).Definition)
                         }
                         else {
+                            Write-Log "Starting $($_.Type) miner $($_.Name): '$($_.Path) $($_.Arguments)'"
                             $_.Process = Start-Process -FilePath (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) -ArgumentList "-executionpolicy bypass -command . '$(Convert-Path ".\Wrapper.ps1")' -ControllerProcessID $PID -Id '$($_.Port)' -FilePath '$($_.Path)' -ArgumentList '$($_.Arguments)' -WorkingDirectory '$(Split-Path $_.Path)'" -WindowStyle $WindowStyle -PassThru
                         }
                     }
@@ -543,10 +544,12 @@ while ($true) {
                             $Binary = ((Get-Command powershell.exe).Definition) -replace ' ','` '
                             $Payload = $_.Path -replace ' ','` '
                             $Arguments = "-command '& {$($Payload) $($_.Arguments)}"
-#                            $_.Process = Invoke-CreateProcess -Binary ($Binary) -Args ($Arguments) -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path $Binary)
-                            $_.Process = Invoke-CreateProcess -Binary $_.Path -Args ("$($_.Arguments)") -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path $_.Path)
+                            Write-Log "Starting $($_.Type) miner $($_.Name) [Invoke-CreateProcess]: '$($_.Path) $($_.Arguments)'"
+                            # $_.Process = Invoke-CreateProcess -Binary ($Binary) -Args ($Arguments) -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path $Binary)
+                            $_.Process = Invoke-CreateProcess -Binary $_.Path -Args (" $($_.Arguments)") -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path $_.Path)
                         }
                         else {
+                            Write-Log "Starting $($_.Type) miner $($_.Name): '$($_.Path) $($_.Arguments)'"
                             $_.Process = Start-SubProcess -FilePath $_.Path -ArgumentList $_.Arguments -WorkingDirectory (Split-Path $_.Path) -Priority ($_.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -WindowStyle ($MinerWindowStyle)
                         }
                     }
@@ -634,8 +637,8 @@ while ($true) {
     #Display mining information
     if ($Miners -and $PGHome -notmatch ".+") {Clear-Host}
 
-    if ($Poolname) {Write-Host "Selected pool: $($Poolname)"}
-    if ($Algorithm) {Write-Host "Selected algorithms: $($Algorithm)"}
+    if ($Poolname) {Write-Log "Selected pool: $($Poolname)"}
+    if ($Algorithm) {Write-Log "Selected algorithms: $($Algorithm)"}
     if ($DeviceSubTypes) {$SortAndGroup = "Device"} else {$SortAndGroup = "Type"}
     
     $Miners | Where-Object {$BenchmarkMode -or $DisplayProfitOnly -or ($_.Earning -gt 0) -or ($_.Profit -eq $null)} | Sort-Object -Descending $SortAndGroup, Profit_Bias | Format-Table -GroupBy $SortAndGroup (
@@ -743,7 +746,7 @@ while ($true) {
         $Timer = (Get-Date).ToUniversalTime()
         if ($CrashedMiners) {
             $CrashedMiners | ForEach-Object {
-                Write-Log -Level Error "Miner $($_.Name) '$(Split-Path $_.Path -leaf) $($_.Arguments)' crashed!"
+                Write-Log -Level Error "Miner $($_.Name) crashed: '$(Split-Path $_.Path -leaf) $($_.Arguments)'"
                 $TimeStamp = Get-Date -format u 
                 "$($Timestamp): $(Split-Path $_.Path -leaf) $($_.Arguments)" | Out-File "CrashedMiners.txt" -Append
             }
@@ -842,7 +845,7 @@ while ($true) {
                 }
             }
             else {
-                if ($Miner.Name -notmatch "PalginNvidia_.+" <# temp fix, Palgin does not have an APi yet#>) {
+                if ($Miner.Name -notlike "PalginNvidia_*" <# temp fix, Palgin does not have an APi yet#>) {
                     if ($BeepOnError) {
                         [console]::beep(1000,500)
                     }

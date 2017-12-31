@@ -11,7 +11,7 @@ $CommonCommands = ""
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    "hsr"   = "" # my best values Values for 108ti/1070/10603G "-i 21.5,21.5,21" # hsr, fastest!
+    "hsr" = "" # my best values Values for 108ti/1070/10603G "-i 21.5,21.5,21" # hsr, fastest!
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -35,20 +35,20 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
         {while (Get-NetTCPConnection -State "Listen" -LocalPort $($Port) -ErrorAction SilentlyContinue){$Port++}} | Out-Null
 
         [PSCustomObject]@{
-            Name        = $Name
-            Type		= $Type
-            Device		= $Device.Device
-            Path		= $Path
-            Arguments	= "-o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass)$Command$CommonCommands"
-            HashRates	= [PSCustomObject]@{$Algorithm = (($Stats."$($Name)_$($Algorithm)_HashRate".Week) * $Fee)}
-            API			= "Wrapper"
-            Port		= $Port
-            Wrap		= $true
-            URI			= $Uri
-            PowerDraw   = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
-            ComputeUsage= $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
-            Pool		= "$($Pools.$Algorithm.Name)"
-            Index		= $Index
+            Name         = $Name
+            Type         = $Type
+            Device       = $Device.Device
+            Path         = $Path
+            Arguments    = "-o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass)$Command$CommonCommands"
+            HashRates    = [PSCustomObject]@{$Algorithm = (($Stats."$($Name)_$($Algorithm)_HashRate".Week) * $Fee)}
+            API          = "Wrapper"
+            Port         = $Port
+            Wrap         = $true
+            URI          = $Uri
+            PowerDraw    = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
+            ComputeUsage = $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
+            Pool         = "$($Pools.$Algorithm.Name)"
+            Index        = $Index
         }
     }
     if ($Port) {$Port ++}

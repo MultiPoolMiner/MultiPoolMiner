@@ -11,36 +11,36 @@ $CommonCommands = "--submit-stale"
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
     #"bitcore"      = "" # Do not use, peaks and falls back to low earnings
-    "_blake2s"      = "" # my best values Values for 1080ti/1070/10603G "-i 31,31,31" # beaten by CcminerAlexis78Hsr, do not use Excavator, high rejects
-    "_blakecoin"   = "" # my best values Values for 1080ti/1070/10603G "-i 31" 
-    "_c11"         = "" # my best values Values for 1080ti/1070/10603G "-i 21" # Beaten by Ccminer-x11gost
-    "cryptonight" = "" # my best values Values for 1080ti/1070/10603G "-i 10.75,10.75,10 --bfactor=12,8,8"
-    "_decred"      = ""
-    "_equihash"    = ""
-    "_groestl"      = "" # my best values Values for 1080ti/1070/10603G "-i 26.5" # beaten by Ccminer-Klaust814_CUDA9
-    "_hmq1725"     = ""
-    "_hsr"         = "" # my best values Values for 1080ti/1070/10603G "-i 21,21,20.25" # beaten by CcminerAlexis78hsr
-    "_keccak"      = "" # my best values Values for 1080ti/1070/10603G "-i 31,30,30" #BROKEN!
-    "keccakc"      = "" # Keccak-256 (CreativeCoin)
-    "_lbry"        = "" # my best values Values for 1080ti/1070/10603G "-i 29,29,28"
-    "_lyra2v2"     = "" # beaten by Ccminer-Palgin-Nist5
-    "_lyra2z"      = "" # my best values Values for 1080ti/1070/10603G "-i 22,21,21" # Lyra2z for ZCash, Beaten by CcminerLyra2Z
-    "_myr-gr"       = "" # my best values Values for 1080ti/1070/10603G "-i 24" # Beaten by CcminerAlexis78cuda8.0
-    "_neoscrypt"   = "" # my best values Values for 1080ti/1070/10603G "-i 26" # beaten by Ccminer-Palgin-Nist5
-    "_nist5"       = "" # my best values Values for 1080ti/1070/10603G "-i 27,26.25,24.75" # Beaten, beaten by CcminerKlaust817_CUDA91
-    "penta"        = "" # Pentablake hash (5x Blake 512)
-    "_phi"          = "" # my best values Values for 1080ti/1070/10603G "-i 25,24,24" # Ccminer 2.2.3 x86 is faster
-    "_polytimos"    = "" # my best values Values for 1080ti/1070/10603G "-i 26.25,26.25" # polytimos, beaten by CcminerPolytimos
-    "sia"          = "" # my best values Values for 1080ti/1070/10603G "-i 31,31,31" #
-    "_sib"         = "" # my best values Values for 1080ti/1070/10603G "-i 21"
-    "_skein"       = "" # my best values Values for 1080ti/1070/10603G "-i 30,29,29" # Beaten by Ccminer 2.2.3 x86
-    "_skunk"       = "" # my best values Values for 1080ti/1070/10603G "-i 25.7,25.2,24.9" # Beaten by Ccminer 2.2.3 x86
-    #    "timetravel"   = "" # my best values Values for 1080ti/1070/10603G "-i 24"
-    "_tribus"      = ""
-    "_vanilla"     = ""
-    "_veltor"      = "" # my best values Values for 1080ti/1070/10603G "-i 23" # Fastest
-    "_x11evo"      = "" # my best values Values for 1080ti/1070/10603G "-i 21"
-    "_x17"          = "" # beaten by CcminerAlexis78hsr
+    "blake2s"       = "" # my best values Values for 1080ti/1070/10603G "-i 31,31,31" # beaten by CcminerAlexis78Hsr, do not use Excavator, high rejects
+    "blakecoin"     = "" # my best values Values for 1080ti/1070/10603G "-i 31" 
+    "c11"           = "" # my best values Values for 1080ti/1070/10603G "-i 21" # Beaten by Ccminer-x11gost
+    "cryptonight"   = "" # my best values Values for 1080ti/1070/10603G "-i 10.75,10.75,10 --bfactor=12,8,8"
+    "decred"        = ""
+    "equihash"      = ""
+    "groestl"       = "" # my best values Values for 1080ti/1070/10603G "-i 26.5" # beaten by Ccminer-Klaust814_CUDA9
+    "hmq1725"       = ""
+    "hsr"           = "" # my best values Values for 1080ti/1070/10603G "-i 21,21,20.25" # beaten by CcminerAlexis78hsr
+    "keccak"        = "" # my best values Values for 1080ti/1070/10603G "-i 31,30,30" #BROKEN!
+    "keccakc"       = "" # Keccak-256 (CreativeCoin)
+    "lbry"          = "" # my best values Values for 1080ti/1070/10603G "-i 29,29,28"
+    "lyra2v2"       = "" # beaten by Ccminer-Palgin-Nist5
+    "lyra2z"        = "" # my best values Values for 1080ti/1070/10603G "-i 22,21,21" # Lyra2z for ZCash, Beaten by CcminerLyra2Z
+    "myr-gr"        = "" # my best values Values for 1080ti/1070/10603G "-i 24" # Beaten by CcminerAlexis78cuda8.0
+    "neoscrypt"     = "" # my best values Values for 1080ti/1070/10603G "-i 26" # beaten by Ccminer-Palgin-Nist5
+    "nist5"         = "" # my best values Values for 1080ti/1070/10603G "-i 27,26.25,24.75" # Beaten, beaten by CcminerKlaust817_CUDA91
+    "penta"         = "" # Pentablake hash (5x Blake 512)
+    "phi"           = "" # my best values Values for 1080ti/1070/10603G "-i 25,24,24" # Ccminer 2.2.3 x86 is faster
+    "polytimos"     = "" # my best values Values for 1080ti/1070/10603G "-i 26.25,26.25" # polytimos, beaten by CcminerPolytimos
+    "sia"           = "" # my best values Values for 1080ti/1070/10603G "-i 31,31,31" #
+    "sib"           = "" # my best values Values for 1080ti/1070/10603G "-i 21"
+    "skein"         = "" # my best values Values for 1080ti/1070/10603G "-i 30,29,29" # Beaten by Ccminer 2.2.3 x86
+    "skunk"         = "" # my best values Values for 1080ti/1070/10603G "-i 25.7,25.2,24.9" # Beaten by Ccminer 2.2.3 x86
+    #"timetravel"   = "" # my best values Values for 1080ti/1070/10603G "-i 24"
+    "tribus"        = ""
+    "vanilla"       = ""
+    "veltor"        = "" # my best values Values for 1080ti/1070/10603G "-i 23" # Fastest
+    "x11evo"        = "" # my best values Values for 1080ti/1070/10603G "-i 21"
+    "x17"           = "" # beaten by CcminerAlexis78hsr
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -65,20 +65,20 @@ $Devices | ForEach-Object {
         {while (Get-NetTCPConnection -State "Listen" -LocalPort $($Port) -ErrorAction SilentlyContinue){$Port++}} | Out-Null
 
         [PSCustomObject]@{
-            Name        = $Name
-            Type		= $Type
-            Device		= $Device.Device
-            Path		= $Path
-            Arguments	= "-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) -b $Port$Command$CommonCommands"
-            HashRates	= [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
-            API			= "Ccminer"
-            Port		= $Port
-            Wrap		= $false
-            URI			= $Uri
-            PowerDraw	= $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
-            ComputeUsage= $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
-            Pool		= "$($Pools.$Algorithm.Name)"
-            Index		= $Index
+            Name         = $Name
+            Type         = $Type
+            Device       = $Device.Device
+            Path         = $Path
+            Arguments    = "-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) -b $Port$Command$CommonCommands"
+            HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
+            API          = "Ccminer"
+            Port         = $Port
+            Wrap         = $false
+            URI          = $Uri
+            PowerDraw	 = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
+            ComputeUsage = $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
+            Pool         = "$($Pools.$Algorithm.Name)"
+            Index        = $Index
         }
     }
     if ($Port) {$Port ++}

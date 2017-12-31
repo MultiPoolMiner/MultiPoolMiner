@@ -12,16 +12,16 @@ $CommonCommands = ""
 
 # Prefix defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    "ethash"				= ""
-    "ethash2gb"				= ""
-    "ethash;decred"			= " -dcoin dcr -dcri 130"
-    "ethash;lbry"			= " -dcoin lbc -dcri 75"
-    "ethash;pascal"			= " -dcoin pasc -dcri 80"
-    "ethash;SiaClaymore"	= " -dcoin sc -dcri 110"
-    "ethash2gb;decred"		= " -dcoin dcr -dcri 130"
-    "ethash2gb;lbry"		= " -dcoin lbc -dcri 75"
-    "ethash2gb;pascal"		= " -dcoin pasc -dcri 80"
-    "ethash2gb;SiaClaymore"	= " -dcoin sc -dcri 110"
+    "ethash"                = ""
+    "ethash2gb"             = ""
+    "ethash;decred"         = " -dcoin dcr -dcri 130"
+    "ethash;lbry"           = " -dcoin lbc -dcri 75"
+    "ethash;pascal"         = " -dcoin pasc -dcri 80"
+    "ethash;SiaClaymore"    = " -dcoin sc -dcri 110"
+    "ethash2gb;decred"      = " -dcoin dcr -dcri 130"
+    "ethash2gb;lbry"        = " -dcoin lbc -dcri 75"
+    "ethash2gb;pascal"      = " -dcoin pasc -dcri 80"
+    "ethash2gb;SiaClaymore" = " -dcoin sc -dcri 110"
 }
 
 $Type = "NVIDIA"
@@ -48,20 +48,20 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
         if ($Pools.$($MainAlgorithm).Name -and -not $SecondaryAlgorithm) {
 
             [PSCustomObject]@{
-                Name        = $Name
-                Type		= $Type
-                Device		= $Device.Device
-                Path		= $Path
-                Arguments	= "-mode 1 -mport $Port -epool $($Pools.$MainAlgorithm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins 1 -platform 2$Command$CommonCommands"
-                HashRates	= [PSCustomObject]@{"$MainAlgorithm_Norm" = ($Stats."$($Name)_$($MainAlgorithm_Norm)_HashRate".Week * $Fee)} 
-                API			= "Claymore"
-                Port		= $Port
-                Wrap		= $false
-                URI			= $Uri
-                PowerDraw	= $Stats."$($Name)_$($MainAlgorithm_Norm)_PowerDraw".Week
-                ComputeUsage= $Stats."$($Name)_$($MainAlgorithm_Norm)_ComputeUsage".Week
-                Pool		= $($Pools.$MainAlgorithm_Norm.Name)
-                Index		= $Index			
+                Name         = $Name
+                Type         = $Type
+                Device       = $Device.Device
+                Path         = $Path
+                Arguments    = "-mode 1 -mport $Port -epool $($Pools.$MainAlgorithm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins 1 -platform 2$Command$CommonCommands"
+                HashRates    = [PSCustomObject]@{"$MainAlgorithm_Norm" = ($Stats."$($Name)_$($MainAlgorithm_Norm)_HashRate".Week * $Fee)} 
+                API          = "Claymore"
+                Port         = $Port
+                Wrap         = $false
+                URI          = $Uri
+                PowerDraw    = $Stats."$($Name)_$($MainAlgorithm_Norm)_PowerDraw".Week
+                ComputeUsage = $Stats."$($Name)_$($MainAlgorithm_Norm)_ComputeUsage".Week
+                Pool         = $($Pools.$MainAlgorithm_Norm.Name)
+                Index        = $Index			
             }
         }
         if ($Pools.$($MainAlgorithm).Name -and $Pools.$($SecondaryAlgorithm).Name) {

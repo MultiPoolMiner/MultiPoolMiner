@@ -399,7 +399,7 @@ function Set-Stat {
         }
     }
     catch {
-        if (Test-Path $Path) {Write-Log -Level Warning "Stat file ($Name) is corrupt and will be reset. "}
+        if (Test-Path $Path) {Write-Log -Level Warn "Stat file ($Name) is corrupt and will be reset. "}
 
         $Stat = [PSCustomObject]@{
             Live = $Value
