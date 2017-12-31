@@ -66,6 +66,9 @@ while ($true) {
 
         $ExcludeAlgorithm = $ExcludeAlgorithm | ForEach-Object {Get-Algorithm $_}
         $Region = $Region | ForEach-Object {Get-Region $_}
+	$WalletBackup = $Wallet
+        $UserNameBackup = $UserName
+        $WorkerNameBackup = $WorkerName
         Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
     }
 
