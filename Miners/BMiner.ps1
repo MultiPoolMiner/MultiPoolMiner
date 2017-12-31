@@ -76,4 +76,6 @@ $Devices | ForEach-Object {
 			Index		= $Index
 		}
 	}
-	if ($Port) {$Port ++}}
+	if ($Port) {$Port ++}
+}
+Sleep 0

@@ -5,6 +5,7 @@ $Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z
 
 $Port = 4068
 
+# Custom command to be applied to all algorithms
 $CommonCommands = ""
 
 $Commands = [PSCustomObject]@{
@@ -46,40 +47,40 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
-$Devices | ForEach-Object {
+    $Devices | ForEach-Object {
 
-	$Device = $_
+        $Device = $_
 
-	$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where {$_ -cnotmatch "^_.+" -and $Pools.$(Get-Algorithm($_)).Name -and {$Pools.$(Get-Algorithm($_)).Protocol -eq "stratum+tcp" <#temp fix#>}} | ForEach-Object {
+        $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where {$_ -cnotmatch "^_.+" -and $Pools.$(Get-Algorithm($_)).Name -and {$Pools.$(Get-Algorithm($_)).Protocol -eq "stratum+tcp" <#temp fix#>}} | ForEach-Object {
 
-		$Algorithm = Get-Algorithm($_)
-		$Command =  $Commands.$_
-		
-		if ($Devices.count -gt 1) {
-			$Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($Device.Device_Norm)"
-			$Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) -d $($Device.Devices -join ',')"
-			$Index = $Device.Devices -join ","
-		}
+        $Algorithm = Get-Algorithm($_)
+        $Command =  $Commands.$_
 
-		{while (Get-NetTCPConnection -State "Listen" -LocalPort $($Port) -ErrorAction SilentlyContinue){$Port++}} | Out-Null
+        if ($Devices.count -gt 1) {
+            $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($Device.Device_Norm)"
+            $Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) -d $($Device.Devices -join ',')"
+            $Index = $Device.Devices -join ","
+        }
 
-		[PSCustomObject]@{
-			Name        = $Name
-			Type		= $Type
-			Device		= $Device.Device
-			Path		= $Path
-			Arguments	= "-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) -b $Port$Command$CommonCommands"
-			HashRates	= [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
-			API			= "Wrapper"
-			Port		= $Port
-			Wrap		= $true
-			URI			= $Uri
-			PowerDraw   = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
-			ComputeUsage= $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
-			Pool		= "$($Pools.$Algorithm.Name)"
-			Index		= $Index
-		}
-	}
-	if ($Port) {$Port ++}
+        {while (Get-NetTCPConnection -State "Listen" -LocalPort $($Port) -ErrorAction SilentlyContinue){$Port++}} | Out-Null
+
+        [PSCustomObject]@{
+            Name        = $Name
+            Type		= $Type
+            Device		= $Device.Device
+            Path		= $Path
+            Arguments	= "-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) -b $Port$Command$CommonCommands"
+            HashRates	= [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
+            API			= "Wrapper"
+            Port		= $Port
+            Wrap		= $true
+            URI			= $Uri
+            PowerDraw   = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
+            ComputeUsage= $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
+            Pool		= "$($Pools.$Algorithm.Name)"
+            Index		= $Index
+        }
+    }
+    if ($Port) {$Port ++}
 }
 Sleep 0
