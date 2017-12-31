@@ -9,7 +9,6 @@ $CommonCommands = "" # my best values Values for 108ti/1070/10603G "--submit-sta
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-<<<<<<< HEAD
     #"bitcore"      = "" # Do not use, peaks and falls back to low earnings
     "_blake2s"      = "" # my best values Values for 108ti/1070/10603G "-i 31" # beaten by Excavator136aNvidia4
     "_blakecoin"   = "" # my best values Values for 108ti/1070/10603G "-i 31" 
@@ -40,40 +39,6 @@ $Commands = [PSCustomObject]@{
     "_vanilla"     = ""
     "_veltor"      = "" # my best values Values for 108ti/1070/10603G "-i 23" # Fastest
     "_x11evo"      = "" # my best values Values for 108ti/1070/10603G "-i 21"
-=======
-    "bitcore" = "" #Bitcore
-    "blake2s" = "" #Blake2s
-    "blakecoin" = "" #Blakecoin
-    "vanilla" = "" #BlakeVanilla
-    "c11" = "" #C11
-    "cryptonight" = "" #CryptoNight
-    "decred" = "" #Decred
-    "equihash" = "" #Equihash
-    #"ethash" = "" #Ethash
-    "groestl" = "" #Groestl
-    "hmq1725" = "" #HMQ1725
-    "jha" = "" #JHA
-    "keccak" = "" #Keccak
-    "lbry" = "" #Lbry
-    "lyra2v2" = "" #Lyra2RE2
-    "lyra2z" = "" #Lyra2z
-    "myr-gr" = "" #MyriadGroestl
-    "neoscrypt" = "" #NeoScrypt
-    "nist5" = "" #Nist5
-    "pascal" = "" #Pascal
-    "phi" = "" #PHI
-    "sia" = "" #Sia
-    "sib" = "" #Sib
-    "skein" = "" #Skein
-    "skunk" = "" #Skunk
-    "timetravel" = "" #Timetravel
-    "tribus" = "" #Tribus
-    "veltor" = "" #Veltor
-    "x11evo" = "" #X11evo
-    "x17" = "" #X17
-    #"yescrypt" = "" #Yescrypt
-    #"xevan" = "" #Xevan
->>>>>>> 563c140d6b91e625e2a2b2a3eb5c3bf27b2b9324
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
