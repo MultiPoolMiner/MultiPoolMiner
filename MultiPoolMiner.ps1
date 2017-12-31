@@ -1,66 +1,26 @@
 ﻿using module .\Include.psm1
 
-param(
-    [Parameter(Mandatory = $false)][String]$Wallet = "1GPSq8txFnyrYdXL8t6S94mYdF8cGqVQJF", 
-    [Parameter(Mandatory = $false)][String]$UserName="UselessGuru", 
-    [Parameter(Mandatory = $false)][String]$WorkerName = "Blackbox", 
-    [Parameter(Mandatory = $false)][String]$Password = "x", 
-    [Parameter(Mandatory = $false)][Int]$API_ID = 0, 
-    [Parameter(Mandatory = $false)][String]$API_Key = "", 
-    [Parameter(Mandatory = $false)][Int]$Interval = 60, #seconds before reading hash rate from miners
-    [Parameter(Mandatory = $false)][String]$Region = "europe", #europe/us/asia
-    [Parameter(Mandatory = $false)][Switch]$SSL = $false, 
-    [Parameter(Mandatory = $false)][Array]$Type = @("AMD","NVIDIA","CPU"), #AMD/NVIDIA/CPU
-    [Parameter(Mandatory = $false)][Array]$Algorithm = @(), #i.e. Ethash,Equihash,CryptoNight etc.
-    [Parameter(Mandatory = $false)][Array]$MinerName = @(), 
-    [Parameter(Mandatory = $false)][Array]$PoolName = @(), 
-    [Parameter(Mandatory = $false)][Array]$ExcludeAlgorithm = @(), #i.e. Ethash,Equihash,CryptoNight etc.
-    [Parameter(Mandatory = $false)][Array]$ExcludeMinerName = @(), 
-    [Parameter(Mandatory = $false)][Array]$ExcludePoolName = @(),
-    [Parameter(Mandatory = $false)][Array]$Currency = ("CHF","BTC","USD"), #i.e. GBP,EUR,ZEC,ETH etc.
-    [Parameter(Mandatory = $false)][Int]$Donate = 24, #Minutes per Day
-    [Parameter(Mandatory = $false)][String]$Proxy = "", #i.e http://192.0.0.1:8080
-    [Parameter(Mandatory = $false)][Int]$Delay = 0, #seconds before opening each miner
-    [Parameter(Mandatory = $false)][Switch]$Watchdog = $false,
-    [Parameter(Mandatory = $false)][String]$MinerStatusURL = "http://mining.emsley.ca/miner.php",
-    [Parameter(Mandatory = $false)][Int]$SwitchingPrevention = 1, #zero does not prevent miners switching,
-    [Parameter(Mandatory = $false)][String]$MinerWindowStyle = "Minimized", # Any of: '"normal","maximized","minimized","hidden". Note: During benchmark all windows will run in "normal" mode. Hidden is not supported for wrapper
-    [Parameter(Mandatory = $false)][String]$PayoutCurrency = "BTC", #i.e. BTH,ZEC,ETH etc., if supported by the pool mining earnings will be autoconverted and paid out in this currency
-    [Parameter(Mandatory = $false)][Double]$MinProfit = 1,  # Minimal required profit (in $Currency[0]), if less it will not mine
-    [Parameter(Mandatory = $false)][Double]$PowerPricePerKW = 0.3, # Electricity price per kW (in $currency[0]), 0 will disable power cost calculation
-    [Parameter(Mandatory = $false)][Double]$Computer_PowerDraw = 50, # Base power consumption of computer (in Watts) excluding GPUs or CPU mining
-    [Parameter(Mandatory = $false)][Double]$CPU_PowerDraw = 80, # Power consumption (in Watts) of all CPUs when mining (on top of general power ($Computer_PowerConsumption) needed to run your computer when NOT mining) (in $currency[0])
-    [Parameter(Mandatory = $false)][Double]$GPU_PowerDraw = 500, # Power consumption of all GPUs when mining (in $currency[0])
-    [Parameter(Mandatory = $false)][Switch]$DisplayProfitOnly = $false, # If $true will not start miners and list hypthetical earnings
-    [Parameter(Mandatory = $false)][Switch]$DisplayComparison = $false, # If $true will evaluate and display MPM miner is faster than... in summary, if $false will save CPU cycles and screen space
-    [Parameter(Mandatory = $false)][Switch]$UseShortPoolNames = $true, # If $true will display short pool names in summary
-    [Parameter(Mandatory = $false)][Switch]$DeviceSubTypes = $false, # If true separate miners will be launched for each GPU model class$
-    [Parameter(Mandatory = $false)][Int]$MinPoolWorkers = 10, # Minimum workers required to mine on coin, if less skip the coin
-    [Parameter(Mandatory = $false)][Switch]$ProfitLessFee = $true, # If true profit = earnings - less pool fees
-    [Parameter(Mandatory = $false)][String]$PriceTimeSpan, # Week, Day, Hour, Minute_10, Minute_5
-    [Parameter(Mandatory = $false)][Switch]$BeepOnError=$true # if $true will beep on errors
-)
+Import-Module NetSecurity -ErrorAction Ignore
+Import-Module Defender -ErrorAction Ignore
 
-$progressPreference = 'silentlyContinue' 
-
-if ($PGHome -notmatch ".+") {Clear-Host}
+$ProgressPreference = 'silentlyContinue' 
+. .\MyInclude.ps1
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+if(-not (Test-Path -Path '.\Config.ps1')) {
+    Throw "Configuration missing! Run setup.ps1 to configure, or copy Config.sample.ps1 to Config.ps1 and edit settings. "
+    }
+else {
+    Write-Log "Applying configuration from Config.ps1..."
+    . .\Config.ps1
+}
 
 if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -Recurse | Unblock-File}
 if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue) -and (Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {
     Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) "-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1'; Add-MpPreference -ExclusionPath '$(Convert-Path .)'" -Verb runAs
 }
 
-if ($Proxy -eq "") {$PSDefaultParameterValues.Remove("*:Proxy")}
-else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
-
-# . .\Invoke-CreateProcess.ps1
-
-$ExcludeAlgorithm = $ExcludeAlgorithm | ForEach-Object {Get-Algorithm $_}
-$Region = $Region | ForEach-Object {Get-Region $_}
-$GPUsFalse = (Get-GPUdevices $Type $false)
-$GPUsTrue = (Get-GPUdevices $Type $true)
+# Read device information
 $GPUs = (Get-GPUdevices $Type $DeviceSubTypes)
 
 $Strikes = 3
@@ -82,8 +42,10 @@ $ActiveMiners = @()
 
 $Rates = [PSCustomObject]@{BTC = [Double]1}
 
-#Start the log
-Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
+# Only when not running in PowerGUI
+if ($PGHome -notmatch ".+") {
+    Clear-Host
+}
 
 #Check for software updates
 #$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ("6.1", $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1
@@ -91,16 +53,32 @@ Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
 #Set donation parameters
 if ($Donate -lt 10) {$Donate = 10}
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
-$WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHhGkCuNrFt6v9")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
-$UserNameDonate = @("aaronsace", "fonyo")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
+$WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHhGkCuNrFt6v9","1GPSq8txFnyrYdXL8t6S94mYdF8cGqVQJF")
+$UserNameDonate = @("aaronsace", "fonyo","uselessguru")
 $WorkerNameDonate = "multipoolminer"
 $WalletBackup = $Wallet
 $UserNameBackup = $UserName
 $WorkerNameBackup = $WorkerName
+$PayoutCurrencyBackup = $PayoutCurrency
+$DonateDistribution = 0,0,0,0,0,0,0,0,0,1,2 #9:1:1
+
+Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
 
 while ($true) {
-    Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
+    if ((Get-ChildItem "Config.ps1").LastWriteTime.ToUniversalTime() -gt $Timer) {
+        # File has changed since last loop; re-read config -  this allows for dynamic configration changes
+        Write-Log "Configuration data has been modified - applying configuration from Config.ps1..."
+        . .\Config.ps1
+        
+        if ($Proxy -eq "") {$PSDefaultParameterValues.Remove("*:Proxy")}
+        else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
 
+        $ExcludeAlgorithm = $ExcludeAlgorithm | ForEach-Object {Get-Algorithm $_}
+        $Region = $Region | ForEach-Object {Get-Region $_}
+        $GPUs = (Get-GPUdevices $Type $DeviceSubTypes)
+        Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
+    }
+    
     $Timer = (Get-Date).ToUniversalTime()
 
     $StatStart = $StatEnd
@@ -112,48 +90,57 @@ while ($true) {
     $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
     $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
 
-#    #Activate or deactivate donation
-#    if ($Timer.AddDays(-1).AddMinutes($Donate) -ge $LastDonated) {
-#        if ($Wallet) {$Wallet = $WalletDonate}
-#        if ($UserName) {$UserName = $UserNameDonate}
-#        if ($WorkerName) {$WorkerName = $WorkerNameDonate}
-#    }
-#    if ($Timer.AddDays(-1) -ge $LastDonated) {
-#        $Wallet = $WalletBackup
-#        $UserName = $UserNameBackup
-#        $WorkerName = $WorkerNameBackup
-#        $LastDonated = $Timer
-#    }
-
+    #Activate or deactivate donation
+    if ($Timer.AddDays(-1).AddMinutes($Donate) -ge $LastDonated -and $Wallet -notcontains $WalletDonate -and $UserNameDonate -inotcontains $UserName) {
+        if ($Wallet) {$Wallet = $WalletDonate[(Get-Random -InputObject $DonateDistribution)]}
+        if ($UserName) {$UserName = $UserNameDonate[(Get-Random -InputObject $DonateDistribution)]}
+        if ($WorkerName) {$WorkerName = $WorkerNameDonate}
+        $PayoutCurrency = "BTC"
+    }
+    if ($Timer.AddDays(-1) -ge $LastDonated) {
+        $Wallet = $WalletBackup
+        $UserName = $UserNameBackup
+        $WorkerName = $WorkerNameBackup
+        $PayoutCurrency = $PayoutCurrencyBackup
+        $LastDonated = $Timer
+    }
+    
     #Update the exchange rates
     try {
+        Write-Log "Updating exchange rates from Coinbase..."
         $NewRates = Invoke-RestMethod "https://api.coinbase.com/v2/exchange-rates?currency=BTC" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop | Select-Object -ExpandProperty data | Select-Object -ExpandProperty rates
         $Currency | Where-Object {$NewRates.$_} | ForEach-Object {$Rates | Add-Member $_ ([Double]$NewRates.$_) -Force}
     }
     catch {
-        Write-Warning "Coinbase is down. "
+        Write-Log -Level Warning "Coinbase is down. "
     }
 
     # By default mining is NOT profitable
     [Switch]$MiningIsProfitable = $false
 
     #Load the stats
+    Write-Log "Loading saved statistics..."
     $Stats = [PSCustomObject]@{}
     if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
-
-    if (-not $CrashedMiners) {
+   
+    # Reset benchmark mode
+    $BenchmarkMode = $false
+    # On crashed miners do not poll pools. Highest priority is having running miners. Skip 3 times befor re-load pool info
+    if ($CrashedMinersWatchdog -lt 1 -or $CrashedMinersWatchdog-ge 3) {
         #Load information about the pools
-        "Loading available pools..." | Out-Host
+        Write-Log "Loading pool information..."
         $NewPools = @()
         if (Test-Path "Pools") {
             $NewPools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; UserName = $UserName; Password = $Password; WorkerName = $WorkerName; StatSpan = $StatSpan; Algorithm = $Algorithm; PayoutCurrency = $PayoutCurrency; ProfitLessFee = $ProfitLessFee; MinPoolWorkers = $MinPoolWorkers; UseShortPoolNames = $UseShortPoolNames} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru}
-        }    
+        }
+        # This finds any pools that were already in $AllPools (from a previous loop) but not in $NewPools. Add them back to the list. Their API likely didn't return in time, but we don't want to cut them off just yet
+        # since mining is probably still working. Then it filters out any algorithms that aren't being used.
         $AllPools = @($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object {$AllPools | Where-Object Name -EQ $_}) | 
             Where-Object {$Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
             Where-Object {$ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $ExcludeAlgorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
 
         #Remove non-present pools
-    $AllPools = $AllPools | Where-Object {Test-Path "Pools\$($_.Name).ps1"}
+        $AllPools = $AllPools | Where-Object {Test-Path "Pools\$($_.Name).ps1"}
 
         #Apply watchdog to pools
         $AllPools = $AllPools | Where-Object {
@@ -164,26 +151,31 @@ while ($true) {
 
         #Update the active pools
         if ($AllPools.Count -eq 0) {
-            Write-Warning "No pools available. "
+            Write-Log -Level Warn "No pools available. "
             if ($Downloader) {$Downloader | Receive-Job}
             Start-Sleep $Interval
             continue
         }
         $Pools = [PSCustomObject]@{}
+        
+        Write-Log "Selecting best pool for each algorithm..."
         $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Sort-Object -Descending {$PoolName.Count -eq 0 -or (Compare-Object $PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}, {$_.StablePrice * (1 - $_.MarginOfError)}, {$_.Region -EQ $Region}, {$_.SSL -EQ $SSL} | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
         if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_} | Measure-Object Updated -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalSeconds) -gt $Interval * $Strikes) {
-            Write-Warning "Pool prices are out of sync. "
+            Write-Log -Level Warn "Pool prices are out of sync. "
             $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.StablePrice * (1 - ($Pools.$_.MarginOfError * $SwitchingPrevention * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
         }
         else {
             $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.Price * (1 - ($Pools.$_.MarginOfError * $SwitchingPrevention * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
         }
     }
-    $BenchmarkMode = $false
-
+ 
     #Load information about the miners
-    "Loading available miners..." | Out-Host
+    Write-Log "Loading available miners..."
     #Messy...?
+    Write-Log "Getting miner information..."
+    # Get all the miners, get just the .Content property and add the name, select only the ones that match our $Type (CPU, AMD, NVIDIA) or all of them if type is unset,
+    # select only the ones that have a HashRate matching our algorithms, and that only include algorithms we have pools for
+    # select only the miners that match $MinerName, if specified, and don't match $ExcludeMinerName
     $AllMiners = if (Test-Path "Miners") {
         Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; StatSpan = $StatSpan; GPUs = $GPUs} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru} | 
         Where-Object {$Type.Count -eq 0 -or (Compare-Object $Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
@@ -192,6 +184,7 @@ while ($true) {
         Where-Object {$MinerName.Count -eq 0 -or (Compare-Object $MinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
         Where-Object {$ExcludeMinerName.Count -eq 0 -or (Compare-Object $ExcludeMinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
     }
+    Write-Log "Calculating profit for each miner..."
     $AllMiners | ForEach-Object {
         $Miner = $_
 
@@ -302,17 +295,20 @@ while ($true) {
 
     $Miners = $AllMiners | Where-Object {(Test-Path $_.Path) -and ((-not $_.PrerequisitePath) -or (Test-Path $_.PrerequisitePath))}
 
-
     if ($Downloader.State -ne "Running") {
         $Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList (@($AllMiners | Where-Object {$_.PrerequisitePath} | Select-Object @{name = "URI"; expression = {$_.PrerequisiteURI}}, @{name = "Path"; expression = {$_.PrerequisitePath}}, @{name = "Searchable"; expression = {$false}}) + @($AllMiners | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($AllMiners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}}) | Select-Object * -Unique) -FilePath .\Downloader.ps1
     }
     
-    # Open firewall ports for all miners    
-    if (Get-Command "Get-NetFirewallRule" -ErrorAction SilentlyContinue) {
-        if ($MinerFirewalls -eq $null) {$MinerFirewalls = Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program}
-        if (@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ "=>") {
-            Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) ("-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1'; ('$(@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ '=>' | Select-Object -ExpandProperty InputObject | ConvertTo-Json -Compress)' | ConvertFrom-Json) | ForEach {New-NetFirewallRule -DisplayName 'MultiPoolMiner' -Program `$_}" -replace '"', '\"') -Verb runAs
-            $MinerFirewalls = $null
+    # Open firewall ports for all miners
+    if (Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) {
+        if ((Get-Command "Get-MpComputerStatus" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue)) {
+            if (Get-Command "Get-NetFirewallRule" -ErrorAction SilentlyContinue) {
+                if ($MinerFirewalls -eq $null) {$MinerFirewalls = Get-NetFirewallRule | Where-Object DisplayName -EQ "MultiPoolMiner" | Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program}
+                if (@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ "=>") {
+                    Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) ("-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1'; ('$(@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ '=>' | Select-Object -ExpandProperty InputObject | ConvertTo-Json -Compress)' | ConvertFrom-Json) | ForEach {New-NetFirewallRule -DisplayName 'MultiPoolMiner' -Program `$_}" -replace '"', '\"') -Verb runAs
+                    $MinerFirewalls = $null
+                }
+            }
         }
     }
 
@@ -325,7 +321,7 @@ while ($true) {
 
     #Update the active miners
     if ($Miners.Count -eq 0) {
-        Write-Warning "No miners available. "
+        Write-Log -Level Warn "No miners available. "
         if ($Downloader) {$Downloader | Receive-Job}
         if ($DisplayProfitOnly) {Start-Sleep ($Interval / 10)} else {Start-Sleep $Interval}
         continue
@@ -487,6 +483,7 @@ while ($true) {
     $BestMiners_Combo | ForEach-Object {$_.Best = $true}
     if ($DisplayComparison) {$BestMiners_Combo_Comparison | ForEach-Object {$_.Best_Comparison = $true}}
 
+    # Accumulate power & profit
     $Earnings= 0
     $Profits = 0
     $PowerCosts = 0
@@ -495,6 +492,8 @@ while ($true) {
         $Profits += $_.Profit
         $PowerCosts += $_.PowerCost
     }
+    
+    #Determine mining profitability
     $MiningIsProfitable = ($Profits * $Rates.$($Currency[0])) -ge $MinProfit
 
     #Stop or start miners in the active list depending on if they are the most profitable
@@ -512,31 +511,48 @@ while ($true) {
                 if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
                     $Miner_Command = "$(Split-Path $_.Path -leaf) $($_.Arguments)"
                     "$(Split-Path $_.Path -leaf) $($_.Arguments)" | Out-File "$(Split-Path $_.Path)\$($_.Name)_$($($_.Algorithm | ForEach-Object { (($_)+ "_" + $Pools.$_.Name)}) -join "-").cmd" -Encoding default
+                    Write-Log "Starting $($_.Type) miner $($_.Name): '$($_.Path) $($_.Arguments)'"
                     $DecayStart = $Timer
                     $_.New = $true
                     $_.Activated++
                     if ($_.Process -ne $null) {$_.Active += $_.Process.ExitTime - $_.Process.StartTime}
-                    if ($BenchmarkMode) {$ShowWindow = "SW_SHOWNORMAL"; $WindowStyle = "Normal"} else {$ShowWindow = "SW_SHOWMINNOACTIVE"; $WindowStyle = "$MinerWindowStyle"}
-                    $ForegroundWindow = Get-ForegroundWindow
+                    if ($BenchmarkMode) {
+                        $ShowWindow = "SW_SHOWNORMAL"; $WindowStyle = "Normal"
+                    } else {
+                        $WindowStyle = "$MinerWindowStyle"
+                        switch ($WindowStyle) {
+                            "Normal"    {$ShowWindow = "SW_SHOW"}
+                            "Maximized" {$ShowWindow = "SW_SHOWMAXIMIZE"}
+                            "Minimized" {$ShowWindow = "SW_SHOWMINNOACTIVE"}
+                            "Hidden"    {$ShowWindow = "SW_HIDDEN"}
+                        }
+                    }
                     if ($_.Wrap) {
-                        $_.Process = Start-Process -FilePath (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) -ArgumentList "-executionpolicy bypass -command . '$(Convert-Path ".\Wrapper.ps1")' -ControllerProcessID $PID -Id '$($_.Port)' -FilePath '$($_.Path)' -ArgumentList '$($_.Arguments)' -WorkingDirectory '$(Split-Path $_.Path)' -ShowWindow '$ShowWindow' -CreationFlags 'CREATE_NEW_CONSOLE' -ForegroundWindowID $($ForegroundWindow.ID)" -WindowStyle $WindowStyle -PassThru
+                        if ($UseNewMinerLauncher) {
+                            $_.Process = Invoke-CreateProcess -Binary ("$((Get-Command powershell.exe).Definition)") -Args ("-command . '$(Convert-Path ".\Wrapper.ps1")' -ControllerProcessID $PID -Id '$($_.Port)' -FilePath '$($_.Path)' -ArgumentList '$($_.Arguments)' -WorkingDirectory '$(Split-Path $_.Path)'") -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path (Get-Command powershell.exe).Definition)
+                        }
+                        else {
+                            $_.Process = Start-Process -FilePath (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) -ArgumentList "-executionpolicy bypass -command . '$(Convert-Path ".\Wrapper.ps1")' -ControllerProcessID $PID -Id '$($_.Port)' -FilePath '$($_.Path)' -ArgumentList '$($_.Arguments)' -WorkingDirectory '$(Split-Path $_.Path)'" -WindowStyle $WindowStyle -PassThru
+                        }
                     }
-#                    elseif ($_.API -eq "eminer"-or $_.API -eq "Bminer") {
-#                        $_.Process = Start-SubProcess -FilePath $_.Path -ArgumentList $_.Arguments -WorkingDirectory (Split-Path $_.Path) -Priority ($_.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
-#                    }
                     else {
-#                        $_.Process = Invoke-CreateProcess -Binary $_.Path -Args (" $($_.Arguments)") -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path $_.Path)
-                        $_.Process = Start-SubProcess -FilePath $_.Path -ArgumentList $_.Arguments -WorkingDirectory (Split-Path $_.Path) -Priority ($_.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -WindowStyle ($MinerWindowStyle)
+                        if ($UseNewMinerLauncher) {
+                            $Binary = ((Get-Command powershell.exe).Definition) -replace ' ','` '
+                            $Payload = $_.Path -replace ' ','` '
+                            $Arguments = "-command '& {$($Payload) $($_.Arguments)}"
+                            $_.Process = Invoke-CreateProcess -Binary ($Binary) -Args ($Arguments) -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path $Binary)
+                            $_.Process = Invoke-CreateProcess -Binary $_.Path -Args ("$($_.Arguments)") -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path $_.Path)
+                        }
+                        else {
+                            $_.Process = Start-SubProcess -FilePath $_.Path -ArgumentList $_.Arguments -WorkingDirectory (Split-Path $_.Path) -Priority ($_.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -WindowStyle ($MinerWindowStyle)
+                        }
                     }
-                    if (-not $BenchmarkMode) {
-                        # Return focus
-                        [Microsoft.VisualBasic.Interaction]::AppActivate($ForegroundWindow.ID) | Out-Null
+                    if ($_.Process -eq $null) {$_.Status = "Failed"}
+                    else {
+                        $_.Status = "Running"
+                        $_.Process.PriorityClass = "BelowNormal"
+                        Write-Log "Started $($_.Type) miner $($_.Name) with PID $($_.Process.Id)"
                     }
-                }
-                if ($_.Process -eq $null) {$_.Status = "Failed"}
-                else {
-                    $_.Status = "Running"
-                    $_.Process.PriorityClass = "BelowNormal"
                 }
                 $KeepOldMinerRunning = 3 #Keep running miners alive until new miners are mining (e.g. DAG download is complete
                 #Add watchdog timer
@@ -575,11 +591,20 @@ while ($true) {
     $ActiveMiners | Where-Object Activated -GT 0 | Where-Object Best -EQ $false | ForEach-Object {
         $Miner = $_
         if ($Miner.Process -eq $null -or $Miner.Process.HasExited) {
-            if ($Miner.Status -eq "Running") {$Miner.Status = "Failed"}
+
+            if ($Miner.Status -eq "Running") {
+                $Miner.Status = "Failed"
+                if($Miner.Process -eq $null) {
+                    Write-Log -Level Warn "$($Miner.Type) miner $($Miner.Name) failed - process handle is missing"
+                }
+                if($Miner.Process.HasExited) {
+                    Write-Log -Level Warn "$($Miner.Type) miner $($Miner.Name) failed - process exited on it's own"
+                }
+            }
         }
         else {
             if ($_.Process -ne "DisplayProfitOnly") {
-                $Miner.Process.PriorityClass = "Normal"
+                Write-Log "Closing $($Miner.Type) miner $($Miner.Name) because it is no longer the most profitable"
                 $Miner.Process.CloseMainWindow() | Out-Null
             }
             $Miner.Status = "Idle"
@@ -629,7 +654,7 @@ while ($true) {
 
     $ProfitSummary = "$(($Profits * $Rates.$($Currency[0])).ToString("N2")) $($Currency[0].ToUpper())/day ($(($Earnings * $Rates.$($Currency[0])).ToString("N2")) - $(($PowerCosts * $Rates.$($Currency[0])).ToString("N2")) $($Currency[0].ToUpper())/day). "
     if ($MiningIsProfitable) {Write-Host "Mining is currently profitable using the algorithms listed above. According to pool pricing information currently mining $($ProfitSummary)"}
-    elseif (-not $BenchmarkMode -or -not $DisplayProfitOnly) {Write-Warning "Mining is currently NOT profitable - mining stopped! According to pool pricing information currently mining $($ProfitSummary)"}
+    elseif (-not $BenchmarkMode -or -not $DisplayProfitOnly) {Write-Log -Level Warning "Mining is currently NOT profitable - mining stopped! According to pool pricing information currently mining $($ProfitSummary)"}
     Write-Host "(Profitability limit: $($MinProfit.ToString("N2")) $($Currency[0].ToUpper())/day; Power cost $($PowerPricePerKW.ToString("N2")) $($Currency[0].ToUpper())/kW; 1 BTC = $($Rates.$($Currency[0]).ToString("N2")) $($Currency[0].ToUpper())). "
     
     if ($BenchmarkMode -and -not $DisplayProfitOnly) {Write-Host  -BackgroundColor Yellow -ForegroundColor Black "Benchmarking - do not execute GPU intense applications until benchmarking is complete!"}
@@ -689,6 +714,7 @@ while ($true) {
     [GC]::Collect()
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
+    Write-Log "Waiting for $Interval seconds to start next run"
     $KeyPressed = $null # Press 'L' for next loop
     for ($i = 3; ($i -gt 0 -or $Timer -lt $StatEnd) -and $KeyPressed -ne 'L'; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
@@ -711,29 +737,21 @@ while ($true) {
             $KeyPressed = $Key.character
             while ($Host.UI.RawUI.KeyAvailable)  {$host.ui.RawUi.Flushinputbuffer()} #keyb buffer flush
         }
-#        switch ($KeyPressed){
-#                'L' {break}
-#                'C' {$Screen='current'}
-#                'H' {$Screen='history'}
-#                'E' {$ExitLoop=$true}
-#                'W' {$Screen='Wallets'}
-#                'U' {if ($Screen -eq "Wallets") {$WalletsUpdate=$null}}
-#                'T' {if ($Screen -eq "Profits") {if ($ProfitsScreenLimit -eq 40) {$ProfitsScreenLimit=1000} else {$ProfitsScreenLimit=40}}}
-#                'B' {if ($Screen -eq "Profits") {if ($ShowBestMinersOnly -eq $true) {$ShowBestMinersOnly=$false} else {$ShowBestMinersOnly=$true}}}
-#        }
         $Timer = (Get-Date).ToUniversalTime()
         if ($CrashedMiners) {
             $CrashedMiners | ForEach-Object {
-                Write-Warning "Miner $($_.Name) '$(Split-Path $_.Path -leaf) $($_.Arguments)' crashed!"
+                Write-Log -Level Error "Miner $($_.Name) '$(Split-Path $_.Path -leaf) $($_.Arguments)' crashed!"
                 $TimeStamp = Get-Date -format u 
                 "$($Timestamp): $(Split-Path $_.Path -leaf) $($_.Arguments)" | Out-File "CrashedMiners.txt" -Append
             }
+            $CrashedMinersWatchdog++
             [console]::beep(2000,500)
             break
         }
+        else {$CrashedMinersWatchdog = 0}
     }
 
-    if (-not $DisplayProfitOnly) {
+    if (-not $CrashedMiners -and -not $DisplayProfitOnly) {
         #Save current hash rates
         $ActiveMiners | ForEach-Object {
             $Miner = $_
@@ -741,7 +759,7 @@ while ($true) {
             if ($Miner.New) {$Miner.Benchmarked++}
 
             if ($Miner.Process -and -not $Miner.Process.HasExited -and $Miner.Port) {
-                "Requesting stats for $($Miner.Device) miner... " | Out-Host
+                Write-Log "Requesting stats for $($Miner.Device) miner... "
 
                 Start-Job -Name "GetMinerData_$($Miner.Device)" ([scriptblock]::Create("Set-Location('$(Get-Location)');. 'APIs\$($Miner.API).ps1'")) -ArgumentList ($Miner, $Strikes) -ScriptBlock {
                     param($Miner, $Strikes)
@@ -781,50 +799,51 @@ while ($true) {
                 } | Out-Null
             }
         }
-        "Waiting for stats... " | Out-Host
+        Write-Log "Waiting for stats... "
         Get-Job -Name "GetMinerData_*" | Wait-Job -Timeout ($Interval * 2) | Out-Null
         
-        $ActiveMiners | ForEach-Object {
+        $ActiveMiners | Where-Object {$_.Process -and -not $_.Process.HasExited -and $_.Port} | ForEach-Object {
             $Miner = $_
             $Miner.Speed_Live = 0
             $Miner_HashRate = [PSCustomObject]@{}
 
-            if ($Miner.Process -and -not $Miner.Process.HasExited -and $Miner.Port) {
-                $Miner_Data = Receive-Job -Name "GetMinerData_$($_.Device)"
-                if ($Miner_Data) {
-                    $Miner_HashRate = $Miner_Data.HashRate
-                    $Miner_PowerDraw = $Miner_Data.PowerDraw
-                    $Miner_ComputeUsage = $Miner_Data.ComputeUsage
-                    $Miner.Speed_Live = $Miner_HashRate.PSObject.Properties.Value
-                    "Saving stats for miner $($Miner.Device) [ $(($Miner.Speed_Live) | ConvertTo-Hash)/s | $($Miner_PowerDraw.ToString("N2"))% W  | $($Miner_ComputeUsage.ToString("N2"))% ]... " | Out-Host
+            $Miner_Data = Receive-Job -Name "GetMinerData_$($_.Device)"
+            
+            if ($Miner_Data) {
+                $Miner_HashRate = $Miner_Data.HashRate
+                $Miner_PowerDraw = $Miner_Data.PowerDraw
+                $Miner_ComputeUsage = $Miner_Data.ComputeUsage
+                $Miner.Speed_Live = $Miner_HashRate.PSObject.Properties.Value
+                Write-Log "Saving stats for miner $($Miner.Device) [ $(($Miner.Speed_Live) | ConvertTo-Hash)/s | $($Miner_PowerDraw.ToString("N2"))% W | $($Miner_ComputeUsage.ToString("N2"))% ]... "
 
-                    $Miner.Algorithm | Where-Object {$Miner_HashRate.$_} | ForEach-Object {
-                    
-                        $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_HashRate.$_ -Duration $StatSpan -FaultDetection $true
+                $Miner.Algorithm | Where-Object {$Miner_HashRate.$_} | ForEach-Object {
+                
+                    $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_HashRate.$_ -Duration $StatSpan -FaultDetection $true
 
-                        #Update watchdog timer
-                        $Miner_Name = $Miner.Name
-                        $Miner_Algorithm = $_
-                        $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
-                        if ($Stat -and $WatchdogTimer -and $Stat.Updated -gt $WatchdogTimer.Kicked) {
-                            $WatchdogTimer.Kicked = $Stat.Updated
-                        }
-                    }
-                    $Miner.New = $false
-                    # Update power stats
-                    if ($Miner_PowerDraw -gt 0) {
-                        $Stat = Set-Stat -Name "$($Miner.Name)_$($_.Algorithm -join '')_PowerDraw" -Value $Miner_PowerDraw -Duration $StatSpan -FaultDetection $false
-                    }
-                    # Update ComputeUsage stats
-                    if ($Miner_ComputeUsage -gt 0) {
-                        $Stat = Set-Stat -Name "$($Miner.Name)_$($_.Algorithm -join '')_ComputeUsage" -Value $Miner_ComputeUsage -Duration $StatSpan -FaultDetection $false
+                    #Update watchdog timer
+                    $Miner_Name = $Miner.Name
+                    $Miner_Algorithm = $_
+                    $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
+                    if ($Stat -and $WatchdogTimer -and $Stat.Updated -gt $WatchdogTimer.Kicked) {
+                        $WatchdogTimer.Kicked = $Stat.Updated
                     }
                 }
-                else {
+                $Miner.New = $false
+                # Update power stats
+                if ($Miner_PowerDraw -gt 0) {
+                    $Stat = Set-Stat -Name "$($Miner.Name)_$($_.Algorithm -join '')_PowerDraw" -Value $Miner_PowerDraw -Duration $StatSpan -FaultDetection $false
+                }
+                # Update ComputeUsage stats
+                if ($Miner_ComputeUsage -gt 0) {
+                    $Stat = Set-Stat -Name "$($Miner.Name)_$($_.Algorithm -join '')_ComputeUsage" -Value $Miner_ComputeUsage -Duration $StatSpan -FaultDetection $false
+                }
+            }
+            else {
+                if ($Miner.Name -notmatch "PalginNvidia_.+" <# temp fix, Palgin does not have an APi yet#>) {
                     if ($BeepOnError) {
                         [console]::beep(1000,500)
                     }
-                    Write-Warning "Failed to connect to miner ($($Miner.Name)). "
+                    Write-Log -Level Error "Failed to connect to miner ($($Miner.Name)). "
                 }
             }
         }
@@ -842,6 +861,7 @@ while ($true) {
             }
         }
     }
+    Write-Log "Starting next run..."
 }
 
 #Stop the log

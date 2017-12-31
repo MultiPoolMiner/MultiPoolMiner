@@ -8,6 +8,11 @@ param(
     [Parameter(Mandatory=$true)]$MinerStatusURL
 )
 
+# Force using . as the decimal separator for this script, no matter what the system locale
+$OriginalCulture = [System.Threading.Thread]::CurrentThread.CurrentCulture
+[System.Threading.Thread]::CurrentThread.CurrentCulture = [Globalization.CultureInfo]::InvariantCulture
+
+
 Write-Host "Pinging monitoring server..."
 $profit = "{0:N8}" -f (($ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Measure-Object Profit -Sum).Sum)
 
@@ -31,3 +36,6 @@ $minerreport = ConvertTo-Json @($ActiveMiners | Where-Object {$_.Activated -GT 0
     }
 })
 Invoke-RestMethod -Uri $MinerStatusURL -Method Post -Body @{address = $Address; workername = $WorkerName; miners = $minerreport; profit = $profit}
+
+# Set culture back
+[System.Threading.Thread]::CurrentThread.CurrentCulture = $OriginalCulture

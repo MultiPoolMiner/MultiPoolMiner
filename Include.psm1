@@ -1,24 +1,6 @@
-﻿Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore
-Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1" -ErrorAction Ignore
-
-Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+﻿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
-
-[void][System.Reflection.Assembly]::LoadWithPartialName("'Microsoft.VisualBasic")
-
-Add-Type -TypeDefinition @"
-  using System;
-  using System.Runtime.InteropServices;
-  public class Tricks {
-    [DllImport("user32.dll")]
-    public static extern IntPtr GetForegroundWindow();
-}
-"@
-
-function Get-ForegroundWindow {
-    Get-Process | Where-Object {$_.MainWindowHandle -eq [tricks]::GetForegroundWindow()}
-}
 
 function Get-GPUdevices {
 
@@ -65,7 +47,7 @@ function Get-GPUdevices {
 				}
 				$Device_ID++
 			}
-
+# Use code below to simulate more HW   
 #			[OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
 #				$Device = $_.Name
 #				$GPU = [PSCustomObject]@{
@@ -294,6 +276,39 @@ function Get-ComputeData {
 	}
 }
 
+Function Write-Log {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
+        [Parameter(Mandatory=$false)][ValidateSet("Error","Warn","Info")][string]$Level = "Info"
+    )
+
+    Begin {
+        $VerbosePreference = 'Continue'
+    }
+    Process {
+        $filename = ".\Logs\MultiPoolMiner-$(Get-Date -Format "yyyy-MM-dd").txt"
+        $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+        switch($Level) {
+            'Error' {
+                $LevelText = 'ERROR:'
+                Write-Host -ForegroundColor Red -Object "$date $LevelText $Message"
+            }
+            'Warn' {
+                $LevelText = 'WARNING:'
+                Write-Host -ForegroundColor Yellow -Object "$date $LevelText $Message"
+            }
+            'Info' {
+                $LevelText = 'INFO:'
+                Write-Host -ForegroundColor DarkCyan -Object "$date $LevelText $Message"
+            }
+        }
+        "$date $LevelText $Message" | Out-File -FilePath $filename -Append
+    }
+    End {}
+}
+
 function Set-Stat {
 	[CmdletBinding()]
 	param(
@@ -348,7 +363,7 @@ function Set-Stat {
         if ($ChangeDetection -and $Value -eq $Stat.Live) {$Updated -eq $Stat.updated}
 
         if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
-            Write-Warning "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin)...$([Int]$ToleranceMax)). "
+            Write-Log -Level Warning "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin)...$([Int]$ToleranceMax)). "
         }
         else {
             $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
@@ -384,7 +399,7 @@ function Set-Stat {
         }
     }
     catch {
-        if (Test-Path $Path) {Write-Warning "Stat file ($Name) is corrupt and will be reset. "}
+        if (Test-Path $Path) {Write-Log -Level Warning "Stat file ($Name) is corrupt and will be reset. "}
 
         $Stat = [PSCustomObject]@{
             Live = $Value
@@ -501,7 +516,7 @@ filter ConvertTo-Hash {
     [CmdletBinding()]
     $Hash = $_
     switch ([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1)))) {
-        "-Infinity" {"0 H"}0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0))}
+        "-Infinity" {"0  H"}0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0))}
         1 {"{0:n2} KH" -f ($Hash / [Math]::Pow(1000, 1))}
         2 {"{0:n2} MH" -f ($Hash / [Math]::Pow(1000, 2))}
         3 {"{0:n2} GH" -f ($Hash / [Math]::Pow(1000, 3))}

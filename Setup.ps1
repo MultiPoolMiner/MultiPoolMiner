@@ -31,6 +31,10 @@ if ($AllPools.Count -eq 0) {
     Throw "No pools available. "
 }
 $PoolList = $AllPools | Select-Object -ExpandProperty Name -Unique
+
+if ($PoolList.count -ne (Get-ChildItem "Pools" -File | Measure-Object ).Count) {
+    Throw "Could not get information from all configured pools. Cannot continue. "
+}
 $Pools = [PSCustomObject]@{}
 $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
 

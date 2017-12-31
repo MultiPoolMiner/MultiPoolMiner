@@ -1,6 +1,6 @@
 using module ..\Include.psm1
 
-class Ccminer : Miner {
+class BMiner : Miner {
 	[PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
 		$Server = "localhost"
 		$Timeout = 10 #seconds
@@ -11,32 +11,54 @@ class Ccminer : Miner {
 
 		$PowerDraws = @()
 		$ComputeUsages = @()
+        
+        if ($this.index -eq $null -or $this.index -le 0) {
+            $Index = @()
+            for ($i = 0; $i -le 15; $i++) {$Index += $i}               
+        }
+        else {
+            $Index = $this.index
+        }
 			
-		$Request = "summary"
+		$URI = "http://$($Server):$($this.Port)/api/status"
         $Response = ""
 
 		do {
 			# Read Data from hardware
 			$ComputeData = [PSCustomObject]@{}
 			$ComputeData = (Get-ComputeData -MinerType $this.type -Index $this.index)
-			$PowerDraws += $ComputeData.PowerDraw
-			$ComputeUsages += $ComputeData.ComputeUsage
+
+#			$PowerDraws += $ComputeData.PowerDraw
+#			$ComputeUsages += $ComputeData.ComputeUsage
 
 			$HashRates += $HashRate = [PSCustomObject]@{}
 
 			try {
-			    $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
-			    $Data = $Response -split ";" | ConvertFrom-StringData -ErrorAction Stop
+			    $Response = Invoke-WebRequest $URI -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
+			    $Data = $Response | ConvertFrom-Json -ErrorAction Stop
 			}
 			catch {
 			    Write-Log -Level Error "Failed to connect to miner ($($this.Name)). "
 			    break
 			}
 
-			$HashRate_Name = [String]$Data.algo
-			if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
-			$HashRate_Value = [Double]$Data.KHS * 1000
+            $HashRate_Value = 0
+            $PowerDraw = 0
+            $ComputeUsage = 0
+            $ComputeUsageCount = 0
+            $Index | Where  {$Data.miners.$_.device} | ForEach {
+                $HashRate_Value += [Double]$Data.miners.$_.solver.solution_rate
+                $PowerDraw += [Double]$Data.miners.$_.device.power
+                $ComputeUsage += [Double]$Data.miners.$_.device.utilization.gpu
+                $ComputeUsageCount++
+            }
 
+            if ($ComputeUsageCount -gt 0) {
+                $PowerDraws += [Double]$PowerDraw
+                $ComputeUsages += ($ComputeUsage / $ComputeUsageCount)
+            }
+
+			$HashRate_Name = [String]$Algorithm[0]
 			if ($Algorithm[0] -match ".+NiceHash") {
 				$HashRate_Name = "$($HashRate_Name)Nicehash"
 			}

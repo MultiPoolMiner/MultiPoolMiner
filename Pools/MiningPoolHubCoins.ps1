@@ -23,7 +23,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 if ($UseShortPoolNames -and $ShortPoolName) {$PoolName = $ShortPoolName} else {$PoolName = $Name}
 $URL = "http://miningpoolhub.com/index.php?page=api&action=getminingandprofitsstatistics"
 
-if (-not $UserName) {Write-Warning "Pool API ($Name) has no miner username to mine to.";return}
+if (-not $UserName) {Write-Log -Level Warn "Pool API ($Name) has no miner username to mine to.";return}
 
 if (-not $PriceTimeSpan) {
     $PriceTimeSpan = "Week" # Week, Day, Hour, Minute_10, Minute_5
@@ -35,12 +35,12 @@ try {
     $MiningPoolHubCoins_Request = Invoke-RestMethod $URL -UseBasicParsing -Headers @{"Cache-Control"="no-cache"} -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
-    Write-Warning "Pool API ($Name) has failed."
+    Write-Log -Level Warn "Pool API ($Name) has failed."
 	return
 }
 
 if (($MiningPoolHubCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
-    Write-Warning "Pool API ($Name) returned nothing."
+    Write-Log -Level Warn "Pool API ($Name) returned nothing."
     return
 }
 

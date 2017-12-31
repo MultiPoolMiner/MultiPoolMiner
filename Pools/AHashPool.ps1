@@ -21,7 +21,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 if ($UseShortPoolNames -and $ShortPoolName) {$PoolName = $ShortPoolName} else {$PoolName = $Name}
 $URL = "http://www.AHashPool.com/api/status"
 
-if (-not $Wallet) {Write-Warning "Pool API ($Name) has no wallet address to mine to.";return}
+if (-not $Wallet) {Write-Log -Level Warn "Pool API ($Name) has no wallet address to mine to.";return}
 
 if (-not $PriceTimeSpan) {
 	$PriceTimeSpan = "Week" # Week, Day, Hour, Minute_10, Minute_5
@@ -29,7 +29,7 @@ if (-not $PriceTimeSpan) {
 
 # Cannot do SSL
 if ($SSL) {
-	Write-Warning "SSL option requested, but pool API ($Name) does not support SSL. Ignoring pool."
+	Write-Log -Level Warn "SSL option requested, but pool API ($Name) does not support SSL. Ignoring pool."
 	return
 }
 
@@ -38,12 +38,12 @@ try {
 	$AHashPool_Request = Invoke-RestMethod $URL -UseBasicParsing -Headers @{"Cache-Control"="no-cache"} -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
-	Write-Warning "Pool API ($Name) has failed."
+	Write-Log -Level Warn "Pool API ($Name) has failed."
 	return
 }
 
 if (($AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
-    Write-Warning "Pool API ($Name) returned nothing."
+    Write-Log -Level Warn "Pool API ($Name) returned nothing."
     return
 }
 

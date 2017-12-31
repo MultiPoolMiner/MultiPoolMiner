@@ -1,25 +1,46 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-KlausT816_CUDA91\ccminer.exe"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.16/ccminer-815-cuda91-x64.zip"
+$Path = ".\Bin\NVIDIA-KlausT817_CUDA91\ccminer.exe"
+$Uri = "https://github.com/KlausT/ccminer/releases/download/8.17/ccminer-817-cuda91-x64.zip"
 
 $Port = 4068
 
-# Custom command to be applied to all algorithms
 $CommonCommands = ""
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-	"_blakecoin"	= "	-i 31,31,31" #Blakecoin, beaten by CCminer-HRS
-	"_c11"		= " -i 22,22,22" #C11 beaten by Ccminer-HSR 
-	"groestl"	= " -i 26,25,25" #Groestl beaten by ccminer-2.2.1-RC
-	"_keccak"	= " -i 31,30,30" #Keccak beaten by ExcavatorNvidia138a
-	"_lyra2v2"	= " -i 22,21.5,20" #Lyra2RE2, beaten by ExcavatorNvidia138a
-	"myr-gr"	= " -i 26,24,24" #MyriadGroestl beaten by CcminerAlexis78cuda8.0
-	"neoscrypt"	= " -i 21,16,16" #NeoScrypt, fastest
-	"_nist5"	= " -i 26,26,25" #Nist5 beaten by Ccminer-HSR
-	"sia"		= "" #Sia
-	"_skein"		= " -i 30,20,29" #Skein, beaten by Ccminer-HSR
+    #"bitcore" = "" #Bitcore
+    #"blake2s" = "" #Blake2s
+    #"blakecoin" = "" #Blakecoin
+    #"vanilla" = "" #BlakeVanilla
+    #"c11" = "" #C11
+    #"cryptonight" = "" #CryptoNight
+    #"decred" = "" #Decred
+    #"equihash" = "" #Equihash
+    #"ethash" = "" #Ethash
+    "groestl" = "" #Groestl
+    #"hmq1725" = "" #HMQ1725
+    #"jha" = "" #JHA
+    #"keccak" = "" #Keccak
+    #"lbry" = "" #Lbry
+    #"lyra2v2" = "" #Lyra2RE2
+    #"lyra2z" = "" #Lyra2z
+    "myr-gr" = "" #MyriadGroestl
+    "neoscrypt" = "" #NeoScrypt
+    #"nist5" = "" #Nist5
+    #"pascal" = "" #Pascal
+    #"phi" = "" #PHI
+    #"sia" = "" #Sia
+    #"sib" = "" #Sib
+    #"skein" = "" #Skein
+    #"skunk" = "" #Skunk
+    #"timetravel" = "" #Timetravel
+    #"tribus" = "" #Tribus
+    #"veltor" = "" #Veltor
+    #"x11evo" = "" #X11evo
+    #"x17" = "" #X17
+    #"yescrypt" = "" #Yescrypt
+    #"xevan" = "" #Xevan
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -27,6 +48,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {
+
 	$Device = $_
 
 	$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where {$_ -cnotmatch "^_.+" -and $Pools.$(Get-Algorithm($_)).Name -and {$Pools.$(Get-Algorithm($_)).Protocol -eq "stratum+tcp" <#temp fix#>}} | ForEach-Object {
@@ -39,6 +61,7 @@ $Devices | ForEach-Object {
 			$Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) -d $($Device.Devices -join ',')"
 			$Index = $Device.Devices -join ","
 		}
+        
 
 		{while (Get-NetTCPConnection -State "Listen" -LocalPort $($Port) -ErrorAction SilentlyContinue){$Port++}} | Out-Null
 

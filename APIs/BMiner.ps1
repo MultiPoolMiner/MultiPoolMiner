@@ -38,7 +38,7 @@ class BMiner : Miner {
                 $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
                 catch {
-                Write-Warning "Failed to connect to miner ($($this.Name)). "
+                Write-Log -Level Error "Failed to connect to miner ($($this.Name)). "
                 break
             }
 

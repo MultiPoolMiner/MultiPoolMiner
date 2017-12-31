@@ -10,17 +10,8 @@ param(
     [Parameter(Mandatory = $false)]
     [String]$ArgumentList = "", 
     [Parameter(Mandatory = $false)]
-    [String]$WorkingDirectory = "",
-    [Parameter(Mandatory = $false)]
-    [String]$ShowWindow = "SW_SHOWNORMAL",
-    [Parameter(Mandatory = $false)]
-    [String]$CreationFlags = "CREATE_NEW_CONSOLE",
-    [Parameter(Mandatory = $false)]
-    [Int]$ForegroundWindowID
-    
+    [String]$WorkingDirectory = ""   
 )
-
-if ($ForegroundWindowID -gt 0) {[Microsoft.VisualBasic.Interaction]::AppActivate($ForegroundWindowID)}
 
 Set-Location (Split-Path $script:MyInvocation.MyCommand.Path)
 

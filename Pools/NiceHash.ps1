@@ -24,7 +24,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 if ($UseShortPoolNames -and $ShortPoolName) {$PoolName = $ShortPoolName} else {$PoolName = $Name}
 $URL = "http://api.nicehash.com/api?method=simplemultialgo.info"
 
-if (-not $Wallet) {Write-Warning "Pool API ($Name) has no wallet address to mine to.";return}
+if (-not $Wallet) {Write-Log -Level Warn "Pool API ($Name) has no wallet address to mine to.";return}
 
 if (-not $PriceTimeSpan) {
     $PriceTimeSpan = "Week" # Week, Day, Hour, Minute_10, Minute_5
@@ -35,12 +35,12 @@ try {
     $NiceHash_Request = Invoke-RestMethod $URL -UseBasicParsing -TimeoutSec 15 -ErrorAction Stop
 }
 catch {
-    Write-Warning "Pool API ($Name) has failed."
+    Write-Log -Level Warn "Pool API ($Name) has failed."
 	return
 }
 
 if (($NiceHash_Request.result.simplemultialgo | Measure-Object).Count -le 1) {
-    Write-Warning "Pool API ($Name) returned nothing."
+    Write-Log -Level Warn "Pool API ($Name) returned nothing."
     return
 }
 

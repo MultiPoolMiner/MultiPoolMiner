@@ -7,3 +7,5 @@ miners/_Original
 *.zip
 *.7z
 *.rar
+CrashedMiners.txt
+_*.*
