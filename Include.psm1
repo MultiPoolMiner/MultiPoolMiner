@@ -207,7 +207,7 @@ filter ConvertTo-Hash {
     [CmdletBinding()]
     $Hash = $_
     switch ([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1)))) {
-	"-Infinity" {"0 H"}
+        "-Infinity" {"0 H"}
         0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0))}
         1 {"{0:n2} KH" -f ($Hash / [Math]::Pow(1000, 1))}
         2 {"{0:n2} MH" -f ($Hash / [Math]::Pow(1000, 2))}
