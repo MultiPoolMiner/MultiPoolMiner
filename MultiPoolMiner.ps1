@@ -542,8 +542,8 @@ while ($true) {
                         if ($UseNewMinerLauncher) {
                             $Binary = ((Get-Command powershell.exe).Definition) -replace ' ','` '
                             $Payload = $_.Path -replace ' ','` '
-#                            $Arguments = "-command '& {$($Payload) $($_.Arguments)}"
-                            $_.Process = Invoke-CreateProcess -Binary ($Binary) -Args ($Arguments) -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path $Binary)
+                            $Arguments = "-command '& {$($Payload) $($_.Arguments)}"
+#                            $_.Process = Invoke-CreateProcess -Binary ($Binary) -Args ($Arguments) -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path $Binary)
                             $_.Process = Invoke-CreateProcess -Binary $_.Path -Args ("$($_.Arguments)") -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path $_.Path)
                         }
                         else {
