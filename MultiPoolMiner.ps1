@@ -472,7 +472,7 @@ while ($true) {
     Start-Sleep $Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
-            Write-Log "Starting $($_.Type) miner $($_.Name) $($_.Arguments)"
+            Write-Log "Starting $($_.Type) miner $($_.Name): '$($_.Path) $($_.Arguments)'"
             $DecayStart = $Timer
             $_.New = $true
             $_.Activated++
