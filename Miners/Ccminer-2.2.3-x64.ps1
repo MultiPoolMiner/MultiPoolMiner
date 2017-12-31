@@ -5,40 +5,40 @@ $Uri = "https://github.com/tpruvot/ccminer/releases/download/2.2.3-tpruvot/ccmin
 
 $Port = 4068
 
-$CommonCommands = " --submit-stale"
+$CommonCommands = "" # my best values Values for 108ti/1070/10603G "--submit-stale"
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
     #"bitcore"      = "" # Do not use, peaks and falls back to low earnings
-    "_blake2s"      = " -i 31,31,31" # beaten by CcminerAlexis78Hsr, do not use Excavator, high rejects
-    "_blakecoin"   = " -i 31" 
-    "_c11"         = " -i 21" # Beaten by Ccminer-x11gost
-    "cryptonight" = " -i 10.75,10.75,10 --bfactor=12,8,8"
+    "_blake2s"      = "" # my best values Values for 108ti/1070/10603G "-i 31,31,31" # beaten by CcminerAlexis78Hsr, do not use Excavator, high rejects
+    "_blakecoin"   = "" # my best values Values for 108ti/1070/10603G "-i 31" 
+    "_c11"         = "" # my best values Values for 108ti/1070/10603G "-i 21" # Beaten by Ccminer-x11gost
+    "cryptonight" = "" # my best values Values for 108ti/1070/10603G "-i 10.75,10.75,10 --bfactor=12,8,8"
     "_decred"      = ""
     "_equihash"    = ""
-    "_groestl"      = " -i 26.5" # beaten by Ccminer-Klaust814_CUDA9
+    "_groestl"      = "" # my best values Values for 108ti/1070/10603G "-i 26.5" # beaten by Ccminer-Klaust814_CUDA9
     "_hmq1725"     = ""
-    "_hsr"         = " -i 21,21,20.25" # beaten by CcminerAlexis78hsr
-    "_keccak"      = " -i 31,30,30" #BROKEN!
+    "_hsr"         = "" # my best values Values for 108ti/1070/10603G "-i 21,21,20.25" # beaten by CcminerAlexis78hsr
+    "_keccak"      = "" # my best values Values for 108ti/1070/10603G "-i 31,30,30" #BROKEN!
 	"keccakc"      = "" # Keccak-256 (CreativeCoin)
-    "_lbry"        = " -i 29,29,28"
+    "_lbry"        = "" # my best values Values for 108ti/1070/10603G "-i 29,29,28"
     "_lyra2v2"     = "" # beaten by Ccminer-Palgin-Nist5
-    "_lyra2z"      = " -i 22,21,21" # Lyra2z for ZCash, Beaten by CcminerLyra2Z
-    "_myr-gr"       = " -i 24" # Beaten by CcminerAlexis78cuda8.0
-    "_neoscrypt"   = " -i 26" # beaten by Ccminer-Palgin-Nist5
-    "_nist5"       = " -i 27,26.25,24.75" # Beaten, beaten by CcminerKlaust817_CUDA91
+    "_lyra2z"      = "" # my best values Values for 108ti/1070/10603G "-i 22,21,21" # Lyra2z for ZCash, Beaten by CcminerLyra2Z
+    "_myr-gr"       = "" # my best values Values for 108ti/1070/10603G "-i 24" # Beaten by CcminerAlexis78cuda8.0
+    "_neoscrypt"   = "" # my best values Values for 108ti/1070/10603G "-i 26" # beaten by Ccminer-Palgin-Nist5
+    "_nist5"       = "" # my best values Values for 108ti/1070/10603G "-i 27,26.25,24.75" # Beaten, beaten by CcminerKlaust817_CUDA91
 	"penta"        = "" # Pentablake hash (5x Blake 512)
-    "_phi"          = " -i 25,24,24" # Ccminer 2.2.3 x86 is faster
-	"_polytimos"    = " -i 26.25,26.25" # polytimos, beaten by CcminerPolytimos
-    "sia"          = " -i 31,31,31" #
-    "_sib"         = " -i 21"
-    "_skein"       = " -i 30,29,29" # Beaten by Ccminer 2.2.3 x86
-    "_skunk"       = " -i 25.7,25.2,24.9" # Beaten by Ccminer 2.2.3 x86
-#    "timetravel"   = " -i 24"
+    "_phi"          = "" # my best values Values for 108ti/1070/10603G "-i 25,24,24" # Ccminer 2.2.3 x86 is faster
+	"_polytimos"    = "" # my best values Values for 108ti/1070/10603G "-i 26.25,26.25" # polytimos, beaten by CcminerPolytimos
+    "sia"          = "" # my best values Values for 108ti/1070/10603G "-i 31,31,31" #
+    "_sib"         = "" # my best values Values for 108ti/1070/10603G "-i 21"
+    "_skein"       = "" # my best values Values for 108ti/1070/10603G "-i 30,29,29" # Beaten by Ccminer 2.2.3 x86
+    "_skunk"       = "" # my best values Values for 108ti/1070/10603G "-i 25.7,25.2,24.9" # Beaten by Ccminer 2.2.3 x86
+#    "timetravel"   = "" # my best values Values for 108ti/1070/10603G "-i 24"
     "_tribus"      = ""
     "_vanilla"     = ""
-    "_veltor"      = " -i 23" # Fastest
-    "_x11evo"      = " -i 21"
+    "_veltor"      = "" # my best values Values for 108ti/1070/10603G "-i 23" # Fastest
+    "_x11evo"      = "" # my best values Values for 108ti/1070/10603G "-i 21"
     "_x17"          = "" # beaten by CcminerAlexis78hsr
 }
 
