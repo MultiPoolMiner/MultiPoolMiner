@@ -817,7 +817,7 @@ while ($true) {
                 $Miner_PowerDraw = $Miner_Data.PowerDraw
                 $Miner_ComputeUsage = $Miner_Data.ComputeUsage
                 $Miner.Speed_Live = $Miner_HashRate.PSObject.Properties.Value
-                Write-Log "Saving stats for miner $($Miner.Device) [ $(($Miner.Speed_Live) | ConvertTo-Hash)/s | $($Miner_PowerDraw.ToString("N2"))% W | $($Miner_ComputeUsage.ToString("N2"))% ]... "
+                Write-Log "Saving stats for miner $($Miner.Device) [ $(($Miner.Speed_Live) | ConvertTo-Hash)/s | $($Miner_PowerDraw.ToString("N2")) W | $($Miner_ComputeUsage.ToString("N2"))% ]... "
 
                 $Miner.Algorithm | Where-Object {$Miner_HashRate.$_} | ForEach-Object {
                 
