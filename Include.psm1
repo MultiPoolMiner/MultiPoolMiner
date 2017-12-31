@@ -9,7 +9,7 @@ Function Write-Log {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
-        [Parameter(Mandatory=$false)][ValidateSet("Error","Warn","Info")][string]$Level = "Info"
+        [Parameter(Mandatory=$false)][ValidateSet("Error","Warn","Info","Debug")][string]$Level = "Info"
     )
 
     Begin {
@@ -31,6 +31,10 @@ Function Write-Log {
             'Info' {
                 $LevelText = 'INFO:'
                 Write-Host -ForegroundColor DarkCyan -Object "$date $LevelText $Message"
+            }
+            'Debug' {
+                $LevelText = 'DEBUG:'
+                Write-Host -ForegroundColor Gray -Object "$date $LevelText $Message"
             }
         }
         "$date $LevelText $Message" | Out-File -FilePath $filename -Append
