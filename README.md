@@ -21,7 +21,7 @@ README.md is based on README.txt - updated on 01/01/2018 - v1.22.00 - latest ver
 
 The bad news first:
 
-- **NVIDIA hardware only! I don't own AMD hardware myself. Sponsors are welcome ;-)
+- **NVIDIA hardware only! I don't own AMD hardware myself. Sponsors are welcome ;-)**
 
 - **Monitors crypto mining pools and coins in real-time and finds the most profitable for your machine**
 - **Controls any miner that is available via command line**
@@ -32,18 +32,18 @@ Experimental features created by UselessGuru
 
 What's new:
 
-- **Setup GUI for configuration (thanks to grantemsley). No more command line parameters!
-- **Display profit in local currency
-- **True profit calculation. Will take power costs into account. Effective power consumtion is read directly from hardware on each loop
-- **Displays profits and earnings in separate columns. Calculated profit equals earnings less power costs
-- **Profit simulation. MPM will calculate and display hypthetical profit, but will not run miners. Perfect for comparing projected earnings with other miners.
-- **Configurable minimal profit threshold. If the projected earnings fall below this value miners will stop.
-- **Brief profitability summary (how much is my projected overall profit?)
-- **Alternative way of launching miners (Configurable - see ADVANCED Configuration (Extensions by UselessGuru)). This experimental feature uses another approach to launch miners and will NOT steal focus.
-- **Runs separate miners for each type of graphis card in your rig, e.g. 1x 1080ti, 1x 1070, 1x 10603GB). This edition will then choose the fastes miner for each of these cards, therfore helping to further optimize profits.
-- **Dynamic configuration changes. Just run 'Setup.bat' to make any changes required. MPM will apply them on start of the next loop.
-- **Extended logs (thanks to grantemsley)
-- **Many more configuration items, see section (ADVANCED Configuration (Extensions by UselessGuru))
+- **Setup GUI for configuration (thanks to grantemsley). No more command line parameters!**
+- **Display profit in local currency**
+- **True profit calculation. Will take power costs into account. Effective power consumtion is read directly from hardware on each loop**
+- **Displays profits and earnings in separate columns. Calculated profit equals earnings less power costs**
+- **Profit simulation. MPM will calculate and display hypthetical profit, but will not run miners. Perfect for comparing projected earnings with other miners.**
+- **Configurable minimal profit threshold. If the projected earnings fall below this value miners will stop.**
+- **Brief profitability summary (how much is my projected overall profit?)**
+- **Alternative way of launching miners (Configurable - see ADVANCED Configuration (Extensions by UselessGuru)). This experimental feature uses another approach to launch miners and will NOT steal focus.**
+- **Runs separate miners for each type of graphis card in your rig, e.g. 1x 1080ti, 1x 1070, 1x 10603GB). This edition will then choose the fastes miner for each of these cards, therfore helping to further optimize profits.**
+- **Dynamic configuration changes. Just run 'Setup.bat' to make any changes required. MPM will apply them on start of the next loop.**
+- **Extended logs (thanks to grantemsley)**
+- **Many more configuration items, see section (ADVANCED Configuration (Extensions by UselessGuru))**
 
 *Any bitcoin donations are greatly appreciated:*
 - aaronsace, the developer of the main fork: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH
@@ -77,7 +77,7 @@ What's new:
 - CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145
 - You may need 'excavator.exe' if you don't already have it: https://github.com/nicehash/excavator/releases
 - It is highly recommended to set Virtual Memory size in Windows to at least 16 GB in multi-GPU systems: Computer Properties -> Advanced System Settings -> Performance -> Advanced -> Virtual Memory
-- Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/MultiPoolMiner/MultiPoolMiner/issues 
+- Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/UselessGuru/MultiPoolMiner/issues 
 - Logs and Stats are produced in text format; use them when submitting issues.
 
 	
@@ -176,55 +176,55 @@ Watchdog timers reset after three times the number of seconds it takes to get to
 ######## ADVANCED Configuration (Extensions by UselessGuru) ########
 The configuration items in this section are currently not available in the configuration GUI, you must edit the config file manually to alter these items
 
-**$DeviceSubTypes = $false
+**$DeviceSubTypes = $false**
 If $true separate miners will be launched for each GPU model class, this will further help to increase profit [Experimental feature, use with care! It will require extra benchmaks to be run]
 
-**$MinPoolWorkers = 7
+**$MinPoolWorkers = 7**
 Minimum workers required to mine on coin, if less skip the coin, there is little point in mining a coin if there are only very few miners working on it, default:7, to always mine all coins set to 0
 
-**$ProfitLessFee = $true
+**$ProfitLessFee = $true**
 Pools and miners can charge a fee. If set to $true all profit calculations will automatically by lowered by the fee
 
-**$MinerWindowStyle = "Minimized"
+**$MinerWindowStyle = "Minimized"**
 WindowStyle for miner windows. Can be any of: "Normal","Maximized","Minimized","Hidden". Note: During benchmark all windows will run in "normal" mode. Warning: "Hidden" can be dangerous because the can only be seen in task manager, therefore NOT recommended
 
-**$UseNewMinerLauncher = $true
+**$UseNewMinerLauncher = $true**
 If $true use alternative launcher process to run miners. This will NOT steal focus, but will 'forget' to close running miners on exit. These need to be closed manually.
 
-**$MinProfit = 5
+**$MinProfit = 5**
 Minimal required profit, if less it will not mine. The configured value must be in the first currency as defined in $currency (see config item above).
 
-**$BeepOnError=$true
+**$BeepOnError=$true**
 If $true will beep on errors
 
-**$DisplayProfitOnly = $false
+**$DisplayProfitOnly = $false**
 If $true will not start miners and list hypthetical earnings
 
-**$PayoutCurrency = "BTC"
+**$PayoutCurrency = "BTC"**
 I.e. BTH,ZEC,ETH etc., if supported by the pool mining earnings will be autoconverted and paid out in this currency, WARNING: make sure ALL configured pools support payout in this curreny! [Experimental feature, use with care!]
 
-**$DisplayComparison = $false
+**$DisplayComparison = $false**
 If $true will evaluate and display MPM miner is faster than... in summary, if $false MPM will not display this and instead save CPU cycles and screen space ;-)
 
-**$UseShortPoolNames = $true
+**$UseShortPoolNames = $true**
 If $true MPM will display short pool names in summary, the names displayed are hard coded in the pool files.
 
-** $DebugPreference = "SilentlyContinue"
+** $DebugPreference = "SilentlyContinue"**
 Debug setting, will allow for more detailled logs. Any of "SilentlyContinue","Continue","Inquire","Stop", see https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1
 
 ######## Power configuration (Extensions by UselessGuru) ######## 
 MultiPoolMiner (UselessGuru Edition) allows for true profit calculation and deducts power costs from earnings (if configured)
 
-**$PowerPricePerKW = 0.3
+**$PowerPricePerKW = 0.3**
 Electricity price per kW, 0 will disable power cost calculation. The configured value must be in the first currency as defined in $currency (see config item above).
 
-**$Computer_PowerDraw = 50
+**$Computer_PowerDraw = 50**
 Base power consumption (in Watts) of computer excluding GPUs or CPU mining.
 
-**$CPU_PowerDraw = 80
+**$CPU_PowerDraw = 80**
 Power consumption (in Watts) of all CPUs when mining (on top of general power ($Computer_PowerDraw) needed to run your computer when NOT mining).
 
-**$GPU_PowerDraw = 500
+**$GPU_PowerDraw = 500**
 Power consumption (in Watts) of all GPUs in computer when mining, put a rough estimate here. This edition of MultiPoolMiner will poll the hardware and read the effective power consuption per algorithm during benchmark
 	
 ====================================================================
