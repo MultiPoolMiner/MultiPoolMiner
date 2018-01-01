@@ -4,7 +4,7 @@
 Why yet another fork?
 This code fork is my private playground. I created it because I wanted to learn abour the brillant ideas hidden in the code (kudos to aaronsace).
 Out of passion I decided to create my own additions. They currently diverge too much from the base code, and I feel that they are far too experimental and are not stable enough to port them to the main fork.
-However some things may prove valuable to the main code and might be ported to themain fork in the future.
+However some things may prove valuable to the main code and might be ported to the main fork in the future.
 
 In any case your comments are highly recommended.
 
@@ -14,7 +14,7 @@ NOTE: This code contains many experimental features which might NOT work for you
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 01/01/2018 - v1.21.22 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 01/01/2018 - v1.21.23 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -319,3 +319,9 @@ NvidiaPalgin miners currently do not have a working API, so MPM can not properly
 
 ###### Q21. My antivirus says the .zip package contains a virus or MultiPoolMiner tries to download viruses. What should I do?
 ###### A21. MultiPoolMiner is open-source and used by many users/rigs. It also downloads miners from github releases that are open-sourced projects. That means the code is readable and you can see for yourself it does not contain any viruses. Your antivirus generates false positives as the miner software used by MultiPoolMiner are often included in malicious programs to create botnets for someone who wants to earn a quick buck. There are other closed-source miner program included in the package such as the Claymore miners. These come from legendary ranked or trusted/respected members of the bitcointalk community and used by a large number of users/rigs worldwide. You can exlude these miners if you wish by following the instructions in FAQ#2 and delete their software from your system. 
+
+###### Q22. My power stats are all mixed up. What can I do?
+###### A22. Run 'ResetPowerDraw.bat'. This will remove all power consumption data accumulated since MultiPoolMiner was first launched. Note: This will also cause all benchmarks to be re-run.
+
+###### Q23. My GPU compute stats are all mixed up. What can I do?
+###### A23. Run 'ResetGPUUsage.bat'. This will remove all power consumption data accumulated since MultiPoolMiner was first launched. Note: This will also cause all benchmarks to be re-run.
