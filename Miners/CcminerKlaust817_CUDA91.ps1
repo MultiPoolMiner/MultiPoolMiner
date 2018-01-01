@@ -11,15 +11,15 @@ $CommonCommands = ""
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
     "blakecoin"     = "	-i 31,31,31" #Blakecoin, beaten by CcminerAlexis78hsr
-    "c11"		    = "" # my best values Values for 1080ti/1070/10603G "-i 22,22,22" #C11 beaten by CcminerAlexis78hsr 
-    "groestl"	    = "" # my best values Values for 1080ti/1070/10603G "-i 26,25,25" #Groestl, fastest
-    "keccak"	    = "" # my best values Values for 1080ti/1070/10603G "-i 31,30,29.5" #Keccak
+    "c11"		    = "" # my best values for 1080ti/1070/10603G " -i 22,22,22" #C11 beaten by CcminerAlexis78hsr 
+    "groestl"	    = "" # my best values for 1080ti/1070/10603G " -i 26,25,25" #Groestl, fastest
+    "keccak"	    = "" # my best values for 1080ti/1070/10603G " -i 31,30,29.5" #Keccak
     "lyra2v2"	    = "" #Lyra2RE2, baten by Ccminer-x11gost
-    "myr-gr"	    = "" # my best values Values for 1080ti/1070/10603G "-i 26,24,24" #MyriadGroestl, fastest
-    "neoscrypt"	    = "" # my best values Values for 1080ti/1070/10603G "-i 21,16,16" #NeoScrypt, beaten by PalginNeoscrypt
-    "nist5"	        = "" # my best values Values for 1080ti/1070/10603G "-i 26,26,25" #Nist5, beaten by Ccminer-x11gost
+    "myr-gr"	    = "" # my best values for 1080ti/1070/10603G " -i 26,24,24" #MyriadGroestl, fastest
+    "neoscrypt"	    = "" # my best values for 1080ti/1070/10603G " -i 21,16,16" #NeoScrypt, beaten by PalginNeoscrypt
+    "nist5"	        = "" # my best values for 1080ti/1070/10603G " -i 26,26,25" #Nist5, beaten by Ccminer-x11gost
     "sia"		    = "" #Sia
-    "skein"	        = "" # my best values Values for 1080ti/1070/10603G "-i 30,20,28.9" #Skein, beaten by Ccminer-x11gost
+    "skein"	        = "" # my best values for 1080ti/1070/10603G " -i 30,20,28.9" #Skein, beaten by Ccminer-x11gost
     "_X17"          = "" #beaten by CcminerAlexis78hsr
 }
 

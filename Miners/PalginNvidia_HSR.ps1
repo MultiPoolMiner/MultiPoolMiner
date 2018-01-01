@@ -11,7 +11,7 @@ $CommonCommands = ""
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    "hsr" = "" # my best values Values for 108ti/1070/10603G "-i 21.5,21.5,21" # hsr, fastest!
+    "hsr" = "" # my best values for 1080ti/1070/10603G " -i 21.5,21.5,21" # hsr, fastest!
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
