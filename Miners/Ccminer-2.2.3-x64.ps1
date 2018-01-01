@@ -6,7 +6,7 @@ $Uri = "https://github.com/tpruvot/ccminer/releases/download/2.2.3-tpruvot/ccmin
 $Port = 4068
 
 # Custom command to be applied to all algorithms
-$CommonCommands = "--submit-stale"
+$CommonCommands = " --submit-stale"
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
