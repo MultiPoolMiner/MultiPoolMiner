@@ -6,7 +6,6 @@
         "HashRates":  {"CryptoNight":  "$($Stats.ClaymoreAmd_CryptoNight_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     },
     {
         "Type":  "AMD",
@@ -15,7 +14,6 @@
         "HashRates":  {"Equihash":  "$($Stats.ClaymoreAmd_Equihash_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     },
     {
         "Type":  "AMD",
@@ -24,7 +22,6 @@
         "HashRates":  {"Ethash":  "$($Stats.ClaymoreAmd_Ethash_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     },
     {
         "Type":  "AMD",
@@ -33,7 +30,6 @@
         "HashRates":  {"Ethash2gb":  "$($Stats.ClaymoreAmd_Ethash2gb_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     }
 ]
 

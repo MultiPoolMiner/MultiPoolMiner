@@ -6,7 +6,6 @@
         "HashRates":  {"Ethash":  "$($Stats.Eminer_Ethash_HashRate.Week)"},
         "API":  "Eminer",
         "Port":  "8550",
-        "Wrap":  false,
         "URI":  "https://github.com/ethash/eminer-release/releases/download/v0.6.1-rc2/eminer.v0.6.1-rc2.win64.zip"
     },
     {
@@ -16,7 +15,6 @@
         "HashRates":  {"Ethash2gb":  "$($Stats.Eminer_Ethash2gb_HashRate.Week)"},
         "API":  "Eminer",
         "Port":  "8550",
-        "Wrap":  false,
         "URI":  "https://github.com/ethash/eminer-release/releases/download/v0.6.1-rc2/eminer.v0.6.1-rc2.win64.zip"
     }
 ]

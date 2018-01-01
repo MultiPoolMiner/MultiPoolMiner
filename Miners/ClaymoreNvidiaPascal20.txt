@@ -6,7 +6,6 @@
         "HashRates":  {"Ethash":  "$($Stats.ClaymoreNvidiaPascal20_Ethash_HashRate.Week)","Pascal":  "$($Stats.ClaymoreNvidiaPascal20_Pascal_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "23333",
-        "Wrap":  false
     }
 ]
 

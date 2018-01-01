@@ -6,7 +6,6 @@
         "HashRates":  {"Ethash2gb":  "$($Stats.ClaymoreAmd2gbSia30_Ethash2gb_HashRate.Week)","Sia":  "$($Stats.ClaymoreAmd2gbSia30_Sia_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     },
     {
         "Type":  "AMD",
@@ -15,7 +14,6 @@
         "HashRates":  {"Ethash2gb":  "$($Stats.ClaymoreAmd2gbSia30_Ethash2gb_HashRate.Week)","SiaClaymore":  "$($Stats.ClaymoreAmd2gbSia30_SiaClaymore_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     }
 ]
 

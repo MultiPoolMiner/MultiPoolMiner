@@ -432,8 +432,7 @@ while ($true) {
             if ($Miner.Status -eq "Running") {$Miner.Status = "Failed"}
         }
         else {
-            $Miner.Process.CloseMainWindow() | Out-Null
-            $Miner.Status = "Idle"
+            $Miner.StopMining()
 
             #Remove watchdog timer
             $Miner_Name = $Miner.Name
@@ -456,14 +455,7 @@ while ($true) {
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
             $DecayStart = $Timer
-            $_.New = $true
-            $_.Activated++
-            if ($_.Process -ne $null) {$_.Active += $_.Process.ExitTime - $_.Process.StartTime}
-            if ($_.Wrap) {$_.Process = Start-Process -FilePath (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) -ArgumentList "-executionpolicy bypass -command . '$(Convert-Path ".\Wrapper.ps1")' -ControllerProcessID $PID -Id '$($_.Port)' -FilePath '$($_.Path)' -ArgumentList '$($_.Arguments)' -WorkingDirectory '$(Split-Path $_.Path)'" -PassThru
-            }
-            else {$_.Process = Start-SubProcess -FilePath $_.Path -ArgumentList $_.Arguments -WorkingDirectory (Split-Path $_.Path) -Priority ($_.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)}
-            if ($_.Process -eq $null) {$_.Status = "Failed"}
-            else {$_.Status = "Running"}
+            $_.StartMining()
 
             #Add watchdog timer
             if ($Watchdog -and $_.Profit -ne $null) {

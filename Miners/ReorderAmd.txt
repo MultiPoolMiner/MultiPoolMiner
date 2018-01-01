@@ -6,7 +6,6 @@
         "HashRates":  {"Skein":  "$($Stats.ReorderAmd_Skein_HashRate.Week)"},
         "API":  "Xgminer",
         "Port":  "14028",
-        "Wrap":  false
     },
     {
         "Type":  "AMD",
@@ -15,6 +14,5 @@
         "HashRates":  {"Keccak":  "$($Stats.ReorderAmd_Keccak_HashRate.Week)"},
         "API":  "Xgminer",
         "Port":  "14028",
-        "Wrap":  false
     }
 ]

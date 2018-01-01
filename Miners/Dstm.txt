@@ -6,6 +6,5 @@
         "HashRates":  {"Equihash":  "$($Stats.Dstm_Equihash_HashRate.Week)"},
         "API":  "DSTM",
         "Port":  "2222",
-        "Wrap":  false
     }
 ]

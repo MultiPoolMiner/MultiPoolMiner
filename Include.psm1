@@ -430,4 +430,18 @@ class Miner {
     $Activated
     $Status
     $Benchmarked
+
+    StartMining() {
+        $this.New = $true
+        $this.Activated++
+        if ($this.Process -ne $null) {$this.Active += $this.Process.ExitTime - $this.Process.StartTime}
+        $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($this -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
+        if ($this.Process -eq $null) {$this.Status = "Failed"}
+        else {$this.Status = "Running"}
+    }
+
+    StopMining() {
+        $this.Process.CloseMainWindow() | Out-Null
+        $this.Status = "Idle"
+    }
 }
