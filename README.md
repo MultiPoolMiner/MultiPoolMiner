@@ -1,4 +1,4 @@
-﻿# MultiPoolMiner (UselessGuru Edition)
+# MultiPoolMiner (UselessGuru Edition)
 ###### created by aaronsace, with additions created by grantemsley and UselessGuru
 
 Why yet another fork?
