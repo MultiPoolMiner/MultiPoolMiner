@@ -28,8 +28,8 @@ $WorkerName = 'BLACKBOX'
 
 # [Europe/US/Asia] Choose your region or the region closest to you.
 $Region = 'Europe'
-# [AMD,NVIDIA,CPU] Choose the relevant GPU(s) and/or CPU mining.
-$Type = @('NVIDIA','AMD')
+# [NVIDIA,CPU] Choose the relevant GPU(s) and/or CPU mining. AMD currently not supported!
+$Type = @('NVIDIA')
 
 # Pools which you prefer to mine on.  All pools are always used if your preferred ones don't support the most profitable algorithm, or your preferred ones are down.
 # If left empty, all pools will be treated equally, and it will mine to the most profitable pool at the moment.
@@ -71,7 +71,7 @@ $MinerStatusURL = ''
 # The configuration items in this section are currently not available in the configuration GUI
 
 # If $true separate miners will be launched for each GPU model class, this will further help to increase profit
-$DeviceSubTypes = $true
+$DeviceSubTypes = $false
 
 # Minimum workers required to mine on coin, if less skip the coin, there is little point in mining a coin if there are only very few miners working on it, default:7, to always mine all coins set to 0
 $MinPoolWorkers = 7
@@ -82,11 +82,14 @@ $ProfitLessFee = $true
 # WindowStyle for miner windows. Can be any of: "Normal","Maximized","Minimized","Hidden". Note: During benchmark all windows will run in "normal" mode. Warning: "Hidden" can be dangerous because the can only be seen in task manager, therefore NOT recommended
 $MinerWindowStyle = "Minimized"
 
-# If $true use alternative launcher process to run miners. This will NOT steal focus, but will 'forget' to close running miners on exit. These need to be clused manually
-$UseNewMinerLauncher = $true
+# If $true use alternative launcher process to run miners. The good: This will NOT steal focus. The bad: I may 'forget' to close running miners on exit. These need to be closed manually.
+$UseNewMinerLauncher = $false
 
-# Minimal required profit (in $Currency[0]), if less it will not mine
+# Minimal required profit, if less it will not mine. The configured value must be in the first currency as defined in $currency (see config item above).
 $MinProfit = 5
+
+# Change debugging level. Can be any of "SilentlyContinue","Continue","Inquire","Stop"; see https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1
+$DebugPreference = "SilentlyContinue"
 
 # if $true will beep on errors
 $BeepOnError=$true
@@ -105,14 +108,14 @@ $UseShortPoolNames = $true
 
 ######## Power configuration (UselessGuru) ######## 
 # Power configuration & true profit calculation
-# Electricity price per kW (in $currency[0]), 0 will disable power cost calculation
+# Electricity price per kW, 0 will disable power cost calculation. The configured value must be in the first currency as defined in $currency (see config item above).
 $PowerPricePerKW = 0.3
 
-# Base power consumption of computer (in Watts) excluding GPUs or CPU mining
+# Base power consumption (in Watts) of computer excluding GPUs or CPU mining.
 $Computer_PowerDraw = 50
 
 # Power consumption (in Watts) of all CPUs when mining (on top of general power ($Computer_PowerDraw) needed to run your computer when NOT mining)
 $CPU_PowerDraw = 80
 
-# Power consumption of all GPUs in computer when mining (in $currency[0]), put a rough estimate here
+# Power consumption (in Watts) of all GPUs in computer when mining (in $currency[0]), put a rough estimate here.
 $GPU_PowerDraw = 500
