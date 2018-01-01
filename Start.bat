@@ -7,6 +7,7 @@ setx GPU_MAX_ALLOC_PERCENT 100
 setx GPU_SINGLE_ALLOC_PERCENT 100
 
 set "command=& .\multipoolminer.ps1"
+if not exist "Config.ps1" set "command=& .\Setup.ps1"
 
 pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
 powershell -version 5.0 -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
