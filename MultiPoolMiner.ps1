@@ -118,7 +118,7 @@ while ($true) {
         $Currency | Where-Object {$NewRates.$_} | ForEach-Object {$Rates | Add-Member $_ ([Double]$NewRates.$_) -Force}
     }
     catch {
-        Write-Log -Level Warning "Coinbase is down. "
+        Write-Log -Level Warn "Coinbase is down. "
     }
 
     # By default mining is NOT profitable
@@ -662,7 +662,7 @@ while ($true) {
 
     $ProfitSummary = "$(($Profits * $Rates.$($Currency[0])).ToString("N2")) $($Currency[0].ToUpper())/day ($(($Earnings * $Rates.$($Currency[0])).ToString("N2")) - $(($PowerCosts * $Rates.$($Currency[0])).ToString("N2")) $($Currency[0].ToUpper())/day). "
     if ($MiningIsProfitable) {Write-Host "Mining is currently profitable using the algorithms listed above. According to pool pricing information currently mining $($ProfitSummary)"}
-    elseif (-not $BenchmarkMode -or -not $DisplayProfitOnly) {Write-Log -Level Warning "Mining is currently NOT profitable - mining stopped! According to pool pricing information currently mining $($ProfitSummary)"}
+    elseif (-not $BenchmarkMode -or -not $DisplayProfitOnly) {Write-Log -Level Warn "Mining is currently NOT profitable - mining stopped! According to pool pricing information currently mining $($ProfitSummary)"}
     Write-Host "(Profitability limit: $($MinProfit.ToString("N2")) $($Currency[0].ToUpper())/day; Power cost $($PowerPricePerKW.ToString("N2")) $($Currency[0].ToUpper())/kW; 1 BTC = $($Rates.$($Currency[0]).ToString("N2")) $($Currency[0].ToUpper())). "
     
     if ($BenchmarkMode -and -not $DisplayProfitOnly) {Write-Host  -BackgroundColor Yellow -ForegroundColor Black "Benchmarking - do not execute GPU intense applications until benchmarking is complete!"}
