@@ -1,4 +1,4 @@
-====================================================================
+﻿====================================================================
   __  __       _ _   _ _____            _ __  __ _                 
  |  \/  |     | | | (_)  __ \          | |  \/  (_)                
  | \  / |_   _| | |_ _| |__) |__   ___ | | \  / |_ _ __   ___ _ __ 
@@ -7,25 +7,51 @@
  |_|  |_|\__,_|_|\__|_|_|   \___/ \___/|_|_|  |_|_|_| |_|\___|_|   
  
 ====================================================================
-MultiPoolMiner - created by aaronsace 
-LINK: https://multipoolminer.io
+MultiPoolMiner (UselessGuru Edition) created by aaronsace, with additions created by grantemsley and UselessGuru
+https://github.com/nicehash/NiceHashMinerLegacy
 
-Licensed under the GNU General Public License v3.0
-Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
+Why yet another fork?
+This code fork is my private playground. I created it because I wanted to learn abour the brillant ideas hidden in the code (kudos to aaronsace).
+Out of passion I decided to create my own additions. They currently diverge too much from the base code, and I feel that they are far too experimental and are not stable enough to port them to the main fork.
+However some things may prove valuable to the main code and might be ported to themain fork in the future.
 
-README.txt - updated on 28/12/2017 - v1.21.21 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+In any case your comments are highly recommended.
 
+NOTE: This code contains many experimental features which might NOT work for you. If you find something that is not working, then test if it is working in the main fork first.
+
+**LINK: [MultiPoolMiner.io](https://multipoolminer.io)**
+
+###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
+
+README.md is based on README.txt - updated on 01/01/2018 - v1.21.22 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 ====================================================================
 
 
 FEATURE SUMMARY:
+
+The bad news first:
+- **NVIDIA hardware only. I don't own AMD hardware myself. Sponsors are welcome ;-)
 
 - Monitors crypto mining pools and coins in real-time and finds the most profitable for your machine
 - Controls any miner that is available via command line
 - Supports benchmarking, multiple platforms (AMD, NVIDIA and CPU) and mining on MiningPoolHub, Zpool, Hash Refinery and Nicehash (Ahashpool support is coming soon)
 - Includes Watchdog Timer to detect and handle miner failures
 
-Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH 
+Experimental features created by UselessGuru
+
+What's new:
+- Setup GUI for configuration (thanks to grantemsley). No more command line parameters!
+- Display profit in local currency
+- True profit calculation. Will take power costs into account. Effective power consumtion is read directly from hardware
+- Runs separate miners for each type of graphis card in your rig, e.g. 1x 1080ti, 1x 1070, 1x 10603GB). This edition will then choose the fastes miner for each of these cards, therfore helping to further optimize profits.
+- Dynamic configuration changes. Just run 'Setup.bat' to make any changes required. MPM will apply them on start of the next loop.
+- Extended logs (thanks to grantemsley)
+- Many more configuration items, see section (ADVANCED Configuration (Extensions by UselessGuru)
+
+Any bitcoin donations are greatly appreciated:
+- aaronsace, the developer of the main fork: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH
+- uselessguru, you'll find my BTC address hidden in the code ;-)
+- grantemsley, he's a great contributor towards the project
 
 
 ====================================================================
@@ -36,12 +62,11 @@ INSTALLATION:
 1. Download the latest RELEASE (.zip package) from https://github.com/MultiPoolMiner/MultiPoolMiner/releases
 2. Extract it to your Desktop (MultiPoolMiner will NOT work from folders such as "C:\Program Files\")
 3. Make sure you have all pre-requisites installed/updated from the IMPORTANT NOTES section below.
-4. Right-click on the (required) Start.bat file and open it with a Notepad application. Multiple start.bat files are included as examples.
-5. Edit the Start.bat file with your details (such as YOUR username, wallet address, region, worker name, device type). New users should NOT edit anything else. Please see COMMAND LINE OPTIONS below for specification and further details.
-6. Save and close the Start.bat file you just edited.
-7. Launch the Start.bat file you just edited.
-8. Let the benchmarking finish (you will be earning shares even during benchmarking).
-9. Done. You are all set to mine the most profitable coins and maximise your profits using MultiPoolMiner.
+4. Run Setup.bat. This will load all available pool and miner information (allow a few seconds for this) and the launch a configuration GUI.
+5. Right-click on the (required) Start.bat file and open it with a Notepad application. Multiple start.bat files are included as examples.
+6. Launch the Start.bat file you just edited.
+7. Let the benchmarking finish (you will be earning shares even during benchmarking).
+8. Done. You are all set to mine the most profitable coins and maximise your profits using MultiPoolMiner.
 
 
 ====================================================================
@@ -64,12 +89,15 @@ IMPORTANT NOTES:
 ====================================================================
 
 
-COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an example):
+###### Configuration ######
+MultiPoolMiner (UselessGuru Edition) uses a GUI for configuration (created by grantemsley). All configuration items below are now stored in a configuration file (Config.ps1).
 
--region [Europe/US/Asia]
+###### Configuration items (case-insensitive - except for BTC addresses, see *Sample Usage* section below for an example)
+
+$region [Europe/US/Asia]
 	Choose your region or the region closest to you.
 
--poolname [miningpoolhub,miningpoolhubcoins,zpool,hashrefinery,nicehash,ahashpool]
+$poolname [miningpoolhub,miningpoolhubcoins,zpool,hashrefinery,nicehash,ahashpool]
 	The following pools are currently supported: 
 	## MiningPoolHub https://miningpoolhub.com/ 
 	        The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
@@ -81,25 +109,25 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	
 	IMPORTANT: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.
 	
--ExcludePoolName
+$ExcludePoolName
 	Same as the -poolname command but it is used to exclude unwanted mining pools (please see above).
 
--username 
+$username 
 	Your username you use to login to MiningPoolHub.
 
--workername
+$workername
 	To identify your mining rig.	
 
--wallet
+$wallet
 	Your Bitcoin payout address. Required when mining on Zpool, Hash Refinery and Nicehash.
 	
--SSL
+$SSL
 	Specifying the -ssl command (without a boolean value of true or false) will restrict the miner application list to include only the miners that support secure connection.
 
--type [AMD,NVIDIA,CPU]
+$type [AMD,NVIDIA,CPU]
 	Choose the relevant GPU(s) and/or CPU mining.
 
--algorithm
+$algorithm
         Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
 	The following algorithms are currently supported: 
 	Bitcore, Blakecoin, Blake2s, BlakeVanilla, C11, CryptoNight, Ethash, X11, Decred, Equihash, Groestl, HMQ1725, JHA, Keccak, Lbry, Lyra2RE2, Lyra2z, MyriadGroestl, NeoScrypt, Nist5, Pascal, Polytimos, Quark, Qubit, Scrypt, SHA256, Sia, Sib, Skunk, Skein, Timetravel, Tribus, BlakeVanilla, Veltor, X11, X11evo, X17, Yescrypt
@@ -109,31 +137,31 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	siaclaymore - enable mining Sia as a secondary coin with Claymore Dual ethash miner on MiningPoolHub
 	Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). WARNING! If you add all algorithms listed above, you may find your earnings spread across 3 different pools regardless what pool(s) you specified with the -poolname command.
 	
--ExcludeAlgorithm
+$ExcludeAlgorithm
 	Same as the -algorithm command but it is used to exclude unwanted algorithms (please see above). Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
 	
--minername
+$minername
 	Specify to only include (restrict to) certain miner applications. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
 
--ExcludeMinerName
+$ExcludeMinerName
 	Exclude certain miners you don't want to use. It is useful if a miner is causing issues with your machine. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
 	
--currency [BTC,USD,EUR,GBP,ETH ...]
+$currency [BTC,USD,EUR,GBP,ETH ...]
 	Choose the default currency or currencies your profit stats will be shown in.
 
--interval
+$interval
 	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
 	
--delay
+$delay
 	Specify the number of seconds required to pass before opening each miner. It is useful if cards are sensitive to switching and need some extra time to recover (eg. clear DAG files from memory)
 
--donate
+$donate
 	Donation of mining time in minutes per day to aaronsace. Default is 24, minimum is 10 minutes per day (less than 0.7% fee). The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
 	
--proxy
+$proxy
 	Specify your proxy address if applicable, i.e http://192.0.0.1:8080
 
--watchdog
+$watchdog
         Include this command to enable the watchdog feature which detects and handles miner and other related failures.
 	It works on a unified interval that is defaulted to 60 seconds. Watchdog timers expire if three of those intervals pass without being kicked. There are three stages as to what action is taken when watchdog timers expire and is determined by the number of related expired timers.
 	- Stage 1: when 1 timer expires relating to one miner/algorithm combination, the one miner/algorithm combination is kicked
@@ -141,30 +169,59 @@ COMMAND LINE OPTIONS (case-insensitive, see Sample Usage section below for an ex
 	- Stage 3: when 3 timers expire relating to one pool, the pool is kicked
 	Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
 	
-	
-====================================================================
-	
-	
-SAMPLE USAGE (check "start.bat" file in root folder):
+######## ADVANCED Configuration (Extensions by UselessGuru) ########
+The configuration items in this section are currently not available in the configuration GUI, you must edit the config file manually to alter these items
 
-############ START OF CONTENT OF START.BAT ############
-cd /d %~dp0
+$DeviceSubTypes = $false
+        If $true separate miners will be launched for each GPU model class, this will further help to increase profit [Experimental feature, use with care! It will require extra benchmaks to be run]
 
-setx GPU_FORCE_64BIT_PTR 1
-setx GPU_MAX_HEAP_SIZE 100
-setx GPU_USE_SYNC_OBJECTS 1
-setx GPU_MAX_ALLOC_PERCENT 100
-setx GPU_SINGLE_ALLOC_PERCENT 100
+$MinPoolWorkers = 7
+        Minimum workers required to mine on coin, if less skip the coin, there is little point in mining a coin if there are only very few miners working on it, default:7, to always mine all coins set to 0
 
-set "command=& .\multipoolminer.ps1 -wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -username aaronsace -workername multipoolminer -region europe -currency btc,usd,eur -type amd,nvidia,cpu -poolname miningpoolhub,miningpoolhubcoins,zpool,nicehash -algorithm cryptonight,decred,decrednicehash,ethash,ethash2gb,equihash,groestl,lbry,lyra2re2,lyra2z,neoscrypt,pascal,sia,siaclaymore,sianicehash,sib,skunk -donate 24 -watchdog -switchingprevention 2"
+$ProfitLessFee = $true
+        Pools and miners can charge a fee. If set to $true all profit calculations will automatically by lowered by the fee
 
-pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
-powershell -version 5.0 -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
-msiexec -i https://github.com/PowerShell/PowerShell/releases/download/v6.0.0-rc.2/PowerShell-6.0.0-rc.2-win-x64.msi -qb!
-pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
+$MinerWindowStyle = "Minimized"
+        WindowStyle for miner windows. Can be any of: "Normal","Maximized","Minimized","Hidden". Note: During benchmark all windows will run in "normal" mode. Warning: "Hidden" can be dangerous because the can only be seen in task manager, therefore NOT recommended
 
-pause
-############ END OF CONTENT OF START.BAT ############
+$UseNewMinerLauncher = $true
+        If $true use alternative launcher process to run miners. This will NOT steal focus, but will 'forget' to close running miners on exit. These need to be closed manually.
+
+$MinProfit = 5
+        Minimal required profit (in $Currency[0]), if less it will not mine
+
+$BeepOnError=$true
+        if $true will beep on errors
+
+$DisplayProfitOnly = $false
+        If $true will not start miners and list hypthetical earnings
+
+$PayoutCurrency = "BTC"
+        i.e. BTH,ZEC,ETH etc., if supported by the pool mining earnings will be autoconverted and paid out in this currency, WARNING: make sure ALL configured pools support payout in this curreny! [Experimental feature, use with care!]
+
+$DisplayComparison = $false
+        If $true will evaluate and display MPM miner is faster than... in summary, if $false MPM will not display this and instead save CPU cycles and screen space ;-)
+
+$UseShortPoolNames = $true
+        If $true MPM will display short pool names in summary, the names displayed are hard coded in the pool files.
+
+$DebugPreference = "SilentlyContinue"
+        Debug setting, will allow for more detailled logs. Any of "SilentlyContinue","Continue","Inquire","Stop", see https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1
+
+######## Power configuration (Extensions by UselessGuru) ######## 
+# MultiPoolMiner (UselessGuru Edition) allows for true profit calculation and deducts power costs (if configured)
+
+$PowerPricePerKW = 0.3
+        Electricity price per kW (in $currency[0]), 0 will disable power cost calculation
+
+$Computer_PowerDraw = 50
+        Base power consumption of computer (in Watts) excluding GPUs or CPU mining
+
+$CPU_PowerDraw = 80
+        Power consumption (in Watts) of all CPUs when mining (on top of general power ($Computer_PowerDraw) needed to run your computer when NOT mining)
+
+$GPU_PowerDraw = 500
+        Power consumption of all GPUs in computer when mining (in $currency[0]), put a rough estimate here, This edition of MultiPoolMiner will poll the hardware and read the effective power consuption per algorithm during benchmark
 
 ====================================================================
 
@@ -176,6 +233,8 @@ There are known issues with the following miners not submitting shares or show h
 - CCminerLyra2RE2
 This is not a fault of MultiPoolMiner and nothing can be done on our end. Please raise an issue on their respective github pages. See FAQ#2 on how to exclude these if you wish to do so.
 
+Benchmarking NvidiaPalgin miners
+NvidiaPalgin miners currently do not have a working API, so MPM can not properly read hash rates from it. In these cases you will need to manually create the benchmark file (copy an benchmark file from another file and replace the hashrates). 
 
 ====================================================================
 
@@ -183,7 +242,7 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 FREQUENTLY ASKED QUESTIONS:
 
 Q1. How do I start using MultiPoolMiner?
-A1. The 'start.bat' file is an example that shows how to run the script without prompting for a username. Amend it with your username/address/workername and other relevant details such as region. Ensure it is run as Administrator to prevent errors.
+###### A1. Run 'Setup.bat' to define your base config. Then execute 'Start.bat'. To change configuration just run 'Setup.bat' again. MPM (UselessGuru Edition) will dynamically re-read the configuiration change on the next loop.
 
 Q2. A miner crashes my computer or does not work correctly. I want to exclude it from mining/benchmarking. What should I do?
 A2. Use the -excludeminername command to exclude certain miners you don't want to use. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners

@@ -56,14 +56,14 @@ if ($PGHome -notmatch ".+") {
 #Set donation parameters
 if ($Donate -lt 10) {$Donate = 10}
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
-$WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHhGkCuNrFt6v9","1GPSq8txFnyrYdXL8t6S94mYdF8cGqVQJF")
-$UserNameDonate = @("aaronsace", "fonyo","uselessguru")
+$WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHhGkCuNrFt6v9")
+$UserNameDonate = @("aaronsace", "fonyo")
 $WorkerNameDonate = "multipoolminer"
 $WalletBackup = $Wallet
 $UserNameBackup = $UserName
 $WorkerNameBackup = $WorkerName
 $PayoutCurrencyBackup = $PayoutCurrency
-$DonateDistribution = 0,0,0,0,0,0,0,0,0,1,2 #9:1:1
+$DonateDistribution = 0,0,0,0,0,0,0,0,0,0,1 #10:1
 
 Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
 
