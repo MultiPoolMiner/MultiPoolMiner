@@ -223,7 +223,7 @@ function Get-ComputeData {
 
 	switch ($MinerType) {
 		"NVIDIA" {
-			$NvidiaSMI = "$SystemDrive\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe"
+			$NvidiaSMI = "$Env:SystemDrive\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe"
 			if (Test-Path $NvidiaSMI) {
                 if ($Index -eq $null -or $Index[0] -lt 0) {
                     $Index = ((&$NvidiaSMI -L) | ForEach {$_.Split(" ")[1].Split(":")[0]})
