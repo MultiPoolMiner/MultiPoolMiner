@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 class Nicehash : Miner {
-    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
+    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false, [String]$DebugPreference = "SilentlyContinue") {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
@@ -33,6 +33,8 @@ class Nicehash : Miner {
                 Write-Log -Level Error "Failed to connect to miner ($($this.Name)). "
                 break
             }
+
+            if ($DebugPreference -ne "SilentlyContinue") {Write-Log -Level Debug $Response}
 
             $Data.algorithms.name | Select-Object -Unique | ForEach-Object {
                 $HashRate_Name = [String]($Algorithm -like (Get-Algorithm $_))

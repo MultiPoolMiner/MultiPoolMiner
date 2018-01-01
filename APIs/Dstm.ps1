@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 class dstm : Miner {
-    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
+    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false, [String]$DebugPreference = "SilentlyContinue") {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
@@ -32,6 +32,8 @@ class dstm : Miner {
                 Write-Log -Level Error "Failed to connect to miner ($($this.Name)). "
                 break
             }
+
+            if ($DebugPreference -ne "SilentlyContinue") {Write-Log -Level Debug $Response}
 
             $HashRate_Name = [String]$Algorithm[0]
             $HashRate_Value = [Double]($Data.result.sol_ps | Measure-Object -Sum).Sum

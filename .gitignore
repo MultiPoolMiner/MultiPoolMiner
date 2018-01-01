@@ -9,3 +9,4 @@ miners/_Original
 *.rar
 CrashedMiners.txt
 _*.*
+.vscode

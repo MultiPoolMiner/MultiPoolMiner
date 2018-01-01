@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 class Xmrig : Miner {
-	[PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
+	[PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false, [String]$DebugPreference = "SilentlyContinue") {
 		$Server = "localhost"
 		$Timeout = 10 #seconds
 
@@ -32,6 +32,8 @@ class Xmrig : Miner {
                 Write-Log -Level Error "Failed to connect to miner ($($this.Name)). "
                 break
             }
+
+            if ($DebugPreference -ne "SilentlyContinue") {Write-Log -Level Debug $Response}
 
             $HashRate_Name = [String]($Algorithm -like (Get-Algorithm $Data.algo))
             if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix

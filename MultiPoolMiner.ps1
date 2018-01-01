@@ -79,6 +79,9 @@ while ($true) {
         $ExcludeAlgorithm = $ExcludeAlgorithm | ForEach-Object {Get-Algorithm $_}
         $Region = $Region | ForEach-Object {Get-Region $_}
         $GPUs = (Get-GPUdevices $Type $DeviceSubTypes)
+        $WalletBackup = $Wallet
+        $UserNameBackup = $UserName
+        $WorkerNameBackup = $WorkerName
         Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
     }
     
@@ -173,7 +176,6 @@ while ($true) {
     }
  
     #Load information about the miners
-    Write-Log "Loading available miners..."
     #Messy...?
     Write-Log "Getting miner information..."
     # Get all the miners, get just the .Content property and add the name, select only the ones that match our $Type (CPU, AMD, NVIDIA) or all of them if type is unset,
@@ -557,7 +559,7 @@ while ($true) {
                     else {
                         $_.Status = "Running"
                         $_.Process.PriorityClass = "BelowNormal"
-                        Write-Log "Started $($_.Type) miner $($_.Name) with PID $($_.Process.Id)"
+                        Write-Log "Started $($_.Type) miner $($_.Name) [PID $($_.Process.Id)]"
                     }
                 }
                 $KeepOldMinerRunning = 3 #Keep running miners alive until new miners are mining (e.g. DAG download is complete
@@ -610,7 +612,7 @@ while ($true) {
         }
         else {
             if ($_.Process -ne "DisplayProfitOnly") {
-                Write-Log "Closing $($Miner.Type) miner $($Miner.Name) because it is no longer the most profitable"
+                Write-Log "Closing $($Miner.Type) miner $($Miner.Name) [PID $($_.Process.Id)] because it is no longer the most profitable"
                 $Miner.Process.CloseMainWindow() | Out-Null
             }
             $Miner.Status = "Idle"
@@ -765,9 +767,9 @@ while ($true) {
             if ($Miner.New) {$Miner.Benchmarked++}
 
             if ($Miner.Process -and -not $Miner.Process.HasExited -and $Miner.Port) {
-                Write-Log "Requesting stats for $($Miner.Device) miner... "
+                Write-Log "Requesting stats for $($Miner.Device) [API: $($Miner.API)] miner... "
 
-                Start-Job -Name "GetMinerData_$($Miner.Device)" ([scriptblock]::Create("Set-Location('$(Get-Location)');. 'APIs\$($Miner.API).ps1'")) -ArgumentList ($Miner, $Strikes) -ScriptBlock {
+                Start-Job -Name "GetMinerData_$($Miner.Device)" ([scriptblock]::Create("Set-Location('$(Get-Location)');. 'APIs\$($Miner.API).ps1'")) -ArgumentList ($Miner, $Strikes, $DebugPreference) -ScriptBlock {
                     param($Miner, $Strikes)
                     $MinerObject = New-Object $Miner.API -Property @{
                         Name                 = $Miner.Name
@@ -801,7 +803,7 @@ while ($true) {
                         ComputeUsage         = $Miner.ComputeUsage
                         Pool                 = $Miner.Pool
                     }
-                    $MinerObject.GetData($Miner.Algorithm, ($Miner.New -and $Miner.Benchmarked -lt $Strikes))
+                    $MinerObject.GetData($Miner.Algorithm, ($Miner.New -and $Miner.Benchmarked -lt $Strikes), $DebugPreference)
                 } | Out-Null
             }
         }
@@ -810,6 +812,7 @@ while ($true) {
         
         $ActiveMiners | Where-Object {$_.Process -and -not $_.Process.HasExited -and $_.Port} | ForEach-Object {
             $Miner = $_
+            $Miner_Name = $Miner.Name
             $Miner.Speed_Live = 0
             $Miner_HashRate = [PSCustomObject]@{}
 
@@ -827,7 +830,6 @@ while ($true) {
                     $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_HashRate.$_ -Duration $StatSpan -FaultDetection $true
 
                     #Update watchdog timer
-                    $Miner_Name = $Miner.Name
                     $Miner_Algorithm = $_
                     $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
                     if ($Stat -and $WatchdogTimer -and $Stat.Updated -gt $WatchdogTimer.Kicked) {
@@ -845,11 +847,12 @@ while ($true) {
                 }
             }
             else {
-                if ($Miner.Name -notlike "PalginNvidia_*" <# temp fix, Palgin does not have an APi yet#>) {
+                ""
+                if ($Miner_Name -notmatch "PalginNvidia.*" <# temp fix, Palgin does not have an APi yet#>) {
                     if ($BeepOnError) {
                         [console]::beep(1000,500)
                     }
-                    Write-Log -Level Error "Failed to connect to miner ($($Miner.Name)). "
+                    Write-Log -Level Error "Failed to connect to miner ($Miner_Name). "
                 }
             }
         }

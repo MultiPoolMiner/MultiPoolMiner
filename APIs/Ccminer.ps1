@@ -1,7 +1,7 @@
 using module ..\Include.psm1
 
 class Ccminer : Miner {
-	[PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
+	[PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false, [String]$DebugPreference = "SilentlyContinue") {
 		$Server = "localhost"
 		$Timeout = 10 #seconds
 
@@ -29,10 +29,14 @@ class Ccminer : Miner {
 			    $Data = $Response -split ";" | ConvertFrom-StringData -ErrorAction Stop
 			}
 			catch {
-			    Write-Log -Level Error "Failed to connect to miner ($($this.Name)). "
+				if ($Safe -and $this.Name -notmatch "PalginNvidia_.*") {
+					Write-Log -Level Error "API failed to connect to miner ($($this.Name)). "
+				}
 			    break
 			}
 
+            if ($DebugPreference -ne "SilentlyContinue") {Write-Log -Level Debug $Response}
+			
 			$HashRate_Name = [String]$Data.algo
 			if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
 			$HashRate_Value = [Double]$Data.KHS * 1000
