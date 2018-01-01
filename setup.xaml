@@ -8,8 +8,9 @@
 <Viewbox VerticalAlignment="Top" HorizontalAlignment="Center">
 <DockPanel>
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" >
-            <Button Name="Save" Width="100" Margin="200,0,0,0">Save</Button>
-            <Button Name="Next" Width="100" Margin="125,0,0,0">Next</Button>
+            <Button Name="Exit" Width="120" Margin="0,0,0,0">Exit without saving</Button>
+            <Button Name="Apply" Width="120" Margin="80,0,0,0">Apply</Button>
+            <Button Name="Next" Width="120" Margin="85,0,0,0">Next</Button>
         </StackPanel>
         <TabControl x:Name="tabControl" VerticalAlignment="Top" Height="660" Width="525" TabStripPlacement="Top" Padding="10">
             <TabItem Header="Welcome">
