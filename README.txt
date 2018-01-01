@@ -23,7 +23,7 @@ NOTE: This code contains many experimental features which might NOT work for you
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 01/01/2018 - v1.21.23 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 01/01/2018 - v1.22.00 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 ====================================================================
 
 
@@ -42,11 +42,14 @@ Experimental features created by UselessGuru
 What's new:
 - Setup GUI for configuration (thanks to grantemsley). No more command line parameters!
 - Display profit in local currency
-- True profit calculation. Will take power costs into account. Effective power consumtion is read directly from hardware
+- True profit calculation. Will take power costs into account. Effective power consumtion is read directly from hardware on each loop
+- Displays profits and earnings in separate columns. Calculated profit equals earnings less power costs
+- Brief profitability summary (how much is my projected overall profit?)
+- Alternative way of launching miners (Configurable - see ADVANCED Configuration (Extensions by UselessGuru)). This experimental feature uses another approach to launch miners and will NOT steal focus.
 - Runs separate miners for each type of graphis card in your rig, e.g. 1x 1080ti, 1x 1070, 1x 10603GB). This edition will then choose the fastes miner for each of these cards, therfore helping to further optimize profits.
 - Dynamic configuration changes. Just run 'Setup.bat' to make any changes required. MPM will apply them on start of the next loop.
 - Extended logs (thanks to grantemsley)
-- Many more configuration items, see section (ADVANCED Configuration (Extensions by UselessGuru)
+- Many more configuration items, see section (ADVANCED Configuration (Extensions by UselessGuru))
 
 Any bitcoin donations are greatly appreciated:
 - aaronsace, the developer of the main fork: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH
@@ -209,7 +212,7 @@ $DebugPreference = "SilentlyContinue"
         Debug setting, will allow for more detailled logs. Any of "SilentlyContinue","Continue","Inquire","Stop", see https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1
 
 ######## Power configuration (Extensions by UselessGuru) ######## 
-# MultiPoolMiner (UselessGuru Edition) allows for true profit calculation and deducts power costs (if configured)
+# MultiPoolMiner (UselessGuru Edition) allows for true profit calculation and deducts power costs from earnings (if configured)
 
 $PowerPricePerKW = 0.3
         Electricity price per kW (in $currency[0]), 0 will disable power cost calculation
