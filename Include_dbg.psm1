@@ -20,8 +20,9 @@ function Get-GPUdevices {
         [bool]$DeviceSubTypes = $false
     )
 
-    $GPUs = @()
+    $ErrorActionPreference = 'Continue'
 
+    $GPUs = @()
     $MinerType | ForEach {
 
         $Miner_Type = $_
@@ -130,6 +131,8 @@ function Get-CommandPerDevice {
         [Int[]]$Devices
     )
     
+    $ErrorActionPreference = 'Continue'
+
     if ($Devices.count -gt 0) {
         # Only required if more than one different card in system
         $Tokens = @()
@@ -216,15 +219,11 @@ function Get-ComputeData {
         [Parameter(Mandatory = $false)]
         [Array]$Index
     )
+
+    $ErrorActionPreference = 'Continue'
     
-    if ($DebugPreference -match "Continue|Inquire|Stop") {Write-Log -Level "Debug" "Index: $([String]$Index)"}
-
-    try {
-        $SystemDrive = (Get-WMIObject -class Win32_OperatingSystem | select-object SystemDrive).SystemDrive
-    }
-    catch {}
-
-    if ($DebugPreference -match "Continue|Inquire|Stop") {Write-Log -Level "Debug" "SystemDrive: $($SystemDrive)"}
+    $SystemDrive = (Get-WMIObject -class Win32_OperatingSystem | select-object SystemDrive).SystemDrive
+    Write-Log -Level "Debug" "SystemDrive: $($SystemDrive)"
 
     $PowerDrawSum = 0
     
