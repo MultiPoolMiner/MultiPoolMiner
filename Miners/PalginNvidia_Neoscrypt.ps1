@@ -53,3 +53,4 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
     }
     if ($Port) {$Port ++}
 }
+Sleep 0

@@ -53,3 +53,4 @@ $Devices | ForEach-Object {
     }
     if ($Port) {$Port ++}
 }
+Sleep 0

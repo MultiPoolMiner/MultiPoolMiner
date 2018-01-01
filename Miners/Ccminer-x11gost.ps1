@@ -76,20 +76,20 @@ $Devices | ForEach-Object {
         else {
             if ($Pools."$($Algorithm)Nicehash".Name) {
                 [PSCustomObject]@{
-                    Miner_Device= $Name
-                    Type		= $Type
-                    Device		= $Device.Device
-                    Path        = $Path
-                    Arguments   = "-a $Algorithm -o stratum+tcp://$($Pools."$($Algorithm)NiceHash".Host):$($Pools."$($Algorithm)NiceHash".Port) -u $($Pools."$($Algorithm)NiceHash".User) -p $($Pools."$($Algorithm)NiceHash".Pass) -b $Port $Command $CommonCommands"
-                    HashRates   = [PSCustomObject]@{"$($Algorithm)NiceHash" = ($Stats."$($Name)_$($Algorithm)NiceHash_HashRate".Week)}
-                    API         = "Ccminer"
-                    Port        = $Port
-                    Wrap        = $false
-                    URI         = $Uri
-                    PowerDraw   = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
-                    ComputeUsage= $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
-                    Pool        = $Pools."$($Algorithm)Nicehash".Name
-                    Index		= $Index
+                    Name         = $Name
+                    Type         = $Type
+                    Device       = $Device.Device
+                    Path         = $Path
+                    Arguments    = "-a $Algorithm -o stratum+tcp://$($Pools."$($Algorithm)NiceHash".Host):$($Pools."$($Algorithm)NiceHash".Port) -u $($Pools."$($Algorithm)NiceHash".User) -p $($Pools."$($Algorithm)NiceHash".Pass) -b $Port $Command $CommonCommands"
+                    HashRates    = [PSCustomObject]@{"$($Algorithm)NiceHash" = ($Stats."$($Name)_$($Algorithm)NiceHash_HashRate".Week)}
+                    API          = "Ccminer"
+                    Port         = $Port
+                    Wrap         = $false
+                    URI          = $Uri
+                    PowerDraw    = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
+                    ComputeUsage = $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
+                    Pool         = $Pools."$($Algorithm)Nicehash".Name
+                    Index        = $Index
                 }
             }
         }

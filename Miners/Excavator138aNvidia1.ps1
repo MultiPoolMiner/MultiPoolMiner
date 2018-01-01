@@ -80,7 +80,7 @@ $Devices | ForEach-Object {
                 [PSCustomObject]@{time = 10; loop = 10; commands = @([PSCustomObject]@{id = 1; method = "algorithm.print.speeds"; params = @("0")})} | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $Path)\$($Pools."$($Algorithm)NiceHash".Name)_$($Algorithm)Nicehash_$($Threads)_Nvidia_$($Device.Device_Norm).json" -Force -ErrorAction SilentlyContinue
 
                 [PSCustomObject]@{
-                    Miner_Device = $Name
+                    Name         = $Name
                     Type         = $Type
                     Device       = $Device.Device
                     Path         = $Path
