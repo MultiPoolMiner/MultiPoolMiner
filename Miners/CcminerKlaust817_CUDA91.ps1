@@ -1,4 +1,4 @@
-﻿﻿using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-KlausT817_CUDA91\ccminer.exe"
 $Uri = "https://github.com/KlausT/ccminer/releases/download/8.17/ccminer-817-cuda91-x64.zip"
