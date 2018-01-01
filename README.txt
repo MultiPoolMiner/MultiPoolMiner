@@ -1,4 +1,4 @@
-﻿====================================================================
+====================================================================
   __  __       _ _   _ _____            _ __  __ _                 
  |  \/  |     | | | (_)  __ \          | |  \/  (_)                
  | \  / |_   _| | |_ _| |__) |__   ___ | | \  / |_ _ __   ___ _ __ 
@@ -18,8 +18,6 @@ However some things may prove valuable to the main code and might be ported to t
 In any case your comments are highly recommended.
 
 NOTE: This code contains many experimental features which might NOT work for you. If you find something that is not working, then test if it is working in the main fork first.
-
-**LINK: [MultiPoolMiner.io](https://multipoolminer.io)**
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
@@ -86,7 +84,7 @@ IMPORTANT NOTES:
 - CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145
 - You may need 'excavator.exe' if you don't already have it: https://github.com/nicehash/excavator/releases
 - It is highly recommended to set Virtual Memory size in Windows to at least 16 GB in multi-GPU systems: Computer Properties -> Advanced System Settings -> Performance -> Advanced -> Virtual Memory
-- Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/MultiPoolMiner/MultiPoolMiner/issues 
+- Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/MultiPoolMiner/UselessGuru/issues 
 - Logs and Stats are produced in text format; use them when submitting issues.
 - Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional or amend current miner files to support mining with more than 6 graphics cards.
 
