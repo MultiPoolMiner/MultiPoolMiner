@@ -298,7 +298,9 @@ Function Write-Log {
     Process {
         $filename = ".\Logs\MultiPoolMiner-$(Get-Date -Format "yyyy-MM-dd").txt"
         $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-
+        
+        if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
+        
         switch($Level) {
             'Error' {
                 $LevelText = 'ERROR:'

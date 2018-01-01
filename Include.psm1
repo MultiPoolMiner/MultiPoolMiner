@@ -290,6 +290,9 @@ Function Write-Log {
         $filename = ".\Logs\MultiPoolMiner-$(Get-Date -Format "yyyy-MM-dd").txt"
         $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
+        # Create log directory
+        if (-not (Test-Path "Logs")) {New-Item "Logs" -ItemType "directory" | Out-Null}
+        
         switch($Level) {
             'Error' {
                 $LevelText = 'ERROR:'
