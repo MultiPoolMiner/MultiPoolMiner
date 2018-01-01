@@ -16,6 +16,7 @@
     "hmq1725":  "HMQ1725",
     "jha":  "JHA",
     "keccak":  "Keccak",
+    "keccakc":  "Keccakc",
     "lbry":  "Lbry",
     "lyra2re2":  "Lyra2RE2",
     "lyra2rev2":  "Lyra2RE2",
