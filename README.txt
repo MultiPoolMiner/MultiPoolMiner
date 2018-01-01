@@ -30,7 +30,7 @@ README.md is based on README.txt - updated on 01/01/2018 - v1.21.22 - latest ver
 FEATURE SUMMARY:
 
 The bad news first:
-- **NVIDIA hardware only. I don't own AMD hardware myself. Sponsors are welcome ;-)
+- NVIDIA hardware only. I don't own AMD hardware myself. Sponsors are welcome ;-)
 
 - Monitors crypto mining pools and coins in real-time and finds the most profitable for your machine
 - Controls any miner that is available via command line
