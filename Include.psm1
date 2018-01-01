@@ -40,48 +40,13 @@ function Get-GPUdevices {
                     Devices = @("$Device_ID")
                 }            
                 if ($MinerType_Devices.Type -contains $Miner_Type -and $MinerType_Devices.Device -contains $Device) {
-                    $MinerType_Devices | Where {$_.Type -eq $Miner_Type -and $_.Device -eq $Device} | ForEach {$_.Devices += $Device_ID}
+                    $MinerType_Devices | Where {$_.Type -eq $Miner_Type -and $_.Device -eq $Device} | ForEach {$_.Devices += "$Device_ID"}
                 }
                 else {
                     $MinerType_Devices += $GPU
                 }
                 $Device_ID++
             }
-# Use code below to simulate more HW   
-#            [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
-#                $Device = $_.Name
-#                $GPU = [PSCustomObject]@{
-#                    Type = $Miner_Type
-#                    Device = $Device
-#                    Device_Norm = (Get-Culture).TextInfo.ToTitleCase(($Device -replace "-", " " -replace "_", " ")) -replace " "
-#                    Vendor = $_.Vendor
-#                    Devices = @("$Device_ID")
-#                }            
-#                if ($MinerType_Devices.Type -contains $Miner_Type -and $MinerType_Devices.Device -contains $Device) {
-#                    $MinerType_Devices | Where {$_.Type -eq $Miner_Type -and $_.Device -eq $Device} | ForEach {$_.Devices += $Device_ID}
-#                }
-#                else {
-#                    $MinerType_Devices += $GPU
-#                }
-#                $Device_ID++
-#            }
-#            [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
-#                $Device = $_.Name
-#                $GPU = [PSCustomObject]@{
-#                    Type = "AMD$Miner_Type"
-#                    Device = "AMD$Device"
-#                    Device_Norm = (Get-Culture).TextInfo.ToTitleCase(($Device -replace "-", " " -replace "_", " ")) -replace " "
-#                    Vendor = "AMD$($_.Vendor)"
-#                    Devices = @("$Device_ID")
-#                }            
-#                if ($MinerType_Devices.Type -contains $Miner_Type -and $MinerType_Devices.Device -contains $Device) {
-#                    $MinerType_Devices | Where {$_.Type -eq $Miner_Type -and $_.Device -eq $Device} | ForEach {$_.Devices += $Device_ID}
-#                }
-#                else {
-#                    $MinerType_Devices += $GPU
-#                }
-#                $Device_ID++
-#            }
         }
         else {
             [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
@@ -290,9 +255,6 @@ Function Write-Log {
         $filename = ".\Logs\MultiPoolMiner-$(Get-Date -Format "yyyy-MM-dd").txt"
         $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
-        # Create log directory
-        if (-not (Test-Path "Logs")) {New-Item "Logs" -ItemType "directory" | Out-Null}
-        
         switch($Level) {
             'Error' {
                 $LevelText = 'ERROR:'
