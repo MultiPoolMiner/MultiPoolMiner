@@ -1,4 +1,4 @@
-ï»¿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
 
@@ -578,7 +578,7 @@ function Start-SubProcess {
         [String]$WindowStyle = "Normal"
     )
 
-    $PriorityNamesÂ =Â [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
+    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
 
     $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory, $WindowStyle {
         param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory, $WindowStyle)
@@ -613,7 +613,7 @@ function Start-SubProcess {
     $Process.Handle | Out-Null
     $Process
 
-    if ($Process) {$Process.PriorityClass =Â $PriorityNames.$Priority}
+    if ($Process) {$Process.PriorityClass = $PriorityNames.$Priority}
 }
 
 function Expand-WebRequest {
