@@ -34,6 +34,8 @@ What's new:
 - **Display profit in local currency
 - **True profit calculation. Will take power costs into account. Effective power consumtion is read directly from hardware on each loop
 - **Displays profits and earnings in separate columns. Calculated profit equals earnings less power costs
+- **Profit simulation. MPM will calculate and display hypthetical profit, but will not run miners. Perfect for comparing projected earnings with other miners.
+- **Configurable minimal profit threshold. If the projected earnings fall below this value miners will stop.
 - **Brief profitability summary (how much is my projected overall profit?)
 - **Alternative way of launching miners (Configurable - see ADVANCED Configuration (Extensions by UselessGuru)). This experimental feature uses another approach to launch miners and will NOT steal focus.
 - **Runs separate miners for each type of graphis card in your rig, e.g. 1x 1080ti, 1x 1070, 1x 10603GB). This edition will then choose the fastes miner for each of these cards, therfore helping to further optimize profits.
@@ -75,7 +77,6 @@ What's new:
 - It is highly recommended to set Virtual Memory size in Windows to at least 16 GB in multi-GPU systems: Computer Properties -> Advanced System Settings -> Performance -> Advanced -> Virtual Memory
 - Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/MultiPoolMiner/MultiPoolMiner/issues 
 - Logs and Stats are produced in text format; use them when submitting issues.
-- Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional or amend current miner files to support mining with more than 6 graphics cards.
 
 	
 ====================================================================
@@ -189,7 +190,7 @@ The configuration items in this section are currently not available in the confi
 # If $true use alternative launcher process to run miners. This will NOT steal focus, but will 'forget' to close running miners on exit. These need to be closed manually.
 
 **$MinProfit = 5
-# Minimal required profit (in $Currency[0]), if less it will not mine
+# Minimal required profit, if less it will not mine. The configured value must be in the first currency as defined in $currency (see config item above).
 
 **$BeepOnError=$true
 # if $true will beep on errors
@@ -213,16 +214,16 @@ The configuration items in this section are currently not available in the confi
 # MultiPoolMiner (UselessGuru Edition) allows for true profit calculation and deducts power costs from earnings (if configured)
 
 **$PowerPricePerKW = 0.3
-# Electricity price per kW (in $currency[0]), 0 will disable power cost calculation
+# Electricity price per kW, 0 will disable power cost calculation. The configured value must be in the first currency as defined in $currency (see config item above).
 
 **$Computer_PowerDraw = 50
-# Base power consumption of computer (in Watts) excluding GPUs or CPU mining
+# Base power consumption (in Watts) of computer excluding GPUs or CPU mining.
 
 **$CPU_PowerDraw = 80
-# Power consumption (in Watts) of all CPUs when mining (on top of general power ($Computer_PowerDraw) needed to run your computer when NOT mining)
+# Power consumption (in Watts) of all CPUs when mining (on top of general power ($Computer_PowerDraw) needed to run your computer when NOT mining).
 
 **$GPU_PowerDraw = 500
-# Power consumption of all GPUs in computer when mining (in $currency[0]), put a rough estimate here, This edition of MultiPoolMiner will poll the hardware and read the effective power consuption per algorithm during benchmark
+# Power consumption (in Watts) of all GPUs in computer when mining, put a rough estimate here. This edition of MultiPoolMiner will poll the hardware and read the effective power consuption per algorithm during benchmark
 	
 ====================================================================
 	
