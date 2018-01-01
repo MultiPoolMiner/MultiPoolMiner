@@ -107,6 +107,9 @@ function Get-GPUdevices {
             }
         }
     }
+    $GPUs_DBG = $GPUs | ConvertTo-Json
+    Write-Log -Level "Debug" "GPUs: $GPUs_DBG"
+    
     $GPUs
 }
 
@@ -214,7 +217,14 @@ function Get-ComputeData {
         [Array]$Index
     )
     
-    $SystemDrive = (Get-WMIObject -class Win32_OperatingSystem | select-object SystemDrive).SystemDrive
+    if ($DebugPreference -match "Continue|Inquire|Stop") {Write-Log -Level "Debug" "Index: $([String]$Index)"}
+
+    try {
+        $SystemDrive = (Get-WMIObject -class Win32_OperatingSystem | select-object SystemDrive).SystemDrive
+    }
+    catch {}
+
+    if ($DebugPreference -match "Continue|Inquire|Stop") {Write-Log -Level "Debug" "SystemDrive: $($SystemDrive)"}
 
     $PowerDrawSum = 0
     
