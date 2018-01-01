@@ -44,7 +44,7 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
                 Type         = "NVIDIA"
                 Device       = $Device.Device
                 Path         = $Path
-                Arguments    = "-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) --api-port=$port$NiceHash$Command$CommonCommands"
+                Arguments    = "-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) --api-port=$port$NiceHash $Command $CommonCommands"
                 HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
                 API          = "XmRig"
                 Port         = $Port

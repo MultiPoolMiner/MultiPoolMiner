@@ -64,7 +64,7 @@ $Devices | ForEach-Object {
             Type         = $Type
             Device       = $Device.Device
             Path         = $Path
-            Arguments    = "--telemetry=127.0.0.1:$Port --server $($Pools.$Algorithm.Host) --port $($Pools.$Algorithm.Port) --user $($Pools.$Algorithm.User) --pass $($Pools.$Algorithm.Pass)$Command$CommonCommands"
+            Arguments    = "--telemetry=127.0.0.1:$Port --server $($Pools.$Algorithm.Host) --port $($Pools.$Algorithm.Port) --user $($Pools.$Algorithm.User) --pass $($Pools.$Algorithm.Pass) $Command $CommonCommands"
             HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
             API          = "DSTM"
             Port         = $Port
