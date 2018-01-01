@@ -107,7 +107,9 @@ function Get-GPUdevices {
 			}
 		}
 	}
-	$GPUs
+	if ($DebugPreference -match "Continue|Inquire|Stop") {Write-Log -Level "Debug" "GPUs: $($GPUs | ConvertTo-Json)"}
+    
+    $GPUs
 }
 
 function Get-CommandPerDevice {
@@ -214,9 +216,16 @@ function Get-ComputeData {
 		[Array]$Index
 	)
 	
-	$SystemDrive = (Get-WMIObject -class Win32_OperatingSystem | select-object SystemDrive).SystemDrive
+   	if ($DebugPreference -match "Continue|Inquire|Stop") {Write-Log -Level "Debug" "Index: $([String]$Index)"}
 
-	$PowerDrawSum = 0
+	try {
+        $SystemDrive = (Get-WMIObject -class Win32_OperatingSystem | select-object SystemDrive).SystemDrive
+    }
+    catch {}
+    
+   	if ($DebugPreference -match "Continue|Inquire|Stop") {Write-Log -Level "Debug" "SystemDrive: $($SystemDrive)"}
+
+    $PowerDrawSum = 0
 	
 	$ComputerUsageSum = 0
 	$ComputeUsageCount = 0
@@ -280,7 +289,7 @@ Function Write-Log {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
-        [Parameter(Mandatory=$false)][ValidateSet("Error","Warn","Info")][string]$Level = "Info"
+        [Parameter(Mandatory=$false)][ValidateSet("Error","Warn","Info","Debug")][string]$Level = "Info"
     )
 
     Begin {
@@ -302,6 +311,10 @@ Function Write-Log {
             'Info' {
                 $LevelText = 'INFO:'
                 Write-Host -ForegroundColor DarkCyan -Object "$date $LevelText $Message"
+            }
+            'Debug' {
+                $LevelText = 'DEBUG:'
+                Write-Host -ForegroundColor Gray -Object "$date $LevelText $Message"
             }
         }
         "$date $LevelText $Message" | Out-File -FilePath $filename -Append
