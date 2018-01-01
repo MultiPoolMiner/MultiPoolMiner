@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+﻿﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-KlausT817_CUDA91\ccminer.exe"
 $Uri = "https://github.com/KlausT/ccminer/releases/download/8.17/ccminer-817-cuda91-x64.zip"
@@ -10,7 +10,7 @@ $CommonCommands = ""
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    "blakecoin"     = "	-i 31,31,31" #Blakecoin, beaten by CcminerAlexis78hsr
+    "blakecoin"     = "" # my best values for 1080ti/1070/10603G " -i 31,31,31" #Blakecoin, beaten by CcminerAlexis78hsr
     "c11"		    = "" # my best values for 1080ti/1070/10603G " -i 22,22,22" #C11 beaten by CcminerAlexis78hsr 
     "groestl"	    = "" # my best values for 1080ti/1070/10603G " -i 26,25,25" #Groestl, fastest
     "keccak"	    = "" # my best values for 1080ti/1070/10603G " -i 31,30,29.5" #Keccak
