@@ -6,7 +6,6 @@
         "HashRates":  {"Ethash":  "$($Stats.ClaymoreAmdSia40_Ethash_HashRate.Week)","Sia":  "$($Stats.ClaymoreAmdSia40_Sia_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     },
     {
         "Type":  "AMD",
@@ -15,7 +14,6 @@
         "HashRates":  {"Ethash":  "$($Stats.ClaymoreAmdSia40_Ethash_HashRate.Week)","SiaClaymore":  "$($Stats.ClaymoreAmdSia40_SiaClaymore_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     },
     {
         "Type":  "AMD",
@@ -24,7 +22,6 @@
         "HashRates":  {"Ethash":  "$($Stats.ClaymoreAmdSia40_Ethash_HashRate.Week)","SiaNiceHash":  "$($Stats.ClaymoreAmdSia40_SiaNiceHash_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     }
 ]
 

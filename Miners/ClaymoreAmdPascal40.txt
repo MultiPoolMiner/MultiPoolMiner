@@ -6,7 +6,6 @@
         "HashRates":  {"Ethash":  "$($Stats.ClaymoreAmdPascal40_Ethash_HashRate.Week)","Pascal":  "$($Stats.ClaymoreAmdPascal40_Pascal_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     }
 ]
 

@@ -6,7 +6,6 @@
         "HashRates":  {"Ethash2gb":  "$($Stats.ClaymoreNvidia2gbSia30_Ethash2gb_HashRate.Week)","Sia":  "$($Stats.ClaymoreNvidia2gbSia30_Sia_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "23333",
-        "Wrap":  false
     },
     {
         "Type":  "NVIDIA",
@@ -15,7 +14,6 @@
         "HashRates":  {"Ethash2gb":  "$($Stats.ClaymoreNvidia2gbSia30_Ethash2gb_HashRate.Week)","SiaClaymore":  "$($Stats.ClaymoreNvidia2gbSia30_SiaClaymore_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "23333",
-        "Wrap":  false
     }
 ]
 

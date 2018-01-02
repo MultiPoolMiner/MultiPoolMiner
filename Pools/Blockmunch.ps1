@@ -40,8 +40,8 @@ $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
         "keccak" {$Divisor *= 1000}
     }
 
-    if ((Get-Stat -Name "$($Name)_$($Blockmunch_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Blockmunch_Algorithm_Norm)_Profit" -Value ([Double]$Blockmunch_Request.$_.estimate_last24h / $Divisor) -Duration $StatSpan -ChangeDetection $true}
-    else {$Stat = Set-Stat -Name "$($Name)_$($Blockmunch_Algorithm_Norm)_Profit" -Value ([Double]$Blockmunch_Request.$_.estimate_current / $Divisor) -Duration (New-TimeSpan -Days 1)}
+    if ((Get-Stat -Name "$($Name)_$($Blockmunch_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Blockmunch_Algorithm_Norm)_Profit" -Value ([Double]$Blockmunch_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
+    else {$Stat = Set-Stat -Name "$($Name)_$($Blockmunch_Algorithm_Norm)_Profit" -Value ([Double]$Blockmunch_Request.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
 
     $Blockmunch_Regions | ForEach-Object {
         $Blockmunch_Region = $_

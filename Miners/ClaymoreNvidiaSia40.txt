@@ -6,7 +6,6 @@
         "HashRates":  {"Ethash":  "$($Stats.ClaymoreNvidiaSia40_Ethash_HashRate.Week)","Sia":  "$($Stats.ClaymoreNvidiaSia40_Sia_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "23333",
-        "Wrap":  false
     },
     {
         "Type":  "NVIDIA",
@@ -15,7 +14,6 @@
         "HashRates":  {"Ethash":  "$($Stats.ClaymoreNvidiaSia40_Ethash_HashRate.Week)","SiaClaymore":  "$($Stats.ClaymoreNvidiaSia40_SiaClaymore_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "23333",
-        "Wrap":  false
     },
     {
         "Type":  "NVIDIA",
@@ -24,7 +22,6 @@
         "HashRates":  {"Ethash":  "$($Stats.ClaymoreNvidiaSia40_Ethash_HashRate.Week)","SiaNiceHash":  "$($Stats.ClaymoreNvidiaSia40_SiaNiceHash_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "23333",
-        "Wrap":  false
     }
 ]
 

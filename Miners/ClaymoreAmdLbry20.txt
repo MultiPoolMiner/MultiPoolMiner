@@ -6,7 +6,6 @@
         "HashRates":  {"Ethash":  "$($Stats.ClaymoreAmdLbry20_Ethash_HashRate.Week)","Lbry":  "$($Stats.ClaymoreAmdLbry20_Lbry_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     }
 ]
 

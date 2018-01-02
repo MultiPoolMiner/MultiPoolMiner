@@ -6,7 +6,6 @@
         "HashRates":  {"Ethash":  "$($Stats.ClaymoreAmdDecred30_Ethash_HashRate.Week)","Decred":  "$($Stats.ClaymoreAmdDecred30_Decred_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     },
     {
         "Type":  "AMD",
@@ -15,7 +14,6 @@
         "HashRates":  {"Ethash":  "$($Stats.ClaymoreAmdDecred30_Ethash_HashRate.Week)","DecredNiceHash":  "$($Stats.ClaymoreAmdDecred30_DecredNiceHash_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333",
-        "Wrap":  false
     }
 ]
 
