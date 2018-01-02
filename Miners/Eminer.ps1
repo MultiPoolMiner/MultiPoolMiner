@@ -3,8 +3,6 @@
 $Path = ".\Bin\Ethash-Eminer\eminer.exe"
 $Uri = "https://github.com/ethash/eminer-release/releases/download/v0.6.1-rc2/eminer.v0.6.1-rc2.win64.zip"
 
-$Port = 8550
-
 # Custom commands to be applied to all algorithms
 $CommonCommands = " -no-devfee"
 
@@ -15,7 +13,7 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-
+$Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA","AMD"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {

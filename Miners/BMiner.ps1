@@ -1,9 +1,7 @@
-	using module ..\Include.psm1
+using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-BMiner\BMiner.exe"
 $Uri = "https://www.bminercontent.com/releases/bminer-v3.0.0-e95eeda-amd64.zip"
-
-$Port = 2222
 
 # Custom commands to be applied to all algorithms
 $CommonCommands = " -nofee -polling"
@@ -40,7 +38,7 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-
+$Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {

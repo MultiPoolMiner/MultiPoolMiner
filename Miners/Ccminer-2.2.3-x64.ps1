@@ -3,8 +3,6 @@
 $Path = ".\Bin\NVIDIA-ccminer-2.2.3-x64\ccminer-x64.exe"
 $Uri = "https://github.com/tpruvot/ccminer/releases/download/2.2.3-tpruvot/ccminer-x64-2.2.3-cuda9.7z"
 
-$Port = 4068
-
 # Custom command to be applied to all algorithms
 $CommonCommands = " --submit-stale"
 
@@ -44,7 +42,7 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-
+$Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {

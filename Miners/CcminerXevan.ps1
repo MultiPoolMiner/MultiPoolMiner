@@ -3,8 +3,7 @@
 $Path = ".\Bin\NVIDIA-xevan\ccminer_x86.exe"
 $Uri = "https://github.com/nemosminer/ccminer-xevan/releases/download/ccminer-xevan/ccminer_x86.7z"
 
-$Port = 4068
-
+# Custom commands to be applied to all algorithms
 $CommonCommands = ""
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
@@ -34,7 +33,7 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-
+$Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {

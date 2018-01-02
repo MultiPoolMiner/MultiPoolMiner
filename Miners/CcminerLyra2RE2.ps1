@@ -3,8 +3,6 @@
 $Path = ".\Bin\Lyra2RE2-NVIDIA\ccminer.exe"
 $Uri = "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip"
 
-$Port = 4068
-
 # Custom command to be applied to all algorithms
 $CommonCommands = ""
 
@@ -14,7 +12,7 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-
+$Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {

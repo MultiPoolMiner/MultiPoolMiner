@@ -3,8 +3,6 @@
 $Path = ".\Bin\Ethash-Ethminer\ethminer.exe"
 $Uri = "https://github.com/ethereum-mining/ethminer/releases/download/v0.12.0/ethminer-0.12.0-Windows.zip"
 
-$Port = 23333
-
 # Custom command to be applied to all algorithms
 $CommonCommands = ""
 
@@ -15,7 +13,7 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-
+$Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {

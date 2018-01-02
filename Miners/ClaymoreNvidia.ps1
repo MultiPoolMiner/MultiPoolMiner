@@ -2,10 +2,8 @@
 
 $Path = ".\Bin\Ethash-Claymore\EthDcrMiner64.exe"
 $Uri = "https://github.com/nanopool/Claymore-Dual-Miner/releases/download/v10.0/Claymore.s.Dual.Ethereum.Decred_Siacoin_Lbry_Pascal.AMD.NVIDIA.GPU.Miner.v10.0.zip"
-$Fee = 0.98
-$Port = 23333
 
-$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$Fee = 0.98
 
 #Custom command to be applied to all algorithms
 $CommonCommands = ""
@@ -24,6 +22,8 @@ $Commands = [PSCustomObject]@{
     "ethash2gb;SiaClaymore" = " -dcoin sc -dcri 110"
 }
 
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {

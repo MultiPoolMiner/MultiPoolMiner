@@ -3,8 +3,6 @@
 $Path = ".\Bin\NVIDIA-Alexis78hsr\ccminer-alexis.exe"
 $Uri = "https://github.com/nemosminer/ccminer-hcash/releases/download/alexishsr/ccminer-hsr-alexis-x86-cuda8.7z"
 
-$Port = 4068
-
 # Custom command to be applied to all algorithms
 $CommonCommands = ""
 
@@ -34,7 +32,7 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-
+$Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
     $Devices | ForEach-Object {

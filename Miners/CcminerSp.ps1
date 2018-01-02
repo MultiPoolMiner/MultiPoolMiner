@@ -3,8 +3,6 @@
 $Path = ".\Bin\NVIDIA-SP\ccminer.exe"
 $Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z"
 
-$Port = 4068
-
 # Custom command to be applied to all algorithms
 $CommonCommands = ""
 
@@ -44,7 +42,7 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-
+$Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
     $Devices | ForEach-Object {

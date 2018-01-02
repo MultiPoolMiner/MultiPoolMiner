@@ -5,8 +5,6 @@ $Threads = 1
 $Path = ".\Bin\NVIDIA-Excavator_138a\excavator.exe"
 $Uri = "https://github.com/nicehash/excavator/releases/download/v1.3.8a/excavator_v1.3.8a_NVIDIA_Win64.zip"
 
-$Port = 3456
-
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
     "_blake2s"          = @() #Blake2s, Beaten by Ccminer-x11gost
@@ -23,7 +21,7 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-
+$Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {

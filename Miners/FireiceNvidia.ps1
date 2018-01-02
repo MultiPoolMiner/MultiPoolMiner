@@ -5,15 +5,13 @@ $ThreadIndex = 0
 $Path = ".\Bin\CryptoNight-FireIce\xmr-stak.exe"
 $Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/v2.2.0/xmr-stak-win64.zip"
 
+$Port = 4001 + 40 * $ItemCounter
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Type = "NVIDIA"
 
 #New-Item -Path "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" -Force | New-ItemProperty -Name ([System.IO.Path]::GetFullPath($Path)) -Value "RunAsInvoker" -Force #temp fix
 
 if ($Pools.Cryptonight.Name) {
-
-    $Port = 3335
-
     $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
     $Devices | ForEach-Object {
 

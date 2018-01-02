@@ -20,7 +20,7 @@ function Get-GPUdevices {
         [bool]$DeviceSubTypes = $false
     )
 
-    $ErrorActionPreference = 'Continue'
+    $ErrorActionPreference = Continue
 
     $GPUs = @()
     $MinerType | ForEach {
@@ -30,7 +30,7 @@ function Get-GPUdevices {
         $Device_ID = 0
         $MinerType_Devices = @()
         
-        $SimulateExtraHW = $true
+        $SimulateExtraHW = $false
         
         if ($DeviceSubTypes) {
             [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
@@ -137,6 +137,8 @@ function Get-CommandPerDevice {
     
     $ErrorActionPreference = 'Continue'
 
+    Write-Log -Level "Debug" -Message "Entering $($MyInvocation.MyCommand): `$Command: '$($Command)', `$Devices: '$$($Devices)'"
+    
     if ($Devices.count -gt 0) {
         # Only required if more than one different card in system
         $Tokens = @()
@@ -204,6 +206,9 @@ function Get-CommandPerDevice {
             }
         }
     }
+    
+    Write-Log -Level "Debug" -Message "Exiting $($MyInvocation.MyCommand): `$Command: '$($Command)'"
+    
     $Command
 }
 
@@ -221,13 +226,15 @@ function Get-ComputeData {
         [Parameter(Mandatory = $true)]
         [String[]]$MinerType,
         [Parameter(Mandatory = $false)]
-        [Array]$Index
+        [Int[]]$Index
     )
 
+    Write-Log -Level "Debug" -Message "Entering $($MyInvocation.MyCommand): `$MinerType: '$($MinerType)', `$Index: '$$($Index)'"
+    
     $ErrorActionPreference = 'Continue'
     
     $SystemDrive = (Get-WMIObject -class Win32_OperatingSystem | select-object SystemDrive).SystemDrive
-    Write-Log -Level "Debug" "SystemDrive: $($SystemDrive)"
+    #Write-Log -Level "Debug" "SystemDrive: $($SystemDrive)"
 
     $PowerDrawSum = 0
     
@@ -247,7 +254,7 @@ function Get-ComputeData {
                     $Loop = 0
                     do {
                         $Loop++
-                        $PowerDraw = [Decimal](&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=power.draw)
+                        $PowerDraw = [Double](&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=power.draw)
                         $PowerDrawSum += $PowerDraw
                     }
                     until ($Loop -gt 2 -or $PowerDraw -gt 0)
@@ -257,7 +264,7 @@ function Get-ComputeData {
                     do {
                         $Loop++
                         for ($i = 0; $i -lt (&$NvidiaSMI -L).Count; $i++) {
-                            $ComputeUsage = [Decimal](&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=utilization.gpu)
+                            $ComputeUsage = [Double](&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=utilization.gpu)
                             if ($ComputeUsage -gt 0) {
                                 $ComputeUsageSum += $ComputeUsage
                                 $ComputeUsageCount++
@@ -281,13 +288,20 @@ function Get-ComputeData {
             $ComputeUsageCount++
         }
     }
+
     if ($ComputeUsageSum -gt 0 -and $ComputeUsageSum -gt 0) {$ComputeUsage = $ComputeUsageSum / $ComputeUsageCount} {else $ComputeUsage = 0}
-    
-    return [PSCustomObject]@{
+
+    $ComputeData = [PSCustomObject]@{
         PowerDraw    = $PowerDrawSum
         ComputeUsage = $ComputeUsage
     }
+
+    Write-Log -Level "Debug" -Message "Exiting $($MyInvocation.MyCommand): `$ComputeData: '$($ComputeData)'"
+
+    $ComputeData
+    
 }
+
 
 Function Write-Log {
     [CmdletBinding()]
@@ -321,7 +335,13 @@ Function Write-Log {
                 Write-Host -ForegroundColor Gray -Object "$date $LevelText $Message"
             }
         }
-        "$date $LevelText $Message" | Out-File -FilePath $filename -Append
+        try {
+            "$date $LevelText $Message" | Out-File -FilePath $filename -Append
+        }
+        catch {
+            Sleep 250
+            "$date $LevelText $Message" | Out-File -FilePath $filename -Append -ErrorAction SilentlyContinue
+        }
     }
     End {}
 }
@@ -479,9 +499,12 @@ function Get-ChildItemContent {
         [Hashtable]$Parameters = @{}
     )
 
+    $ItemCounter = 0
+    
     Get-ChildItem $Path -Exclude "_*" | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
+        $ItemCounter ++
         if ($_.Extension -eq ".ps1") {
             $Content = & {
                 $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters[$_]}
@@ -591,7 +614,7 @@ function Start-SubProcess {
         [String]$WindowStyle = "Normal"
     )
 
-    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
+    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
 
     $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory, $WindowStyle {
         param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory, $WindowStyle)
@@ -626,7 +649,7 @@ function Start-SubProcess {
     $Process.Handle | Out-Null
     $Process
 
-    if ($Process) {$Process.PriorityClass = $PriorityNames.$Priority}
+    if ($Process) {$Process.PriorityClass =ï¿½$PriorityNames.$Priority}
 }
 
 function Expand-WebRequest {

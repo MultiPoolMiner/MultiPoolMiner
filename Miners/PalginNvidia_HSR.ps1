@@ -4,8 +4,6 @@ $Path = ".\Bin\NVIDIA-PalginHSR\hsrminer_hsr.exe"
 $Uri = "https://github.com/palginpav/hsrminer/raw/master/HSR%20algo/Windows/hsrminer_hsr.exe"
 $Fee = 0.99 # 1% miner fee
 
-$Port = 23333 # Miner has currently no API port available, must use wrapper
-
 # Custom command to be applied to all algorithms
 $CommonCommands = ""
 
@@ -15,7 +13,7 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-
+$Port = 4001 + 40 * $ItemCounter # Miner has currently no API port available, must use wrapper
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
     $Devices | ForEach-Object {

@@ -3,8 +3,6 @@ using module ..\Include.psm1
 $Path = ".\Bin\NVIDIA-DSTM\zm.exe"
 # Uri = "https://bitcointalk.org/index.php?topic=2021765.0"
 
-$Port = 2222
-
 # Custom command to be applied to all algorithms
 $CommonCommands = ""
 
@@ -40,7 +38,7 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-
+$Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {

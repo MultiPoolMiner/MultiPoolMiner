@@ -767,7 +767,7 @@ while ($true) {
             if ($Miner.New) {$Miner.Benchmarked++}
 
             if ($Miner.Process -and -not $Miner.Process.HasExited -and $Miner.Port) {
-                Write-Log "Requesting stats for $($Miner.Device) [API: $($Miner.API)] miner... "
+                Write-Log "Requesting stats for $($Miner.Device) [API: $($Miner.API), Port: $($Miner.Port)] miner... "
 
                 Start-Job -Name "GetMinerData_$($Miner.Device)" ([scriptblock]::Create("Set-Location('$(Get-Location)');. 'APIs\$($Miner.API).ps1'")) -ArgumentList ($Miner, $Strikes, $DebugPreference) -ScriptBlock {
                     param($Miner, $Strikes)
@@ -822,8 +822,18 @@ while ($true) {
                 $Miner_HashRate = $Miner_Data.HashRate
                 $Miner_PowerDraw = $Miner_Data.PowerDraw
                 $Miner_ComputeUsage = $Miner_Data.ComputeUsage
-                $Miner.Speed_Live = $Miner_HashRate.PSObject.Properties.Value
-                Write-Log "Saving stats for miner $($Miner.Device) [ $(($Miner.Speed_Live) | ConvertTo-Hash)/s | $($Miner_PowerDraw.ToString("N2")) W | $($Miner_ComputeUsage.ToString("N2"))% ]... "
+                if ($Miner_HashRate -is [Array]) {
+                    $Miner.Speed_Live = $Miner_HashRate[0]
+                }
+                else {
+                    $Miner.Speed_Live = $Miner_HashRate
+                }
+                
+                $Miner_HashRates = ""
+                $Miner.Algorithm | Where-Object {$Miner_HashRate.$_} | ForEach-Object {
+                    $Miner_HashRates += "$($Miner_HashRate.$_ | ConvertTo-Hash)/s | "
+                }
+                Write-Log "Saving stats for miner $($Miner.Device) [ $Miner_HashRates$($Miner_PowerDraw.ToString("N2")) W | $($Miner_ComputeUsage.ToString("N2"))% ]... "
 
                 $Miner.Algorithm | Where-Object {$Miner_HashRate.$_} | ForEach-Object {
                 
@@ -846,15 +856,14 @@ while ($true) {
                     $Stat = Set-Stat -Name "$($Miner.Name)_$($_.Algorithm -join '')_ComputeUsage" -Value $Miner_ComputeUsage -Duration $StatSpan -FaultDetection $false
                 }
             }
-            else {
-                ""
-                if ($Miner_Name -notmatch "PalginNvidia.*" <# temp fix, Palgin does not have an APi yet#>) {
-                    if ($BeepOnError) {
-                        [console]::beep(1000,500)
-                    }
-                    Write-Log -Level Error "Failed to connect to miner ($Miner_Name). "
-                }
-            }
+#            else {
+#                if ($Miner_Name -notmatch "PalginNvidia.*" <# temp fix, Palgin does not have an APi yet#>) {
+#                    if ($BeepOnError) {
+#                        [console]::beep(1000,500)
+#                    }
+#                    Write-Log -Level Error "Failed to connect to miner ($Miner_Name). "
+#                }
+#            }
         }
 
         #Reduce Memory

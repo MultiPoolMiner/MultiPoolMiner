@@ -199,7 +199,7 @@ function Get-ComputeData {
                     $Loop = 0
                     do {
                         $Loop++
-                        $PowerDraw = [Decimal](&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=power.draw)
+                        $PowerDraw = [Double](&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=power.draw)
                         $PowerDrawSum += $PowerDraw
                     }
                     until ($Loop -gt 2 -or $PowerDraw -gt 0)
@@ -209,7 +209,7 @@ function Get-ComputeData {
                     do {
                         $Loop++
                         for ($i = 0; $i -lt (&$NvidiaSMI -L).Count; $i++) {
-                            $ComputeUsage = [Decimal](&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=utilization.gpu)
+                            $ComputeUsage = [Double](&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=utilization.gpu)
                             if ($ComputeUsage -gt 0) {
                                 $ComputeUsageSum += $ComputeUsage
                                 $ComputeUsageCount++
@@ -273,7 +273,13 @@ Function Write-Log {
                 Write-Host -ForegroundColor Gray -Object "$date $LevelText $Message"
             }
         }
-        "$date $LevelText $Message" | Out-File -FilePath $filename -Append
+        try {
+            "$date $LevelText $Message" | Out-File -FilePath $filename -Append
+        }
+        catch {
+            Sleep 250
+            "$date $LevelText $Message" | Out-File -FilePath $filename -Append -ErrorAction SilentlyContinue
+        }
     }
     End {}
 }
@@ -431,9 +437,12 @@ function Get-ChildItemContent {
         [Hashtable]$Parameters = @{}
     )
 
+    $ItemCounter = 0
+    
     Get-ChildItem $Path -Exclude "_*" | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
+        $ItemCounter ++
         if ($_.Extension -eq ".ps1") {
             $Content = & {
                 $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters[$_]}
