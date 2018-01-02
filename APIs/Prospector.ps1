@@ -28,7 +28,7 @@ class Prospector : Miner {
                 $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
             catch {
-                Write-Log -Level Error "Failed to connect to miner ($($this.Name)). "
+                Write-Log -Level Error "$($this.API) failed to connect to miner ($($this.Name)). Could not hash rates from miner."
                 break
             }
             

@@ -27,7 +27,7 @@ class Xgminer : Miner {
 				$Data = $Response.Substring($Response.IndexOf("{"), $Response.LastIndexOf("}") - $Response.IndexOf("{") + 1) -replace " ", "_" | ConvertFrom-Json -ErrorAction Stop
 			}
 			catch {
-				Write-Log -Level Error "Failed to connect to miner ($($this.Name)). "
+				Write-Log -Level Error "$($this.API) failed to connect to miner ($($this.Name)). Could not hash rates from miner."
 				break
 			}
 

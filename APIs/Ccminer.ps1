@@ -30,7 +30,7 @@ class Ccminer : Miner {
 			}
 			catch {
 				if ($Safe -and $this.Name -notmatch "PalginNvidia_.*") {
-					Write-Log -Level Error "API failed to connect to miner ($($this.Name)). "
+					Write-Log -Level Error "$($this.API) failed to connect to miner ($($this.Name)). Could not hash rates from miner."
 				}
 			    break
 			}
