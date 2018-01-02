@@ -277,7 +277,7 @@ Function Write-Log {
             "$date $LevelText $Message" | Out-File -FilePath $filename -Append
         }
         catch {
-            Sleep 250
+            Sleep 0.2
             "$date $LevelText $Message" | Out-File -FilePath $filename -Append -ErrorAction SilentlyContinue
         }
     }

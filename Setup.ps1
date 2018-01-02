@@ -27,7 +27,7 @@ $GPUs = (Get-GPUdevices $Type $False)
 
 # Load pool and miner information
 $Stats = @()
-Write-Host 'Loading available pools...'
+Write-Host ('Loading available pools - this may take up to ' + ((Get-ChildItem "Pools" -File).count * 15) + ' seconds...')
 $AllPools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; Username = $UserName; WorkerName = $WorkerName; StatSpan = $StatSpan; Algorithm = $null} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru}
 if ($AllPools.Count -eq 0) {
     Throw "No pools available. "
