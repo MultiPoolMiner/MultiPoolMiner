@@ -1,26 +1,26 @@
 ﻿using module ..\Include.psm1
 
 class Xmrig : Miner {
-	[PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false, [String]$DebugPreference = "SilentlyContinue") {
-		$Server = "localhost"
-		$Timeout = 10 #seconds
+    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false, [String]$DebugPreference = "SilentlyContinue") {
+        $Server = "localhost"
+        $Timeout = 10 #seconds
 
-		$Delta = 0.05
-		$Interval = 5
-		$HashRates = @()
+        $Delta = 0.05
+        $Interval = 5
+        $HashRates = @()
 
-		$PowerDraws = @()
-		$ComputeUsages = @()
+        $PowerDraws = @()
+        $ComputeUsages = @()
 
-		$Request = ""
+        $Request = ""
         $Response = ""
 
-		do {
-			# Read Data from hardware
-			$ComputeData = [PSCustomObject]@{}
-			$ComputeData = (Get-ComputeData -MinerType $this.type -Index $this.index) 
-			$PowerDraws += $ComputeData.PowerDraw
-			$ComputeUsages += $ComputeData.ComputeUsage
+        do {
+            # Read Data from hardware
+            $ComputeData = [PSCustomObject]@{}
+            $ComputeData = (Get-ComputeData -MinerType $this.type -Index $this.index) 
+            $PowerDraws += $ComputeData.PowerDraw
+            $ComputeUsages += $ComputeData.ComputeUsage
 
             $HashRates += $HashRate = [PSCustomObject]@{}
 
@@ -32,8 +32,6 @@ class Xmrig : Miner {
                 Write-Log -Level Error "$($this.API) failed to connect to miner ($($this.Name)). Could not hash rates from miner."
                 break
             }
-
-            if ($DebugPreference -ne "SilentlyContinue") {Write-Log -Level Debug $Response}
 
             $HashRate_Name = [String]($Algorithm -like (Get-Algorithm $Data.algo))
             if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
@@ -58,25 +56,25 @@ class Xmrig : Miner {
             }
 
             Start-Sleep $Interval
-		} while ($HashRates.Count -lt 6)
+        } while ($HashRates.Count -lt 6)
 
-		$HashRate = [PSCustomObject]@{}
-		$Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
-		$Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
+        $HashRate = [PSCustomObject]@{}
+        $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
+        $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
 
-		$PowerDraws_Info = [PSCustomObject]@{}
-		$PowerDraws_Info = ($PowerDraws | Measure-Object -Maximum -Minimum -Average)
-		$PowerDraw = if ($PowerDraws_Info.Maximum - $PowerDraws_Info.Minimum -le $PowerDraws_Info.Average * $Delta) {$PowerDraws_Info.Maximum} else {$PowerDraws_Info.Average}
+        $PowerDraws_Info = [PSCustomObject]@{}
+        $PowerDraws_Info = ($PowerDraws | Measure-Object -Maximum -Minimum -Average)
+        $PowerDraw = if ($PowerDraws_Info.Maximum - $PowerDraws_Info.Minimum -le $PowerDraws_Info.Average * $Delta) {$PowerDraws_Info.Maximum} else {$PowerDraws_Info.Average}
 
-		$ComputeUsages_Info = [PSCustomObject]@{}
-		$ComputeUsages_Info = ($ComputeUsages | Measure-Object -Maximum -Minimum -Average)
-		$ComputeUsage = if ($ComputeUsages_Info.Maximum - $ComputeUsages_Info.Minimum -le $ComputeUsages_Info.Average * $Delta) {$ComputeUsages_Info.Maximum} else {$ComputeUsages_Info.Average}
+        $ComputeUsages_Info = [PSCustomObject]@{}
+        $ComputeUsages_Info = ($ComputeUsages | Measure-Object -Maximum -Minimum -Average)
+        $ComputeUsage = if ($ComputeUsages_Info.Maximum - $ComputeUsages_Info.Minimum -le $ComputeUsages_Info.Average * $Delta) {$ComputeUsages_Info.Maximum} else {$ComputeUsages_Info.Average}
 
-		return [PSCustomObject]@{
-			HashRate     = $HashRate
-			PowerDraw    = $PowerDraw
-			ComputeUsage = $ComputeUsage
+        return [PSCustomObject]@{
+            HashRate     = $HashRate
+            PowerDraw    = $PowerDraw
+            ComputeUsage = $ComputeUsage
             Response     = $Response
-		}
-	}
+        }
+    }
 }

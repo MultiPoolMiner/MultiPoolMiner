@@ -226,6 +226,8 @@ while ($true) {
         $Miner_Profits_MarginOfError = [PSCustomObject]@{}
         $Miner_Profits_Bias = [PSCustomObject]@{}
 
+        # Convert index into string
+        $Miner.Index = [String]$Miner.Index
         $Miner_Types = $Miner.Type | Select-Object -Unique
         $Miner_Indexes = $Miner.Index | Select-Object -Unique
         $Miner_Devices = $Miner.Device | Select-Object -Unique
@@ -271,8 +273,20 @@ while ($true) {
         if ($Miner_Indexes -eq $null) {$Miner_Indexes = $AllMiners.Index | Select-Object -Unique}
 
         if ($Miner_Types -eq $null) {$Miner_Types = ""}
-        if ($Miner_Indexes -eq $null) {$Miner_Indexes = -1}
-
+        if ($Miner_Indexes -eq $null) {
+            $Miner_Indexes = -1
+        }
+        else {
+            if ($Miner_Type -ne "CPU") {
+                if ($Miner.Index -like "*,*") {
+                    $Miner_Devices = "$($Miner_Devices) [GPU Devices $($Miner.Index)]"
+                }
+                else {
+                    $Miner_Devices = "$($Miner_Devices) [GPU Device $($Miner.Index)]"
+                }
+            }
+        }
+        
         $Miner.HashRates = $Miner_HashRates
 
         $Miner | Add-Member Pools $Miner_Pools
@@ -740,11 +754,12 @@ while ($true) {
             if ($BenchmarkMode) {Start-Sleep 1} else {Start-Sleep 5}
         }
 
-        if ($host.ui.RawUi.KeyAvailable) {
-            $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyUp")
+        if ($host.UI.RawUI.KeyAvailable) {
+            $Key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyUp")
             $KeyPressed = $Key.character
-            while ($Host.UI.RawUI.KeyAvailable)  {$host.ui.RawUi.Flushinputbuffer()} #keyb buffer flush
+            while ($host.UI.RawUI.KeyAvailable)  {$host.UI.RawUI.Flushinputbuffer()} #keyb buffer flush
         }
+
         $Timer = (Get-Date).ToUniversalTime()
         if ($CrashedMiners) {
             $CrashedMiners | ForEach-Object {
@@ -767,6 +782,7 @@ while ($true) {
             if ($Miner.New) {$Miner.Benchmarked++}
 
             if ($Miner.Process -and -not $Miner.Process.HasExited -and $Miner.Port) {
+
                 Write-Log "Requesting stats for $($Miner.Device) [API: $($Miner.API), Port: $($Miner.Port)] miner... "
 
                 Start-Job -Name "GetMinerData_$($Miner.Device)" ([scriptblock]::Create("Set-Location('$(Get-Location)');. 'APIs\$($Miner.API).ps1'")) -ArgumentList ($Miner, $Strikes, $DebugPreference) -ScriptBlock {
@@ -856,14 +872,14 @@ while ($true) {
                     $Stat = Set-Stat -Name "$($Miner.Name)_$($_.Algorithm -join '')_ComputeUsage" -Value $Miner_ComputeUsage -Duration $StatSpan -FaultDetection $false
                 }
             }
-#            else {
-#                if ($Miner_Name -notmatch "PalginNvidia.*" <# temp fix, Palgin does not have an APi yet#>) {
-#                    if ($BeepOnError) {
-#                        [console]::beep(1000,500)
-#                    }
-#                    Write-Log -Level Error "Failed to connect to miner ($Miner_Name). "
-#                }
-#            }
+            else {
+                if ($Miner_Name -notmatch "PalginNvidia.*" <# temp fix, Palgin does not have an APi yet#>) {
+                    if ($BeepOnError) {
+                        [console]::beep(1000,500)
+                    }
+                    Write-Log -Level Error "Failed to connect to miner ($Miner_Name). "
+                }
+            }
         }
 
         #Reduce Memory

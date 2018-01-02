@@ -92,7 +92,7 @@ function Get-CommandPerDevice {
         [Int[]]$Devices
     )
     
-    if ($Devices.count -gt 0) {
+    if ($Command -match ".*" -and $Devices.count -gt 0) {
         # Only required if more than one different card in system
         $Tokens = @()
 
@@ -141,7 +141,7 @@ function Get-CommandPerDevice {
 
             }
         }
-        
+
         # Build command token for selected gpu device
         [String]$Command = ""
         $Tokens | ForEach-Object {
@@ -150,9 +150,8 @@ function Get-CommandPerDevice {
                 $Values = @()
                 $Devices | ForEach {
                     if ($Token.Values[$_]) {$Values += $Token.Values[$_]}
-                    else {$Values += ""}
                 }
-                if ($Values -match "\w") {$Command += " $($Token.Parameter)$($Token.ParamValueSeparator)$($Values -join $($Token.ValueSeparator))"}
+                $Command += " $($Token.Parameter)$($Token.ParamValueSeparator)$($Values -join $($Token.ValueSeparator))"
             }
             else {
                 $Command += " $($_.Parameter)"
@@ -176,47 +175,49 @@ function Get-ComputeData {
         [Parameter(Mandatory = $true)]
         [String[]]$MinerType,
         [Parameter(Mandatory = $false)]
-        [Array]$Index
+        [String]$Index
     )
-    
-    $SystemDrive = (Get-WMIObject -class Win32_OperatingSystem | select-object SystemDrive).SystemDrive
 
-    $PowerDrawSum = 0
-    
+    Write-Log -Level "Debug" -Message "Entering $($MyInvocation.MyCommand): `$MinerType: '$($MinerType)', `$Index: '$($Index)'"
+
     $ComputerUsageSum = 0
     $ComputeUsageCount = 0
 
+    $PowerDrawSum = 0
+    
     switch ($MinerType) {
         "NVIDIA" {
             $NvidiaSMI = "$Env:SystemDrive\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe"
             if (Test-Path $NvidiaSMI) {
-                if ($Index -eq $null -or $Index[0] -lt 0) {
-                    $Index = ((&$NvidiaSMI -L) | ForEach {$_.Split(" ")[1].Split(":")[0]})
+                if ($Index -notlike "*,*") {
+                    $Index = ((&$NvidiaSMI -L) | ForEach {$_.Split(" ")[1].Split(":")[0]}) -join ","
                 }
-                $Index | ForEach {
+                $Index.Split(",") | ForEach {
                     $idx = $_
-                    $PowerDraw = 0
-                    $Loop = 0
+                    $Loop = 1
                     do {
-                        $Loop++
-                        $PowerDraw = [Double](&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=power.draw)
-                        $PowerDrawSum += $PowerDraw
-                    }
-                    until ($Loop -gt 2 -or $PowerDraw -gt 0)
-
-                    $ComputeUsage = 0
-                    $Counter = 0
-                    do {
-                        $Loop++
-                        for ($i = 0; $i -lt (&$NvidiaSMI -L).Count; $i++) {
-                            $ComputeUsage = [Double](&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=utilization.gpu)
-                            if ($ComputeUsage -gt 0) {
-                                $ComputeUsageSum += $ComputeUsage
-                                $ComputeUsageCount++
-                            }
+                        $Readout = (&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=utilization.gpu)
+                        Try {
+                            $ComputeUsageSum += [Decimal]$Readout
+                            if ($Readout -gt 0) {$ComputeUsageCount++}
                         }
+                        catch {}
+                        $Loop++
                     }
-                    until ($Loop -gt 2 -or $ComputeUsage -gt 0)
+                    until ($Readout -gt 0 -or $Loop -gt 3)
+                    
+                    if ($Readout -gt 0) {
+                        $Loop = 1
+                        do {
+                            $Readout = (&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=power.draw)
+                            try {
+                                $PowerDrawSum += [Decimal]$Readout
+                            }
+                            catch {}
+                            $Loop ++
+                        }
+                        until ($Readout -gt 0 -or $Loop -gt 3)
+                    }
                 }
             }
         }
@@ -233,12 +234,18 @@ function Get-ComputeData {
             $ComputeUsageCount++
         }
     }
+
     if ($ComputeUsageSum -gt 0 -and $ComputeUsageSum -gt 0) {$ComputeUsage = $ComputeUsageSum / $ComputeUsageCount} {else $ComputeUsage = 0}
-    
-    return [PSCustomObject]@{
-        PowerDraw    = $PowerDrawSum
-        ComputeUsage = $ComputeUsage
+
+    $ComputeData = [PSCustomObject]@{
+        PowerDraw    = [Decimal]$PowerDrawSum
+        ComputeUsage = [Decimal]$ComputeUsage
     }
+
+    Write-Log -Level "Debug" -Message "Exiting $($MyInvocation.MyCommand): `$ComputeData: '$($ComputeData)'"
+
+    $ComputeData
+    
 }
 
 Function Write-Log {

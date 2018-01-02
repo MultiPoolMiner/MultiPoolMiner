@@ -29,8 +29,6 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {
     $Device = $_
 
-    {while (Get-NetTCPConnection -State "Listen" -LocalPort $($Port) -ErrorAction SilentlyContinue){$Port++}} | Out-Null
-
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where {$_ -cnotmatch "^_.+"} | ForEach-Object {
 
         $Command = $Commands.$_
@@ -44,6 +42,8 @@ $Devices | ForEach-Object {
             $Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $($Device.Devices)) -di $($Device.Devices -join '')"
             $Index = $Device.Devices -join ','
         }
+
+        {while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)){$Port++}} | Out-Null
 
         if ($Pools.$($MainAlgorithm).Name -and -not $SecondaryAlgorithm) {
 

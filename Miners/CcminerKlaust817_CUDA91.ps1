@@ -41,7 +41,7 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
         }
 
 
-        {while (Get-NetTCPConnection -State "Listen" -LocalPort $($Port) -ErrorAction SilentlyContinue){$Port++}} | Out-Null
+        {while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)){$Port++}} | Out-Null
 
         [PSCustomObject]@{
             Name         = $Name

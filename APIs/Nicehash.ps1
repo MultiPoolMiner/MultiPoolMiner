@@ -9,8 +9,8 @@ class Nicehash : Miner {
         $Interval = 5
         $HashRates = @()
 
-		$Request = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
-		
+        $Request = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
+        
         $PowerDraws = @()
         $ComputeUsages = @()
         
@@ -22,7 +22,7 @@ class Nicehash : Miner {
             $ComputeData = (Get-ComputeData -MinerType $this.type -Index $this.index)
             $PowerDraws += $ComputeData.PowerDraw
             $ComputeUsages += $ComputeData.ComputeUsage
-			
+            
             $HashRates += $HashRate = [PSCustomObject]@{}
 
             try {
@@ -33,8 +33,6 @@ class Nicehash : Miner {
                 Write-Log -Level Error "$($this.API) failed to connect to miner ($($this.Name)). Could not hash rates from miner."
                 break
             }
-
-            if ($DebugPreference -ne "SilentlyContinue") {Write-Log -Level Debug $Response}
 
             $Data.algorithms.name | Select-Object -Unique | ForEach-Object {
                 $HashRate_Name = [String]($Algorithm -like (Get-Algorithm $_))
@@ -62,7 +60,7 @@ class Nicehash : Miner {
         $ComputeUsages_Info = [PSCustomObject]@{}
         $ComputeUsages_Info = ($ComputeUsages | Measure-Object -Maximum -Minimum -Average)
         $ComputeUsage = if ($ComputeUsages_Info.Maximum - $ComputeUsages_Info.Minimum -le $ComputeUsages_Info.Average * $Delta) {$ComputeUsages_Info.Maximum} else {$ComputeUsages_Info.Average}
-		
+        
         return [PSCustomObject]@{
             HashRate     = $HashRate
             PowerDraw    = $PowerDraw
