@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 class Ewbf : Miner {
-    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false, [String]$DebugPreference = "SilentlyContinue") {
+    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
@@ -14,7 +14,8 @@ class Ewbf : Miner {
 
         $Request = @{id = 1; method = "getstat"} | ConvertTo-Json -Compress
         $Response = ""
-
+        $Data = ""
+        
         do {
             # Read Data from hardware
             $ComputeData = [PSCustomObject]@{}
@@ -29,10 +30,10 @@ class Ewbf : Miner {
                 $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
             catch {
-                Write-Log -Level Error "$($this.API) failed to connect to miner ($($this.Name)). Could not hash rates from miner."
+                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
                 break
             }
-            
+
             $HashRate_Name = [String]$Algorithm[0]
             $HashRate_Value = [Double]($Data.result.sol_ps | Measure-Object -Sum).Sum
             if (-not $HashRate_Value) {$HashRate_Value = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum} #ewbf fix

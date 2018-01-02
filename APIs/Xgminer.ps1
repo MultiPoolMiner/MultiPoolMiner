@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 class Xgminer : Miner {
-    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false, [String]$DebugPreference = "SilentlyContinue") {
+    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
@@ -14,7 +14,8 @@ class Xgminer : Miner {
 
         $Request = @{command = "summary"; parameter = ""} | ConvertTo-Json -Compress
         $Response = ""
-
+        $Data = ""
+        
         do {
             # Read Data from hardware
             $ComputeData = [PSCustomObject]@{}
@@ -24,11 +25,10 @@ class Xgminer : Miner {
 
             try {
                 $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
-                if ($DebugPreference -ne "SilentlyContinue") {Write-Log -Level Debug $Response}
                 $Data = $Response.Substring($Response.IndexOf("{"), $Response.LastIndexOf("}") - $Response.IndexOf("{") + 1) -replace " ", "_" | ConvertFrom-Json -ErrorAction Stop
             }
             catch {
-                Write-Log -Level Error "$($this.API) failed to connect to miner ($($this.Name)). Could not hash rates from miner."
+                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
                 break
             }
 

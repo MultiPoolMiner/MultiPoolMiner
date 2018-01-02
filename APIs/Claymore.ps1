@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 class Claymore : Miner {
-    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false, [String]$DebugPreference = "SilentlyContinue") {
+    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
@@ -15,6 +15,7 @@ class Claymore : Miner {
         $ComputeUsages = @()
         
         $Response = ""
+        $Data = ""
         
         do {
             # Read Data from hardware
@@ -30,7 +31,7 @@ class Claymore : Miner {
                 $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
             catch {
-                Write-Log -Level Error "$($this.API) failed to connect to miner ($($this.Name)). Could not hash rates from miner."
+                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
                 break
             }
 

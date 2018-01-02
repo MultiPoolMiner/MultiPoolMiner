@@ -1,7 +1,7 @@
 using module ..\Include.psm1
 
 class Ccminer : Miner {
-    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false, [String]$DebugPreference = "SilentlyContinue") {
+    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
@@ -14,11 +14,12 @@ class Ccminer : Miner {
             
         $Request = "summary"
         $Response = ""
-
+        $Data = ""
+        
         do {
             # Read Data from hardware
             $ComputeData = [PSCustomObject]@{}
-            $ComputeData = (Get-ComputeData -MinerType $this.type -Index $this.index)
+            $ComputeData = (Get-ComputeData -MinerType $this.Type -Index $this.Index)
             $PowerDraws += $ComputeData.PowerDraw
             $ComputeUsages += $ComputeData.ComputeUsage
 
@@ -29,12 +30,10 @@ class Ccminer : Miner {
                 $Data = $Response -split ";" | ConvertFrom-StringData -ErrorAction Stop
             }
             catch {
-                if ($Safe -and $this.Name -notmatch "PalginNvidia_.*") {
-                    Write-Log -Level Error "$($this.API) failed to connect to miner ($($this.Name)). Could not hash rates from miner."
-                }
+                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
                 break
             }
-
+            
             $HashRate_Name = [String]$Data.algo
             if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
             $HashRate_Value = [Double]$Data.KHS * 1000

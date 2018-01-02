@@ -20,7 +20,7 @@ if ($Pools.Cryptonight.Name) {
             $HWConfigFile = " --$($_.Type.ToLower()) $($_.Device_Norm).txt"
         }
 
-        {while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)){$Port++}} | Out-Null
+        while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)){$Port++} | Out-Null
 
         ([PSCustomObject]@{
             pool_list = @([PSCustomObject]@{

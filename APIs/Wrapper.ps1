@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 class Wrapper : Miner {
-    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false, [String]$DebugPreference = "SilentlyContinue") {
+    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
@@ -14,6 +14,7 @@ class Wrapper : Miner {
 
         $Request = ""
         $Response = ""
+        $Data = ""
 
         do {
             # Read Data from hardware
@@ -36,7 +37,9 @@ class Wrapper : Miner {
                 }
             }
             catch {
-                Write-Log -Level Error "$($this.API) failed to connect to miner ($($this.Name)). Could not hash rates from miner."
+                if ($Safe -and $this.Name -notmatch "PalginNvidia_.*") {
+                    Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
+                }
                 break
             }
 

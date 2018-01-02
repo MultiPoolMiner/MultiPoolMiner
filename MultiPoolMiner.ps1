@@ -13,6 +13,7 @@ if(-not (Test-Path -Path '.\Config.ps1')) {
 else {
     Write-Log "Applying configuration from Config.ps1..."
     . .\Config.ps1
+    $ConfigTimeStamp = (Get-ChildItem "Config.ps1").LastWriteTime.ToUniversalTime()
 }
 
 #Start the log
@@ -56,22 +57,23 @@ if ($PGHome -notmatch ".+") {
 #Set donation parameters
 if ($Donate -lt 10) {$Donate = 10}
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
-$WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHhGkCuNrFt6v9")
-$UserNameDonate = @("aaronsace", "fonyo")
+$WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb","3JQt8RezoGeEmA5ziAKNvxk34cM9JWsMCo")
+$UserNameDonate = @("aaronsace","uselessguru")
 $WorkerNameDonate = "multipoolminer"
 $WalletBackup = $Wallet
 $UserNameBackup = $UserName
 $WorkerNameBackup = $WorkerName
 $PayoutCurrencyBackup = $PayoutCurrency
-$DonateDistribution = 0,0,0,0,0,0,0,0,0,0,1 #10:1
+$DonateDistribution = 0,0,0,0,0,0,0,0,0,1 #9:1
 
-Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
+Get-ChildItem "APIs" -Exclude "_*" | ForEach-Object {. $_.FullName}
 
 while ($true) {
-    if ((Get-ChildItem "Config.ps1").LastWriteTime.ToUniversalTime() -gt $Timer) {
+    if ((Get-ChildItem "Config.ps1").LastWriteTime.ToUniversalTime() -gt $ConfigTimeStamp) {
         # File has changed since last loop; re-read config -  this allows for dynamic configration changes
         Write-Log "Configuration data has been modified - applying configuration from Config.ps1..."
         . .\Config.ps1
+        $ConfigTimeStamp = (Get-ChildItem "Config.ps1").LastWriteTime.ToUniversalTime() 
         
         if ($Proxy -eq "") {$PSDefaultParameterValues.Remove("*:Proxy")}
         else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
@@ -82,7 +84,7 @@ while ($true) {
         $WalletBackup = $Wallet
         $UserNameBackup = $UserName
         $WorkerNameBackup = $WorkerName
-        Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
+        Get-ChildItem "APIs" -Exclude "_*" | ForEach-Object {. $_.FullName}
     }
     
     $Timer = (Get-Date).ToUniversalTime()
@@ -276,14 +278,17 @@ while ($true) {
         if ($Miner_Indexes -eq $null) {
             $Miner_Indexes = -1
         }
-        else {
-            if ($Miner_Type -ne "CPU") {
-                if ($Miner.Index -like "*,*") {
-                    $Miner_Devices = "$($Miner_Devices) [GPU Devices $($Miner.Index)]"
-                }
-                else {
-                    $Miner_Devices = "$($Miner_Devices) [GPU Device $($Miner.Index)]"
-                }
+
+        # Show device IDs in mining overview
+        if ($Miner_Type -ne "CPU") {
+            if ($Miner.Index -like "*,*") {
+                $Miner_Devices = "$($Miner_Devices) [GPU Devices: $($Miner.Index)]"
+            }
+            elseif ($Miner.Index -like "") {
+                $Miner_Devices = "$($Miner_Devices) [GPU Devices: $(($GPUs.Device | Where-Object {$_.Type -eq $Miner_Types}).Devices -join ",")]"
+            }
+            else {
+                $Miner_Devices = "$($Miner_Devices) [GPU Device: $($Miner.Index)]"
             }
         }
         
@@ -657,18 +662,20 @@ while ($true) {
     if ($Algorithm) {Write-Log "Selected algorithms: $($Algorithm)"}
     if ($DeviceSubTypes) {$SortAndGroup = "Device"} else {$SortAndGroup = "Type"}
     
+    $SortAndGroup = "Device"
+    
     $Miners | Where-Object {$BenchmarkMode -or $DisplayProfitOnly -or ($_.Earning -gt 0) -or ($_.Profit -eq $null)} | Sort-Object -Descending $SortAndGroup, Profit_Bias | Format-Table -GroupBy $SortAndGroup (
         @{Label = "Miner";              Expression = {$_.Name -replace "_$((Get-Culture).TextInfo.ToTitleCase(($_.Device -replace "-", " " -replace "_", " ")) -replace " ")",""}}, 
         @{Label = "Algorithm(s)";       Expression = {($_.HashRates.PSObject.Properties.Name) -join " & "}},
-        @{Label = "Profit";             Expression = {$($_.Profit * $Rates.$($Currency[0])).ToString("N5")}; Align='right'},
-        @{Label = "Power Cost";         Expression = {"-$(($_.PowerCost * $Rates.$($Currency[0])).ToString("N5"))"}; Align='right'},
-        @{Label = "Power Total";		Expression = {"$(($_.PowerDraw + ($Computer_PowerDraw / $GPUs.Device.count)).ToString("N2")) W"}; Align='right'},
-        @{Label = "Power GPU [+Base]";  Expression = {"$($_.PowerDraw.ToString("N2")) W [+$($($Computer_PowerDraw / $GPUs.Device.count).ToString("N2")) W]"}; Align='right'},
-        @{Label = "Earning";            Expression = {$($_.Earning * $Rates.$($Currency[0])).ToString("N5")}; Align='right'},
+        @{Label = "Profit";             Expression = {if ($_.Profit -ne $null) {$($_.Profit * $Rates.$($Currency[0])).ToString("N5")} else {"Benchmarking"}}; Align='right'},
+        @{Label = "Power Cost";         Expression = {if ($_.Profit -ne $null) {"-$(($_.PowerCost * $Rates.$($Currency[0])).ToString("N5"))"} else {"Benchmarking"}}; Align='right'},
+        @{Label = "Power Total";		Expression = {if ($_.Profit -ne $null) {"$(($_.PowerDraw + ($Computer_PowerDraw / $GPUs.Device.count)).ToString("N2")) W"} else {"Benchmarking"}}; Align='right'},
+        @{Label = "Power GPU [+Base]";  Expression = {if ($_.Profit -ne $null) {"$($_.PowerDraw.ToString("N2")) W [+$($($Computer_PowerDraw / $GPUs.Device.count).ToString("N2")) W]"} else {"Benchmarking"}}; Align='right'},
+        @{Label = "Earning";            Expression = {if ($_.Earning -ne $null) {$($_.Earning * $Rates.$($Currency[0])).ToString("N5")} else {"Benchmarking"}}; Align='right'},
         @{Label = "Accuracy";           Expression = {($_.Pools.PSObject.Properties.Value.MarginOfError | ForEach-Object {(1 - $_).ToString("P0")}) -join "|"}; Align = 'right'}, 
         @{Label = "BTC/GH/Day";         Expression = {($_.Pools.PSObject.Properties.Value.Price | ForEach-Object {($_ * 1000000000).ToString("N5")}) -join "+"}; Align = 'right'}, 
         @{Label = "Speed(s)";           Expression = {($_.HashRates.PSObject.Properties.Value | ForEach-Object {if ($_ -ne $null) {"$($_ | ConvertTo-Hash)/s"} else {"Benchmarking"}}) -join "|"}; Align = 'right'}, 
-        @{Label = "GPU Usage";          Expression = {"$($_.ComputeUsage.ToString("N2"))%"}; Align='right'},
+        @{Label = "GPU Usage";          Expression = {if ($_.Profit -ne $null) {"$($_.ComputeUsage.ToString("N2"))%"} else {"Benchmarking"}}; Align='right'},
         @{Label = "Pool [Region]";      Expression = {($_.Pools.PSObject.Properties.Value | ForEach-Object {"$($_.PoolName) [$($_.Region)]"}) -join " & "}},
         @{Label = "Quote Timestamp(s)"; Expression = {($_.Pools.PSObject.Properties.Value | ForEach-Object {($_.Updated.ToString('dd.MM.yyyy HH:mm:ss'))}) -join "|"}},
         @{Label = "Info";               Expression = {($_.Pools.PSObject.Properties.Value | ForEach-Object {$_.Info}) -join " "}}
@@ -690,8 +697,8 @@ while ($true) {
         @{Label = "Time spent mining"; Expression = {"{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f $(if ($_.Process -eq $null) {$_.Active}else {if ($_.Process.ExitTime -gt $_.Process.StartTime) {($_.Active + ($_.Process.ExitTime - $_.Process.StartTime))}else {($_.Active + ((Get-Date) - $_.Process.StartTime))}})}}, 
         @{Label = "Launched";          Expression = {Switch ($_.Activated) {0 {"Never"} 1 {"Once"} Default {"$_ Times"}}}}, 
         @{Label = "Algorithm(s)";      Expression = {($_.Algorithm) -join " & "}},
-        @{Label = "Profit";            Expression = {$($_.Profit * $Rates.$($Currency[0])).ToString("N5")}; Align='right'},
-        @{Label = "Earning";           Expression = {$($_.Earning * $Rates.$($Currency[0])).ToString("N5")}; Align='right'},
+        @{Label = "Profit";            Expression = {if ($_.Profit -ne $null) {($_.Profit * $Rates.$($Currency[0])).ToString("N5")} else {"Benchmarking"}}},
+        @{Label = "Earning";           Expression = {if ($_.Earning -ne $null) {($_.Earning * $Rates.$($Currency[0])).ToString("N5")} else {"Benchmarking"}}},
         @{Label = "Command";           Expression = {($_.Path -ireplace [regex]::Escape($(Convert-Path ".\")), "") + " " + $_.Arguments }}
     ) | Out-Host
 
@@ -784,8 +791,8 @@ while ($true) {
             if ($Miner.Process -and -not $Miner.Process.HasExited -and $Miner.Port) {
 
                 Write-Log "Requesting stats for $($Miner.Device) [API: $($Miner.API), Port: $($Miner.Port)] miner... "
-
-                Start-Job -Name "GetMinerData_$($Miner.Device)" ([scriptblock]::Create("Set-Location('$(Get-Location)');. 'APIs\$($Miner.API).ps1'")) -ArgumentList ($Miner, $Strikes, $DebugPreference) -ScriptBlock {
+                
+                Start-Job -Name "GetMinerData_$($Miner.Name)" ([scriptblock]::Create("Set-Location('$(Get-Location)');. 'APIs\$($Miner.API).ps1'")) -ArgumentList ($Miner, $Strikes) -ScriptBlock {
                     param($Miner, $Strikes)
                     $MinerObject = New-Object $Miner.API -Property @{
                         Name                 = $Miner.Name
@@ -819,12 +826,13 @@ while ($true) {
                         ComputeUsage         = $Miner.ComputeUsage
                         Pool                 = $Miner.Pool
                     }
-                    $MinerObject.GetData($Miner.Algorithm, ($Miner.New -and $Miner.Benchmarked -lt $Strikes), $DebugPreference)
+                    $MinerObject.GetData($Miner.Algorithm, ($Miner.New -and $Miner.Benchmarked -lt $Strikes))
                 } | Out-Null
             }
         }
-        Write-Log "Waiting for stats... "
-        Get-Job -Name "GetMinerData_*" | Wait-Job -Timeout ($Interval * 2) | Out-Null
+        
+        Write-Log "Waiting for stats from miner, max. 120 seconds... "
+        Get-Job -Name "GetMinerData_*" | Wait-Job -Timeout (120) | Out-Null
         
         $ActiveMiners | Where-Object {$_.Process -and -not $_.Process.HasExited -and $_.Port} | ForEach-Object {
             $Miner = $_
@@ -832,7 +840,7 @@ while ($true) {
             $Miner.Speed_Live = 0
             $Miner_HashRate = [PSCustomObject]@{}
 
-            $Miner_Data = Receive-Job -Name "GetMinerData_$($_.Device)"
+            $Miner_Data = Receive-Job -Name "GetMinerData_$($Miner_Name)"
             
             if ($Miner_Data) {
                 $Miner_HashRate = $Miner_Data.HashRate
