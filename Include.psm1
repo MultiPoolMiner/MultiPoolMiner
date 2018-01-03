@@ -643,7 +643,7 @@ function Start-SubProcess {
     $Process.Handle | Out-Null
     $Process
 
-    if ($Process) {$Process.PriorityClass =?$PriorityNames.$Priority}
+    if ($Process) {$Process.PriorityClass = $PriorityNames.$Priority}
 }
 
 function Expand-WebRequest {
