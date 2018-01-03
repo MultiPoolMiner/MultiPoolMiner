@@ -50,7 +50,7 @@ $Devices | ForEach-Object {
             $Index = $Device.Devices -join ","
         }
 
-        while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)){$Port++} | Out-Null
+        while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)) {$Port++}
 
         if ($Algorithm -ne "Decred" -and $Algorithm -ne "Sia") {
             if ($Pools.$Algorithm.Name) {

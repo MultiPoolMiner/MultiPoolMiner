@@ -32,9 +32,9 @@ $Devices | ForEach-Object {
         $Index = $Device.Devices -join ","
     }
 
-    while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)){$Port++} | Out-Null
+    while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)) {$Port++}
     $APIPort = $Port++
-    while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $APIPort -ErrorAction SilentlyContinue)){$APIPort++} | Out-Null
+    while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $APIPort -ErrorAction SilentlyContinue)) {$APIPort++}
     
     $CommonCommands = " -f 6 -wp $($APIPort)"
 
