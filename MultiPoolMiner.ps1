@@ -280,18 +280,18 @@ while ($true) {
             $Miner_Indexes = -1
         }
 
-        # Show device IDs in mining overview
-        if ($Miner_Type -ne "CPU") {
-            if ($Miner.Index -like "*,*") {
-                $Miner_Devices = "$($Miner_Devices) [GPU Devices: $($Miner.Index)]"
-            }
-            elseif ($Miner.Index -like "") {
-                $Miner_Devices = "$($Miner_Devices) [GPU Devices: $(($GPUs.Device | Where-Object {$_.Type -eq $Miner_Types}).Devices -join ",")]"
-            }
-            else {
-                $Miner_Devices = "$($Miner_Devices) [GPU Device: $($Miner.Index)]"
-            }
-        }
+#        # Show device IDs in mining overview
+#        if ($Miner_Type -ne "CPU") {
+#            if ($Miner.Index -like "*,*") {
+#                $Miner_Devices = "$($Miner_Devices) [GPU Devices: $($Miner.Index)]"
+#            }
+#            elseif ($Miner.Index -like "") {
+#                $Miner_Devices = "$($Miner_Devices) [GPU Devices: $(($GPUs.Device | Where-Object {$_.Type -eq $Miner_Types}).Devices -join ",")]"
+#            }
+#            else {
+#                $Miner_Devices = "$($Miner_Devices) [GPU Device: $($Miner.Index)]"
+#            }
+#        }
         
         $Miner.HashRates = $Miner_HashRates
 
@@ -633,8 +633,8 @@ while ($true) {
         else {
             if ($_.Process -ne "DisplayProfitOnly") {
                 Write-Log "Closing $($Miner.Type) miner $($Miner.Name) [PID $($_.Process.Id)] because it is no longer the most profitable"
-                $Miner.Process.CloseMainWindow() | Out-Null
             }
+            $Miner.Process.CloseMainWindow() | Out-Null
             $Miner.Status = "Idle"
 
             #Remove watchdog timer
