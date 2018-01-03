@@ -53,7 +53,7 @@ $ExcludeMinerName = @()
 # Donation of mining time in minutes per day to aaronsace. Default is 24, minimum is 10 minutes per day (less than 0.7% fee). The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
 $Donate = 24
 # Enable the watchdog feature which detects and handles miner and other related failures. It works on a unified interval that is defaulted to 60 seconds. Watchdog timers expire if three of those intervals pass without being kicked. There are three stages as to what action is taken when watchdog timers expire and is determined by the number of related expired timers.
-$Watchdog = $False
+$Watchdog = $true
 # Enabling SSL will restrict the miner application list to include only the miners that support secure connection.
 $SSL = $False
 # Specify your proxy address if applicable, i.e http://192.0.0.1:8080
@@ -71,7 +71,7 @@ $MinerStatusURL = ''
 # The configuration items in this section are currently not available in the configuration GUI
 
 # If $true separate miners will be launched for each GPU model class, this will further help to increase profit
-$DeviceSubTypes = $false
+$DeviceSubTypes = $true
 
 # Minimum workers required to mine on coin, if less skip the coin, there is little point in mining a coin if there are only very few miners working on it, default:7, to always mine all coins set to 0
 $MinPoolWorkers = 7
