@@ -1,6 +1,6 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-KlausT817_CUDA91\ccminer.exe"
+$Path = ".\Bin\NVIDIA-KlausT817_CUDA91-x64\ccminer.exe"
 $Uri = "https://github.com/KlausT/ccminer/releases/download/8.17/ccminer-817-cuda91-x64.zip"
 
 # Custom command to be applied to all algorithms
