@@ -69,7 +69,7 @@ $Devices | ForEach-Object {
             [PSCustomObject]@{
                 Name         = $Name
                 Type         = $Type
-                Devic        = $Device.Device
+                Device       = $Device.Device
                 Path         = $Path
                 Arguments    = "-mode 0 -mport $Port -epool $($Pools.$MainAlgorithm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm.User) -epsw $($Pools.$MainAlgorithm.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass) -platform 2 $Command $CommonCommands"
                 HashRates    = [PSCustomObject]@{"$MainAlgorithm_Norm" = ($Stats."$($Name)_$($MainAlgorithm_Norm)_HashRate".Week * $Fee); "$SecondaryAlgorithm_Norm" = ($Stats."$($Name)_$($SecondaryAlgorithm_Norm)_HashRate".Week * $Fee)}
