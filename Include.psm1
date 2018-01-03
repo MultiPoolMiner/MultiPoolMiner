@@ -21,13 +21,14 @@ function Get-GPUdevices {
     )
 
     $GPUs = @()
-
     $MinerType | ForEach {
 
         $Miner_Type = $_
         $Devices = @()
         $Device_ID = 0
         $MinerType_Devices = @()
+        
+        $SimulateExtraHW = $false
         
         if ($DeviceSubTypes) {
             [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
@@ -46,6 +47,43 @@ function Get-GPUdevices {
                     $MinerType_Devices += $GPU
                 }
                 $Device_ID++
+            }
+            if ($SimulateExtraHW) {
+                # Simulate more HW   
+                [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
+                    $Device = $_.Name
+                    $GPU = [PSCustomObject]@{
+                        Type = $Miner_Type
+                        Device = $Device
+                        Device_Norm = (Get-Culture).TextInfo.ToTitleCase(($Device -replace "-", " " -replace "_", " ")) -replace " "
+                        Vendor = $_.Vendor
+                        Devices = @("$Device_ID")
+                    }            
+                    if ($MinerType_Devices.Type -contains $Miner_Type -and $MinerType_Devices.Device -contains $Device) {
+                        $MinerType_Devices | Where {$_.Type -eq $Miner_Type -and $_.Device -eq $Device} | ForEach {$_.Devices += "$Device_ID"}
+                    }
+                    else {
+                        $MinerType_Devices += $GPU
+                    }
+                    $Device_ID++
+                }
+                [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
+                    $Device = $_.Name
+                    $GPU = [PSCustomObject]@{
+                        Type = $Miner_Type
+                        Device = $Device
+                        Device_Norm = (Get-Culture).TextInfo.ToTitleCase(($Device -replace "-", " " -replace "_", " ")) -replace " "
+                        Vendor = $_.Vendor
+                        Devices = @("$Device_ID")
+                    }            
+                    if ($MinerType_Devices.Type -contains $Miner_Type -and $MinerType_Devices.Device -contains $Device) {
+                        $MinerType_Devices | Where {$_.Type -eq $Miner_Type -and $_.Device -eq $Device} | ForEach {$_.Devices += "$Device_ID"}
+                    }
+                    else {
+                        $MinerType_Devices += $GPU
+                    }
+                    $Device_ID++
+                }
             }
         }
         else {
@@ -72,6 +110,9 @@ function Get-GPUdevices {
             }
         }
     }
+    #    $GPUs_DBG = $GPUs | ConvertTo-Json
+    #    Write-Log -Level "Debug" "GPUs: $GPUs_DBG"
+    
     $GPUs
 }
 
@@ -92,7 +133,9 @@ function Get-CommandPerDevice {
         [Int[]]$Devices
     )
     
-    if ($Command -match ".*" -and $Devices.count -gt 0) {
+    # Write-Log -Level "Debug" -Message "Entering $($MyInvocation.MyCommand): '`$Command=$($Command)', '`$Devices=$($Devices)'"
+    
+    if ($Devices.count -gt 0) {
         # Only required if more than one different card in system
         $Tokens = @()
 
@@ -141,7 +184,7 @@ function Get-CommandPerDevice {
 
             }
         }
-
+        
         # Build command token for selected gpu device
         [String]$Command = ""
         $Tokens | ForEach-Object {
@@ -150,14 +193,18 @@ function Get-CommandPerDevice {
                 $Values = @()
                 $Devices | ForEach {
                     if ($Token.Values[$_]) {$Values += $Token.Values[$_]}
+                    else {$Values += ""}
                 }
-                $Command += " $($Token.Parameter)$($Token.ParamValueSeparator)$($Values -join $($Token.ValueSeparator))"
+                if ($Values -match "\w") {$Command += " $($Token.Parameter)$($Token.ParamValueSeparator)$($Values -join $($Token.ValueSeparator))"}
             }
             else {
                 $Command += " $($_.Parameter)"
             }
         }
     }
+    
+    # Write-Log -Level "Debug" -Message "Exiting $($MyInvocation.MyCommand): '`$Command='$($Command)'"
+    
     $Command
 }
 
@@ -178,7 +225,7 @@ function Get-ComputeData {
         [String]$Index
     )
 
-    Write-Log -Level "Debug" -Message "Entering $($MyInvocation.MyCommand): `$MinerType: '$($MinerType)', `$Index: '$($Index)'"
+    # Write-Log -Level "Debug" -Message "Entering $($MyInvocation.MyCommand): '`$MinerType=$($MinerType)', '`$Index=$($Index)'"
 
     $ComputerUsageSum = 0
     $ComputeUsageCount = 0
@@ -197,6 +244,7 @@ function Get-ComputeData {
                     $Loop = 1
                     do {
                         $Readout = (&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=utilization.gpu)
+                        # Write-Log -Level "Debug" -Message "$($MyInvocation.MyCommand) reading GPU usage [Try $($Loop) of 3]: '`$MinerType=$($MinerType)', '`$Index=$($Index)', '`$Idx=$($Idx)', '`$Readout=$($Readout)'"
                         Try {
                             $ComputeUsageSum += [Decimal]$Readout
                             if ($Readout -gt 0) {$ComputeUsageCount++}
@@ -210,6 +258,7 @@ function Get-ComputeData {
                         $Loop = 1
                         do {
                             $Readout = (&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=power.draw)
+                            # Write-Log -Level "Debug" -Message "$($MyInvocation.MyCommand) reading power draw [Try $($Loop) of 3]: '`$MinerType=$($MinerType)', '`$Index=$($Index)', '`$Idx=$($Idx)', '`$Readout=$($Readout)'"
                             try {
                                 $PowerDrawSum += [Decimal]$Readout
                             }
@@ -242,11 +291,11 @@ function Get-ComputeData {
         ComputeUsage = [Decimal]$ComputeUsage
     }
 
-    Write-Log -Level "Debug" -Message "Exiting $($MyInvocation.MyCommand): `$ComputeData: '$($ComputeData)'"
+    # Write-Log -Level "Debug" -Message "Exiting $($MyInvocation.MyCommand): '`$ComputeData=$($ComputeData)'"
 
     $ComputeData
-    
 }
+
 
 Function Write-Log {
     [CmdletBinding()]
@@ -281,7 +330,7 @@ Function Write-Log {
             }
         }
         try {
-            "$date $LevelText $Message" | Out-File -FilePath $filename -Append
+            "$date $LevelText $Message" | Out-File -FilePath $filename -Append -ErrorAction SilentlyContinue
         }
         catch {
             Sleep 0.2
@@ -345,7 +394,7 @@ function Set-Stat {
         if ($ChangeDetection -and $Value -eq $Stat.Live) {$Updated -eq $Stat.updated}
 
         if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
-            Write-Log -Level Warning "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin)...$([Int]$ToleranceMax)). "
+            Write-Log -Level "Warning" "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin)...$([Int]$ToleranceMax)). "
         }
         else {
             $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
@@ -381,7 +430,7 @@ function Set-Stat {
         }
     }
     catch {
-        if (Test-Path $Path) {Write-Log -Level Warn "Stat file ($Name) is corrupt and will be reset. "}
+        if (Test-Path $Path) {Write-Log -Level "Warn" "Stat file ($Name) is corrupt and will be reset. "}
 
         $Stat = [PSCustomObject]@{
             Live = $Value
@@ -446,7 +495,7 @@ function Get-ChildItemContent {
 
     $ItemCounter = 0
     
-    Get-ChildItem $Path -Exclude "_*" | ForEach-Object {
+    Get-ChildItem $Path -Exclude "_*" |  Sort-Object | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
         $ItemCounter ++
@@ -559,7 +608,7 @@ function Start-SubProcess {
         [String]$WindowStyle = "Normal"
     )
 
-    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
+    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
 
     $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory, $WindowStyle {
         param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory, $WindowStyle)
@@ -594,7 +643,7 @@ function Start-SubProcess {
     $Process.Handle | Out-Null
     $Process
 
-    if ($Process) {$Process.PriorityClass = $PriorityNames.$Priority}
+    if ($Process) {$Process.PriorityClass =?$PriorityNames.$Priority}
 }
 
 function Expand-WebRequest {
