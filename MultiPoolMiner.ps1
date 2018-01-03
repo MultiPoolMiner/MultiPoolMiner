@@ -202,20 +202,22 @@ while ($true) {
         }
         $Miner.ComputeUsage = [Double]$Miner.ComputeUsage
         
-        # Default power consumption, force BenchmarkMode
+        # Default power consumption 
         if (-not $Miner.PowerDraw -gt 0) {
-            $Miner | Add-Member PowerDraw 0 -Force
+            $Miner | Add-Member PowerDraw ($GPU_PowerDraw / $GPUs.Device.count) -Force
             $Miner.HashRates.PSObject.Properties.Name | ForEach-Object {
                 $Miner.HashRates.$_ = $null
-                $BenchmarkMode = $true
+                if ($PowerPricePerKW -gt 0) { #force BenchmarkMode if power ist part of the equation
+                    $BenchmarkMode = $true
+                }
             }
         }
 
-        if ($PowerPricePerKW -gt 1E-11) {
+        Try {
             # Convert power cost back to BTC, all profit calculations are done in BTC
             $Miner_PowerCost = [Double](([Double]$Miner.PowerDraw + [Double]($Computer_PowerDraw / $GPUs.Device.Count)) / 1000 * 24 * [Double]$PowerPricePerKW / $Rates.$($Currency[0]))
         }
-        else {
+        Catch {
             $Miner_PowerCost = 0
         }
         $Miner | Add-Member PowerCost $Miner_PowerCost -Force
@@ -280,18 +282,18 @@ while ($true) {
             $Miner_Indexes = -1
         }
 
-#        # Show device IDs in mining overview
-#        if ($Miner_Type -ne "CPU") {
-#            if ($Miner.Index -like "*,*") {
-#                $Miner_Devices = "$($Miner_Devices) [GPU Devices: $($Miner.Index)]"
-#            }
-#            elseif ($Miner.Index -like "") {
-#                $Miner_Devices = "$($Miner_Devices) [GPU Devices: $(($GPUs.Device | Where-Object {$_.Type -eq $Miner_Types}).Devices -join ",")]"
-#            }
-#            else {
-#                $Miner_Devices = "$($Miner_Devices) [GPU Device: $($Miner.Index)]"
-#            }
-#        }
+        # Show device IDs in mining overview
+        if ($Miner_Type -ne "CPU") {
+            if ($Miner.Index -like "*,*") {
+                $Miner_Devices = "$($Miner_Devices) [GPU Devices: $($Miner.Index)]"
+            }
+            elseif ($Miner.Index -like "") {
+                $Miner_Devices = "$($Miner_Devices) [GPU Devices: $(($GPUs.Device | Where-Object {$_.Type -eq $Miner_Types}).Devices -join ",")]"
+            }
+            else {
+                $Miner_Devices = "$($Miner_Devices) [GPU Device: $($Miner.Index)]"
+            }
+        }
         
         $Miner.HashRates = $Miner_HashRates
 
@@ -670,8 +672,8 @@ while ($true) {
         @{Label = "Algorithm(s)";       Expression = {($_.HashRates.PSObject.Properties.Name) -join " & "}},
         @{Label = "Profit";             Expression = {if ($_.Profit -ne $null) {$($_.Profit * $Rates.$($Currency[0])).ToString("N5")} else {"Benchmarking"}}; Align='right'},
         @{Label = "Power Cost";         Expression = {if ($_.Profit -ne $null) {"-$(($_.PowerCost * $Rates.$($Currency[0])).ToString("N5"))"} else {"Benchmarking"}}; Align='right'},
-        @{Label = "Power Total";		Expression = {if ($_.Profit -ne $null) {"$(($_.PowerDraw + ($Computer_PowerDraw / $GPUs.Device.count)).ToString("N2")) W"} else {"Benchmarking"}}; Align='right'},
-        @{Label = "Power GPU [+Base]";  Expression = {if ($_.Profit -ne $null) {"$($_.PowerDraw.ToString("N2")) W [+$($($Computer_PowerDraw / $GPUs.Device.count).ToString("N2")) W]"} else {"Benchmarking"}}; Align='right'},
+        @{Label = "Power Total";		Expression = {"$(($_.PowerDraw + ($Computer_PowerDraw / $GPUs.Device.count)).ToString("N2")) W"}; Align='right'},
+        @{Label = "Power GPU [+Base]";  Expression = {"$($_.PowerDraw.ToString("N2")) W [+$($($Computer_PowerDraw / $GPUs.Device.count).ToString("N2")) W]"}; Align='right'},
         @{Label = "Earning";            Expression = {if ($_.Earning -ne $null) {$($_.Earning * $Rates.$($Currency[0])).ToString("N5")} else {"Benchmarking"}}; Align='right'},
         @{Label = "Accuracy";           Expression = {($_.Pools.PSObject.Properties.Value.MarginOfError | ForEach-Object {(1 - $_).ToString("P0")}) -join "|"}; Align = 'right'}, 
         @{Label = "BTC/GH/Day";         Expression = {($_.Pools.PSObject.Properties.Value.Price | ForEach-Object {($_ * 1000000000).ToString("N5")}) -join "+"}; Align = 'right'}, 
@@ -791,7 +793,7 @@ while ($true) {
 
             if ($Miner.Process -and -not $Miner.Process.HasExited -and $Miner.Port) {
 
-                Write-Log "Requesting stats for $($Miner.Device) [API: $($Miner.API), Port: $($Miner.Port)] miner... "
+                Write-Log "Requesting stats for miner $($Miner.Device) [API: $($Miner.API), Port: $($Miner.Port)]... "
                 
                 Start-Job -Name "GetMinerData_$($Miner.Name)" ([scriptblock]::Create("Set-Location('$(Get-Location)');. 'APIs\$($Miner.API).ps1'")) -ArgumentList ($Miner, $Strikes) -ScriptBlock {
                     param($Miner, $Strikes)
@@ -832,7 +834,7 @@ while ($true) {
             }
         }
         
-        Write-Log "Waiting for stats from miner, max. 120 seconds... "
+        Write-Log "Waiting for stats from miner - max. 120 seconds... "
         Get-Job -Name "GetMinerData_*" | Wait-Job -Timeout (120) | Out-Null
         
         $ActiveMiners | Where-Object {$_.Process -and -not $_.Process.HasExited -and $_.Port} | ForEach-Object {
