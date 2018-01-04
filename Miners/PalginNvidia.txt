@@ -18,4 +18,3 @@
         "URI":  "https://github.com/palginpav/hsrminer/raw/master/Neoscrypt%20algo/Windows/hsrminer_neoscrypt.exe"
     }
 ]
-
