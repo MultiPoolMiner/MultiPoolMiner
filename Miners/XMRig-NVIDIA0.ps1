@@ -38,7 +38,7 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 
             [PSCustomObject]@{
                 Name         = $Name
-                Type         = "NVIDIA"
+                Type         = $Device.Type
                 Device       = $Device.Device
                 Path         = $Path
                 Arguments    = "-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) --api-port=$port$NiceHash $Command $CommonCommands"

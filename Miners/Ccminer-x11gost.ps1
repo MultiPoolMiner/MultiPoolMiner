@@ -56,7 +56,7 @@ $Devices | ForEach-Object {
             if ($Pools.$Algorithm.Name) {
                 [PSCustomObject]@{
                     Name         = $Name
-                    Type         = $Type
+                    Type         = $Device.Type
                     Device       = $Device.Device
                     Path         = $Path
                     Arguments    = "-a $Algorithm -o $($Pools.($Algorithm).Protocol)://$($Pools.($Algorithm).Host):$($Pools.($Algorithm).Port) -u $($Pools.($Algorithm).User) -p $($Pools.($Algorithm).Pass) -b $Port $Command $CommonCommands"

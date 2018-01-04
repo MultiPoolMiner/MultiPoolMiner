@@ -64,7 +64,7 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 
         [PSCustomObject]@{
             Name         = $Name
-            Type         = $Type
+            Type         = $Device.Type
             Device       = $Device.Device
             Path         = $Path
             Arguments    = "-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) -b $Port $Command $CommonCommands"

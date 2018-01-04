@@ -37,7 +37,7 @@ class dstm : Miner {
             $HashRate_Name = [String]$Algorithm[0]
             $HashRate_Value = [Double]($Data.result.sol_ps | Measure-Object -Sum).Sum
             if (-not $HashRate_Value) {$HashRate_Value = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum} #ewbf fix
-
+            if (-not $HashRate_Value) {$HashRate_Value = [Double]($Data.result.avg_sol_ps | Measure-Object -Sum).Sum} #ewbf fix
             $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
             $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}

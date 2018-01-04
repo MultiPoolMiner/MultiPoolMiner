@@ -2,15 +2,68 @@ Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
 
+function Update-Stats {
+
+# UselessGuru: updates stats (hashrate, GPU and power) receives from GetData
+
+[CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [PSCustomObject]$Miner,
+        [Parameter(Mandatory = $true)]
+        [PSCustomObject]$Miner_Data,
+        [Parameter(Mandatory = $true)]
+        [TimeSpan]$StatSpan
+    )
+
+    $Miner_HashRate = $Miner_Data.HashRate
+    $Miner_PowerDraw = $Miner_Data.PowerDraw
+    $Miner_ComputeUsage = $Miner_Data.ComputeUsage
+    if ($Miner_HashRate -is [Array]) {
+        $Miner.Speed_Live = $Miner_HashRate[0]
+    }
+    else {
+        $Miner.Speed_Live = $Miner_HashRate
+    }
+    
+    $Miner_HashRates = ""
+    $Miner.Algorithm | Where-Object {$Miner_HashRate.$_} | ForEach-Object {
+        $Miner_HashRates += "$($Miner_HashRate.$_ | ConvertTo-Hash)/s | "
+    }
+    $MinerInfo = "$($Miner.Type) miner '$($Miner.Name)' [GPU Devices: $($Miner.Index)]' ($($Miner.Algorithm -join '|')) [API: $($Miner.API), Port: $($Miner.Port)]"
+    Write-Log -Message "Saving stats for $($MinerInfo): [ $Miner_HashRates$($Miner_PowerDraw.ToString("N2")) W | $($Miner_ComputeUsage.ToString("N2"))% ]... "
+
+    $Miner.Algorithm | Where-Object {$Miner_HashRate.$_} | ForEach-Object {
+    
+        $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_HashRate.$_ -Duration $StatSpan -FaultDetection $true
+
+        #Update watchdog timer
+        $Miner_Algorithm = $_
+        $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
+        if ($Stat -and $WatchdogTimer -and $Stat.Updated -gt $WatchdogTimer.Kicked) {
+            $WatchdogTimer.Kicked = $Stat.Updated
+        }
+    }
+    $Miner.New = $false
+    # Update power stats
+    if ($Miner_PowerDraw -gt 0) {
+        $Stat = Set-Stat -Name "$($Miner.Name)_$($_.Algorithm -join '')_PowerDraw" -Value $Miner_PowerDraw -Duration $StatSpan -FaultDetection $false
+    }
+    # Update ComputeUsage stats
+    if ($Miner_ComputeUsage -gt 0) {
+        $Stat = Set-Stat -Name "$($Miner.Name)_$($_.Algorithm -join '')_ComputeUsage" -Value $Miner_ComputeUsage -Duration $StatSpan -FaultDetection $false
+    }
+}
+
 function Get-GPUdevices {
 
-#returns a data structure containing all found OpenCL devices like
+# UselessGuru: returns a data structure containing all found OpenCL devices like
 #
-#Type : AMD
-#Device : {}
-#Type : NVIDIA
-#Device : {@{Type=NVIDIA; Device=GeForce GTX 1080 Ti; Device_Norm=GeforceGTX1080Ti; Vendor=NVIDIA Corporation; Devices=System.Object[]}, @{Type=NVIDIA; Device=GeForce GTX 1060 3GB;
-#Device_Norm=GeforceGTX10603GB; Vendor=NVIDIA Corporation; Devices=System.Object[]}}
+# Type : AMD
+# Device : {}
+# Type : NVIDIA
+# Device : {@{Type=NVIDIA; Device=GeForce GTX 1080 Ti; Device_Norm=GeforceGTX1080Ti; Vendor=NVIDIA Corporation; Devices=System.Object[]}, @{Type=NVIDIA; Device=GeForce GTX 1060 3GB;
+# Device_Norm=GeforceGTX10603GB; Vendor=NVIDIA Corporation; Devices=System.Object[]}}
 
 [CmdletBinding()]
     param(
@@ -20,6 +73,9 @@ function Get-GPUdevices {
         [bool]$DeviceSubTypes = $false
     )
 
+    $SimulateExtraHW = $false
+    $SimulateAMD = $false
+
     $GPUs = @()
     $MinerType | ForEach {
 
@@ -27,9 +83,7 @@ function Get-GPUdevices {
         $Devices = @()
         $Device_ID = 0
         $MinerType_Devices = @()
-        
-        $SimulateExtraHW = $false
-        
+
         if ($DeviceSubTypes) {
             [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
                 $Device = $_.Name
@@ -48,7 +102,7 @@ function Get-GPUdevices {
                 }
                 $Device_ID++
             }
-            if ($SimulateExtraHW) {
+           if ($SimulateExtraHW) {
                 # Simulate more HW   
                 [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
                     $Device = $_.Name
@@ -102,22 +156,35 @@ function Get-GPUdevices {
                 }
             }
         }                
-
+        Sleep 0
         if ($MinerType_Devices) {
             $GPUs += [PSCustomObject]@{
                 Type = $Miner_Type
                 Device = $MinerType_Devices
             }
         }
+    }   
+    if ($SimulateAMD) { # Fake AMD card with DeviceID 2
+        $GPU= [PSCustomObject]@{
+            Type = "AMD"
+            Device = "Fake AMD Card"
+            Device_Norm = "FakeAMDCard"
+            Vendor = "AMD Fake Corp."
+            Devices = @("2")
+        }
+        $Devices = @()
+        $Devices += $GPU
+        $GPUs += [PSCustomObject]@{
+            Type = "AMD"
+            Device = $Devices
+        }
     }
-    #    $GPUs_DBG = $GPUs | ConvertTo-Json
-    #    Write-Log -Level "Debug" "GPUs: $GPUs_DBG"
-    
     $GPUs
 }
 
 function Get-CommandPerDevice {
-# Split command into seprate command tokens, note: first letter of command string must be space
+# UselessGuru: Split command into seprate command tokens
+#
 # Supported parameter syntax:
 # -param-name[ value1[,value2[,..]]]
 # -param-name[=value1[,value2[,..]]]
@@ -210,12 +277,13 @@ function Get-CommandPerDevice {
 
 function Get-ComputeData {
 
-#reads current GPU compute usage and power draw and from device
-#returned values are:
-#        PowerDraw:    0 - max (in watts)
-#        ComputeUsage: 0 - 100 (percent)
-# Requirements for Nvidia:  nvidia-smi.exe (part of driver package)
-# Requirements for AMD:     unknown
+#UselessGuru: reads current GPU compute usage and power draw and from device
+#
+# returned values are:
+#         PowerDraw:    0 - max (in watts)
+#         ComputeUsage: 0 - 100 (percent)
+#  Requirements for Nvidia:  nvidia-smi.exe (part of driver package)
+#  Requirements for AMD:     unknown
 
 [CmdletBinding()]
     param(
@@ -236,14 +304,14 @@ function Get-ComputeData {
         "NVIDIA" {
             $NvidiaSMI = "$Env:SystemDrive\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe"
             if (Test-Path $NvidiaSMI) {
-                if ($Index -notmatch "^[0-9].*") { # -L prints one line per card
+                if ($Index -notmatch "^[0-9].*") { <# Index bust start with a number, otherwise read cumulated power#>
                     $Index = ((&$NvidiaSMI -L) | ForEach {$_.Split(" ")[1].Split(":")[0]}) -join ","
                 }
                 $Index.Split(",") | ForEach {
                     $idx = $_
                     $Loop = 1
                     do {
-                        $Readout = (&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=utilization.gpu) # -i {idx{,idx}} selects the card(s) with {idx{,idx}} for readout
+                        $Readout = (&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=utilization.gpu)
                         # Write-Log -Level "Debug" -Message "$($MyInvocation.MyCommand) reading GPU usage [Try $($Loop) of 3]: '`$MinerType=$($MinerType)', '`$Index=$($Index)', '`$Idx=$($Idx)', '`$Readout=$($Readout)'"
                         Try {
                             $ComputeUsageSum += [Decimal]$Readout
@@ -284,7 +352,7 @@ function Get-ComputeData {
         }
     }
 
-    if ($ComputeUsageSum -gt 0 -and $ComputeUsageSum -gt 0) {$ComputeUsage = $ComputeUsageSum / $ComputeUsageCount} {else $ComputeUsage = 0}
+    if ($ComputeUsageSum -gt 0 -and $ComputeUsageSum -gt 0) {$ComputeUsage = $ComputeUsageSum / $ComputeUsageCount} else {$ComputeUsage = 0}
 
     $ComputeData = [PSCustomObject]@{
         PowerDraw    = [Decimal]$PowerDrawSum
@@ -295,7 +363,6 @@ function Get-ComputeData {
 
     $ComputeData
 }
-
 
 Function Write-Log {
     [CmdletBinding()]
@@ -394,7 +461,7 @@ function Set-Stat {
         if ($ChangeDetection -and $Value -eq $Stat.Live) {$Updated -eq $Stat.updated}
 
         if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
-            Write-Log -Level "Warning" "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin)...$([Int]$ToleranceMax)). "
+            Write-Warning "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin) ... $([Int]$ToleranceMax)). "
         }
         else {
             $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
@@ -430,7 +497,7 @@ function Set-Stat {
         }
     }
     catch {
-        if (Test-Path $Path) {Write-Log -Level "Warn" "Stat file ($Name) is corrupt and will be reset. "}
+        if (Test-Path $Path) {Write-Warning "Stat file ($Name) is corrupt and will be reset. "}
 
         $Stat = [PSCustomObject]@{
             Live = $Value
@@ -493,12 +560,10 @@ function Get-ChildItemContent {
         [Hashtable]$Parameters = @{}
     )
 
-    $ItemCounter = 0
-    
-    Get-ChildItem $Path -Exclude "_*" |  Sort-Object | ForEach-Object {
+    Get-ChildItem $Path -Exclude "_*" | ForEach-Object { <# UselessGura added -Exclude "_*"; all files beginning with _ will be ignored #>
+#    Get-ChildItem $Path | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
-        $ItemCounter ++
         if ($_.Extension -eq ".ps1") {
             $Content = & {
                 $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters[$_]}
@@ -543,6 +608,9 @@ function Get-ChildItemContent {
                 [PSCustomObject]@{Name = $Name; Content = $_}
             }
         }
+#		$Content | ForEach-Object {
+#            [PSCustomObject]@{Name = $Name; Content = $_}
+#        }
     }
 }
 
@@ -550,7 +618,8 @@ filter ConvertTo-Hash {
     [CmdletBinding()]
     $Hash = $_
     switch ([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1)))) {
-        "-Infinity" {"0  H"}0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0))}
+        "-Infinity" {"0  H"}
+        0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0))}
         1 {"{0:n2} KH" -f ($Hash / [Math]::Pow(1000, 1))}
         2 {"{0:n2} MH" -f ($Hash / [Math]::Pow(1000, 2))}
         3 {"{0:n2} GH" -f ($Hash / [Math]::Pow(1000, 3))}
@@ -604,21 +673,22 @@ function Start-SubProcess {
         [ValidateRange(-2, 3)]
         [Parameter(Mandatory = $false)]
         [Int]$Priority = 0,
-        [Parameter(Mandatory = $false)]
-        [String]$WindowStyle = "Normal"
+        [Parameter(Mandatory = $false)] <# UselessGuru #>
+        [String]$MinerWindowStyle = "Minimized" <# UselessGuru #>
     )
 
     $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
 
-    $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory, $WindowStyle {
-        param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory, $WindowStyle)
+    $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory, $MinerWindowStyle {
+        param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory, $MinerWindowStyle)
 
         $ControllerProcess = Get-Process -Id $ControllerProcessID
         if ($ControllerProcess -eq $null) {return}
 
         $ProcessParam = @{}
         $ProcessParam.Add("FilePath", $FilePath)
-        $ProcessParam.Add("WindowStyle", $WindowStyle)
+        $ProcessParam.Add("WindowStyle", $MinerWindowStyle) <# UselessGuru #>
+        <# $ProcessParam.Add("WindowStyle", 'Minimized') UselessGuru #>
         if ($ArgumentList -ne "") {$ProcessParam.Add("ArgumentList", $ArgumentList)}
         if ($WorkingDirectory -ne "") {$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
         $Process = Start-Process @ProcessParam -PassThru
@@ -708,8 +778,6 @@ function Invoke-TcpRequest {
         $Writer.WriteLine($Request)
         $Response = $Reader.ReadLine()
     }
-    catch {
-    }
     finally {
         if ($Reader) {$Reader.Close()}
         if ($Writer) {$Writer.Close()}
@@ -741,7 +809,7 @@ function Get-Region {
         [Parameter(Mandatory = $false)]
         [String]$Region = ""
     )
-    
+
     $Regions = Get-Content "Regions.txt" | ConvertFrom-Json
 
     $Region = (Get-Culture).TextInfo.ToTitleCase(($Region -replace "-", " " -replace "_", " ")) -replace " "
@@ -762,8 +830,7 @@ class Miner {
     $Index
     $Device
     $Device_Auto
-    $Earning
-    $Profit # = Earning - PowerCost
+    $Profit
     $Profit_Comparison
     $Profit_MarginOfError
     $Profit_Bias
@@ -777,9 +844,43 @@ class Miner {
     $Activated
     $Status
     $Benchmarked
-    # Power measurement
-    $PowerDraw # Power consumption of all cards
-    $PowerCost # = Total power draw  * $PowerPricePerKW
-    $ComputeUsage
-    $Pool
+	<# Power power and profit calculation added by UselessGuru #>
+    $Earning <# UselessGuru added Earning #>
+    $PowerDraw <# Power consumption of all cards #>
+    $PowerCost <# Total power draw  * $PowerPricePerKW #>
+    $ComputeUsage <# UselessGuru added -MinerWindowStyle #>
+    $Pool <# UselessGuru added Pool #>
+    $MinerWindowStyle <# UselessGuru added MinerWindowStyle #>
+    $UseNewMinerLauncher <# UselessGuru added UseNewMinerLauncher #>
+    $ShowWindow <# UselessGuru added ShowWindow #>
+    
+    StartMining() {
+        $this.New = $true
+        $this.Activated++
+        if ($this.Process -ne $null) {$this.Active += $this.Process.ExitTime - $this.Process.StartTime}
+        # Begin UselessGuru added $UseNewMinerLauncher
+        if ($this.UseNewMinerLauncher) {
+            . .\MyInclude.ps1
+            switch ($this.MinerWindowStyle) {
+                "Normal"    {$this.ShowWindow = "SW_SHOW"}
+                "Maximized" {$this.ShowWindow = "SW_SHOWMAXIMIZE"}
+                "Minimized" {$this.ShowWindow = "SW_SHOWMINNOACTIVE"}
+                "Hidden"    {$this.ShowWindow = "SW_HIDDEN"}
+            }
+            $this.Process = Invoke-CreateProcess -Binary $this.Path -Arguments $this.Arguments -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $this.ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path $this.Path)
+        }
+        else {
+            $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList ($this.Arguments) -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($this -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -MinerWindowStyle $this.MinerWindowStyle <# UselessGuru added -MinerWindowStyle #>
+        }
+        # Begin UselessGuru added $UseNewMinerLauncher
+        # $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($this -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -MinerWindowStyle $this.MinerWindowStyle <# UselessGuru added -MinerWindowStyle #>
+
+        if ($this.Process -eq $null) {$this.Status = "Failed"}
+        else {$this.Status = "Running"}
+    }
+
+    StopMining() {
+        $this.Process.CloseMainWindow() | Out-Null
+        $this.Status = "Idle"
+    }
 }

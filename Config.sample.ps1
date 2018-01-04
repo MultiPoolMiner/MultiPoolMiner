@@ -34,13 +34,13 @@ $Type = @('NVIDIA')
 # Pools which you prefer to mine on.  All pools are always used if your preferred ones don't support the most profitable algorithm, or your preferred ones are down.
 # If left empty, all pools will be treated equally, and it will mine to the most profitable pool at the moment.
 # If you really want to completely disable a specific pool, delete it's file from the Pools directory.
-$PoolName = @('Nicehash','Zpool','ZpoolCoins')
+$PoolName = @("miningpoolhub","miningpoolhubcoins","zpool","nicehash")
 # Pools you prefer not to mine on. These will be used only as an absolute last resort if your preferred pools are down.
 $ExcludePoolName = @()
 
 # Algorithms to mine on this system.  If left empty, all supported algorithms will be used.
 # Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
-$Algorithm = @('Blake2s','Blakecoin','Decred','Equihash','Groestl','Hsr','Keccak','Lbry','Lyra2RE2','Lyra2z','NeoScrypt','Nist5','Phi','Polytimos','Sib','Skunk','Tribus','Veltor','X17','Xevan')
+$Algorithm = @("cryptonight","decred","decrednicehash","ethash","ethash2gb","equihash","groestl,lbry","lyra2re2","lyra2z","neoscrypt","pascal","sia","siaclaymore","sianicehash","sib","skunk")
 # If $Algorithm is left empty, it will mine all algorithms EXCEPT the ones listed in $ExcludeAlgorithm
 $ExcludeAlgorithm = @()
 
@@ -53,7 +53,7 @@ $ExcludeMinerName = @()
 # Donation of mining time in minutes per day to aaronsace. Default is 24, minimum is 10 minutes per day (less than 0.7% fee). The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
 $Donate = 24
 # Enable the watchdog feature which detects and handles miner and other related failures. It works on a unified interval that is defaulted to 60 seconds. Watchdog timers expire if three of those intervals pass without being kicked. There are three stages as to what action is taken when watchdog timers expire and is determined by the number of related expired timers.
-$Watchdog = $true
+$Watchdog = $True
 # Enabling SSL will restrict the miner application list to include only the miners that support secure connection.
 $SSL = $False
 # Specify your proxy address if applicable, i.e http://192.0.0.1:8080
@@ -64,47 +64,53 @@ $SwitchingPrevention = 2
 $Interval = 60
 # Specify the number of seconds required to pass before opening each miner. It is useful when cards are more sensitive to switching and need some extra time to recover (eg. clear DAG files from memory)
 $Delay = 0
-# Send mining status to a URL for monitoring.  This sends information about the miners running on this worker to a remote monitoring web interface
+# Send mining status to a URL for monitoring.  This sends information about the miners running on this worker to a remote monitoring web interface.
 $MinerStatusURL = ''
 
 ######## ADVANCED (UselessGuru) ########
 # The configuration items in this section are currently not available in the configuration GUI
 
-# If $true separate miners will be launched for each GPU model class, this will further help to increase profit
-$DeviceSubTypes = $true
+# If $true separate miners will be launched for each GPU model class, this will further help to increase profit. Notwe: This is an experimental feature!
+$DeviceSubTypes = $False
 
-# Minimum workers required to mine on coin, if less skip the coin, there is little point in mining a coin if there are only very few miners working on it, default:7, to always mine all coins set to 0
+# Minimum workers required to mine on coin. Requires coin , if less skip the coin, there is little point in mining a coin if there are only very few miners working on it, default:7, to always mine all coins set to 0
 $MinPoolWorkers = 7
 
 # Pools and miners can charge a fee. If set to $true all profit calculations will automatically by lowered by the fee
-$ProfitLessFee = $true
+$ProfitLessFee = $True
 
 # WindowStyle for miner windows. Can be any of: "Normal","Maximized","Minimized","Hidden". Note: During benchmark all windows will run in "normal" mode. Warning: "Hidden" can be dangerous because the can only be seen in task manager, therefore NOT recommended
 $MinerWindowStyle = "Minimized"
 
 # If $true use alternative launcher process to run miners. The good: This will NOT steal focus. The bad: I may 'forget' to close running miners on exit. These need to be closed manually.
-$UseNewMinerLauncher = $false
+$UseNewMinerLauncher = $False
+
+# If $True MPM (UselessGuru Edition) will parallelize the hash rate readout from miners. This will speed up overall loop time, e.g. benchmarking.
+$UseJobsForGetData = $True
 
 # Minimal required profit, if less it will not mine. The configured value must be in the first currency as defined in $currency (see config item above).
-$MinProfit = 5
+$MinProfit = 0
 
 # Change debugging level. Can be any of "SilentlyContinue","Continue","Inquire","Stop"; see https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_preference_variables?view=powershell-5.1
-$DebugPreference = "SilentlyContinue"
+# N/A $DebugPreference = "SilentlyContinue"
 
 # if $true will beep on errors
-$BeepOnError=$true
+$BeepOnError=$True
 
 # If $true will not start miners and list hypthetical earnings
 $DisplayProfitOnly = $false
 
-#i.e. BTH,ZEC,ETH etc., if supported by the pool mining earnings will be autoconverted and paid out in this currency, WARNING: make sure ALL configured pools support payout in this curreny!
+#i.e. BTH,ZEC,ETH etc., if supported by the pool mining earnings will be autoconverted and paid out in this currency. WARNING: make sure ALL configured pools support payout in this curreny!
 $PayoutCurrency = "BTC"
 
 # If $true will evaluate and display MPM miner is faster than... in summary, if $false MPM will not display this and instead save CPU cycles and screen space ;-)
-$DisplayComparison = $false
+$DisplayComparison = $Ffalse
 
-# If $true MPM will display short pool names in summary
-$UseShortPoolNames = $true
+# If $true MPM will display short pool names in summary (condensed mode)
+$UseShortPoolNames = $True
+
+# If $True will display mining summary in very flashy colors (https://github.com/UselessGuru/MultiPoolMiner/pull/15)
+$UseDopeColoring = $False
 
 ######## Power configuration (UselessGuru) ######## 
 # Power configuration & true profit calculation

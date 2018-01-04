@@ -56,7 +56,7 @@ $Devices | ForEach-Object {
 
             [PSCustomObject]@{
                 Name         = $Name
-                Type         = $Type
+                Type         = $Device.Type
                 Device       = $Device.Device
                 Path         = $Path
                 Arguments    = "-p $Port -c $($Pools.$Algorithm.Name)_$($Algorithm)_$($Threads)_Nvidia_$($Device.Device_Norm).json -na$CommonCommands"
@@ -80,7 +80,7 @@ $Devices | ForEach-Object {
 
             [PSCustomObject]@{
                 Name         = $Name
-                Type         = $Type
+                Type         = $Device.Type
                 Device       = $Device.Device
                 Path         = $Path
                 Arguments    = "-p $Port -c $($Pools."$($Algorithm)NiceHash".Name)_$($Algorithm)Nicehash_$($Threads)_Nvidia_$($Device.Device_Norm).json -na$CommonCommands"

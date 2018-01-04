@@ -59,7 +59,7 @@ $Devices | ForEach-Object {
 
         [PSCustomObject]@{
 			Name         = $Name
-			Type         = $Type
+			Type         = $Device.Type
 			Device       = $Device.Device
 			Path         = $Path
 			Arguments    = "-api 127.0.0.1:$Port -uri stratum://$($Pools.$Algorithm.User).$($Pools.$Algorithm.Pass)@$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) $Command $CommonCommands"

@@ -49,7 +49,7 @@ $Devices | ForEach-Object {
 
             [PSCustomObject]@{
                 Name         = $Name
-                Type         = $Type
+                Type         = $Device.Type
                 Device       = $Device.Device
                 Path         = $Path
                 Arguments    = "-mode 1 -mport $Port -epool $($Pools.$MainAlgorithm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins 1 -platform 2 $Command $CommonCommands"

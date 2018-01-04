@@ -8,8 +8,13 @@ param(
     [Parameter(Mandatory=$true)]$MinerStatusURL
 )
 
+# Force using . as the decimal separator for this script, no matter what the system locale
+$OriginalCulture = [System.Threading.Thread]::CurrentThread.CurrentCulture
+[System.Threading.Thread]::CurrentThread.CurrentCulture = [Globalization.CultureInfo]::InvariantCulture
+
+
 Write-Host "Pinging monitoring server..."
-$profit = ($ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Measure-Object Profit -Sum).Sum | ConvertTo-Json
+$profit = "{0:N8}" -f (($ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Measure-Object Profit -Sum).Sum)
 
 # Format the miner values for reporting.  Set relative path so the server doesn't store anything personal (like your system username, if running from somewhere in your profile)
 $minerreport = ConvertTo-Json @($ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Foreach-Object {
@@ -24,10 +29,13 @@ $minerreport = ConvertTo-Json @($ActiveMiners | Where-Object {$_.Activated -GT 0
         Active = "{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f ((Get-Date) - $_.Process.StartTime)
         Algorithm = @($_.Algorithm)
         Pool = @($MatchingMiner.Pools.PsObject.Properties.Value.Name)
-        CurrentSpeed = @($_.Speed_Live)
-        EstimatedSpeed = @($_.Speed)
+        CurrentSpeed = @($_.Speed_Live | Foreach-Object {"$($_ | ConvertTo-Hash)/s"})
+        EstimatedSpeed = @($_.Speed | Foreach-Object {"$($_ | ConvertTo-Hash)/s"})
         PID = $_.Process.Id
-        'BTC/day' = $_.Profit
+        'BTC/day' = "{0:N8}" -f $_.Profit
     }
 })
 Invoke-RestMethod -Uri $MinerStatusURL -Method Post -Body @{address = $Address; workername = $WorkerName; miners = $minerreport; profit = $profit}
+
+# Set culture back
+[System.Threading.Thread]::CurrentThread.CurrentCulture = $OriginalCulture

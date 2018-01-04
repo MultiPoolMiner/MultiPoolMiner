@@ -59,7 +59,7 @@ $Devices | ForEach-Object {
 
         [PSCustomObject]@{
             Name         = $Name
-            Type         = $Type
+            Type         = $Device.Type
             Device       = $Device.Device
             Path         = $Path
             Arguments    = "--telemetry=127.0.0.1:$Port --server $($Pools.$Algorithm.Host) --port $($Pools.$Algorithm.Port) --user $($Pools.$Algorithm.User) --pass $($Pools.$Algorithm.Pass) $Command $CommonCommands"

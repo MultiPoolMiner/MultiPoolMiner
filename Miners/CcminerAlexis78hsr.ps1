@@ -20,7 +20,7 @@ $Commands = [PSCustomObject]@{
     "neoscrypt"  = "" #NeoScrypt, lower intensity is better, beaten by CcminerKlausT
     "nist5"      = "" #Nist5, beaten by CcminerKlaust817_CUDA91
     "sia"        = "" #Sia
-    "sib"        = "" # my best values for 1080ti/1070/10603G " -i 21.5,20.5,20.5" #Sib / x11gost, beaten by Ccminer-x11gost
+    #"sib"        = "" # Default intensity values crash miner, my best values for 1080ti/1070/10603G " -i 21.5,20.5,20.5" #Sib / x11gost, beaten by Ccminer-x11gost
     "skein"      = "" # my best values for 1080ti/1070/10603G " -i 30,20,28.9" #Skein, where do my hashes go???
     "skein2"     = "" # Double Skein (Woodcoin)
     "vanilla"    = "" #BlakeVanilla
@@ -54,7 +54,7 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 
         [PSCustomObject]@{
             Name         = $Name
-            Type         = $Type
+            Type         = $Device.Type
             Device       = $Device.Device
             Path         = $Path
             Arguments    = "-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) -b $Port $Command $CommonCommands"

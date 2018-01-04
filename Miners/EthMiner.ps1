@@ -34,7 +34,7 @@ $Devices | ForEach-Object {
 
         [PSCustomObject]@{
             Name         = $Name
-            Type         = $Type
+            Type         = $Device.Type
             Device       = $Device.Device
             Path         = $Path
             Arguments    = "--api-port $Port -S $($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -O $($Pools.$Algorithm.User):$($Pools.$Algorithm.Pass) -SP 2 --cuda $Command $CommonCommands"

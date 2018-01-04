@@ -1,6 +1,6 @@
 bin/
 stats/
-logs/
+logs/*
 wrapper/
 downloads/
 miners/_Original

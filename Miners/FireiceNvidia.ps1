@@ -54,9 +54,8 @@ if ($Pools.Cryptonight.Name) {
 
         [PSCustomObject]@{
             Name         = $Name
-            Type         = $Type
+            Type         = $_.Type
             Device       = $_.Device
-            Devices      = $_.Devices
             Path         = $Path
             Arguments    = "-c $($Name)_$($Pools.CryptoNight.Name)_CryptoNight.txt --noAMD --noCPU --noUAC $HWConfigFile"
             HashRates    = [PSCustomObject]@{"CryptoNight" = $Stats."$($Name)_CryptoNight_HashRate".Week}
