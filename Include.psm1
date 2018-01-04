@@ -236,7 +236,7 @@ function Get-ComputeData {
         "NVIDIA" {
             $NvidiaSMI = "$Env:SystemDrive\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe"
             if (Test-Path $NvidiaSMI) {
-                if ($Index -notlike "*,*") {
+                if ($Index -notmatch "^[0-9].*") {
                     $Index = ((&$NvidiaSMI -L) | ForEach {$_.Split(" ")[1].Split(":")[0]}) -join ","
                 }
                 $Index.Split(",") | ForEach {
