@@ -1,7 +1,7 @@
 using module ..\Include.psm1
 
 class BMiner : Miner {
-    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false, [String]$DebugPreference = "SilentlyContinue") {
+    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
@@ -41,8 +41,6 @@ class BMiner : Miner {
                 Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
                 break
             }
-            
-            if ($DebugPreference -ne "SilentlyContinue") {Write-Log -Level Debug $Response}
             
             $HashRate_Value = 0
             $Index | Where  {$Data.miners.$_.solver} | ForEach {
