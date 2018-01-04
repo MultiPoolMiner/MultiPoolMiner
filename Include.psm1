@@ -236,14 +236,14 @@ function Get-ComputeData {
         "NVIDIA" {
             $NvidiaSMI = "$Env:SystemDrive\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe"
             if (Test-Path $NvidiaSMI) {
-                if ($Index -notmatch "^[0-9].*") {
+                if ($Index -notmatch "^[0-9].*") { # -L prints one line per card
                     $Index = ((&$NvidiaSMI -L) | ForEach {$_.Split(" ")[1].Split(":")[0]}) -join ","
                 }
                 $Index.Split(",") | ForEach {
                     $idx = $_
                     $Loop = 1
                     do {
-                        $Readout = (&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=utilization.gpu)
+                        $Readout = (&$NvidiaSMI -i $idx --format=csv,noheader,nounits --query-gpu=utilization.gpu) # -i {idx{,idx}} selects the card(s) with {idx{,idx}} for readout
                         # Write-Log -Level "Debug" -Message "$($MyInvocation.MyCommand) reading GPU usage [Try $($Loop) of 3]: '`$MinerType=$($MinerType)', '`$Index=$($Index)', '`$Idx=$($Idx)', '`$Readout=$($Readout)'"
                         Try {
                             $ComputeUsageSum += [Decimal]$Readout
