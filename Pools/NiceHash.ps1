@@ -54,25 +54,25 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
                     SSL           = $true
                     Updated       = $Stat.Updated
                 }
-				else
-				{
-				[PSCustomObject]@{
-					Algorithm     = $NiceHash_Algorithm_Norm
-					Info          = $NiceHash_Coin
-					Price         = $Stat.Live
-					StablePrice   = $Stat.Week
-					MarginOfError = $Stat.Week_Fluctuation
-					Protocol      = "stratum+tcp"
-					Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
-					Port          = $NiceHash_Port
-					User          = "$Wallet.$WorkerName"
-					Pass          = "x"
-					Region        = $NiceHash_Region_Norm
-					SSL           = $false
-					Updated       = $Stat.Updated
-				}   
-			}			
             }
+			else
+			{
+            [PSCustomObject]@{
+                Algorithm     = $NiceHash_Algorithm_Norm
+                Info          = $NiceHash_Coin
+                Price         = $Stat.Live
+                StablePrice   = $Stat.Week
+                MarginOfError = $Stat.Week_Fluctuation
+                Protocol      = "stratum+tcp"
+                Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
+                Port          = $NiceHash_Port
+                User          = "$Wallet.$WorkerName"
+                Pass          = "x"
+                Region        = $NiceHash_Region_Norm
+                SSL           = $false
+                Updated       = $Stat.Updated
+            }
+		}
         }
     }
 }
