@@ -20,19 +20,19 @@ param(
     [Parameter(Mandatory = $false)]
     [Array]$Type = @(), #AMD/NVIDIA/CPU
     [Parameter(Mandatory = $false)]
-    [Array]$Algorithm = @(), #i.e. Ethash,Equihash,CryptoNight ect.
+    [Array]$Algorithm = @(), #i.e. Ethash,Equihash,CryptoNight etc.
     [Parameter(Mandatory = $false)]
     [Array]$MinerName = @(), 
     [Parameter(Mandatory = $false)]
     [Array]$PoolName = @(), 
     [Parameter(Mandatory = $false)]
-    [Array]$ExcludeAlgorithm = @(), #i.e. Ethash,Equihash,CryptoNight ect.
+    [Array]$ExcludeAlgorithm = @(), #i.e. Ethash,Equihash,CryptoNight etc.
     [Parameter(Mandatory = $false)]
     [Array]$ExcludeMinerName = @(), 
     [Parameter(Mandatory = $false)]
     [Array]$ExcludePoolName = @(), 
     [Parameter(Mandatory = $false)]
-    [Array]$Currency = ("BTC", "USD"), #i.e. GBP,EUR,ZEC,ETH ect.
+    [Array]$Currency = ("BTC", "USD"), #i.e. GBP,EUR,ZEC,ETH etc.
     [Parameter(Mandatory = $false)]
     [Int]$Donate = 24, #Minutes per Day
     [Parameter(Mandatory = $false)]
@@ -40,7 +40,11 @@ param(
     [Parameter(Mandatory = $false)]
     [Int]$Delay = 0, #seconds before opening each miner
     [Parameter(Mandatory = $false)]
-    [Switch]$Watchdog = $false
+    [Switch]$Watchdog = $false,
+    [Parameter(Mandatory = $false)]
+    [String]$MinerStatusURL,
+    [Parameter(Mandatory = $false)]
+    [Int]$SwitchingPrevention = 1 #zero does not prevent miners switching
 )
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
@@ -108,9 +112,9 @@ while ($true) {
 
     #Activate or deactivate donation
     if ($Timer.AddDays(-1).AddMinutes($Donate) -ge $LastDonated) {
-        $Wallet = $WalletDonate
-        $UserName = $UserNameDonate
-        $WorkerName = $WorkerNameDonate
+        if ($Wallet) {$Wallet = $WalletDonate}
+        if ($UserName) {$UserName = $UserNameDonate}
+        if ($WorkerName) {$WorkerName = $WorkerNameDonate}
     }
     if ($Timer.AddDays(-1) -ge $LastDonated) {
         $Wallet = $WalletBackup
@@ -120,8 +124,13 @@ while ($true) {
     }
 
     #Update the exchange rates
-    $NewRates = Invoke-RestMethod "https://api.coinbase.com/v2/exchange-rates?currency=BTC" -UseBasicParsing | Select-Object -ExpandProperty data | Select-Object -ExpandProperty rates
-    $Currency | Where-Object {$NewRates.$_} | ForEach-Object {$Rates | Add-Member $_ ([Double]$NewRates.$_) -Force}
+    try {
+        $NewRates = Invoke-RestMethod "https://api.coinbase.com/v2/exchange-rates?currency=BTC" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop | Select-Object -ExpandProperty data | Select-Object -ExpandProperty rates
+        $Currency | Where-Object {$NewRates.$_} | ForEach-Object {$Rates | Add-Member $_ ([Double]$NewRates.$_) -Force}
+    }
+    catch {
+        Write-Warning "Coinbase is down. "
+    }
 
     #Load the stats
     $Stats = [PSCustomObject]@{}
@@ -135,6 +144,9 @@ while ($true) {
     $AllPools = @($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object {$AllPools | Where-Object Name -EQ $_}) | 
         Where-Object {$Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
         Where-Object {$ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $ExcludeAlgorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
+
+    #Remove non-present pools
+    $AllPools = $AllPools | Where-Object {Test-Path "Pools\$($_.Name).ps1"}
 
     #Apply watchdog to pools
     $AllPools = $AllPools | Where-Object {
@@ -151,13 +163,13 @@ while ($true) {
         continue
     }
     $Pools = [PSCustomObject]@{}
-    $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Sort-Object -Descending {$PoolName.Count -eq 0 -or (Compare-Object $PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}, {$ExcludePoolName.Count -eq 0 -or (Compare-Object $ExcludePoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}, StablePrice, {$_.Region -EQ $Region}, {$_.SSL -EQ $SSL} | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
+    $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Sort-Object -Descending {$PoolName.Count -eq 0 -or (Compare-Object $PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}, {$ExcludePoolName.Count -eq 0 -or (Compare-Object $ExcludePoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}, {$_.StablePrice * (1 - $_.MarginOfError)}, {$_.Region -EQ $Region}, {$_.SSL -EQ $SSL} | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
     if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_} | Measure-Object Updated -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalSeconds) -gt $Interval * $Strikes) {
         Write-Warning "Pool prices are out of sync. "
-        $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.StablePrice * (1 - ($Pools.$_.MarginOfError * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
+        $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.StablePrice * (1 - ($Pools.$_.MarginOfError * $SwitchingPrevention * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
     }
     else {
-        $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.Price * (1 - ($Pools.$_.MarginOfError * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
+        $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.Price * (1 - ($Pools.$_.MarginOfError * $SwitchingPrevention * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
     }
 
     #Load information about the miners
@@ -240,8 +252,8 @@ while ($true) {
         $Miner | Add-Member Device ($Miner_Devices | Sort-Object) -Force
         $Miner | Add-Member Device_Auto (($Miner_Devices -eq $null) | Sort-Object) -Force
 
-        $Miner.Path = [System.IO.Path]::GetFullPath($Miner.Path)
-        if ($Miner.PrerequisitePath) {$Miner.PrerequisitePath = [System.IO.Path]::GetFullPath($Miner.PrerequisitePath)}
+        $Miner.Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Miner.Path)
+        if ($Miner.PrerequisitePath) {$Miner.PrerequisitePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Miner.PrerequisitePath)}
 
         if (-not $Miner.API) {$Miner | Add-Member API "Miner" -Force}
     }
@@ -249,11 +261,16 @@ while ($true) {
     if ($Downloader.State -ne "Running") {
         $Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList (@($AllMiners | Where-Object {$_.PrerequisitePath} | Select-Object @{name = "URI"; expression = {$_.PrerequisiteURI}}, @{name = "Path"; expression = {$_.PrerequisitePath}}, @{name = "Searchable"; expression = {$false}}) + @($AllMiners | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($AllMiners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}}) | Select-Object * -Unique) -FilePath .\Downloader.ps1
     }
-    if (Get-Command "Get-NetFirewallRule" -ErrorAction SilentlyContinue) {
-        if ($MinerFirewalls -eq $null) {$MinerFirewalls = Get-NetFirewallRule | Where-Object DisplayName -EQ "MultiPoolMiner" | Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program}
-        if (@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ "=>") {
-            Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) ("-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1'; ('$(@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ '=>' | Select-Object -ExpandProperty InputObject | ConvertTo-Json -Compress)' | ConvertFrom-Json) | ForEach {New-NetFirewallRule -DisplayName 'MultiPoolMiner' -Program `$_}" -replace '"', '\"') -Verb runAs
-            $MinerFirewalls = $null
+    # Open firewall ports for all miners
+    if (Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) {
+        if ((Get-Command "Get-MpComputerStatus" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue)) {
+            if (Get-Command "Get-NetFirewallRule" -ErrorAction SilentlyContinue) {
+                if ($MinerFirewalls -eq $null) {$MinerFirewalls = Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program}
+                if (@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ "=>") {
+                    Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) ("-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1'; ('$(@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ '=>' | Select-Object -ExpandProperty InputObject | ConvertTo-Json -Compress)' | ConvertFrom-Json) | ForEach {New-NetFirewallRule -DisplayName 'MultiPoolMiner' -Program `$_}" -replace '"', '\"') -Verb runAs
+                    $MinerFirewalls = $null
+                }
+            }
         }
     }
 
@@ -415,8 +432,7 @@ while ($true) {
             if ($Miner.Status -eq "Running") {$Miner.Status = "Failed"}
         }
         else {
-            $Miner.Process.CloseMainWindow() | Out-Null
-            $Miner.Status = "Idle"
+            $Miner.StopMining()
 
             #Remove watchdog timer
             $Miner_Name = $Miner.Name
@@ -439,14 +455,7 @@ while ($true) {
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
             $DecayStart = $Timer
-            $_.New = $true
-            $_.Activated++
-            if ($_.Process -ne $null) {$_.Active += $_.Process.ExitTime - $_.Process.StartTime}
-            if ($_.Wrap) {$_.Process = Start-Process -FilePath (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) -ArgumentList "-executionpolicy bypass -command . '$(Convert-Path ".\Wrapper.ps1")' -ControllerProcessID $PID -Id '$($_.Port)' -FilePath '$($_.Path)' -ArgumentList '$($_.Arguments)' -WorkingDirectory '$(Split-Path $_.Path)'" -PassThru
-            }
-            else {$_.Process = Start-SubProcess -FilePath $_.Path -ArgumentList $_.Arguments -WorkingDirectory (Split-Path $_.Path) -Priority ($_.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)}
-            if ($_.Process -eq $null) {$_.Status = "Failed"}
-            else {$_.Status = "Running"}
+            $_.StartMining()
 
             #Add watchdog timer
             if ($Watchdog -and $_.Profit -ne $null) {
@@ -470,13 +479,16 @@ while ($true) {
         }
     }
 
+    if ($MinerStatusURL) {& .\ReportStatus.ps1 -Address $WalletBackup -WorkerName $WorkerNameBackup -ActiveMiners $ActiveMiners -Miners $Miners -MinerStatusURL $MinerStatusURL}
+
     #Display mining information
     Clear-Host
-    $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object -Descending Type, Profit | Format-Table -GroupBy Type (
+    $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object -Descending Type, Profit_Bias | Format-Table -GroupBy Type (
         @{Label = "Miner"; Expression = {$_.Name}}, 
         @{Label = "Algorithm"; Expression = {$_.HashRates.PSObject.Properties.Name}}, 
         @{Label = "Speed"; Expression = {$_.HashRates.PSObject.Properties.Value | ForEach-Object {if ($_ -ne $null) {"$($_ | ConvertTo-Hash)/s"}else {"Benchmarking"}}}; Align = 'right'}, 
         @{Label = "BTC/Day"; Expression = {$_.Profits.PSObject.Properties.Value | ForEach-Object {if ($_ -ne $null) {$_.ToString("N5")}else {"Benchmarking"}}}; Align = 'right'}, 
+        @{Label = "Accuracy"; Expression = {$_.Pools.PSObject.Properties.Value.MarginOfError | ForEach-Object {(1 - $_).ToString("P0")}}; Align = 'right'}, 
         @{Label = "BTC/GH/Day"; Expression = {$_.Pools.PSObject.Properties.Value.Price | ForEach-Object {($_ * 1000000000).ToString("N5")}}; Align = 'right'}, 
         @{Label = "Pool"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {if ($_.Info) {"$($_.Name)-$($_.Info)"}else {"$($_.Name)"}}}}
     ) | Out-Host
@@ -514,7 +526,7 @@ while ($true) {
             $MinerComparisons[1] | Add-Member $_.ToUpper() ("{0:N5} $([Char]0x00B1){1:P0} ({2:N5}-{3:N5})" -f ($MinerComparisons_Profit[1] * $Rates.$_), $MinerComparisons_MarginOfError[1], (($MinerComparisons_Profit[1] * $Rates.$_) / (1 + $MinerComparisons_MarginOfError[1])), (($MinerComparisons_Profit[1] * $Rates.$_) * (1 + $MinerComparisons_MarginOfError[1])))
         }
 
-        if ($MinerComparisons_Profit[0] -gt $MinerComparisons_Profit[1]) {
+        if ([Math]::Round(($MinerComparisons_Profit[0] - $MinerComparisons_Profit[1]) / $MinerComparisons_Profit[1], 2) -gt 0) {
             $MinerComparisons_Range = ($MinerComparisons_MarginOfError | Measure-Object -Average | Select-Object -ExpandProperty Average), (($MinerComparisons_Profit[0] - $MinerComparisons_Profit[1]) / $MinerComparisons_Profit[1]) | Measure-Object -Minimum | Select-Object -ExpandProperty Minimum
             Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is between $([Math]::Round((((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])-$MinerComparisons_Range)*100)))% and $([Math]::Round((((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])+$MinerComparisons_Range)*100)))% more profitable than the fastest miner: "
         }

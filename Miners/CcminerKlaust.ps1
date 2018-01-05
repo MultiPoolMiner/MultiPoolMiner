@@ -1,6 +1,6 @@
 using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
+$Path = ".\Bin\NVIDIA-KlausT\ccminer"
 $Uri = "https://github.com/KlausT/ccminer/archive/8.18.tar.gz"
 
 $Commands = [PSCustomObject]@{
@@ -24,6 +24,7 @@ $Commands = [PSCustomObject]@{
     "neoscrypt" = "" #NeoScrypt
     #"nist5" = "" #Nist5
     #"pascal" = "" #Pascal
+    #"phi" = "" #PHI
     #"sia" = "" #Sia
     #"sib" = "" #Sib
     #"skein" = "" #Skein
@@ -47,7 +48,6 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Ccminer"
         Port = 4068
-        Wrap = $false
         URI = $Uri
     }
 }
