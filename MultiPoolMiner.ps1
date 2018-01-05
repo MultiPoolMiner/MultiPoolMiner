@@ -220,6 +220,9 @@ while ($true) {
         if ($PowerPricePerKW -gt 0 -and $Miner.PowerDraw -eq 0) { #force BenchmarkMode if power is part of the equation
             $BenchmarkMode = $true
         }
+        else {
+            $Miner.PowerDraw = [Double]$Miner.PowerDraw
+        }
         # Convert power cost back to BTC, all profit calculations are done in BTC
         Try {
             $Miner_PowerCost = [Double](([Double]$Miner.PowerDraw + [Double]($Computer_PowerDraw / $GPUs.Device.Count)) / 1000 * 24 * [Double]$PowerPricePerKW / $Rates.$($Currency[0]))
