@@ -11,7 +11,7 @@ MultiPoolMiner (UselessGuru Edition) created by aaronsace, with additions create
 https://github.com/nicehash/NiceHashMinerLegacy
 
 Why yet another fork?
-This code fork is my private playground. I created it because I wanted to learn abour the brillant ideas hidden in the code (kudos to aaronsace).
+This code fork is my private playground. I created it because I wanted to learn about the brillant ideas hidden in the code (kudos to aaronsace).
 Out of passion I decided to create my own additions. They currently diverge too much from the base code, and I feel that they are far too experimental and are not stable enough to port them to the main fork.
 However some things may prove valuable to the main code and might be ported to the main fork in the future.
 
@@ -32,7 +32,7 @@ The bad news first:
 
 - Monitors crypto mining pools and coins in real-time and finds the most profitable for your machine
 - Controls any miner that is available via command line
-- Supports benchmarking, multiple platforms (AMD, NVIDIA and CPU) and mining on MiningPoolHub, Zpool, Hash Refinery and Nicehash (Ahashpool support is coming soon)
+- Supports benchmarking, multiple platforms (NVIDIA and CPU, AMD is currently under development) and mining on MiningPoolHub, Zpool, Hash Refinery and Nicehash (Ahashpool support is coming soon)
 - Includes Watchdog Timer to detect and handle miner failures
 
 Experimental features created by UselessGuru
