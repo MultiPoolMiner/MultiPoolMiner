@@ -42,6 +42,7 @@ $ActiveMiners = @()
 $Rates = [PSCustomObject]@{BTC = [Double]1}
 
 #Start the log
+if (-not (Test-Path "Logs")) {New-Item "Logs" -ItemType "directory" | Out-Null}
 Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
 
 ##
