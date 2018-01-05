@@ -5,6 +5,9 @@ $ProgressPreference = 'silentlyContinue'
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
+# Make sure there is a log directory
+if (-not (Test-Path "Logs")) {New-Item "Logs" -ItemType "directory" | Out-Null}
+
 # Read configuration
 Write-Log -Message "Applying configuration from Config.ps1..."
 . .\Config.ps1
@@ -42,7 +45,6 @@ $ActiveMiners = @()
 $Rates = [PSCustomObject]@{BTC = [Double]1}
 
 #Start the log
-if (-not (Test-Path "Logs")) {New-Item "Logs" -ItemType "directory" | Out-Null}
 Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
 
 ##
@@ -357,8 +359,13 @@ while ($true) {
     }
 
     #Update the active miners
-    if ($Miners.Count -eq 0 -and (Get-ChildItem "Bin").count-eq 0) {
-        Write-Log -Level Warn -Message "No miners available. "
+    if ($Miners.Count -eq 0) {
+        if ($AllMiners.Count -gt 0 -and (Get-ChildItem "Bin" -ErrorAction SilentlyContinue).count -eq 0) {
+            Write-Log -Level Info -Message "No miners binary available. They will be downloaded automatically, please wait... "
+        }
+        else {
+            Write-Log -Level Warn -Message "No miners available. "
+        }
         if ($Downloader) {$Downloader | Receive-Job}
         if ($DisplayProfitOnly) {Start-Sleep ($Interval / 10)} else {Start-Sleep $Interval} <# UselessGuru #>
         <# Start-Sleep $Interval #>
