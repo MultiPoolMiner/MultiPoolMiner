@@ -58,7 +58,7 @@ $Devices | ForEach-Object {
                     Type         = $Device.Type
                     Device       = $Device.Device
                     Path         = $Path
-                    Arguments    = "-p $Port -c $($Pools.$Algorithm.Name)_$($Algorithm)_$($Threads)_Nvidia_$($Device.Device_Norm).json -na$CommonCommands"
+                    Arguments    = ("-p $Port -c $($Pools.$Algorithm.Name)_$($Algorithm)_$($Threads)_Nvidia_$($Device.Device_Norm).json -na $CommonCommands").trim()
                     HashRates    = [PSCustomObject]@{$Algorithm = $Stats."$($Name)_$($Algorithm)_HashRate".Week}
                     API          = "NiceHash"
                     Port         = $Port
@@ -82,7 +82,7 @@ $Devices | ForEach-Object {
                     Type         = $Device.Type
                     Device       = $Device.Device
                     Path         = $Path
-                    Arguments    = "-p $Port -c $($Pools."$($Algorithm)NiceHash".Name)_$($Algorithm)Nicehash_$($Threads)_Nvidia_$($Device.Device_Norm).json -na$CommonCommands"
+                    Arguments    = ("-p $Port -c $($Pools."$($Algorithm)NiceHash".Name)_$($Algorithm)Nicehash_$($Threads)_Nvidia_$($Device.Device_Norm).json -na $CommonCommands").trim()
                     HashRates    = [PSCustomObject]@{"$($Algorithm)NiceHash" = $Stats."$($Name)_$($Algorithm)NiceHash_HashRate".Week}
                     API          = "NiceHash"
                     Port         = $Port

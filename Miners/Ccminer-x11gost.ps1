@@ -59,7 +59,7 @@ $Devices | ForEach-Object {
                     Type         = $Device.Type
                     Device       = $Device.Device
                     Path         = $Path
-                    Arguments    = "-a $Algorithm -o $($Pools.($Algorithm).Protocol)://$($Pools.($Algorithm).Host):$($Pools.($Algorithm).Port) -u $($Pools.($Algorithm).User) -p $($Pools.($Algorithm).Pass) -b $Port $Command $CommonCommands"
+                    Arguments    = ("-a $Algorithm -o $($Pools.($Algorithm).Protocol)://$($Pools.($Algorithm).Host):$($Pools.($Algorithm).Port) -u $($Pools.($Algorithm).User) -p $($Pools.($Algorithm).Pass) -b $Port $Command $CommonCommands").trim()
                     HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
                     API          = "Ccminer"
                     Port         = $Port
@@ -76,10 +76,10 @@ $Devices | ForEach-Object {
             if ($Pools."$($Algorithm)Nicehash".Name) {
                 [PSCustomObject]@{
                     Name         = $Name
-                    Type         = $Type
+                    Type         = $Device.Type
                     Device       = $Device.Device
                     Path         = $Path
-                    Arguments    = "-a $Algorithm -o stratum+tcp://$($Pools."$($Algorithm)NiceHash".Host):$($Pools."$($Algorithm)NiceHash".Port) -u $($Pools."$($Algorithm)NiceHash".User) -p $($Pools."$($Algorithm)NiceHash".Pass) -b $Port $Command $CommonCommands"
+                    Arguments    = ("-a $Algorithm -o stratum+tcp://$($Pools."$($Algorithm)NiceHash".Host):$($Pools."$($Algorithm)NiceHash".Port) -u $($Pools."$($Algorithm)NiceHash".User) -p $($Pools."$($Algorithm)NiceHash".Pass) -b $Port $Command $CommonCommands").trim()
                     HashRates    = [PSCustomObject]@{"$($Algorithm)NiceHash" = ($Stats."$($Name)_$($Algorithm)NiceHash_HashRate".Week)}
                     API          = "Ccminer"
                     Port         = $Port

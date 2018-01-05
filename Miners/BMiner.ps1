@@ -62,7 +62,7 @@ $Devices | ForEach-Object {
 			Type         = $Device.Type
 			Device       = $Device.Device
 			Path         = $Path
-			Arguments    = "-api 127.0.0.1:$Port -uri stratum://$($Pools.$Algorithm.User).$($Pools.$Algorithm.Pass)@$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) $Command $CommonCommands"
+			Arguments    = ("-api 127.0.0.1:$Port -uri stratum://$($Pools.$Algorithm.User).$($Pools.$Algorithm.Pass)@$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) $Command $CommonCommands").trim()
 			HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
 			API          = "BMiner"
 			Port         = $Port

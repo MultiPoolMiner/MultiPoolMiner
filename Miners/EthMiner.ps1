@@ -37,7 +37,7 @@ $Devices | ForEach-Object {
             Type         = $Device.Type
             Device       = $Device.Device
             Path         = $Path
-            Arguments    = "--api-port $Port -S $($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -O $($Pools.$Algorithm.User):$($Pools.$Algorithm.Pass) -SP 2 --cuda $Command $CommonCommands"
+            Arguments    = ("--api-port $Port -S $($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -O $($Pools.$Algorithm.User):$($Pools.$Algorithm.Pass) -SP 2 --cuda $Command $CommonCommands").trim()
             HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
             API          = "Claymore"
             Port         = $Port

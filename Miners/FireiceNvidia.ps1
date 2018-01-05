@@ -60,7 +60,7 @@ if ($Pools.Cryptonight.Name) {
             Type         = $_.Type
             Device       = $_.Device
             Path         = $Path
-            Arguments    = "-c $($Name)_CryptoNight.txt --noAMD --noCPU --noUAC $HWConfigFile"
+            Arguments    = ("-c $($Name)_CryptoNight.txt --noAMD --noCPU --noUAC $HWConfigFile").trim()
             HashRates    = [PSCustomObject]@{"CryptoNight" = $Stats."$($Name)_CryptoNight_HashRate".Week}
             API          = "XMRig"
             Port         = $Port

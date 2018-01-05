@@ -37,7 +37,7 @@ $Devices | ForEach-Object {
             Type         = $Device.Type
             Device       = $Device.Device
             Path         = $Path
-            Arguments    = "-S $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -U $($Pools.$Algorithm.User) -P $($Pools.$Algorithm.Pass) -http :$Port -N $($Device.Device_Norm) $Command $CommonCommands"
+            Arguments    = ("-S $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -U $($Pools.$Algorithm.User) -P $($Pools.$Algorithm.Pass) -http :$Port -N $($Device.Device_Norm) $Command $CommonCommands").trim()
             HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
             API          = "Eminer"
             Port         = $Port

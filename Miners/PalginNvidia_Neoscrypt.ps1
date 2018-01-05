@@ -37,7 +37,7 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
             Type		= $Device.Type
             Device		= $Device.Device
             Path		= $Path
-            Arguments	= "-o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) $Command $CommonCommands"
+            Arguments	= ("-o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) $Command $CommonCommands").trim()
             HashRates	= [PSCustomObject]@{$Algorithm = (($Stats."$($Name)_$($Algorithm)_HashRate".Week) * $Fee)}
             API			= "Wrapper"
             Port		= $Port
