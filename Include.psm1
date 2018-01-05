@@ -22,31 +22,23 @@ Function Write-Log {
         switch($Level) {
             'Error' {
                 $LevelText = 'ERROR:'
-                if($ErrorActionPreference -ne 'SilentlyContinue') {
-                    Write-Host -ForegroundColor Red -Object "$date $LevelText $Message"
-                }
+                Write-Error -Message $Message
             }
             'Warn' {
                 $LevelText = 'WARNING:'
-                if($WarningPreference -ne 'SilentlyContinue') {
-                    Write-Host -ForegroundColor Yellow -Object "$date $LevelText $Message"
-                }
+                Write-Warning -Message $Message
             }
             'Info' {
                 $LevelText = 'INFO:'
-                Write-Host -ForegroundColor DarkCyan -Object "$date $LevelText $Message"
+                Write-Information -MessageData $Message
             }
             'Verbose' {
                 $LevelText = 'VERBOSE:'
-                if($VerbosePreference -ne 'SilentlyContinue') {
-                    Write-Host -ForegroundColor Cyan -Object "$date $LevelText $Message"
-                }
+                Write-Verbose -Message $Message
             }
             'Debug' {
                 $LevelText = 'DEBUG:'
-                if($DebugPreference -ne 'SilentlyContinue') {
-                    Write-Host -ForegroundColor Gray -Object "$date $LevelText $Message"
-                }
+                Write-Debug -Message $Message
             }
         }
         "$date $LevelText $Message" | Out-File -FilePath $filename -Append
