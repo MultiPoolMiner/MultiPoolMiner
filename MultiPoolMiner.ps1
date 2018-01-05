@@ -357,7 +357,7 @@ while ($true) {
     }
 
     #Update the active miners
-    if ($Miners.Count -eq 0) {
+    if ($Miners.Count -eq 0 -and (Get-ChildItem "Bin").count-eq 0) {
         Write-Log -Level Warn -Message "No miners available. "
         if ($Downloader) {$Downloader | Receive-Job}
         if ($DisplayProfitOnly) {Start-Sleep ($Interval / 10)} else {Start-Sleep $Interval} <# UselessGuru #>
@@ -547,7 +547,7 @@ while ($true) {
     $MiningIsProfitable = ($Profits * $Rates.$($Currency[0])) -ge $MinProfit <# UselessGuru: Determine mining profitability #>
     
     #Stop or start miners in the active list depending on if they are the most profitable
-    $ActiveMiners | Where-Object Activated -GT 0 | Where-Object Best -EQ ($false -or -not $MiningIsProfitable) | ForEach-Object {
+    $ActiveMiners | Where-Object Activated -GT 0 | Where-Object {$_.Best -EQ $false -or -not $MiningIsProfitable}| ForEach-Object {
         $Miner = $_
 
         if ($Miner.Process -eq $null -or $Miner.Process.HasExited) {
@@ -587,15 +587,15 @@ while ($true) {
     if ($MiningIsProfitable -or $BenchmarkMode) { <# UselessGuru: Support $MiningIsProfitable switch #>
         $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
             if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
-                $DecayStart = $Timer
                 "$(Split-Path $_.Path -leaf) $($_.Arguments)" | Out-File "$(Split-Path $_.Path)\$($_.Name)_$($_.Algorithm -join "-").cmd" -Encoding default <# UselessGuru: Write cmd file for each run miner #>
                 
-                $MinerInfo = "$($_.Type) miner '$($Miner.Name)' ($($Miner.Algorithm -join '|')) [GPU Devices: $($Miner.Index)]" <# UselessGuru #>
+                $MinerInfo = "$($_.Type) miner '$($_.Name)' ($($_.Algorithm -join '|')) [GPU Devices: $($_.Index)]" <# UselessGuru #>
                 if ($DisplayProfitOnly) {
-                    Write-Log -Message "DisplayProfitOnly: Would be starting $($MinerInfo): '$($_.Path) $($_.Arguments)'" <# UselessGuru #>
+                    Write-Log -Message "DisplayProfitOnly: Would be starting $($MinerInfo): '$($_.Path.TrimStart((Convert-Path ".\"))) $($_.Arguments)'" <# UselessGuru #>
                 }
                 else {
-                    Write-Log -Message "Starting $($MinerInfo): '$($_.Path) $($_.Arguments)'" <# UselessGuru #>
+                    Write-Log -Message "Starting $($MinerInfo): '$($_.Path.TrimStart((Convert-Path ".\"))) $($_.Arguments)'" <# UselessGuru #>
+                    $DecayStart = $Timer
                     # Set miner window style
                     $_.MinerWindowStyle = $MinerWindowStyle
                     $_.UseNewMinerLauncher = $UseNewMinerLauncher
@@ -647,7 +647,7 @@ while ($true) {
     #Display mining information   
     if ($Poolname) {Write-Log -Message "Selected pool: $($Poolname)"}
     if ($Algorithm) {Write-Log -Message "Selected algorithms: $($Algorithm)"}
-    $Miners | Where-Object {$BenchmarkMode -or $DisplayProfitOnly -or ($_.Earning -gt 0) -or ($_.Profit -eq $null)} | Sort-Object -Descending Device, Profit_Bias | Format-Table -GroupBy Device (
+    $Miners | Where-Object {$BenchmarkMode -or $DisplayProfitOnly -or ($_.Earning -gt 0) -or ($_.Profit -eq $null)} | Sort-Object -Descending Device, Profit_Bias, Earnings, Profit | Format-Table -GroupBy Device (
         @{Label = "Miner";              Expression = {$_.Name -replace "_$((Get-Culture).TextInfo.ToTitleCase(($_.Device -replace "-", " " -replace "_", " ")) -replace " ")",""}}, 
         @{Label = "Algorithm(s)";       Expression = {($_.HashRates.PSObject.Properties.Name) -join " & "}},
         @{Label = "Profit";             Expression = {if ($_.Profit) {$($_.Profit * $Rates.$($Currency[0])).ToString("N5")} else {if ($_.Running) {"Measuring"} else {"Pending"}}}; Align = "right"},
@@ -670,20 +670,24 @@ while ($true) {
     # Begin UselessGuru: Profit summary
     if ($UseDopeColoring) {
         $ProfitSummary = "$(($Profits * $Rates.$($Currency[0])).ToString("N2")) $($Currency[0].ToUpper()) ($(($Earnings * $Rates.$($Currency[0])).ToString("N2"))-$(($PowerCosts * $Rates.$($Currency[0])).ToString("N2")))"
-        if ($MiningIsProfitable) {Write-Host -ForegroundColor Black -BackgroundColor Green -NoNewline "Mining selected algorithms is profitable!"; Write-Host -ForegroundColor Yellow -NoNewline " Estimated daily earnings:"; Write-Host -ForegroundColor Green " $($ProfitSummary)"}
-        elseif (-not $BenchmarkMode -or -not $DisplayProfitOnly) {Write-Log -Level Warn "Mining is currently NOT profitable - mining stopped! According to pool pricing information currently mining $($ProfitSummary)"}
+        if (-not $BenchmarkMode) {
+            if ($MiningIsProfitable) {Write-Host -ForegroundColor Black -BackgroundColor Green -NoNewline "Mining selected algorithms is profitable!"; Write-Host -ForegroundColor Yellow -NoNewline " Estimated daily earnings:"; Write-Host -ForegroundColor Green " $($ProfitSummary)"}
+            elseif (-not $DisplayProfitOnly) {Write-Log -Level Warn "Mining is currently NOT profitable - mining stopped! According to pool pricing information currently mining $($ProfitSummary)"}
+        }
         Write-Host -ForegroundColor DarkMagenta -NoNewline "Profitability limit: "; Write-Host -ForegroundColor DarkGreen -NoNewline "$($MinProfit.ToString("N2")) "; Write-Host -ForegroundColor DarkYellow -NoNewline "$($Currency[0].ToUpper())"; Write-Host -ForegroundColor Gray -NoNewline "/"; Write-Host -ForegroundColor DarkMagenta -NoNewline "day"; Write-Host -ForegroundColor DarkGray -Nonewline "  |  "; Write-Host -ForegroundColor DarkRed -NoNewline "Electricity rate: "; Write-Host -ForegroundColor Red -NoNewline "$($PowerPricePerKW.ToString("N2")) "; Write-Host -ForegroundColor DarkYellow -NoNewline "$($Currency[0].ToUpper())"; Write-Host -ForegroundColor Gray -NoNewline "/"; Write-Host -ForegroundColor DarkRed -NoNewline "kWh"; Write-Host -ForegroundColor DarkGray -Nonewline "  |  "; Write-Host -ForegroundColor Cyan -NoNewline "$($Rates.$($Currency[0]).ToString("N2")) "; Write-Host -ForegroundColor DarkYellow -NoNewline "$($Currency[0].ToUpper())"; Write-Host -ForegroundColor Gray -NoNewline "/"; Write-Host -ForegroundColor Cyan "BTC"
     }
     else {
         $ProfitSummary = "$(($Profits * $Rates.$($Currency[0])).ToString("N2")) $($Currency[0].ToUpper())/day ($(($Earnings * $Rates.$($Currency[0])).ToString("N2")) - $(($PowerCosts * $Rates.$($Currency[0])).ToString("N2")) $($Currency[0].ToUpper())/day). "
-        if ($MiningIsProfitable) {Write-Host "Mining is currently profitable using the algorithms listed above. According to pool pricing information currently mining $($ProfitSummary)"}
-        elseif (-not $BenchmarkMode -or -not $DisplayProfitOnly) {Write-Log -Level Warn -Message "Mining is currently NOT profitable - mining stopped! According to pool pricing information currently mining $($ProfitSummary)"}
+        if (-not $BenchmarkMode) {
+            if ($MiningIsProfitable) {Write-Host "Mining is currently profitable using the algorithms listed above. According to pool pricing information currently mining $($ProfitSummary)"}
+            elseif (-not $DisplayProfitOnly) {Write-Log -Level Warn -Message "Mining is currently NOT profitable - mining stopped! According to pool pricing information currently mining $($ProfitSummary)"}
+        }
         Write-Host "(Profitability limit: $($MinProfit.ToString("N2")) $($Currency[0].ToUpper())/day; Power cost $($PowerPricePerKW.ToString("N2")) $($Currency[0].ToUpper())/kW; 1 BTC = $($Rates.$($Currency[0]).ToString("N2")) $($Currency[0].ToUpper())). "
     }
     
     if ($BenchmarkMode -and -not $DisplayProfitOnly) {Write-Host  -BackgroundColor Yellow -ForegroundColor Black "Benchmarking - do not execute GPU intense applications until benchmarking is complete!"}
-
     if (-not $BenchmarkMode -and $DisplayProfitOnly) {Write-Host  -BackgroundColor Yellow -ForegroundColor Black "DisplayProfitOnly - will not run any miners!"}
+
     # End UselessGuru: Profit summary
 
     # Begin UselessGuru: Display active miners list
@@ -744,16 +748,13 @@ while ($true) {
         if ($CrashedMiners) {
             $CrashedMiners | Where-Object { $_.Status -ne "Reported" } | ForEach-Object {
                 Write-Log -Level Error "$($_.Type) Miner '$($_.Name)' ($($_.Algorithm -join '|')) [GPU Devices: $($_.Index)] crashed: '$(Split-Path $_.Path -leaf) $($_.Arguments)'"
+                if ($BeepOnError) {[console]::beep(2000,500)}
                 $_.Status = "Reported"
                 $TimeStamp = Get-Date -format u
-                "$($Timestamp): $(Split-Path $_.Path -leaf) $($_.Arguments)" | Out-File "CrashedMiners.txt" -Append
                 if ($CrashedMiners.Count -eq ($ActiveMiners | Where-Object Best -EQ $true)) {break}
             }
-            $CrashedMinersWatchdog++
-            if ($BeepOnError) {[console]::beep(2000,500)}
             if (-not $Benchmarkmode) {break}
         }
-        else {$CrashedMinersWatchdog = 0}
     }
 
     #Save current hash rates
