@@ -30,7 +30,7 @@ $MatchingMiner = $Miners | Where-Object {$_.Name -eq $ActiveMiner.Name -and $_.P
 })
 
 try{
-    Invoke-RestMethod -Uri "https://miningpoolhubstats.com/api/worker/$MPHApiKey" -TimeoutSec 10 -ErrorAction Stop -Method Post -Body @{workername = $WorkerName; miners = $minerreport; profit = $profit}
+    Invoke-RestMethod -Uri "https://miningpoolhubstats.com/api/worker/$MPHApiKey" -TimeoutSec 10 -Method Post -Body @{workername = $WorkerName; miners = $minerreport; profit = $profit}
 } catch {
     Write-Warning "Unable to post to monitoring URL..."
 }
