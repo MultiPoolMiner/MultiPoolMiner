@@ -33,7 +33,7 @@ function Update-Stats {
     $Miner.Algorithm | Where-Object {$Miner_HashRate.$_} | ForEach-Object {
         $Miner_HashRates += "$($Miner_HashRate.$_ | ConvertTo-Hash)/s | "
     }
-    $MinerInfo = "$($Miner.Type) miner '$($Miner.Name)' [GPU Devices: $($Miner.Index)]' ($($Miner.Algorithm -join '|')) [API: $($Miner.API), Port: $($Miner.Port)]"
+    $MinerInfo = "$($Miner.Type) miner '$($Miner.Name)' ($($Miner.Algorithm -join '|')) [GPU Devices: $($Miner.Index); API: $($Miner.API); Port: $($Miner.Port)]"
     Write-Log -Message "Saving stats for $($MinerInfo): [ $Miner_HashRates$($Miner_PowerDraw.ToString("N2")) W | $($Miner_ComputeUsage.ToString("N2"))% ]... "
 
     $Miner.Algorithm | Where-Object {$Miner_HashRate.$_} | ForEach-Object {
