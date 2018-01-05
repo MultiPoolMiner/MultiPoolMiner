@@ -3,7 +3,7 @@ Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defe
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
-Add-Type -Path .\OpenCL\*.cs
+Add-Type -Path .\OpenCLLinux\*.cs
 
 function Set-Stat {
     [CmdletBinding()]
