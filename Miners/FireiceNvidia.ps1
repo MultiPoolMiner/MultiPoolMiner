@@ -53,21 +53,21 @@ if ($Pools.Cryptonight.Name) {
             http_pass       = ""
             prefer_ipv4     = $true
             } | ConvertTo-Json -Depth 10
-        ) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path)\$($Name)_$($Pools.CryptoNight.Name)_CryptoNight.txt" -Force -ErrorAction SilentlyContinue
+        ) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path)\$($Name)_CryptoNight.txt" -Force -ErrorAction SilentlyContinue
 
         [PSCustomObject]@{
             Name         = $Name
             Type         = $_.Type
             Device       = $_.Device
             Path         = $Path
-            Arguments    = "-c $($Name)_$($Pools.CryptoNight.Name)_CryptoNight.txt --noAMD --noCPU --noUAC $HWConfigFile"
+            Arguments    = "-c $($Name)_CryptoNight.txt --noAMD --noCPU --noUAC $HWConfigFile"
             HashRates    = [PSCustomObject]@{"CryptoNight" = $Stats."$($Name)_CryptoNight_HashRate".Week}
             API          = "XMRig"
             Port         = $Port
             Wrap         = $false
             URI          = $Uri
-            PowerDraw    = $Stats."$($Name)_CryptoNight_$($Pools.CryptoNight.Name)_PowerDraw".Week
-            ComputeUsage = $Stats."$($Name)_CryptoNight_$($Pools.CryptoNight.Name)_ComputeUsage".Week
+            PowerDraw    = $Stats."$($Name)_CryptoNight_PowerDraw".Week
+            ComputeUsage = $Stats."$($Name)_CryptoNight_ComputeUsage".Week
             Pool         = "$($Pools.CryptoNight.Name)"
             Index        = $Index
         }
