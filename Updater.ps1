@@ -9,7 +9,7 @@ $ProgressPreferenceBackup = $ProgressPreference
 $Name = "MultiPoolMiner"
 try {
     $ProgressPreference = "SilentlyContinue"
-    $Request = Invoke-RestMethod -Uri "https://api.github.com/repos/aaronsace/$Name/releases/latest" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $Request = Invoke-RestMethod -Uri "https://api.github.com/repos/multipoolminer/$Name/releases/latest" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
     $Version = ($Request.tag_name -replace '^v')
     $Uri = $Request.assets | Where-Object Name -EQ "$($Name)V$($Version).zip" | Select-Object -ExpandProperty browser_download_url
 
