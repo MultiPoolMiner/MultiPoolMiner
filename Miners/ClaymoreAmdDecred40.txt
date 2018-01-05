@@ -1,0 +1,19 @@
+[
+    {
+        "Type":  "AMD",
+        "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "Arguments":  "-r -1 -mport 13333 -epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -allcoins 1 -dpool $($Pools.Decred.Host):$($Pools.Decred.Port) -dwal $($Pools.Decred.User) -dpsw $($Pools.Decred.Pass) -dcoin dcr -dcri 40 -platform 1",
+        "HashRates":  {"Ethash":  "$($Stats.ClaymoreAmdDecred40_Ethash_HashRate.Week)","Decred":  "$($Stats.ClaymoreAmdDecred40_Decred_HashRate.Week)"},
+        "API":  "Claymore",
+        "Port":  "13333"
+    },
+    {
+        "Type":  "AMD",
+        "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "Arguments":  "-r -1 -mport 13333 -epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -allcoins 1 -dpool $($Pools.DecredNiceHash.Host):$($Pools.DecredNiceHash.Port) -dwal $($Pools.DecredNiceHash.User) -dpsw $($Pools.DecredNiceHash.Pass) -dcoin dcr -dcri 40 -platform 1",
+        "HashRates":  {"Ethash":  "$($Stats.ClaymoreAmdDecred40_Ethash_HashRate.Week)","DecredNiceHash":  "$($Stats.ClaymoreAmdDecred40_DecredNiceHash_HashRate.Week)"},
+        "API":  "Claymore",
+        "Port":  "13333"
+    }
+]
+

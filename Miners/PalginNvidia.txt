@@ -1,0 +1,20 @@
+[
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\HSR-Palgin\\hsrminer_hsr.exe",
+        "Arguments":  "-o $($Pools.HSR.Protocol)://$($Pools.Hsr.Host):$($Pools.Hsr.Port) -u $($Pools.Hsr.User) -p $($Pools.Hsr.Pass)",
+        "HashRates":  {"HSR":  "$($Stats.PalginNvidia_Hsr_HashRate.Week)"},
+        "API":  "Wrapper",
+        "Port":  "23333",
+        "URI":  "https://github.com/palginpav/hsrminer/raw/master/HSR%20algo/Windows/hsrminer_hsr.exe"
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\NeoScrypt-Palgin\\hsrminer_neoscrypt.exe",
+        "Arguments":  "-o $($Pools.NeoScrypt.Protocol)://$($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -u $($Pools.NeoScrypt.User) -p $($Pools.NeoScrypt.Pass)",
+        "HashRates":  {"NeoScrypt":  "$($Stats.PalginNvidia_Neoscrypt_HashRate.Week)"},
+        "API":  "Wrapper",
+        "Port":  "23333",
+        "URI":  "https://github.com/palginpav/hsrminer/raw/master/Neoscrypt%20algo/Windows/hsrminer_neoscrypt.exe"
+    }
+]

@@ -1,0 +1,21 @@
+[
+    {
+        "Type":  ["AMD","NVIDIA"],
+        "Path":  ".\\Bin\\Ethash-Eminer\\eminer.exe",
+        "Arguments":  "-S $($Pools.CryptoNight.Protocol)://$($Pools.Ethash.Host):$($Pools.Ethash.Port) -U $($Pools.Ethash.User) -P $($Pools.Ethash.Pass) -no-devfee -intensity 64",
+        "HashRates":  {"Ethash":  "$($Stats.Eminer_Ethash_HashRate.Week)"},
+        "API":  "Eminer",
+        "Port":  "8550",
+        "URI":  "https://github.com/ethash/eminer-release/releases/download/v0.6.1-rc2/eminer.v0.6.1-rc2.win64.zip"
+    },
+    {
+        "Type":  ["AMD","NVIDIA"],
+        "Path":  ".\\Bin\\Ethash-Eminer\\eminer.exe",
+        "Arguments":  "-S $($Pools.CryptoNight.Protocol)://$($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -U $($Pools.Ethash2gb.User) -P $($Pools.Ethash2gb.Pass) -no-devfee -intensity 64",
+        "HashRates":  {"Ethash2gb":  "$($Stats.Eminer_Ethash2gb_HashRate.Week)"},
+        "API":  "Eminer",
+        "Port":  "8550",
+        "URI":  "https://github.com/ethash/eminer-release/releases/download/v0.6.1-rc2/eminer.v0.6.1-rc2.win64.zip"
+    }
+]
+
