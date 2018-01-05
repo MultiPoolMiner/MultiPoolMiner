@@ -5,19 +5,22 @@ $ThreadIndex = 0
 $Path = ".\Bin\CryptoNight-FireIce\xmr-stak.exe"
 $Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/v2.2.0/xmr-stak-win64.zip"
 
-$Port = 4001 + 40 * $ItemCounter
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Type = "NVIDIA"
 
 #New-Item -Path "HKCU:\Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers" -Force | New-ItemProperty -Name ([System.IO.Path]::GetFullPath($Path)) -Value "RunAsInvoker" -Force #temp fix
 
 if ($Pools.Cryptonight.Name) {
+
+    $Port = 4001 + 40 * $ItemCounter
+
     $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
     $Devices | ForEach-Object {
 
         if ($Devices.count -gt 1 ){
             $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($_.Device_Norm)"
             $HWConfigFile = " --$($_.Type.ToLower()) $($_.Device_Norm).txt"
+            $Index = $_.Devices -join ","
         }
 
         while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)) {$Port++}
@@ -66,6 +69,7 @@ if ($Pools.Cryptonight.Name) {
             PowerDraw    = $Stats."$($Name)_CryptoNight_$($Pools.CryptoNight.Name)_PowerDraw".Week
             ComputeUsage = $Stats."$($Name)_CryptoNight_$($Pools.CryptoNight.Name)_ComputeUsage".Week
             Pool         = "$($Pools.CryptoNight.Name)"
+            Index        = $Index
         }
         if ($Port) {$Port ++}
     }
