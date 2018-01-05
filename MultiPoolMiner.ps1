@@ -42,7 +42,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$Watchdog = $false,
     [Parameter(Mandatory = $false)]
-    [String]$MinerStatusURL,
+    [String]$MPHApiKey,
     [Parameter(Mandatory = $false)]
     [Int]$SwitchingPrevention = 1 #zero does not prevent miners switching
 )
@@ -89,8 +89,8 @@ $Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Locati
 #Set donation parameters
 if ($Donate -lt 10) {$Donate = 10}
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
-$WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHhGkCuNrFt6v9")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
-$UserNameDonate = @("aaronsace", "fonyo")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
+$WalletDonate = @("3DJtEaAAxt6eMkkoJYdBVvatKGTL329UJj","1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHhGkCuNrFt6v9")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
+$UserNameDonate = @("jimok82","aaronsace", "fonyo")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
 $WorkerNameDonate = "multipoolminer"
 $WalletBackup = $Wallet
 $UserNameBackup = $UserName
@@ -479,10 +479,14 @@ while ($true) {
         }
     }
 
-    if ($MinerStatusURL) {& .\ReportStatus.ps1 -Address $WalletBackup -WorkerName $WorkerNameBackup -ActiveMiners $ActiveMiners -Miners $Miners -MinerStatusURL $MinerStatusURL}
+    Clear-Host
+
+    #POST data to stats
+    if($MPHApiKey) {
+        .\ReportStatus.ps1 -WorkerName $WorkerNameBackup -ActiveMiners $ActiveMiners -Miners $Miners -MPHApiKey $MPHApiKey
+    }
 
     #Display mining information
-    Clear-Host
     $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object -Descending Type, Profit_Bias | Format-Table -GroupBy Type (
         @{Label = "Miner"; Expression = {$_.Name}}, 
         @{Label = "Algorithm"; Expression = {$_.HashRates.PSObject.Properties.Name}}, 
