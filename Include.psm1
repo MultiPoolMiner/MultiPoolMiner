@@ -9,12 +9,10 @@ Function Write-Log {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
-        [Parameter(Mandatory=$false)][ValidateSet("Error","Warn","Info","Debug")][string]$Level = "Info"
+        [Parameter(Mandatory=$false)][ValidateSet("Error","Warn","Info","Verbose","Debug")][string]$Level = "Info"
     )
 
-    Begin {
-        $VerbosePreference = 'Continue'
-    }
+    Begin { }
     Process {
         $filename = ".\Logs\MultiPoolMiner-$(Get-Date -Format "yyyy-MM-dd").txt"
         $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
@@ -24,19 +22,31 @@ Function Write-Log {
         switch($Level) {
             'Error' {
                 $LevelText = 'ERROR:'
-                Write-Host -ForegroundColor Red -Object "$date $LevelText $Message"
+                if($ErrorActionPreference -ne 'SilentlyContinue') {
+                    Write-Host -ForegroundColor Red -Object "$date $LevelText $Message"
+                }
             }
             'Warn' {
                 $LevelText = 'WARNING:'
-                Write-Host -ForegroundColor Yellow -Object "$date $LevelText $Message"
+                if($WarningPreference -ne 'SilentlyContinue') {
+                    Write-Host -ForegroundColor Yellow -Object "$date $LevelText $Message"
+                }
             }
             'Info' {
                 $LevelText = 'INFO:'
                 Write-Host -ForegroundColor DarkCyan -Object "$date $LevelText $Message"
             }
+            'Verbose' {
+                $LevelText = 'VERBOSE:'
+                if($VerbosePreference -ne 'SilentlyContinue') {
+                    Write-Host -ForegroundColor Cyan -Object "$date $LevelText $Message"
+                }
+            }
             'Debug' {
                 $LevelText = 'DEBUG:'
-                Write-Host -ForegroundColor Gray -Object "$date $LevelText $Message"
+                if($DebugPreference -ne 'SilentlyContinue') {
+                    Write-Host -ForegroundColor Gray -Object "$date $LevelText $Message"
+                }
             }
         }
         "$date $LevelText $Message" | Out-File -FilePath $filename -Append
