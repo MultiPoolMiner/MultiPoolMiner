@@ -50,11 +50,11 @@ function Update-Stats {
     $Miner.New = $false
     # Update power stats
     if ($Miner_PowerDraw -gt 0) {
-        $Stat = Set-Stat -Name "$($Miner.Name)_$($_.Algorithm -join '')_PowerDraw" -Value $Miner_PowerDraw -Duration $StatSpan -FaultDetection $false
+        $Stat = Set-Stat -Name "$($Miner.Name)_$($Miner.Algorithm -join '')_PowerDraw" -Value $Miner_PowerDraw -Duration $StatSpan -FaultDetection $false
     }
     # Update ComputeUsage stats
     if ($Miner_ComputeUsage -gt 0) {
-        $Stat = Set-Stat -Name "$($Miner.Name)_$($_.Algorithm -join '')_ComputeUsage" -Value $Miner_ComputeUsage -Duration $StatSpan -FaultDetection $false
+        $Stat = Set-Stat -Name "$($Miner.Name)_$($Miner.Algorithm -join '')_ComputeUsage" -Value $Miner_ComputeUsage -Duration $StatSpan -FaultDetection $false
     }
 }
 
