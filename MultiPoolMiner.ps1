@@ -797,10 +797,11 @@ while ($true) {
         }
         $Timer = (Get-Date).ToUniversalTime()
         if ($CrashedMiners) {
-            $CrashedMiners | ForEach-Object {
+            $CrashedMiners | Where-Object { $_.Status -ne "Crashed" } | ForEach-Object {
                 Write-Log -Level Error "$($_.Type) Miner '$($_.Name)' [GPU Devices: $($_.Index)] ($($_.Algorithm -join '|')) crashed: '$(Split-Path $_.Path -leaf) $($_.Arguments)'"
                 $TimeStamp = Get-Date -format u 
                 "$($Timestamp): $(Split-Path $_.Path -leaf) $($_.Arguments)" | Out-File "CrashedMiners.txt" -Append
+                $_.Status = "Failed"
             }
             $CrashedMinersWatchdog++
             if ($BeepOnError) {[console]::beep(2000,500)}
@@ -927,6 +928,17 @@ while ($true) {
         }
     }
     Write-Log -Message "Starting next run..." <# UselessGuru #>
+    if (Test-Path "Debug") {
+        $TimeStamp = (Get-Date).ticks
+        $Stats | Export-Clixml -Path "Debug\Stats-$($TimeStamp).xml"
+        $AllPools | Export-Clixml -Path "Debug\AllPools-$($TimeStamp).xml"
+        $Pools | Export-Clixml -Path "Debug\Pools-$($TimeStamp).xml"
+        $AllMiners | Export-Clixml -Path "Debug\AllMiners-$($TimeStamp).xml"
+        $Miners | Export-Clixml -Path "Debug\Miners-$($TimeStamp).xml"
+        $ActiveMiners | Export-Clixml -Path "Debug\ActiveMiners-$($TimeStamp).xml"
+        $WatchdogTimers | Export-Clixml -Path "Debug\WatchdogTimers-$($TimeStamp).xml"
+        $GPUs | Export-Clixml -Path "Debug\WatchdogTimers-$($TimeStamp).xml"
+    }
 }
 
 #Stop the log
