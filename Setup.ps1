@@ -5,6 +5,9 @@ Write-Host 'Preparing setup...'
 
 Add-Type -AssemblyName PresentationFramework
 
+# Make sure there is a log directory
+if (-not (Test-Path "Logs")) {New-Item "Logs" -ItemType "directory" | Out-Null}
+
 # Load defaults from Config.sample.ps1, and read the file into memory to be altered later
 If(Test-Path -Path '.\Config.sample.ps1') {
     . .\Config.Sample.ps1
