@@ -47,6 +47,7 @@ $Request.getuserallbalances.data | Foreach-Object {
      'pending' = $balance.unconfirmed + $balance.ae_confirmed + $balance.ae_unconfirmed + $balance.exchange
      'pendingalt' = $altcointotal
      'total' = $balance.confirmed + $balance.unconfirmed + $balance.ae_confirmed + $balance.ae_unconfirmed + $balance.exchange + $altcointotal
+     'lastupdated' = (Get-Date)
 }
 #[PSCustomObject]@{
 #    'currency' = 'BTC'

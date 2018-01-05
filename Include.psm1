@@ -134,13 +134,13 @@ function Get-Balances {
         $balances | Where-Object {
             if($_.Content.currency -eq 'BTC') {
                 ForEach($Rate in ($Rates.PSObject.Properties)) {
-                    $_ | Add-Member "Total_$($Rate.Name)" ([Double]$Rate.Value * $_.Content.total)
+                    $_.Content | Add-Member "Total_$($Rate.Name)" ([Double]$Rate.Value * $_.Content.total)
                 }
             } else {
                 # Try to get exchange rate to BTC
                 $btcvalue = Get-BTCValue -altcoin $_.Content.currency -amount $_.Content.total
                 ForEach($Rate in ($Rates.PSObject.Properties)) {
-                    $_ | Add-Member "Total_$($Rate.Name)" ([Double]$Rate.Value * $btcvalue)
+                    $_.Content | Add-Member "Total_$($Rate.Name)" ([Double]$Rate.Value * $btcvalue)
                 }
             }
         }
@@ -447,12 +447,17 @@ function Start-SubProcess {
         $lpProcessInformation = New-Object PROCESS_INFORMATION
 
         [Kernel32]::CreateProcess($lpApplicationName, $lpCommandLine, [ref] $lpProcessAttributes, [ref] $lpThreadAttributes, $bInheritHandles, $dwCreationFlags, $lpEnvironment, $lpCurrentDirectory, [ref] $lpStartupInfo, [ref] $lpProcessInformation)
- 
+        if($lpProcessInformation.dwProcessId -eq 0) {
+            Write-Error "Failed to launch process $FilePath $ArgumentList"
+            [PSCustomObject]@{ProcessId = $null}
+            return
+        }
+
         $Process = Get-Process -Id $lpProcessInformation.dwProcessId
 
-        if ($Process -eq $null) {
-			Write-Log -Level Error "Did not get a process handle when starting miner"
-			Write-Log -Level Error "Trying to find process " $lpProcessInformation.dwProcessId
+        if ($Process -eq $null -or $Process -eq 0) {
+			Write-Error "Did not get a process handle when starting miner"
+			Write-Error "Trying to find process " $lpProcessInformation.dwProcessId
             [PSCustomObject]@{ProcessId = $null}
             return        
         }

@@ -581,13 +581,6 @@ while ($true) {
 
     ) | Out-Host
 
-    # Print Balances
-    $Balances = Get-Balances -Wallet $WalletBackup -API_Key $API_Key -Rates $Rates
-    $Balances | ft *
-    $Rates.PsObject.Properties.Name | Foreach-Object {
-        Write-Host -ForegroundColor Green "Total $_ :" ($Balances | Measure-Object -sum "Total_$_").sum
-    }
-
 	# Export data to files - this can be used by an external process to get status information
 	$ActiveMiners | Export-Clixml -Path 'Data\ActiveMiners.xml'
 	$Miners | Export-Clixml -Path 'Data\Miners.xml'

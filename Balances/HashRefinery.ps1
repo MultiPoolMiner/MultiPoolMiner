@@ -27,4 +27,5 @@ if (($Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measur
   "balance" = $Request.balance
   "pending" = $Request.unsold
   "total" = $Request.unpaid
+  'lastupdated' = (Get-Date)
 }
