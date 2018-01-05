@@ -4,7 +4,7 @@ $Path = ".\Bin\Lyra2z-NVIDIA\ccminer.exe"
 $Uri = "https://github.com/djm34/ccminer-msvc2015/releases/download/v0.3.0/ccminer.rar"
 
 # Custom command to be applied to all algorithms
-$CommonCommands = " --submit-stale"
+$CommonCommands = ""
 
 $Commands = [PSCustomObject]@{
     "lyra2h" = "" #Lyra2h
