@@ -86,7 +86,7 @@ $MinerWindowStyle = "Minimized"
 $UseNewMinerLauncher = $False
 
 # If $True MPM (UselessGuru Edition) will parallelize the hash rate readout from miners. This will speed up overall loop time, e.g. benchmarking.
-$UseJobsForGetData = $True
+$UseJobsForGetData = $False
 
 # Minimal required profit, if less it will not mine. The configured value must be in the first currency as defined in $currency (see config item above).
 $MinProfit = 0
@@ -125,3 +125,8 @@ $CPU_PowerDraw = 80
 
 # Power consumption (in Watts) of all GPUs in computer when mining (in $currency[0]), put a rough estimate here.
 $GPU_PowerDraw = 500
+
+# If $True MPM will force re-bechmarking all algorithms for which there is no power data available (e.g. after having delete the power stats). 
+# If $False MPM cannot properly calculate profit until power data has been retrieved, projected profit will be too high. This will push theses algorithms higher in the profitability list and will eventually re-benchmark.
+$ForceBenchmarkOnMissingPowerData = $True
+
