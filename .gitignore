@@ -3,6 +3,8 @@ Stats/
 Logs/
 Wrapper/
 Downloads/
+Miners/
+OpenCL/
 *.zip
 *.7z
 *.rar

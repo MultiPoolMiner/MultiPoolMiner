@@ -1,7 +1,7 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.18/ccminer-818-cuda91-x64.zip"
+$Path = ".\Bin\NVIDIA-KlausT\ccminer"
+$Uri = "https://github.com/KlausT/ccminer/archive/8.18.tar.gz"
 
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore
