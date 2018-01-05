@@ -625,4 +625,34 @@ class Miner {
     $Activated
     $Status
     $Benchmarked
+
+    StartMining() {
+        $this.New = $true
+        $this.Activated++
+        if ($this.Process -ne $null) {$this.Active += $this.Process.ExitTime - $this.Process.StartTime}
+        $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($this -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
+        if ($this.Process -eq $null) {
+            $this.Status = "Failed"
+            Write-Log -Level Warning "$($this.Type) miner $($this.Name) failed to start."
+        } else {
+            $this.Status = "Running"
+            Write-Log "$($this.Type) miner $($this.Name) started with PID $($this.Process.Id)"
+        }
+    }
+
+    StopMining() {
+        $this.Process.CloseMainWindow() | Out-Null
+        # Wait up to 10 seconds for the miner to close gracefully
+        $closedgracefully = $this.Process.WaitForExit(10000)
+        if($closedgracefully) { 
+            Write-Log "$($this.Type) miner $($this.Name) closed gracefully" 
+        } else {
+            Write-Log -Level Error "$($this.Type) miner $($this.Name) failed to close within 10 seconds"
+            if(!$this.Process.HasExited) {
+                Write-Log -Level Error "Attempting to kill $($this.Type) miner $($this.Name) PID $($this.Process.Id)"
+                $this.Process.Kill()
+            }
+        }
+        $this.Status = "Idle"
+    }
 }

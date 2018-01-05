@@ -17,7 +17,6 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Ccminer"
         Port = 4068
-        Wrap = $false
         URI = $Uri
     }
 }

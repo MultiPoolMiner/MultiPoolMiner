@@ -1,9 +1,10 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\Lyra2z-NVIDIA\ccminer_cuda9.exe"
-$Uri = "https://github.com/djm34/ccminer-msvc2015/releases/download/v0.2.1/ccminer_cuda9.exe"
+$Path = ".\Bin\Lyra2z-NVIDIA\ccminer.exe"
+$Uri = "https://github.com/djm34/ccminer-msvc2015/releases/download/v0.3.0/ccminer.rar"
 
 $Commands = [PSCustomObject]@{
+    "lyra2h" = "" #Lyra2h
     "lyra2z" = "" #Lyra2z
 }
 
@@ -17,7 +18,6 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Ccminer"
         Port = 4068
-        Wrap = $false
         URI = $Uri
     }
 }

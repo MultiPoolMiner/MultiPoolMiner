@@ -6,7 +6,6 @@
         "HashRates":  {"NeoScrypt":  "$($Stats.NsgminerNvidia_NeoScrypt_HashRate.Week)"},
         "API":  "Xgminer",
         "Port":  "24028",
-        "Wrap":  false,
         "URI":  "https://github.com/ghostlander/nsgminer/releases/download/nsgminer-v0.9.4/nsgminer-win64-0.9.4.zip"
     }
 ]

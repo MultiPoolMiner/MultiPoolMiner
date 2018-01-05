@@ -6,7 +6,6 @@
         "HashRates":  {"HSR":  "$($Stats.PalginNvidia_Hsr_HashRate.Week)"},
         "API":  "Wrapper",
         "Port":  "23333",
-        "Wrap":  true,
         "URI":  "https://github.com/palginpav/hsrminer/raw/master/HSR%20algo/Windows/hsrminer_hsr.exe"
     },
     {
@@ -16,8 +15,6 @@
         "HashRates":  {"NeoScrypt":  "$($Stats.PalginNvidia_Neoscrypt_HashRate.Week)"},
         "API":  "Wrapper",
         "Port":  "23333",
-        "Wrap":  true,
         "URI":  "https://github.com/palginpav/hsrminer/raw/master/Neoscrypt%20algo/Windows/hsrminer_neoscrypt.exe"
     }
 ]
-

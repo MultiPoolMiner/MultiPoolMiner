@@ -251,7 +251,7 @@ while ($true) {
     if (Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) {
         if ((Get-Command "Get-MpComputerStatus" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue)) {
             if (Get-Command "Get-NetFirewallRule" -ErrorAction SilentlyContinue) {
-                if ($MinerFirewalls -eq $null) {$MinerFirewalls = Get-NetFirewallRule | Where-Object DisplayName -EQ "MultiPoolMiner" | Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program}
+                if ($MinerFirewalls -eq $null) {$MinerFirewalls = Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program}
                 if (@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ "=>") {
                     Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) ("-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1'; ('$(@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ '=>' | Select-Object -ExpandProperty InputObject | ConvertTo-Json -Compress)' | ConvertFrom-Json) | ForEach {New-NetFirewallRule -DisplayName 'MultiPoolMiner' -Program `$_}" -replace '"', '\"') -Verb runAs
                     $MinerFirewalls = $null
@@ -426,21 +426,8 @@ while ($true) {
             }
         }
         else {
-			Write-Log "Closing $($Miner.Type) miner $($Miner.Name) because it is no longer the most profitable"
-            $Miner.Process.CloseMainWindow() | Out-Null
-            # Wait up to 10 seconds for the miner to close gracefully
-            $closedgracefully = $Miner.Process.WaitForExit(10000)
-            if($closedgracefully) { 
-                Write-Log "$($Miner.Type) miner $($Miner.Name) closed gracefully" 
-            } else {
-                Write-Log -Level Error "$($Miner.Type) miner $($Miner.Name) failed to close within 10 seconds"
-                if(!$Miner.Process.HasExited) {
-                    Write-Log -Level Error "Attempting to kill $($Miner.Type) miner $($Miner.Name) PID $($Miner.Process.Id)"
-                    $Miner.Process.Kill()
-                }
-            }
-
-            $Miner.Status = "Idle"
+            Write-Log "Closing $($Miner.Type) miner $($Miner.Name) because it is no longer the most profitable"
+            $Miner.StopMining()
 
             #Remove watchdog timer
             $Miner_Name = $Miner.Name
@@ -483,15 +470,7 @@ while ($true) {
         if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
 			Write-Log "Starting $($_.Type) miner $($_.Name) $($_.Arguments)"
             $DecayStart = $Timer
-            $_.New = $true
-            $_.Activated++
-            if ($_.Process -ne $null) {$_.Active += $_.Process.ExitTime - $_.Process.StartTime}
-            if ($_.Wrap) {$_.Process = Start-Process -FilePath (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) -ArgumentList "-executionpolicy bypass -command . '$(Convert-Path ".\Wrapper.ps1")' -ControllerProcessID $PID -Id '$($_.Port)' -FilePath '$($_.Path)' -ArgumentList '$($_.Arguments)' -WorkingDirectory '$(Split-Path $_.Path)'" -PassThru
-            }
-            else {$_.Process = Start-SubProcess -FilePath $_.Path -ArgumentList $_.Arguments -WorkingDirectory (Split-Path $_.Path) -Priority ($_.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)}
-            if ($_.Process -eq $null) {$_.Status = "Failed"}
-            else {$_.Status = "Running"}
-			Write-Log "Started $($_.Type) miner $($_.Name) with PID $($_.Process.Id)"
+            $_.StartMining()
 
             #Add watchdog timer
             if ($Watchdog -and $_.Profit -ne $null) {

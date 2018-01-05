@@ -48,7 +48,6 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Wrapper"
         Port = 4068
-        Wrap = $true
         URI = $Uri
     }
 }
