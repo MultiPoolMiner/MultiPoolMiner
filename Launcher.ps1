@@ -1,3 +1,5 @@
+[CmdletBinding()]Param()
+
 # GUI Launcher for MultiPoolMiner
 
 #syncHash is the only variable that is accessible by all threads.
@@ -17,7 +19,7 @@ $guiCmd = [PowerShell]::Create().AddScript({
     # Can't figure out how to use 'using module' in a script like this - complains that it has to be the first statement in the script.
     # But that's ok - using Import-Module gets everything except the Miner class, which isn't needed here.
     Import-Module .\Include.psm1
-    [void][System.Reflection.Assembly]::LoadWithPartialName('presentationframework')
+    Add-Type -AssemblyName PresentationFramework, System.Drawing, System.Windows.Forms, WindowsFormsIntegration
 
     # Load settings
     If(Test-Path -Path '.\launchersettings.json') {
@@ -100,7 +102,11 @@ $guiCmd = [PowerShell]::Create().AddScript({
     $syncHash.MultiPoolMinerProcess = $null
 
     # Setup functions for buttons
-    # TODO FIXME: actually start the script
+    
+    $syncHash.Window.Add_Closing({
+        [System.Windows.Forms.Application]::Exit()
+    })
+
     $syncHash.StartStop.add_Click({
         if($syncHash.Running) {
             $syncHash.Running = $false
@@ -414,8 +420,11 @@ namespace PInvoke.Win32 {
     #endregion Create mining list updating thread
 
     # Open window
-    $null = $syncHash.Window.ShowDialog()
-    $syncHash.Error = $Error
+    [System.Windows.Forms.Integration.ElementHost]::EnableModelessKeyboardInterop($synchash.Window)
+    $syncHash.Window.Show()
+    $syncHash.Window.Activate()
+    $appContext = New-Object System.Windows.Forms.ApplicationContext
+    [void][System.Windows.Forms.Application]::Run($appContext)
 })
 
 # GUIRunning flag makes sure all threads exit after GUI closes
@@ -423,11 +432,21 @@ $syncHash.GUIRunning = $true
 
 $guiCmd.Runspace = $newRunspace
 $ui = $guiCmd.BeginInvoke()
+
 Write-Host "MultiPoolMiner GUI.  If you close this, the GUI will exit as well."
 
-#While(!$ui.IsCompleted) {
-#    Start-Sleep 1
-#}
-$host.EnterNestedPrompt()
+If($DebugPreference -ne 'SilentlyContinue') {
+    # If using -debug, give a prompt that can access $synchash for debugging.
+    $host.EnterNestedPrompt()
+} else {
+
+    # Hide the powershell window and wait
+    $windowcode = '[DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);' 
+    $asyncwindow = Add-Type -MemberDefinition $windowcode -name Win32ShowWindowAsync -namespace Win32Functions -PassThru 
+    $null = $asyncwindow::ShowWindowAsync((Get-Process -PID $pid).MainWindowHandle, 0) 
+    While(!$ui.IsCompleted) {
+        Start-Sleep 1
+    }
+}
 
 $synchash.GUIRunning = $false
