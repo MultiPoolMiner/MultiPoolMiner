@@ -2,15 +2,15 @@
 
 $ThreadIndex = 0
 
-$Path = ".\Bin\NVIDIA-XMRig$ThreadIndex\xmrig.exe"
-$Uri = "https://github.com/xmrig/xmrig/releases/download/v2.4.3/xmrig-2.4.3-gcc-win64.zip"
+$Path = ".\Bin\NVIDIA-XMRig$ThreadIndex\xmrig-nvidia.exe"
+$Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.4.2/xmrig-nvidia-2.4.2-cuda9-win64.zip"
 
 # Custom command to be applied to all algorithms
 $CommonCommands = " --keepalive --donate-level=1"
 
 # Uncomment outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    "cryptonight"       = ""
+    "cryptonight"       = " --cuda-bfactor=10,8,6 --cuda-launch=64x72,53x64,16x77"
     "cryptonight-light" = ""
 }
 
