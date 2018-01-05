@@ -325,7 +325,7 @@ function Expand-WebRequest {
         $Path_New = (Join-Path (Split-Path $Path) (Split-Path $Path -Leaf))
 
         if (Test-Path $Path_Old) {Remove-Item $Path_Old -Recurse}
-        Start-Process "7z" "x `"$([IO.Path]::GetFullPath($FileName))`" -o`"$([IO.Path]::GetFullPath($Path_Old))`" -y -spe" -Wait
+        Start-Process "tar" "xzvf `"$([IO.Path]::GetFullPath($FileName))`" -C `"$([IO.Path]::GetFullPath($Path_Old))`"" -Wait
 
         if (Test-Path $Path_New) {Remove-Item $Path_New -Recurse}
         if (Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $false) {
