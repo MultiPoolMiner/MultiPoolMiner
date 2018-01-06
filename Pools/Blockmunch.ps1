@@ -20,7 +20,7 @@ if (($Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Igno
 $Blockmunch_Regions = "us"
 
 $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
-    $Blockmunch_Host = "mine.blockmunch.club"
+    $Blockmunch_Host = "blockmunch.club"
     $Blockmunch_Port = $Blockmunch_Request.$_.port
     $Blockmunch_Algorithm = $Blockmunch_Request.$_.name
     $Blockmunch_Algorithm_Norm = Get-Algorithm $Blockmunch_Algorithm
@@ -55,7 +55,7 @@ $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = "$Blockmunch_Algorithm.$Blockmunch_Host"
+                Host          = $Blockmunch_Host
                 Port          = $Blockmunch_Port
                 User          = $Wallet
                 Pass          = "$WorkerName,c=BTC"
