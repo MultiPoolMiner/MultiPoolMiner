@@ -1,12 +1,12 @@
 ﻿using module ..\Include.psm1
 
-# Static values per pool, if set will override values from start.bat
-#$UserName = "UselessGuru"
-#$WorkerName = "Blackbox"
-#$Password = "x"
-#$PayoutCurrency = "BTC" # mining earnings will be autoconverted and paid out in this currency
-#$MinPoolWorkers = 10 * $BenchmarkMode# Minimum workers required to mine on coin, if less skip the coin
-$ProfitLessFee = $true
+# Static values per pool, if set will override values from Config.ps1
+# $UserName = "UselessGuru"
+# $WorkerName = "Blackbox"
+# $Password = "x"
+# $PayoutCurrency = "BTC" # mining earnings will be autoconverted and paid out in this currency
+# $MinPoolWorkers = 10 * $BenchmarkMode# Minimum workers required to mine on coin, if less skip the coin
+# $ProfitLessFee = $true# If $true reported profit will be less fees as sent by the pool
 # End static values per pool, if set will override values from start.bat
 
 # In case some algos are not working properly, comma separated list
@@ -43,7 +43,7 @@ if (($MiningPoolHub_Request.return | Measure-Object).Count -le 1) {
     return
 }
 
-$MiningPoolHub_Request.return | Where {$_.algo} | ForEach-Object {
+$MiningPoolHub_Request.return | Where {$_.algo} | Where-Object {$MiningPoolHub_Request.$_.hashrate -gt 0} | ForEach-Object {
 
     $MiningPoolHub_Algorithm = $_.algo
     
