@@ -1,5 +1,5 @@
 ﻿using module .\Include.psm1
-
+[CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
     [String]$Wallet, 
@@ -125,22 +125,28 @@ while ($true) {
 
     #Update the exchange rates
     try {
+        Write-Log "Updating exchange rates from Coinbase..."
         $NewRates = Invoke-RestMethod "https://api.coinbase.com/v2/exchange-rates?currency=BTC" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop | Select-Object -ExpandProperty data | Select-Object -ExpandProperty rates
         $Currency | Where-Object {$NewRates.$_} | ForEach-Object {$Rates | Add-Member $_ ([Double]$NewRates.$_) -Force}
     }
     catch {
-        Write-Warning "Coinbase is down. "
+        Write-Log -Level Warn "Coinbase is down. "
     }
 
     #Load the stats
+    Write-Log "Loading saved statistics..."
     $Stats = [PSCustomObject]@{}
     if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
 
     #Load information about the pools
+    Write-Log "Loading pool information..."
     $NewPools = @()
     if (Test-Path "Pools") {
         $NewPools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; UserName = $UserName; WorkerName = $WorkerName; StatSpan = $StatSpan} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
     }
+
+    # This finds any pools that were already in $AllPools (from a previous loop) but not in $NewPools. Add them back to the list. Their API likely didn't return in time, but we don't want to cut them off just yet
+    # since mining is probably still working.  Then it filters out any algorithms that aren't being used.
     $AllPools = @($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object {$AllPools | Where-Object Name -EQ $_}) | 
         Where-Object {$Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
         Where-Object {$ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $ExcludeAlgorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
@@ -157,15 +163,17 @@ while ($true) {
 
     #Update the active pools
     if ($AllPools.Count -eq 0) {
-        Write-Warning "No pools available. "
+        Write-Log -Level Warn "No pools available. "
         if ($Downloader) {$Downloader | Receive-Job}
         Start-Sleep $Interval
         continue
     }
     $Pools = [PSCustomObject]@{}
+
+    Write-Log "Selecting best pool for each algorithm..."
     $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Sort-Object -Descending {$PoolName.Count -eq 0 -or (Compare-Object $PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}, {$ExcludePoolName.Count -eq 0 -or (Compare-Object $ExcludePoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}, {$_.StablePrice * (1 - $_.MarginOfError)}, {$_.Region -EQ $Region}, {$_.SSL -EQ $SSL} | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
     if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_} | Measure-Object Updated -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalSeconds) -gt $Interval * $Strikes) {
-        Write-Warning "Pool prices are out of sync. "
+        Write-Log -Level Warn "Pool prices are out of sync. "
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.StablePrice * (1 - ($Pools.$_.MarginOfError * $SwitchingPrevention * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
     }
     else {
@@ -174,6 +182,10 @@ while ($true) {
 
     #Load information about the miners
     #Messy...?
+    Write-Log "Getting miner information..."
+    # Get all the miners, get just the .Content property and add the name, select only the ones that match our $Type (CPU, AMD, NVIDIA) or all of them if type is unset,
+    # select only the ones that have a HashRate matching our algorithms, and that only include algorithms we have pools for
+    # select only the miners that match $MinerName, if specified, and don't match $ExcludeMinerName
     $AllMiners = if (Test-Path "Miners") {
         Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru} | 
             Where-Object {$Type.Count -eq 0 -or (Compare-Object $Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
@@ -182,6 +194,7 @@ while ($true) {
             Where-Object {$MinerName.Count -eq 0 -or (Compare-Object $MinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
             Where-Object {$ExcludeMinerName.Count -eq 0 -or (Compare-Object $ExcludeMinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
     }
+    Write-Log "Calculating profit for each miner..."
     $AllMiners | ForEach-Object {
         $Miner = $_
 
@@ -283,7 +296,7 @@ while ($true) {
 
     #Update the active miners
     if ($Miners.Count -eq 0) {
-        Write-Warning "No miners available. "
+        Write-Log -Level Warn "No miners available. "
         if ($Downloader) {$Downloader | Receive-Job}
         Start-Sleep $Interval
         continue
@@ -429,9 +442,18 @@ while ($true) {
         $Miner = $_
 
         if ($Miner.Process -eq $null -or $Miner.Process.HasExited) {
-            if ($Miner.Status -eq "Running") {$Miner.Status = "Failed"}
+            if ($Miner.Status -eq "Running") {
+                $Miner.Status = "Failed"
+                if($Miner.Process -eq $null) {
+                    Write-Log -Level Warn "$($Miner.Type) miner $($Miner.Name) failed - process handle is missing"
+                }
+                if($Miner.Process.HasExited) {
+                    Write-Log -Level Warn "$($Miner.Type) miner $($Miner.Name) failed - process exited on it's own"
+                }
+            }
         }
         else {
+            Write-Log "Closing $($Miner.Type) miner $($Miner.Name) [PID $($_.Process.Id)] because it is no longer the most profitable"
             $Miner.StopMining()
 
             #Remove watchdog timer
@@ -454,6 +476,7 @@ while ($true) {
     Start-Sleep $Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
+            Write-Log "Starting $($_.Type) miner $($_.Name): '$($_.Path) $($_.Arguments)'"
             $DecayStart = $Timer
             $_.StartMining()
 
@@ -482,7 +505,6 @@ while ($true) {
     if ($MinerStatusURL) {& .\ReportStatus.ps1 -Address $WalletBackup -WorkerName $WorkerNameBackup -ActiveMiners $ActiveMiners -Miners $Miners -MinerStatusURL $MinerStatusURL}
 
     #Display mining information
-    Clear-Host
     $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object -Descending Type, Profit_Bias | Format-Table -GroupBy Type (
         @{Label = "Miner"; Expression = {$_.Name}}, 
         @{Label = "Algorithm"; Expression = {$_.HashRates.PSObject.Properties.Name}}, 
@@ -539,6 +561,7 @@ while ($true) {
     [GC]::Collect()
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
+    Write-Log "Waiting for $Interval seconds to start next run"
     for ($i = $Strikes; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
         Start-Sleep 10
@@ -546,6 +569,7 @@ while ($true) {
     }
 
     #Save current hash rates
+    Write-Log "Saving hash rates..."
     $ActiveMiners | ForEach-Object {
         $Miner = $_
         $Miner.Speed_Live = 0
@@ -581,6 +605,7 @@ while ($true) {
             }
         }
     }
+    Write-Log "Starting next run..."
 }
 
 #Stop the log

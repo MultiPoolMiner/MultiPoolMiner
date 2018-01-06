@@ -8,12 +8,12 @@ try {
     $NiceHash_Request = Invoke-RestMethod "http://api.nicehash.com/api?method=simplemultialgo.info" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
-    Write-Warning "Pool API ($Name) has failed. "
+    Write-Log -Level Warn "Pool API ($Name) has failed. "
     return
 }
 
 if (($NiceHash_Request.result.simplemultialgo | Measure-Object).Count -le 1) {
-    Write-Warning "Pool API ($Name) returned nothing. "
+    Write-Log -Level Warn "Pool API ($Name) returned nothing. "
     return
 }
 
