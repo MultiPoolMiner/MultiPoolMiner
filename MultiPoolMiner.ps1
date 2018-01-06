@@ -8,6 +8,10 @@ if(!(Test-Path -Path '.\Config.ps1')) {
 	. .\Config.ps1
 }
 
+# Make sure needed directories exist
+if (-not (Test-Path "Cache")) {New-Item "Cache" -ItemType "directory" | Out-Null}
+if (-not (Test-Path "Data")) {New-Item "Data" -ItemType "directory" | Out-Null}
+
 if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -Recurse | Unblock-File}
 if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue) -and (Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {
     Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) "-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1'; Add-MpPreference -ExclusionPath '$(Convert-Path .)'" -Verb runAs
@@ -456,6 +460,12 @@ while ($true) {
     }
 
     if($MinerStatusURL) { .\ReportStatus.ps1 -Address $WalletBackup -WorkerName $WorkerNameBackup -ActiveMiners $ActiveMiners -Miners $Miners -MinerStatusURL $MinerStatusURL }
+
+    # Export variables for GUI and debugging purposes
+    $ActiveMiners | Export-Clixml -Path 'Data\ActiveMiners.xml'
+    $Miners | Export-Clixml -Path 'Data\Miners.xml'
+    $Pools | Export-Clixml -Path 'Data\Pools.xml'
+    $AllPools | Export-Clixml -Path 'Data\AllPools.xml'
 
     #Display mining information
     Clear-Host
