@@ -1,0 +1,1 @@
+start powershell -version 5.0 -executionpolicy bypass -command "& .\launcher.ps1"
