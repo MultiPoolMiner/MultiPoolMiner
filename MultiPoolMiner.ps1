@@ -56,6 +56,7 @@ $UserNameBackup = $UserName
 $WorkerNameBackup = $WorkerName
 
 while ($true) {
+    Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
     if ((Get-ChildItem "Config.ps1").LastWriteTime.ToUniversalTime() -gt $Timer) {
         # File has changed since last loop; re-read config -  this allows for dynamic configration changes
         Write-Log "Configuration data has been modified - applying configuration from Config.ps1..."
@@ -69,7 +70,6 @@ while ($true) {
         $WalletBackup = $Wallet
         $UserNameBackup = $UserName
         $WorkerNameBackup = $WorkerName
-        Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
     }
 
     $Timer = (Get-Date).ToUniversalTime()
