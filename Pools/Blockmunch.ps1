@@ -48,14 +48,14 @@ if (($Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Igno
     return
 }
 
-$Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
+$Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Blockmunch_Request.$_.hashrate -gt 0} | ForEach-Object {
 
 	$Blockmunch_Algorithm = $_
 
 	# Do only for selected algorithms
 	if ($DisabledAlgorithms -inotcontains $Blockmunch_Algorithm -and ($Algorithm -eq $null -or $Algorithm.count -eq 0 -or $Algorithm -icontains $Blockmunch_Algorithm) -and $Blockmunch_Request.$_.workers -ge ($MinPoolWorkers * -not $BenchmarkMode)) {
 
-		$Blockmunch_Host = "mine.Blockmunch.club"
+		$Blockmunch_Host = "Blockmunch.club"
 		$Blockmunch_Port = $Blockmunch_Request.$_.port
 		$Blockmunch_Algorithm_Norm = Get-Algorithm $Blockmunch_Algorithm
         
@@ -88,8 +88,8 @@ $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
 				StablePrice     = $Stat.$($PriceTimeSpan)
 				MarginOfError   = $Stat.$("$($PriceTimeSpan)_Fluctuation")
 				Protocol        = "stratum+tcp"
-				Host            = "$Blockmunch_Algorithm.$Blockmunch_Host"
-				Hosts           = "$Blockmunch_Algorithm.$Blockmunch_Host"
+				Host            = $Blockmunch_Host
+				Hosts           = $Blockmunch_Host
 				Port            = $Blockmunch_Port
 				User            = $Wallet
 				Pass            = "ID=$WorkerName,c=$PayoutCurrency"
