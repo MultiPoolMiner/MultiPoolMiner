@@ -6,3 +6,6 @@ downloads/
 *.zip
 *.7z
 *.rar
+Config.ps1
+Data/
+Cache/
