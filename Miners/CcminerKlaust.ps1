@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.17/ccminer-817-cuda91-x64.zip"
+$Uri = "https://github.com/KlausT/ccminer/releases/download/8.18/ccminer-818-cuda91-x64.zip"
 
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore
@@ -48,7 +48,6 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Ccminer"
         Port = 4068
-        Wrap = $false
         URI = $Uri
     }
 }

@@ -1,0 +1,11 @@
+[
+    {
+        "Type":  "AMD",
+        "Path":  ".\\Bin\\Lyra2RE2-Mkxminer\\mkxminer.exe",
+        "Arguments":  "--exitsick -o $($Pools.Lyra2RE2.Protocol)://$($Pools.Lyra2RE2.Host):$($Pools.Lyra2RE2.Port) -u $($Pools.Lyra2RE2.User) -p $($Pools.Lyra2RE2.Pass) --intensity 23",
+        "HashRates":  {"Lyra2RE2":  "$($Stats.MkxminerAmd_Lyra2re2_HashRate.Week)"},
+        "API":  "Wrapper",
+        "Port":  "13333",
+        "URI":  "https://filebin.net/ewevfr4of65pvtda/mkxminer300.zip"
+    }
+]

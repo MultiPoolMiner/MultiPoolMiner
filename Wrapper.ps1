@@ -32,30 +32,36 @@ do {
     $Job | Receive-Job | ForEach-Object {
         $Line = $_
 
-        if (($Line -like "*total*" -or $Line -like "*accepted*") -and $Line -like "*/s*") {
+        if (($Line -like "*total*" -or $Line -like "*accepted*" -or $Line -like ">*") -and $Line -like "*/s*") {
             $Words = $Line -split " "
 
             $matches = $null
 
-            if ($Words[$Words.IndexOf(($Words -like "*/s*" | Select-Object -Last 1))] -match "^((?:\d*\.)?\d+)(.*)$") {
-                $HashRate = [Decimal]$matches[1]
-                $HashRate_Unit = $matches[2]
-            }
-            else {
-                $HashRate = [Decimal]$Words[$Words.IndexOf(($Words -like "*/s*" | Select-Object -Last 1)) - 1]
-                $HashRate_Unit = $Words[$Words.IndexOf(($Words -like "*/s*" | Select-Object -Last 1))]
-            }
+            $HashRates = @()
 
-            switch -wildcard ($HashRate_Unit) {
-                "kh/s*" {$HashRate *= [Math]::Pow(1000, 1)}
-                "mh/s*" {$HashRate *= [Math]::Pow(1000, 2)}
-                "gh/s*" {$HashRate *= [Math]::Pow(1000, 3)}
-                "th/s*" {$HashRate *= [Math]::Pow(1000, 4)}
-                "ph/s*" {$HashRate *= [Math]::Pow(1000, 5)}
+            $Words -like "*/s*" | ForEach-Object {
+                if ($Words[$Words.IndexOf($_)] -match "^((?:\d*\.)?\d+)(.*)$") {
+                    $HashRate = [Decimal]$matches[1]
+                    $HashRate_Unit = $matches[2]
+                }
+                else {
+                    $HashRate = [Decimal]$Words[$Words.IndexOf($_) - 1]
+                    $HashRate_Unit = $Words[$Words.IndexOf($_)]
+                }
+
+                switch -wildcard ($HashRate_Unit) {
+                    "kh/s*" {$HashRate *= [Math]::Pow(1000, 1)}
+                    "mh/s*" {$HashRate *= [Math]::Pow(1000, 2)}
+                    "gh/s*" {$HashRate *= [Math]::Pow(1000, 3)}
+                    "th/s*" {$HashRate *= [Math]::Pow(1000, 4)}
+                    "ph/s*" {$HashRate *= [Math]::Pow(1000, 5)}
+                }
+
+                $HashRates += $HashRate
             }
 
             if (-not (Test-Path "Wrapper")) {New-Item "Wrapper" -ItemType "directory" -Force | Out-Null}
-            $HashRate | ConvertTo-Json | Set-Content ".\Wrapper\$Id.txt" -Force -ErrorAction Ignore
+            if ($HashRates) {$HashRates | Measure-Object -Sum | Select-Object -ExpandProperty Sum | ConvertTo-Json | Set-Content ".\Wrapper\$Id.txt" -Force -ErrorAction Ignore}
         }
 
         if (($Line -replace "\x1B\[[0-?]*[ -/]*[@-~]", "")) {Write-Host ($Line -replace "`n|`r", "")}

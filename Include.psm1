@@ -5,6 +5,47 @@ Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
 
+Function Write-Log {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
+        [Parameter(Mandatory=$false)][ValidateSet("Error","Warn","Info","Verbose","Debug")][string]$Level = "Info"
+    )
+
+    Begin { }
+    Process {
+        $filename = ".\Logs\MultiPoolMiner-$(Get-Date -Format "yyyy-MM-dd").txt"
+        $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+        if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
+        
+        switch($Level) {
+            'Error' {
+                $LevelText = 'ERROR:'
+                Write-Error -Message $Message
+            }
+            'Warn' {
+                $LevelText = 'WARNING:'
+                Write-Warning -Message $Message
+            }
+            'Info' {
+                $LevelText = 'INFO:'
+                Write-Information -MessageData $Message
+            }
+            'Verbose' {
+                $LevelText = 'VERBOSE:'
+                Write-Verbose -Message $Message
+            }
+            'Debug' {
+                $LevelText = 'DEBUG:'
+                Write-Debug -Message $Message
+            }
+        }
+        "$date $LevelText $Message" | Out-File -FilePath $filename -Append
+    }
+    End {}
+}
+
 function Set-Stat {
     [CmdletBinding()]
     param(
@@ -59,7 +100,7 @@ function Set-Stat {
         if ($ChangeDetection -and $Value -eq $Stat.Live) {$Updated -eq $Stat.updated}
 
         if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
-            Write-Warning "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin) ... $([Int]$ToleranceMax)). "
+            Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin) ... $([Int]$ToleranceMax)). "
         }
         else {
             $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
@@ -95,7 +136,7 @@ function Set-Stat {
         }
     }
     catch {
-        if (Test-Path $Path) {Write-Warning "Stat file ($Name) is corrupt and will be reset. "}
+        if (Test-Path $Path) {Write-Log -Level Warn "Stat file ($Name) is corrupt and will be reset. "}
 
         $Stat = [PSCustomObject]@{
             Live = $Value
@@ -207,6 +248,7 @@ filter ConvertTo-Hash {
     [CmdletBinding()]
     $Hash = $_
     switch ([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1)))) {
+        "-Infinity" {"0  H"}
         0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0))}
         1 {"{0:n2} KH" -f ($Hash / [Math]::Pow(1000, 1))}
         2 {"{0:n2} MH" -f ($Hash / [Math]::Pow(1000, 2))}
@@ -392,15 +434,15 @@ function Get-Region {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String]$Location = ""
+        [String]$Region = ""
     )
 
-    $Locations = Get-Content "Regions.txt" | ConvertFrom-Json
+    $Regions = Get-Content "Regions.txt" | ConvertFrom-Json
 
-    $Location = (Get-Culture).TextInfo.ToTitleCase(($Location -replace "-", " " -replace "_", " ")) -replace " "
+    $Region = (Get-Culture).TextInfo.ToTitleCase(($Region -replace "-", " " -replace "_", " ")) -replace " "
 
-    if ($Locations.$Location) {$Locations.$Location}
-    else {$Location}
+    if ($Regions.$Region) {$Regions.$Region}
+    else {$Region}
 }
 
 class Miner {
@@ -429,4 +471,18 @@ class Miner {
     $Activated
     $Status
     $Benchmarked
+
+    StartMining() {
+        $this.New = $true
+        $this.Activated++
+        if ($this.Process -ne $null) {$this.Active += $this.Process.ExitTime - $this.Process.StartTime}
+        $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($this -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
+        if ($this.Process -eq $null) {$this.Status = "Failed"}
+        else {$this.Status = "Running"}
+    }
+
+    StopMining() {
+        $this.Process.CloseMainWindow() | Out-Null
+        $this.Status = "Idle"
+    }
 }
