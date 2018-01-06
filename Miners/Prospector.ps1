@@ -57,7 +57,6 @@ enabled = false" | Set-Content "$(Split-Path $Path)\$($Pools.$(Get-Algorithm $_)
             HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
             API = "Prospector"
             Port = $Port
-            Wrap = $false
             URI = $Uri
         }
 
@@ -69,7 +68,6 @@ enabled = false" | Set-Content "$(Split-Path $Path)\$($Pools.$(Get-Algorithm $_)
                 HashRates = [PSCustomObject]@{"$(Get-Algorithm $_)2gb" = $Stats."$($Name)_$(Get-Algorithm $_)2gb_HashRate".Week}
                 API = "Prospector"
                 Port = $Port
-                Wrap = $false
                 URI = $Uri
             }
         }

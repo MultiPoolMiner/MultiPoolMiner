@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\Lyra2z-AMD\sgminer.exe"
-$Uri = "https://github.com/djm34/sgminer-msvc2015/releases/download/v0.2-pre/kernel_and_binary.rar"
+$Uri = "https://github.com/djm34/sgminer-msvc2015/releases/download/v0.3/kernel.rar"
 
 $Commands = [PSCustomObject]@{
     "lyra2z" = " --worksize 32 --intensity 18" #Lyra2z
@@ -17,7 +17,6 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Xgminer"
         Port = 4028
-        Wrap = $false
         URI = $Uri
     }
 }

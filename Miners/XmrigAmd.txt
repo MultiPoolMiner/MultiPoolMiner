@@ -6,7 +6,6 @@
         "HashRates":  {"CryptoNight":  "$(if ($Pools.CryptoNight.SSL) {0}else {$Stats.XmrigAmd_CryptoNight_HashRate.Week})"},
         "API":  "XMRig",
         "Port":  "3336",
-        "Wrap":  false,
         "URI":  "https://github.com/xmrig/xmrig-amd/releases/download/v2.4.3-beta2/xmrig-amd-2.4.3-beta2-win64.zip"
     }
 ]

@@ -1,6 +1,15 @@
 ﻿using module ..\Include.psm1
 
 class Wrapper : Miner {
+    StartMining() {
+        $this.New = $true
+        $this.Activated++
+        if ($this.Process -ne $null) {$this.Active += $this.Process.ExitTime - $this.Process.StartTime}
+        $this.Process = Start-Process -FilePath (@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) -ArgumentList "-executionpolicy bypass -command . '$(Convert-Path ".\Wrapper.ps1")' -ControllerProcessID $Global:PID -Id '$($this.Port)' -FilePath '$($this.Path)' -ArgumentList '$($this.Arguments)' -WorkingDirectory '$(Split-Path $this.Path)'" -PassThru
+        if ($this.Process -eq $null) {$this.Status = "Failed"}
+        else {$this.Status = "Running"}
+    }
+
     [PSCustomObject]GetHashRate ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds

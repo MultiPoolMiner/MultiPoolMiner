@@ -20,7 +20,7 @@ if (($Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Igno
 $Blockmunch_Regions = "us"
 
 $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
-    $Blockmunch_Host = "mine.blockmunch.club"
+    $Blockmunch_Host = "blockmunch.club"
     $Blockmunch_Port = $Blockmunch_Request.$_.port
     $Blockmunch_Algorithm = $Blockmunch_Request.$_.name
     $Blockmunch_Algorithm_Norm = Get-Algorithm $Blockmunch_Algorithm
@@ -40,8 +40,8 @@ $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
         "keccak" {$Divisor *= 1000}
     }
 
-    if ((Get-Stat -Name "$($Name)_$($Blockmunch_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Blockmunch_Algorithm_Norm)_Profit" -Value ([Double]$Blockmunch_Request.$_.estimate_last24h / $Divisor) -Duration $StatSpan -ChangeDetection $true}
-    else {$Stat = Set-Stat -Name "$($Name)_$($Blockmunch_Algorithm_Norm)_Profit" -Value ([Double]$Blockmunch_Request.$_.estimate_current / $Divisor) -Duration (New-TimeSpan -Days 1)}
+    if ((Get-Stat -Name "$($Name)_$($Blockmunch_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Blockmunch_Algorithm_Norm)_Profit" -Value ([Double]$Blockmunch_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
+    else {$Stat = Set-Stat -Name "$($Name)_$($Blockmunch_Algorithm_Norm)_Profit" -Value ([Double]$Blockmunch_Request.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
 
     $Blockmunch_Regions | ForEach-Object {
         $Blockmunch_Region = $_
@@ -55,7 +55,7 @@ $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = "$Blockmunch_Algorithm.$Blockmunch_Host"
+                Host          = $Blockmunch_Host
                 Port          = $Blockmunch_Port
                 User          = $Wallet
                 Pass          = "$WorkerName,c=BTC"
