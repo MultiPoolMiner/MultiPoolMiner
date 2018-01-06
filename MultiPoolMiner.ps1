@@ -3,7 +3,7 @@
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 if(!(Test-Path -Path '.\Config.ps1')) {
-	Throw "Configuration missing!  Run setup.ps1 to configure, or copy Config.sample.ps1 to Config.ps1 and edit settings."
+	Throw "Configuration missing!  Copy Config.sample.ps1 to Config.ps1 and edit settings."
 } else {
 	. .\Config.ps1
 }
@@ -61,7 +61,7 @@ while ($true) {
         # File has changed since last loop; re-read config -  this allows for dynamic configration changes
         Write-Log "Configuration data has been modified - applying configuration from Config.ps1..."
         . .\Config.ps1
-        
+
         if ($Proxy -eq "") {$PSDefaultParameterValues.Remove("*:Proxy")}
         else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
 
