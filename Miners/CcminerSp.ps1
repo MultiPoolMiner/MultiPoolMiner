@@ -69,9 +69,9 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
             Path         = $Path
             Arguments    = ("-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) -b $Port $Command $CommonCommands").trim()
             HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
-            API          = "Wrapper"
+            API          = "Ccminer"
             Port         = $Port
-            Wrap         = $true
+            Wrap         = $false
             URI	         = $Uri
             PowerDraw    = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
             ComputeUsage = $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
