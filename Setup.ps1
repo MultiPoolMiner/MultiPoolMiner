@@ -23,7 +23,6 @@ $Region = $Region | ForEach-Object {Get-Region $_}
 $StatStart = (Get-Date).ToUniversalTime()
 $StatEnd = $StatStart.AddSeconds($Interval)
 $StatSpan = New-TimeSpan $StatStart $StatEnd
-$GPUs = (Get-GPUdevices $Type $False)
 
 # Load pool and miner information
 $Stats = @()
@@ -48,7 +47,7 @@ $AlgorithmList = $AllPools.Algorithm | Foreach-Object {Get-Algorithm $_} | Selec
 
 Write-Host 'Loading available miners...'
 
-$Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; StatSpan = $StatSpan; GPUs = $GPUs} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru} 
+$Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; StatSpan = $StatSpan} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru} 
 #$Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
 $MinerList = $Miners | Select-Object -ExpandProperty Name -Unique | Sort-Object
 
