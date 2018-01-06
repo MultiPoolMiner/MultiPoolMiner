@@ -10,6 +10,11 @@ class Wrapper : Miner {
         else {$this.Status = "Running"}
     }
 
+    StopMining() {
+        $this.Process.CloseMainWindow() | Out-Null
+        $this.Status = "Idle"
+    }
+    
     [PSCustomObject]GetHashRate ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
