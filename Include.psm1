@@ -5,6 +5,48 @@ Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
 
+Function Write-Log {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
+        [Parameter(Mandatory=$false)][ValidateSet("Error","Warn","Info","Verbose","Debug")][string]$Level = "Info"
+    )
+
+    Begin { }
+    Process {
+        $filename = ".\Logs\MultiPoolMiner-$(Get-Date -Format "yyyy-MM-dd").txt"
+        $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+
+        if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
+        
+        switch($Level) {
+            'Error' {
+                $LevelText = 'ERROR:'
+                Write-Error -Message $Message
+            }
+            'Warn' {
+                $LevelText = 'WARNING:'
+                Write-Warning -Message $Message
+            }
+            'Info' {
+                $LevelText = 'INFO:'
+                Write-Information -MessageData $Message
+            }
+            'Verbose' {
+                $LevelText = 'VERBOSE:'
+                Write-Verbose -Message $Message
+            }
+            'Debug' {
+                $LevelText = 'DEBUG:'
+                Write-Debug -Message $Message
+            }
+        }
+        "$date $LevelText $Message" | Out-File -FilePath $filename -Append
+    }
+    End {}
+}
+
+
 Function Get-BittrexMarkets {
     # Get a list of markets. This list includes both the long and short names of each currency.
     $filename = 'Cache\BittrexMarkets.json'
