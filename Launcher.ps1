@@ -170,6 +170,10 @@ $guiCmd = [PowerShell]::Create().AddScript({
         $synchash.Settings | ConvertTo-Json | Out-File '.\Launchersettings.json'
     })
 
+    $syncHash.website.add_Click({
+        Start-Process "https://multipoolminer.io/"
+    })
+
     #region Create multipoolminer script runner thread...
     # This thread is responsible for starting the script when $synchash.Running = $true, and stopping it when it's $false.
     # The Running flag is set by both the StartStop button and the idle monitoring thread.
@@ -419,12 +423,14 @@ namespace PInvoke.Win32 {
     [void]$Jobs.Add(([pscustomobject]@{MiningUpdater = $miningupdater; Runspace = $miningupdater.BeginInvoke() }))
     #endregion Create mining list updating thread
 
-    # Open window
+    #region Open window
+    # See https://blog.netnerds.net/2016/01/showdialog-sucks-use-applicationcontexts-instead/ for an explaination of why not just use .ShowDialog()
     [System.Windows.Forms.Integration.ElementHost]::EnableModelessKeyboardInterop($synchash.Window)
     $syncHash.Window.Show()
     $syncHash.Window.Activate()
     $appContext = New-Object System.Windows.Forms.ApplicationContext
     [void][System.Windows.Forms.Application]::Run($appContext)
+    #endregion Open window
 })
 
 # GUIRunning flag makes sure all threads exit after GUI closes
@@ -435,12 +441,11 @@ $ui = $guiCmd.BeginInvoke()
 
 Write-Host "MultiPoolMiner GUI.  If you close this, the GUI will exit as well."
 
-If($DebugPreference -ne 'SilentlyContinue') {
-    # If using -debug, give a prompt that can access $synchash for debugging.
+# If running from the ISE or -debug is set, give a prompt that can access $synchash for debugging.
+# Otherwise, hide the console window and wait for the GUI to exit.
+If($DebugPreference -ne 'SilentlyContinue' -or $host.name -match 'ISE') {
     $host.EnterNestedPrompt()
 } else {
-
-    # Hide the powershell window and wait
     $windowcode = '[DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);' 
     $asyncwindow = Add-Type -MemberDefinition $windowcode -name Win32ShowWindowAsync -namespace Win32Functions -PassThru 
     $null = $asyncwindow::ShowWindowAsync((Get-Process -PID $pid).MainWindowHandle, 0) 
