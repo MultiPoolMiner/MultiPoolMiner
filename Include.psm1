@@ -217,6 +217,20 @@ filter ConvertTo-Hash {
     }
 }
 
+filter ConvertTo-ReadableNumbers { 
+    [CmdletBinding()]
+    # To get same numbering scheme reagardless of value $_ use BTC to dermine formatting
+    $Number = $_
+    switch ([math]::truncate([math]::log($Rates."$($Currency[0])", [Math]::Pow(10, 1))) -2 ) {
+        default {$Number.ToString("N0")}
+        0 {$Number.ToString("N5")}
+        1 {$Number.ToString("N4")}
+        2 {$Number.ToString("N3")}
+        3 {$Number.ToString("N2")}
+        4 {$Number.ToString("N1")}
+    }
+}
+
 function Get-Combination {
     [CmdletBinding()]
     param(
