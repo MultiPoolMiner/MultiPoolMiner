@@ -1,6 +1,15 @@
 ﻿using module ..\Include.psm1
 
 class Wrapper : Miner {
+    StartMining() {
+        $this.New = $true
+        $this.Activated++
+        if ($this.Process -ne $null) {$this.Active += $this.Process.ExitTime - $this.Process.StartTime}
+        $this.Process = Start-SubProcess -FilePath  (@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) -ArgumentList -ArgumentList "-executionpolicy bypass -command . '$(Convert-Path ".\Wrapper.ps1")' -ControllerProcessID $Global:PID -Id '$($this.Port)' -FilePath '$($this.Path)' -ArgumentList '$($this.Arguments)' -WorkingDirectory '$(Split-Path $this.Path)'" -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($this -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -MinerWindowStyle $this.MinerWindowStyle <# UselessGuru added -MinerWindowStyle #>
+        if ($this.Process -eq $null) {$this.Status = "Failed"}
+        else {$this.Status = "Running"}
+    }
+    
     [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
