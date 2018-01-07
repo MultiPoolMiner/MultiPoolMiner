@@ -51,7 +51,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
     $NiceHash_Algorithm = $_.name
 
     # Do only for selected algorithms
-    if ($DisabledAlgorithms -inotcontains $NiceHash_Algorithm -and ($Algorithm -eq $null -or $Algorithm.count -eq 0 -or $Algorithm -icontains $NiceHash_Algorithm) -and [Double]$_.paying -gt 0) {
+    if ($DisabledAlgorithms -inotcontains $NiceHash_Algorithm -and ($Algorithm -eq $null -or $Algorithm.count -eq 0 -or $Algorithm -icontains $(Get-Algorithm $NiceHash_Algorithm)) -and [Double]$_.paying -gt 0) {
 
         $NiceHash_Port = $_.port
         $NiceHash_Algorithm_Norm = Get-Algorithm $NiceHash_Algorithm
