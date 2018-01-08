@@ -24,6 +24,9 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 if ($UseShortPoolNames -and $ShortPoolName) {$PoolName = $ShortPoolName} else {$PoolName = $Name}
 $URL = "http://api.nicehash.com/api?method=simplemultialgo.info"
 
+# Switch to nicehash wallet
+if ($Wallet -eq '1GPSq8txFnyrYdXL8t6S94mYdF8cGqVQJF') $Wallet = "3JQt8RezoGeEmA5ziAKNvxk34cM9JWsMCo"
+
 if (-not $Wallet) {Write-Log -Level Warn "Pool API ($Name) has no wallet address to mine to.";return}
 
 if (-not $PriceTimeSpan) {
