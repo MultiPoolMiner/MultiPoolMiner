@@ -3,6 +3,8 @@ using module .\Include.psm1
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 Write-Host 'Preparing setup...'
 
+Add-Type -AssemblyName PresentationFramework
+
 # Load defaults from Config.sample.ps1, and read the file into memory to be altered later
 If(Test-Path -Path '.\Config.sample.ps1') {
     . .\Config.Sample.ps1
@@ -25,16 +27,31 @@ $StatSpan = New-TimeSpan $StatStart $StatEnd
 # Load pool and miner information
 $Stats = @()
 Write-Host 'Loading available pools...'
-$Pools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; Username = $UserName; WorkerName = $WorkerName; StatSpan = $StatSpan} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
-$PoolList = $Pools | Select-Object -ExpandProperty Name -Unique
+$AllPools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; Username = $UserName; WorkerName = $WorkerName; StatSpan = $StatSpan; Algorithm = $null} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru}
+if ($AllPools.Count -eq 0) {
+    Throw "No pools available. "
+}
+$PoolList = $AllPools | Select-Object -ExpandProperty Name -Unique
+
+if ($PoolList.count -ne (Get-ChildItem "Pools" -File | Measure-Object ).Count) {
+    $confirm = [System.Windows.MessageBox]::Show("Unable to retrieve all pool information. If you continue, these pools and their associated algorithms will not be shown in setup, and will be treated as new pools and algorithms when they come back online. Are you sure you want to continue?", "Pool Warning", "YesNo", "Error", "No")
+    if($confirm -eq "No") {
+        Throw "Could not get information from all configured pools. Cannot continue. "
+    }
+}
+$Pools = [PSCustomObject]@{}
+$AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
+
 Write-Host 'Loading available algorithms...'
-$AlgorithmList = $Pools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | Foreach-Object {Get-Algorithm $_} | Sort-Object
+$AlgorithmList = $AllPools.Algorithm | Foreach-Object {Get-Algorithm $_} | Select-Object -Unique | Sort-Object
+
 Write-Host 'Loading available miners...'
-$Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
+
+$Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; StatSpan = $StatSpan} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru} 
+#$Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
 $MinerList = $Miners | Select-Object -ExpandProperty Name -Unique | Sort-Object
 
 # Get XAML and create a window
-Add-Type -AssemblyName PresentationFramework
 [xml]$xaml = [xml](Get-Content -Path "setup.xaml")
 $reader = (New-Object -TypeName System.Xml.XmlNodeReader -ArgumentList $xaml)
 $Window = [Windows.Markup.XamlReader]::Load($reader)
@@ -133,7 +150,14 @@ $Controls.Next.add_Click({
     }
 })
 
-$Controls.Save.add_Click({
+$Controls.Exit.add_Click({
+    $confirm = [System.Windows.MessageBox]::Show("Exit without saving?","Exit","YesNo","Exclamation")
+    if($confirm -eq "Yes") {
+        $Window.Close()
+    }
+})
+
+$Controls.Apply.add_Click({
 
     # This converts an array to a string that defines the array, eg @("CPU","NVIDIA","AMD").
     # It handles putting the quotes in the appropriate places.
@@ -248,7 +272,6 @@ $Controls.Save.add_Click({
     # Write file
     $config | Set-Content -Path "Config.ps1"
     [System.Windows.MessageBox]::Show("Settings saved.  Run start.bat to begin mining.", "Saved","OK","Information")
-    $Window.Close()
 })
 
 
