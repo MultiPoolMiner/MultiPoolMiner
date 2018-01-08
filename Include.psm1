@@ -377,6 +377,32 @@ filter ConvertTo-Hash {
     }
 }
 
+function ConvertTo-LocalCurrency { 
+    [CmdletBinding()]
+    # To get same numbering scheme reagardless of value BTC value (size) to dermine formatting
+    # Use $Offset to add/remove decimal places
+
+    param(
+        [Parameter(Mandatory = $true)]
+        [Double]$Number, 
+        [Parameter(Mandatory = $true)]
+        [Double]$BTCRate,
+        [Parameter(Mandatory = $false)]
+        [Int]$Offset        
+    )
+
+    $Number = $Number * $BTCRate
+    
+    switch ([math]::truncate([math]::log($BTCRate, [Math]::Pow(10, 1))) -2 + $Offset) {
+        default {$Number.ToString("N0")}
+        0 {$Number.ToString("N5")}
+        1 {$Number.ToString("N4")}
+        2 {$Number.ToString("N3")}
+        3 {$Number.ToString("N2")}
+        4 {$Number.ToString("N1")}
+    }
+}
+
 function Get-Combination {
     [CmdletBinding()]
     param(

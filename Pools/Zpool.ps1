@@ -19,7 +19,7 @@ if (($Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
 
 $Zpool_Regions = "us"
 
-$Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
+$Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Zpool_Request.$_.hashrate -gt 0} |ForEach-Object {
     $Zpool_Host = "mine.zpool.ca"
     $Zpool_Port = $Zpool_Request.$_.port
     $Zpool_Algorithm = $Zpool_Request.$_.name
