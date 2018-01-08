@@ -44,7 +44,9 @@ param(
     [Parameter(Mandatory = $false)]
     [String]$MinerStatusURL,
     [Parameter(Mandatory = $false)]
-    [Int]$SwitchingPrevention = 1 #zero does not prevent miners switching
+    [Int]$SwitchingPrevention = 1, #zero does not prevent miners switching
+    [Parameter(Mandatory = $false)]
+    [String]$ZpoolCurrency = "BTC"  #currency for zpool payouts
 )
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
@@ -142,7 +144,7 @@ while ($true) {
     Write-Log "Loading pool information..."
     $NewPools = @()
     if (Test-Path "Pools") {
-        $NewPools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; UserName = $UserName; WorkerName = $WorkerName; StatSpan = $StatSpan} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
+        $NewPools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; UserName = $UserName; WorkerName = $WorkerName; StatSpan = $StatSpan; ZpoolCurrency = $ZpoolCurrency} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
     }
 
     # This finds any pools that were already in $AllPools (from a previous loop) but not in $NewPools. Add them back to the list. Their API likely didn't return in time, but we don't want to cut them off just yet
