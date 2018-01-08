@@ -19,7 +19,7 @@ if (($MiningPoolHub_Request.return | Measure-Object).Count -le 1) {
 
 $MiningPoolHub_Regions = "europe", "us", "asia"
 
-$MiningPoolHub_Request.return | Where-Object {$MiningPoolHub_Request.$_.hashrate -gt 0} | ForEach-Object {
+$MiningPoolHub_Request.return | ForEach-Object {
     $MiningPoolHub_Hosts = $_.all_host_list.split(";")
     $MiningPoolHub_Port = $_.algo_switch_port
     $MiningPoolHub_Algorithm = $_.algo
