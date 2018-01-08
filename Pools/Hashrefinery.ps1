@@ -19,7 +19,7 @@ if (($HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ig
 
 $HashRefinery_Regions = "us"
 
-$HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
+$HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Hashrefinery_Request.$_.hashrate -gt 0} | ForEach-Object {
     $HashRefinery_Host = "hashrefinery.com"
     $HashRefinery_Port = $HashRefinery_Request.$_.port
     $HashRefinery_Algorithm = $HashRefinery_Request.$_.name

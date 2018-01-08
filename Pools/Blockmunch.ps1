@@ -19,7 +19,7 @@ if (($Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Igno
 
 $Blockmunch_Regions = "us"
 
-$Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
+$Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Blockmunch_Request.$_.hashrate -gt 0} | ForEach-Object {
     $Blockmunch_Host = "blockmunch.club"
     $Blockmunch_Port = $Blockmunch_Request.$_.port
     $Blockmunch_Algorithm = $Blockmunch_Request.$_.name
@@ -66,3 +66,4 @@ $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
         }
     }
 }
+Sleep 0
