@@ -390,8 +390,9 @@ namespace PInvoke.Win32 {
                 if((Get-ChildItem ".\Data\ActiveMiners.xml").LastWriteTime -gt $synchash.activeminerslastupdated) {
                     $miners = Import-CliXml .\Data\Miners.xml
                     $synchash.activeminers = Import-CliXml .\Data\ActiveMiners.xml | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | ForEach-Object {
+			$ActiveMiner = $_
                         # Find the matching entry in $Miners, to get pool information. Perhaps there is a better way to do this?
-                        $MatchingMiner = $Miners | Where-Object {$_.Name -eq $ActiveMiner.Name -and $_.Path -eq $ActiveMiner.Path -and $_.Arguments -eq $ActiveMiner.Arguments -and $_.Wrap -eq $ActiveMiner.Wrap -and $_.API -eq $ActiveMiner.API -and $_.Port -eq $ActiveMiner.Port}
+                        $MatchingMiner = $Miners | Where-Object {$_.Name -eq $ActiveMiner.Name -and $_.Path -eq $ActiveMiner.Path -and $_.Arguments -eq $ActiveMiner.Arguments -and $_.API -eq $ActiveMiner.API -and $_.Port -eq $ActiveMiner.Port}
                         [pscustomobject]@{
                             Name = $_.Name
                             Active = "{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f ((Get-Date) - $_.Process.StartTime)
