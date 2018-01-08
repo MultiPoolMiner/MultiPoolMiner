@@ -17,6 +17,7 @@ $Commands = [PSCustomObject]@{
     "hmq1725" = "" #HMQ1725
     "jha" = "" #JHA
     "keccak" = "" #Keccak
+    "keccakc" = "" #Keccakc
     "lbry" = "" #Lbry
     "lyra2v2" = "" #Lyra2RE2
     "lyra2z" = "" #Lyra2z
