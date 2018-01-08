@@ -1,53 +1,13 @@
 ﻿using module .\Include.psm1
-[CmdletBinding()]
-param(
-    [Parameter(Mandatory = $false)]
-    [String]$Wallet, 
-    [Parameter(Mandatory = $false)]
-    [String]$UserName, 
-    [Parameter(Mandatory = $false)]
-    [String]$WorkerName = "multipoolminer", 
-    [Parameter(Mandatory = $false)]
-    [Int]$API_ID = 0, 
-    [Parameter(Mandatory = $false)]
-    [String]$API_Key = "", 
-    [Parameter(Mandatory = $false)]
-    [Int]$Interval = 60, #seconds before reading hash rate from miners
-    [Parameter(Mandatory = $false)]
-    [String]$Region = "europe", #europe/us/asia
-    [Parameter(Mandatory = $false)]
-    [Switch]$SSL = $false, 
-    [Parameter(Mandatory = $false)]
-    [Array]$Type = @(), #AMD/NVIDIA/CPU
-    [Parameter(Mandatory = $false)]
-    [Array]$Algorithm = @(), #i.e. Ethash,Equihash,CryptoNight etc.
-    [Parameter(Mandatory = $false)]
-    [Array]$MinerName = @(), 
-    [Parameter(Mandatory = $false)]
-    [Array]$PoolName = @(), 
-    [Parameter(Mandatory = $false)]
-    [Array]$ExcludeAlgorithm = @(), #i.e. Ethash,Equihash,CryptoNight etc.
-    [Parameter(Mandatory = $false)]
-    [Array]$ExcludeMinerName = @(), 
-    [Parameter(Mandatory = $false)]
-    [Array]$ExcludePoolName = @(), 
-    [Parameter(Mandatory = $false)]
-    [Array]$Currency = ("BTC", "USD"), #i.e. GBP,EUR,ZEC,ETH etc.
-    [Parameter(Mandatory = $false)]
-    [Int]$Donate = 24, #Minutes per Day
-    [Parameter(Mandatory = $false)]
-    [String]$Proxy = "", #i.e http://192.0.0.1:8080
-    [Parameter(Mandatory = $false)]
-    [Int]$Delay = 0, #seconds before opening each miner
-    [Parameter(Mandatory = $false)]
-    [Switch]$Watchdog = $false,
-    [Parameter(Mandatory = $false)]
-    [String]$MinerStatusURL,
-    [Parameter(Mandatory = $false)]
-    [Int]$SwitchingPrevention = 1 #zero does not prevent miners switching
-)
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+
+# Get all configuration from Config.ps1
+If(!(Test-Path -Path '.\Config.ps1')) {
+    Throw "Configuration missing!  You must copy Config.sample.ps1 as Config.ps1 and edit the settings."  
+} else {
+    . .\Config.ps1
+}
 
 if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -Recurse | Unblock-File}
 if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue) -and (Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {
@@ -60,6 +20,15 @@ else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
 $Algorithm = $Algorithm | ForEach-Object {Get-Algorithm $_}
 $ExcludeAlgorithm = $ExcludeAlgorithm | ForEach-Object {Get-Algorithm $_}
 $Region = $Region | ForEach-Object {Get-Region $_}
+
+$TotalThreads = (gwmi win32_processor).numberoflogicalprocessors
+$MaxThreads = $TotalThreads
+if($ReserveThreads) {
+	$MaxThreads = $TotalThreads - $ReserveThreads
+}
+if ($MaxThreads -lt 1) { $MaxThreads = 1 }
+Write-Log "CPU mining limited to $MaxThreads/$TotalThreads of logical processors"
+
 
 $Strikes = 3
 
@@ -80,23 +49,25 @@ $ActiveMiners = @()
 
 $Rates = [PSCustomObject]@{BTC = [Double]1}
 
+# Make sure necessary directories exist
+if (-not (Test-Path "Cache")) {New-Item "Cache" -ItemType "directory" | Out-Null}
+if (-not (Test-Path "Data")) {New-Item "Data" -ItemType "directory" | Out-Null}
+
 #Start the log
 Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
-
-#Check for software updates
-$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ("2.7.1.4", $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1
 
 #Set donation parameters
 if ($Donate -lt 10) {$Donate = 10}
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
-$WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHhGkCuNrFt6v9")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
-$UserNameDonate = @("aaronsace", "fonyo")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
+$WalletDonate = @("1BLXARB3GbKyEg8NTY56me5VXFsX2cixFB", "1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHhGkCuNrFt6v9")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
+$UserNameDonate = @("grantemsley","aaronsace", "fonyo")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
 $WorkerNameDonate = "multipoolminer"
 $WalletBackup = $Wallet
 $UserNameBackup = $UserName
 $WorkerNameBackup = $WorkerName
 
 while ($true) {
+
     Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
 
     $Timer = (Get-Date).ToUniversalTime()
@@ -187,7 +158,7 @@ while ($true) {
     # select only the ones that have a HashRate matching our algorithms, and that only include algorithms we have pools for
     # select only the miners that match $MinerName, if specified, and don't match $ExcludeMinerName
     $AllMiners = if (Test-Path "Miners") {
-        Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru} | 
+        Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; Threads = $MaxThreads} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru} | 
             Where-Object {$Type.Count -eq 0 -or (Compare-Object $Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
             Where-Object {($Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0) -and ((Compare-Object $Pools.PSObject.Properties.Name $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0)} | 
             Where-Object {$ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $ExcludeAlgorithm $_.HashRates.PSObject.Properties.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0} | 
@@ -472,6 +443,25 @@ while ($true) {
             }
         }
     }
+
+    # Kill any miners that are running that aren't expected to be running right now. This is the sledgehammer approach to fixing multiple copies of the same miner running for no good reason.
+	# It's not a condition that should happen, but sometimes a PID doesn't get returned properly and a miner is left running without being accounted for.
+	$ExpectedPIDs = ($ActiveMiners | Where-Object {$_.Status -eq "Running"} | Select-Object -ExpandProperty process).id
+    $ActualPIDs = (Get-Process | Where-Object {$_.Path -like "$((Get-Location).Path)*" }).id
+    If($ExpectedPIDs -and $ActualPIDs) {
+        Compare-Object $ExpectedPIDs $ActualPIDs | Where-Object SideIndicator -eq "=>" | Select-Object -ExpandProperty InputObject | Foreach-Object {
+            # Check if it's parent is an expected PID - because it was launched by Wrapper.ps1
+			Write-Log -Level Error "Checking on PID $_"
+			Write-Log -Level Error "Allowed PIDS: $ExpectedPIDs"
+            $ParentPID = (gwmi win32_process -filter "processid='$_'").ParentProcessId
+			Write-Log -Level Error "Parent: $ParentPID"
+            if($ExpectedPIDs -notcontains $ParentPID) {
+                Write-Log -Level Error "Killing PID $_ - it was not supposed to be running"
+                Stop-Process -Force -Id $_
+            }
+        }
+    }
+
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
@@ -556,6 +546,23 @@ while ($true) {
 
         $MinerComparisons | Out-Host
     }
+	
+    # Display miner current profit
+	Write-Host -ForegroundColor Green "Running Miners: Estimated Profit"
+    $ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Format-Table -Wrap (
+        @{Label = "Name"; Expression = {$_.Name}},
+        @{Label = "Current Speed"; Expression = {$_.Speed_Live | Foreach-Object {"$($_ | ConvertTo-Hash)/s"}}; Align = 'right'},
+        @{Label = "Estimated Speed"; Expression = {$_.Speed | Foreach-Object {"$($_ | ConvertTo-Hash)/s"}}; Align = 'right'},
+        @{Label = "Estimated BTC/day"; Expression = {"{0:N8}" -f $_.Profit}; Align='right'},
+        @{Label = "Estimated CAD/day"; Expression = {"{0:N4}" -f ($_.Profit*$Rates.CAD)}; Align='right'}
+
+    ) | Out-Host
+
+	# Export data to files - this can be used by an external process to get status information
+	$ActiveMiners | Export-Clixml -Path 'Data\ActiveMiners.xml'
+	$Miners | Export-Clixml -Path 'Data\Miners.xml'
+	$Pools | Export-Clixml -Path 'Data\Pools.xml'
+	$AllPools | Export-Clixml -Path 'Data\AllPools.xml'
 
     #Reduce Memory
     Get-Job -State Completed | Remove-Job
