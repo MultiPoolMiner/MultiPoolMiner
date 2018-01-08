@@ -22,7 +22,7 @@ if ($WorkerName.Length -gt 15) {$WorkerName = $WorkerName.substring(0,15)}
 $Nicehash_Regions = "eu"
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 if ($UseShortPoolNames -and $ShortPoolName) {$PoolName = $ShortPoolName} else {$PoolName = $Name}
-$URL = "http://api.nicehash.com/api?method=simplemultialgo.info"
+$URI = "http://api.nicehash.com/api?method=simplemultialgo.info"
 
 # Switch to nicehash wallet
 if ($Wallet -eq '1GPSq8txFnyrYdXL8t6S94mYdF8cGqVQJF') {$Wallet = "3JQt8RezoGeEmA5ziAKNvxk34cM9JWsMCo"}
@@ -35,7 +35,7 @@ if (-not $PriceTimeSpan) {
 
 $NiceHash_Request = [PSCustomObject]@{}
 try {
-    $NiceHash_Request = Invoke-RestMethod $URL -UseBasicParsing -TimeoutSec 15 -ErrorAction Stop
+    $NiceHash_Request = Invoke-RestMethod $URI -UseBasicParsing -TimeoutSec 15 -ErrorAction Stop
 }
 catch {
     Write-Log -Level Warn "Pool API ($Name) has failed."

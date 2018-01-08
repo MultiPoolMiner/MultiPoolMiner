@@ -21,7 +21,7 @@ $ShortPoolName = "ZP" # Short pool name
 $ZpoolCoins_Regions = "US"
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 if ($UseShortPoolNames -and $ShortPoolName) {$PoolName = $ShortPoolName} else {$PoolName = $Name}
-$URL = "http://www.zpool.ca/api/currencies"
+$URI = "http://www.zpool.ca/api/currencies"
 
 if (-not $Wallet) {Write-Log -Level Warn "Pool API ($Name) has no wallet address to mine to.";return}
 
@@ -34,7 +34,7 @@ if ($SSL) {Write-Log -Level Warn "SSL option requested, but pool API ($Name) doe
 
 $ZpoolCoins_Request = [PSCustomObject]@{}
 try {
-    $ZpoolCoins_Request = Invoke-RestMethod $URL -UseBasicParsing -TimeoutSec 15 -ErrorAction Stop
+    $ZpoolCoins_Request = Invoke-RestMethod $URI -UseBasicParsing -TimeoutSec 15 -ErrorAction Stop
 }
 catch {
     Write-Log -Level Warn "Pool API ($Name) has failed."

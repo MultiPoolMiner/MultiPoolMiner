@@ -19,7 +19,7 @@ $ShortPoolName = "AHP" # Short pool name
 $AHashPool_Regions = "us"
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 if ($UseShortPoolNames -and $ShortPoolName) {$PoolName = $ShortPoolName} else {$PoolName = $Name}
-$URL = "http://www.AHashPool.com/api/status"
+$URI = "http://www.AHashPool.com/api/status"
 
 if (-not $Wallet) {Write-Log -Level Warn "Pool API ($Name) has no wallet address to mine to.";return}
 
@@ -35,7 +35,7 @@ if ($SSL) {
 
 $AHashPool_Request = [PSCustomObject]@{}
 try {
-	$AHashPool_Request = Invoke-RestMethod $URL -UseBasicParsing -Headers @{"Cache-Control"="no-cache"} -TimeoutSec 10 -ErrorAction Stop
+	$AHashPool_Request = Invoke-RestMethod $URI -UseBasicParsing -Headers @{"Cache-Control"="no-cache"} -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
 	Write-Log -Level Warn "Pool API ($Name) has failed."

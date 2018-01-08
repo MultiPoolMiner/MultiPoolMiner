@@ -21,7 +21,7 @@ $ShortPoolName = "MPH" # Short pool name
 $MiningPoolHub_Regions = "Europe", "US", "Asia" #Valid values "Europe", "US", "Asia"
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 if ($UseShortPoolNames -and $ShortPoolName) {$PoolName = $ShortPoolName} else {$PoolName = $Name}
-$URL = "http://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics"
+$URI = "http://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics"
 
 if (-not $UserName) {Write-Log -Level Warn "Pool API ($Name) has no miner username to mine to.";return}
 
@@ -31,7 +31,7 @@ if (-not $PriceTimeSpan) {
 
 $MiningPoolHub_Request = [PSCustomObject]@{}
 try {
-    $MiningPoolHub_Request = Invoke-RestMethod $URL -UseBasicParsing -Headers @{"Cache-Control"="no-cache"} -TimeoutSec 10 -ErrorAction Stop
+    $MiningPoolHub_Request = Invoke-RestMethod $URI -UseBasicParsing -Headers @{"Cache-Control"="no-cache"} -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
     Write-Log -Level Warn "Pool API ($Name) has failed."
@@ -43,7 +43,7 @@ if (($MiningPoolHub_Request.return | Measure-Object).Count -le 1) {
     return
 }
 
-$MiningPoolHub_Request.return | Where {$_.algo} | Where-Object {$MiningPoolHub_Request.$_.hashrate -gt 0} | ForEach-Object {
+$MiningPoolHub_Request.return | ForEach-Object {
 
     $MiningPoolHub_Algorithm = $_.algo
     
