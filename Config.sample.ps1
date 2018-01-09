@@ -40,7 +40,7 @@ $ExcludePoolName = @()
 
 # Algorithms to mine on this system.  If left empty, all supported algorithms will be used.
 # Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
-$Algorithm = @("cryptonight","decred","decrednicehash","ethash","ethash2gb","equihash","groestl,lbry","lyra2re2","lyra2z","neoscrypt","pascal","sia","siaclaymore","sianicehash","sib","skunk")
+$Algorithm = @("cryptonight","decred","decrednicehash","ethash","ethash2gb","equihash","groestl","lbry","lyra2re2","lyra2z","neoscrypt","nist5","pascal","sia","siaclaymore","sianicehash","sib","skunk")
 # If $Algorithm is left empty, it will mine all algorithms EXCEPT the ones listed in $ExcludeAlgorithm
 $ExcludeAlgorithm = @()
 
@@ -70,6 +70,9 @@ $MinerStatusURL = ''
 ######## ADVANCED (UselessGuru) ########
 # The configuration items in this section are currently not available in the configuration GUI
 
+# If configured, MPM will use this interval for benchmark loops, instead of the normal interval. This may help detecting hash rates during benchmarks for slower cards or algorithms that take longer to report hash rates.
+$BenchmarkInterval = 120
+
 # If $true separate miners will be launched for each GPU model class, this will further help to increase profit. Notwe: This is an experimental feature!
 $DeviceSubTypes = $False
 
@@ -79,14 +82,14 @@ $MinPoolWorkers = 7
 # Pools and miners can charge a fee. If set to $true all profit calculations will automatically by lowered by the fee
 $ProfitLessFee = $True
 
-# WindowStyle for miner windows. Can be any of: "Normal","Maximized","Minimized","Hidden". Note: During benchmark all windows will run in "normal" mode. Warning: "Hidden" can be dangerous because the can only be seen in task manager, therefore NOT recommended
+# WindowStyle for miner windows. Can be any of: "Normal","Maximized","Minimized","Hidden". Warning: "Hidden" can be dangerous because the running miner process can only be seen in task manager, therefor NOT recommended
 $MinerWindowStyle = "Minimized"
 
-# If $true use alternative launcher process to run miners. The good: This will NOT steal focus. The bad: I may 'forget' to close running miners on exit. These need to be closed manually.
-$UseNewMinerLauncher = $False
+# If $true use alternative launcher process to run miners. This will NOT steal focus when starting miners.
+$UseAlternateMinerLauncher = $True
 
-# If $True MPM (UselessGuru Edition) will parallelize the hash rate readout from miners. This will speed up overall loop time, e.g. benchmarking.
-$UseJobsForGetData = $False
+# If $True MPM (UselessGuru Edition) will parallelize the hash rate readout from miners if there are more than two miner instances running. This will speed up overall loop time, e.g. benchmarking.
+$UseJobsForGetData = $True
 
 # Minimal required profit, if less it will not mine. The configured value must be in the first currency as defined in $currency (see config item above).
 $MinProfit = 0
