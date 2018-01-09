@@ -1,4 +1,4 @@
-using module .\Include.psm1
+﻿using module .\Include.psm1
 
 param(
     [Parameter(Mandatory = $true)]
@@ -24,7 +24,8 @@ $Job = Start-Job -ArgumentList $FilePath, $ArgumentList, $WorkingDirectory {
     else {Invoke-Expression "& '$FilePath' 2>&1"}
 }
 
-Write-Host "MultiPoolMiner Wrapper Started" -BackgroundColor Yellow -ForegroundColor Black
+Write-Host "MultiPoolMiner Wrapper started with parameters:" -BackgroundColor Yellow -ForegroundColor Black
+Write-Host "$FilePath $ArgumentList`n"
 
 do {
     Start-Sleep 1
