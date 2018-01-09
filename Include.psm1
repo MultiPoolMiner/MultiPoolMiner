@@ -307,7 +307,7 @@ function Get-ComputeData {
         "NVIDIA" {
             $NvidiaSMI = "$Env:SystemDrive\Program Files\NVIDIA Corporation\NVSMI\nvidia-smi.exe"
             if (Test-Path $NvidiaSMI) {
-                if ($Index -notmatch "^[0-9].*") { <# Index bust start with a number, otherwise read cumulated power#>
+                if ($Index -notmatch "^[0-9].*") { <# Index must start with a number, otherwise read cumulated power#>
                     $Index = ((&$NvidiaSMI -L) | ForEach {$_.Split(" ")[1].Split(":")[0]}) -join ","
                 }
                 $Index.Split(",") | ForEach {
@@ -562,11 +562,13 @@ function Get-ChildItemContent {
         [Parameter(Mandatory = $false)]
         [Hashtable]$Parameters = @{}
     )
-
+    $ItemCounter = 0
+    
     Get-ChildItem $Path -Exclude "_*" | ForEach-Object { <# UselessGura added -Exclude "_*"; all files beginning with _ will be ignored #>
 #    Get-ChildItem $Path | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
+        $ItemCounter++
         if ($_.Extension -eq ".ps1") {
             $Content = & {
                 $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters[$_]}
@@ -631,6 +633,32 @@ filter ConvertTo-Hash {
     }
 }
 
+function ConvertTo-LocalCurrency { 
+    [CmdletBinding()]
+    # To get same numbering scheme reagardless of value BTC value (size) to dermine formatting
+    # Use $Offset to add/remove decimal places
+
+    param(
+        [Parameter(Mandatory = $true)]
+        [Double]$Number, 
+        [Parameter(Mandatory = $true)]
+        [Double]$BTCRate,
+        [Parameter(Mandatory = $false)]
+        [Int]$Offset        
+    )
+
+    $Number = $Number * $BTCRate
+    
+    switch ([math]::truncate([math]::log($BTCRate, [Math]::Pow(10, 1))) -2 + $Offset) {
+        default {$Number.ToString("N0")}
+        0 {$Number.ToString("N5")}
+        1 {$Number.ToString("N4")}
+        2 {$Number.ToString("N3")}
+        3 {$Number.ToString("N2")}
+        4 {$Number.ToString("N1")}
+    }
+}
+
 function Get-Combination {
     [CmdletBinding()]
     param(
@@ -640,6 +668,7 @@ function Get-Combination {
         [Int]$SizeMax = $Value.Count, 
         [Parameter(Mandatory = $false)]
         [Int]$SizeMin = 1
+
     )
 
     $Combination = [PSCustomObject]@{}
@@ -677,36 +706,66 @@ function Start-SubProcess {
         [Parameter(Mandatory = $false)]
         [Int]$Priority = 0,
         [Parameter(Mandatory = $false)] <# UselessGuru #>
-        [String]$MinerWindowStyle = "Minimized" <# UselessGuru #>
+        [String]$MinerWindowStyle = "Minimized", <# UselessGuru #>
+        [Parameter(Mandatory = $false)] <# UselessGuru #>
+        [String]$UseAlternateMinerLauncher = $true <# UselessGuru #>
     )
 
-    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
+    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}        
 
-    $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory, $MinerWindowStyle {
-        param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory, $MinerWindowStyle)
+    if ($UseAlternateMinerLauncher) {
+        
+        $ShowWindow = [PSCustomObject]@{"Normal" = "SW_SHOW"; "Maximized" = "SW_SHOWMAXIMIZE"; "Minimized"= "SW_SHOWMINNOACTIVE"; "Hidden" = "SW_HIDDEN"}
 
-        $ControllerProcess = Get-Process -Id $ControllerProcessID
-        if ($ControllerProcess -eq $null) {return}
+        $Job = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)');. .\MyInclude.ps1")) -ArgumentList $PID, $FilePath, $ArgumentList, $ShowWindow.$MinerWindowStyle, $PriorityNames.$Priority, $WorkingDirectory {
+            param($ControllerProcessID, $FilePath, $ArgumentList, $ShowWindow, $Priority, $WorkingDirectory)
+            
+            . .\MyInclude.ps1
+            $ControllerProcess = Get-Process -Id $ControllerProcessID
+            if ($ControllerProcess -eq $null) {return}
+            
+            $Process = Invoke-CreateProcess -Binary $FilePath -Arguments $ArgumentList -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $ShowWindow -StartF STARTF_USESHOWWINDOW -Priority $Priority -WorkingDirectory $WorkingDirectory
+            if ($Process -eq $null) {
+                [PSCustomObject]@{ProcessId = $null}
+                return        
+            }
 
-        $ProcessParam = @{}
-        $ProcessParam.Add("FilePath", $FilePath)
-        $ProcessParam.Add("WindowStyle", $MinerWindowStyle) <# UselessGuru #>
-        <# $ProcessParam.Add("WindowStyle", 'Minimized') UselessGuru #>
-        if ($ArgumentList -ne "") {$ProcessParam.Add("ArgumentList", $ArgumentList)}
-        if ($WorkingDirectory -ne "") {$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
-        $Process = Start-Process @ProcessParam -PassThru
-        if ($Process -eq $null) {
-            [PSCustomObject]@{ProcessId = $null}
-            return        
+            [PSCustomObject]@{ProcessId = $Process.Id; ProcessHandle = $Process.Handle}
+
+            $ControllerProcess.Handle | Out-Null
+            $Process.Handle | Out-Null
+
+            do {if ($ControllerProcess.WaitForExit(1000)) {$Process.CloseMainWindow() | Out-Null}}
+            while ($Process.HasExited -eq $false)
         }
+    }
+    else {
+        $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory, $MinerWindowStyle {
+            param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory, $MinerWindowStyle)
 
-        [PSCustomObject]@{ProcessId = $Process.Id; ProcessHandle = $Process.Handle}
+            $ControllerProcess = Get-Process -Id $ControllerProcessID
+            if ($ControllerProcess -eq $null) {return}
 
-        $ControllerProcess.Handle | Out-Null
-        $Process.Handle | Out-Null
+            $ProcessParam = @{}
+            $ProcessParam.Add("FilePath", $FilePath)
+            $ProcessParam.Add("WindowStyle", $MinerWindowStyle)
+            if ($ArgumentList -ne "") {$ProcessParam.Add("ArgumentList", $ArgumentList)}
+            if ($WorkingDirectory -ne "") {$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
+            $Process = Start-Process @ProcessParam -PassThru
+            if ($Process -eq $null) {
+                [PSCustomObject]@{ProcessId = $null}
+                return        
+            }
 
-        do {if ($ControllerProcess.WaitForExit(1000)) {$Process.CloseMainWindow() | Out-Null}}
-        while ($Process.HasExited -eq $false)
+            [PSCustomObject]@{ProcessId = $Process.Id; ProcessHandle = $Process.Handle}
+
+            $ControllerProcess.Handle | Out-Null
+            $Process.Handle | Out-Null
+
+            do {if ($ControllerProcess.WaitForExit(1000)) {$Process.CloseMainWindow() | Out-Null}}
+            while ($Process.HasExited -eq $false)
+
+        }
     }
 
     do {Start-Sleep 1; $JobOutput = Receive-Job $Job}
@@ -854,30 +913,14 @@ class Miner {
     $ComputeUsage <# UselessGuru added -MinerWindowStyle #>
     $Pool <# UselessGuru added Pool #>
     $MinerWindowStyle <# UselessGuru added MinerWindowStyle #>
-    $UseNewMinerLauncher <# UselessGuru added UseNewMinerLauncher #>
+    $UseAlternateMinerLauncher <# UselessGuru added UseAlternateMinerLauncher #>
     $ShowWindow <# UselessGuru added ShowWindow #>
     
     StartMining() {
         $this.New = $true
         $this.Activated++
         if ($this.Process -ne $null) {$this.Active += $this.Process.ExitTime - $this.Process.StartTime}
-        # Begin UselessGuru added $UseNewMinerLauncher
-        if ($this.UseNewMinerLauncher) {
-            . .\MyInclude.ps1
-            switch ($this.MinerWindowStyle) {
-                "Normal"    {$this.ShowWindow = "SW_SHOW"}
-                "Maximized" {$this.ShowWindow = "SW_SHOWMAXIMIZE"}
-                "Minimized" {$this.ShowWindow = "SW_SHOWMINNOACTIVE"}
-                "Hidden"    {$this.ShowWindow = "SW_HIDDEN"}
-            }
-            $this.Process = Invoke-CreateProcess -Binary $this.Path -Arguments $this.Arguments -CreationFlags CREATE_NEW_CONSOLE -ShowWindow $this.ShowWindow -StartF STARTF_USESHOWWINDOW -Priority BelowNormal -WorkingDirectory (Split-Path $this.Path)
-        }
-        else {
-            $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList ($this.Arguments) -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($this -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -MinerWindowStyle $this.MinerWindowStyle <# UselessGuru added -MinerWindowStyle #>
-        }
-        # Begin UselessGuru added $UseNewMinerLauncher
-        # $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($this -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -MinerWindowStyle $this.MinerWindowStyle <# UselessGuru added -MinerWindowStyle #>
-
+        $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList ($this.Arguments) -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($this -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -MinerWindowStyle $this.MinerWindowStyle -UseAlternateMinerLauncher $this.UseAlternateMinerLauncher <# UselessGuru added -MinerWindowStyle #>
         if ($this.Process -eq $null) {$this.Status = "Failed"}
         else {$this.Status = "Running"}
     }
