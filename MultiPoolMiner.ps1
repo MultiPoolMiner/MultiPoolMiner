@@ -444,10 +444,10 @@ while ($true) {
         if ($Miner.Process -eq $null -or $Miner.Process.HasExited) {
             if ($Miner.Status -eq "Running") {
                 $Miner.Status = "Failed"
-                if($Miner.Process -eq $null) {
+                if ($Miner.Process -eq $null) {
                     Write-Log -Level Warn "$($Miner.Type) miner $($Miner.Name) failed - process handle is missing"
                 }
-                if($Miner.Process.HasExited) {
+                if ($Miner.Process.HasExited) {
                     Write-Log -Level Warn "$($Miner.Type) miner $($Miner.Name) failed - process exited on it's own"
                 }
             }
