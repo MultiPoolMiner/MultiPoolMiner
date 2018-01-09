@@ -41,7 +41,6 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
             HashRates	= [PSCustomObject]@{$Algorithm = (($Stats."$($Name)_$($Algorithm)_HashRate".Week) * $Fee)}
             API			= "Wrapper"
             Port		= $Port
-            Wrap		= $true
             URI			= $Uri
             PowerDraw   = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
             ComputeUsage= $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week

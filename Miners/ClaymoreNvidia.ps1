@@ -45,18 +45,17 @@ $Devices | ForEach-Object {
 
         while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)) {$Port++}
 
-        if ($Pools.$($MainAlgorithm).Name -and -not $SecondaryAlgorithm) {
+        if ($Pools.$($MainAlgorithm_Norm).Name -and -not $Secondary) {
 
             [PSCustomObject]@{
                 Name         = $Name
                 Type         = $Device.Type
                 Device       = $Device.Device
                 Path         = $Path
-                Arguments    = ("-mode 1 -mport $Port -epool $($Pools.$MainAlgorithm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins 1 -platform 2 $Command $CommonCommands").trim()
+                Arguments    = ("-mode 1 -mport $Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins 1 -platform 2 $Command $CommonCommands").trim()
                 HashRates    = [PSCustomObject]@{"$MainAlgorithm_Norm" = ($Stats."$($Name)_$($MainAlgorithm_Norm)_HashRate".Week * $Fee)} 
                 API          = "Claymore"
                 Port         = $Port
-                Wrap         = $false
                 URI          = $Uri
                 PowerDraw    = $Stats."$($Name)_$($MainAlgorithm_Norm)_PowerDraw".Week
                 ComputeUsage = $Stats."$($Name)_$($MainAlgorithm_Norm)_ComputeUsage".Week
@@ -64,18 +63,17 @@ $Devices | ForEach-Object {
                 Index        = $Index			
             }
         }
-        if ($Pools.$($MainAlgorithm).Name -and $Pools.$($SecondaryAlgorithm).Name) {
+        if ($Pools.$($MainAlgorithm_Norm).Name -and $Pools.$($SecondaryAlgorithm_Norm).Name) {
 
             [PSCustomObject]@{
                 Name         = $Name
                 Type         = $Device.Type
                 Device       = $Device.Device
                 Path         = $Path
-                Arguments    = ("-mode 0 -mport $Port -epool $($Pools.$MainAlgorithm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm.User) -epsw $($Pools.$MainAlgorithm.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass) -platform 2 $Command $CommonCommands").trim()
+                Arguments    = ("-mode 0 -mport $Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass) -platform 2 $Command $CommonCommands").trim()
                 HashRates    = [PSCustomObject]@{"$MainAlgorithm_Norm" = ($Stats."$($Name)_$($MainAlgorithm_Norm)_HashRate".Week * $Fee); "$SecondaryAlgorithm_Norm" = ($Stats."$($Name)_$($SecondaryAlgorithm_Norm)_HashRate".Week * $Fee)}
                 API          = "Claymore"
                 Port         = $Port
-                Wrap         = $false
                 URI          = $Uri
                 PowerDraw    = $Stats."$($Name)_$($MainAlgorithm_Norm)$($SecondaryAlgorithm_Norm)_PowerDraw".Week
                 ComputeUsage = $Stats."$($Name)_$($MainAlgorithm_Norm)$($SecondaryAlgorithm_Norm)_ComputeUsage".Week

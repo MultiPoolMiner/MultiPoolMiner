@@ -10,7 +10,7 @@ $CommonCommands = " --keepalive --donate-level=1"
 
 # Uncomment outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    "cryptonight"       = " --cuda-bfactor=10,8,6 --cuda-launch=64x72,53x64,16x77"
+    "cryptonight"       = ""
     "cryptonight-light" = ""
 }
 
@@ -45,7 +45,6 @@ $Devices | ForEach-Object {
             HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
             API          = "XmRig"
             Port         = $Port
-            Wrap         = $false
             URI          = $Uri
             PowerDraw    = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
             ComputeUsage = $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week

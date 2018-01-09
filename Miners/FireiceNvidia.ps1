@@ -64,7 +64,6 @@ if ($Pools.Cryptonight.Name) {
             HashRates    = [PSCustomObject]@{"CryptoNight" = $Stats."$($Name)_CryptoNight_HashRate".Week}
             API          = "XMRig"
             Port         = $Port
-            Wrap         = $false
             URI          = $Uri
             PowerDraw    = $Stats."$($Name)_CryptoNight_PowerDraw".Week
             ComputeUsage = $Stats."$($Name)_CryptoNight_ComputeUsage".Week

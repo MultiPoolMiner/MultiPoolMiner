@@ -40,7 +40,6 @@ $Devices | ForEach-Object {
             HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
             API          = "Ccminer"
             Port         = $Port
-            Wrap         = $false
             URI          = $Uri
             PowerDraw    = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
             ComputeUsage = $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
