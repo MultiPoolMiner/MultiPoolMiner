@@ -20,8 +20,8 @@ Remove-Item ".\Wrapper\$Id.txt" -Force -ErrorAction Ignore
 $Job = Start-Job -ArgumentList $FilePath, $ArgumentList, $WorkingDirectory {
     param($FilePath, $ArgumentList, $WorkingDirectory)
     if ($WorkingDirectory) {Set-Location $WorkingDirectory}
-    if ($ArgumentList) {Invoke-Expression "& $FilePath $ArgumentList 2>&1"}
-    else {Invoke-Expression "& $FilePath 2>&1"}
+    if ($ArgumentList) {Invoke-Expression "& '$FilePath' $ArgumentList 2>&1"}
+    else {Invoke-Expression "& '$FilePath' 2>&1"}
 }
 
 Write-Host "MultiPoolMiner Wrapper Started" -BackgroundColor Yellow -ForegroundColor Black
