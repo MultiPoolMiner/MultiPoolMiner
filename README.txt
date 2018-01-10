@@ -19,16 +19,18 @@ In any case your comments are highly recommended.
 
 NOTE: This code contains many experimental features which might NOT work for you. If you find something that is not working, then test if it is working in the main fork first.
 
-###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
+###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/UselessGuru/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 01/01/2018 - v1.22.00 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 10/01/2018 - v1.23.00 - latest version can be found here: https://github.com/UselessGuru/MultiPoolMiner/blob/master/README.txt
 ====================================================================
 
 
 FEATURE SUMMARY:
 
 The bad news first:
-- NVIDIA hardware only! I don't own AMD hardware myself. Sponsors are welcome ;-)
+- NVIDIA hardware only! I don't own AMD hardware myself. Sponsors are welcome ;-).
+  AMD users: If you have time and you would like to help making it wiok with AMD hardware too please update this thread:
+  https://github.com/UselessGuru/MultiPoolMiner/issues/23
 
 - Monitors crypto mining pools and coins in real-time and finds the most profitable for your machine
 - Controls any miner that is available via command line
@@ -322,3 +324,19 @@ A22. Run 'ResetPowerDraw.bat'. This will remove all power consumption data accum
 
 Q23. My GPU compute stats are all mixed up. What can I do?
 A23. Run 'ResetGPUUsage.bat'. This will remove all power consumption data accumulated since MultiPoolMiner was first launched. Note: This will also cause all benchmarks to be re-run.
+
+Q24. What are debug files and can I see what they contain?
+A24. MPM UselessGuru Edition contains extra program code to export some internal data to files (debug files) that may help tracking down issues. These files are not encrypted so you can read the contents. They contain information about your GPU hardware, all statistics, directory listings of some vital MPM folders as well as an overview of all configured pool and miner data as seen by MPM. They DO NOT contain personal information such as passwords or other personal information that you have stored outside the MPM folder on your computer.
+In case of some difficult to analyze problems you my be asked to provide some or all the debug files.
+
+Q25. How to create debug files?
+A25. Follow these simple steps:
+   1. Stop MPM
+   2. Create a directory 'Debug' in the MPM installation directory
+   3. Start MPM -> it will start to create files in the Debug directory
+   4. Let it run until you see the problem occuring that you want to report
+   5. Stop MPM
+   6. If desired: Neutralize the contents by search&replace to remove confidential information, DO NOT remove lines!
+   7. Pack the contents of the Debug folder to a zip file and upload it.
+   
+   To stop creating debug files remove the Debug folder.
