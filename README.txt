@@ -29,7 +29,7 @@ FEATURE SUMMARY:
 
 The bad news first:
 - NVIDIA hardware only! I don't own AMD hardware myself. Sponsors are welcome ;-).
-  AMD users: If you have time and you would like to help making it wiok with AMD hardware too please update this thread:
+  AMD users: If you have time and you would like to help making it work with AMD hardware too please update this thread:
   https://github.com/UselessGuru/MultiPoolMiner/issues/23
 
 - Monitors crypto mining pools and coins in real-time and finds the most profitable for your machine
@@ -189,8 +189,8 @@ $ProfitLessFee = $true
 $MinerWindowStyle = "Minimized"
         WindowStyle for miner windows. Can be any of: "Normal","Maximized","Minimized","Hidden". Note: During benchmark all windows will run in "normal" mode. Warning: "Hidden" can be dangerous because the can only be seen in task manager, therefore NOT recommended
 
-$UseNewMinerLauncher = $true
-        If $true use alternative launcher process to run miners. This will NOT steal focus, but will 'forget' to close running miners on exit. These need to be closed manually.
+$UseAlternateMinerLauncher = $true
+        If $true use alternative launcher process to run miners. This will NOT steal focus when launching new miner windows :-)
 
 $MinProfit = 5
         Minimal required profit, if less it will not mine. The configured value must be in the first currency as defined in $currency (see config item above).
