@@ -12,7 +12,7 @@ NOTE: This code contains many experimental features which might NOT work for you
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/UselessGuru/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 01/01/2018 - v1.22.00 - latest version can be found here: https://github.com/UselessGuru/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 10/01/2018 - v1.23.00 - latest version can be found here: https://github.com/UselessGuru/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -22,6 +22,8 @@ README.md is based on README.txt - updated on 01/01/2018 - v1.22.00 - latest ver
 The bad news first:
 
 - **NVIDIA hardware only! I don't own AMD hardware myself. Sponsors are welcome ;-)**
+  **AMD users: If you have time and you would like to help making it work with AMD hardware too please update this thread:**
+  https://github.com/UselessGuru/MultiPoolMiner/issues/23
 
 - **Monitors crypto mining pools and coins in real-time and finds the most profitable for your machine**
 - **Controls any miner that is available via command line**
@@ -188,8 +190,8 @@ Pools and miners can charge a fee. If set to $true all profit calculations will 
 **$MinerWindowStyle = "Minimized"**
 WindowStyle for miner windows. Can be any of: "Normal","Maximized","Minimized","Hidden". Note: During benchmark all windows will run in "normal" mode. Warning: "Hidden" can be dangerous because the can only be seen in task manager, therefore NOT recommended
 
-**$UseNewMinerLauncher = $true**
-If $true use alternative launcher process to run miners. This will NOT steal focus, but will 'forget' to close running miners on exit. These need to be closed manually.
+**$UseAlternativeMinerLauncher = $true**
+If $true use alternative launcher process to run miners. This will NOT steal focus when launching a miner window :-)
 
 **$MinProfit = 5**
 Minimal required profit, if less it will not mine. The configured value must be in the first currency as defined in $currency (see config item above).
@@ -329,3 +331,20 @@ NvidiaPalgin miners currently do not have a working API, so MPM can not properly
 
 ###### Q23. My GPU compute stats are all mixed up. What can I do?
 ###### A23. Run 'ResetGPUUsage.bat'. This will remove all power consumption data accumulated since MultiPoolMiner was first launched. Note: This will also cause all benchmarks to be re-run.
+
+
+###### Q24. What are debug files and can I see what they contain?
+###### A24. MPM UselessGuru Edition contains extra program code to export some internal data to files (debug files) that may help tracking down issues. These files are not encrypted so you can read the contents. They contain information about your GPU hardware, all statistics, directory listings of some vital MPM folders as well as an overview of all configured pool and miner data as seen by MPM. They DO NOT contain personal information such as passwords or other personal information that you have stored outside the MPM folder on your computer.
+###### In case of some difficult to analyze problems you my be asked to provide some or all the debug files.
+
+###### Q25. How to create debug files?
+###### A25. Follow these simple steps:
+######    1. Stop MPM
+######    2. Create a directory 'Debug' in the MPM installation directory
+######    3. Start MPM -> it will start to create files in the Debug directory
+######    4. Let it run until you see the problem occuring that you want to report
+######    5. Stop MPM
+######    6. If desired: Neutralize the contents by search&replace to remove confidential information, DO NOT remove lines!
+######    7. Pack the contents of the Debug folder to a zip file and upload it.
+   
+######    To stop creating debug files remove the Debug folder.
