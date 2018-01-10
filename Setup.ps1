@@ -135,9 +135,17 @@ $Controls.EnableNewMiners.IsChecked = $True
 if($ExcludeMinerName) {$Controls.EnableNewMiners.IsChecked = $True }
 if($ExcludeMinerName) {$Controls.DisableNewPools.IsChecked = $True }
 
+#Power Tab
+$Controls.PowerPricePerKW.Text = $PowerPricePerKW
+$Controls.Computer_PowerDraw.Text = $Computer_PowerDraw
+$Controls.CPU_PowerDraw.Text = $CPU_PowerDraw
+$Controls.GPU_PowerDraw.Text = $GPU_PowerDraw
+$Controls.ForceBenchmarkOnMissingPowerData.IsChecked = $ForceBenchmarkOnMissingPowerData
+
 #Advanced Tab
 $Controls.Donate.Text = 24
 $Controls.Interval.Text = 60
+$Controls.BenchmarkInterval.Text = $BenchmarkInterval
 $Controls.Delay.Text = 0
 $Controls.SSL.IsChecked = $SSL
 $Controls.Watchdog.IsChecked = $Watchdog
@@ -183,13 +191,19 @@ $Controls.Apply.add_Click({
     $WorkerName = "'$($Controls.WorkerName.Text)'"
     $Donate = $Controls.Donate.Text
     $Interval = $Controls.Interval.Text
+    $BenchmarkInterval = $Controls.BenchmarkInterval.Text
     $Delay = $Controls.Delay.Text
     $SwitchingPrevention = $Controls.SwitchingPrevention.Text
     $MinerStatusURL = "'$($Controls.MinerStatusURL.Text)'"
     $Proxy = "'$($Controls.Proxy.Text)'"
+    $PowerPricePerKW = "'$($Controls.PowerPricePerKW.Text)'"
+    $Computer_PowerDraw = "'$($Controls.Computer_PowerDraw.Text)'"
+    $CPU_PowerDraw = "'$($Controls.CPU_PowerDraw.Text)'"
+    $GPU_PowerDraw = "'$($Controls.GPU_PowerDraw.Text)'"
 
     if($Controls.Watchdog.IsChecked) { $Watchdog = '$True' } else { $Watchdog = '$False' }
     if($Controls.SSL.IsChecked) { $SSL = '$True' } else { $SSL = '$False' }
+    if($Controls.ForceBenchmarkOnMissingPowerData.IsChecked) {$ForceBenchmarkOnMissingPowerData = '$True'} else {$ForceBenchmarkOnMissingPowerData = '$False'}
 
     $Currency = ArrayToString($Controls.Currency.Text -Split ',')
 
@@ -271,8 +285,14 @@ $Controls.Apply.add_Click({
         if($config[$i] -like '$ExcludePoolName =*') { $config[$i] = "`$ExcludePoolName = $ExcludePoolName" }
         if($config[$i] -like '$MinerName =*') { $config[$i] = "`$MinerName = $MinerName" }
         if($config[$i] -like '$ExcludeMinerName =*') { $config[$i] = "`$ExcludeMinerName = $ExcludeMinerName" }
+        if($config[$i] -like '$BenchmarkInterval =*') { $config[$i] = "`$BenchmarkInterval = $BenchmarkInterval" }
+        if($config[$i] -like '$PowerPricePerKW =*') { $config[$i] = "`$PowerPricePerKW = $PowerPricePerKW" }
+        if($config[$i] -like '$Computer_PowerDraw =*') { $config[$i] = "`$Computer_PowerDraw = $Computer_PowerDraw" }
+        if($config[$i] -like '$CPU_PowerDraw =*') { $config[$i] = "`$CPU_PowerDraw = $CPU_PowerDraw" }
+        if($config[$i] -like '$GPU_PowerDraw =*') { $config[$i] = "`$GPU_PowerDraw = $GPU_PowerDraw" }
+        if($config[$i] -like '$ForceBenchmarkOnMissingPowerData =*') { $config[$i] = "`$ForceBenchmarkOnMissingPowerData = $ForceBenchmarkOnMissingPowerData" }
     }
-    
+
     # Write file
     $config | Set-Content -Path "Config.ps1"
     [System.Windows.MessageBox]::Show("Settings saved.  Run start.bat to begin mining.", "Saved","OK","Information")

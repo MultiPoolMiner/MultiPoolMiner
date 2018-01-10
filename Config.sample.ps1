@@ -107,7 +107,7 @@ $DisplayProfitOnly = $false
 $PayoutCurrency = "BTC"
 
 # If $true will evaluate and display MPM miner is faster than... in summary, if $false MPM will not display this and instead save CPU cycles and screen space ;-)
-$DisplayComparison = $Ffalse
+$DisplayComparison = $False
 
 # If $true MPM will display short pool names in summary (condensed mode)
 $UseShortPoolNames = $True

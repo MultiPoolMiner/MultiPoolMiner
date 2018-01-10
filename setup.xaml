@@ -198,12 +198,57 @@
                     <RadioButton GroupName="NewMiners" Name="DisableNewMiners" Content="Disabled until manually enabled (Use $MinerName to include only checked)" VerticalAlignment="Center"/>
                 </StackPanel>                 
             </TabItem>
+            <TabItem Header="Power">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition Height="65"/>
+                        <RowDefinition Height="65"/>
+                        <RowDefinition Height="75"/>
+                        <RowDefinition Height="65"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="0" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="16">Power Settings</TextBlock>
+                    <Label Grid.Row="1" Content="Electricity price per kW:"/>
+                    <StackPanel Grid.Row="1" Grid.Column="1">
+                        <TextBox Name="PowerPricePerKW" VerticalContentAlignment="Center"/>
+                        <TextBlock TextWrapping="Wrap">The configured value must be in the first currency as defined in User Info, Currencies. (0 will disable power cost calculation).</TextBlock>
+                    </StackPanel>
+                    <Label Grid.Row="2" Content="Computer PowerDraw:"/>
+                    <StackPanel Grid.Row="2" Grid.Column="1">
+                        <TextBox Name="Computer_PowerDraw" VerticalContentAlignment="Center"/>
+                        <TextBlock TextWrapping="Wrap">Base power consumption (in Watts) of computer excluding GPUs or CPU mining.</TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Row="3">
+                        <Label Content="CPU PowerDraw:"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="3" Grid.Column="1">
+                        <TextBox Name="CPU_PowerDraw" VerticalContentAlignment="Center"/>
+                        <TextBlock TextWrapping="Wrap">Power consumption (in Watts) of all CPUs when mining (on top of general power (Computer PowerDraw) needed to run your computer when NOT mining)</TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Row="4">
+                        <Label Content="GPU PowerDraw:"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="4" Grid.Column="1">
+                        <TextBox Name="GPU_PowerDraw" VerticalContentAlignment="Center"/>
+                        <TextBlock TextWrapping="Wrap">Power consumption (in Watts) of all GPUs in computer when mining, put a rough estimate here.</TextBlock>
+                    </StackPanel>
+                    <Label Grid.Row="5" Content="Force Benchmark:"/><CheckBox Grid.Row="6" Grid.Column="1" Name="ForceBenchmarkOnMissingPowerData" Content="Force Benchmark on missing power data"/>
+
+
+                    </Grid>
+            </TabItem>
             <TabItem Header="Advanced">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="25"/>
                         <RowDefinition Height="75"/>
                         <RowDefinition/>
+                        <RowDefinition Height="95"/>
                         <RowDefinition Height="55"/>
                         <RowDefinition/>
                         <RowDefinition/>
@@ -226,17 +271,24 @@
                         <TextBox Name="Interval" VerticalContentAlignment="Center"/>
                     </StackPanel>
                     <StackPanel Grid.Row="3">
-                        <Label Content="Delay:"/>
+                        <Label Content="Benchmark Interval:"/>
                     </StackPanel>
                     <StackPanel Grid.Row="3" Grid.Column="1">
+                        <TextBox Name="BenchmarkInterval" VerticalContentAlignment="Center"/>
+                        <TextBlock TextWrapping="Wrap">If configured, MPM will use this interval for benchmark loops, instead of the normal interval. This may help detecting hash rates during benchmarks for slower cards or algorithms that take longer to report hash rates.</TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Row="4">
+                        <Label Content="Delay:"/>
+                    </StackPanel>
+                    <StackPanel Grid.Row="4" Grid.Column="1">
                         <TextBox Name="Delay" VerticalContentAlignment="Center"/>
                         <TextBlock TextWrapping="Wrap">Delay between closing miners and starting new ones.  A small (5-10 second) delay can help with system stability.</TextBlock>
                     </StackPanel>
-                    <Label Grid.Row="4" Content="SSL:"/><CheckBox Grid.Row="4" Grid.Column="1" Name="SSL" Content="Use SSL"/>
-                    <Label Grid.Row="5" Content="Watchdog:"/><CheckBox Grid.Row="5" Grid.Column="1" Name="Watchdog" Content="Use Watchdog"/>
-                    <Label Grid.Row="6" Content="Switching Prevention:"/><StackPanel Grid.Row="6" Grid.Column="1"><TextBox VerticalContentAlignment="Center" Name="SwitchingPrevention"/></StackPanel>
-                    <Label Grid.Row="7" Content="Proxy:"/><StackPanel Grid.Row="7" Grid.Column="1"><TextBox VerticalContentAlignment="Center" Name="Proxy"/></StackPanel>
-                    <Label Grid.Row="8" Content="Miner Status URL:"/><StackPanel Grid.Row="8" Grid.Column="1"><TextBox VerticalContentAlignment="Center" Name="MinerStatusURL"/></StackPanel>
+                    <Label Grid.Row="5" Content="SSL:"/><CheckBox Grid.Row="5" Grid.Column="1" Name="SSL" Content="Use SSL"/>
+                    <Label Grid.Row="6" Content="Watchdog:"/><CheckBox Grid.Row="6" Grid.Column="1" Name="Watchdog" Content="Use Watchdog"/>
+                    <Label Grid.Row="7" Content="Switching Prevention:"/><StackPanel Grid.Row="7" Grid.Column="1"><TextBox VerticalContentAlignment="Center" Name="SwitchingPrevention"/></StackPanel>
+                    <Label Grid.Row="8" Content="Proxy:"/><StackPanel Grid.Row="8" Grid.Column="1"><TextBox VerticalContentAlignment="Center" Name="Proxy"/></StackPanel>
+                    <Label Grid.Row="9" Content="Miner Status URL:"/><StackPanel Grid.Row="9" Grid.Column="1"><TextBox VerticalContentAlignment="Center" Name="MinerStatusURL"/></StackPanel>
 
 
                     </Grid>
