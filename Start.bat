@@ -5,6 +5,7 @@ setx GPU_MAX_HEAP_SIZE 100
 setx GPU_USE_SYNC_OBJECTS 1
 setx GPU_MAX_ALLOC_PERCENT 100
 setx GPU_SINGLE_ALLOC_PERCENT 100
+setx CUDA_DEVICE_ORDER PCI_BUS_ID
 
 set "command=& .\multipoolminer.ps1"
 if not exist "Config.ps1" set "command=& .\Setup.ps1"
