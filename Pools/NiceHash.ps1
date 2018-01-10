@@ -18,8 +18,8 @@ $ShortPoolName = "NH"
 if (-not $WorkerName) {$WorkerName = $env:computername}
 if ($WorkerName.Length -gt 15) {$WorkerName = $WorkerName.substring(0,15)}
 
-#$Nicehash_Regions = "eu", "usa", "hk", "jp", "in", "br"
-$Nicehash_Regions = "eu"
+$Nicehash_Regions = "eu", "usa", "hk", "jp", "in", "br"
+
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 if ($UseShortPoolNames -and $ShortPoolName) {$PoolName = $ShortPoolName} else {$PoolName = $Name}
 $URI = "http://api.nicehash.com/api?method=simplemultialgo.info"
