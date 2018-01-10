@@ -346,5 +346,4 @@ NvidiaPalgin miners currently do not have a working API, so MPM can not properly
 ######    5. Stop MPM
 ######    6. If desired: Neutralize the contents by search&replace to remove confidential information, DO NOT remove lines!
 ######    7. Pack the contents of the Debug folder to a zip file and upload it.
-   
 ######    To stop creating debug files remove the Debug folder.
