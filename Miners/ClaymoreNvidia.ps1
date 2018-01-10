@@ -45,7 +45,7 @@ $Devices | ForEach-Object {
 
         while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)) {$Port++}
 
-        if ($Pools.$($MainAlgorithm_Norm).Name -and -not $Secondary) {
+        if ($Pools.$($MainAlgorithm_Norm).Name -and -not $SecondaryAlgorithm) {
 
             [PSCustomObject]@{
                 Name         = $Name
