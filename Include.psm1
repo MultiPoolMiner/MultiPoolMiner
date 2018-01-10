@@ -8,8 +8,8 @@ Add-Type -Path .\OpenCL\*.cs
 Function Write-Log {
     [CmdletBinding()]
     Param(
-        [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName=$true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
-        [Parameter(Mandatory=$false)][ValidateSet("Error","Warn","Info","Verbose","Debug")][string]$Level = "Info"
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
+        [Parameter(Mandatory = $false)][ValidateSet("Error", "Warn", "Info", "Verbose", "Debug")][string]$Level = "Info"
     )
 
     Begin { }
@@ -18,8 +18,8 @@ Function Write-Log {
         $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
         if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
-        
-        switch($Level) {
+
+        switch ($Level) {
             'Error' {
                 $LevelText = 'ERROR:'
                 Write-Error -Message $Message
@@ -273,8 +273,8 @@ function ConvertTo-LocalCurrency {
     )
 
     $Number = $Number * $BTCRate
-    
-    switch ([math]::truncate([math]::log($BTCRate, [Math]::Pow(10, 1))) -2 + $Offset) {
+
+    switch ([math]::truncate([math]::log($BTCRate, [Math]::Pow(10, 1))) - 2 + $Offset) {
         default {$Number.ToString("N0")}
         0 {$Number.ToString("N5")}
         1 {$Number.ToString("N4")}
