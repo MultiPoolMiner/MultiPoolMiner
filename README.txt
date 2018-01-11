@@ -203,7 +203,6 @@ Example:
 Determination of "biased" estimated profit:
 
 The percentage amount that a reported estimated profit value is reduced, is based on the calculation below.
-
 Percent Estimated Profit Reduction = (Margin of Error * SwitchingPrevention) / (Value that grows exponentially based on the number of minutes current miner has been running)
 
 This means that the longer the current miner is running, the less MPM takes the Margin of Error into consideration and the less it reduces the estimated profit value. By adjusting the -SwitchingPrevention value up, you increase the effect the Margin of Error has on the calculation and, therefore, increase the amount of current miner run-time required to reduce this effect.
