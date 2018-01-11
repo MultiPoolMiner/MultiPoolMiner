@@ -100,11 +100,11 @@ function Get-GPUdevices {
                 if ($MinerType_Devices.Type -contains $Miner_Type -and $MinerType_Devices.Device -contains $Device) {
                     $MinerType_Devices | Where {$_.Type -eq $Miner_Type -and $_.Device -eq $Device} | ForEach {$_.Devices += "$Device_ID"}
                 }
-                else {
+                elseif ($GPU.Device) {
                     $MinerType_Devices += $GPU
                 }
                 $Device_ID++
-            }
+           }
            if ($SimulateExtraHW) {
                 # Simulate more HW   
                 [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
