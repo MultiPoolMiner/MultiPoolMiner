@@ -196,10 +196,10 @@ $Controls.Apply.add_Click({
     $SwitchingPrevention = $Controls.SwitchingPrevention.Text
     $MinerStatusURL = "'$($Controls.MinerStatusURL.Text)'"
     $Proxy = "'$($Controls.Proxy.Text)'"
-    $PowerPricePerKW = "'$($Controls.PowerPricePerKW.Text)'"
-    $Computer_PowerDraw = "'$($Controls.Computer_PowerDraw.Text)'"
-    $CPU_PowerDraw = "'$($Controls.CPU_PowerDraw.Text)'"
-    $GPU_PowerDraw = "'$($Controls.GPU_PowerDraw.Text)'"
+    $PowerPricePerKW = "$($Controls.PowerPricePerKW.Text)"
+    $Computer_PowerDraw = "$($Controls.Computer_PowerDraw.Text)"
+    $CPU_PowerDraw = "$($Controls.CPU_PowerDraw.Text)"
+    $GPU_PowerDraw = "$($Controls.GPU_PowerDraw.Text)"
 
     if($Controls.Watchdog.IsChecked) { $Watchdog = '$True' } else { $Watchdog = '$False' }
     if($Controls.SSL.IsChecked) { $SSL = '$True' } else { $SSL = '$False' }
