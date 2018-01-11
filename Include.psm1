@@ -100,11 +100,11 @@ function Get-GPUdevices {
                 if ($MinerType_Devices.Type -contains $Miner_Type -and $MinerType_Devices.Device -contains $Device) {
                     $MinerType_Devices | Where {$_.Type -eq $Miner_Type -and $_.Device -eq $Device} | ForEach {$_.Devices += "$Device_ID"}
                 }
-                else {
+                elseif ($GPU.Device) {
                     $MinerType_Devices += $GPU
                 }
                 $Device_ID++
-            }
+           }
            if ($SimulateExtraHW) {
                 # Simulate more HW   
                 [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq "GPU" -and $_.Vendor -match "^$($Miner_Type) .+"} | ForEach-Object {
@@ -649,13 +649,17 @@ function ConvertTo-LocalCurrency {
 
     $Number = $Number * $BTCRate
     
-    switch ([math]::truncate([math]::log($BTCRate, [Math]::Pow(10, 1))) -2 + $Offset) {
-        default {$Number.ToString("N0")}
-        0 {$Number.ToString("N5")}
-        1 {$Number.ToString("N4")}
-        2 {$Number.ToString("N3")}
-        3 {$Number.ToString("N2")}
-        4 {$Number.ToString("N1")}
+    switch ([math]::truncate(10 - $Offset - [math]::log($BTCRate, [Math]::Pow(10, 1)))) {
+        0 {$Number.ToString("N0")}
+        1 {$Number.ToString("N1")}
+        2 {$Number.ToString("N2")}
+        3 {$Number.ToString("N3")}
+        4 {$Number.ToString("N4")}
+        5 {$Number.ToString("N5")}
+        6 {$Number.ToString("N6")}
+        7 {$Number.ToString("N7")}
+        8 {$Number.ToString("N8")}
+        Default {$Number.ToString("N9")}
     }
 }
 

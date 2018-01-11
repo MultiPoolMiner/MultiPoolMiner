@@ -1,79 +1,81 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
-class Ewbf : Miner {
-    [PSCustomObject]GetData ([String[]]$Algorithm, [Bool]$Safe = $false) {
-        $Server = "localhost"
-        $Timeout = 10 #seconds
+$Path = ".\Bin\NVIDIA-EWBF\zminer.exe"
+$Uri = "https://github.com/poolgold/ewbf-miner-btg-edition/releases/download/v0.3.4b-BTG/BTG-nVidia.miner.0.3.4b.zip"
 
-        $Delta = 0.05
-        $Interval = 5
-        $HashRates = @()
+# Custom command to be applied to all algorithms
+$CommonCommands = ""
 
-        $PowerDraws = @()
-        $ComputeUsages = @()
+$Commands = [PSCustomObject]@{
+    #"bitcore"      = "" #Bitcore
+    #"blake2s"      = "" #Blake2s
+    #"blakecoin"    = "" #Blakecoin
+    #"vanilla"      = "" #BlakeVanilla
+    #"cryptonight"  = "" #Cryptonight
+    #"decred"       = "" #Decred
+    "equihash"      = "" #Equihash
+    #"ethash"       = "" #Ethash
+    #"groestl"      = "" #Groestl
+    #"hmq1725"      = "" #hmq1725
+    #"keccak"       = "" #Keccak
+    #"lbry"         = "" #Lbry
+    #"lyra2v2"      = "" #Lyra2RE2
+    #"lyra2z"       = "" #Lyra2z
+    #"myr-gr"       = "" #MyriadGroestl
+    #"neoscrypt"    = "" #NeoScrypt
+    #"nist5"        = "" #Nist5
+    #"pascal"       = "" #Pascal
+    #"qubit"        = "" #Qubit
+    #"scrypt"       = "" #Scrypt
+    #"sia"          = "" #Sia
+    #"sib"          = "" #Sib
+    #"skein"        = "" #Skein
+    #"timetravel"   = "" #Timetravel
+    #"x11"          = "" #X11
+    #"x11evo"       = "" #X11evo
+    #"x17"          = "" #X17
+    #"yescrypt"     = "" #Yescrypt
+}
 
-        $Request = @{id = 1; method = "getstat"} | ConvertTo-Json -Compress
-        $Response = ""
-        $Data = ""
-        
-        do {
-            # Read Data from hardware
-            $ComputeData = [PSCustomObject]@{}
-            $ComputeData = (Get-ComputeData -MinerType $this.type -Index $this.index)
-            $PowerDraws += $ComputeData.PowerDraw
-            $ComputeUsages += $ComputeData.ComputeUsage
-            
-            $HashRates += $HashRate = [PSCustomObject]@{}
+#Cannot do SSL
+if ($Pools.Equihash.SSL) {exit}
 
-            try {
-                $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
-                $Data = $Response | ConvertFrom-Json -ErrorAction Stop
-            }
-            catch {
-                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
-                break
-            }
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$Port = 4001 + 40 * $ItemCounter
+$Type = "NVIDIA"
+$Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
+$Devices | ForEach-Object {
+    $Device = $_
 
-            $HashRate_Name = [String]$Algorithm[0]
-            $HashRate_Value = [Double]($Data.result.sol_ps | Measure-Object -Sum).Sum
-            if (-not $HashRate_Value) {$HashRate_Value = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum} #ewbf fix
+    $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where {$_ -cnotmatch "^_.+" -and $Pools.$(Get-Algorithm($_)).Name -and {$Pools.$(Get-Algorithm($_)).Protocol -eq "stratum+tcp" <#temp fix#>}} | ForEach-Object {
 
-            $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
+        $Algorithm = Get-Algorithm($_)
+        $Command = $Commands.$_
 
-            $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
+        if ($Devices.count -gt 1) {
+            $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($Device.Device_Norm)"
+            $Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) --cuda_devices $($Device.Devices -join ',')"
+            $Index = $Device.Devices -join ","
+        }
 
-            if (-not $Safe) {break}
+        while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)) {$Port++}
 
-            $HashRate_Value = [Double]($Data.result.avg_sol_ps | Measure-Object -Sum).Sum
-
-            if ($HashRate_Value) {
-                $HashRates += $HashRate = [PSCustomObject]@{}
-
-                $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
-
-                $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
-            }
-
-            Start-Sleep $Interval
-        } while ($HashRates.Count -lt 6)
-
-        $HashRate = [PSCustomObject]@{}
-        $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
-        $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
-
-        $PowerDraws_Info = [PSCustomObject]@{}
-        $PowerDraws_Info = ($PowerDraws | Measure-Object -Maximum -Minimum -Average)
-        $PowerDraw = if ($PowerDraws_Info.Maximum - $PowerDraws_Info.Minimum -le $PowerDraws_Info.Average * $Delta) {$PowerDraws_Info.Maximum} else {$PowerDraws_Info.Average}
-
-        $ComputeUsages_Info = [PSCustomObject]@{}
-        $ComputeUsages_Info = ($ComputeUsages | Measure-Object -Maximum -Minimum -Average)
-        $ComputeUsage = if ($ComputeUsages_Info.Maximum - $ComputeUsages_Info.Minimum -le $ComputeUsages_Info.Average * $Delta) {$ComputeUsages_Info.Maximum} else {$ComputeUsages_Info.Average}
-        
-        return [PSCustomObject]@{
-            HashRate     = $HashRate
-            PowerDraw    = $PowerDraw
-            ComputeUsage = $ComputeUsage
-            Response     = $Response
+        [PSCustomObject]@{
+            Name         = $Name
+            Type         = $Device.Type
+            Device       = $Device.Device
+            Path         = $Path
+            Arguments    = ("--eexit 1 --api 0.0.0.0:$port --server $($Pools.Equihash.Host) --port $($Pools.Equihash.Port) --user $($Pools.Equihash.User) --pass $($Pools.Equihash.Pass) --fee 0 --intensity 64 $Command $CommonCommands").trim()
+            HashRates    = [PSCustomObject]@{$Algorithm = $Stats."$($Name)_Equihash_HashRate".Week}
+            API          = "DSTM"
+            Port         = $Port
+            URI          = $Uri
+            PowerDraw    = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
+            ComputeUsage = $Stats."$($Name)_$($Algorithm)_ComputeUsage".Week
+            Pool         = "$($Pools.$Algorithm.Name)"
+            Index        = $Index
         }
     }
+    if ($Port) {$Port ++}
 }
+Sleep 0

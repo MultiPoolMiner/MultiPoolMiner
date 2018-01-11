@@ -1,4 +1,5 @@
 ﻿using module .\Include.psm1
+import-module $env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetTCPIP\NetTCPIP.psd1
 
 $ProgressPreference = 'silentlyContinue' 
 . .\MyInclude.ps1
@@ -7,6 +8,8 @@ Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 # Make sure there is a log directory
 if (-not (Test-Path "Logs")) {New-Item "Logs" -ItemType "directory" | Out-Null}
+if (-not (Test-Path "Cache")) {New-Item "Cache" -ItemType "directory" | Out-Null}
+if (-not (Test-Path "Data")) {New-Item "Data" -ItemType "directory" | Out-Null}
 
 # Read configuration
 Write-Log -Message "Applying configuration from Config.ps1..."
@@ -66,10 +69,24 @@ $DonateDistribution = 0,0,0,0,0,0,0,0,1,1 #8:2
 
 # UselessGuru: Support for power & profit calculation; read device information
 $GPUs = (Get-GPUdevices $Type $DeviceSubTypes)
+
+#UselessGuru: Debug stuff
 if (Test-Path "Debug") {
-    [OpenCl.Platform]::GetPlatformIDs() | Out-File "Debug\OpenCL1.txt"
-    [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Out-File "Debug\OpenCL2.txt"
-    $GPUs | Export-Clixml -Path "Debug\GPUs.xml"}
+    Copy-Item "Config.ps1" "Debug\Config.ps1"
+    Copy-Item "MultiPoolMiner.ps1" "Debug\MultiPoolMiner.ps1"
+    Copy-Item "Include.psm1" "Debug\Include.psm1"
+    Copy-Item "Pools" "Debug" -Recurse
+    Copy-Item "Miners" "Debug" -Recurse
+}
+
+if (Test-Path "DebugIn\GPUs.xml") {
+    $GPUs = Import-CliXML -Path "DebugIn\GPUs.xml"
+}
+elseif (Test-Path "Debug") {
+    [OpenCl.Platform]::GetPlatformIDs() | Export-CliXML "Debug\OpenCL1.xml"
+    [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Export-CliXML "Debug\OpenCL2.xml"
+    $GPUs | Export-Clixml -Path "Debug\GPUs.xml"
+}
 
 # Read API definitions
 Write-Log -Message "Loading miner APIs..."
@@ -143,7 +160,12 @@ while ($true) {
     Write-Log -Message "Loading saved statistics..."	
     $Stats = [PSCustomObject]@{}
     if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
-    if (Test-Path "Debug") {$Stats | Export-Clixml -Path "Debug\Stats-$((Get-Date).ticks).xml"}
+
+    if (Test-Path "DebugIn\Stats-*.xml") {$Stats = Import-Clixml -Path "DebugIn\Stats-*.xml"}
+    elseif (Test-Path "Debug") {
+        $Stats | Export-Clixml -Path "Debug\Stats-$((Get-Date).ticks).xml"
+        Get-ChildItem "Stats" -Recurse | Out-File "Debug\Stats.lst"
+    }
 
     #Load information about the pools
 	Write-Log -Message "Loading pool information..."
@@ -152,17 +174,24 @@ while ($true) {
         $NewPools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; UserName = $UserName; Password = $Password; WorkerName = $WorkerName; StatSpan = $StatSpan; Algorithm = $Algorithm; PayoutCurrency = $PayoutCurrency; ProfitLessFee = $ProfitLessFee; MinPoolWorkers = $MinPoolWorkers; UseShortPoolNames = $UseShortPoolNames} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru}
         <# $NewPools = Get-ChildItemContent "Pools" -Parameters @{Wallet = $Wallet; UserName = $UserName; WorkerName = $WorkerName; StatSpan = $StatSpan} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru} #>
     }
-    if (Test-Path "Debug") {$NewPools | Export-Clixml -Path "Debug\NewPools-$((Get-Date).ticks).xml"}
+    # Debug stuff
+    if (Test-Path "DebugIn\NewPools-*.xml") {$NewPools = Import-Clixml -Path "DebugIn\NewPools-*.xml"}
+    elseif (Test-Path "Debug") {$NewPools | Export-Clixml -Path "Debug\NewPools-$((Get-Date).ticks).xml"}
+    
     # This finds any pools that were already in $AllPools (from a previous loop) but not in $NewPools. Add them back to the list. Their API likely didn't return in time, but we don't want to cut them off just yet
     # since mining is probably still working. Then it filters out any algorithms that aren't being used.
 	$AllPools = @($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object {$AllPools | Where-Object Name -EQ $_}) | 
         Where-Object {$Algorithm.Count -eq 0 -or (Compare-Object $Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
         Where-Object {$ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $ExcludeAlgorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
 
-    if (Test-Path "Debug") {$AllPools | Export-Clixml -Path "Debug\AllPools-$((Get-Date).ticks).xml"}
+    if (Test-Path "DebugIn\AllPools-*.xml") {$AllPools = Import-Clixml -Path "DebugIn\AllPools-*.xml"}
+    elseif (Test-Path "Debug") {
+        $AllPools | Export-Clixml -Path "Debug\AllPools-$((Get-Date).ticks).xml"
+        Get-ChildItem "Pools" -Recurse | Out-File "Debug\Pools.lst"
+    }
 
     #Remove non-present pools
-    $AllPools = $AllPools | Where-Object {Test-Path "Pools\$($_.Name).ps1"}
+    if (-not (Test-Path "DebugIn")) {$AllPools = $AllPools | Where-Object {Test-Path "Pools\$($_.Name).ps1"}}
 
     #Apply watchdog to pools
     $AllPools = $AllPools | Where-Object {
@@ -190,7 +219,9 @@ while ($true) {
     else {
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.Price * (1 - ($Pools.$_.MarginOfError * $SwitchingPrevention * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
     }
-    if (Test-Path "Debug") {$Pools | Export-Clixml -Path "Debug\Pools-$((Get-Date).ticks).xml"}
+    # Debug stuff
+    if (Test-Path "DebugIn\Pools-*.xml") {$Pools = Import-Clixml -Path "DebugIn\Pools-*.xml"}
+    elseif (Test-Path "Debug") {$Pools | Export-Clixml -Path "Debug\Pools-$((Get-Date).ticks).xml"}
 
     #Load information about the miners
     #Messy...?
@@ -200,6 +231,7 @@ while ($true) {
     # select only the miners that match $MinerName, if specified, and don't match $ExcludeMinerName
     if (Test-Path "Debug") {
         Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; StatSpan = $StatSpan; GPUs = $GPUs} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru} | Export-Clixml -Path "Debug\Miners1-$((Get-Date).ticks).xml"
+        Get-ChildItem "Miners" -Recurse | Out-File "Debug\Miners.lst"
     }
     $AllMiners = if (Test-Path "Miners") {
         Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; StatSpan = $StatSpan; GPUs = $GPUs} | ForEach-Object {$_.Content | Add-Member Name $_.Name -Force -PassThru} | <# UselessGuru#>
@@ -210,7 +242,9 @@ while ($true) {
             Where-Object {$MinerName.Count -eq 0 -or (Compare-Object $MinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
             Where-Object {$ExcludeMinerName.Count -eq 0 -or (Compare-Object $ExcludeMinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
     }
-    if (Test-Path "Debug") {$AllPools | Export-Clixml -Path "Debug\AllPools-$((Get-Date).ticks).xml"}
+    if (Test-Path "DebugIn\AllMiners-*.xml") {$AllMiners = Import-Clixml -Path "DebugIn\AllMiners-*.xml"}
+    elseif (Test-Path "Debug") {$AllMiners | Export-Clixml -Path "Debug\AllMiners-$((Get-Date).ticks).xml"}
+    
     # UselessGuru: By default mining is NOT profitable
     $MiningIsProfitable = $false
     # UselessGuru: By default no benchmark mode
@@ -359,7 +393,10 @@ while ($true) {
     if ($Downloader.State -ne "Running") {
         $Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList (@($AllMiners | Where-Object {$_.PrerequisitePath} | Select-Object @{name = "URI"; expression = {$_.PrerequisiteURI}}, @{name = "Path"; expression = {$_.PrerequisitePath}}, @{name = "Searchable"; expression = {$false}}) + @($AllMiners | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($AllMiners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}}) | Select-Object * -Unique) -FilePath .\Downloader.ps1
     }
-    if (Test-Path "Debug") {$Miners | Export-Clixml -Path "Debug\Miners-$((Get-Date).ticks).xml"}
+    #Debug stuff
+    if (Test-Path "DebugIn\Miners-*.xml") {$Miners = Import-Clixml -Path "DebugIn\Miners-*.xml"}
+    elseif (Test-Path "Debug") {$Miners | Export-Clixml -Path "Debug\Miners-$((Get-Date).ticks).xml"}
+
     # Open firewall ports for all miners
     if (Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) {
         if ((Get-Command "Get-MpComputerStatus" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue)) {
@@ -467,7 +504,11 @@ while ($true) {
             }
         }
     }
-    if (Test-Path "Debug") {$ActiveMiners | Export-Clixml -Path "Debug\ActiveMiners-$((Get-Date).ticks).xml"}
+
+    # Debug Stuff
+    if (Test-Path "DebugIn\ActiveMiners-*.xml") {$ActiveMiners = Import-Clixml -Path "DebugIn\ActiveMiners-*.xml"}
+    elseif (Test-Path "Debug") {$ActiveMiners | Export-Clixml -Path "Debug\ActiveMiners-$((Get-Date).ticks).xml"}
+    
     $ActiveMiners | Where-Object Device_Auto | ForEach-Object {
         $Miner = $_
         $Miner.Device = ($Miners | Where-Object {(Compare-Object $Miner.Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}).Device | Select-Object -Unique | Sort-Object
@@ -652,6 +693,12 @@ while ($true) {
     }  <# End UselessGuru: Support $MiningIsProfitable switch #>
 
     if ($MinerStatusURL) {& .\ReportStatus.ps1 -Address $WalletBackup -WorkerName $WorkerNameBackup -ActiveMiners $ActiveMiners -Miners $Miners -MinerStatusURL $MinerStatusURL}
+
+    # Export variables for GUI and debugging purposes
+    $ActiveMiners | Export-Clixml -Path 'Data\ActiveMiners.xml'
+    $Miners | Export-Clixml -Path 'Data\Miners.xml'
+    $Pools | Export-Clixml -Path 'Data\Pools.xml'
+    $AllPools | Export-Clixml -Path 'Data\AllPools.xml'
 
 #    if ($PowerPricePerKW -gt 0) { 
 #        $PowerCostSummary = ScriptBlock {
