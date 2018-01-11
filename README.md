@@ -4,7 +4,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 11/01/2018 - v1.22.1 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 11/01/2018 - v1.22.2 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -72,7 +72,8 @@ The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to 
 - Hash Refinery http://pool.hashrefinery.com (Bitcoin address must be provided using the -wallet command, see below)
 - Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -wallet command, see below)
 - A Hash Pool https://www.ahashpool.com/ (Bitcoin address must be provided using the -wallet command, see below)
-- Upcoming pool support for: [BlockMunch](http://www.blockmunch.club/) | [ItalYiiMP](http://www.italyiimp.com/)
+- BlockMunch http://www.blockmunch.club/ (Bitcoin address must be provided using the -wallet command, see below)
+- ItalYiiMP http://www.italyiimp.com/ (Bitcoin address must be provided using the -wallet command, see below)
 
 ***IMPORTANT**: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
 
@@ -100,7 +101,7 @@ Supported algorithms sorted by pool can be found at https://multipoolminer.io/al
 
 The following algorithms are currently supported: 
 
-    Bitcore, Blakecoin, Blake2s, BlakeVanilla, C11, CryptoNight, Ethash, X11, Decred, Equihash, Groestl, HMQ1725, JHA, Keccak, Lbry, Lyra2RE2, Lyra2z, MyriadGroestl, NeoScrypt, Nist5, Pascal, Polytimos, Quark, Qubit, Scrypt, SHA256, Sia, Sib, Skunk, Skein, Timetravel, Tribus, BlakeVanilla, Veltor, X11, X11evo, X17, Yescrypt
+    Bitcore, Blakecoin, Blake2s, BlakeVanilla, C11, CryptoNight, Ethash, X11, Decred, Equihash, Groestl, HMQ1725, HSR, JHA, Keccak, Lbry, Lyra2RE2, Lyra2z, MyriadGroestl, NeoScrypt, Nist5, Pascal, Phi, Polytimos, Quark, Qubit, Scrypt, SHA256, Sia, Sib, Skunk, Skein, Timetravel, Tribus, Veltor, X11, X11evo, X17, Yescrypt
 
 #### Special parameters: 
 - **ethash2gb** - can be profitable for older GPUs that have 2GB or less GDDR memory. It includes ethash coins that have a DAG file size of less than 2GB (and will be mined when most profitable). Ethereum and a few other coins have surpassed this size therefore cannot be mined with older cards.
