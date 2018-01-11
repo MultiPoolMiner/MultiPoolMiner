@@ -1,4 +1,5 @@
 ﻿using module .\Include.psm1
+import-module $env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetTCPIP\NetTCPIP.psd1
 
 $ProgressPreference = 'silentlyContinue' 
 . .\MyInclude.ps1
