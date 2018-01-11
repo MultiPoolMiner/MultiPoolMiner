@@ -190,7 +190,7 @@ Since version 2.6, the delta value (integer) that was used to determine how ofte
 - The most profitable miner/algorithm/pool combination for your rig is selected and (if it isn't already running) it is launched.
 - MPM idles for a pre-defined interval of time (default 60 seconds), then repeats the steps above.
 
-**Formula:**
+##### **Formula:**
 
     [Price] x (1 - ([Fluctuation] x [Switching Prevention] x 0.9^[Intervals Past]))
     i.e. 123 x (1 - (0.2 x 2 x 0.9^5)
@@ -203,7 +203,7 @@ where:
     0.9 is 10% reduction
     5 is minutes if interval is 60 seconds
 
-**Example 1:**
+##### **Example 1:**
 
 	If SwitchingPrevention = 2 and accuracy of most profitable coin = 90%
 	Then NegativeValue = -20%
@@ -214,7 +214,7 @@ where:
 	Takes 6 minutes for 20% to reduce to 10%.
 	Takes 28 minutes for 20% to reduce to 1%.
 	
-**Example 2:**
+##### **Example 2:**
 
 	If SwitchingPrevention = 4 and accuracy of most profitable coin = 90%
 	Then NegativeValue = -40%
@@ -226,6 +226,7 @@ where:
 ### Determination of "biased" estimated profit:
 
 The percentage amount that a reported estimated profit value is reduced, is based on the calculation below.
+
 Percent Estimated Profit Reduction = (Margin of Error * SwitchingPrevention) / (Value that grows exponentially based on the number of minutes current miner has been running)
 
 This means that the longer the current miner is running, the less MPM takes the Margin of Error into consideration and the less it reduces the estimated profit value. By adjusting the -SwitchingPrevention value up, you increase the effect the Margin of Error has on the calculation and, therefore, increase the amount of current miner run-time required to reduce this effect.
