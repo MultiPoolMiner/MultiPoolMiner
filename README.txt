@@ -189,8 +189,18 @@ Switching (or anti-switching) logic:
     - The "biased" estimated profits for each enabled pool/algorithm are combined with the benchmark hashrates previously calculated for all miners to calculate potential profit for your specific rig.
     - The most profitable miner/algorithm/pool combination for your rig is selected and (if it isn't already running) it is launched.
     - MPM idles for a pre-defined interval of time (default 60 seconds), then repeats the steps above.
-    
-Example:
+
+Formula:
+	[Price] x (1 - ([Fluctuation] x [Switching Prevention] x 0.9^[Intervals Past]))
+	i.e. 123 x (1 - (0.2 x 2 x 0.9^5)
+	where:
+	123 is BTC
+	1 is 100%
+	0.2 is 80% accuracy
+	0.9 is 10% reduction
+	5 is minutes if interval is 60 seconds
+
+Example 1:
 	If SwitchingPrevention = 2 and accuracy of most profitable coin = 90%
 	Then NegativeValue = -20%
 
@@ -199,6 +209,14 @@ Example:
 	It can switch at any moment but to put the negative value into perspective:
 	Takes 6 minutes for 20% to reduce to 10%.
 	Takes 28 minutes for 20% to reduce to 1%.
+	
+Example 2:
+	If SwitchingPrevention = 4 and accuracy of most profitable coin = 90%
+	Then NegativeValue = -40%
+	
+	It takes 13 minutes for 40% to reduce to 10%.
+	0.9 ^ 13 * 40 = 10
+	
 
 Determination of "biased" estimated profit:
 
