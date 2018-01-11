@@ -70,12 +70,20 @@ $DonateDistribution = 0,0,0,0,0,0,0,0,1,1 #8:2
 $GPUs = (Get-GPUdevices $Type $DeviceSubTypes)
 
 #UselessGuru: Debug stuff
+if (Test-Path "Debug") {
+    Copy-Item "Config.ps1" "Debug\Config.ps1"
+    Copy-Item "MultiPoolMiner.ps1" "Debug\MultiPoolMiner.ps1"
+    Copy-Item "Include.psm1" "Debug\Include.psm1"
+    Copy-Item "Pools" "Debug" -Recurse
+    Copy-Item "Miners" "Debug" -Recurse
+}
+
 if (Test-Path "DebugIn\GPUs.xml") {
     $GPUs = Import-CliXML -Path "DebugIn\GPUs.xml"
 }
 elseif (Test-Path "Debug") {
-    [OpenCl.Platform]::GetPlatformIDs() | Out-File "Debug\OpenCL1.txt"
-    [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Out-File "Debug\OpenCL2.txt"
+    [OpenCl.Platform]::GetPlatformIDs() | Export-CliXML "Debug\OpenCL1.xml"
+    [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Export-CliXML "Debug\OpenCL2.xml"
     $GPUs | Export-Clixml -Path "Debug\GPUs.xml"
 }
 
