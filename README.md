@@ -4,7 +4,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 01/01/2018 - v1.21.22 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 01/01/2018 - v1.21.23 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -142,6 +142,8 @@ It works on a unified interval that is defaulted to 60 seconds. Watchdog timers 
 
 Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
 	
+**-switchingprevention**
+Since version 2.6, the delta value (integer) that was used to determine how often MultiPoolMiner is allowed to switch, is now user-configurable on a scale of 1 to infinity on an intensity basis. Default is 1 (Start.bat default is 2). Recommended values are 1-10 where 1 means the most frequent switching and 10 means the least switching. Please note setting this value to zero (0) will not turn this function off! Please see further explanation in MULTIPOOLMINER'S LOGIC section below. 
 
 	
 ====================================================================
@@ -166,6 +168,71 @@ Watchdog timers reset after three times the number of seconds it takes to get to
     pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
 
     pause
+
+
+====================================================================
+
+
+## MULTIPOOLMINER'S LOGIC:
+
+### General overview:
+
+- The various pools estimated profit values (visible on their respective web pages) are determined by the pools themselves. Each algorithm's estimated profit value is a combination of the current mined coin's last known exchange value in BTC, the coins network difficulty (or network hashrate) and the current pools overall hashrate.
+- MPM polls all pools it knows about (enabled or not) on a pre-defined interval (default is every 60 seconds) to gather the pools estimated profit for all of its advertised algorithms. As these profits change at each polling interval (based on the three factors mentioned above), MPM tracks how often and how drastic the changes are per algorithm and records this per-algorithm as a "fluctuation" metric. This fluctuation or margin-of-error is represented in MPM's output as "accuracy". e.g. An algorithm whose reported estimated profit values have a 90% accuracy can be conversely thought of as having a 10% margin-of-error.
+- As MPM repeatedly polls the pools over time, the more correct the reported accuracy (i.e. margin of error) becomes for a particular pools algorithm.
+- Due to the nature of pool-based mining, it is generally considered better to mine longer on algorithms that are most profitable with low margin-of-error over time (i.e. high accuracy). Technically, this takes into account concepts like PPLNS vs. PPS, ramp-up time for reported pool hash rate vs. miner reported hash rates, new/cheap coins with wildly fluctuating exchange prices etc.
+
+### Switching (or anti-switching) logic:
+
+- MPM retrieves the estimated profit for all pools/algorithms and filters out any undesired algorithms.
+- The estimated profit for each pool/algorithm combo is reduced by a calculated percentage amount (see below for specifics) to determine a "biased" estimated profit.
+- The "biased" estimated profits for each enabled pool/algorithm are combined with the benchmark hashrates previously calculated for all miners to calculate potential profit for your specific rig.
+- The most profitable miner/algorithm/pool combination for your rig is selected and (if it isn't already running) it is launched.
+- MPM idles for a pre-defined interval of time (default 60 seconds), then repeats the steps above.
+
+**Formula:**
+
+    [Price] x (1 - ([Fluctuation] x [Switching Prevention] x 0.9^[Intervals Past]))
+    i.e. 123 x (1 - (0.2 x 2 x 0.9^5)
+    
+where:
+
+    123 is BTC
+    1 is 100%
+    0.2 is 80% accuracy
+    0.9 is 10% reduction
+    5 is minutes if interval is 60 seconds
+
+**Example 1:**
+
+	If SwitchingPrevention = 2 and accuracy of most profitable coin = 90%
+	Then NegativeValue = -20%
+
+	The negative value then decays by 10% every minute.
+
+	It can switch at any moment but to put the negative value into perspective:
+	Takes 6 minutes for 20% to reduce to 10%.
+	Takes 28 minutes for 20% to reduce to 1%.
+	
+**Example 2:**
+
+	If SwitchingPrevention = 4 and accuracy of most profitable coin = 90%
+	Then NegativeValue = -40%
+	
+	It takes 13 minutes for 40% to reduce to 10%.
+	0.9 ^ 13 * 40 = 10
+	
+
+### Determination of "biased" estimated profit:
+
+The percentage amount that a reported estimated profit value is reduced, is based on the calculation below.
+Percent Estimated Profit Reduction = (Margin of Error * SwitchingPrevention) / (Value that grows exponentially based on the number of minutes current miner has been running)
+
+This means that the longer the current miner is running, the less MPM takes the Margin of Error into consideration and the less it reduces the estimated profit value. By adjusting the -SwitchingPrevention value up, you increase the effect the Margin of Error has on the calculation and, therefore, increase the amount of current miner run-time required to reduce this effect.
+
+In practice, this explains why when you first launch MPM it may pick a pool/algorithm combo that has a lower value in the "Currency/Day" column, as it is favoring a more accurate combo. Over time, assuming the more profitable pool/algorithm stays more profitable, the accuracy will have less and less weight in the miner selection calculation process until MPM eventually switches over to it.
+
+*Please note, a new install of MultiPoolMiner has no historical information on which to build accurate "margin-of-error" values. MPM will, therefore, sometimes make less desirable miner selections and switch more often until it can gather enough coin data to stabilize its decision-making process.*
 
 
 ====================================================================
