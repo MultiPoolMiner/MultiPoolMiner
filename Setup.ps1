@@ -80,7 +80,9 @@ $Controls.logo.Source = $i
 $Controls.Wallet.Text = $Wallet
 $Controls.Username.Text = $UserName
 $Controls.API_KEY.Text = $API_Key
+$Controls.Password.Text = $Password
 $Controls.Currency.Text = $Currency -Join ","
+
 # Machine tab
 $Controls.WorkerName.Text = $WorkerName
 $Controls.RegionUSA.IsChecked = ($Region -eq 'US')
@@ -142,16 +144,36 @@ $Controls.CPU_PowerDraw.Text = $CPU_PowerDraw
 $Controls.GPU_PowerDraw.Text = $GPU_PowerDraw
 $Controls.ForceBenchmarkOnMissingPowerData.IsChecked = $ForceBenchmarkOnMissingPowerData
 
-#Advanced Tab
-$Controls.Donate.Text = 24
-$Controls.Interval.Text = 60
+#Advanced 1 Tab
+$Controls.Donate.Text = $Donate
+$Controls.Interval.Text = $Interval
 $Controls.BenchmarkInterval.Text = $BenchmarkInterval
-$Controls.Delay.Text = 0
+$Controls.Delay.Text = $Delay
 $Controls.SSL.IsChecked = $SSL
 $Controls.Watchdog.IsChecked = $Watchdog
 $Controls.SwitchingPrevention.Text = $SwitchingPrevention
+
+#Advanced 2 Tab
 $Controls.Proxy.Text = $Proxy
 $Controls.MinerStatusURL.Text = $MinerStatusURL
+$Controls.DeviceSubTypes.IsChecked = $DeviceSubTypes
+$Controls.MinPoolWorkers.Text = $MinPoolWorkers
+$Controls.ProfitLessFee.IsChecked = $ProfitLessFee
+$Controls.WindowNormal.IsChecked = ($MinerWindowStyle -eq 'Normal')
+$Controls.WindowMaximized.IsChecked = ($MinerWindowStyle -eq 'Maximised')
+$Controls.WindowMinimized.IsChecked = ($MinerWindowStyle -eq 'Minimized')
+$Controls.WindowHidden.IsChecked = ($MinerWindowStyle -eq 'Hidden')
+$Controls.UseAlternateMinerLauncher.IsChecked = $UseAlternateMinerLauncher
+$Controls.UseJobsForGetData.IsChecked = $UseJobsForGetData
+
+#Advanced 3 Tab
+$Controls.MinProfit.Text = $MinProfit
+$Controls.BeepOnError.IsChecked = $BeepOnError
+$Controls.DisplayProfitOnly.IsChecked = $DisplayProfitOnly
+$Controls.PayoutCurrency.Text = $PayoutCurrency
+$Controls.DisplayComparison.IsChecked = $DisplayComparison
+$Controls.UseShortPoolNames.IsChecked = $UseShortPoolNames
+$Controls.UseDopeColoring.IsChecked = $UseDopeColoring
 
 # Setup functions for buttons
 $Controls.Next.add_Click({
@@ -185,38 +207,26 @@ $Controls.Apply.add_Click({
     }
 
     # Generate settings based on the controls - these must all be the exact string that comes after the = sign for that setting.
+
+    # User Info
     $Wallet = "'$($Controls.Wallet.Text)'"
     $Username = "'$($Controls.Username.Text)'"
     $API_KEY = "'$($Controls.API_KEY.Text)'"
-    $WorkerName = "'$($Controls.WorkerName.Text)'"
-    $Donate = $Controls.Donate.Text
-    $Interval = $Controls.Interval.Text
-    $BenchmarkInterval = $Controls.BenchmarkInterval.Text
-    $Delay = $Controls.Delay.Text
-    $SwitchingPrevention = $Controls.SwitchingPrevention.Text
-    $MinerStatusURL = "'$($Controls.MinerStatusURL.Text)'"
-    $Proxy = "'$($Controls.Proxy.Text)'"
-    $PowerPricePerKW = "$($Controls.PowerPricePerKW.Text)"
-    $Computer_PowerDraw = "$($Controls.Computer_PowerDraw.Text)"
-    $CPU_PowerDraw = "$($Controls.CPU_PowerDraw.Text)"
-    $GPU_PowerDraw = "$($Controls.GPU_PowerDraw.Text)"
-
-    if($Controls.Watchdog.IsChecked) { $Watchdog = '$True' } else { $Watchdog = '$False' }
-    if($Controls.SSL.IsChecked) { $SSL = '$True' } else { $SSL = '$False' }
-    if($Controls.ForceBenchmarkOnMissingPowerData.IsChecked) {$ForceBenchmarkOnMissingPowerData = '$True'} else {$ForceBenchmarkOnMissingPowerData = '$False'}
-
+    $Password = "'$($Controls.Password.Text)'"
     $Currency = ArrayToString($Controls.Currency.Text -Split ',')
 
+    # Machine
+    $WorkerName = "'$($Controls.WorkerName.Text)'"
+    $Region = '''Europe'''
+    if($Controls.RegionUSA.IsChecked) { $Region = '''US''' }
+    if($Controls.RegionAsia.IsChecked) { $Region = '''Asia''' }
     $TypeArray = @()
     if($Controls.TypeNVIDIA.IsChecked) { $TypeArray += "NVIDIA" }
     if($Controls.TypeAMD.IsChecked) { $TypeArray += "AMD" }
     if($Controls.TypeCPU.IsChecked) { $TypeArray += "CPU" }
     $Type = ArrayToString($TypeArray)
 
-    $Region = '''Europe'''
-    if($Controls.RegionUSA.IsChecked) { $Region = '''US''' }
-    if($Controls.RegionAsia.IsChecked) { $Region = '''Asia''' }
-
+    # Pools
     if($Controls.EnableNewPools.IsChecked) {
         # $PoolName left empty so new ones get automatically included. Put any unchecked ones into $ExcludePoolName
         $PoolName = ArrayToString(@())
@@ -231,6 +241,7 @@ $Controls.Apply.add_Click({
         $PoolName = ArrayToString($PoolNameArray)
     }
 
+    # Algorithms
     if($Controls.EnableNewAlgorithms.IsChecked) {
         # $Algorithm left empty so new ones get automatically included. Put any unchecked ones into $ExcludeAlgorithm
         $Algorithm = ArrayToString(@())
@@ -245,6 +256,7 @@ $Controls.Apply.add_Click({
         $Algorithm = ArrayToString($AlgorithmArray)
     }
 
+    # Miners
     if($Controls.EnableNewMiners.IsChecked) {
         # $MinerName left empty so new ones get automatically included. Put any unchecked ones into $ExcludeMinerName
         $MinerName = ArrayToString(@())
@@ -259,38 +271,109 @@ $Controls.Apply.add_Click({
         $MinerName = ArrayToString($MinerNameArray)
     }
 
+    # Power
+    $PowerPricePerKW = $Controls.PowerPricePerKW.Text
+    $Computer_PowerDraw = $Controls.Computer_PowerDraw.Text
+    $CPU_PowerDraw = $Controls.CPU_PowerDraw.Text
+    $GPU_PowerDraw = $Controls.GPU_PowerDraw.Text
+    if($Controls.ForceBenchmarkOnMissingPowerData.IsChecked) {$ForceBenchmarkOnMissingPowerData = '$True'} else {$ForceBenchmarkOnMissingPowerData = '$False'}
+
+    # Advanced 1
+    $Donate = $Controls.Donate.Text
+    $Interval = $Controls.Interval.Text
+    $BenchmarkInterval = $Controls.BenchmarkInterval.Text
+    $Delay = $Controls.Delay.Text
+    if($Controls.SSL.IsChecked) { $SSL = '$True' } else { $SSL = '$False' }
+    if($Controls.Watchdog.IsChecked) { $Watchdog = '$True' } else { $Watchdog = '$False' }
+    $SwitchingPrevention = $Controls.SwitchingPrevention.Text
+
+    # Advanced 2
+    $Proxy = "'$($Controls.Proxy.Text)'"
+    $MinerStatusURL = "'$($Controls.MinerStatusURL.Text)'"
+    if($Controls.DeviceSubTypes.IsChecked) { $DeviceSubTypes = '$True' } else { $DeviceSubTypes = '$False' }
+    $MinPoolWorkers = $Controls.MinPoolWorkers.Text
+    if($Controls.ProfitLessFee.IsChecked) { $ProfitLessFee = '$True' } else { $ProfitLessFee = '$False' }
+    $MinerWindowStyle = '''Minimized'''
+    if($Controls.WindowNormal.IsChecked) { $MinerWindowStyle = '''Normal''' }
+    if($Controls.WindowMaximized.IsChecked) { $MinerWindowStyle = '''Maximized''' }
+    if($Controls.WindowHidden.IsChecked) { $MinerWindowStyle = '''Hidden''' }
+    if($Controls.UseAlternateMinerLauncher.IsChecked) { $UseAlternateMinerLauncher = '$True' } else { $UseAlternateMinerLauncher = '$False' }
+    if($Controls.UseJobsForGetData.IsChecked) { $UseJobsForGetData = '$True' } else { $UseJobsForGetData = '$False' }
+
+    # Advanced 3
+    $MinProfit = $Controls.MinProfit.Text
+    if($Controls.BeepOnError.IsChecked) { $BeepOnError = '$True' } else { $BeepOnError = '$False' }
+    if($Controls.DisplayProfitOnly.IsChecked) { $DisplayProfitOnly = '$True' } else { $DisplayProfitOnly = '$False' }
+    $PayoutCurrency = "'$($Controls.PayoutCurrency.Text)'"
+    if($Controls.DisplayComparison.IsChecked) { $DisplayComparison = '$True' } else { $DisplayComparison = '$False' }
+    if($Controls.UseShortPoolNames.IsChecked) { $UseShortPoolNames = '$True' } else { $UseShortPoolNames = '$False' }
+    if($Controls.UseDopeColoring.IsChecked) { $UseDopeColoring = '$True' } else { $UseDopeColoring = '$False' }
+
+
     # Change the lines in $Config to match the new settings
     # Why not just write a brand new config file?  Because this lets you keep any other lines intact - so new parameters that aren't in the setup yet can still be edited in a text editor.
     for($i=0; $i -lt $config.Count; $i++) {
 
         # Update the lines in the config file
+
+        # User Info
         if($config[$i] -like '$Wallet =*') { $config[$i] = "`$Wallet = $Wallet" }
         if($config[$i] -like '$Username =*') { $config[$i] = "`$Username = $Username" }
         if($config[$i] -like '$API_Key =*') { $config[$i] = "`$API_KEY = $API_KEY" }
-        if($config[$i] -like '$WorkerName =*') { $config[$i] = "`$WorkerName = $WorkerName" }
-        if($config[$i] -like '$Donate =*') { $config[$i] = "`$Donate = $Donate" }
-        if($config[$i] -like '$Interval =*') { $config[$i] = "`$Interval = $Interval" }
-        if($config[$i] -like '$Region =*') { $config[$i] = "`$Region = $Region" }
-        if($config[$i] -like '$Delay =*') { $config[$i] = "`$Delay = $Delay" }
-        if($config[$i] -like '$MinerStatusURL =*') { $config[$i] = "`$MinerStatusURL = $MinerStatusURL" }
-        if($config[$i] -like '$SwitchingPrevention =*') { $config[$i] = "`$SwitchingPrevention = $SwitchingPrevention" }
-        if($config[$i] -like '$Proxy =*') { $config[$i] = "`$Proxy = $Proxy" }
+        if($config[$i] -like '$Password =*') { $config[$i] = "`$Password = $Password" }
         if($config[$i] -like '$Currency =*') { $config[$i] = "`$Currency = $Currency" }
+
+        # Machine
+        if($config[$i] -like '$WorkerName =*') { $config[$i] = "`$WorkerName = $WorkerName" }
+        if($config[$i] -like '$Region =*') { $config[$i] = "`$Region = $Region" }
         if($config[$i] -like '$Type =*') { $config[$i] = "`$Type = $Type" }
-        if($config[$i] -like '$Watchdog =*') { $config[$i] = "`$Watchdog = $Watchdog" }
-        if($config[$i] -like '$SSL =*') { $config[$i] = "`$SSL = $SSL" }
-        if($config[$i] -like '$Algorithm =*') { $config[$i] = "`$Algorithm = $Algorithm" }
-        if($config[$i] -like '$ExcludeAlgorithm =*') { $config[$i] = "`$ExcludeAlgorithm = $ExcludeAlgorithm" }
+
+        # Pools
         if($config[$i] -like '$PoolName =*') { $config[$i] = "`$PoolName = $PoolName" }
         if($config[$i] -like '$ExcludePoolName =*') { $config[$i] = "`$ExcludePoolName = $ExcludePoolName" }
+
+        # Algorithms
+        if($config[$i] -like '$Algorithm =*') { $config[$i] = "`$Algorithm = $Algorithm" }
+        if($config[$i] -like '$ExcludeAlgorithm =*') { $config[$i] = "`$ExcludeAlgorithm = $ExcludeAlgorithm" }
+
+        # Miners
         if($config[$i] -like '$MinerName =*') { $config[$i] = "`$MinerName = $MinerName" }
         if($config[$i] -like '$ExcludeMinerName =*') { $config[$i] = "`$ExcludeMinerName = $ExcludeMinerName" }
-        if($config[$i] -like '$BenchmarkInterval =*') { $config[$i] = "`$BenchmarkInterval = $BenchmarkInterval" }
+
+        # Power
         if($config[$i] -like '$PowerPricePerKW =*') { $config[$i] = "`$PowerPricePerKW = $PowerPricePerKW" }
         if($config[$i] -like '$Computer_PowerDraw =*') { $config[$i] = "`$Computer_PowerDraw = $Computer_PowerDraw" }
         if($config[$i] -like '$CPU_PowerDraw =*') { $config[$i] = "`$CPU_PowerDraw = $CPU_PowerDraw" }
         if($config[$i] -like '$GPU_PowerDraw =*') { $config[$i] = "`$GPU_PowerDraw = $GPU_PowerDraw" }
         if($config[$i] -like '$ForceBenchmarkOnMissingPowerData =*') { $config[$i] = "`$ForceBenchmarkOnMissingPowerData = $ForceBenchmarkOnMissingPowerData" }
+
+        # Advanced 1
+        if($config[$i] -like '$Donate =*') { $config[$i] = "`$Donate = $Donate" }
+        if($config[$i] -like '$Interval =*') { $config[$i] = "`$Interval = $Interval" }
+        if($config[$i] -like '$BenchmarkInterval =*') { $config[$i] = "`$BenchmarkInterval = $BenchmarkInterval" }
+        if($config[$i] -like '$Delay =*') { $config[$i] = "`$Delay = $Delay" }
+        if($config[$i] -like '$SSL =*') { $config[$i] = "`$SSL = $SSL" }
+        if($config[$i] -like '$Watchdog =*') { $config[$i] = "`$Watchdog = $Watchdog" }
+        if($config[$i] -like '$SwitchingPrevention =*') { $config[$i] = "`$SwitchingPrevention = $SwitchingPrevention" }
+
+        # Advanced 2
+        if($config[$i] -like '$Proxy =*') { $config[$i] = "`$Proxy = $Proxy" }
+        if($config[$i] -like '$MinerStatusURL =*') { $config[$i] = "`$MinerStatusURL = $MinerStatusURL" }
+        if($config[$i] -like '$DeviceSubTypes =*') { $config[$i] = "`$DeviceSubTypes = $DeviceSubTypes" }
+        if($config[$i] -like '$MinPoolWorkers =*') { $config[$i] = "`$MinPoolWorkers = $MinPoolWorkers" }
+        if($config[$i] -like '$ProfitLessFee =*') { $config[$i] = "`$ProfitLessFee = $ProfitLessFee" }
+        if($config[$i] -like '$MinerWindowStyle =*') { $config[$i] = "`$MinerWindowStyle = $MinerWindowStyle" }
+        if($config[$i] -like '$UseAlternateMinerLauncher =*') { $config[$i] = "`$UseAlternateMinerLauncher = $UseAlternateMinerLauncher" }
+        if($config[$i] -like '$UseJobsForGetData =*') { $config[$i] = "`$UseJobsForGetData = $UseJobsForGetData" }
+
+        # Advanced 3
+        if($config[$i] -like '$MinProfit =*') { $config[$i] = "`$MinProfit = $MinProfit" }
+        if($config[$i] -like '$BeepOnError =*') { $config[$i] = "`$BeepOnError = $BeepOnError" }
+        if($config[$i] -like '$DisplayProfitOnly =*') { $config[$i] = "`$DisplayProfitOnly = $DisplayProfitOnly" }
+        if($config[$i] -like '$PayoutCurrency =*') { $config[$i] = "`$PayoutCurrency = $PayoutCurrency" }
+        if($config[$i] -like '$DisplayComparison =*') { $config[$i] = "`$DisplayComparison = $DisplayComparison" }
+        if($config[$i] -like '$UseShortPoolNames =*') { $config[$i] = "`$UseShortPoolNames = $UseShortPoolNames" }
+        if($config[$i] -like '$UseDopeColoring =*') { $config[$i] = "`$UseDopeColoring = $UseDopeColoring" }
     }
 
     # Write file
