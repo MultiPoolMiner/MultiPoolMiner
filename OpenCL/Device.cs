@@ -303,7 +303,7 @@ namespace OpenCl
         public Platform Platform
         {
             get {
-                var handle = Cl.GetInfo<IntPtr>(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_NAME);
+                var handle = Cl.GetInfo<IntPtr>(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_PLATFORM);
                 return new Platform(handle);
             }
         }
@@ -390,13 +390,13 @@ namespace OpenCl
             ErrorCode error;
             uint count;
 
-            error = NativeMethods.clGetDeviceIDs(platform.handle, type, 0, null, out count);
+            error = NativeMethods.clGetDeviceIDs((platform?.handle).GetValueOrDefault(), type, 0, null, out count);
             if (error != ErrorCode.Success) {
                 throw new OpenClException(error);
             }
 
             var ids = new IntPtr[count] ;
-            error = NativeMethods.clGetDeviceIDs(platform.handle, type, count, ids, out count);
+            error = NativeMethods.clGetDeviceIDs((platform?.handle).GetValueOrDefault(), type, count, ids, out count);
             if (error != ErrorCode.Success) {
                 throw new OpenClException(error);
             }
@@ -426,6 +426,11 @@ namespace OpenCl
                 res[i] = devices[i].handle;
             }
             return res;
+        }
+
+        internal static IntPtr[] ToIntPtr(Device device)
+        {
+            return new IntPtr[] { device.handle };
         }
     }
 }
