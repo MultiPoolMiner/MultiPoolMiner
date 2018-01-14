@@ -1,6 +1,6 @@
 using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-EWBF\zminer.exe"
+$Path = ".\Bin\NVIDIA-EWBF\miner.exe"
 $Uri = "https://github.com/poolgold/ewbf-miner-btg-edition/releases/download/v0.3.4b-BTG/BTG-nVidia.miner.0.3.4b.zip"
 
 # Custom command to be applied to all algorithms
