@@ -4,245 +4,545 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MultiPoolMinerSetup"
-        Title="MultiPoolMiner Setup" Height="700" Width="525">
-<Viewbox VerticalAlignment="Top" HorizontalAlignment="Center">
-<DockPanel>
-        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" >
-            <Button Name="Exit" Width="120" Margin="0,0,0,0">Exit without saving</Button>
-            <Button Name="Apply" Width="120" Margin="80,0,0,0">Apply</Button>
-            <Button Name="Next" Width="120" Margin="85,0,0,0">Next</Button>
-        </StackPanel>
-        <TabControl x:Name="tabControl" VerticalAlignment="Top" Height="660" Width="525" TabStripPlacement="Top" Padding="10">
-            <TabItem Header="Welcome">
-                <StackPanel>
-                    <Image Name="logo" Height="109" Width="109"/>
+        Title="MultiPoolMiner Setup" Height="700" Width="620">
+
+    <Viewbox VerticalAlignment="Top" HorizontalAlignment="Center">
+
+        <DockPanel>
+
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" >
+                <Button Name="Exit" Width="130" Margin="0,0,0,0">Exit without saving</Button>
+                <Button Name="Apply" Width="130" Margin="105,0,0,0">Apply</Button>
+                <Button Name="Next" Width="130" Margin="105,0,0,0">Next</Button>
+            </StackPanel>
+            <TabControl x:Name="tabControl" VerticalAlignment="Top" Height="660" Width="620" TabStripPlacement="Top" Padding="10">
+
+                <TabItem Header="Welcome">
+                    <StackPanel>
+                        <Image Name="logo" Height="109" Width="109"/>
                         <TextBlock FontWeight="Bold" FontSize="16" Margin="0,0,0,10">Welcome to the MultiPoolMiner setup Wizard.</TextBlock>
-                    <TextBlock>This will guide you through setting up MultiPoolMiner for this machine.</TextBlock>
-                    <TextBlock TextWrapping="Wrap">If you are unsure which options to choose, accept the defaults - they work reasonably well for most people.</TextBlock>
-                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,10,0,10">About MultiPoolMiner</TextBlock>
-                    <TextBlock Margin="0,0,0,10">created by aaronsace</TextBlock>
-                    <TextBlock FontWeight="Bold">Features:</TextBlock>
-                    <TextBlock>- Controls any miner that is available via command line</TextBlock>
-                    <TextBlock>- Supports benchmarking</TextBlock>
-                    <TextBlock>- Supports multiple platforms: AMD, NVIDIA and CPU</TextBlock>
-                    <TextBlock>- Supports multiple pools</TextBlock>
+                        <TextBlock>This will guide you through setting up MultiPoolMiner for this machine.</TextBlock>
+                        <TextBlock TextWrapping="Wrap">If you are unsure which options to choose, accept the defaults - they work reasonably well for most people.</TextBlock>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,10,0,10">About MultiPoolMiner</TextBlock>
+                        <TextBlock Margin="0,0,0,10">created by aaronsace</TextBlock>
+                        <TextBlock FontWeight="Bold">Features:</TextBlock>
+                        <TextBlock>- Controls any miner that is available via command line</TextBlock>
+                        <TextBlock>- Supports benchmarking</TextBlock>
+                        <TextBlock>- Supports multiple platforms: AMD, NVIDIA and CPU</TextBlock>
+                        <TextBlock>- Supports multiple pools</TextBlock>
+                    </StackPanel>
+                </TabItem>
 
+                <TabItem Header="User Info">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                    
-                </StackPanel>
-            </TabItem>
-            <TabItem Header="User Info">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition Height="40"/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="150"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="16">Address and Username</TextBlock>
-                    <Label Grid.Row="1" Content="Bitcoin Address:"/>
-                    <StackPanel Grid.Row="1" Grid.Column="1">
-                        <TextBox Name="Wallet" VerticalContentAlignment="Center"/>
-                        <TextBlock TextWrapping="Wrap">Your bitcoin address is used to track your earnings at most pools, and is the address funds will be paid to. These pools do not require any signup. Multiple machines can (and should) mine to the same bitcoin address to ensure quicker payouts.</TextBlock>
-                    </StackPanel>
-                    <Label Grid.Row="2" Content="MultiPoolHub Username:"/>
-                    <StackPanel Grid.Row="2" Grid.Column="1">
-                        <TextBox Name="Username" VerticalContentAlignment="Center"/>
-                        <TextBlock TextWrapping="Wrap">Multipoolhub uses your username instead of bitcoin address to track your earnings. You must sign up at http://miningpoolhub.com</TextBlock>
-                    </StackPanel>
-                    <StackPanel Grid.Row="3">
-                        <Label Content="MultiPoolHub API Key:"/>
-                        <Label Content="(Optional)"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="3" Grid.Column="1">
-                        <TextBox Name="API_KEY" VerticalContentAlignment="Center"/>
-                        <TextBlock TextWrapping="Wrap">API key from https://miningpoolhub.com/?page=account&amp;action=edit</TextBlock>
-                    </StackPanel>
-                    <Label Grid.Row="4" Content="Currencies:"/>
-                    
-                    <StackPanel Grid.Row="4" Grid.Column="1">
-                        <TextBox Name="Currency" VerticalContentAlignment="Center"/>
-                        <TextBlock TextWrapping="Wrap">Currencies to show profit in.</TextBlock>
-                    </StackPanel>
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="16" Margin="5">Address and Username</TextBlock>
 
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Bitcoin Address:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
+                            <TextBox Name="Wallet"/>
+                            <TextBlock TextWrapping="Wrap">Your bitcoin address is used to track your earnings at most pools, and is the address funds will be paid to. These pools do not require any signup. Multiple machines can (and should) mine to the same bitcoin address to ensure quicker payouts.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">MultiPoolHub Username:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="5">
+                            <TextBox Name="Username"/>
+                            <TextBlock TextWrapping="Wrap">Multipoolhub uses your username instead of bitcoin address to track your earnings. You must sign up at http://miningpoolhub.com</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="3" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">MultiPoolHub API Key:</TextBlock>
+                            <TextBlock TextWrapping="Wrap">(Optional)</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Grid.Column="1" Margin="5">
+                            <TextBox Name="API_KEY"/>
+                            <TextBlock TextWrapping="Wrap">API key from https://miningpoolhub.com/?page=account&amp;action=edit</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="4" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Password:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Grid.Column="1" Margin="5">
+                            <TextBox Name="Password"/>
+                            <TextBlock TextWrapping="Wrap">For most pools this is not of importance, so just leave the default.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="5" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Currencies:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" Grid.Column="1" Margin="5">
+                            <TextBox Name="Currency"/>
+                            <TextBlock TextWrapping="Wrap">Currencies to show profit in.</TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="Machine">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="16" Margin="5">Machine Configuration</TextBlock>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Worker Name:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
+                            <TextBox Name="WorkerName"/>
+                            <TextBlock TextWrapping="Wrap">The worker name is used to track this particular machine's mining performance. It is recommended that each machine have a unique name.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Region:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="5">
+                            <RadioButton GroupName="Region" Name="RegionUSA" Content="USA"/>
+                            <RadioButton GroupName="Region" Name="RegionEurope" Content="Europe"/>
+                            <RadioButton GroupName="Region" Name="RegionAsia" Content="Asia"/>
+                            <TextBlock TextWrapping="Wrap">Choose the region closest to this worker, to connect to pool servers with the lowest latency.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="3" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Mining Types:</TextBlock>
+                        </StackPanel>
+                        <Label Grid.Row="3" Content="Mining Types:"/>
+                        <StackPanel Grid.Row="3" Grid.Column="1" Margin="5">
+                            <CheckBox Name="TypeNVIDIA" Content="NVIDIA"/>
+                            <CheckBox Name="TypeAMD" Content="AMD"/>
+                            <CheckBox Name="TypeCPU" Content="CPU"/>
+                            <TextBlock TextWrapping="Wrap">Types of devices to mine with. CPU mining can cause performance issues, and is recommended to be left off on systems with weak CPUs.</TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="Pools">
+                    <StackPanel>
+                        <TextBlock FontSize="16" FontWeight="Bold">Pool Selection</TextBlock>
+                        <TextBlock TextWrapping="Wrap">Check pools you prefer to mine at. More pools can mean better profitability, but spreads your profit out so you wait longer for payouts. Pools that are not selected here may still be used if the most profitable algorithm is only available at that pool, or if all your preferred pools are down.</TextBlock>
+
+                        <ListView Name="PoolsList" Height="450">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Include">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding Path=Checked}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="Name">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Path=Name}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+
+                        <Label>New pools should be:</Label>
+                        <RadioButton GroupName="NewPools" Name="EnableNewPools" Content="Enabled automatically (Use $ExcludePoolName to exclude unchecked)" VerticalContentAlignment="Center"/>
+                        <RadioButton GroupName="NewPools" Name="DisableNewPools" Content="Disabled until manually enabled (Use $PoolName to include only checked)" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </TabItem>
+
+                <TabItem Header="Algorithms">
+                    <StackPanel>
+                        <TextBlock FontSize="16" FontWeight="Bold">Algorithm Selection</TextBlock>
+                        <TextBlock TextWrapping="Wrap">Check which algorithms you wish to mine.  The default selection is a good starting point.</TextBlock>
+                        <WrapPanel Name="Algorithms"></WrapPanel>
+
+                        <ListView Name="AlgorithmsList" Height="500">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Include">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding Path=Checked}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="Name">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Path=Name}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+
+                        <Label>New algorithms should be:</Label>
+                        <RadioButton GroupName="NewAlgorithms" Name="EnableNewAlgorithms" Content="Enabled automatically (Use $ExcludeAlgorithm to exclude unchecked)" VerticalContentAlignment="Center"/>
+                        <RadioButton GroupName="NewAlgorithms" Name="DisableNewAlgorithms" Content="Disabled until manually enabled (Use $Algorithm to include only checked)" VerticalAlignment="Center"/>
+                    </StackPanel>                
+                </TabItem>
+
+                <TabItem Header="Miners">
+                    <StackPanel>
+                        <TextBlock FontSize="16" FontWeight="Bold">Miner Selection</TextBlock>
+                        <TextBlock TextWrapping="Wrap">Check which miners you wish to use. You should leave them all enabled unless a specific one is causing issues.  They will all be benchmarked most efficient ones for your hardware will automatically be used.</TextBlock>
+
+                        <ListView Name="MinersList" Height="480">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn Header="Include">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <CheckBox IsChecked="{Binding Path=Checked}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn Header="Name">
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Path=Name}"/>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+
+                        <Label>New miners should be:</Label>
+                        <RadioButton GroupName="NewMiners" Name="EnableNewMiners" Content="Enabled automatically (Use $ExcludeMinerName to exclude unchecked)" VerticalContentAlignment="Center"/>
+                        <RadioButton GroupName="NewMiners" Name="DisableNewMiners" Content="Disabled until manually enabled (Use $MinerName to include only checked)" VerticalAlignment="Center"/>
+                    </StackPanel>                 
+                </TabItem>
+
+                <TabItem Header="Power">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="16" Margin="5">Power Settings (UselessGuru Edition)</TextBlock>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Electricity price per kW:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
+                            <TextBox Name="PowerPricePerKW"/>
+                            <TextBlock TextWrapping="Wrap">The configured value must be in the first currency as defined in User Info, Currencies. (0 will disable power cost calculation).</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Computer PowerDraw:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="5">
+                            <TextBox Name="Computer_PowerDraw"/>
+                            <TextBlock TextWrapping="Wrap">Base power consumption (in Watts) of computer excluding GPUs or CPU mining.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="3" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">CPU PowerDraw:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Grid.Column="1" Margin="5">
+                            <TextBox Name="CPU_PowerDraw"/>
+                            <TextBlock TextWrapping="Wrap">Power consumption (in Watts) of all CPUs when mining (on top of general power (Computer PowerDraw) needed to run your computer when NOT mining)</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="4" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">GPU PowerDraw:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Grid.Column="1" Margin="5">
+                            <TextBox Name="GPU_PowerDraw"/>
+                            <TextBlock TextWrapping="Wrap">Power consumption (in Watts) of all GPUs in computer when mining, put a rough estimate here.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="5" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Force Benchmark:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" Grid.Column="1" Margin="5">
+                            <CheckBox Name="ForceBenchmarkOnMissingPowerData" Content="Force Benchmark on missing power data"/>
+                            <TextBlock TextWrapping="Wrap">If checked MPM will force re-bechmarking all algorithms for which there is no power data available (e.g. after having delete the power stats).</TextBlock>
+                            <TextBlock TextWrapping="Wrap">If unchecked MPM cannot properly calculate profit until power data has been retrieved, projected profit will be too high. This will push theses algorithms higher in the profitability list and will eventually re-benchmark.</TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="Advanced 1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="16" Margin="5">Advanced Settings 1</TextBlock>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Minutes per day to donate:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
+                            <TextBox Name="Donate"/>
+                            <TextBlock TextWrapping="Wrap">Number of minutes each day to donate mining power to the creators.  Default is 24 minutes (1.6%). Minimum is 10 minutes (0.7%).</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Interval:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="5">
+                            <TextBox Name="Interval"/>
+                            <TextBlock TextWrapping="Wrap">MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc). It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="3" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Benchmark Interval:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Grid.Column="1" Margin="5">
+                            <TextBox Name="BenchmarkInterval"/>
+                            <TextBlock TextWrapping="Wrap">If configured, MPM will use this interval for benchmark loops, instead of the normal interval. This may help detecting hash rates during benchmarks for slower cards or algorithms that take longer to report hash rates.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="4" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Delay:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Grid.Column="1" Margin="5">
+                            <TextBox Name="Delay"/>
+                            <TextBlock TextWrapping="Wrap">Delay between closing miners and starting new ones.  A small (5-10 second) delay can help with system stability.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="5" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">SSL:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" Grid.Column="1" Margin="5">
+                            <CheckBox Name="SSL"/>
+                            <TextBlock TextWrapping="Wrap">Enabling SSL will restrict the miner application list to include only the miners that support secure connection.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="6" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Watchdog:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="6" Grid.Column="1" Margin="5">
+                            <CheckBox Name="Watchdog"/>
+                            <TextBlock TextWrapping="Wrap">Enable the watchdog feature which detects and handles miner and other related failures. It works on a unified interval that is defaulted to 60 seconds. Watchdog timers expire if three of those intervals pass without being kicked. There are three stages as to what action is taken when watchdog timers expire and is determined by the number of related expired timers.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="7" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Switching Prevention:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="7" Grid.Column="1" Margin="5">
+                            <TextBox Name="SwitchingPrevention"/>
+                            <TextBlock TextWrapping="Wrap">Zero does not prevent miners switching (0 will force MPM to always mine the highest paying algo, not recommended!; 1 and greater: the bigger the number, the less switching.</TextBlock>
+                        </StackPanel>
+                    </Grid>
+                </TabItem>
+
+                <TabItem Header="Advanced 2">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="16" Margin="5">Advanced Settings 2 (UselessGuru Edition)</TextBlock>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Proxy:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
+                            <TextBox Name="Proxy"/>
+                            <TextBlock TextWrapping="Wrap">Specify your proxy address if applicable, i.e http://192.0.0.1:8080</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Miner Status URL:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="5">
+                            <TextBox Name="MinerStatusURL"/>
+                            <TextBlock TextWrapping="Wrap">Send mining status to a URL for monitoring.  This sends information about the miners running on this worker to a remote monitoring web interface.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="3" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Device Sub Types:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Grid.Column="1" Margin="5">
+                            <CheckBox Name="DeviceSubTypes"/>
+                            <TextBlock TextWrapping="Wrap">Separate miners will be launched for each GPU model class, this will further help to increase profit. Note: This is an experimental feature!</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="4" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Minium Pool Workers:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Grid.Column="1" Margin="5">
+                            <TextBox Name="MinPoolWorkers"/>
+                            <TextBlock TextWrapping="Wrap">Minimum workers required to mine on coin. Requires coin. If less skip the coin, there is little point in mining a coin if there are only very few miners working on it. To always mine all coins set to 0.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="5" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Profit less fees:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" Grid.Column="1" Margin="5">
+                            <CheckBox Name="ProfitLessFee"/>
+                            <TextBlock TextWrapping="Wrap">Pools and miners can charge a fee. If checked all profit calculations will automatically by lowered by the fee</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="6" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Miner Window Style:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="6" Grid.Column="1" Margin="5">
+                            <RadioButton GroupName="MinerWindowStyle" Name="WindowNormal" Content="Normal"/>
+                            <RadioButton GroupName="MinerWindowStyle" Name="WindowMaximized" Content="Maximized"/>
+                            <RadioButton GroupName="MinerWindowStyle" Name="WindowMinimized" Content="Minimized"/>
+                            <RadioButton GroupName="MinerWindowStyle" Name="WindowHidden" Content="Hidden"/>
+                            <TextBlock TextWrapping="Wrap">WindowStyle for miner windows. Warning: "Hidden" can be dangerous because the running miner process can only be seen in task manager, therefore NOT recommended</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="7" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Alternate Miner Launcher:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="7" Grid.Column="1" Margin="5">
+                            <CheckBox Name="UseAlternateMinerLauncher"/>
+                            <TextBlock TextWrapping="Wrap">If checked use alternative launcher process to run miners. This will NOT steal focus when starting miners.</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="8" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Use Jobs to Get Data:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="8" Grid.Column="1" Margin="5">
+                            <CheckBox Name="UseJobsForGetData"/>
+                            <TextBlock TextWrapping="Wrap">If checked MPM (UselessGuru Edition) will parallelize the hash rate readout from miners if there are more than two miner instances running. This will speed up overall loop time, e.g. benchmarking.</TextBlock>
+                        </StackPanel>
 
                     </Grid>
-            </TabItem>
-            <TabItem Header="Machine">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="150"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="16">Machine Configuration</TextBlock>
-                    <Label Grid.Row="1" Content="Worker Name:"/>
-                    <StackPanel Grid.Row="1" Grid.Column="1">
-                        <TextBox Name="WorkerName" VerticalContentAlignment="Center"/>
-                        <TextBlock TextWrapping="Wrap">The worker name is used to track this particular machine's mining performance. It is recommended that each machine have a unique name.</TextBlock>
-                    </StackPanel>
-                    <Label Grid.Row="2" Content="Region:"/>
-                    <StackPanel Grid.Row="2" Grid.Column="1">
-                        <RadioButton GroupName="Region" Name="RegionUSA" Content="USA"/>
-                        <RadioButton GroupName="Region" Name="RegionEurope" Content="Europe"/>
-                        <RadioButton GroupName="Region" Name="RegionAsia" Content="Asia"/>
-                        <TextBlock TextWrapping="Wrap">Choose the region closest to this worker, to connect to pool servers with the lowest latency.</TextBlock>
-                    </StackPanel>
-                    <StackPanel Grid.Row="3">
-                        <Label Content="Mining Types:"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="3" Grid.Column="1">
-                        <CheckBox Name="TypeNVIDIA" Content="NVIDIA"/>
-                        <CheckBox Name="TypeAMD" Content="AMD"/>
-                        <CheckBox Name="TypeCPU" Content="CPU"/>
-                        <TextBlock TextWrapping="Wrap">Types of devices to mine with. CPU mining can cause performance issues, and is recommended to be left off on systems with weak CPUs.</TextBlock>
-                    </StackPanel>
+                </TabItem>
+
+                <TabItem Header="Advanced 3">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="16" Margin="5">Advanced Settings 3 (UselessGuru Edition)</TextBlock>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Minium Profit:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="1" Margin="5">
+                            <TextBox Name="MinProfit"/>
+                            <TextBlock TextWrapping="Wrap">Minimal required profit, if less it will not mine. The configured value must be in the first currency as defined in "User Info", "Currencies".</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="2" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Beep on Error:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="2" Grid.Column="1" Margin="5">
+                            <CheckBox Name="BeepOnError"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="3" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Display Profit Only:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="3" Grid.Column="1" Margin="5">
+                            <CheckBox Name="DisplayProfitOnly"/>
+                            <TextBlock TextWrapping="Wrap">If checked will not start miners and just list hypthetical earnings</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="4" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Payout Currency:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="4" Grid.Column="1" Margin="5">
+                            <TextBox Name="PayoutCurrency"/>
+                            <TextBlock TextWrapping="Wrap">One of BTC,BTH,ZEC,ETH etc. If supported by the pool, mining earnings will be autoconverted and paid out in this currency. WARNING: Make sure ALL configured pools support payout in this currency!</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="5" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Display Comparison:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="5" Grid.Column="1" Margin="5">
+                            <CheckBox Name="DisplayComparison"/>
+                            <TextBlock TextWrapping="Wrap">If checked will evaluate and display MPM miner is faster than... in summary. If unchecked MPM will not display this and instead save CPU cycles and screen space ;-)</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="6" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Use Short Poolnames:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="6" Grid.Column="1" Margin="5">
+                            <CheckBox Name="UseShortPoolNames"/>
+                            <TextBlock TextWrapping="Wrap">If checked MPM will display short pool names in summary (condensed mode).</TextBlock>
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="7" Grid.Column="0" Margin="5">
+                            <TextBlock TextWrapping="Wrap">Use Dope Coloring:</TextBlock>
+                        </StackPanel>
+                        <StackPanel Grid.Row="7" Grid.Column="1" Margin="5">
+                            <CheckBox Name="UseDopeColoring"/>
+                            <TextBlock TextWrapping="Wrap">If checked will display mining summary in very flashy colors (https://github.com/UselessGuru/MultiPoolMiner/pull/15).</TextBlock>
+                        </StackPanel>
 
                     </Grid>
-            </TabItem>
-            <TabItem Header="Pools">
-                <StackPanel>
-                    <TextBlock FontSize="16" FontWeight="Bold">Pool Selection</TextBlock>
-                    <TextBlock TextWrapping="Wrap">Check pools you prefer to mine at. More pools can mean better profitability, but spreads your profit out so you wait longer for payouts. Pools that are not selected here may still be used if the most profitable algorithm is only available at that pool, or if all your preferred pools are down.</TextBlock>
-                    <ListView Name="PoolsList" Height="450">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn Header="Include">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox IsChecked="{Binding Path=Checked}"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn Header="Name">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Path=Name}"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
-                    <Label>New pools should be:</Label>
-                    <RadioButton GroupName="NewPools" Name="EnableNewPools" Content="Enabled automatically (Use $ExcludePoolName to exclude unchecked)" VerticalContentAlignment="Center"/>
-                    <RadioButton GroupName="NewPools" Name="DisableNewPools" Content="Disabled until manually enabled (Use $PoolName to include only checked)" VerticalAlignment="Center"/>
-                </StackPanel>
-            </TabItem>
-            <TabItem Header="Algorithms">
-                <StackPanel>
-                    <TextBlock FontSize="16" FontWeight="Bold">Algorithm Selection</TextBlock>
-                    <TextBlock TextWrapping="Wrap">Check which algorithms you wish to mine.  The default selection is a good starting point.</TextBlock>
-                    <WrapPanel Name="Algorithms"></WrapPanel>
-                    <ListView Name="AlgorithmsList" Height="500">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn Header="Include">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox IsChecked="{Binding Path=Checked}"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn Header="Name">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Path=Name}"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
-                    <Label>New algorithms should be:</Label>
-                    <RadioButton GroupName="NewAlgorithms" Name="EnableNewAlgorithms" Content="Enabled automatically (Use $ExcludeAlgorithm to exclude unchecked)" VerticalContentAlignment="Center"/>
-                    <RadioButton GroupName="NewAlgorithms" Name="DisableNewAlgorithms" Content="Disabled until manually enabled (Use $Algorithm to include only checked)" VerticalAlignment="Center"/>
-                </StackPanel>                
-            </TabItem>
-            <TabItem Header="Miners">
-                <StackPanel>
-                    <TextBlock FontSize="16" FontWeight="Bold">Miner Selection</TextBlock>
-                    <TextBlock TextWrapping="Wrap">Check which miners you wish to use. You should leave them all enabled unless a specific one is causing issues.  They will all be benchmarked most efficient ones for your hardware will automatically be used.</TextBlock>
-                    <ListView Name="MinersList" Height="480">
-                        <ListView.View>
-                            <GridView>
-                                <GridViewColumn Header="Include">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <CheckBox IsChecked="{Binding Path=Checked}"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                                <GridViewColumn Header="Name">
-                                    <GridViewColumn.CellTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Path=Name}"/>
-                                        </DataTemplate>
-                                    </GridViewColumn.CellTemplate>
-                                </GridViewColumn>
-                            </GridView>
-                        </ListView.View>
-                    </ListView>
-                    <Label>New miners should be:</Label>
-                    <RadioButton GroupName="NewMiners" Name="EnableNewMiners" Content="Enabled automatically (Use $ExcludeMinerName to exclude unchecked)" VerticalContentAlignment="Center"/>
-                    <RadioButton GroupName="NewMiners" Name="DisableNewMiners" Content="Disabled until manually enabled (Use $MinerName to include only checked)" VerticalAlignment="Center"/>
-                </StackPanel>                 
-            </TabItem>
-            <TabItem Header="Advanced">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="25"/>
-                        <RowDefinition Height="75"/>
-                        <RowDefinition/>
-                        <RowDefinition Height="55"/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="150"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Row="0" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="16">Advanced Settings</TextBlock>
-                    <Label Grid.Row="1" Content="Minutes per day to donate:"/>
-                    <StackPanel Grid.Row="1" Grid.Column="1">
-                        <TextBox Name="Donate" VerticalContentAlignment="Center"/>
-                        <TextBlock TextWrapping="Wrap">Number of minutes each day to donate mining power to the creators.  Default is 24 minutes (1.6%). Minimum is 10 minutes (0.7%).</TextBlock>
-                    </StackPanel>
-                    <Label Grid.Row="2" Content="Interval:"/>
-                    <StackPanel Grid.Row="2" Grid.Column="1">
-                        <TextBox Name="Interval" VerticalContentAlignment="Center"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="3">
-                        <Label Content="Delay:"/>
-                    </StackPanel>
-                    <StackPanel Grid.Row="3" Grid.Column="1">
-                        <TextBox Name="Delay" VerticalContentAlignment="Center"/>
-                        <TextBlock TextWrapping="Wrap">Delay between closing miners and starting new ones.  A small (5-10 second) delay can help with system stability.</TextBlock>
-                    </StackPanel>
-                    <Label Grid.Row="4" Content="SSL:"/><CheckBox Grid.Row="4" Grid.Column="1" Name="SSL" Content="Use SSL"/>
-                    <Label Grid.Row="5" Content="Watchdog:"/><CheckBox Grid.Row="5" Grid.Column="1" Name="Watchdog" Content="Use Watchdog"/>
-                    <Label Grid.Row="6" Content="Switching Prevention:"/><StackPanel Grid.Row="6" Grid.Column="1"><TextBox VerticalContentAlignment="Center" Name="SwitchingPrevention"/></StackPanel>
-                    <Label Grid.Row="7" Content="Proxy:"/><StackPanel Grid.Row="7" Grid.Column="1"><TextBox VerticalContentAlignment="Center" Name="Proxy"/></StackPanel>
-                    <Label Grid.Row="8" Content="Miner Status URL:"/><StackPanel Grid.Row="8" Grid.Column="1"><TextBox VerticalContentAlignment="Center" Name="MinerStatusURL"/></StackPanel>
-
-
-                    </Grid>
-            </TabItem>
-        </TabControl>
-</DockPanel>
+                </TabItem>
+            </TabControl>
+        </DockPanel>
 
     </Viewbox>
 
