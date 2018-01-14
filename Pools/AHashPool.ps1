@@ -1,5 +1,13 @@
 ﻿using module ..\Include.psm1
 
+param(
+    [alias("Wallet")]
+    [String]$BTC, 
+    [alias("WorkerName")]
+    [String]$Worker, 
+    [TimeSpan]$StatSpan
+)
+
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $AHashPool_Request = [PSCustomObject]@{}
@@ -42,7 +50,7 @@ $AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
         $AHashPool_Region = $_
         $AHashPool_Region_Norm = Get-Region $AHashPool_Region
 
-        if ($Wallet) {
+        if ($BTC) {
             [PSCustomObject]@{
                 Algorithm     = $AHashPool_Algorithm_Norm
                 Info          = $AHashPool_Coin
@@ -52,8 +60,8 @@ $AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
                 Protocol      = "stratum+tcp"
                 Host          = "$AHashPool_Algorithm.$AHashPool_Host"
                 Port          = $AHashPool_Port
-                User          = $Wallet
-                Pass          = "$WorkerName,c=BTC"
+                User          = $BTC
+                Pass          = "$Worker,c=BTC"
                 Region        = $AHashPool_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated

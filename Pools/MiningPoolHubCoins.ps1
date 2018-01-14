@@ -1,5 +1,13 @@
 ﻿using module ..\Include.psm1
 
+param(
+    [alias("UserName")]
+    [String]$User, 
+    [alias("WorkerName")]
+    [String]$Worker, 
+    [TimeSpan]$StatSpan
+)
+
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $MiningPoolHubCoins_Request = [PSCustomObject]@{}
@@ -36,7 +44,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
         $MiningPoolHubCoins_Region = $_
         $MiningPoolHubCoins_Region_Norm = Get-Region $MiningPoolHubCoins_Region
 
-        if ($UserName) {
+        if ($User) {
             [PSCustomObject]@{
                 Algorithm     = $MiningPoolHubCoins_Algorithm_Norm
                 Info          = $MiningPoolHubCoins_Coin
@@ -46,7 +54,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
                 Protocol      = "stratum+tcp"
                 Host          = $MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHubCoins_Region*"} | Select-Object -First 1
                 Port          = $MiningPoolHubCoins_Port
-                User          = "$UserName.$WorkerName"
+                User          = "$User.$Worker"
                 Pass          = "x"
                 Region        = $MiningPoolHubCoins_Region_Norm
                 SSL           = $false
@@ -63,7 +71,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
                     Protocol      = "stratum+ssl"
                     Host          = $MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHubCoins_Region*"} | Select-Object -First 1
                     Port          = $MiningPoolHubCoins_Port
-                    User          = "$UserName.$WorkerName"
+                    User          = "$User.$Worker"
                     Pass          = "x"
                     Region        = $MiningPoolHubCoins_Region_Norm
                     SSL           = $true
@@ -81,7 +89,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
                     Protocol      = "stratum+tcp"
                     Host          = $MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHubCoins_Region*"} | Select-Object -First 1
                     Port          = $MiningPoolHubCoins_Port
-                    User          = "$UserName.$WorkerName"
+                    User          = "$User.$Worker"
                     Pass          = "x"
                     Region        = $MiningPoolHubCoins_Region_Norm
                     SSL           = $false
@@ -98,7 +106,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
                         Protocol      = "stratum+ssl"
                         Host          = $MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHubCoins_Region*"} | Select-Object -First 1
                         Port          = $MiningPoolHubCoins_Port
-                        User          = "$UserName.$WorkerName"
+                        User          = "$User.$Worker"
                         Pass          = "x"
                         Region        = $MiningPoolHubCoins_Region_Norm
                         SSL           = $true

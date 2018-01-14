@@ -1,5 +1,13 @@
 ﻿using module ..\Include.psm1
 
+param(
+    [alias("Wallet")]
+    [String]$BTC, 
+    [alias("WorkerName")]
+    [String]$Worker, 
+    [TimeSpan]$StatSpan
+)
+
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $NiceHash_Request = [PSCustomObject]@{}
@@ -37,7 +45,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
         $NiceHash_Region = $_
         $NiceHash_Region_Norm = Get-Region $NiceHash_Region
 
-        if ($Wallet) {
+        if ($BTC) {
             [PSCustomObject]@{
                 Algorithm     = $NiceHash_Algorithm_Norm
                 Info          = $NiceHash_Coin
@@ -47,7 +55,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
                 Protocol      = "stratum+tcp"
                 Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
                 Port          = $NiceHash_Port
-                User          = "$Wallet.$WorkerName"
+                User          = "$BTC.$Worker"
                 Pass          = "x"
                 Region        = $NiceHash_Region_Norm
                 SSL           = $false
@@ -64,7 +72,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
                     Protocol      = "stratum+ssl"
                     Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
                     Port          = $NiceHash_Port + 30000
-                    User          = "$Wallet.$WorkerName"
+                    User          = "$BTC.$Worker"
                     Pass          = "x"
                     Region        = $NiceHash_Region_Norm
                     SSL           = $true

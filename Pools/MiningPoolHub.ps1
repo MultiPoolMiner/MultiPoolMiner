@@ -1,5 +1,13 @@
 ﻿using module ..\Include.psm1
 
+param(
+    [alias("UserName")]
+    [String]$User, 
+    [alias("WorkerName")]
+    [String]$Worker, 
+    [TimeSpan]$StatSpan
+)
+
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $MiningPoolHub_Request = [PSCustomObject]@{}
@@ -36,7 +44,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
         $MiningPoolHub_Region = $_
         $MiningPoolHub_Region_Norm = Get-Region $MiningPoolHub_Region
 
-        if ($UserName) {
+        if ($User) {
             [PSCustomObject]@{
                 Algorithm     = $MiningPoolHub_Algorithm_Norm
                 Info          = $MiningPoolHub_Coin
@@ -46,7 +54,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 Protocol      = "stratum+tcp"
                 Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Region*"} | Select-Object -First 1
                 Port          = $MiningPoolHub_Port
-                User          = "$UserName.$WorkerName"
+                User          = "$User.$Worker"
                 Pass          = "x"
                 Region        = $MiningPoolHub_Region_Norm
                 SSL           = $false
@@ -63,7 +71,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                     Protocol      = "stratum+ssl"
                     Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Region*"} | Select-Object -First 1
                     Port          = $MiningPoolHub_Port
-                    User          = "$UserName.$WorkerName"
+                    User          = "$User.$Worker"
                     Pass          = "x"
                     Region        = $MiningPoolHub_Region_Norm
                     SSL           = $true

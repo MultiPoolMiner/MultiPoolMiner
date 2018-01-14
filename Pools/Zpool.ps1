@@ -1,5 +1,13 @@
 ﻿using module ..\Include.psm1
 
+param(
+    [alias("Wallet")]
+    [String]$BTC, 
+    [alias("WorkerName")]
+    [String]$Worker, 
+    [TimeSpan]$StatSpan
+)
+
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Zpool_Request = [PSCustomObject]@{}
@@ -47,7 +55,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Selec
         $Zpool_Region = $_
         $Zpool_Region_Norm = Get-Region $Zpool_Region
 
-        if ($Wallet) {
+        if ($BTC) {
             [PSCustomObject]@{
                 Algorithm     = $Zpool_Algorithm_Norm
                 Info          = $Zpool_Coin
@@ -57,8 +65,8 @@ $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Selec
                 Protocol      = "stratum+tcp"
                 Host          = "$Zpool_Algorithm.$Zpool_Host"
                 Port          = $Zpool_Port
-                User          = $Wallet
-                Pass          = "$WorkerName,c=BTC"
+                User          = $BTC
+                Pass          = "$Worker,c=BTC"
                 Region        = $Zpool_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated

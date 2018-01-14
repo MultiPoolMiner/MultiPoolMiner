@@ -1,5 +1,13 @@
 ﻿using module ..\Include.psm1
 
+param(
+    [alias("Wallet")]
+    [String]$BTC, 
+    [alias("WorkerName")]
+    [String]$Worker, 
+    [TimeSpan]$StatSpan
+)
+
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Blockmunch_Request = [PSCustomObject]@{}
@@ -47,7 +55,7 @@ $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
         $Blockmunch_Region = $_
         $Blockmunch_Region_Norm = Get-Region $Blockmunch_Region
 
-        if ($Wallet) {
+        if ($BTC) {
             [PSCustomObject]@{
                 Algorithm     = $Blockmunch_Algorithm_Norm
                 Info          = $Blockmunch_Coin
@@ -57,8 +65,8 @@ $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
                 Protocol      = "stratum+tcp"
                 Host          = $Blockmunch_Host
                 Port          = $Blockmunch_Port
-                User          = $Wallet
-                Pass          = "$WorkerName,c=BTC"
+                User          = $BTC
+                Pass          = "$Worker,c=BTC"
                 Region        = $Blockmunch_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated

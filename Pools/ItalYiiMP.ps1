@@ -1,5 +1,13 @@
 ﻿using module ..\Include.psm1
 
+param(
+    [alias("Wallet")]
+    [String]$BTC, 
+    [alias("WorkerName")]
+    [String]$Worker, 
+    [TimeSpan]$StatSpan
+)
+
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $ItalYiiMP_Request = [PSCustomObject]@{}
@@ -47,7 +55,7 @@ $ItalYiiMP_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
         $ItalYiiMP_Region = $_
         $ItalYiiMP_Region_Norm = Get-Region $ItalYiiMP_Region
 
-        if ($Wallet) {
+        if ($BTC) {
             [PSCustomObject]@{
                 Algorithm     = $ItalYiiMP_Algorithm_Norm
                 Info          = $ItalYiiMP_Coin
@@ -57,8 +65,8 @@ $ItalYiiMP_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
                 Protocol      = "stratum+tcp"
                 Host          = "$ItalYiiMP_Algorithm.$ItalYiiMP_Host"
                 Port          = $ItalYiiMP_Port
-                User          = $Wallet
-                Pass          = "$WorkerName,c=BTC"
+                User          = $BTC
+                Pass          = "$Worker,c=BTC"
                 Region        = $ItalYiiMP_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated

@@ -1,5 +1,13 @@
 ﻿using module ..\Include.psm1
 
+param(
+    [alias("Wallet")]
+    [String]$BTC, 
+    [alias("WorkerName")]
+    [String]$Worker, 
+    [TimeSpan]$StatSpan
+)
+
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $HashRefinery_Request = [PSCustomObject]@{}
@@ -42,7 +50,7 @@ $HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore 
         $HashRefinery_Region = $_
         $HashRefinery_Region_Norm = Get-Region $HashRefinery_Region
 
-        if ($Wallet) {
+        if ($BTC) {
             [PSCustomObject]@{
                 Algorithm     = $HashRefinery_Algorithm_Norm
                 Info          = $HashRefinery_Coin
@@ -52,8 +60,8 @@ $HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore 
                 Protocol      = "stratum+tcp"
                 Host          = "$HashRefinery_Algorithm.$HashRefinery_Region.$HashRefinery_Host"
                 Port          = $HashRefinery_Port
-                User          = $Wallet
-                Pass          = "$WorkerName,c=BTC"
+                User          = $BTC
+                Pass          = "$Worker,c=BTC"
                 Region        = $HashRefinery_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated
