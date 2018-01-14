@@ -12,7 +12,7 @@
 # $DisabledAlgorithms = @("skein","X17")
 
 $ProfitFactor = 1 # 1 = 100%, use lower number to compensate for overoptimistic profit estimates sent by pool
-#$Fee = 0 # Default fee for all algos in %; if uncommented fee information from pool/algo is used
+$Fee = 1.25 # Default fee for all algos in %; if uncommented fee information from pool/algo is used
 
 $ShortPoolName = "HRef" # Short pool name
 #End of user settable variables

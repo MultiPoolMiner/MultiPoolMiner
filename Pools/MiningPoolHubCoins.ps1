@@ -13,7 +13,7 @@
 #$DisabledAlgorithms = @("lyra2z","cryptonight") # 'stratum connection interupted'
 
 $ProfitFactor = 1 # 1 = 100%, use lower number to compensate for overoptimistic profit estimates sent by pool
-$Fee = 1 # Default pool fee in %
+$Fee = 0.9 # Default pool fee in %
 
 $ShortPoolName = "MPHC" # Short pool name
 #End of user settable variables
