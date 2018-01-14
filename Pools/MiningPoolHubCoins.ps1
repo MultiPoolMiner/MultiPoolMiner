@@ -87,24 +87,6 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
                     SSL           = $false
                     Updated       = $Stat.Updated
                 }
-
-                if ($MiningPoolHubCoins_Algorithm_Norm -eq "Cryptonight" -or $MiningPoolHubCoins_Algorithm_Norm -eq "Equihash") {
-                    [PSCustomObject]@{
-                        Algorithm     = "$($MiningPoolHubCoins_Algorithm_Norm)2gb"
-                        Info          = $MiningPoolHubCoins_Coin
-                        Price         = $Stat.Live
-                        StablePrice   = $Stat.Week
-                        MarginOfError = $Stat.Week_Fluctuation
-                        Protocol      = "stratum+ssl"
-                        Host          = $MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHubCoins_Region*"} | Select-Object -First 1
-                        Port          = $MiningPoolHubCoins_Port
-                        User          = "$UserName.$WorkerName"
-                        Pass          = "x"
-                        Region        = $MiningPoolHubCoins_Region_Norm
-                        SSL           = $true
-                        Updated       = $Stat.Updated
-                    }
-                }
             }
         }
     }
