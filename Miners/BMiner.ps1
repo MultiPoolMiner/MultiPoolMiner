@@ -1,40 +1,13 @@
 using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-BMiner\BMiner.exe"
-$Uri = "https://www.bminercontent.com/releases/bminer-v3.0.0-e95eeda-amd64.zip"
+$Uri = "https://www.bminercontent.com/releases/bminer-v5.0.0-3a6fcd1-amd64.zip"
 
 # Custom commands to be applied to all algorithms
-$CommonCommands = " -nofee -polling"
+$CommonCommands = ""
 
 $Commands = [PSCustomObject]@{
-	#"bitcore"      = "" #Bitcore
-	#"blake2s"      = "" #Blake2s
-	#"blakecoin"    = "" #Blakecoin
-	#"vanilla"      = "" #BlakeVanilla
-	#"cryptonight"  = "" #Cryptonight
-	#"decred"       = "" #Decred
-	"equihash"      = "" #Equihash
-	#"ethash"       = "" #Ethash
-	#"groestl"      = "" #Groestl
-	#"hmq1725"      = "" #hmq1725
-	#"keccak"       = "" #Keccak
-	#"lbry"         = "" #Lbry
-	#"lyra2v2"      = "" #Lyra2RE2
-	#"lyra2z"       = "" #Lyra2z
-	#"myr-gr"       = "" #MyriadGroestl
-	#"neoscrypt"    = "" #NeoScrypt
-	#"nist5"        = "" #Nist5
-	#"pascal"       = "" #Pascal
-	#"qubit"        = "" #Qubit
-	#"scrypt"       = "" #Scrypt
-	#"sia"          = "" #Sia
-	#"sib"          = "" #Sib
-	#"skein"        = "" #Skein
-	#"timetravel"   = "" #Timetravel
-	#"x11"          = "" #X11
-	#"x11evo"       = "" #X11evo
-	#"x17"          = "" #X17
-	#"yescrypt"     = "" #Yescrypt
+	"equihash" = "" #Equihash
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -44,7 +17,7 @@ $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {
 	$Device = $_
 
-	$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where {$_ -cnotmatch "^_.+" -and $Pools.$(Get-Algorithm($_)).Name -and {$Pools.$(Get-Algorithm($_)).Protocol -eq "stratum+tcp" <#temp fix#>}} | ForEach-Object {
+	$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where {$_ -cnotmatch "^_.+" -and $Pools.$(Get-Algorithm($_)).Name} | ForEach-Object {
 
 		$Algorithm = Get-Algorithm($_)
 		$Command = $Commands.$_
@@ -62,7 +35,7 @@ $Devices | ForEach-Object {
 			Type         = $Device.Type
 			Device       = $Device.Device
 			Path         = $Path
-			Arguments    = ("-api 127.0.0.1:$Port -uri stratum://$($Pools.$Algorithm.User).$($Pools.$Algorithm.Pass)@$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) $Command $CommonCommands").trim()
+			Arguments    = ("-api 127.0.0.1:$Port -uri $(if ($Pools.Equihash.SSL) {'stratum+ssl'}else {'stratum'})://$($Pools.$Algorithm.User).$($Pools.$Algorithm.Pass)@$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -nofee $Command $CommonCommands").trim()
 			HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
 			API          = "BMiner"
 			Port         = $Port
