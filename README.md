@@ -6,7 +6,6 @@
 
 README.md is based on README.txt - updated on 16/01/2018 - v1.22.4 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
-====================================================================
 
 
 ## FEATURE SUMMARY
@@ -18,8 +17,6 @@ README.md is based on README.txt - updated on 16/01/2018 - v1.22.4 - latest vers
 
 *Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH*
 
-
-====================================================================
 
 
 ## INSTALLATION
@@ -34,8 +31,6 @@ README.md is based on README.txt - updated on 16/01/2018 - v1.22.4 - latest vers
 8. Let the benchmarking finish (you will be earning shares even during benchmarking).
 9. Done. You are all set to mine the most profitable coins and maximise your profits using MultiPoolMiner.
 
-
-====================================================================
 
 
 ## IMPORTANT NOTES
@@ -52,8 +47,6 @@ README.md is based on README.txt - updated on 16/01/2018 - v1.22.4 - latest vers
 - Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional or amend current miner files to support mining with more than 6 graphics cards.
 
 	
-====================================================================
-
 
 ## COMMAND LINE OPTIONS
 ###### (case-insensitive - except for BTC addresses, see *Sample Usage* section below for an example)
@@ -151,8 +144,6 @@ Report and monitor your mining rig's status by including the command above. Wall
 Since version 2.6, the delta value (integer) that was used to determine how often MultiPoolMiner is allowed to switch, is now user-configurable on a scale of 1 to infinity on an intensity basis. Default is 1 (Start.bat default is 2). Recommended values are 1-10 where 1 means the most frequent switching and 10 means the least switching. Please note setting this value to zero (0) will not turn this function off! Please see further explanation in MULTIPOOLMINER'S LOGIC section below. 
 
 	
-====================================================================
-	
 	
 ## SAMPLE USAGE
 ###### (check "start.bat" file in root folder)
@@ -174,8 +165,6 @@ Since version 2.6, the delta value (integer) that was used to determine how ofte
 
     pause
 
-
-====================================================================
 
 
 ## MULTIPOOLMINER'S LOGIC:
@@ -241,8 +230,6 @@ In practice, this explains why when you first launch MPM it may pick a pool/algo
 *Please note, a new install of MultiPoolMiner has no historical information on which to build accurate "margin-of-error" values. MPM will, therefore, sometimes make less desirable miner selections and switch more often until it can gather enough coin data to stabilize its decision-making process.*
 
 
-====================================================================
-
 
 ## KNOWN ISSUES
 
@@ -252,8 +239,6 @@ There are known issues with the following miners not submitting shares or show h
 
 This is not a fault of MultiPoolMiner and nothing can be done on our end. Please raise an issue on their respective github pages. See FAQ#2 on how to exclude these if you wish to do so.
 
-
-====================================================================
 
 
 ## FREQUENTLY ASKED QUESTIONS
@@ -344,8 +329,6 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 	sia, decred, pascal, siaclaymore, sianicehash, decrednicehash
 
 
-
-====================================================================
 
 ## REPORTING AND MONITORING
 ### TERMS AND CONDITIONS & PRIVACY POLICY
