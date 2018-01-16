@@ -144,6 +144,7 @@ It works on a unified interval that is defaulted to 60 seconds. Watchdog timers 
 Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
 
 **-minerstatusurl** https://multipoolminer.io/monitor/miner.php
+
 Report and monitor your mining rig's status by including the command above. Wallet address must be set even if you are only using MiningPoolHub as a pool. You can access the reported information by entering your wallet address on the https://multipoolminer.io/monitor web address. By using this service you understand and accept the terms and conditions detailed in this document (further below). 
 
 **-switchingprevention**
