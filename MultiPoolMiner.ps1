@@ -167,7 +167,7 @@ while ($true) {
     if ($Timer.AddDays(-1) -ge $LastDonated) {$LastDonated = $Timer}
     if ($Timer.AddDays(-1).AddMinutes($Config.Donate) -ge $LastDonated) {
         Get-ChildItem "Pools" | ForEach-Object {
-            $Config.PoolsDonate | Add-Member $_.BaseName (
+            $Config.Pools | Add-Member $_.BaseName (
                 [PSCustomObject]@{
                     BTC    = $WalletDonate
                     User   = $UserNameDonate
