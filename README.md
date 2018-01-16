@@ -349,20 +349,20 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 
 ## REPORTING AND MONITORING TERMS AND CONDITIONS & PRIVACY POLICY:
 
-By enabling the Monitoring Service by setting the *-MinerStatusURL* to point to *https://multipoolminer.io/monitor/miner.php* as described in the **Command Line Options** section, you agree that the https://multipoolminer.io website can store relevant information about your mining rig(s) in its database that is directly accessible by anyone accessing the https://multipoolminer.io/monitor webpage with the corresponding wallet address (your BTC address set with the *-wallet* command). The following data is stored for each mining machine (rig) and overwritten in the database in each script-cycle determined by the *-interval* command:
+###### By enabling the Monitoring Service by setting the *-MinerStatusURL* to point to *https://multipoolminer.io/monitor/miner.php* as described in the **Command Line Options** section, you agree that the https://multipoolminer.io website can store relevant information about your mining rig(s) in its database that is directly accessible by anyone accessing the https://multipoolminer.io/monitor webpage with the corresponding wallet address (your BTC address set with the *-wallet* command). The following data is stored for each mining machine (rig) and overwritten in the database in each script-cycle determined by the *-interval* command:
 
-**BTC address:** all data is stored under and identified by the Bitcoin address set with the -wallet command
-**WorkerName:** the name of the worker you set using the -workername command, also used for sorting
-**MinerName:** the current miner software the worker is running
-**Type:** device type set using the -type command, also used for sorting
-**Pool:** current pool(s) the worker is mining on
-**Path:** the miner application's path starting from /Bin as root. We will not store other user data!
-**Active:** time the worker has been active for
-**Algorithm:** the current algorithm the worker is running
-**Current Speed:** reported hashrate from the miner
-**Benchmark Speed:** benchmarked hashrate for the current algorithm running
-**PID:** process ID of the miner application being used
-**BTC/day:** Estimated Bitcoin earnings per day
+###### **BTC address:** all data is stored under and identified by the Bitcoin address set with the -wallet command
+###### **WorkerName:** the name of the worker you set using the -workername command, also used for sorting
+###### **MinerName:** the current miner software the worker is running
+###### **Type:** device type set using the -type command, also used for sorting
+###### **Pool:** current pool(s) the worker is mining on
+###### **Path:** the miner application's path starting from /Bin as root. We will not store other user data!
+###### **Active:** time the worker has been active for
+###### **Algorithm:** the current algorithm the worker is running
+###### **Current Speed:** reported hashrate from the miner
+###### **Benchmark Speed:** benchmarked hashrate for the current algorithm running
+###### **PID:** process ID of the miner application being used
+###### **BTC/day:** Estimated Bitcoin earnings per day
 
-*The monitoring service can change, evolve, be unavailable any time without prior notice. The contents of the database will NOT be shared with any third-parties but we reserve the right to create metrics out of it and use its contents to improve or promote our services and MultiPoolMiner.*
+###### *The monitoring service can change, evolve, be unavailable any time without prior notice. The contents of the database will NOT be shared with any third-parties but we reserve the right to create metrics out of it and use its contents to improve or promote our services and MultiPoolMiner.*
 
