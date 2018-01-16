@@ -7,13 +7,17 @@
  |_|  |_|\__,_|_|\__|_|_|   \___/ \___/|_|_|  |_|_|_| |_|\___|_|   
  
 ====================================================================
+
 MultiPoolMiner - created by aaronsace 
-LINK: https://multipoolminer.io
+WEBSITE: https://multipoolminer.io
+GITHUB: https://github.com/MultiPoolMiner/MultiPoolMiner/releases
+REDDIT: https://www.reddit.com/r/multipoolminer/
+TWITTER: @multipoolminer 
 
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 16/01/2018 (dd/mm/yyyy) - v1.22.4 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 16/01/2018 (dd/mm/yyyy) - v1.22.5 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -41,7 +45,8 @@ INSTALLATION:
 6. Save and close the Start.bat file you just edited.
 7. Launch the Start.bat file you just edited.
 8. Let the benchmarking finish (you will be earning shares even during benchmarking).
-9. Done. You are all set to mine the most profitable coins and maximise your profits using MultiPoolMiner.
+
+Done. You are all set to mine the most profitable coins and maximise your profits using MultiPoolMiner.
 
 
 ====================================================================
