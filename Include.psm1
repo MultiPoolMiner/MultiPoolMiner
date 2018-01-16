@@ -199,38 +199,34 @@ function Get-ChildItemContent {
         [Hashtable]$Parameters = @{}
     )
 
+    function Invoke-ExpressionRecursive ($Expression) {
+        if ($Expression -is [String]) {
+            if ((Invoke-Expression "`"$Expression`"") -ne $Expression) {
+                try {$Expression = Invoke-Expression $Expression}
+                catch {$Expression = Invoke-Expression "`"$Expression`""}
+            }
+        }
+        elseif ($Expression -is [PSCustomObject]) {
+            $Expression | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
+                $Expression.$_ = Invoke-ExpressionRecursive $Expression.$_}
+        }
+        return $Expression
+    }
+
     Get-ChildItem $Path | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
         if ($_.Extension -eq ".ps1") {
             $Content = & {
-                $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters[$_]}
+                $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters.$_}
                 & $_.FullName @Parameters
             }
         }
         else {
             $Content = & {
-                $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters[$_]}
+                $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters.$_}
                 try {
-                    ($_ | Get-Content | ConvertFrom-Json) | ForEach-Object {
-                        $Item = $_
-                        $ItemKeys = $Item.PSObject.Properties.Name.Clone()
-                        $ItemKeys | ForEach-Object {
-                            if ($Item.$_ -is [String]) {
-                                $Item.$_ = Invoke-Expression "`"$($Item.$_)`""
-                            }
-                            elseif ($Item.$_ -is [PSCustomObject]) {
-                                $Property = $Item.$_
-                                $PropertyKeys = $Property.PSObject.Properties.Name
-                                $PropertyKeys | ForEach-Object {
-                                    if ($Property.$_ -is [String]) {
-                                        $Property.$_ = Invoke-Expression "`"$($Property.$_)`""
-                                    }
-                                }
-                            }
-                        }
-                        $Item
-                    }
+                    ($_ | Get-Content | ConvertFrom-Json) | ForEach-Object {Invoke-ExpressionRecursive $_}
                 }
                 catch [ArgumentException] {
                     $null
