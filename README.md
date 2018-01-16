@@ -167,7 +167,7 @@ Since version 2.6, the delta value (integer) that was used to determine how ofte
 
 
 
-## MULTIPOOLMINER'S LOGIC:
+## MULTIPOOLMINER'S LOGIC
 
 ### General overview:
 
@@ -331,7 +331,7 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 
 
 ## REPORTING AND MONITORING
-### TERMS AND CONDITIONS & PRIVACY POLICY
+##### TERMS AND CONDITIONS & PRIVACY POLICY
 
 ###### By enabling the Monitoring Service by setting the *-MinerStatusURL* to point to *https://multipoolminer.io/monitor/miner.php* as described in the **Command Line Options** section, you agree that the https://multipoolminer.io website can store relevant information about your mining rig(s) in its database that is directly accessible by anyone accessing the https://multipoolminer.io/monitor webpage with the corresponding wallet address (your BTC address set with the *-wallet* command). The following data is stored for each mining machine (rig) and overwritten in the database in each script-cycle determined by the *-interval* command:
 
