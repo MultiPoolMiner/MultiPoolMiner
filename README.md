@@ -4,7 +4,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 11/01/2018 - v1.22.2 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 16/01/2018 - v1.22.3 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -142,7 +142,10 @@ It works on a unified interval that is defaulted to 60 seconds. Watchdog timers 
 - Stage 3: when 3 timers expire relating to one pool, the pool is kicked
 
 Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
-	
+
+**-minerstatusurl** https://multipoolminer.io/monitor/miner.php
+Report and monitor your mining rig's status by including the command above. Wallet address must be set even if you are only using MiningPoolHub as a pool. You can access the reported information by entering your wallet address on the https://multipoolminer.io/monitor web address. By using this service you understand and accept the terms and conditions detailed in this document (further below). 
+
 **-switchingprevention**
 Since version 2.6, the delta value (integer) that was used to determine how often MultiPoolMiner is allowed to switch, is now user-configurable on a scale of 1 to infinity on an intensity basis. Default is 1 (Start.bat default is 2). Recommended values are 1-10 where 1 means the most frequent switching and 10 means the least switching. Please note setting this value to zero (0) will not turn this function off! Please see further explanation in MULTIPOOLMINER'S LOGIC section below. 
 
@@ -338,3 +341,27 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 ###### Q22. How to disable dual-mining?
 ###### A22. Make sure NOT to include any of the the following parameters in your start.bat after *-algorithm* or add them after the *-ExludeAlgorithm* command: 
 	sia, decred, pascal, siaclaymore, sianicehash, decrednicehash
+
+
+
+====================================================================
+
+## REPORTING AND MONITORING TERMS AND CONDITIONS & PRIVACY POLICY:
+
+By enabling the Monitoring Service by setting the *-MinerStatusURL* to point to *https://multipoolminer.io/monitor/miner.php* as described in the **Command Line Options** section, you agree that the https://multipoolminer.io website can store relevant information about your mining rig(s) in its database that is directly accessible by anyone accessing the https://multipoolminer.io/monitor webpage with the corresponding wallet address (your BTC address set with the *-wallet* command). The following data is stored for each mining machine (rig) and overwritten in the database in each script-cycle determined by the *-interval* command:
+
+**BTC address:** all data is stored under and identified by the Bitcoin address set with the -wallet command
+**WorkerName:** the name of the worker you set using the -workername command, also used for sorting
+**MinerName:** the current miner software the worker is running
+**Type:** device type set using the -type command, also used for sorting
+**Pool:** current pool(s) the worker is mining on
+**Path:** the miner application's path starting from /Bin as root. We will not store other user data!
+**Active:** time the worker has been active for
+**Algorithm:** the current algorithm the worker is running
+**Current Speed:** reported hashrate from the miner
+**Benchmark Speed:** benchmarked hashrate for the current algorithm running
+**PID:** process ID of the miner application being used
+**BTC/day:** Estimated Bitcoin earnings per day
+
+*The monitoring service can change, evolve, be unavailable any time without prior notice. The contents of the database will NOT be shared with any third-parties but we reserve the right to create metrics out of it and use its contents to improve or promote our services and MultiPoolMiner.*
+
