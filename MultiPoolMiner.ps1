@@ -3,10 +3,13 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
+    [Alias("BTC")]
     [String]$Wallet, 
     [Parameter(Mandatory = $false)]
+    [Alias("User")]
     [String]$UserName, 
     [Parameter(Mandatory = $false)]
+    [Alias("Worker")]
     [String]$WorkerName = "multipoolminer", 
     [Parameter(Mandatory = $false)]
     [Int]$API_ID = 0, 
@@ -15,6 +18,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Int]$Interval = 60, #seconds before reading hash rate from miners
     [Parameter(Mandatory = $false)]
+    [Alias("Location")]
     [String]$Region = "europe", #europe/us/asia
     [Parameter(Mandatory = $false)]
     [Switch]$SSL = $false, 
@@ -23,14 +27,18 @@ param(
     [Parameter(Mandatory = $false)]
     [Array]$Algorithm = @(), #i.e. Ethash,Equihash,CryptoNight etc.
     [Parameter(Mandatory = $false)]
+    [Alias("Miner")]
     [Array]$MinerName = @(), 
     [Parameter(Mandatory = $false)]
+    [Alias("Pool")]
     [Array]$PoolName = @(), 
     [Parameter(Mandatory = $false)]
     [Array]$ExcludeAlgorithm = @(), #i.e. Ethash,Equihash,CryptoNight etc.
     [Parameter(Mandatory = $false)]
+    [Alias("ExcludeMiner")]
     [Array]$ExcludeMinerName = @(), 
     [Parameter(Mandatory = $false)]
+    [Alias("ExcludePool")]
     [Array]$ExcludePoolName = @(), 
     [Parameter(Mandatory = $false)]
     [Array]$Currency = ("BTC", "USD"), #i.e. GBP,EUR,ZEC,ETH etc.
@@ -43,9 +51,10 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$Watchdog = $false,
     [Parameter(Mandatory = $false)]
-    [String]$MinerStatusURL,
+    [Alias("Uri", "Url")]
+    [String]$MinerStatusUrl = "https://multipoolminer.io/monitor/miner.php",
     [Parameter(Mandatory = $false)]
-    [Int]$SwitchingPrevention = 1 #zero does not prevent miners switching
+    [Double]$SwitchingPrevention = 1 #zero does not prevent miners switching
 )
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
@@ -54,6 +63,8 @@ if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -
 if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue) -and (Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {
     Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) "-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1'; Add-MpPreference -ExclusionPath '$(Convert-Path .)'" -Verb runAs
 }
+$Version = "2.7.1.4"
+$Strikes = 3
 
 if ($Proxy -eq "") {$PSDefaultParameterValues.Remove("*:Proxy")}
 else {$PSDefaultParameterValues["*:Proxy"] = $Proxy}
@@ -85,7 +96,7 @@ $Rates = [PSCustomObject]@{BTC = [Double]1}
 Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
 
 #Check for software updates
-$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ("2.7.1.4", $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1
+$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1
 
 #Set donation parameters
 if ($Donate -lt 10) {$Donate = 10}
