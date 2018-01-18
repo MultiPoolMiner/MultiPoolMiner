@@ -31,3 +31,4 @@ $minerreport = ConvertTo-Json @($ActiveMiners | Where-Object {$_.Activated -GT 0
     }
 })
 Invoke-RestMethod -Uri $MinerStatusURL -Method Post -Body @{address = $Key; workername = $WorkerName; miners = $minerreport; profit = $profit}
+Write-Host "Your miner status key is: $Key"

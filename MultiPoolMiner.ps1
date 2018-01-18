@@ -148,6 +148,10 @@ while ($true) {
             SwitchingPrevention = $SwitchingPrevention
         }
     }
+
+    # For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
+    if($Wallet -and -not $Config.MinerStatusKey) { $Config.MinerStatusKey = $Wallet }
+
     Get-ChildItem "Pools" | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
         $Config.Pools | Add-Member $_.BaseName (
             [PSCustomObject]@{
