@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 class Eminer : Miner {
-    [PSCustomObject]GetHashRate ([String[]]$Algorithm, [Bool]$Safe = $false) {
+    [PSCustomObject]GetMinerData ([String[]]$Algorithm, [Bool]$Safe = $false) {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
@@ -39,6 +39,8 @@ class Eminer : Miner {
         $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
         $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
 
-        return $HashRate
+        return [PSCustomObject]@{
+            HashRate = $HashRate
+        }
     }
 }
