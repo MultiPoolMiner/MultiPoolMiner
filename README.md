@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 19/01/2018 - v1.22.7 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 19/01/2018 - v1.22.8 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -44,7 +44,7 @@ Done. You are all set to mine the most profitable coins and maximise your profit
 - Microsoft .NET Framework 4.5.1 or later is required for MultiPoolMiner to function properly. [Web Installer](https://www.microsoft.com/en-us/download/details.aspx?id=40773)
 - CCMiner (NVIDIA cards only) may need 'MSVCR120.dll' if you don't already have it: https://www.microsoft.com/en-gb/download/details.aspx?id=40784
 - CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145
-- You may need 'excavator.exe' if you don't already have it: https://github.com/nicehash/excavator/releases
+- You may need 'excavator.exe' if you don't already have it: https://github.com/nicehash/excavator/releases (NVIDIA cards only)
 - It is highly recommended to set Virtual Memory size in Windows to at least 16 GB in multi-GPU systems: Computer Properties -> Advanced System Settings -> Performance -> Advanced -> Virtual Memory
 - Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/MultiPoolMiner/MultiPoolMiner/issues 
 - Logs and Stats are produced in text format; use them when submitting issues.
