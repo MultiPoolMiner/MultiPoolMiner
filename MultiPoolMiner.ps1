@@ -640,7 +640,7 @@ while ($true) {
     [GC]::Collect()
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
-    Write-Log "Waiting for $Config.Interval seconds to start next run"
+    Write-Log "Waiting for $($Config.Interval) seconds to start next run"
     for ($i = $Strikes; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
         Start-Sleep 10
