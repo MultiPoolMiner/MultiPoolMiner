@@ -652,16 +652,16 @@ while ($true) {
     $ActiveMiners | ForEach-Object {
         $Miner = $_
         $Miner.Speed_Live = 0
-        $Miner_HashRate = [PSCustomObject]@{}
+        $Miner_Data = [PSCustomObject]@{}
 
         if ($Miner.New) {$Miner.Benchmarked++}
 
         if ($Miner.Process -and -not $Miner.Process.HasExited) {
-            $Miner_HashRate = $Miner.GetHashRate($Miner.Algorithm, ($Miner.New -and $Miner.Benchmarked -lt $Strikes))
-            $Miner.Speed_Live = $Miner_HashRate.PSObject.Properties.Value
+            $Miner_Data = $Miner.GetMinerData($Miner.Algorithm, ($Miner.New -and $Miner.Benchmarked -lt $Strikes))
+            $Miner.Speed_Live = $Miner_Data.HashRate.PSObject.Properties.Value
 
-            $Miner.Algorithm | Where-Object {$Miner_HashRate.$_} | ForEach-Object {
-                $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_HashRate.$_ -Duration $StatSpan -FaultDetection $true
+            $Miner.Algorithm | Where-Object {$Miner_Data.HashRate.$_} | ForEach-Object {
+                $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Data.HashRate.$_ -Duration $StatSpan -FaultDetection $true
 
                 #Update watchdog timer
                 $Miner_Name = $Miner.Name
