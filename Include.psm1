@@ -208,7 +208,8 @@ function Get-ChildItemContent {
         }
         elseif ($Expression -is [PSCustomObject]) {
             $Expression | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
-                $Expression.$_ = Invoke-ExpressionRecursive $Expression.$_}
+                $Expression.$_ = Invoke-ExpressionRecursive $Expression.$_
+            }
         }
         return $Expression
     }
