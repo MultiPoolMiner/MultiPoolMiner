@@ -14,6 +14,7 @@ $ItalYiiMP_Request = [PSCustomObject]@{}
 
 try {
     $ItalYiiMP_Request = Invoke-RestMethod "http://www.italyiimp.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $ItalYiiMPCoins_Request = Invoke-RestMethod "http://www.italyiimp.com/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
     Write-Warning "Pool API ($Name) has failed. "
@@ -26,6 +27,7 @@ if (($ItalYiiMP_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignor
 }
 
 $ItalYiiMP_Regions = "us"
+$ItalYiiMP_Currencies = @("BTC") + ($ItalYiiMPCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 $ItalYiiMP_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$ItalYiiMP_Request.$_.hashrate -gt 0} | ForEach-Object {
     $ItalYiiMP_Host = "mine.italyiimp.com"
@@ -55,7 +57,7 @@ $ItalYiiMP_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
         $ItalYiiMP_Region = $_
         $ItalYiiMP_Region_Norm = Get-Region $ItalYiiMP_Region
 
-        if ($BTC) {
+        $ItalYiiMP_Currencies | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $ItalYiiMP_Algorithm_Norm
                 Info          = $ItalYiiMP_Coin
@@ -65,8 +67,8 @@ $ItalYiiMP_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
                 Protocol      = "stratum+tcp"
                 Host          = "$ItalYiiMP_Algorithm.$ItalYiiMP_Host"
                 Port          = $ItalYiiMP_Port
-                User          = $BTC
-                Pass          = "$Worker,c=BTC"
+                User          = Get-Variable $_ -ValueOnly
+                Pass          = "$Worker,c=$_"
                 Region        = $ItalYiiMP_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated

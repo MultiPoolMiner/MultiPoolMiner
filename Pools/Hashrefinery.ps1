@@ -14,6 +14,7 @@ $HashRefinery_Request = [PSCustomObject]@{}
 
 try {
     $HashRefinery_Request = Invoke-RestMethod "http://pool.hashrefinery.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $HashRefineryCoins_Request = Invoke-RestMethod "http://pool.hashrefinery.com/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
@@ -26,6 +27,7 @@ if (($HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ig
 }
 
 $HashRefinery_Regions = "us"
+$HashRefinery_Currencies = @("BTC") + ($HashRefineryCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 $HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Hashrefinery_Request.$_.hashrate -gt 0} | ForEach-Object {
     $HashRefinery_Host = "hashrefinery.com"
@@ -50,7 +52,7 @@ $HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore 
         $HashRefinery_Region = $_
         $HashRefinery_Region_Norm = Get-Region $HashRefinery_Region
 
-        if ($BTC) {
+        $HashRefinery_Currencies | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $HashRefinery_Algorithm_Norm
                 Info          = $HashRefinery_Coin
@@ -60,8 +62,8 @@ $HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore 
                 Protocol      = "stratum+tcp"
                 Host          = "$HashRefinery_Algorithm.$HashRefinery_Region.$HashRefinery_Host"
                 Port          = $HashRefinery_Port
-                User          = $BTC
-                Pass          = "$Worker,c=BTC"
+                User          = Get-Variable $_ -ValueOnly
+                Pass          = "$Worker,c=$_"
                 Region        = $HashRefinery_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated
