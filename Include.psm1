@@ -227,7 +227,7 @@ function Get-ChildItemContent {
             $Content = & {
                 $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters.$_}
                 try {
-                    ($_ | Get-Content | ConvertFrom-Json) | ForEach-Object {Invoke-ExpressionRecursive $_}
+                    (($_ | Get-Content) "(<#.*#>)|(\s*#.*)","" | ConvertFrom-Json) | ForEach-Object {Invoke-ExpressionRecursive $_}
                 }
                 catch [ArgumentException] {
                     $null
