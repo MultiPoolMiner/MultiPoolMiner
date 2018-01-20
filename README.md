@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 19/01/2018 - v1.22.8 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 20/01/2018 - v1.22.9 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -314,11 +314,11 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
     [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9)
     
 ###### From:
-    0.1
+    0.1), 0.9)
 ###### TO:
-    0.3
+    0.3), 0.75)
 
-###### This will change the fault tolerance limit from +/-10% to +30/-10%.
+###### This will change the fault tolerance limit from +/-10% to +30/-25%.
 
 ###### Q19. MultiPoolMiner is not mining the most profitable algorithm. Why?
 ###### A19. MPM version 2.7 introduced a smarter spike resistance for both of your hashrate and coin difficulty/price ratio. This feature will detect and handle mining accordingly to prevent you losing time and profit. The usual case is, if an algorithm's price fluctuates a lot, then the short time profit might appear to be higher, but by the time you have mined it for a period of time, the coins will be exchanged for a much lower price and your mining will be less profitable. This is due to the PPLNS(+) nature implemented in the pools. To mitigate this effect MPM uses an 24h mean price (if provided by the pool) when determininig the most profitable algo. (#712, #713, query re NH to be resolved/omitted)
