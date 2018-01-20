@@ -148,7 +148,7 @@ namespace OpenCl
             var offset = 0;
             var length = (uint)(Marshal.SizeOf<T>()*ptr.Length);
             if (buffer.Size < length) {
-                throw new ArgumentException($"Memory buffer is to small: expected length >= {length}, found {buffer.Size}.");
+                throw new ArgumentException(String.Format("Memory buffer is to small: expected length >= {0}, found {1}.", length, buffer.Size));
             }
             var numEvents = 0;
             IntPtr[] events = null;

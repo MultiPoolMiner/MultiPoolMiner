@@ -305,7 +305,7 @@
             }
             int count = (int)arraySize/elemSize;
             if (count*elemSize < (int)arraySize) {
-                throw new InvalidOperationException($"Array size is incompatible with managed element size: array size = {arraySize}, sizeof({typeof(T)}) = {elemSize})");
+                throw new InvalidOperationException(String.Format("Array size is incompatible with managed element size: array size = {0}, sizeof({1}) = {2})", arraySize, typeof(T), elemSize));
             }
             T[] result = new T[count];
             GCHandle gch = GCHandle.Alloc(result, GCHandleType.Pinned);
