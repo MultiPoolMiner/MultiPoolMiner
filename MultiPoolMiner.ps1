@@ -54,6 +54,8 @@ param(
     [Alias("Uri", "Url")]
     [String]$MinerStatusUrl = "https://multipoolminer.io/monitor/miner.php",
     [Parameter(Mandatory = $false)]
+    [String]$MinerStatusKey = "",
+    [Parameter(Mandatory = $false)]
     [Double]$SwitchingPrevention = 1 #zero does not prevent miners switching
 )
 
@@ -121,6 +123,7 @@ while ($true) {
             Delay               = $Delay
             Watchdog            = $Watchdog
             MinerStatusURL      = $MinerStatusURL
+            MinerStatusKey      = $MinerStatusKey
             SwitchingPrevention = $SwitchingPrevention
         } | Select-Object -ExpandProperty Content
     }
@@ -144,9 +147,14 @@ while ($true) {
             Delay               = $Delay
             Watchdog            = $Watchdog
             MinerStatusURL      = $MinerStatusURL
+            MinerStatusKey      = $MinerStatusKey
             SwitchingPrevention = $SwitchingPrevention
         }
     }
+
+    # For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
+    if($Wallet -and -not $Config.MinerStatusKey) { $Config.MinerStatusKey = $Wallet }
+
     Get-ChildItem "Pools" | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
         $Config.Pools | Add-Member $_.BaseName (
             [PSCustomObject]@{
@@ -580,7 +588,7 @@ while ($true) {
         }
     }
 
-    if ($Config.MinerStatusURL) {& .\ReportStatus.ps1 -Address $Wallet -WorkerName $WorkerName -ActiveMiners $ActiveMiners -Miners $Miners -MinerStatusURL $Config.MinerStatusURL}
+    if ($Config.MinerStatusURL -and $Config.MinerStatusKey) {& .\ReportStatus.ps1 -Key $Config.MinerStatusKey -WorkerName $WorkerName -ActiveMiners $ActiveMiners -Miners $Miners -MinerStatusURL $Config.MinerStatusURL}
 
     #Display mining information
     $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object -Descending Type, Profit_Bias | Format-Table -GroupBy Type (
