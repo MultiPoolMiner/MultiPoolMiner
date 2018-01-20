@@ -188,7 +188,7 @@ namespace OpenCl
         public T[] Values
         {
             get {
-                //ErrorCode err;
+//                ErrorCode err;
                 var size = this.mem.Size;
 
                 var elemSize = Marshal.SizeOf<T>();

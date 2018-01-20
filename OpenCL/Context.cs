@@ -120,7 +120,7 @@ namespace OpenCl
 
         public Device[] Devices
         {
-            get { return Device.FromIntPtr(Cl.GetInfoArray<IntPtr>(NativeMethods.clGetContextInfo, this.handle, CL_CONTEXT_REFERENCE_COUNT)); }
+            get { return Device.FromIntPtr(Cl.GetInfoArray<IntPtr>(NativeMethods.clGetContextInfo, this.handle, CL_CONTEXT_DEVICES)); }
         }
 
         public ContextProperty[] Properties
@@ -158,9 +158,29 @@ namespace OpenCl
 
         // static factory methods
 
+        public static Context CreateContext(Platform platform, Device device, ContextNotify callback, object userData)
+        {
+            var pty = platform != null ? new ContextProperty[] { new ContextProperty(ContextProperties.Platform, platform.handle), ContextProperty.Zero } : null;
+            var dev = new IntPtr[] { device.handle };
+            var pfn = (ContextNotifyData)null;
+            var pcb = (ContextNotifyInternal)null;
+            var ptr = IntPtr.Zero;
+            if (callback != null) {
+                pfn = new ContextNotifyData(callback, userData);
+                pcb = ContextNotifyData.Callback;
+                ptr = pfn.Handle;
+            }
+            var err = ErrorCode.Success;
+            var ctx = NativeMethods.clCreateContext(pty, 1, dev, pcb, ptr, out err);
+            if (err != ErrorCode.Success) {
+                throw new OpenClException(err);
+            }
+            return new Context(ctx, pfn);
+        }
+
         public static Context CreateContext(Platform platform, Device[] devices, ContextNotify callback, object userData)
         {
-            var pty = new ContextProperty[] { new ContextProperty(ContextProperties.Platform, platform.handle), ContextProperty.Zero };
+            var pty = platform != null ? new ContextProperty[] { new ContextProperty(ContextProperties.Platform, platform.handle), ContextProperty.Zero } : null;
             var num = devices.Length;
             var dev = new IntPtr[num];
             for (var i=0; i<num; i++) {
@@ -184,7 +204,7 @@ namespace OpenCl
 
         public static Context CreateContextFromType(Platform platform, DeviceType type, ContextNotify callback, object userData)
         {
-            var pty = new ContextProperty[] { new ContextProperty(ContextProperties.Platform, platform.handle), ContextProperty.Zero };
+            var pty = platform != null ? new ContextProperty[] { new ContextProperty(ContextProperties.Platform, platform.handle), ContextProperty.Zero } : null;
             var pfn = (ContextNotifyData)null;
             var pcb = (ContextNotifyInternal)null;
             var ptr = IntPtr.Zero;

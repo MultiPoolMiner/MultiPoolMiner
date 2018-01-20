@@ -1,6 +1,7 @@
 ﻿namespace OpenCl
 {
     using System;
+    using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
 
     [Flags]
@@ -237,7 +238,7 @@
     internal static class Cl
     {
 
-        internal static T GetInfo<T>(GetInfoDelegate method, IntPtr handle, uint name) where T: struct
+        internal static T GetInfo<T>(GetInfoDelegate method, IntPtr handle, uint name) where T : struct
         {
             IntPtr size;
             object result = default(T);
@@ -276,7 +277,7 @@
             return result;
         }
 
-        internal static T GetInfoEnum<T>(GetInfoDelegate method, IntPtr handle, uint name) where T: struct
+        internal static T GetInfoEnum<T>(GetInfoDelegate method, IntPtr handle, uint name) where T : struct
         {
             var type = Enum.GetUnderlyingType(typeof(T));
             var result = Activator.CreateInstance(type);
@@ -294,21 +295,22 @@
             return (T)result;
         }
 
-        internal static T[] GetInfoArray<T>(GetInfoDelegate method, IntPtr handle, uint name) where T: struct
+        internal static T[] GetInfoArray<T>(GetInfoDelegate method, IntPtr handle, uint name) where T : struct
         {
-            IntPtr size;
-            ErrorCode error = method(handle, name, IntPtr.Zero, IntPtr.Zero, out size);
+            var elemSize = Marshal.SizeOf<T>();
+            IntPtr arraySize;
+            ErrorCode error = method(handle, name, IntPtr.Zero, IntPtr.Zero, out arraySize);
             if (error != ErrorCode.Success) {
                 throw new OpenClException(error);
             }
-            int count = (int)size/Marshal.SizeOf<T>();
-            if (count*Marshal.SizeOf<T>() < (int)size) {
-                count++;
+            int count = (int)arraySize/elemSize;
+            if (count*elemSize < (int)arraySize) {
+                throw new InvalidOperationException(String.Format("Array size is incompatible with managed element size: array size = {0}, sizeof({1}) = {2})", arraySize, typeof(T), elemSize));
             }
             T[] result = new T[count];
             GCHandle gch = GCHandle.Alloc(result, GCHandleType.Pinned);
             try {
-                error = method(handle, name, (IntPtr)(count*Marshal.SizeOf<T>()), gch.AddrOfPinnedObject(), out size);
+                error = method(handle, name, (IntPtr)(count*elemSize), gch.AddrOfPinnedObject(), out arraySize);
                 if (error != ErrorCode.Success) {
                     throw new OpenClException(error);
                 }

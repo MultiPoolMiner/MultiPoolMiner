@@ -138,6 +138,119 @@ namespace OpenCl
             return new Event(result);
         }
 
+        public Event EnqueueWriteBuffer<T>(Mem<T> buffer, bool blockingWrite, T[] ptr) where T: struct
+        {
+            return EnqueueWriteBuffer(buffer, blockingWrite, ptr, null);
+        }
+
+        public Event EnqueueWriteBuffer<T>(Mem<T> buffer, bool blockingWrite, T[] ptr, Event[] eventWaitList) where T: struct
+        {
+            var offset = 0;
+            var length = (uint)(Marshal.SizeOf<T>()*ptr.Length);
+            if (buffer.Size < length) {
+                throw new ArgumentException(String.Format("Memory buffer is to small: expected length >= {0}, found {1}.", length, buffer.Size));
+            }
+            var numEvents = 0;
+            IntPtr[] events = null;
+            if (eventWaitList != null) {
+                numEvents = eventWaitList.Length;
+                events = Event.ToIntPtr(eventWaitList);
+            }
+            IntPtr result = IntPtr.Zero;
+            GCHandle gch = GCHandle.Alloc(ptr, GCHandleType.Pinned);
+            try {
+                var error = NativeMethods.clEnqueueWriteBuffer(
+                    this.handle,
+                    buffer.handle,
+                    blockingWrite ? 1u : 0u,
+                    (IntPtr)offset,
+                    (IntPtr)length,
+                    gch.AddrOfPinnedObject(),
+                    (uint)numEvents,
+                    events,
+                    out result);
+                if (error != ErrorCode.Success) {
+                    throw new OpenClException(error);
+                }
+            }
+            finally {
+                gch.Free();
+            }
+            return new Event(result);
+        }
+
+        public Event EnqueueWriteBuffer<T>(Mem<T> buffer, bool blockingRead, uint offset, uint length, T[] ptr, Event[] eventWaitList) where T: struct
+        {
+            var numEvents = 0;
+            IntPtr[] events = null;
+            if (eventWaitList != null) {
+                numEvents = eventWaitList.Length;
+                events = Event.ToIntPtr(eventWaitList);
+            }
+            IntPtr result = IntPtr.Zero;
+            GCHandle gch = GCHandle.Alloc(ptr, GCHandleType.Pinned);
+            try {
+                var error = NativeMethods.clEnqueueWriteBuffer(
+                    this.handle,
+                    buffer.handle,
+                    blockingRead ? 1u : 0u,
+                    (IntPtr)offset,
+                    (IntPtr)length,
+                    gch.AddrOfPinnedObject(),
+                    (uint)numEvents,
+                    events,
+                    out result);
+                if (error != ErrorCode.Success) {
+                    throw new OpenClException(error);
+                }
+            }
+            finally {
+                gch.Free();
+            }
+            return new Event(result);
+        }
+
+        public Event EnqueueFillBuffer<T>(Mem<T> buffer, T pattern) where T: struct
+        {
+            return EnqueueFillBuffer(buffer, pattern, null);
+        }
+
+        public Event EnqueueFillBuffer<T>(Mem<T> buffer, T pattern, Event[] eventWaitList) where T: struct
+        {
+            return EnqueueFillBuffer(buffer, new T[] { pattern }, 0, buffer.Size, eventWaitList);
+        }
+
+        public Event EnqueueFillBuffer<T>(Mem<T> buffer, T[] pattern, uint offset, uint length, Event[] eventWaitList) where T: struct
+        {
+            var numEvents = 0;
+            IntPtr[] events = null;
+            if (eventWaitList != null) {
+                numEvents = eventWaitList.Length;
+                events = Event.ToIntPtr(eventWaitList);
+            }
+            IntPtr result = IntPtr.Zero;
+            GCHandle gch = GCHandle.Alloc(pattern, GCHandleType.Pinned);
+            try {
+                var error = NativeMethods.clEnqueueFillBuffer(
+                    this.handle,
+                    buffer.handle,
+                    gch.AddrOfPinnedObject(),
+                    (IntPtr)(Marshal.SizeOf<T>()*pattern.Length),
+                    (IntPtr)offset,
+                    (IntPtr)length,
+                    (uint)numEvents,
+                    events,
+                    out result);
+                if (error != ErrorCode.Success) {
+                    throw new OpenClException(error);
+                }
+            }
+            finally {
+                gch.Free();
+            }
+            return new Event(result);
+        }
+
         public Event EnqueueNDRangeKernel(Kernel kernel, uint[] globalWorkOffset, uint[] globalWorkSize, uint[] localWorkSize, Event[] eventWaitList)
         {
             var workDim = globalWorkSize.Length;
