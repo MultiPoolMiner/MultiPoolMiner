@@ -214,7 +214,7 @@ function Get-ChildItemContent {
         return $Expression
     }
 
-    Get-ChildItem $Path | ForEach-Object {
+    Get-ChildItem $Path -Exclude "_*" | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
         if ($_.Extension -eq ".ps1") {
