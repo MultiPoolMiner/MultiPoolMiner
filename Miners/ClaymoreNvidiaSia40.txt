@@ -5,7 +5,7 @@
         "Arguments":  "-r -1 -mport -23333 -epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -allcoins 1 -dpool $($Pools.Sia.Host):$($Pools.Sia.Port) -dwal $($Pools.Sia.User) -dpsw $($Pools.Sia.Pass) -dcoin sc -dcri 40 -platform 2$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | ForEach-Object {if ($_.GlobalMemsize -ge 3221225472) {$DeviceIDs += $DeviceID}; $DeviceID++});if($DeviceIDs){' -di';$($DeviceIDs -join '')})",
         "HashRates":  {"Ethash":  "$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | Where-Object {$_.GlobalMemsize -ge 3221225472}).Count -eq 0) {0} else {$Stats.ClaymoreNvidiaSia40_Ethash_HashRate.Week})","Sia":  "$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | Where-Object {$_.GlobalMemsize -ge 3221225472}).Count -eq 0) {0} else {$Stats.ClaymoreNvidiaSia40_Sia_HashRate.Week})"},
         "API":  "Claymore",
-        "Port":  "-23333"
+        "Port":  "23333"
     },
     {
         "Type":  "NVIDIA",
@@ -13,7 +13,7 @@
         "Arguments":  "-r -1 -mport -23333 -epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -allcoins 1 -dpool $($Pools.SiaClaymore.Host):$($Pools.SiaClaymore.Port) -dwal $($Pools.SiaClaymore.User) -dpsw $($Pools.SiaClaymore.Pass) -dcoin sc -dcri 40 -platform 2$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | ForEach-Object {if ($_.GlobalMemsize -ge 3221225472) {$DeviceIDs += $DeviceID}; $DeviceID++});if($DeviceIDs){' -di';$($DeviceIDs -join '')})",
         "HashRates":  {"Ethash":  "$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | Where-Object {$_.GlobalMemsize -ge 3221225472}).Count -eq 0) {0} else {$Stats.ClaymoreNvidiaSia40_Ethash_HashRate.Week})","SiaClaymore":  "$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | Where-Object {$_.GlobalMemsize -ge 3221225472}).Count -eq 0) {0} else {$Stats.ClaymoreNvidiaSia40_SiaClaymore_HashRate.Week})"},
         "API":  "Claymore",
-        "Port":  "-23333"
+        "Port":  "23333"
     },
     {
         "Type":  "NVIDIA",
@@ -21,7 +21,7 @@
         "Arguments":  "-r -1 -mport -23333 -epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -allcoins 1 -dpool $($Pools.SiaNiceHash.Host):$($Pools.SiaNiceHash.Port) -dwal $($Pools.SiaNiceHash.User) -dpsw $($Pools.SiaNiceHash.Pass) -dcoin sc -dcri 40 -platform 2$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | ForEach-Object {if ($_.GlobalMemsize -ge 3221225472) {$DeviceIDs += $DeviceID}; $DeviceID++});if($DeviceIDs){' -di';$($DeviceIDs -join '')})",
         "HashRates":  {"Ethash":  "$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | Where-Object {$_.GlobalMemsize -ge 3221225472}).Count -eq 0) {0} else {$Stats.ClaymoreNvidiaSia40_Ethash_HashRate.Week})","SiaNiceHash":  "$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | Where-Object {$_.GlobalMemsize -ge 3221225472}).Count -eq 0) {0} else {$Stats.ClaymoreNvidiaSia40_SiaNiceHash_HashRate.Week})"},
         "API":  "Claymore",
-        "Port":  "-23333"
+        "Port":  "23333"
     }
 ]
 
