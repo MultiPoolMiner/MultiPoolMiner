@@ -1,26 +1,28 @@
 ﻿using module ..\Include.psm1
 
-$Threads = 1
+$Threads = 2
 
-$Path = ".\Bin\NVIDIA-Excavator_138a\excavator.exe"
-$Uri = "https://github.com/nicehash/excavator/releases/download/v1.3.8a/excavator_v1.3.8a_NVIDIA_Win64.zip"
+$Path = ".\Bin\NVIDIA-Excavator_141\excavator.exe"
+#$Uri = "https://github.com/nicehash/excavator/releases/tag/v1.4.1a"
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    "_blake2s"          = @() #Blake2s, Beaten by Ccminer-x11gost
-    "_cryptonight"      = @() #Cryptonight, Beaten by XMRig Nvidia
-    #"decred"           = @() #Decred
-    "_daggerhashimoto"  = @() #Ethash, 4 threads out of memory, Beaten by EthMiner
-    "_equihash"         = @() #Equihash, Beaten by DSTM
-    "_neoscrypt"        = @() #NeoScrypt, 4 threads out of memory
-    "_keccak"           = @() #Keccak, Beaten by Excavator138aNvidia4
-    "_lbry"             = @() #Lbry, Beaten by Excavator138aNvidia4
-    "_lyra2rev2"        = @() #Lyra2RE2, Beaten by Ccminer-Palgin_Nist5
-    "_pascal"           = @() #Pascal, Beaten by Excavator138aNvidia4
-    #"sia"              = @() #Sia
+    "blake2s"         = @() #Blake2s
+    "cryptonight"     = @() #Cryptonight
+    "decred"          = @() #Decred
+    "daggerhashimoto" = @() #Ethash
+    "equihash"        = @() #Equihash
+    "neoscrypt"       = @() #NeoScrypt
+    "nist5"           = @() #Nist5
+    "keccak"          = @() #Keccak
+    "lbry"            = @() #Lbry
+    "lyra2rev2"       = @() #Lyra2RE2
+    "pascal"          = @() #Pascal
+    "sia"             = @() #Sia
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$API = "Nicehash"
 $Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
@@ -31,7 +33,7 @@ $Devices | ForEach-Object {
         $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($Device.Device_Norm)"
         $Index = $Device.Devices -join ","
     }
-
+    
     while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)) {$Port++}
     $APIPort = $Port++
     while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $APIPort -ErrorAction SilentlyContinue)) {$APIPort++}
@@ -50,7 +52,7 @@ $Devices | ForEach-Object {
                 $PoolIpAddress = ([System.Net.Dns]::GetHostAddresses($Pools.$($Algorithm).Host)[0]).IPAddressToString
 
                 [PSCustomObject]@{time = 0; commands = @([PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$_", "$($PoolIpAddress):$($Pools.$($Algorithm).Port)", "$($Pools.$($Algorithm).User):$($Pools.$($Algorithm).Pass)")})},
-                [PSCustomObject]@{time = 1; commands = @($Device.Devices | Foreach {[PSCustomObject]@{id = 1; method = "worker.add"; params = @("0", "$_") + $Command}}) * $Threads},
+                [PSCustomObject]@{time = 1; commands = @($Device.Devices | Foreach {[PSCustomObject]@{id = 1; method = "worker.add"; params = @("0", "$_") + $Commands.$Algorithm}}) * $Threads},
                 [PSCustomObject]@{time = 10; loop = 10; commands = @([PSCustomObject]@{id = 1; method = "algorithm.print.speeds"; params = @("0")})} | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $Path)\$($Pools.$($Algorithm).Name)_$($Algorithm)_$($Threads)_Nvidia_$($Device.Device_Norm).json" -Force -ErrorAction SilentlyContinue
 
                 [PSCustomObject]@{
@@ -60,7 +62,7 @@ $Devices | ForEach-Object {
                     Path         = $Path
                     Arguments    = ("-p $Port -c $($Pools.$Algorithm.Name)_$($Algorithm)_$($Threads)_Nvidia_$($Device.Device_Norm).json -na $CommonCommands").trim()
                     HashRates    = [PSCustomObject]@{$Algorithm = $Stats."$($Name)_$($Algorithm)_HashRate".Week}
-                    API          = "NiceHash"
+                    API          = $API
                     Port         = $Port
                     URI          = $Uri
                     PowerDraw    = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week
@@ -73,7 +75,7 @@ $Devices | ForEach-Object {
                 $PoolIpAddress = ([System.Net.Dns]::GetHostAddresses($Pools."$($Algorithm)Nicehash".Host)[0]).IPAddressToString
 
                 [PSCustomObject]@{time = 0; commands = @([PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$_", "$($PoolIpAddress):$($Pools."$($Algorithm)NiceHash".Port)", "$($Pools."$($Algorithm)NiceHash".User):$($Pools."$($Algorithm)NiceHash".Pass)")})},
-                [PSCustomObject]@{time = 3; commands = @($Device.$Devices | Foreach {[PSCustomObject]@{id = 1; method = "worker.add"; params = @("0", "$_") + $Command}}) * $Threads},
+                [PSCustomObject]@{time = 3; commands = @($Device.$Devices | Foreach {[PSCustomObject]@{id = 1; method = "worker.add"; params = @("0", "$_") + $Commands.$Algorithm}}) * $Threads},
                 [PSCustomObject]@{time = 10; loop = 10; commands = @([PSCustomObject]@{id = 1; method = "algorithm.print.speeds"; params = @("0")})} | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $Path)\$($Pools."$($Algorithm)NiceHash".Name)_$($Algorithm)Nicehash_$($Threads)_Nvidia_$($Device.Device_Norm).json" -Force -ErrorAction SilentlyContinue
 
                 [PSCustomObject]@{
@@ -83,7 +85,7 @@ $Devices | ForEach-Object {
                     Path         = $Path
                     Arguments    = ("-p $Port -c $($Pools."$($Algorithm)NiceHash".Name)_$($Algorithm)Nicehash_$($Threads)_Nvidia_$($Device.Device_Norm).json -na $CommonCommands").trim()
                     HashRates    = [PSCustomObject]@{"$($Algorithm)NiceHash" = $Stats."$($Name)_$($Algorithm)NiceHash_HashRate".Week}
-                    API          = "NiceHash"
+                    API          = $API
                     Port         = $Port
                     URI          = $Uri
                     PowerDraw    = $Stats."$($Name)_$($Algorithm)Nicehash_PowerDraw".Week
