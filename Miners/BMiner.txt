@@ -2,7 +2,7 @@
     {
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\NVIDIA-BMiner\\BMiner.exe",
-        "Arguments":  "-api 127.0.0.1:1880 -uri $(if ($Pools.Equihash.SSL) {'stratum+ssl'}else {'stratum'})://$($Pools.Equihash.User).$($Pools.Equihash.Pass)@$($Pools.Equihash.Host):$($Pools.Equihash.Port) -nofee",
+        "Arguments":  "-api 127.0.0.1:1880 -uri $(if ($Pools.Equihash.SSL) {'stratum+ssl'}else {'stratum'})://$($Pools.Equihash.User):$($Pools.Equihash.Pass)@$($Pools.Equihash.Host):$($Pools.Equihash.Port) -nofee",
         "HashRates":  {"Equihash":  "$($Stats.Bminer_Equihash_HashRate.Week)"},
         "API":  "Bminer",
         "Port":  "1880",
