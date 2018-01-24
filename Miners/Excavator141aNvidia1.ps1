@@ -3,7 +3,7 @@
 $Threads = 1
 
 $Path = ".\Bin\NVIDIA-Excavator_141a\excavator.exe"
-$Uri = "https://github.com/nicehash/excavator/releases/tag/v1.4.1a"
+#$Uri = "https://github.com/nicehash/excavator/releases/tag/v1.4.1a"
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
