@@ -1,18 +1,18 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-KlausT819pre_CUDA91\ccminer.exe"
-$Uri = "https://github.com/KlausT/ccminer/files/1627184/ccminer-819prerelease-cuda91-x64.zip"
+$Path = ".\Bin\NVIDIA-KlausT819_CUDA91\ccminer.exe"
+$Uri = "https://github.com/KlausT/ccminer/releases/download/8.19/ccminer-819final-cuda91-x64.zip"
 
 # Custom command to be applied to all algorithms
 $CommonCommands = ""
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    #"blakecoin" = "" #Blakecoin
-    #"c11"       = "" #C11
+    "blakecoin" = "" #Blakecoin
+    "c11"       = "" #C11
     "groestl"   = "" #Groestl
-    #"keccak"    = "" #Keccak
-    #"lyra2v2"   = "" #Lyra2RE2
+    "keccak"    = "" #Keccak
+    "lyra2v2"   = "" #Lyra2RE2
     "myr-gr"    = "" #MyriadGroestl
     "neoscrypt" = "" #NeoScrypt
     "nist5"     = "" #Nist5
