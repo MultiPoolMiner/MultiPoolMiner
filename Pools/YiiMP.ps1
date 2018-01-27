@@ -56,7 +56,7 @@ $YiiMP_Currencies | Where-Object {$YiiMPCoins_Request.$_.hashrate -gt 0} |ForEac
             StablePrice   = $Stat.Week
             MarginOfError = $Stat.Week_Fluctuation
             Protocol      = "stratum+tcp"
-            Host          = "$YiiMP_Algorithm.$YiiMP_Host"
+            Host          = $YiiMP_Host
             Port          = $YiiMP_Port
             User          = Get-Variable $YiiMP_Currency -ValueOnly
             Pass          = "$Worker,c=$YiiMP_Currency"
