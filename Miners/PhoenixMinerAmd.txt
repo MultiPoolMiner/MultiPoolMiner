@@ -2,18 +2,18 @@
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\PhoenixMiner\\PhoenixMiner.exe",
-        "Arguments":  "-rmode 0 -cdmport -23334 -pool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -wal $($Pools.Ethash.User) -pass $($Pools.Ethash.Pass) -proto 4 -coin auto -amd",
+        "Arguments":  "-rmode 0 -cdmport -23335 -cdm 1 -pool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -wal $($Pools.Ethash.User) -pass $($Pools.Ethash.Pass) -proto 4 -coin auto -amd",
         "HashRates":  {"Ethash":  "$($Stats.PhoenixMinerNvidia_Ethash_HashRate.Week)"},
         "API":  "Claymore",
-        "Port":  "23334"
+        "Port":  "23335"
     },
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\PhoenixMiner\\PhoenixMiner.exe",
-        "Arguments":  "-rmode 0 -cdmport -23334 -pool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -wal $($Pools.Ethash2gb.User) -pass $($Pools.Ethash2gb.Pass) -proto 4 -coin auto -amd",
+        "Arguments":  "-rmode 0 -cdmport -23335 -cdm 1 -pool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -wal $($Pools.Ethash2gb.User) -pass $($Pools.Ethash2gb.Pass) -proto 4 -coin auto -amd",
         "HashRates":  {"Ethash2gb":  "$($Stats.PhoenixMinerNvidia_Ethash2gb_HashRate.Week)"},
         "API":  "Claymore",
-        "Port":  "23334"
+        "Port":  "23335"
     }
 ]
 
