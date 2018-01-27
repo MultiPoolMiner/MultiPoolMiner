@@ -61,9 +61,9 @@ namespace OpenCl
             uint count;
 
             error = NativeMethods.clGetPlatformIDs(0, null, out count);
-            if (error != ErrorCode.Success) {
-                throw new OpenClException(error);
-            }
+//            if (error != ErrorCode.Success) {
+//                throw new OpenClException(error);
+//            }
 
             var ids = new IntPtr[count] ;
             error = NativeMethods.clGetPlatformIDs(count, ids, out count);

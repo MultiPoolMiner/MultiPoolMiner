@@ -397,9 +397,9 @@ namespace OpenCl
 
             var ids = new IntPtr[count] ;
             error = NativeMethods.clGetDeviceIDs(platform.handle, type, count, ids, out count);
-            if (error != ErrorCode.Success) {
-                throw new OpenClException(error);
-            }
+//            if (error != ErrorCode.Success) {
+//                throw new OpenClException(error);
+//            }
 
             var res = new Device[count];
             for (var i=0; i<count; i++) {
