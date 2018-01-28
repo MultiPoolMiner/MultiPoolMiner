@@ -166,6 +166,12 @@ while ($true) {
             }
         )
     }
+
+    # Remove configuration for pools specified in ExcludePoolName
+    if($Config.ExcludePoolName) {
+        $Config.ExcludePoolName | Foreach-Object { $Config.Pools.PSObject.Properties.Remove($_) }
+    }
+
     Get-ChildItem "Miners" | Where-Object {-not $Config.Miners.($_.BaseName)} | ForEach-Object {
         $Config.Miners | Add-Member $_.BaseName (
             [PSCustomObject]@{
@@ -223,7 +229,7 @@ while ($true) {
     Write-Log "Loading pool information..."
     $NewPools = @()
     if (Test-Path "Pools") {
-        $NewPools = Get-ChildItem "Pools" | ForEach-Object {
+        $NewPools = Get-ChildItem "Pools" | Where-Object {$Config.Pools.$($_.BaseName)} | ForEach-Object {
             $Pool_Name = $_.BaseName
             $Pool_Parameters = @{StatSpan = $StatSpan}
             $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
