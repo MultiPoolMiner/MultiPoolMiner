@@ -82,7 +82,7 @@ $Rates = [PSCustomObject]@{BTC = [Double]1}
 Start-Transcript ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
 
 #Set process priority to BelowNormal to avoid hash rate drops on systems with weak CPUs
-(Get-Process -Id $Global:PID).priorityclass = "BelowNormal"
+(Get-Process -Id $PID).PriorityClass = "BelowNormal"
 
 if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -Recurse | Unblock-File}
 if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue) -and (Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {
