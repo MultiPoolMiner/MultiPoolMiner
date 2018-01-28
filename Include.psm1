@@ -55,7 +55,7 @@ Function Write-Log {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
-        [Parameter(Mandatory = $false)][ValidateSet("Error", "Warn", "Info", "Verbose", "Debug", "")][string]$Level = "Info"
+        [Parameter(Mandatory = $false)][ValidateSet("Error", "Warn", "Info", "Verbose", "Debug")][string]$Level = "Info"
     )
 
     Begin { }
@@ -316,7 +316,6 @@ function ConvertTo-LocalCurrency {
     )
 
     $Number = $Number * $BTCRate
-    
     switch ([math]::truncate(10 - $Offset - [math]::log($BTCRate, [Math]::Pow(10, 1)))) {
         0 {$Number.ToString("N0")}
         1 {$Number.ToString("N1")}
