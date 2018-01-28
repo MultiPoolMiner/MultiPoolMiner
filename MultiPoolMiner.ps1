@@ -169,7 +169,7 @@ while ($true) {
 
     # Remove configuration for pools specified in ExcludePoolName
     if($Config.ExcludePoolName) {
-        $Config.ExcludePoolName | Foreach-Objecct { $Config.Pools.PSObject.Properties.Remove($_) }
+        $Config.ExcludePoolName | Foreach-Object { $Config.Pools.PSObject.Properties.Remove($_) }
     }
 
     Get-ChildItem "Miners" | Where-Object {-not $Config.Miners.($_.BaseName)} | ForEach-Object {
