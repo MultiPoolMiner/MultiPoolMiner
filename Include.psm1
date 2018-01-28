@@ -5,11 +5,57 @@ Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
 
+function Get-Devices {
+    [CmdletBinding()]
+	
+    $OpenGlDevices = [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)}
+
+    $Devices = [PSCustomObject]@{}
+    $DeviceID = 0
+    
+    $OpenGlDevices | ForEach-Object {
+
+        $Vendor = $_.Vendor
+        $Name_Norm = (Get-Culture).TextInfo.ToTitleCase(($_.Name)) -replace "[^A-Z0-9]"
+
+        if ($_.Type -eq "Cpu") {
+            $Type = "CPU"
+        }
+        else {
+            Switch ($Vendor) {
+                "Advanced Micro Devices, Inc." {$Type = "AMD"}
+                "Intel(R) Corporation"         {$Type = "INTEL"}
+                "NVIDIA Corporation"           {$Type = "NVIDIA"}
+            }
+        }        
+
+        $Device = @([PSCustomObject]$_)
+        $Device | Add-Member Name_Norm $Name_Norm
+
+        if (-not $Devices.$Type) {
+            $DeviceID = 0
+            $Device | Add-Member DeviceIDs @($DeviceID)
+            $Devices | Add-Member $Type $Device
+        }
+        else {
+            if ($Devices.$Type.Name_Norm -notcontains $Name_Norm) {
+                $Device | Add-Member DeviceIDs @($DeviceID)
+                $Devices.$Type += $Device
+            }
+            else {
+                $Devices.$Type | Where-Object {$_.Name_Norm -eq $Name_Norm} | ForEach-Object {$_.DeviceIDs += $DeviceID}
+            }
+        }
+        $DeviceID++
+    }
+    $Devices
+}
+
 Function Write-Log {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
-        [Parameter(Mandatory = $false)][ValidateSet("Error", "Warn", "Info", "Verbose", "Debug")][string]$Level = "Info"
+        [Parameter(Mandatory = $false)][ValidateSet("Error", "Warn", "Info", "Verbose", "Debug", "")][string]$Level = "Info"
     )
 
     Begin { }
@@ -270,7 +316,7 @@ function ConvertTo-LocalCurrency {
     )
 
     $Number = $Number * $BTCRate
-
+    
     switch ([math]::truncate(10 - $Offset - [math]::log($BTCRate, [Math]::Pow(10, 1)))) {
         0 {$Number.ToString("N0")}
         1 {$Number.ToString("N1")}
