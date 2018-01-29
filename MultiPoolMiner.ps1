@@ -210,6 +210,9 @@ while ($true) {
     $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
     $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
 
+    # Force $Config.Currency to [array] # There must be a better way
+    if ($Config.Currency -is [String]) {$Config.Currency | ForEach-Object {$Config.Currency = @(); $Config.Currency += $_}}
+
     #Update the exchange rates
     try {
         Write-Log "Updating exchange rates from Coinbase..."
