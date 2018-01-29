@@ -210,9 +210,6 @@ while ($true) {
     $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
     $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
 
-    # Force $Config.Currency to [array] # There must be a better way
-    if ($Config.Currency -is [String]) {$Config.Currency | ForEach-Object {$Config.Currency = @(); $Config.Currency += $_}}
-
     #Update the exchange rates
     try {
         Write-Log "Updating exchange rates from Coinbase..."
@@ -604,9 +601,9 @@ while ($true) {
         @{Label = "Miner"; Expression = {$_.Name}}, 
         @{Label = "Algorithm"; Expression = {$_.HashRates.PSObject.Properties.Name}}, 
         @{Label = "Speed"; Expression = {$_.HashRates.PSObject.Properties.Value | ForEach-Object {if ($_ -ne $null) {"$($_ | ConvertTo-Hash)/s"}else {"Benchmarking"}}}; Align = 'right'}, 
-        @{Label = "$($Config.Currency[0])/Day"; Expression = {if ($_.Profit) {ConvertTo-LocalCurrency $($_.Profit) $($Rates.$($Config.Currency[0])) -Offset 2} else {"Unknown"}}; Align = "right"},
+        @{Label = "$($Config.Currency | Select -Index 0)/Day"; Expression = {if ($_.Profit) {ConvertTo-LocalCurrency $($_.Profit) $($Rates.$($Config.Currency | Select -Index 0)) -Offset 2} else {"Unknown"}}; Align = "right"},
         @{Label = "Accuracy"; Expression = {$_.Pools.PSObject.Properties.Value.MarginOfError | ForEach-Object {(1 - $_).ToString("P0")}}; Align = 'right'}, 
-        @{Label = "$($Config.Currency[0])/GH/Day"; Expression = {($_.Pools.PSObject.Properties.Value.Price | ForEach-Object {ConvertTo-LocalCurrency $($_ * 1000000000) $($Rates.$($Config.Currency[0])) -Offset 2}) -join "+"}; Align = "right"}, 
+        @{Label = "$($Config.Currency | Select -Index 0)/GH/Day"; Expression = {($_.Pools.PSObject.Properties.Value.Price | ForEach-Object {ConvertTo-LocalCurrency $($_ * 1000000000) $($Rates.$($Config.Currency | Select -Index 0)) -Offset 2}) -join "+"}; Align = "right"}, 
         @{Label = "BTC/GH/Day"; Expression = {$_.Pools.PSObject.Properties.Value.Price | ForEach-Object {($_ * 1000000000).ToString("N5")}}; Align = 'right'}, 
         @{Label = "Pool"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {if ($_.Info) {"$($_.Name)-$($_.Info)"}else {"$($_.Name)"}}}}
     ) | Out-Host
