@@ -6,7 +6,7 @@
         "HashRates":  {"Ethash":  "$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | Where-Object {$_.GlobalMemsize -ge 3221225472}).Count -eq 0) {0} else {$Stats.ClaymoreNvidia_Ethash_HashRate.Week})"},
         "API":  "Claymore",
         "Port":  "23333",
-         "Fee": "0.01"
+        "Fee": "0.01"
     },
     {
         "Type":  "NVIDIA",
@@ -15,7 +15,7 @@
         "HashRates":  {"Ethash2gb":  "$($Stats.ClaymoreNvidia_Ethash2gb_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "23333",
-         "Fee": "0.01"
+        "Fee": "0.01"
     }
 ]
 
