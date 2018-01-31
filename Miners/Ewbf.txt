@@ -6,6 +6,7 @@
         "HashRates":  {"Equihash":  "$(if ($Pools.Equihash.SSL) {0}else {$Stats.Ewbf_Equihash_HashRate.Week})"},
         "API":  "DSTM",
         "Port":  "42000",
+        "Fee":  "0.02",
         "PrerequisitePath":  "$env:SystemRoot\\System32\\msvcr120.dll",
         "PrerequisiteURI":  "http://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe"
     }
