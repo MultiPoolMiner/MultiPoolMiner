@@ -14,7 +14,7 @@ if ($Pools.Cryptonight.Name) {
 
     $Port = 4001 + 40 * $ItemCounter
 
-    $Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
+    $Devices = ($GPUs | Where-Object {$Type -contains $_.Type}).Device
     $Devices | ForEach-Object {
 
         if ($Devices.count -gt 1 ){
@@ -22,8 +22,6 @@ if ($Pools.Cryptonight.Name) {
             $HWConfigFile = " --$($_.Type.ToLower()) $($_.Device_Norm).txt"
             $Index = $_.Devices -join ","
         }
-
-        while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)) {$Port++}
 
         ([PSCustomObject]@{
             pool_list = @([PSCustomObject]@{
@@ -73,4 +71,3 @@ if ($Pools.Cryptonight.Name) {
         if ($Port) {$Port ++}
     }
 }
-Sleep 0

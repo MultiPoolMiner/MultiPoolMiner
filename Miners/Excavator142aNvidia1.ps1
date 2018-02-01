@@ -2,8 +2,8 @@
 
 $Threads = 1
 
-$Path = ".\Bin\NVIDIA-Excavator_141a\excavator.exe"
-#$Uri = "https://github.com/nicehash/excavator/releases/tag/v1.4.1a"
+$Path = ".\Bin\NVIDIA-Excavator_142a\excavator.exe"
+#$Uri = "https://github.com/nicehash/excavator/releases/tag/v1.4.2a"
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
@@ -25,7 +25,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 $API = "Nicehash"
 $Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
-$Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
+$Devices = ($GPUs | Where-Object {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {
     $Device = $_
 
@@ -33,14 +33,12 @@ $Devices | ForEach-Object {
         $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($Device.Device_Norm)"
         $Index = $Device.Devices -join ","
     }
-    
-    while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)) {$Port++}
+
     $APIPort = $Port++
-    while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $APIPort -ErrorAction SilentlyContinue)) {$APIPort++}
     
     $CommonCommands = " -f 6 -wp $($APIPort)"
 
-    $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where {$_ -cnotmatch "^_.+" -and $Pools.$(Get-Algorithm($_)).Name} | ForEach-Object {
+    $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$_ -cnotmatch "^_.+" -and $Pools.$(Get-Algorithm($_)).Name} | ForEach-Object {
 
         $Algorithm = Get-Algorithm($_)
         try {
@@ -97,4 +95,3 @@ $Devices | ForEach-Object {
     }
     if ($APIPort) {$Port = $APIPort +1}
 }
-Sleep 0

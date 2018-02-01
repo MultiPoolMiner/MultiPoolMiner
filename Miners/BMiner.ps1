@@ -1,7 +1,7 @@
 using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-BMiner\BMiner.exe"
-$Uri = "https://www.bminercontent.com/releases/bminer-v5.2.0-4f20af3-amd64.zip"
+$Uri = "https://www.bminercontent.com/releases/bminer-v5.3.0-e337b9a-amd64.zip"
 
 # Custom commands to be applied to all algorithms
 $CommonCommands = ""
@@ -13,11 +13,11 @@ $Commands = [PSCustomObject]@{
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
-$Devices = ($GPUs | Where {$Type -contains $_.Type}).Device
+$Devices = ($GPUs | Where-Object {$Type -contains $_.Type}).Device
 $Devices | ForEach-Object {
 	$Device = $_
 
-	$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where {$_ -cnotmatch "^_.+" -and $Pools.$(Get-Algorithm($_)).Name} | ForEach-Object {
+	$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$_ -cnotmatch "^_.+" -and $Pools.$(Get-Algorithm($_)).Name} | ForEach-Object {
 
 		$Algorithm = Get-Algorithm($_)
 		$Command = $Commands.$_
@@ -27,8 +27,6 @@ $Devices | ForEach-Object {
 			$Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) -devices $($Device.Devices -join ',')"
 			$Index = $Device.Devices -join ","
 		}
-
-		while ([Bool](Get-NetTCPConnection -State "Listen" -LocalPort $Port -ErrorAction SilentlyContinue)) {$Port++}
 
         [PSCustomObject]@{
 			Name         = $Name
@@ -48,4 +46,3 @@ $Devices | ForEach-Object {
 	}
 	if ($Port) {$Port ++}
 }
-Sleep 0
