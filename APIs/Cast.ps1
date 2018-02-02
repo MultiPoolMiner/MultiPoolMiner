@@ -29,10 +29,7 @@ class Cast : Miner {
                 $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
                 $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
-            catch {
-                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not hash rates from miner."
-                break
-            }
+            catch {}
 
             $HashRate_Name = [String]$Algorithm[0]
             $HashRate_Value = [Double]($Data.devices.hash_rate | Measure-Object -Sum).Sum / 1000

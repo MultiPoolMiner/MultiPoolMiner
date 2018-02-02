@@ -29,10 +29,7 @@ class Eminer : Miner {
                 $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/api/v1/stats" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
                 $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
-            catch {
-                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
-                break
-            }
+            catch {}
 
             $HashRate_Name = [String]$Algorithm[0]
             $HashRate_Value = [Double]($Data.devices.hashrate_1m | Measure-Object -Sum).Sum

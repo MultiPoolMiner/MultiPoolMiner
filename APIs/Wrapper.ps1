@@ -45,12 +45,7 @@ class Wrapper : Miner {
                     $Data = $Response | ConvertFrom-Json -ErrorAction Stop
                 }
             }
-            catch {
-                if ($Safe -and $this.Name -notmatch "PalginNvidia_.*") {
-                    Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
-                }
-                break
-            }
+            catch {}
 
             $HashRate_Name = [String]$Algorithm[0]
             $HashRate_Value = [Double]$Data

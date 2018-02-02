@@ -30,10 +30,7 @@ class Claymore : Miner {
                 $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
                 $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
-            catch {
-                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
-                break
-            }
+            catch {}
 
             $HashRate_Name = [String]($Algorithm -like (Get-Algorithm ($Data.result[0] -split " - ")[1]))
             if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm ($Data.result[0] -split " - ")[1])*")} #temp fix

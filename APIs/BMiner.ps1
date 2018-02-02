@@ -37,10 +37,7 @@ class BMiner : Miner {
                 $Response = Invoke-WebRequest $URI -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
                 $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
-            catch {
-                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
-                break
-            }
+            catch {}
             
             $HashRate_Value = 0
             $Index | Where  {$Data.miners.$_.solver} | ForEach {

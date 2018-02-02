@@ -29,10 +29,7 @@ class Xmrig : Miner {
                 $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/api.json" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
                 $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
-            catch {
-                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
-                break
-            }
+            catch {}
 
             $HashRate_Name = [String]($Algorithm -like (Get-Algorithm $Data.algo))
             if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix

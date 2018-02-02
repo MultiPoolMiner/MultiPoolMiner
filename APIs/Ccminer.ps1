@@ -29,11 +29,8 @@ class Ccminer : Miner {
                 $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
                 $Data = $Response -split ";" | ConvertFrom-StringData -ErrorAction Stop
             }
-            catch {
-                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
-                break
-            }
-            
+            catch {}
+                
             $HashRate_Name = [String]$Data.algo
             if (-not $HashRate_Name) {$HashRate_Name = [String]($Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
             $HashRate_Value = [Double]$Data.KHS * 1000

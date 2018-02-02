@@ -27,10 +27,7 @@ class Xgminer : Miner {
                 $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
                 $Data = $Response.Substring($Response.IndexOf("{"), $Response.LastIndexOf("}") - $Response.IndexOf("{") + 1) -replace " ", "_" | ConvertFrom-Json -ErrorAction Stop
             }
-            catch {
-                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
-                break
-            }
+            catch {}
 
             $HashRate_Name = [String]$Algorithm[0]
             $HashRate_Value = if ($Data.SUMMARY.HS_5s) {[Double]$Data.SUMMARY.HS_5s * [Math]::Pow(1000, 0)}
