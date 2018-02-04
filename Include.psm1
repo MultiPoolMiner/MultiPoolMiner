@@ -577,4 +577,17 @@ class Miner {
             }
         }
     }
+
+    [PSCustomObject]GetMinerData ([String[]]$Algorithm, [Bool]$Safe = $false) {
+        $Lines = @()
+
+        $this.Process | Receive-Job | ForEach-Object {
+            $Line = $_ -replace "\x1B\[[0-?]*[ -/]*[@-~]", "" -replace "`n|`r", ""
+            if ($Line) {$Lines += $Line}
+        }
+
+        return [PSCustomObject]@{
+            Lines = $Lines
+        }
+    }
 }

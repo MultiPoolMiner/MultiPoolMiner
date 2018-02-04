@@ -28,6 +28,8 @@ class Wrapper : Miner {
     }
 
     [PSCustomObject]GetMinerData ([String[]]$Algorithm, [Bool]$Safe = $false) {
+        $MinerData = ([Miner]$this).GetMinerData($Algorithm, $Safe)
+
         $Server = "localhost"
         $Timeout = 10 #seconds
 
@@ -72,8 +74,7 @@ class Wrapper : Miner {
         $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
         $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
 
-        return [PSCustomObject]@{
-            HashRate = $HashRate
-        }
+        $MinerData | Add-Member HashRate $HashRate -Force
+        return $MinerData
     }
 }
