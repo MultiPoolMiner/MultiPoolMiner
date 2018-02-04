@@ -605,6 +605,7 @@ while ($true) {
     ) | Out-Host
 
     #Display profit comparison
+    if ($Downloader.State -eq "Running") {$Downloader | Wait-Job -Timeout 10 | Out-Null}
     if (($BestMiners_Combo | Where-Object Profit -EQ $null | Measure-Object).Count -eq 0 -and $Downloader.State -ne "Running") {
         $MinerComparisons = 
         [PSCustomObject]@{"Miner" = "MultiPoolMiner"}, 
