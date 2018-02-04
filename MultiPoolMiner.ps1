@@ -169,7 +169,7 @@ while ($true) {
     }
 
     # Remove configuration for pools specified in ExcludePoolName
-    if($Config.ExcludePoolName) {
+    if ($Config.ExcludePoolName) {
         $Config.ExcludePoolName | Foreach-Object { $Config.Pools.PSObject.Properties.Remove($_) }
     }
 
