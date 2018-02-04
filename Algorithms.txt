@@ -53,6 +53,7 @@
     "x11":  "X11",
     "x11gost":  "Sib",
     "x11evo":  "X11evo",
+    "x16r":  "X16R",
     "x17":  "X17",
     "xevan":  "Xevan",
     "xmr":  "CryptoNight",
