@@ -67,6 +67,7 @@ Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 $Algorithm = $Algorithm | ForEach-Object {Get-Algorithm $_}
 $ExcludeAlgorithm = $ExcludeAlgorithm | ForEach-Object {Get-Algorithm $_}
 $Region = $Region | ForEach-Object {Get-Region $_}
+$Currency = $Currency | ForEach-Object {$_.ToUpper()}
 
 $Timer = (Get-Date).ToUniversalTime()
 $StatEnd = $Timer
