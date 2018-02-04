@@ -32,6 +32,10 @@
       "BTC": "$Wallet",
       "Worker": "$WorkerName"
     },
+    "Zergpool": {
+      "BTC": "$Wallet",
+      "Worker": "$WorkerName"
+    },
     "Zpool": {
       "BTC": "$Wallet",
       "Worker": "$WorkerName"
