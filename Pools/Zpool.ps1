@@ -37,7 +37,9 @@ $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Selec
     $Zpool_Coin = ""
 
     $Divisor = 1000000
-
+    
+    $Fee = 0
+    
     switch ($Zpool_Algorithm_Norm) {
         "equihash" {$Divisor /= 1000}
         "blake2s" {$Divisor *= 1000}
@@ -49,9 +51,37 @@ $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Selec
         "scrypt" {$Divisor *= 1000}
         "keccak" {$Divisor *= 1000}
     }
+    
+    switch ($Zpool_Algorithm_Norm) {
+        "equihash" {$Fee += 1.75}
+		"neoscrypt" {$Fee += 2}
+        "blake2s" {$Fee += 2}
+		"xevan" {$Fee += 2}
+		"m7m" {$Fee += 2}
+		"lyra2z" {$Fee += 1}
+		"x17" {$Fee += 2}
+		"sib" {$Fee += 2}
+		"phi" {$Fee += 2}
+		"yescrypt" {$Fee += 2}
+		"hsr" {$Fee += 2}
+		"bitcore" {$Fee += 2}
+		"x11evo" {$Fee += 2}
+		"nist5" {$Fee += 2}
+		"c11" {$Fee += 2}
+		"skunk" {$Fee += 2}
+		"lyra2v2" {$Fee += 1.75}
+		"polytimos" {$Fee += 2}
+		"timetravel" {$Fee += 2}
+		"groestl" {$Fee += 2}
+		"tribus" {$Fee += 2}
+		"skein" {$Fee += 2}
+		"myr-gr" {$Fee += 2}
+        "blakecoin" {$Fee += 2}
+        "keccak" {$Fee += 2}
+    }
 
-    if ((Get-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit" -Value ([Double]$Zpool_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
-    else {$Stat = Set-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit" -Value ([Double]$Zpool_Request.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
+    if ((Get-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit" -Value ([Double]$Zpool_Request.$_.estimate_last24h / $Divisor * (1-($Fee/100))) -Duration (New-TimeSpan -Days 1)}
+    else {$Stat = Set-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit" -Value ([Double]$Zpool_Request.$_.estimate_current / $Divisor * (1-($Fee/100))) -Duration $StatSpan -ChangeDetection $true}
 
     $Zpool_Regions | ForEach-Object {
         $Zpool_Region = $_
