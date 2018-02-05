@@ -6,6 +6,7 @@
         "HashRates":  {"CryptoNight":  "$(if ($Pools.CryptoNight.SSL) {0}else {$Stats.XmrigNvidia_CryptoNight_HashRate.Week})"},
         "API":  "XMRig",
         "Port":  "3335",
+        "Fee":  "0.01",
         "URI":  "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.4.2/xmrig-nvidia-2.4.2-cuda9-win64.zip"
     }
 ]
