@@ -173,7 +173,7 @@ Function Test-Config {
     }
 
     # Donate is an integer greater than 10
-    if($Controls.Donate.Text -lt 10) {
+    if($Controls.Donate.Value -lt 10) {
         $null = [Windows.MessageBox]::Show('Minimum donation time is 10 minutes per day','Invalid configuration','Ok','Error')
         return $false
     }
