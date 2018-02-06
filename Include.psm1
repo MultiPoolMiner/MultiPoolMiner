@@ -326,22 +326,48 @@ function Start-SubProcess {
         [Parameter(Mandatory = $false)]
         [String]$ArgumentList = "", 
         [Parameter(Mandatory = $false)]
-        [String]$LogPath = "", 
-        [Parameter(Mandatory = $false)]
         [String]$WorkingDirectory = "", 
         [ValidateRange(-2, 3)]
         [Parameter(Mandatory = $false)]
         [Int]$Priority = 0
     )
 
-    $ScriptBlock = "Set-Location '$WorkingDirectory'; (Get-Process -Id `$PID).PriorityClass = $(@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}[$Priority]); "
-    $ScriptBlock += "& '$FilePath'"
-    if ($ArgumentList) {$ScriptBlock += " $ArgumentList"}
-    $ScriptBlock += " *>&1"
-    $ScriptBlock += " | Write-Output"
-    if ($LogPath) {$ScriptBlock += " | Tee-Object '$LogPath'"}
+    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
 
-    Start-Job ([ScriptBlock]::Create($ScriptBlock))
+    $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory {
+        param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory)
+
+        $ControllerProcess = Get-Process -Id $ControllerProcessID
+        if ($ControllerProcess -eq $null) {return}
+
+        $ProcessParam = @{}
+        $ProcessParam.Add("FilePath", $FilePath)
+        $ProcessParam.Add("WindowStyle", 'Minimized')
+        if ($ArgumentList -ne "") {$ProcessParam.Add("ArgumentList", $ArgumentList)}
+        if ($WorkingDirectory -ne "") {$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
+        $Process = Start-Process @ProcessParam -PassThru
+        if ($Process -eq $null) {
+            [PSCustomObject]@{ProcessId = $null}
+            return        
+        }
+
+        [PSCustomObject]@{ProcessId = $Process.Id; ProcessHandle = $Process.Handle}
+
+        $ControllerProcess.Handle | Out-Null
+        $Process.Handle | Out-Null
+
+        do {if ($ControllerProcess.WaitForExit(1000)) {$Process.CloseMainWindow() | Out-Null}}
+        while ($Process.HasExited -eq $false)
+    }
+
+    do {Start-Sleep 1; $JobOutput = Receive-Job $Job}
+    while ($JobOutput -eq $null)
+
+    $Process = Get-Process | Where-Object Id -EQ $JobOutput.ProcessId
+    $Process.Handle | Out-Null
+    $Process
+
+    if ($Process) {$Process.PriorityClass = $PriorityNames.$Priority}
 }
 
 function Expand-WebRequest {
@@ -446,12 +472,6 @@ function Get-Region {
     else {$Region}
 }
 
-enum MinerStatus {
-    Running
-    Idle
-    Failed
-}
-
 class Miner {
     $Name
     $Path
@@ -472,109 +492,24 @@ class Miner {
     $Speed_Live
     $Best
     $Best_Comparison
-    hidden [System.Management.Automation.Job]$Process = $null
+    $Process
     $New
-    hidden [TimeSpan]$Active = [TimeSpan]::Zero
-    hidden [Int]$Activated = 0
-    hidden [MinerStatus]$Status = [MinerStatus]::Idle
+    $Active
+    $Activated
+    $Status
     $Benchmarked
 
-    hidden StartMining() {
-        $this.Status = [MinerStatus]::Failed
-
+    StartMining() {
         $this.New = $true
         $this.Activated++
-
-        if ($this.Process) {
-            if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
-                $this.Process | Remove-Job -Force
-            }
-
-            if (-not ($this.Process | Get-Job -ErrorAction SilentlyContinue)) {
-                $this.Active += $this.Process.PSEndTime - $this.Process.PSBeginTime
-                $this.Process = $null
-            }
-        }
-
-        if (-not $this.Process) {
-            $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -LogPath $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\$($this.Name)-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt") -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
-
-            if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
-                $this.Status = [MinerStatus]::Running
-            }
-        }
+        if ($this.Process -ne $null) {$this.Active += $this.Process.ExitTime - $this.Process.StartTime}
+        $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($this -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
+        if ($this.Process -eq $null) {$this.Status = "Failed"}
+        else {$this.Status = "Running"}
     }
 
-    hidden StopMining() {
-        $this.Status = [MinerStatus]::Failed
-
-        if ($this.Process) {
-            if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
-                $this.Process | Remove-Job -Force
-            }
-
-            if (-not ($this.Process | Get-Job -ErrorAction SilentlyContinue)) {
-                $this.Active += $this.Process.PSEndTime - $this.Process.PSBeginTime
-                $this.Process = $null
-                $this.Status = [MinerStatus]::Idle
-            }
-        }
-    }
-
-    [DateTime]GetActiveLast() {
-        if ($this.Process.PSBeginTime -and $this.Process.PSEndTime) {
-            return $this.Process.PSEndTime
-        }
-        elseif ($this.Process.PSBeginTime) {
-            return Get-Date
-        }
-        else {
-            return [DateTime]::MinValue
-        }
-    }
-
-    [TimeSpan]GetActiveTime() {
-        if ($this.Process.PSBeginTime -and $this.Process.PSEndTime) {
-            return $this.Active + ($this.Process.PSEndTime - $this.Process.PSBeginTime)
-        }
-        elseif ($this.Process.PSBeginTime) {
-            return $this.Active + ((Get-Date) - $this.Process.PSBeginTime)
-        }
-        else {
-            return $this.Active
-        }
-    }
-
-    [Int]GetActivateCount() {
-        return $this.Activated
-    }
-
-    [MinerStatus]GetStatus() {
-        if ($this.Process.State -eq "Running") {
-            return [MinerStatus]::Running
-        }
-        elseif ($this.Status -eq "Running") {
-            return [MinerStatus]::Failed
-        }
-        else {
-            return $this.Status
-        }
-    }
-
-    SetStatus([MinerStatus]$Status) {
-        if ($Status -eq $this.GetStatus()) {return}
-
-        switch ($Status) {
-            "Running" {
-                $this.StartMining()
-            }
-            "Idle" {
-                $this.StopMining()
-            }
-            Default {
-                $this.StopMining()
-                $this.Status -eq $Status
-            }
-        }
+    StopMining() {
+        $this.Process.CloseMainWindow() | Out-Null
+        $this.Status = "Idle"
     }
 }

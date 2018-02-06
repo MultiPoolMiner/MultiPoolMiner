@@ -21,11 +21,12 @@ $minerreport = ConvertTo-Json @($ActiveMiners | Where-Object {$_.Activated -GT 0
             Name           = $_.Name
             Path           = Resolve-Path -Relative $_.Path
             Type           = @($_.Type)
-            Active         = "{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f $_.GetActiveTime()
+            Active         = "{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f ((Get-Date) - $_.Process.StartTime)
             Algorithm      = @($_.Algorithm)
             Pool           = @($MatchingMiner.Pools.PsObject.Properties.Value.Name)
             CurrentSpeed   = @($_.Speed_Live)
             EstimatedSpeed = @($_.Speed)
+            PID            = $_.Process.Id
             'BTC/day'      = $_.Profit
         }
     })

@@ -445,7 +445,11 @@ while ($true) {
                 Speed_Live           = 0
                 Best                 = $false
                 Best_Comparison      = $false
+                Process              = $null
                 New                  = $false
+                Active               = [TimeSpan]0
+                Activated            = 0
+                Status               = ""
                 Benchmarked          = 0
             }
         }
@@ -530,9 +534,20 @@ while ($true) {
     $ActiveMiners | Where-Object Activated -GT 0 | Where-Object Best -EQ $false | ForEach-Object {
         $Miner = $_
 
-        if ($Miner.GetStatus() -eq "Running") {
-            Write-Log "Closing $($Miner.Type) miner $($Miner.Name) because it is no longer the most profitable"
-            $Miner.SetStatus("Idle")
+        if ($Miner.Process -eq $null -or $Miner.Process.HasExited) {
+            if ($Miner.Status -eq "Running") {
+                $Miner.Status = "Failed"
+                if ($Miner.Process -eq $null) {
+                    Write-Log -Level Warn "$($Miner.Type) miner $($Miner.Name) failed - process handle is missing"
+                }
+                if ($Miner.Process.HasExited) {
+                    Write-Log -Level Warn "$($Miner.Type) miner $($Miner.Name) failed - process exited on it's own"
+                }
+            }
+        }
+        else {
+            Write-Log "Closing $($Miner.Type) miner $($Miner.Name) [PID $($_.Process.Id)] because it is no longer the most profitable"
+            $Miner.StopMining()
 
             #Remove watchdog timer
             $Miner_Name = $Miner.Name
@@ -541,7 +556,7 @@ while ($true) {
                 $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
                 if ($WatchdogTimer) {
                     if ($WatchdogTimer.Kicked -lt $Timer.AddSeconds( - $WatchdogInterval)) {
-                        $Miner.SetStatus("Failed")
+                        $Miner.Status = "Failed"
                     }
                     else {
                         $WatchdogTimers = $WatchdogTimers -notmatch $WatchdogTimer
@@ -553,10 +568,10 @@ while ($true) {
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Config.Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
-        if ($_.GetStatus() -ne "Running") {
+        if ($_.Process -eq $null -or $_.Process.HasExited -ne $false) {
             Write-Log "Starting $($_.Type) miner $($_.Name): '$($_.Path) $($_.Arguments)'"
             $DecayStart = $Timer
-            $_.SetStatus("Running")
+            $_.StartMining()
 
             #Add watchdog timer
             if ($Config.Watchdog -and $_.Profit -ne $null) {
@@ -595,10 +610,10 @@ while ($true) {
     ) | Out-Host
 
     #Display active miners list
-    $ActiveMiners | Where-Object Activated -GT 0 | Sort-Object -Descending {$_.GetActiveLast()} | Select-Object -First (1 + 6 + 6) | Format-Table -Wrap -GroupBy Status (
+    $ActiveMiners | Where-Object Activated -GT 0 | Sort-Object -Descending Status, {if ($_.Process -eq $null) {[DateTime]0}else {$_.Process.StartTime}} | Select-Object -First (1 + 6 + 6) | Format-Table -Wrap -GroupBy Status (
         @{Label = "Speed"; Expression = {$_.Speed_Live | ForEach-Object {"$($_ | ConvertTo-Hash)/s"}}; Align = 'right'}, 
-        @{Label = "Active"; Expression = {"{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f $_.GetActiveTime()}}, 
-        @{Label = "Launched"; Expression = {Switch ($_.GetActivateCount()) {0 {"Never"} 1 {"Once"} Default {"$_ Times"}}}}, 
+        @{Label = "Active"; Expression = {"{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f $(if ($_.Process -eq $null) {$_.Active}else {if ($_.Process.ExitTime -gt $_.Process.StartTime) {($_.Active + ($_.Process.ExitTime - $_.Process.StartTime))}else {($_.Active + ((Get-Date) - $_.Process.StartTime))}})}}, 
+        @{Label = "Launched"; Expression = {Switch ($_.Activated) {0 {"Never"} 1 {"Once"} Default {"$_ Times"}}}}, 
         @{Label = "Command"; Expression = {"$($_.Path.TrimStart((Convert-Path ".\"))) $($_.Arguments)"}}
     ) | Out-Host
 
@@ -657,7 +672,7 @@ while ($true) {
 
         if ($Miner.New) {$Miner.Benchmarked++}
 
-        if ($Miner.GetStatus() -eq "Running") {
+        if ($Miner.Process -and -not $Miner.Process.HasExited) {
             $Miner_Data = $Miner.GetMinerData($Miner.Algorithm, ($Miner.New -and $Miner.Benchmarked -lt $Strikes))
             $Miner.Speed_Live = $Miner_Data.HashRate.PSObject.Properties.Value
 
@@ -677,7 +692,7 @@ while ($true) {
         }
 
         #Benchmark timeout
-        if ($Miner.Benchmarked -ge ($Strikes * $Strikes) -or ($Miner.Benchmarked -ge $Strikes -and $Miner.GetActivateCount() -ge $Strikes)) {
+        if ($Miner.Benchmarked -ge ($Strikes * $Strikes) -or ($Miner.Benchmarked -ge $Strikes -and $Miner.Activated -ge $Strikes)) {
             $Miner.Algorithm | Where-Object {-not $Miner_HashRate.$_} | ForEach-Object {
                 if ((Get-Stat "$($Miner.Name)_$($_)_HashRate") -eq $null) {
                     $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value 0 -Duration $StatSpan
