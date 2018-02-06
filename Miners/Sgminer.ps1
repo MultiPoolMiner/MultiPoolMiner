@@ -24,6 +24,7 @@ $Commands = [PSCustomObject]@{
     "neoscrypt" = " --gpu-threads 1 --worksize 64 --intensity 15" #NeoScrypt
     #"nist5" = "" #Nist5
     "pascal" = "" #Pascal
+    "sia" = "" #Sia
     "sibcoin-mod" = "" #Sib
     "skeincoin" = " --gpu-threads 2 --worksize 256 --intensity d" #Skein
     #"skunk" = "" #Skunk

@@ -6,6 +6,7 @@ $Uri = "https://github.com/semtexzv/Prospector/releases/download/0.0.13-ALPHA/pr
 $Commands = [PSCustomObject]@{
     "xmr" = @() #CryptoNight
     "eth" = @() #Ethash
+    "sia" = @() #Sia
     "sigt" = @() #Skunk
 }
 
@@ -67,7 +68,6 @@ enabled = false" | Set-Content "$(Split-Path $Path)\$($Pools.$(Get-Algorithm $_)
                 HashRates = [PSCustomObject]@{"$(Get-Algorithm $_)2gb" = $Stats."$($Name)_$(Get-Algorithm $_)2gb_HashRate".Week}
                 API = "Prospector"
                 Port = $Port
-                Fee = "0.0097"
                 URI = $Uri
             }
         }

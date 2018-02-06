@@ -6,6 +6,6 @@
         "HashRates":  {"Equihash":  "$($Stats.Bminer_Equihash_HashRate.Week)"},
         "API":  "Bminer",
         "Port":  "1880",
-        "URI":  "https://www.bminercontent.com/releases/bminer-v5.3.0-e337b9a-amd64.zip"
+        "URI":  "https://www.bminercontent.com/releases/bminer-v5.2.0-4f20af3-amd64.zip"
     }
 ]

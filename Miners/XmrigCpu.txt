@@ -6,7 +6,6 @@
         "HashRates":  {"CryptoNight":  "$(if ($Pools.CryptoNight.SSL) {0}else {$Stats.XmrigCpu_CryptoNight_HashRate.Week})"},
         "API":  "XMRig",
         "Port":  "3334",
-        "Fee":  "0.01",
         "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.4.3/xmrig-2.4.3-msvc-win64.zip"
     }
 ]

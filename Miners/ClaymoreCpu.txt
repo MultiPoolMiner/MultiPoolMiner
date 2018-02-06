@@ -6,7 +6,6 @@
         "HashRates":  {"CryptoNight": "$($Stats.ClaymoreCPU_CryptoNight_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "-3333",
-        "Fee": "0.015",
         "Wrap":  false
     }
 ]
