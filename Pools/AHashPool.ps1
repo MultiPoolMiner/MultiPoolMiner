@@ -5,12 +5,40 @@ param(
     [String]$BTC, 
     [alias("WorkerName")]
     [String]$Worker, 
-    [TimeSpan]$StatSpan
+    [TimeSpan]$StatSpan,
+    [bool]$Info = $false
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $AHashPool_Request = [PSCustomObject]@{}
+
+if($Info) {
+    # Just return info about the pool for use in setup
+    $SupportedAlgorithms = @()
+    try {
+        $AHashPool_Request = Invoke-RestMethod "http://www.ahashpool.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Foreach-Object { 
+            $SupportedAlgorithms += Get-Algorithm $_
+        }
+    } Catch {
+        Write-Warning "Unable to load supported algorithms for $Name - may not be able to configure all pool settings"
+        $SupportedAlgorithms = @()
+    }
+
+    return [PSCustomObject]@{
+        Name = $Name
+        Website = "https://ahashpool.com"
+        Description = "AHashPool converts all profits to BTC"
+        Algorithms = $SupportedAlgorithms
+        Note = "BTC payout only" # Note is shown beside each pool in setup
+        # Define the settings this pool uses.
+        Settings = @(
+            @{Name='BTC'; Required=$true; Description='Bitcoin payout address'},
+            @{Name='Worker'; Required=$true; Description='Worker name to report to pool'}
+        )
+    }
+}
 
 try {
     $AHashPool_Request = Invoke-RestMethod "http://www.ahashpool.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
