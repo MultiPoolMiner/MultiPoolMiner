@@ -381,7 +381,6 @@ $Controls.Apply.add_Click{
         if(Test-Config) {
             [Windows.MessageBox]::Show('Configuration saved!','All set','Ok','Info')
             Save-Config
-            $Window.Close()
         }
 }
 
