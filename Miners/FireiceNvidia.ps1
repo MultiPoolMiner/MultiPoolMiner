@@ -44,5 +44,6 @@ $Port = 3335
     HashRates = [PSCustomObject]@{CryptoNight = $Stats."$($Name)_CryptoNight_HashRate".Week}
     API       = "XMRig"
     Port      = $Port
+    Fee       = "0.02"
     URI       = $Uri
 }
