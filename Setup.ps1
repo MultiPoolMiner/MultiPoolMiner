@@ -253,10 +253,12 @@ $Controls.GetMinerStatusKey.add_Click{
 
 $Controls.CopyWalletToPools.add_Click{
         $Pools.Settings | Where-Object { $_.Name -eq 'BTC' } | Foreach-Object { $_.Value = $Controls.Wallet.Text }
+        $Controls.PoolsList.Items.Refresh()
 }
 
 $Controls.CopyWorkerNameToPools.add_Click{
         $Pools.Settings | Where-Object { $_.Name -eq 'Worker' } | Foreach-Object { $_.Value = $Controls.WorkerName.Text }
+        $Controls.PoolsList.Items.Refresh()
 }
 
 # Pools tab
