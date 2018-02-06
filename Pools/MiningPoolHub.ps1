@@ -5,12 +5,41 @@ param(
     [String]$User, 
     [alias("WorkerName")]
     [String]$Worker, 
-    [TimeSpan]$StatSpan
+    [TimeSpan]$StatSpan,
+    [bool]$Info = $false
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $MiningPoolHub_Request = [PSCustomObject]@{}
+
+if($Info) {
+    # Just return info about the pool for use in setup
+    $SupportedAlgorithms = @()
+    try {
+        $MiningPoolHub_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $MiningPoolHub_Request.return | Foreach-Object {
+            $SupportedAlgorithms += Get-Algorithm $_.algo
+        }
+    } Catch {
+        Write-Warning "Unable to load supported algorithms for $Name - may not be able to configure all pool settings"
+        $SupportedAlgorithms = @()
+    }
+
+    return [PSCustomObject]@{
+        Name = $Name
+        Website = "https://miningpoolhub.com"
+        Description = "Payout and automatic conversion is configured through their website"
+        Algorithms = $SupportedAlgorithms
+        Note = "Registration required" # Note is shown beside each pool in setup
+        # Define the settings this pool uses.
+        Settings = @(
+            @{Name='Username'; Required=$true; Description='MiningPoolHub username'},
+            @{Name='Worker'; Required=$true; Description='Worker name to report to pool'},
+            @{Name='API_Key'; Required=$false; Description='Used to retrieve balances'}
+        )
+    }
+}
 
 try {
     $MiningPoolHub_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
