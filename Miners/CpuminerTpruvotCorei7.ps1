@@ -24,7 +24,6 @@ $Commands = [PSCustomObject]@{
     "neoscrypt" = "" #NeoScrypt
     "nist5" = "" #Nist5
     #"pascal" = "" #Pascal
-    "sia" = "" #Sia
     "sib" = "" #Sib
     "skein" = "" #Skein
     "skunk" = "" #Skunk

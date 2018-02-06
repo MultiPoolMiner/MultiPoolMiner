@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.19/ccminer-819final-cuda91-x64.zip"
+$Uri = "https://github.com/KlausT/ccminer/releases/download/8.20/ccminer-820-cuda91-x64.zip"
 
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore
@@ -25,7 +25,6 @@ $Commands = [PSCustomObject]@{
     #"nist5" = "" #Nist5
     #"pascal" = "" #Pascal
     #"phi" = "" #PHI
-    #"sia" = "" #Sia
     #"sib" = "" #Sib
     #"skein" = "" #Skein
     #"skunk" = "" #Skunk
