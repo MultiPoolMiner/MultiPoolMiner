@@ -11,7 +11,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 
 $YiiMPCoins_Request = [PSCustomObject]@{}
 
-if($Info) {
+if ($Info) {
     # Just return info about the pool for use in setup
     $SupportedAlgorithms = @()
     $Currencies = @()
@@ -27,6 +27,7 @@ if($Info) {
 
     $Settings = @()
     $Settings += @{Name='Worker'; Required=$true; Description='Worker name to report to pool'}
+
     $Currencies | Foreach-Object {
         $Settings += @{Name=$_; Required = $false; Description = "$_ payout address"}
     }

@@ -11,36 +11,37 @@ Set-Location -Path (Split-Path -Path $MyInvocation.MyCommand.Path)
 Function Get-Config {
     If(Test-Path -Path '.\Config.txt') {
         $Config = Get-Content -Path 'config.txt' | ConvertFrom-Json
-    } else {
+    }
+    else {
         $Config = Get-Content -Path 'config.example.txt' | ConvertFrom-Json
     }
 
     # Replace unset parameters with their defaults
     # The goal is to have config.txt contain all the necessary configuration, so command line switches are not needed to run MultiPoolMiner.ps1
-    If($Config.Interval -eq '$Interval') { $Config.Interval = 60 }
-    If($Config.Region -eq '$Region') { $Config.Region = 'eu' }
-    If($Config.SSL -eq '$SSL') { $Config.SSL = $false }
-    If($Config.Type -eq '$Type') { $Config.Type = @('AMD','CPU','NVIDIA') }
-    If($Config.Algorithm -eq '$Algorithm') { $Config.Algorithm = @() }
-    If($Config.MinerName -eq '$MinerName') { $Config.MinerName = @() }
-    If($Config.PoolName -eq '$PoolName') { $Config.PoolName = @() }
-    If($Config.ExcludeAlgorithm -eq '$ExcludeAlgorithm') { $Config.ExcludeAlgorithm = @() }
-    If($Config.ExcludeMinerName -eq '$ExcludeMinerName') { $Config.ExcludeMinerName = @() }
-    If($Config.ExcludePoolName -eq '$ExcludePoolName') { $Config.ExcludePoolName = @() }
-    If($Config.Currency -eq '$Currency') { $Config.Currency = @('BTC','USD') }
-    If($Config.Donate -eq '$Donate') { $Config.Donate = 24 }
-    If($Config.Proxy -eq '$Proxy') { $Config.Proxy = '' }
-    If($Config.Delay -eq '$Delay') { $Config.Delay = 0 }
-    If($Config.Watchdog -eq '$Watchdog') { $Config.Watchdog = $True }
-    If(-not $Config.MinerStatusURL -or $Config.MinerStatusURL -eq '$MinerStatusURL') { $Config | Add-Member MinerStatusURL 'https://multipoolminer.io/monitor/miner.php' -Force}
-    If($Config.MinerStatusKey -eq '$MinerStatusKey') { $Config.MinerStatusKey = '' }
-    If($Config.SwitchingPrevention -eq '$SwitchingPrevention') { $Config.SwitchingPrevention = 1 }
+    if ($Config.Interval -eq '$Interval') { $Config.Interval = 60 }
+    if ($Config.Region -eq '$Region') { $Config.Region = 'eu' }
+    if ($Config.SSL -eq '$SSL') { $Config.SSL = $false }
+    if ($Config.Type -eq '$Type') { $Config.Type = @('AMD','CPU','NVIDIA') }
+    if ($Config.Algorithm -eq '$Algorithm') { $Config.Algorithm = @() }
+    if ($Config.MinerName -eq '$MinerName') { $Config.MinerName = @() }
+    if ($Config.PoolName -eq '$PoolName') { $Config.PoolName = @() }
+    if ($Config.ExcludeAlgorithm -eq '$ExcludeAlgorithm') { $Config.ExcludeAlgorithm = @() }
+    if ($Config.ExcludeMinerName -eq '$ExcludeMinerName') { $Config.ExcludeMinerName = @() }
+    if ($Config.ExcludePoolName -eq '$ExcludePoolName') { $Config.ExcludePoolName = @() }
+    if ($Config.Currency -eq '$Currency') { $Config.Currency = @('BTC','USD') }
+    if ($Config.Donate -eq '$Donate') { $Config.Donate = 24 }
+    if ($Config.Proxy -eq '$Proxy') { $Config.Proxy = '' }
+    if ($Config.Delay -eq '$Delay') { $Config.Delay = 0 }
+    if ($Config.Watchdog -eq '$Watchdog') { $Config.Watchdog = $True }
+    if (-not $Config.MinerStatusURL -or $Config.MinerStatusURL -eq '$MinerStatusURL') { $Config | Add-Member MinerStatusURL 'https://multipoolminer.io/monitor/miner.php' -Force}
+    if ($Config.MinerStatusKey -eq '$MinerStatusKey') { $Config.MinerStatusKey = '' }
+    if ($Config.SwitchingPrevention -eq '$SwitchingPrevention') { $Config.SwitchingPrevention = 1 }
 
     # Remove the variables in pool configuration to ensure they get set with real values
     $Config.Pools.PSObject.Properties.Name | Foreach-Object {
         $PoolName = $_
         $Config.Pools.$PoolName.PSObject.Properties.Name | Where-Object {$_} | Foreach-Object {
-            If($Config.Pools.$PoolName.$_.StartsWith('$')) {
+            if ($Config.Pools.$PoolName.$_.StartsWith('$')) {
                 $Config.Pools.$PoolName.$_ = ''
             }
         }
@@ -58,14 +59,14 @@ Function Create-Config {
     $Config | Add-Member Currency ($Controls.Currency.Text -replace '\s','' -split ',') -Force
     $Config | Add-Member WorkerName $Controls.WorkerName.Text -Force
 
-    If($Controls.RegionUSA.IsChecked) { $Config | Add-Member Region 'US' -Force }
-    If($Controls.RegionEurope.IsChecked) { $Config | Add-Member Region 'Europe' -Force}
-    If($Controls.RegionAsia.IsChecked) { $Config | Add-Member Region 'Asia' -Force}
+    if ($Controls.RegionUSA.IsChecked) { $Config | Add-Member Region 'US' -Force }
+    if ($Controls.RegionEurope.IsChecked) { $Config | Add-Member Region 'Europe' -Force}
+    if ($Controls.RegionAsia.IsChecked) { $Config | Add-Member Region 'Asia' -Force}
 
     $Config | Add-Member Type @() -Force
-    If($Controls.TypeNVIDIA.IsChecked) { $Config.Type += 'NVIDIA' }
-    If($Controls.TypeAMD.IsChecked) { $Config.Type += 'AMD' }
-    If($Controls.TypeCPU.IsChecked) { $Config.Type += 'CPU' }
+    if ($Controls.TypeNVIDIA.IsChecked) { $Config.Type += 'NVIDIA' }
+    if ($Controls.TypeAMD.IsChecked) { $Config.Type += 'AMD' }
+    if ($Controls.TypeCPU.IsChecked) { $Config.Type += 'CPU' }
 
     # Pools tab
 
@@ -79,11 +80,11 @@ Function Create-Config {
     $Pools | Foreach-Object {
         $Pool = $_
 
-        If($_.UsePool -eq 'Primary') { $Config.PoolName += $Pool.Name }
-        If($_.UsePool -eq 'Disabled') { $Config.ExcludePoolName += $Pool.Name }
+        if ($_.UsePool -eq 'Primary') { $Config.PoolName += $Pool.Name }
+        if ($_.UsePool -eq 'Disabled') { $Config.ExcludePoolName += $Pool.Name }
 
         $PoolSettings = @{}
-        If($Pool.Settings) {
+        if ($Pool.Settings) {
             $Pool.Settings | Where-Object {$_.Value} | Foreach-Object {
                 $PoolSettings.$($_.Name) = $_.Value
             }
@@ -95,23 +96,24 @@ Function Create-Config {
     $Config | Add-Member Algorithm @() -Force
     $Config | Add-Member ExcludeAlgorithm @() -Force
 
-    if($Controls.EnableNewAlgorithms.IsChecked) {
+    if ($Controls.EnableNewAlgorithms.IsChecked) {
         # $Algorithm left empty so new ones get automatically included. Put any unchecked ones into $ExcludeAlgorithm
         $Algorithms | Where-Object {$_.Checked -eq $False} | Foreach-Object { $Config.ExcludeAlgorithm += $_.Name }
-    } else {
+    }
+    else {
         # $ExcludeAlgorithm left empty, put checked ones into $Algorithm
         $Algorithms | Where-Object {$_.Checked -eq $True} | Foreach-Object { $Config.Algorithm += $_.Name }
     }
-
 
     # Miners tab
     $Config | Add-Member MinerName @() -Force
     $Config | Add-Member ExcludeMinerName @() -Force
 
-    if($Controls.EnableNewMiners.IsChecked) {
+    if ($Controls.EnableNewMiners.IsChecked) {
         # $MinerName left empty so new ones get automatically included
         $Miners | Where-Object {$_.Checked -eq $False} | Foreach-Object {$Config.ExcludeMinerName += $_.Name }
-    } else {
+    }
+    else {
         $Miners | Where-Object {$_.Checked -eq $True} | Foreach-Object {$Config.MinerName += $_.Name}
     }
 
@@ -119,8 +121,8 @@ Function Create-Config {
     $Config | Add-Member Donate $Controls.Donate.Value -Force
     $Config | Add-Member Interval $Controls.Interval.Value -Force
     $Config | Add-Member Delay $Controls.Delay.Value -Force
-    If($Controls.SSLYes.IsChecked) { $Config | Add-Member SSL $True  -Force} else { $Config | Add-Member SSL $False  -Force}
-    If($Controls.WatchdogEnabled.IsChecked) { $Config | Add-Member Watchdog $True  -Force} else { $Config | Add-Member Watchdog $False  -Force}
+    if ($Controls.SSLYes.IsChecked) { $Config | Add-Member SSL $True  -Force} else { $Config | Add-Member SSL $False  -Force}
+    if ($Controls.WatchdogEnabled.IsChecked) { $Config | Add-Member Watchdog $True  -Force} else { $Config | Add-Member Watchdog $False  -Force}
     $Config | Add-Member SwitchingPrevention $Controls.SwitchingPrevention.Value -Force
     $Config | Add-Member Proxy $Controls.Proxy.Text -Force
     $Config | Add-Member MinerStatusURL $Controls.MinerStatusURL.Text -Force
@@ -130,11 +132,8 @@ Function Create-Config {
     return $json
 }
 
-
 Function Test-Config {
     # Check that the configuration is valid
-
-    
 
     # At least one algorithm is enabled
     Add-Type -AssemblyName PresentationFramework
@@ -167,13 +166,13 @@ Function Test-Config {
             $message += ('Pool {0} setting {1} is required' -f $Pool.Name, $_.Name)
         }
     }
-    if($message) {
+    if ($message) {
         $null = [Windows.MessageBox]::Show(('{0}' -f ($message -join "`n")),'Invalid configuration','Ok','Error')
         return $false
     }
 
     # Donate is an integer greater than 10
-    if($Controls.Donate.Value -lt 10) {
+    if ($Controls.Donate.Value -lt 10) {
         $null = [Windows.MessageBox]::Show('Minimum donation time is 10 minutes per day','Invalid configuration','Ok','Error')
         return $false
     }
@@ -195,7 +194,7 @@ $Config = Get-Config
 
 if ($Pools.count -ne (Get-ChildItem "Pools" -File | Measure-Object ).Count) {
     $confirm = [System.Windows.MessageBox]::Show("Unable to retrieve all pool information. If you continue, these pools and their associated algorithms will not be shown in setup, and will be treated as new pools and algorithms when they come back online. Are you sure you want to continue?", "Pool Warning", "YesNo", "Error", "No")
-    if($confirm -eq "No") {
+    if ($confirm -eq "No") {
         Throw "Could not get information from all configured pools. Cannot continue. "
     }
 }
@@ -228,9 +227,10 @@ $Controls.logo.Source = $i
 $Controls.Wallet.Text = $Config.Wallet
 $Controls.MinerStatusKey.Text = $Config.MinerStatusKey
 $Controls.Currency.Text = $Config.Currency -join ', '
-if($Config.WorkerName) {
+if ($Config.WorkerName) {
     $Controls.WorkerName.Text = $Config.WorkerName
-} else {
+}
+else {
     $Controls.WorkerName.Text = $env:COMPUTERNAME -replace '[^a-zA-Z]', ''
 }
 
@@ -240,25 +240,25 @@ Switch(Get-Region $Config.Region) {
     'Asia' { $Controls.RegionAsia.IsChecked = $True }
 }
 
-If ($Config.Type -contains 'NVIDIA') { $Controls.TypeNVIDIA.IsChecked = $True }
-If ($Config.Type -contains 'AMD') { $Controls.TypeAMD.IsChecked = $True }
-If ($Config.Type -contains 'CPU') { $Controls.TypeCPU.IsChecked = $True }
+if ($Config.Type -contains 'NVIDIA') { $Controls.TypeNVIDIA.IsChecked = $True }
+if ($Config.Type -contains 'AMD') { $Controls.TypeAMD.IsChecked = $True }
+if ($Config.Type -contains 'CPU') { $Controls.TypeCPU.IsChecked = $True }
 
 
 $Controls.GetMinerStatusKey.add_Click{
-        #$Controls.MinerStatusKey.Text = Invoke-RestMethod "https://multipoolminer.io/monitor/generatekey.php"
-        # Since it's actually just a GUID, we don't need to make the web request
-        $Controls.MinerStatusKey.Text = [GUID]::NewGuid()
+    #$Controls.MinerStatusKey.Text = Invoke-RestMethod "https://multipoolminer.io/monitor/generatekey.php"
+    # Since it's actually just a GUID, we don't need to make the web request
+    $Controls.MinerStatusKey.Text = [GUID]::NewGuid()
 }
 
 $Controls.CopyWalletToPools.add_Click{
-        $Pools.Settings | Where-Object { $_.Name -eq 'BTC' } | Foreach-Object { $_.Value = $Controls.Wallet.Text }
-        $Controls.PoolsList.Items.Refresh()
+    $Pools.Settings | Where-Object { $_.Name -eq 'BTC' } | Foreach-Object { $_.Value = $Controls.Wallet.Text }
+    $Controls.PoolsList.Items.Refresh()
 }
 
 $Controls.CopyWorkerNameToPools.add_Click{
-        $Pools.Settings | Where-Object { $_.Name -eq 'Worker' } | Foreach-Object { $_.Value = $Controls.WorkerName.Text }
-        $Controls.PoolsList.Items.Refresh()
+    $Pools.Settings | Where-Object { $_.Name -eq 'Worker' } | Foreach-Object { $_.Value = $Controls.WorkerName.Text }
+    $Controls.PoolsList.Items.Refresh()
 }
 
 # Pools tab
@@ -268,7 +268,7 @@ $Pools | Foreach-Object {
     $Pool = $_
     $PoolName = $_.Name
     
-    If($Config.PoolName -contains $PoolName) { 
+    if ($Config.PoolName -contains $PoolName) { 
         $UsePool = 'Primary' 
     } elseif ($Config.ExcludePoolName -contains $PoolName) {
         $UsePool = 'Disabled'
@@ -278,11 +278,11 @@ $Pools | Foreach-Object {
     $_ | Add-Member UsePool $UsePool -Force
 
     # Rewrite each settings object to ensure they have a value property
-    If($_.PSObject.Properties.Name -notcontains 'Settings') { $_ | Add-Member Settings @() }
+    if ($_.PSObject.Properties.Name -notcontains 'Settings') { $_ | Add-Member Settings @() }
     $_.Settings = $_.Settings | Foreach-Object {[pscustomobject]@{Name=$_.Name; Description=$_.Description; Required=$_.Required; Value=$Config.Pools.$PoolName.($_.Name)}}
     # Add settings for anything specified in $Config that hasn't already been added, so customized settings don't get lost
     $Config.Pools.$PoolName.PsObject.Properties.Name | Foreach-Object {
-        if($Pool.Settings.Name -notcontains $_) {
+        if ($Pool.Settings.Name -notcontains $_) {
             $Pool.Settings += [pscustomobject]@{Name=$_; Description='Custom'; Required=$false; Value=$Config.Pools.$PoolName.$_}
         }
     }
@@ -295,38 +295,40 @@ $Controls.PoolsList.ItemsSource = $Pools
 $Algorithms = $Algorithms | Select-Object -Property @{Name='Name';Expression={$_}},@{Name='Checked';Expression={$false}} 
 $Controls.AlgorithmsList.ItemsSource = $Algorithms
 $Controls.DisableNewAlgorithms.IsChecked = $True # Set default
-if($Config.ExcludeAlgorithm) { $Controls.EnableNewAlgorithms.IsChecked = $True } else { $Controls.DisableNewAlgorithms.IsChecked = $True }
+if ($Config.ExcludeAlgorithm) { $Controls.EnableNewAlgorithms.IsChecked = $True } else { $Controls.DisableNewAlgorithms.IsChecked = $True }
 
 # Set control values
-If($Config.Algorithm) {
+if ($Config.Algorithm) {
     $Algorithms | Foreach-Object {$_.Checked = $false}
     $Algorithms | Where-Object {$Config.Algorithm -contains $_.Name} | Foreach-Object { $_.Checked = $True }
-} elseif($Config.ExcludeAlgorithm) {
+}
+elseif ($Config.ExcludeAlgorithm) {
     $Algorithms | Foreach-Object {$_.Checked = $true}
     $Algorithms | Where-Object {$Config.Algorithm -contains $_.Name} | Foreach-Object { $_.Checked = $False}
-} else {
+}
+else {
     # Enable default algorithms
     $defaultalgorithms = @('cryptonight','decred','decrednicehash','ethash','ethash2gb','equihash','groestl','lbry','lyra2re2','lyra2z','neoscrypt','pascal','sib','skunk')
     $Algorithms | Where-Object {$defaultalgorithms -contains $_.Name} | Foreach-Object {$_.Checked = $True}
 }
 
 $Controls.DisableAllAlgorithms.add_Click{
-        $Algorithms | Foreach-Object {$_.Checked = $false}
-        $Controls.AlgorithmsList.Items.Refresh()
+    $Algorithms | Foreach-Object {$_.Checked = $false}
+    $Controls.AlgorithmsList.Items.Refresh()
 }
 
 $Controls.EnableAllAlgorithms.add_Click{
-        $Algorithms | Foreach-Object {$_.Checked = $true}
-        $Controls.AlgorithmsList.Items.Refresh()
+    $Algorithms | Foreach-Object {$_.Checked = $true}
+    $Controls.AlgorithmsList.Items.Refresh()
 }
 
 $Controls.EnablePrimaryPoolAlgorithms.add_Click{
-        $Algorithms | Foreach-Object {$_.Checked = $False }
-        $Pools | Where-Object {$_.UsePool -eq 'Primary'} | Foreach-Object {
-            $Pool = $_
-            $Algorithms | Where-Object {$Pool.Algorithms -contains $_.Name} | Foreach-Object { $_.Checked = $True }
-        }
-        $Controls.AlgorithmsList.Items.Refresh()
+    $Algorithms | Foreach-Object {$_.Checked = $False }
+    $Pools | Where-Object {$_.UsePool -eq 'Primary'} | Foreach-Object {
+        $Pool = $_
+        $Algorithms | Where-Object {$Pool.Algorithms -contains $_.Name} | Foreach-Object { $_.Checked = $True }
+    }
+    $Controls.AlgorithmsList.Items.Refresh()
 }
 
 
@@ -334,54 +336,54 @@ $Controls.EnablePrimaryPoolAlgorithms.add_Click{
 $Miners = $Miners | Select-Object -Property @{Name='Name';Expression={$_}},@{Name='Checked';Expression={$false}}
 $Controls.MinersList.ItemsSource = $Miners
 $Controls.EnableNewMiners.IsChecked = $True
-if($Config.MinerName) {$Controls.DisableNewMiners.IsChecked = $True }
+if ($Config.MinerName) {$Controls.DisableNewMiners.IsChecked = $True }
 
 # Set control values
-If($Config.MinerName) {
+if ($Config.MinerName) {
     $Miners | Foreach-Object {$_.Checked = $false}
     $Miners | Where-Object {$Config.MinerName -contains $_.Name} | Foreach-Object { $_.Checked = $True }
-} elseif($Config.ExcludeMinerName) {
+}
+elseif ($Config.ExcludeMinerName) {
     $Miners | Foreach-Object {$_.Checked = $true}
     $Miners | Where-Object {$Config.ExcludeMinerName -contains $_.Name} | Foreach-Object { $_.Checked = $False}
-} else {
+}
+else {
     # enble all miners by default
     $Miners | Foreach-Object { $_.Checked = $True }
 }
 
 $Controls.EnableAllMiners.add_Click{
-        $Miners | Foreach-Object {$_.Checked = $true}
-        $Controls.MinersList.Items.Refresh()
+    $Miners | Foreach-Object {$_.Checked = $true}
+    $Controls.MinersList.Items.Refresh()
 }
 
 $Controls.DisableAllMiners.add_Click{
-        $Miners | Foreach-Object {$_.Checked = $false}
-        $Controls.MinersList.Items.Refresh()
+    $Miners | Foreach-Object {$_.Checked = $false}
+    $Controls.MinersList.Items.Refresh()
 }
-
 
 # Setup Advanced tab
 $Controls.Donate.Value = $Config.Donate
 $Controls.Interval.Value = $Config.Interval
 $Controls.Delay.Value = $Config.Delay
-If($Config.SSL) { $Controls.SSLYes.IsChecked = $True } else { $Controls.SSLNo.IsChecked = $True }
-If($Config.Watchdog) { $Controls.WatchdogEnabled.IsChecked = $True } else { $Controls.WatchdogDisabled.IsChecked = $True }
+if ($Config.SSL) { $Controls.SSLYes.IsChecked = $True } else { $Controls.SSLNo.IsChecked = $True }
+if ($Config.Watchdog) { $Controls.WatchdogEnabled.IsChecked = $True } else { $Controls.WatchdogDisabled.IsChecked = $True }
 $Controls.SwitchingPrevention.Value = $Config.SwitchingPrevention
 $Controls.Proxy.Text = $Config.Proxy
 $Controls.MinerStatusURL.Text = $Config.MinerStatusURL
 
 # Setup Preview tab
 $Controls.PreviewTab.add_GotFocus{
-        $ConfigJson = Create-Config
-        $Controls.Preview.Text = $ConfigJson
-
+    $ConfigJson = Create-Config
+    $Controls.Preview.Text = $ConfigJson
 }
 
 # Setup buttons
 $Controls.Apply.add_Click{
-        if(Test-Config) {
-            [Windows.MessageBox]::Show('Configuration saved!','All set','Ok','Info')
-            Save-Config
-        }
+    if (Test-Config) {
+        [Windows.MessageBox]::Show('Configuration saved!','All set','Ok','Info')
+        Save-Config
+    }
 }
 
 $Controls.Exit.add_Click{
@@ -389,9 +391,10 @@ $Controls.Exit.add_Click{
 }
 
 $Controls.Next.add_Click{
-    if($Controls.tabControl.SelectedIndex -eq ($Controls.tabControl.Items.Count -1)) {
+    if ($Controls.tabControl.SelectedIndex -eq ($Controls.tabControl.Items.Count -1)) {
         $Controls.tabControl.SelectedIndex = 0;
-    } else {
+    }
+    else {
         $Controls.tabControl.SelectedIndex++;
     }
 }

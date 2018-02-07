@@ -13,7 +13,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 
 $HashRefinery_Request = [PSCustomObject]@{}
 
-if($Info) {
+if ($Info) {
     # Just return info about the pool for use in setup
     $SupportedAlgorithms = @()
     # Use try catch here to still return some info about the pool even if the API is down

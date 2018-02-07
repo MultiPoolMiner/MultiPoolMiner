@@ -13,7 +13,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 
 $AHashPool_Request = [PSCustomObject]@{}
 
-if($Info) {
+if ($Info) {
     # Just return info about the pool for use in setup
     $SupportedAlgorithms = @()
     try {
@@ -21,7 +21,8 @@ if($Info) {
         $AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Foreach-Object { 
             $SupportedAlgorithms += Get-Algorithm $_
         }
-    } Catch {
+    }
+    Catch {
         Write-Warning "Unable to load supported algorithms for $Name - may not be able to configure all pool settings"
         $SupportedAlgorithms = @()
     }

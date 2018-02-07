@@ -13,7 +13,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 
 $MiningPoolHub_Request = [PSCustomObject]@{}
 
-if($Info) {
+if ($Info) {
     # Just return info about the pool for use in setup
     $SupportedAlgorithms = @()
     try {

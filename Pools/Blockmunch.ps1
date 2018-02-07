@@ -5,12 +5,49 @@ param(
     [String]$BTC, 
     [alias("WorkerName")]
     [String]$Worker, 
-    [TimeSpan]$StatSpan
+    [TimeSpan]$StatSpan,
+    [bool]$Info = $false
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Blockmunch_Request = [PSCustomObject]@{}
+$BlockmunchCoins_Request = [PSCustomObject]@{}
+
+if ($Info) {
+    # Just return info about the pool for use in setup
+    $SupportedAlgorithms = @()
+    $Currencies = @()
+    try {
+        $Blockmunch_Request = Invoke-RestMethod "http://www.blockmunch.club/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Foreach-Object { 
+            $SupportedAlgorithms += Get-Algorithm $_
+        }
+        $BlockmunchCoins_Request = Invoke-RestMethod "http://www.blockmunch.club/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $Currencies = @("BTC") + ($BlockmunchCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique
+    }
+    Catch {
+        Write-Warning "Unable to load supported algorithms for $Name - may not be able to configure all pool settings"
+        $SupportedAlgorithms = @()
+    }
+
+    $Settings = @()
+    $Settings += @{Name='Worker'; Required=$true; Description='Worker name to report to pool'}
+
+    $Currencies | Foreach-Object {
+        $Settings += @{Name=$_; Required = $false; Description = "$_ payout address"}
+    }
+
+    return [PSCustomObject]@{
+        Name = $Name
+        Website = "http://blockmunch.club"
+        Description = "Supports autoexchange to BTC or payout in mined coins"
+        Algorithms = $SupportedAlgorithms
+        Note = ""
+        # Define the settings this pool uses.
+        Settings = $Settings
+    }
+}
 
 try {
     $Blockmunch_Request = Invoke-RestMethod "http://www.blockmunch.club/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
@@ -76,4 +113,3 @@ $Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
         }
     }
 }
-Sleep 0
