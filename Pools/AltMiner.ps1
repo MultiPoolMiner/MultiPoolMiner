@@ -20,7 +20,7 @@ if ($Info) {
     $SupportedAlgorithms = @()
     $Currencies = @()
     try {
-        $AltMiner_Request = Invoke-RestMethod "http://www.blockmunch.club/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $AltMiner_Request = Invoke-RestMethod "https://altminer.net/api/status" -UseBasicParsing -Headers $Headers -TimeoutSec 10 -ErrorAction Stop
         $AltMiner_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Foreach-Object { 
             $SupportedAlgorithms += Get-Algorithm $_
         }

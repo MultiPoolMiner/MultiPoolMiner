@@ -19,9 +19,9 @@ if ($Info) {
     $SupportedAlgorithms = @()
     $Currencies = @()
     try {
-        $ZergPool_Request = Invoke-RestMethod "http://www.ahashpool.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $ZergPool_Request = Invoke-RestMethod "http://zergpool.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
         $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Foreach-Object { 
-            $SupportedAlgorithms += Get-Algorithm $_
+            $SupportedAlgorithms += Get-Algorithm $ZergPool_Request.$_.name
         }
         $ZergPoolCurrencies_Request = Invoke-RestMethod "http://zergpool.com/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
         $Currencies = @("BTC") + ($ZergPoolCurrencies_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique

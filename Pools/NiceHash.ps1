@@ -18,8 +18,8 @@ if ($Info) {
     $SupportedAlgorithms = @()
     try {
         $NiceHash_Request = Invoke-RestMethod "http://api.nicehash.com/api?method=simplemultialgo.info" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-        $NiceHash_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Foreach-Object { 
-            $SupportedAlgorithms += Get-Algorithm $_
+        $NiceHash_Request.result.simplemultialgo | Foreach-Object { 
+            $SupportedAlgorithms += Get-Algorithm $_.name
         }
     }
     Catch {
@@ -29,7 +29,7 @@ if ($Info) {
 
     return [PSCustomObject]@{
         Name = $Name
-        Website = "https://www.nicehash"
+        Website = "https://www.nicehash.com"
         Description = "NiceHash converts all profits to BTC"
         Algorithms = $SupportedAlgorithms
         Note = "BTC payout only" # Note is shown beside each pool in setup
