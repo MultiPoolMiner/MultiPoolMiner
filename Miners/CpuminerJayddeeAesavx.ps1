@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\CPU-JayDDee\cpuminer-aes-avx.exe"
-$Uri = "https://github.com/JayDDee/cpuminer-opt/files/1636873/cpuminer-opt-3.7.10-windows.zip"
+$Uri = "https://github.com/JayDDee/cpuminer-opt/files/1697610/cpuminer-opt-3.8.0.1-windows.zip"
 
 $Commands = [PSCustomObject]@{
     #"bitcore" = "" #Bitcore
