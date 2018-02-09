@@ -49,7 +49,7 @@ $Blazepool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
     # Do only for selected algorithms
     if ($DisabledAlgorithms -inotcontains $Blazepool_Algorithm -and ($Algorithm -eq $null -or $Algorithm.count -eq 0 -or $Algorithm -icontains $Blazepool_Algorithm) -and $Blazepool_Request.$_.workers -ge ($MinPoolWorkers * -not $BenchmarkMode)) {
 
-        $Blazepool_Host = "mine.Blazepool.com"
+        $Blazepool_Host = "$Blazepool_Algorithm.mine.blazepool.com"
         $Blazepool_Port = $Blazepool_Request.$_.port
         $Blazepool_Algorithm_Norm = Get-Algorithm $Blazepool_Algorithm
 
@@ -99,3 +99,4 @@ $Blazepool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
         }
     }
 }
+Sleep 0
