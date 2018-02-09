@@ -1,53 +1,39 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-DSTM\zm.exe"
-# Uri = "https://bitcointalk.org/index.php?topic=2021765.0"
+$Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
+$Uri = "https://github.com/KlausT/ccminer/releases/download/8.20/ccminer-820-cuda91-x64.zip"
 
 # Custom command to be applied to all algorithms
 $CommonCommands = ""
 
+# Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
-    #"bitcore"      = "" #Bitcore
-    #"blake2s"      = "" #Blake2s
-    #"blakecoin"    = "" #Blakecoin
-    #"vanilla"      = "" #BlakeVanilla
-    #"cryptonight"  = "" #Cryptonight
-    #"decred"       = "" #Decred
-    "equihash"      = "" #Equihash
-    #"ethash"       = "" #Ethash
-    #"groestl"      = "" #Groestl
-    #"hmq1725"      = "" #hmq1725
-    #"keccak"       = "" #Keccak
-    #"lbry"         = "" #Lbry
-    #"lyra2v2"      = "" #Lyra2RE2
-    #"lyra2z"       = "" #Lyra2z
-    #"myr-gr"       = "" #MyriadGroestl
-    #"neoscrypt"    = "" #NeoScrypt
-    #"nist5"        = "" #Nist5
-    #"pascal"       = "" #Pascal
-    #"qubit"        = "" #Qubit
-    #"scrypt"       = "" #Scrypt
-    #"sia"          = "" #Sia
-    #"sib"          = "" #Sib
-    #"skein"        = "" #Skein
-    #"timetravel"   = "" #Timetravel
-    #"x11"          = "" #X11
-    #"x11evo"       = "" #X11evo
-    #"x17"          = "" #X17
-    #"yescrypt"     = "" #Yescrypt
+    "blakecoin" = "" #Blakecoin
+    "c11"       = "" #C11
+    "groestl"   = "" #Groestl
+    "keccak"    = "" #Keccak
+    "lyra2v2"   = "" #Lyra2RE2
+    "myr-gr"    = "" #MyriadGroestl
+    "neoscrypt" = "" #NeoScrypt
+    "nist5"     = "" #Nist5
+    "sia"       = "" #Sia
+    "skein"     = "" #Skein
+    "x16r"      = "" #X16r
+    "x17"       = "" #
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 4001 + 40 * $ItemCounter
 $Type = "NVIDIA"
 $Devices = ($GPUs | Where-Object {$Type -contains $_.Type}).Device
-$Devices | ForEach-Object {
+    $Devices | ForEach-Object {
+
     $Device = $_
 
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$_ -cnotmatch "^_.+" -and $Pools.$(Get-Algorithm($_)).Name -and {$Pools.$(Get-Algorithm($_)).Protocol -eq "stratum+tcp" <#temp fix#>}} | ForEach-Object {
 
         $Algorithm = Get-Algorithm($_)
-        $Command = $Commands.$_
+        $Command =  $Commands.$_
 
         if ($Devices.count -gt 1) {
             $Name = "$(Name)-$($Device.Device_Norm)"
@@ -60,9 +46,9 @@ $Devices | ForEach-Object {
             Type         = $Device.Type
             Device       = $Device.Device
             Path         = $Path
-            Arguments    = ("--telemetry=127.0.0.1:$Port --server $($Pools.$Algorithm.Host) --port $($Pools.$Algorithm.Port) --user $($Pools.$Algorithm.User) --pass $($Pools.$Algorithm.Pass) $Command $CommonCommands").trim()
+            Arguments    = ("-a $_ -o $($Pools.$Algorithm.Protocol)://$($Pools.$Algorithm.Host):$($Pools.$Algorithm.Port) -u $($Pools.$Algorithm.User) -p $($Pools.$Algorithm.Pass) -b $Port $Command $CommonCommands").trim()
             HashRates    = [PSCustomObject]@{$Algorithm = ($Stats."$($Name)_$($Algorithm)_HashRate".Week)}
-            API          = "DSTM"
+            API          = "Ccminer"
             Port         = $Port
             URI          = $Uri
             PowerDraw    = $Stats."$($Name)_$($Algorithm)_PowerDraw".Week

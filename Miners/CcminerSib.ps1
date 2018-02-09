@@ -1,6 +1,6 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-Ccminer_x11ghost\ccminer_x11gost.exe"
+$Path = ".\Bin\Sib-NVIDIA\ccminer_x11gost.exe"
 $Uri = "https://github.com/nicehash/ccminer-x11gost/releases/download/ccminer-x11gost_windows/ccminer_x11gost.7z"
 
 # Custom commands to be applied to all algorithms
@@ -45,7 +45,7 @@ $Devices | ForEach-Object {
         $Command =  $Commands.$_
 
         if ($Devices.count -gt 1) {
-            $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($Device.Device_Norm)"
+            $Name = "$(Name)-$($Device.Device_Norm)"
             $Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) -d $($Device.Devices -join ',')"
             $Index = $Device.Devices -join ","
         }

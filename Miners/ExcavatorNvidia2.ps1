@@ -2,8 +2,8 @@
 
 $Threads = 2
 
-$Path = ".\Bin\NVIDIA-Excavator_142a\excavator.exe"
-#$Uri = "https://github.com/nicehash/excavator/releases/tag/v1.4.2a"
+$Path = ".\Bin\NVIDIA-Excavator\excavator.exe"
+#$Uri = "https://github.com/nicehash/excavator/releases/tag/v1.4.3a"
 
 # Uncomment defunct or outpaced algorithms with _ (do not use # to distinguish from default config)
 $Commands = [PSCustomObject]@{
@@ -30,7 +30,7 @@ $Devices | ForEach-Object {
     $Device = $_
 
     if ($Devices.count -gt 1 ){
-        $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($Device.Device_Norm)"
+        $Name = "$(Name)-$($Device.Device_Norm)"
         $Index = $Device.Devices -join ","
     }
 

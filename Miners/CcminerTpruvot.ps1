@@ -1,6 +1,6 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-ccminer-2.2.4-x64\ccminer-x64.exe"
+$Path = ".\Bin\NVIDIA-TPruvot\ccminer-x64.exe"
 $Uri = "https://github.com/tpruvot/ccminer/releases/download/2.2.4-tpruvot/ccminer-x64-2.2.4-cuda9.7z"
 
 # Custom command to be applied to all algorithms
@@ -55,7 +55,7 @@ $Devices | ForEach-Object {
         $Command =  $Commands.$_
 
         if ($Devices.count -gt 1) {
-            $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($Device.Device_Norm)"
+            $Name = "$(Name)-$($Device.Device_Norm)"
             $Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) -d $($Device.Devices -join ',')"
             $Index = $Device.Devices -join ","
         }

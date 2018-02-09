@@ -45,7 +45,7 @@ $Devices | ForEach-Object {
         $Command =  $Commands.$_
 
         if ($Devices.count -gt 1) {
-            $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)_$($Device.Device_Norm)"
+            $Name = "$(Name)-$($Device.Device_Norm)"
             $Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) -d $($Device.Devices -join ',')"
             $Index = $Device.Devices -join ","
         }
