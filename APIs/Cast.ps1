@@ -1,8 +1,8 @@
 ﻿using module ..\Include.psm1
 
 class Cast : Miner {
-    [PSCustomObject]GetMinerData ([String[]]$Algorithm, [Bool]$Safe = $false) {
-        $MinerData = ([Miner]$this).GetMinerData($Algorithm, $Safe)
+    [PSCustomObject]GetMinerData ([Bool]$Safe = $false) {
+        $MinerData = ([Miner]$this).GetMinerData($Safe)
 
         $Server = "localhost"
         $Timeout = 10 #seconds
@@ -25,12 +25,12 @@ class Cast : Miner {
                 break
             }
 
-            $HashRate_Name = [String]$Algorithm[0]
+            $HashRate_Name = [String]$this.Algorithm[0]
             $HashRate_Value = [Double]($Data.devices.hash_rate | Measure-Object -Sum).Sum / 1000
 
             $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
-            $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
+            $this.Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
 
             if (-not $Safe) {break}
 
@@ -41,15 +41,15 @@ class Cast : Miner {
 
                 $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
-                $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
+                $this.Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
             }
 
             Start-Sleep $Interval
         } while ($HashRates.Count -lt 6)
 
         $HashRate = [PSCustomObject]@{}
-        $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
-        $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
+        $this.Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
+        $this.Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$this.Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
 
         $MinerData | Add-Member HashRate $HashRate -Force
         return $MinerData

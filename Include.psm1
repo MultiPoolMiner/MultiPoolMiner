@@ -578,7 +578,7 @@ class Miner {
         }
     }
 
-    [PSCustomObject]GetMinerData ([String[]]$Algorithm, [Bool]$Safe = $false) {
+    [PSCustomObject]GetMinerData ([Bool]$Safe = $false) {
         $Lines = @()
 
         $this.Process | Receive-Job | ForEach-Object {
