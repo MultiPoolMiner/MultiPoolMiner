@@ -1,0 +1,11 @@
+[
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "Arguments":  "-r -1 -mport -23333 -epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -allcoins 1 -dpool $($Pools.Keccak.Host):$($Pools.Keccak.Port) -dwal $($Pools.Keccak.User) -dpsw $($Pools.Keccak.Pass) -dcoin keccak -dcri 30 -platform 2$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | ForEach-Object {if ($_.GlobalMemsize -ge 3000000000) {$DeviceIDs += $DeviceID}; $DeviceID++});if($DeviceIDs){' -di';$($DeviceIDs -join '')})",
+        "HashRates":  {"Ethash":  "$(if(((Get-Item '.\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe').LastWriteTime.Ticks -lt 636536951860000000) -or ([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | Where-Object {$_.GlobalMemsize -ge 3000000000}).Count -eq 0) {0} else {$Stats.ClaymoreNvidiaKeccak30_Ethash_HashRate.Week})","Keccak":  "$(if(((Get-Item '.\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe').LastWriteTime.Ticks -lt 636536951860000000) -or ([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | Where-Object {$_.GlobalMemsize -ge 3000000000}).Count -eq 0) {0} else {$Stats.ClaymoreNvidiaKeccak30_Keccak_HashRate.Week})"},
+        "API":  "Claymore",
+        "Port":  "23333"
+    }
+]
+
