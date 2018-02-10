@@ -1,11 +1,11 @@
-[
-    {
-        "Type":  "AMD",
-        "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
-        "Arguments":  "-r -1 -mport -13333 -epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -allcoins 1 -dpool $($Pools.Blake2s.Host):$($Pools.Blake2s.Port) -dwal $($Pools.Blake2s.User) -dpsw $($Pools.Blake2s.Pass) -dcoin blake2s -dcri 30 -platform 1$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'} | ForEach-Object {if ($_.GlobalMemsize -ge 3000000000) {$DeviceIDs += $DeviceID}; $DeviceID++});if($DeviceIDs){' -di';$($DeviceIDs -join '')})",
-        "HashRates":  {"Ethash":  "$(if(((Get-Item '.\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe').LastWriteTime.Ticks -lt 636536951860000000) -or ([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'} | Where-Object {$_.GlobalMemsize -ge 3000000000}).Count -eq 0) {0} else {$Stats.ClaymoreAmdBlake2s30_Ethash_HashRate.Week})","Blake2s":  "$(if(((Get-Item '.\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe').LastWriteTime.Ticks -lt 636536951860000000) -or ([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'} | Where-Object {$_.GlobalMemsize -ge 3000000000}).Count -eq 0) {0} else {$Stats.ClaymoreAmdBlake2s30_Blake2s_HashRate.Week})"},
-        "API":  "Claymore",
-        "Port":  "13333"
-    }
-]
-
+{
+    "Type":  "AMD",
+    "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+    "Arguments":  "\"-r -1 -mport -13333 -epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -allpools 1 -allcoins 1 -dpool $($Pools.Blake2s.Host):$($Pools.Blake2s.Port) -dwal $($Pools.Blake2s.User) -dpsw $($Pools.Blake2s.Pass) -dcoin blake2s -dcri 30 -platform 1$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq \u0027GPU\u0027 -and $_.Vendor -eq \u0027Advanced Micro Devices, Inc.\u0027} | ForEach-Object {if ($_.GlobalMemsize -ge 3000000000) {$DeviceIDs += $DeviceID}; $DeviceID++});if($DeviceIDs){\u0027 -di\u0027;$($DeviceIDs -join \u0027\u0027)})\"",
+    "HashRates":  {
+                      "Ethash":  "\"$(if(((Get-Item \u0027.\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe\u0027).LastWriteTime.Ticks -lt 636536951860000000) -or ([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq \u0027GPU\u0027 -and $_.Vendor -eq \u0027Advanced Micro Devices, Inc.\u0027} | Where-Object {$_.GlobalMemsize -ge 3000000000}).Count -eq 0) {0} else {$Stats.ClaymoreAmdBlake2s30_Ethash_HashRate.Week})\"",
+                      "Blake2s":  "\"$(if(((Get-Item \u0027.\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe\u0027).LastWriteTime.Ticks -lt 636536951860000000) -or ([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq \u0027GPU\u0027 -and $_.Vendor -eq \u0027Advanced Micro Devices, Inc.\u0027} | Where-Object {$_.GlobalMemsize -ge 3000000000}).Count -eq 0) {0} else {$Stats.ClaymoreAmdBlake2s30_Blake2s_HashRate.Week})\""
+                  },
+    "API":  "Claymore",
+    "Port":  "13333"
+}

@@ -201,7 +201,7 @@ function Get-ChildItemContent {
 
     function Invoke-ExpressionRecursive ($Expression) {
         if ($Expression -is [String]) {
-            if ((Invoke-Expression "`"$Expression`"") -ne $Expression) {
+            if ($Expression -match '(\$|")') {
                 try {$Expression = Invoke-Expression $Expression}
                 catch {$Expression = Invoke-Expression "`"$Expression`""}
             }
