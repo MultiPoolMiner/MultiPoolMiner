@@ -1,6 +1,32 @@
 ﻿using module ..\Include.psm1
 
 class Nicehash : Miner {
+    hidden StartMining() {
+        $this.Status = [MinerStatus]::Failed
+
+        $this.New = $true
+        $this.Activated++
+
+        if ($this.Process) {
+            if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
+                $this.Process | Remove-Job -Force
+            }
+
+            if (-not ($this.Process | Get-Job -ErrorAction SilentlyContinue)) {
+                $this.Active += $this.Process.PSEndTime - $this.Process.PSBeginTime
+                $this.Process = $null
+            }
+        }
+
+        if (-not $this.Process) {
+            $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process PowerShell `"```$Process = (Start-Process '$($this.Path)' '$($this.Arguments)' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+
+            if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
+                $this.Status = [MinerStatus]::Running
+            }
+        }
+    }
+
     [PSCustomObject]GetMinerData ([Bool]$Safe = $false) {
         $MinerData = ([Miner]$this).GetMinerData($Safe)
 
