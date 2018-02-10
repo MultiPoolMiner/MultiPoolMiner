@@ -99,4 +99,3 @@ $Blazepool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
         }
     }
 }
-Sleep 0
