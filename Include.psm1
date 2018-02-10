@@ -97,7 +97,7 @@ function Set-Stat {
             $ToleranceMax = $Stat.Week * (1 + [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
         }
 
-        if ($ChangeDetection -and $Value -eq $Stat.Live) {$Updated -eq $Stat.updated}
+        if ($ChangeDetection -and $Value -eq $Stat.Live) {$Updated = $Stat.updated}
 
         if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
             Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin) ... $([Int]$ToleranceMax)). "
@@ -131,7 +131,7 @@ function Set-Stat {
                 Week_Fluctuation = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + 
                 ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
                 Duration = $Stat.Duration + $Duration
-                Updated = (Get-Date).ToUniversalTime()
+                Updated = $Updated
             }
         }
     }
@@ -153,7 +153,7 @@ function Set-Stat {
             Week = $Value
             Week_Fluctuation = 1
             Duration = $Duration
-            Updated = (Get-Date).ToUniversalTime()
+            Updated = $Updated
         }
     }
 
