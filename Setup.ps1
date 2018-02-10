@@ -281,7 +281,7 @@ $Pools | Foreach-Object {
     if ($_.PSObject.Properties.Name -notcontains 'Settings') { $_ | Add-Member Settings @() }
     $_.Settings = $_.Settings | Foreach-Object {[pscustomobject]@{Name=$_.Name; Description=$_.Description; Required=$_.Required; Value=$Config.Pools.$PoolName.($_.Name)}}
     # Add settings for anything specified in $Config that hasn't already been added, so customized settings don't get lost
-    $Config.Pools.$PoolName.PsObject.Properties.Name | Foreach-Object {
+    $Config.Pools.$PoolName.PsObject.Properties.Name | Where-Object {$_} | Foreach-Object {
         if ($Pool.Settings.Name -notcontains $_) {
             $Pool.Settings += [pscustomobject]@{Name=$_; Description='Custom'; Required=$false; Value=$Config.Pools.$PoolName.$_}
         }
