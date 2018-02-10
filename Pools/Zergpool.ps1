@@ -21,13 +21,9 @@ $ShortPoolName = "ZergP" # Short pool name
 $Zergpool_Regions = "US"
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 if ($UseShortPoolNames -and $ShortPoolName) {$PoolName = $ShortPoolName} else {$PoolName = $Name}
-$URI = "http://zergpool.com/api/status"
+$URI = "http://api.zergpool.com:8080/api/status"
 
 if (-not $Wallet) {Write-Log -Level Warn "Pool API ($Name) has no wallet address to mine to."; return}
-
-if (-not $PriceTimeSpan) {
-    $PriceTimeSpan = "Week" # Week, Day, Hour, Minute_10, Minute_5
-}
 
 # Cannot do SSL
 if ($SSL) {Write-Log -Level Warn "SSL option requested, but pool API ($Name) does not support SSL. Ignoring pool.";return}
@@ -69,7 +65,7 @@ $Zergpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
             "blake2s"   {$Divisor *= 1000}
             "blakecoin" {$Divisor *= 1000}
             "decred"    {$Divisor *= 1000}
-			"keccak"    {$Divisor *= 1000}
+            "keccak"    {$Divisor *= 1000}
             "x11"       {$Divisor *= 1000}
             "quark"     {$Divisor *= 1000}
             "qubit"     {$Divisor *= 1000}
@@ -88,8 +84,8 @@ $Zergpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
                 Algorithm       = $Zergpool_Algorithm_Norm
                 Info            = $Zergpool_Info
                 Price           = $Stat.Live
-                StablePrice     = $Stat.$($PriceTimeSpan)
-                MarginOfError   = $Stat.$("$($PriceTimeSpan)_Fluctuation")
+                StablePrice     = $Stat.Week
+                MarginOfError   = $Stat.Week_Fluctuation
                 Protocol        = "stratum+tcp"
                 Host            = "$Zergpool_Host"
                 Hosts           = "$Zergpool_Host"
@@ -103,4 +99,3 @@ $Zergpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
         }
     }
 }
-Sleep 0
