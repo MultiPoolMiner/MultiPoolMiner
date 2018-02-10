@@ -18,7 +18,7 @@ if ($Pools.Cryptonight.Name) {
     $Devices | ForEach-Object {
 
         if ($Devices.count -gt 1 ){
-            $Name = "$($Name)-$($Device.Device_Norm)"
+            $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)-$($Device.Device_Norm)"
             $HWConfigFile = " --$($_.Type.ToLower()) $($_.Device_Norm).txt"
             $Index = $_.Devices -join ","
         }

@@ -55,7 +55,7 @@ $Devices = ($GPUs | Where-Object {$Type -contains $_.Type}).Device
         $Command =  $Commands.$_
 
         if ($Devices.count -gt 1) {
-            $Name = "$($Name)-$($Device.Device_Norm)"
+            $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)-$($Device.Device_Norm)"
             $Command = "$(Get-CommandPerDevice -Command "$Command" -Devices $Device.Devices) -d $($Device.Devices -join ',')"
             $Index = $Device.Devices -join ","
         }
