@@ -245,7 +245,7 @@ while ($true) {
         Where-Object {$Config.ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $Config.ExcludeAlgorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
 
     #Remove non-present pools
-    $AllPools = $AllPools | Where-Object {Test-Path "Pools\$($_.Name).ps1"}
+    $AllPools = $AllPools | Where-Object {(Test-Path "Pools\$($_.Name).ps1") -and $Config.Pools -match $_.Name}
 
     #Apply watchdog to pools
     $AllPools = $AllPools | Where-Object {
