@@ -164,9 +164,6 @@ Since version 2.6, the delta value (integer) that was used to determine how ofte
     set "command=& .\multipoolminer.ps1 -wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -username aaronsace -workername multipoolminer -region europe -currency btc,usd,eur -type amd,nvidia,cpu -poolname miningpoolhub,zpool,nicehash -algorithm cryptonight,decred,decrednicehash,ethash,ethash2gb,equihash,groestl,lbry,lyra2re2,lyra2z,neoscrypt,pascal,sib,skunk -donate 24 -watchdog -minerstatusurl https://multipoolminer.io/monitor/miner.php -switchingprevention 2"
 
     pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
-    powershell -version 5.0 -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
-    msiexec -i https://github.com/PowerShell/PowerShell/releases/download/v6.0.0/PowerShell-6.0.0-win-x64.msi -qb!
-    pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
     
     pause
 
