@@ -141,17 +141,17 @@ function Set-Stat {
         $Stat = [PSCustomObject]@{
             Live = $Value
             Minute = $Value
-            Minute_Fluctuation = 1
+            Minute_Fluctuation = 0
             Minute_5 = $Value
-            Minute_5_Fluctuation = 1
+            Minute_5_Fluctuation = 0
             Minute_10 = $Value
-            Minute_10_Fluctuation = 1
+            Minute_10_Fluctuation = 0
             Hour = $Value
-            Hour_Fluctuation = 1
+            Hour_Fluctuation = 0
             Day = $Value
-            Day_Fluctuation = 1
+            Day_Fluctuation = 0
             Week = $Value
-            Week_Fluctuation = 1
+            Week_Fluctuation = 0
             Duration = $Duration
             Updated = $Updated
         }
