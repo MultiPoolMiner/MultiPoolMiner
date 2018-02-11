@@ -79,8 +79,7 @@ $ZpoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
             "scrypt"    {$Divisor *= 1000}
         }
 
-        if ((Get-Stat -Name "$($Name)_$($ZpoolCoins_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($ZpoolCoins_Algorithm_Norm)_Profit" -Value ([Double]$ZpoolCoins_Request.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true}
-        else {$Stat = Set-Stat -Name "$($Name)_$($ZpoolCoins_Algorithm_Norm)_Profit" -Value ($ZpoolCoins_Request.$_.estimate / $Divisor) -Duration (New-TimeSpan -Days 1)}
+        $Stat = Set-Stat -Name "$($Name)_$($ZpoolCoins_Algorithm_Norm)_Profit" -Value ($ZpoolCoins_Request.$_.estimate / $Divisor) -Duration (New-TimeSpan -Days 1)
 
         $ZpoolCoins_Regions | ForEach-Object {
             $ZpoolCoins_Region = $_
