@@ -459,7 +459,7 @@ class Miner {
     $Wrap
     $API
     $Port
-    $Algorithm
+    [Array]$Algorithm = @()
     $Type
     $Index
     $Device
