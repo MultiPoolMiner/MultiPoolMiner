@@ -17,11 +17,11 @@ try {
         $ProgressPreference = $ProgressPreferenceBackup
         Write-Progress -Activity "Updater" -Status $Name -CurrentOperation "Acquiring Online ($URI)"
         $ProgressPreference = "SilentlyContinue"
-        Write-Warning "$Name is out of date; there is an updated version available at $URI. "
+        Write-Log -Level Warn "The software ($Name) is out of date; there is an updated version available at $URI. "
     }
 }
 catch {
-    Write-Warning "The software ($Name) failed to update. "
+    Write-Log -Level Warn "The software ($Name) failed to update. "
 }
 
 $Name = "PowerShell"
@@ -39,7 +39,7 @@ try {
     }
 }
 catch {
-    Write-Warning "The software ($Name) failed to update. "
+    Write-Log -Level Warn "The software ($Name) failed to update. "
 }
 
 $ProgressPreference = $ProgressPreferenceBackup

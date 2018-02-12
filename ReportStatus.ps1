@@ -8,7 +8,7 @@ param(
     [Parameter(Mandatory = $true)]$MinerStatusURL
 )
 
-Write-Host "Pinging monitoring server..."
+Write-Log "Pinging monitoring server. "
 $profit = ($ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | Measure-Object Profit -Sum).Sum | ConvertTo-Json
 
 # Format the miner values for reporting.  Set relative path so the server doesn't store anything personal (like your system username, if running from somewhere in your profile)

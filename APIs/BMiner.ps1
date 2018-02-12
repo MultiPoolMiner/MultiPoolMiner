@@ -34,7 +34,7 @@ class BMiner : Miner {
                 $Data = $Response | ConvertFrom-Json -ErrorAction Stop
             }
             catch {
-                Write-Log -Level "Error" "$($this.API) API failed to connect to miner ($($this.Name)). Could not read hash rates from miner."
+                Write-Log -Level Error "Failed to connect to miner ($($this.Name)). "
                 break
             }
             

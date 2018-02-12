@@ -213,7 +213,7 @@ while ($true) {
 
     #Update the exchange rates
     try {
-        Write-Log "Updating exchange rates from Coinbase..."
+        Write-Log "Updating exchange rates from Coinbase. "
         $NewRates = Invoke-RestMethod "https://api.coinbase.com/v2/exchange-rates?currency=BTC" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop | Select-Object -ExpandProperty data | Select-Object -ExpandProperty rates
         $Config.Currency | Where-Object {$NewRates.$_} | ForEach-Object {$Rates | Add-Member $_ ([Double]$NewRates.$_) -Force}
     }
@@ -222,12 +222,12 @@ while ($true) {
     }
 
     #Load the stats
-    Write-Log "Loading saved statistics..."
+    Write-Log "Loading saved statistics. "
     $Stats = [PSCustomObject]@{}
     if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
 
     #Load information about the pools
-    Write-Log "Loading pool information..."
+    Write-Log "Loading pool information. "
     $NewPools = @()
     if (Test-Path "Pools") {
         $NewPools = Get-ChildItem "Pools" | Where-Object {$Config.Pools.$($_.BaseName)} | ForEach-Object {
@@ -263,7 +263,7 @@ while ($true) {
     }
     $Pools = [PSCustomObject]@{}
 
-    Write-Log "Selecting best pool for each algorithm..."
+    Write-Log "Selecting best pool for each algorithm. "
     $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Sort-Object -Descending {$Config.PoolName.Count -eq 0 -or (Compare-Object $Config.PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}, {$Config.ExcludePoolName.Count -eq 0 -or (Compare-Object $Config.ExcludePoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}, {$_.StablePrice * (1 - $_.MarginOfError)}, {$_.Region -EQ $Config.Region}, {$_.SSL -EQ $Config.SSL} | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
     if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_} | Measure-Object Updated -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalSeconds) -gt $Config.Interval * $Strikes) {
         Write-Log -Level Warn "Pool prices are out of sync. "
@@ -275,7 +275,7 @@ while ($true) {
 
     #Load information about the miners
     #Messy...?
-    Write-Log "Getting miner information..."
+    Write-Log "Getting miner information. "
     # Get all the miners, get just the .Content property and add the name, select only the ones that match our $Config.Type (CPU, AMD, NVIDIA) or all of them if type is unset,
     # select only the ones that have a HashRate matching our algorithms, and that only include algorithms we have pools for
     # select only the miners that match $Config.MinerName, if specified, and don't match $Config.ExcludeMinerName
@@ -287,7 +287,7 @@ while ($true) {
             Where-Object {$Config.MinerName.Count -eq 0 -or (Compare-Object $Config.MinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
             Where-Object {$Config.ExcludeMinerName.Count -eq 0 -or (Compare-Object $Config.ExcludeMinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
     }
-    Write-Log "Calculating profit for each miner..."
+    Write-Log "Calculating profit for each miner. "
     $AllMiners | ForEach-Object {
         $Miner = $_
 
@@ -531,7 +531,7 @@ while ($true) {
         $Miner = $_
 
         if ($Miner.GetStatus() -eq "Running") {
-            Write-Log "Closing $($Miner.Type) miner $($Miner.Name) because it is no longer the most profitable"
+            Write-Log "Closing miner ($($Miner.Name)) because it is no longer the most profitable. "
             $Miner.SetStatus("Idle")
 
             #Remove watchdog timer
@@ -554,7 +554,7 @@ while ($true) {
     Start-Sleep $Config.Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         if ($_.GetStatus() -ne "Running") {
-            Write-Log "Starting $($_.Type) miner $($_.Name): '$($_.Path) $($_.Arguments)'"
+            Write-Log "Starting miner ($($_.Name)): '$($_.Path) $($_.Arguments)'"
             $DecayStart = $Timer
             $_.SetStatus("Running")
 
@@ -640,15 +640,16 @@ while ($true) {
     [GC]::Collect()
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
-    Write-Log "Waiting for $($Config.Interval) seconds to start next run"
+    Write-Log "Start waiting before next run. "
     for ($i = $Strikes; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
         Start-Sleep 10
         $Timer = (Get-Date).ToUniversalTime()
     }
+    Write-Log "Finish waiting before next run. "
 
     #Save current hash rates
-    Write-Log "Saving hash rates..."
+    Write-Log "Saving hash rates. "
     $ActiveMiners | ForEach-Object {
         $Miner = $_
         $Miner.Speed_Live = 0
@@ -658,7 +659,7 @@ while ($true) {
 
         if ($Miner.GetStatus() -eq "Running") {
             $Miner_Data = $Miner.GetMinerData(($Miner.New -and $Miner.Benchmarked -lt $Strikes))
-            $Miner_Data.Lines | ForEach-Object {Write-Log -Level Verbose $_}
+            $Miner_Data.Lines | ForEach-Object {Write-Log -Level Verbose "$($Miner.Name): $_"}
             $Miner.Speed_Live = $Miner_Data.HashRate.PSObject.Properties.Value
 
             $Miner.Algorithm | Where-Object {$Miner_Data.HashRate.$_} | ForEach-Object {
@@ -685,7 +686,7 @@ while ($true) {
             }
         }
     }
-    Write-Log "Starting next run..."
+    Write-Log "Starting next run. "
 }
 
 #Stop the log
