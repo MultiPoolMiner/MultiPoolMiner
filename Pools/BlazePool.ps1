@@ -72,8 +72,8 @@ $Blazepool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
             "scrypt"    {$Divisor *= 1000}
         }
 
-        if ((Get-Stat -Name "$($Name)_$($Blazepool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Blazepool_Algorithm_Norm)_Profit" -Value ([Double]$Blazepool_Request.$_.estimate_last24h / $Divisor) -Duration $StatSpan -ChangeDetection $true}
-        else {$Stat = Set-Stat -Name "$($Name)_$($Blazepool_Algorithm_Norm)_Profit" -Value ($Blazepool_Request.$_.estimate_current / $Divisor) -Duration (New-TimeSpan -Days 1)}
+        if ((Get-Stat -Name "$($Name)_$($Blazepool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Blazepool_Algorithm_Norm)_Profit" -Value ([Double]$Blazepool_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1) -ChangeDetection $true}
+        else {$Stat = Set-Stat -Name "$($Name)_$($Blazepool_Algorithm_Norm)_Profit" -Value ($Blazepool_Request.$_.estimate_current / $Divisor) -Duration $StatSpan}
 
         $Blazepool_Regions | ForEach-Object {
             $Blazepool_Region = $_
