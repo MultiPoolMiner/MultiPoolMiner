@@ -2,9 +2,9 @@
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\Ethash-Ethminer\\ethminer.exe",
-        "Arguments":  "\"--api-port 23333 -S $($Pools.Ethash.Host):$($Pools.Ethash.Port) -O $($Pools.Ethash.User):$($Pools.Ethash.Pass) -SP 2 --opencl --opencl-platform $([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), \u0027Advanced Micro Devices, Inc.\u0027))$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq \u0027GPU\u0027 -and $_.Vendor -eq \u0027Advanced Micro Devices, Inc.\u0027} | ForEach-Object {if ($_.GlobalMemsize -ge 3000000000) {$DeviceIDs += $DeviceID}; $DeviceID++});if($DeviceIDs){\u0027 --opencl-devices\u0027;$($DeviceIDs)})\"",
+        "Arguments":  "\"--api-port 23333 -S $($Pools.Ethash.Host):$($Pools.Ethash.Port) -O $($Pools.Ethash.User):$($Pools.Ethash.Pass) -SP 2 --opencl --opencl-platform $([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'Advanced Micro Devices, Inc.'))$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'} | ForEach-Object {if ($_.GlobalMemsize -ge 3000000000) {$DeviceIDs += $DeviceID}; $DeviceID++});if($DeviceIDs){' --opencl-devices';$($DeviceIDs)})\"",
         "HashRates":  {
-                          "Ethash":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq \u0027GPU\u0027 -and $_.Vendor -eq \u0027Advanced Micro Devices, Inc.\u0027} | Where-Object {$_.GlobalMemsize -ge 3000000000}).Count -eq 0) {0} else {$Stats.EthminerAmd_Ethash_HashRate.Week})\""
+                          "Ethash":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'} | Where-Object {$_.GlobalMemsize -ge 3000000000}).Count -eq 0) {0} else {$Stats.EthminerAmd_Ethash_HashRate.Week})\""
                       },
         "API":  "Claymore",
         "Port":  "13333",
@@ -13,7 +13,7 @@
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\Ethash-Ethminer\\ethminer.exe",
-        "Arguments":  "\"--api-port 13333 -S $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -O $($Pools.Ethash2gb.User):$($Pools.Ethash2gb.Pass) -SP 2 --opencl --opencl-platform $([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), \u0027Advanced Micro Devices, Inc.\u0027))\"",
+        "Arguments":  "\"--api-port 13333 -S $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -O $($Pools.Ethash2gb.User):$($Pools.Ethash2gb.Pass) -SP 2 --opencl --opencl-platform $([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'Advanced Micro Devices, Inc.'))\"",
         "HashRates":  {
                           "Ethash2gb":  "\"$($Stats.EthminerAmd_Ethash2gb_HashRate.Week)\""
                       },
