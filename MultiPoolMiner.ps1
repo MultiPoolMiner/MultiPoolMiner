@@ -101,8 +101,8 @@ $WorkerNameDonate = "multipoolminer"
 
 while ($true) {
     #Load the config
-    if (Test-Path "Config.txt") {
-        $Config = Get-ChildItemContent "Config.txt" -Parameters @{
+    if (Test-Path "Configs\Config.txt") {
+        $Config = Get-ChildItemContent "Configs\Config.txt" -Parameters @{
             Wallet              = $Wallet
             UserName            = $UserName
             WorkerName          = $WorkerName
