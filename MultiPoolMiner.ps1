@@ -168,11 +168,12 @@ while ($true) {
         )
     }
 
-    Get-ChildItem "Miners" | Where-Object {-not $Config.Miners.($_.BaseName)} | ForEach-Object {
-        $Config.Miners | Add-Member $_.BaseName (
-            [PSCustomObject]@{
-            }
-        )
+    #Read miner configuration, a separate config file per miner is required
+    if (-not (Test-Path "Configs\Miners")) {New-Item "Configs\Miners" -ItemType "directory" | Out-Null}
+    else {
+        Get-ChildItem "Configs\Miners" | ForEach-Object {
+            $Config.Miners | Add-Member $_.BaseName (Get-Content $_.FullName | ConvertFrom-Json)
+        }
     }
 
     #Activate or deactivate donation
