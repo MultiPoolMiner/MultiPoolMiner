@@ -22,12 +22,12 @@ if (-not $Config.$Name.MinerFileVersion) {
             "MinerBinaryInfo" =  "Claymore Claymore Dual Ethereum AMD/NVIDIA GPU Miner v11.0"
             "Uri" = "$Uri"
             "UriComment" = "Note: The miner binary cannot be updated automatically due to the lack of a proper download link. You need to download the miner binaries from '$($Uri)' and then extract them to .\\Bin\\Ethash-Claymore\\"
-            "Type" = "NVIDIA"
+            "Type" = "$Type"
             "Path" = ".\Bin\Ethash-Claymore\EthDcrMiner64.exe"
             "Port" = 23333
             "MinerFeeInPercent" = 1.5
-            "IgnoreAmdGpuID" = @(0, 1)
-            "IgnoreNvidiaGpuID" =  @(0, 1)
+            "IgnoreAmdGpuID" = @(0, 1) # Currently unused, example only
+            "IgnoreNvidiaGpuID" =  @(0, 1) # Currently unused, example only
             "Commands" = [PSCustomObject]@{
                 "ethash" = ""
                 "ethash2gb" = ""
