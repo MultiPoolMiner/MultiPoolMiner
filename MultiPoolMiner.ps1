@@ -101,6 +101,7 @@ $WorkerNameDonate = "multipoolminer"
 
 while ($true) {
     #Load the config
+    $ConfigBackup = $Config
     if (Test-Path "Config.txt") {
         $Config = Get-ChildItemContent "Config.txt" -Parameters @{
             Wallet              = $Wallet
@@ -191,6 +192,9 @@ while ($true) {
         $Config | Add-Member ExcludePoolName @() -Force
     }
 
+    #Clear pool cache if the configuration has changed
+    if (($ConfigBackup | ConvertTo-Json -Compress) -ne ($Config | ConvertTo-Json -Compress)) {$AllPools = $null}
+
     if ($Config.Proxy) {$PSDefaultParameterValues["*:Proxy"] = $Config.Proxy}
     else {$PSDefaultParameterValues.Remove("*:Proxy")}
 
@@ -240,9 +244,6 @@ while ($true) {
         Where-Object {$Config.Algorithm.Count -eq 0 -or (Compare-Object $Config.Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
         Where-Object {$Config.ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $Config.ExcludeAlgorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0} | 
         Where-Object {$Config.ExcludePoolName.Count -eq 0 -or (Compare-Object $Config.ExcludePoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
-
-    #Remove non-present pools
-    $AllPools = $AllPools | Where-Object {(Test-Path "Pools\$($_.Name).ps1") -and $Config.Pools -match $_.Name}
 
     #Apply watchdog to pools
     $AllPools = $AllPools | Where-Object {
