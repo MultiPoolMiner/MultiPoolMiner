@@ -1,7 +1,7 @@
 using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-BMiner\BMiner.exe"
-$Uri = "https://www.bminercontent.com/releases/bminer-v5.3.0-e337b9a-amd64.zip"
+$Uri = "https://www.bminercontent.com/releases/bminer-v5.4.0-ae18e12-amd64.zip"
 
 # Custom commands to be applied to all algorithms
 $CommonCommands = ""
