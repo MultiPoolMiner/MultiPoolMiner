@@ -32,5 +32,18 @@ $minerreport = ConvertTo-Json @(
     }
 )
 
-Write-Log (Invoke-RestMethod -Uri $MinerStatusURL -Method Post -Body @{address = $Key; workername = $WorkerName; miners = $minerreport; profit = $profit})
+try {
+    $Response = Invoke-RestMethod -Uri $MinerStatusURL -Method Post -Body @{address = $Key; workername = $WorkerName; miners = $minerreport; profit = $profit} -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+
+    if ($Response -eq "success") {
+        Write-Log "Miner Status ($MinerStatusURL): $Response"
+    }
+    else {
+        Write-Log -Level Warn "Miner Status ($MinerStatusURL): $Response"
+    }
+}
+catch {
+    Write-Log -Level Warn "Miner Status ($MinerStatusURL) has failed. "
+}
+
 Write-Host "Your miner status key is: $Key"
