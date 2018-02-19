@@ -97,7 +97,7 @@ function Set-Stat {
             $ToleranceMax = $Stat.Week * (1 + [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
         }
 
-        if ($ChangeDetection -and $Value -eq $Stat.Live) {$Updated = $Stat.updated}
+        if ($ChangeDetection -and [Decimal]$Value -eq [Decimal]$Stat.Live) {$Updated = $Stat.updated}
 
         if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
             Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin) to $([Int]$ToleranceMax)). "
