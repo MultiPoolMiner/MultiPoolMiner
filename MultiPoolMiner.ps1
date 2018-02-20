@@ -549,6 +549,7 @@ while ($true) {
             }
         }
     }
+    Get-Process -Name @($ActiveMiners | ForEach-Object {([IO.FileInfo]($_.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName}) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best -EQ $true | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {([IO.FileInfo]($_.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName}) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Config.Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
