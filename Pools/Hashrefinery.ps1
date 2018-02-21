@@ -39,10 +39,14 @@ $HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore 
     $Divisor = 1000000
 
     switch ($HashRefinery_Algorithm_Norm) {
-        "equihash" {$Divisor /= 1000}
         "blake2s" {$Divisor *= 1000}
         "blakecoin" {$Divisor *= 1000}
         "decred" {$Divisor *= 1000}
+        "equihash" {$Divisor /= 1000}
+        "quark" {$Divisor *= 1000}
+        "qubit" {$Divisor *= 1000}
+        "scrypt" {$Divisor *= 1000}
+        "x11" {$Divisor *= 1000}
     }
 
     if ((Get-Stat -Name "$($Name)_$($HashRefinery_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($HashRefinery_Algorithm_Norm)_Profit" -Value ([Double]$HashRefinery_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
