@@ -13,9 +13,9 @@ class BMiner : Miner {
 
         $PowerDraws = @()
         $ComputeUsages = @()
-        
+
         if ($this.index -eq $null -or $this.index -le 0) {
-            
+
             # Supports max. 20 cards
             $Index = @()
             for ($i = 0; $i -le 20; $i++) {$Index += $i}               
@@ -37,9 +37,9 @@ class BMiner : Miner {
                 Write-Log -Level Error "Failed to connect to miner ($($this.Name)). "
                 break
             }
-            
+
             $HashRate_Value = 0
-            $Index | Where  {$Data.miners.$_.solver} | ForEach {
+            $Index | Where {$Data.miners.$_.solver} | ForEach {
                 $HashRate_Value += [Double]$Data.miners.$_.solver.solution_rate
             }
 
