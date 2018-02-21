@@ -23,6 +23,7 @@ $Commands = [PSCustomObject]@{
     "myr-gr" = "" #MyriadGroestl
     "neoscrypt" = "" #NeoScrypt
     "nist5" = "" #Nist5
+    #"pascal" = "" #Pascal
     "phi" = "" #PHI
     "sib" = "" #Sib
     "skein" = "" #Skein
