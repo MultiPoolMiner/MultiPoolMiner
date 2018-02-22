@@ -29,7 +29,7 @@ if (($Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
 $Zpool_Regions = "us"
 $Zpool_Currencies = @("BTC") + ($ZpoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
-$Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Zpool_Request.$_.hashrate -gt 0} |ForEach-Object {
+$Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Zpool_Request.$_.hashrate -gt 0} | Where-Object {$Zpool_Request.$_.name -ne "scrypt"} | Where-Object {$Zpool_Request.$_.name -ne "sha256"} | Where-Object {$Zpool_Request.$_.name -ne "x11"} | Where-Object {$Zpool_Request.$_.name -ne "x13"} | Where-Object {$Zpool_Request.$_.name -ne "x14"} | Where-Object {$Zpool_Request.$_.name -ne "qubit"} | Where-Object {$Zpool_Request.$_.name -ne "quark"} | Where-Object {$Zpool_Request.$_.name -ne "lbry"} | ForEach-Object {
     $Zpool_Host = "mine.zpool.ca"
     $Zpool_Port = $Zpool_Request.$_.port
     $Zpool_Algorithm = $Zpool_Request.$_.name
@@ -41,12 +41,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Selec
     switch ($Zpool_Algorithm_Norm) {
         "blake2s" {$Divisor *= 1000}
         "blakecoin" {$Divisor *= 1000}
-        "decred" {$Divisor *= 1000}
         "equihash" {$Divisor /= 1000}
-        "quark" {$Divisor *= 1000}
-        "qubit" {$Divisor *= 1000}
-        "scrypt" {$Divisor *= 1000}
-        "x11" {$Divisor *= 1000}
     }
 
     if ((Get-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit" -Value ([Double]$Zpool_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
