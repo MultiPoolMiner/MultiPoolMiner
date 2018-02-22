@@ -573,7 +573,7 @@ class Miner {
             }
             Default {
                 $this.StopMining()
-                $this.Status -eq $Status
+                $this.Status = $Status
             }
         }
     }
