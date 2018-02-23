@@ -59,7 +59,7 @@ param(
     [Double]$SwitchingPrevention = 1 #zero does not prevent miners switching
 )
 
-$Version = "2.7.2.3"
+$Version = "2.7.2.4"
 $Strikes = 3
 $SyncWindow = 5 #minutes
 
