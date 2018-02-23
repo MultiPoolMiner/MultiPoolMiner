@@ -4,7 +4,7 @@ class Xgminer : Miner {
     [PSCustomObject]GetMinerData ([Bool]$Safe = $false) {
         $MinerData = ([Miner]$this).GetMinerData($Safe)
 
-        if ($this.GetStatus() -ne "Running") {return $MinerData}
+        if ($this.GetStatus() -ne [MinerStatus]::Running) {return $MinerData}
 
         $Server = "localhost"
         $Timeout = 10 #seconds
