@@ -52,7 +52,7 @@ param(
     [Switch]$Watchdog = $false,
     [Parameter(Mandatory = $false)]
     [Alias("Uri", "Url")]
-    [String]$MinerStatusUrl = "https://multipoolminer.io/monitor/miner.php",
+    [String]$MinerStatusUrl = "", #i.e https://multipoolminer.io/monitor/miner.php
     [Parameter(Mandatory = $false)]
     [String]$MinerStatusKey = "",
     [Parameter(Mandatory = $false)]
