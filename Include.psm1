@@ -565,10 +565,10 @@ class Miner {
         if ($Status -eq $this.GetStatus()) {return}
 
         switch ($Status) {
-            [MinerStatus]::Running {
+            "Running" {
                 $this.StartMining()
             }
-            [MinerStatus]::Idle {
+            "Idle" {
                 $this.StopMining()
             }
             Default {
