@@ -70,7 +70,7 @@ The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to 
 - Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -wallet command, see below)
 - A Hash Pool https://www.ahashpool.com/ (Bitcoin address must be provided using the -wallet command, see below)
 - BlockMunch http://www.blockmunch.club/ (Bitcoin address must be provided using the -wallet command, see below)
-- ItalYiiMP http://www.italyiimp.com/ (Bitcoin address must be provided using the -wallet command, see below)
+- BlazePool http://www.blazepool.com/ (Bitcoin address must be provided using the -wallet command, see below)
 - YiiMP http://yiimp.eu/ (Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config.txt. Detailled documentation will follow. For now read https://github.com/MultiPoolMiner/MultiPoolMiner/issues/1105)
 
 ***IMPORTANT**: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
