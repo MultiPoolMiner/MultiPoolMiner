@@ -103,13 +103,13 @@
                                                 </DockPanel>
                                             </Expander.Header>
                                             <StackPanel>
-                                                <TextBlock Text="{Binding Path=Description}"/>
+                                                <TextBlock TextWrapping="Wrap" Text="{Binding Path=Description}"/>
                                                 <DockPanel>
                                                     <TextBlock Width="130" FontWeight="Bold" Text="Website:"/>
                                                     <TextBlock Text="{Binding Path=Website}"/>
                                                 </DockPanel>
                                                 <DockPanel>
-                                                    <TextBlock Width="130" FontWeight="Bold" Text="Supported Algorithms:"/>
+                                                    <TextBlock TextWrapping="Wrap" Width="130" FontWeight="Bold" Text="Supported Algorithms:"/>
                                                     <TextBlock TextWrapping="Wrap" Text="{Binding Path=AlgorithmsString}" Width="480"/>
                                                 </DockPanel>
 
