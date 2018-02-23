@@ -1,9 +1,9 @@
-﻿param([String]$Log = ".\.txt", [String]$Sort = "")
+﻿param([String]$Log = ".\.txt", [String]$Sort = "", [Switch]$QuickStart)
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 while ($true) {
-    Compare-Object @(Get-Job -ErrorAction Ignore | Select-Object -ExpandProperty Name) @(Get-ChildItem ".\Logs" -ErrorAction Ignore | Select-Object -ExpandProperty Name) | 
+    Compare-Object @(Get-Job -ErrorAction Ignore | Select-Object -ExpandProperty Name) @(Get-ChildItem ".\Logs" -ErrorAction Ignore | Where-Object {(-not $QuickStart) -or ((Get-Date) - $_.LastWriteTime).TotalMinutes -le 1} | Select-Object -ExpandProperty Name) | 
         Sort-Object {$_.InputObject -replace $Sort} | 
         Where-Object InputObject -match $Log | 
         Where-Object SideIndicator -EQ "=>" | 
