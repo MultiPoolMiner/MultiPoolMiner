@@ -4,7 +4,7 @@ param(
     [alias("Wallet")]
     [String]$BTC, 
     [alias("WorkerName")]
-    [String]$Worker, 
+    [String]$Worker,
     [TimeSpan]$StatSpan,
     [bool]$Info = $false
 )
@@ -19,38 +19,61 @@ if ($Info) {
     $SupportedAlgorithms = @()
     $Currencies = @()
     try {
-        $ZergPool_Request = Invoke-RestMethod "http://zergpool.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $ZergPool_Request = Invoke-RestMethod "http://zerg.zergpool.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
         $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Foreach-Object { 
-            $SupportedAlgorithms += Get-Algorithm $ZergPool_Request.$_.name
+            $SupportedAlgorithms += Get-Algorithm $_
         }
-        $ZergPoolCurrencies_Request = Invoke-RestMethod "http://zergpool.com/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-        $Currencies = @("BTC") + ($ZergPoolCurrencies_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique
-    } 
-    Catch {
+    }
+    catch {
         Write-Warning "Unable to load supported algorithms for $Name - may not be able to configure all pool settings"
         $SupportedAlgorithms = @()
     }
+    try {
+        $ZergPoolCurrencies_Request = Invoke-RestMethod 'http://zerg.zergpool.com/api/currencies' -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $Currencies = $ZergPoolCurrencies_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Select-Object -Unique 
+    } 
+    catch {
+        Write-Warning "Unable to load currencies for $Name - may not be able to configure all pool settings"
+    }
 
+    # Define the settings this pool uses.
     $Settings = @()
     $Settings += @{Name='Worker'; Required=$true; Description='Worker name to report to pool'}
-
+    $Settings += @{Name='BTC'; Required=$false; Description='Bitcoin payout address'}
     $Currencies | Foreach-Object {
         $Settings += @{Name=$_; Required = $false; Description = "$_ payout address"}
     }
-    
+
     return [PSCustomObject]@{
         Name = $Name
-        Website = "https://zergpool.com"
-        Description = "Supports autoexchange to BTC or payout in mined coins"
+        Website = "zergpool.com"
+        Description = "Zergpool allows three different options for payout, but only options 1 & 2 are supported by MPM:
+
+Option 1 - Mine in particular algorithm
+This will let pool to mine most profitable coin in this algo or use merged mining benefits, and auto exchange rewards to your coin wallet. You should use coin wallet address as username.
+Use c=SYMBOL in password to make sure payout wallet coin is identified correctly.
+Example to mine in Scrypt algorithm and get payout in BTC
+-o stratum+tcp://zergpool.com:PORT -u <YOUR_BTC_ADDRESS> -p c=BTC
+
+Option 2 - Mine particular coin
+Use your coin wallet address as username in mining software. Specify c=SYMBOL as password to idenfify payout wallet coin, and the same coin in mc=SYMBOL to specify mining coin
+Example to mine Guncoin and get payout in Guncoin
+-o stratum+tcp://zergpool.com:PORT -u <YOUR_GUNCOIN_WALLET_ADDRESS> -p c=GUN,mc=GUN
+
+Option 3 - Mine particular coin with auto exchange to wallet address (not supported by MPM)
+This will mine coin you specified in password field only and autoexchange it to your wallet currency for payout.
+Use c=SYMBOL in password to make sure payout wallet coin is identified correctly. Use mc=SYMBOL to target particular coin for mining
+Example to mine in Innova coin and get payout in LTC
+-o stratum+tcp://zergpool.com:PORT -u <YOUR_LTC_ADDRESS> -p c=LTC,mc=INN"
         Algorithms = $SupportedAlgorithms
-        Note = ""
+        Note = "" # Note is shown beside each pool in setup
         Settings = $Settings
     }
 }
 
 try {
-    $ZergPool_Request = Invoke-RestMethod "http://zergpool.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-    # $ZergPoolCurrencies_Request = Invoke-RestMethod "http://zergpool.com/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $ZergPool_Request = Invoke-RestMethod "http://zerg.zergpool.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $ZergPoolCurrencies_Request = Invoke-RestMethod "http://zerg.zergpool.com/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
@@ -62,9 +85,8 @@ if (($ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore
     return
 }
 
-
 $ZergPool_Regions = "us"
-$ZergPool_Currencies = @("BTC") # + ($ZergPoolCurrencies_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
+$ZergPool_Currencies = @("BTC") + ($ZergPoolCurrencies_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$ZergPool_Request.$_.hashrate -gt 0} | ForEach-Object {
     $ZergPool_Host = "zergpool.com"
@@ -80,7 +102,7 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
         "blake2s"   {$Divisor *= 1000}
         "blakecoin" {$Divisor *= 1000}
         "decred"    {$Divisor *= 1000}
-		"keccak"    {$Divisor *= 1000}
+        "keccak"    {$Divisor *= 1000}
         "x11"       {$Divisor *= 1000}
         "quark"     {$Divisor *= 1000}
         "qubit"     {$Divisor *= 1000}
@@ -105,7 +127,7 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
                 Host          = "$ZergPool_Host"
                 Port          = $ZergPool_Port
                 User          = Get-Variable $_ -ValueOnly
-                Pass          = "$Worker,c=$_"
+                Pass          = "c=$_,mc=$_"
                 Region        = $ZergPool_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated

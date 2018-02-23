@@ -12,10 +12,6 @@
       "BTC": "$Wallet",
       "Worker": "$WorkerName"
     },
-    "ItalYiiMP": {
-      "BTC": "$Wallet",
-      "Worker": "$WorkerName"
-    },
     "MiningPoolHub": {
       "User": "$UserName",
       "Worker": "$WorkerName",
@@ -32,7 +28,7 @@
       "BTC": "$Wallet",
       "Worker": "$WorkerName"
     },
-    "Zergpool": {
+    "ZergPool": {
       "BTC": "$Wallet",
       "Worker": "$WorkerName"
     },
