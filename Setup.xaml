@@ -4,163 +4,202 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MultiPoolMinerSetup"
-        Title="MultiPoolMiner Setup" Height="800" Width="625">
-    <Viewbox VerticalAlignment="Top" HorizontalAlignment="Center">
-        <DockPanel>
-            <Grid DockPanel.Dock="Bottom" Margin="10,10,10,10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <Button Name="Exit" Width="120">Exit without saving</Button>
-                <Button Grid.Column="1"  Name="Apply" Width="120" >Apply</Button>
-                <Button Grid.Column="2" Name="Next" Width="120" >Next</Button>
-            </Grid>
-            <TabControl x:Name="tabControl" VerticalAlignment="Top" Height="760" Width="625" TabStripPlacement="Top" Padding="10">
-                <TabItem Header="Welcome">
-                    <StackPanel>
-                        <Image Name="logo" Height="109" Width="109"/>
-                        <TextBlock FontWeight="Bold" FontSize="16" Margin="0,0,0,10">Welcome to the MultiPoolMiner setup Wizard.</TextBlock>
-                        <TextBlock>This will guide you through setting up MultiPoolMiner for this machine.</TextBlock>
-                        <TextBlock TextWrapping="Wrap">If you are unsure which options to choose, accept the defaults - they work reasonably well for most people.</TextBlock>
-                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,10,0,10">About MultiPoolMiner</TextBlock>
-                        <TextBlock Margin="0,0,0,10">created by aaronsace</TextBlock>
-                        <TextBlock FontWeight="Bold">Features:</TextBlock>
-                        <TextBlock>- Controls any miner that is available via command line</TextBlock>
-                        <TextBlock>- Supports benchmarking</TextBlock>
-                        <TextBlock>- Supports multiple platforms: AMD, NVIDIA and CPU</TextBlock>
-                        <TextBlock>- Supports multiple pools</TextBlock>
-                    </StackPanel>
-                </TabItem>
-                <TabItem Header="Basic Settings">
-                    <StackPanel Margin="0">
-                        <TextBlock FontWeight="Bold" FontSize="16">Basic Settings</TextBlock>
+        Title="MultiPoolMiner Setup" Height="840" Width="645" ResizeMode="CanMinimize">
+    <DockPanel>
+        <Grid DockPanel.Dock="Bottom" Margin="10,10,10,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Name="Exit" Width="120">Exit without saving</Button>
+            <Button Grid.Column="1"  Name="Apply" Width="120" >Apply</Button>
+            <Button Grid.Column="2" Name="Next" Width="120" >Next</Button>
+        </Grid>
+        <TabControl x:Name="tabControl" VerticalAlignment="Top" Height="760" Width="625" TabStripPlacement="Top" Padding="10" Margin="5,0">
+            <TabItem Header="Welcome">
+                <StackPanel>
+                    <Image Name="logo" Height="109" Width="109"/>
+                    <TextBlock FontWeight="Bold" FontSize="16" Margin="0,0,0,10">Welcome to the MultiPoolMiner setup Wizard.</TextBlock>
+                    <TextBlock>This will guide you through setting up MultiPoolMiner for this machine.</TextBlock>
+                    <TextBlock TextWrapping="Wrap">If you are unsure which options to choose, accept the defaults - they work reasonably well for most people.</TextBlock>
+                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,10,0,10">About MultiPoolMiner</TextBlock>
+                    <TextBlock Margin="0,0,0,10">created by aaronsace</TextBlock>
+                    <TextBlock FontWeight="Bold">Features:</TextBlock>
+                    <TextBlock>- Controls any miner that is available via command line</TextBlock>
+                    <TextBlock>- Supports benchmarking</TextBlock>
+                    <TextBlock>- Supports multiple platforms: AMD, NVIDIA and CPU</TextBlock>
+                    <TextBlock>- Supports multiple pools</TextBlock>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Basic Settings">
+                <StackPanel Margin="0">
+                    <TextBlock FontWeight="Bold" FontSize="16">Basic Settings</TextBlock>
 
-                        <Label FontWeight="Bold">Bitcoin Address:</Label>
-                        <DockPanel Margin="0,10,0,0">
-                            <TextBox Name="Wallet" Width="320"></TextBox>
-                            <Button Name="CopyWalletToPools">Copy to all pools</Button>
-                        </DockPanel>
-                        <TextBlock TextWrapping="Wrap">Bitcoin address to use.  Wallets for other coins or specific addresses for different pools can be further selected in the pools tab. If you only wish to use the advanced pool configuration to specify payout currencies and addresses, this can be left blank.</TextBlock>
-
-                        <Label FontWeight="Bold" Margin="0,10,0,0">Miner Status Key:</Label>
-                        <DockPanel>
-                            <TextBox Name="MinerStatusKey" Width="320"></TextBox>
-                            <Button Name="GetMinerStatusKey">Generate new miner status key</Button>
-                        </DockPanel>
-                        <TextBlock TextWrapping="Wrap">Your unique key to check worker status at https://multipoolminer.io/monitor. All your workers should be set to use the same status key.</TextBlock>
-
-                        <Label FontWeight="Bold">Currencies:</Label>
-                        <TextBox Name="Currency"></TextBox>
-                        <TextBlock TextWrapping="Wrap">Currencies to show profit in. Currency must be supported by coinbase. Comma separated. eg. "USD, BTC, ETH"</TextBlock>
-
-                        <Label FontWeight="Bold">Worker Name</Label>
-                        <DockPanel Margin="0,10,0,0">
-                            <TextBox Name="WorkerName" Width="320"></TextBox>
-                            <Button Name="CopyWorkerNameToPools">Copy to all pools</Button>
-                        </DockPanel>
-                        <TextBlock TextWrapping="Wrap">The worker name used to track this particular machine's performance. It is recommended each machine have a unique name. Specific worker names for each pool can be configured in the pools tab.</TextBlock>
-
-                        <DockPanel Margin="0,10,0,0">
-                            <Label FontWeight="Bold">Region</Label>
-                            <RadioButton GroupName="Region" Name="RegionUSA" Content="USA" Margin="20,0,0,0" VerticalAlignment="Center"/>
-                            <RadioButton GroupName="Region" Name="RegionEurope" Content="Europe" Margin="20,0,0,0" VerticalAlignment="Center"/>
-                            <RadioButton GroupName="Region" Name="RegionAsia" Content="Asia" Margin="20,0,0,0" VerticalAlignment="Center"/>
-                        </DockPanel>
-                        <TextBlock TextWrapping="Wrap">Choose the region closest to this worker, to connect to pool servers with the lowest latency.</TextBlock>
-
-                        <DockPanel Margin="0,10,0,0">
-                            <Label FontWeight="Bold">Mining Types:</Label>
-                            <CheckBox Name="TypeNVIDIA" Content="NVIDIA" Margin="20,0,0,0" VerticalAlignment="Center"/>
-                            <CheckBox Name="TypeAMD" Content="AMD" Margin="20,0,0,0" VerticalAlignment="Center"/>
-                            <CheckBox Name="TypeCPU" Content="CPU" Margin="20,0,0,0" VerticalAlignment="Center"/>
-                        </DockPanel>
-                        <TextBlock TextWrapping="Wrap">Types of devices to mine with. CPU mining can cause performance issues, and is recommended to be left off on systems with weak CPUs.</TextBlock>
-                    </StackPanel>
-                </TabItem>
-                <TabItem Header="Pools">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Top">
-                            <TextBlock FontSize="16" FontWeight="Bold">Pool Selection</TextBlock>
-                            <TextBlock TextWrapping="Wrap">Select pools to use. More pools can mean better profitability, but spreads your profit out so you wait longer for payouts. Backup pools will be used if your preferred pools are down, or the most profitable algorithm isn't supported by your preferred pools.  Settings in red are required if the pool is enabled.</TextBlock>
-                        </StackPanel>
-                        <ScrollViewer VerticalScrollBarVisibility="Visible">
-                            <ItemsControl Name="PoolsList">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Expander>
-                                            <Expander.Header>
-                                                <DockPanel>
-                                                    <TextBlock Text="{Binding Path=Name}" Width="130"/>
-                                                    <TextBlock FontWeight="Bold" Text="Use as: " />
-                                                    <ComboBox Width="150" SelectedValuePath="Content" SelectedValue="{Binding Path=UsePool}">
-                                                        <ComboBoxItem>Primary</ComboBoxItem>
-                                                        <ComboBoxItem>Backup</ComboBoxItem>
-                                                        <ComboBoxItem>Disabled</ComboBoxItem>
-                                                    </ComboBox>
-                                                    <TextBlock Name="Note" Text="{Binding Path=Note}"/>
-                                                </DockPanel>
-                                            </Expander.Header>
-                                            <StackPanel>
-                                                <TextBlock TextWrapping="Wrap" Text="{Binding Path=Description}"/>
-                                                <DockPanel>
-                                                    <TextBlock Width="130" FontWeight="Bold" Text="Website:"/>
-                                                    <TextBlock Text="{Binding Path=Website}"/>
-                                                </DockPanel>
-                                                <DockPanel>
-                                                    <TextBlock TextWrapping="Wrap" Width="130" FontWeight="Bold" Text="Supported Algorithms:"/>
-                                                    <TextBlock TextWrapping="Wrap" Text="{Binding Path=AlgorithmsString}" Width="480"/>
-                                                </DockPanel>
-
-                                                <ItemsControl ItemsSource="{Binding Path=Settings}">
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate>
-                                                            <DockPanel>
-                                                                <TextBlock Width="90" Text="{Binding Path=Name}">
-                                                                    <TextBlock.Style>
-                                                                        <Style TargetType="TextBlock">
-                                                                            <Style.Triggers>
-                                                                                <DataTrigger Binding="{Binding Path=Required}" Value="True">
-                                                                                    <Setter Property="FontWeight" Value="Bold"/>
-                                                                                    <Setter Property="Foreground" Value="Red"/>
-                                                                                </DataTrigger>
-                                                                            </Style.Triggers>
-                                                                        </Style>
-                                                                    </TextBlock.Style>
-                                                                </TextBlock>
-                                                                <TextBox Text="{Binding Path=Value}" Width="250"/>
-                                                                <TextBlock Text="{Binding Path=Description}"/>
-                                                            </DockPanel>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
-                                            </StackPanel>
-                                        </Expander>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+                    <Label FontWeight="Bold">Bitcoin Address:</Label>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBox Name="Wallet" Width="320"></TextBox>
+                        <Button Name="CopyWalletToPools">Copy to all pools</Button>
                     </DockPanel>
-                </TabItem>
-                <TabItem Header="Algorithms">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Top">
-                            <TextBlock FontSize="16" FontWeight="Bold">Algorithm Selection</TextBlock>
-                            <TextBlock TextWrapping="Wrap">Check which algorithms you wish to mine.  The default selection is a good starting point.</TextBlock>
-                        </StackPanel>
-                        <StackPanel DockPanel.Dock="Bottom">
-                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
-                                <Button Name="EnableAllAlgorithms" Content="Enable All" Padding="10"/>
-                                <Button Name="EnablePrimaryPoolAlgorithms" Content="Enable algorithms supported by primary pools" Padding="10"/>
-                                <Button Name="DisableAllAlgorithms" Content="Disable All" Padding="10"/>
-                            </StackPanel>
-                            <Label>New algorithms should be:</Label>
-                            <RadioButton GroupName="NewAlgorithms" Name="EnableNewAlgorithms" Content="Enabled automatically (Use $ExcludeAlgorithm to exclude unchecked)" VerticalContentAlignment="Center"/>
-                            <RadioButton GroupName="NewAlgorithms" Name="DisableNewAlgorithms" Content="Disabled until manually enabled (Use $Algorithm to include only checked)" VerticalAlignment="Center"/>
+                    <TextBlock TextWrapping="Wrap">Bitcoin address to use.  Wallets for other coins or specific addresses for different pools can be further selected in the pools tab. If you only wish to use the advanced pool configuration to specify payout currencies and addresses, this can be left blank.</TextBlock>
 
+                    <Label FontWeight="Bold" Margin="0,10,0,0">Miner Status Key:</Label>
+                    <DockPanel>
+                        <TextBox Name="MinerStatusKey" Width="320"></TextBox>
+                        <Button Name="GetMinerStatusKey">Generate new miner status key</Button>
+                    </DockPanel>
+                    <TextBlock TextWrapping="Wrap">Your unique key to check worker status at https://multipoolminer.io/monitor. All your workers should be set to use the same status key.</TextBlock>
+
+                    <Label FontWeight="Bold">Currencies:</Label>
+                    <TextBox Name="Currency"></TextBox>
+                    <TextBlock TextWrapping="Wrap">Currencies to show profit in. Currency must be supported by coinbase. Comma separated. eg. "USD, BTC, ETH"</TextBlock>
+
+                    <Label FontWeight="Bold">Worker Name</Label>
+                    <DockPanel Margin="0,10,0,0">
+                        <TextBox Name="WorkerName" Width="320"></TextBox>
+                        <Button Name="CopyWorkerNameToPools">Copy to all pools</Button>
+                    </DockPanel>
+                    <TextBlock TextWrapping="Wrap">The worker name used to track this particular machine's performance. It is recommended each machine have a unique name. Specific worker names for each pool can be configured in the pools tab.</TextBlock>
+
+                    <DockPanel Margin="0,10,0,0">
+                        <Label FontWeight="Bold">Region</Label>
+                        <RadioButton GroupName="Region" Name="RegionUSA" Content="USA" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                        <RadioButton GroupName="Region" Name="RegionEurope" Content="Europe" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                        <RadioButton GroupName="Region" Name="RegionAsia" Content="Asia" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                    </DockPanel>
+                    <TextBlock TextWrapping="Wrap">Choose the region closest to this worker, to connect to pool servers with the lowest latency.</TextBlock>
+
+                    <DockPanel Margin="0,10,0,0">
+                        <Label FontWeight="Bold">Mining Types:</Label>
+                        <CheckBox Name="TypeNVIDIA" Content="NVIDIA" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                        <CheckBox Name="TypeAMD" Content="AMD" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                        <CheckBox Name="TypeCPU" Content="CPU" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                    </DockPanel>
+                    <TextBlock TextWrapping="Wrap">Types of devices to mine with. CPU mining can cause performance issues, and is recommended to be left off on systems with weak CPUs.</TextBlock>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Pools">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock FontSize="16" FontWeight="Bold">Pool Selection</TextBlock>
+                        <TextBlock TextWrapping="Wrap">Select pools to use. More pools can mean better profitability, but spreads your profit out so you wait longer for payouts. Backup pools will be used if your preferred pools are down, or the most profitable algorithm isn't supported by your preferred pools.  Settings in red are required if the pool is enabled.</TextBlock>
+                    </StackPanel>
+                    <ScrollViewer VerticalScrollBarVisibility="Visible">
+                        <ItemsControl Name="PoolsList">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Expander>
+                                        <Expander.Header>
+                                            <DockPanel>
+                                                <TextBlock Text="{Binding Path=Name}" Width="130"/>
+                                                <TextBlock FontWeight="Bold" Text="Use as: " />
+                                                <ComboBox Width="150" SelectedValuePath="Content" SelectedValue="{Binding Path=UsePool}">
+                                                    <ComboBoxItem>Primary</ComboBoxItem>
+                                                    <ComboBoxItem>Backup</ComboBoxItem>
+                                                    <ComboBoxItem>Disabled</ComboBoxItem>
+                                                </ComboBox>
+                                                <TextBlock Name="Note" Text="{Binding Path=Note}"/>
+                                            </DockPanel>
+                                        </Expander.Header>
+                                        <StackPanel>
+                                            <TextBlock TextWrapping="Wrap" Text="{Binding Path=Description}"/>
+                                            <DockPanel>
+                                                <TextBlock Width="130" FontWeight="Bold" Text="Website:"/>
+                                                <TextBlock Text="{Binding Path=Website}"/>
+                                            </DockPanel>
+                                            <DockPanel>
+                                                <TextBlock TextWrapping="Wrap" Width="130" FontWeight="Bold" Text="Supported Algorithms:"/>
+                                                <TextBlock TextWrapping="Wrap" Text="{Binding Path=AlgorithmsString}" Width="450"/>
+                                            </DockPanel>
+
+                                            <ItemsControl ItemsSource="{Binding Path=Settings}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <DockPanel>
+                                                            <TextBlock Width="90" Text="{Binding Path=Name}">
+                                                                <TextBlock.Style>
+                                                                    <Style TargetType="TextBlock">
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding Path=Required}" Value="True">
+                                                                                <Setter Property="FontWeight" Value="Bold"/>
+                                                                                <Setter Property="Foreground" Value="Red"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </TextBlock.Style>
+                                                            </TextBlock>
+                                                            <TextBox Text="{Binding Path=Value}" Width="250"/>
+                                                            <TextBlock Text="{Binding Path=Description}"/>
+                                                        </DockPanel>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </Expander>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Algorithms">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock FontSize="16" FontWeight="Bold">Algorithm Selection</TextBlock>
+                        <TextBlock TextWrapping="Wrap">Check which algorithms you wish to mine.  The default selection is a good starting point.</TextBlock>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Bottom">
+                        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                            <Button Name="EnableAllAlgorithms" Content="Enable All" Padding="10"/>
+                            <Button Name="EnablePrimaryPoolAlgorithms" Content="Enable algorithms supported by primary pools" Padding="10"/>
+                            <Button Name="DisableAllAlgorithms" Content="Disable All" Padding="10"/>
                         </StackPanel>
-                        <ListView Name="AlgorithmsList">
+                        <Label>New algorithms should be:</Label>
+                        <RadioButton GroupName="NewAlgorithms" Name="EnableNewAlgorithms" Content="Enabled automatically (Use $ExcludeAlgorithm to exclude unchecked)" VerticalContentAlignment="Center"/>
+                        <RadioButton GroupName="NewAlgorithms" Name="DisableNewAlgorithms" Content="Disabled until manually enabled (Use $Algorithm to include only checked)" VerticalAlignment="Center"/>
+
+                    </StackPanel>
+                    <ListView Name="AlgorithmsList">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Include">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <CheckBox IsChecked="{Binding Path=Checked}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Name" Width="300">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Path=Name}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Miners">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock FontSize="16" FontWeight="Bold">Miner Selection</TextBlock>
+                        <TextBlock TextWrapping="Wrap">Check which miners you wish to use. You should leave them all enabled unless a specific one is causing issues.  They will all be benchmarked most efficient ones for your hardware will automatically be used.</TextBlock>
+                    </StackPanel>
+                    <StackPanel DockPanel.Dock="Bottom">
+                        <StackPanel Orientation="Horizontal">
+                            <Button Name="EnableAllMiners" Content="Enable All" Padding="10"/>
+                            <Button Name="DisableAllMiners" Content="Disable All" Padding="10"/>
+                        </StackPanel>
+                        <Label>New miners should be:</Label>
+                        <RadioButton GroupName="NewMiners" Name="EnableNewMiners" Content="Enabled automatically (Use $ExcludeMinerName to exclude unchecked)" VerticalContentAlignment="Center"/>
+                        <RadioButton GroupName="NewMiners" Name="DisableNewMiners" Content="Disabled until manually enabled (Use $MinerName to include only checked)" VerticalAlignment="Center"/>
+
+                    </StackPanel>
+                    <StackPanel>
+                        <ListView Name="MinersList" Height="480">
                             <ListView.View>
                                 <GridView>
                                     <GridViewColumn Header="Include">
@@ -170,7 +209,7 @@
                                             </DataTemplate>
                                         </GridViewColumn.CellTemplate>
                                     </GridViewColumn>
-                                    <GridViewColumn Header="Name" Width="300">
+                                    <GridViewColumn Header="Name">
                                         <GridViewColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding Path=Name}"/>
@@ -180,116 +219,73 @@
                                 </GridView>
                             </ListView.View>
                         </ListView>
+                    </StackPanel>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Advanced">
+                <StackPanel>
+                    <TextBlock FontWeight="Bold" FontSize="16">Advanced Settings</TextBlock>
+                    <DockPanel Margin="0,10,0,0">
+                        <Label FontWeight="Bold">Donate:</Label>
+                        <TextBox Text="{Binding ElementName=Donate, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Height="30" FontSize="18" Width="50" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center"/>
+                        <Slider Name="Donate" Maximum="120" Minimum="10" TickFrequency="1" TickPlacement="Both" IsSnapToTickEnabled="True"/>
+                    </DockPanel>
+                    <TextBlock TextWrapping="Wrap">Minutes per day to donate mining power to the creators of MultiPoolMiner. Default is 24 minutes (1.6%). Minimum is 10 minutes (0.7%). These donations help keep MultiPoolMiner updated and support new features and improvements.</TextBlock>
+
+                    <DockPanel Margin="0,10,0,0">
+                        <Label FontWeight="Bold">Interval:</Label>
+                        <TextBox Text="{Binding ElementName=Interval, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Height="30" FontSize="18" Width="50" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center"/>
+                        <Slider Name="Interval" Maximum="900" Minimum="30" TickFrequency="10" TickPlacement="Both" IsSnapToTickEnabled="True"/>
+                    </DockPanel>
+                    <TextBlock TextWrapping="Wrap">Seconds to wait before starting the next cycle of profit calculations. It is recommended to leave this at the default of 60.</TextBlock>
+
+                    <DockPanel Margin="0,10,0,0">
+                        <Label FontWeight="Bold">Delay:</Label>
+                        <TextBox Text="{Binding ElementName=Delay, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Height="30" FontSize="18" Width="50" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center"/>
+                        <Slider Name="Delay" Maximum="60" Minimum="0" TickFrequency="1" TickPlacement="Both" IsSnapToTickEnabled="True"/>
 
                     </DockPanel>
-                </TabItem>
-                <TabItem Header="Miners">
-                    <DockPanel>
-                        <StackPanel DockPanel.Dock="Top">
-                            <TextBlock FontSize="16" FontWeight="Bold">Miner Selection</TextBlock>
-                            <TextBlock TextWrapping="Wrap">Check which miners you wish to use. You should leave them all enabled unless a specific one is causing issues.  They will all be benchmarked most efficient ones for your hardware will automatically be used.</TextBlock>
-                        </StackPanel>
-                        <StackPanel DockPanel.Dock="Bottom">
-                            <StackPanel Orientation="Horizontal">
-                                <Button Name="EnableAllMiners" Content="Enable All" Padding="10"/>
-                                <Button Name="DisableAllMiners" Content="Disable All" Padding="10"/>
-                            </StackPanel>
-                            <Label>New miners should be:</Label>
-                            <RadioButton GroupName="NewMiners" Name="EnableNewMiners" Content="Enabled automatically (Use $ExcludeMinerName to exclude unchecked)" VerticalContentAlignment="Center"/>
-                            <RadioButton GroupName="NewMiners" Name="DisableNewMiners" Content="Disabled until manually enabled (Use $MinerName to include only checked)" VerticalAlignment="Center"/>
+                    <TextBlock TextWrapping="Wrap">Delay between closing previous miners and starting new ones. A small (5-10 second) delay can help with system stability.</TextBlock>
 
-                        </StackPanel>
-                        <StackPanel>
-                            <ListView Name="MinersList" Height="480">
-                                <ListView.View>
-                                    <GridView>
-                                        <GridViewColumn Header="Include">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <CheckBox IsChecked="{Binding Path=Checked}"/>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                        <GridViewColumn Header="Name">
-                                            <GridViewColumn.CellTemplate>
-                                                <DataTemplate>
-                                                    <TextBlock Text="{Binding Path=Name}"/>
-                                                </DataTemplate>
-                                            </GridViewColumn.CellTemplate>
-                                        </GridViewColumn>
-                                    </GridView>
-                                </ListView.View>
-                            </ListView>
-                        </StackPanel>
+                    <DockPanel Margin="0,10,0,0">
+                        <Label FontWeight="Bold">SSL:</Label>
+                        <RadioButton GroupName="SSL" Name="SSLYes" Content="Yes" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                        <RadioButton GroupName="SSL" Name="SSLNo" Content="No" Margin="20,0,0,0" VerticalAlignment="Center"/>
                     </DockPanel>
-                </TabItem>
-                <TabItem Header="Advanced">
-                    <StackPanel>
-                        <TextBlock FontWeight="Bold" FontSize="16">Advanced Settings</TextBlock>
-                        <DockPanel Margin="0,10,0,0">
-                            <Label FontWeight="Bold">Donate:</Label>
-                            <TextBox Text="{Binding ElementName=Donate, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Height="30" FontSize="18" Width="50" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center"/>
-                            <Slider Name="Donate" Maximum="120" Minimum="10" TickFrequency="1" TickPlacement="Both" IsSnapToTickEnabled="True"/>
-                        </DockPanel>
-                        <TextBlock TextWrapping="Wrap">Minutes per day to donate mining power to the creators of MultiPoolMiner. Default is 24 minutes (1.6%). Minimum is 10 minutes (0.7%). These donations help keep MultiPoolMiner updated and support new features and improvements.</TextBlock>
+                    <TextBlock TextWrapping="Wrap">Use SSL for pool connections.</TextBlock>
 
-                        <DockPanel Margin="0,10,0,0">
-                            <Label FontWeight="Bold">Interval:</Label>
-                            <TextBox Text="{Binding ElementName=Interval, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Height="30" FontSize="18" Width="50" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center"/>
-                            <Slider Name="Interval" Maximum="900" Minimum="30" TickFrequency="10" TickPlacement="Both" IsSnapToTickEnabled="True"/>
-                        </DockPanel>
-                        <TextBlock TextWrapping="Wrap">Seconds to wait before starting the next cycle of profit calculations. It is recommended to leave this at the default of 60.</TextBlock>
+                    <DockPanel Margin="0,10,0,0">
+                        <Label FontWeight="Bold">Watchdog:</Label>
+                        <RadioButton GroupName="Watchdog" Name="WatchdogEnabled" Content="Enabled" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                        <RadioButton GroupName="Watchdog" Name="WatchdogDisabled" Content="Disabled" Margin="20,0,0,0" VerticalAlignment="Center"/>
+                    </DockPanel>
+                    <TextBlock TextWrapping="Wrap">Use watchdog to kick pools and miners that are not working properly.</TextBlock>
 
-                        <DockPanel Margin="0,10,0,0">
-                            <Label FontWeight="Bold">Delay:</Label>
-                            <TextBox Text="{Binding ElementName=Delay, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Height="30" FontSize="18" Width="50" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center"/>
-                            <Slider Name="Delay" Maximum="60" Minimum="0" TickFrequency="1" TickPlacement="Both" IsSnapToTickEnabled="True"/>
+                    <DockPanel Margin="0,10,0,0">
+                        <Label FontWeight="Bold">Switching Prevention:</Label>
+                        <TextBox Text="{Binding ElementName=SwitchingPrevention, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Height="30" FontSize="18" Width="50" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center"/>
+                        <Slider Name="SwitchingPrevention" Maximum="10" Minimum="0" TickFrequency="1" TickPlacement="Both" IsSnapToTickEnabled="True"/>
 
-                        </DockPanel>
-                        <TextBlock TextWrapping="Wrap">Delay between closing previous miners and starting new ones. A small (5-10 second) delay can help with system stability.</TextBlock>
+                    </DockPanel>
+                    <TextBlock TextWrapping="Wrap">See details at https://multipoolminer.io/docs</TextBlock>
 
-                        <DockPanel Margin="0,10,0,0">
-                            <Label FontWeight="Bold">SSL:</Label>
-                            <RadioButton GroupName="SSL" Name="SSLYes" Content="Yes" Margin="20,0,0,0" VerticalAlignment="Center"/>
-                            <RadioButton GroupName="SSL" Name="SSLNo" Content="No" Margin="20,0,0,0" VerticalAlignment="Center"/>
-                        </DockPanel>
-                        <TextBlock TextWrapping="Wrap">Use SSL for pool connections.</TextBlock>
+                    <DockPanel Margin="0,10,0,0">
+                        <Label FontWeight="Bold">Proxy:</Label>
+                        <TextBox Name="Proxy"></TextBox>
+                    </DockPanel>
+                    <TextBlock TextWrapping="Wrap"></TextBlock>
 
-                        <DockPanel Margin="0,10,0,0">
-                            <Label FontWeight="Bold">Watchdog:</Label>
-                            <RadioButton GroupName="Watchdog" Name="WatchdogEnabled" Content="Enabled" Margin="20,0,0,0" VerticalAlignment="Center"/>
-                            <RadioButton GroupName="Watchdog" Name="WatchdogDisabled" Content="Disabled" Margin="20,0,0,0" VerticalAlignment="Center"/>
-                        </DockPanel>
-                        <TextBlock TextWrapping="Wrap">Use watchdog to kick pools and miners that are not working properly.</TextBlock>
+                    <Label FontWeight="Bold">Miner Status URL:</Label>
+                    <TextBox Name="MinerStatusURL"></TextBox>
+                    <TextBlock TextWrapping="Wrap">URL for reporting miner status. Leave blank to disable online monitoring. Default is https://multipoolminer.io/monitor/miner.php and should only be changed if you are running your own status monitoring site.</TextBlock>
 
-                        <DockPanel Margin="0,10,0,0">
-                            <Label FontWeight="Bold">Switching Prevention:</Label>
-                            <TextBox Text="{Binding ElementName=SwitchingPrevention, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" Height="30" FontSize="18" Width="50" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center"/>
-                            <Slider Name="SwitchingPrevention" Maximum="10" Minimum="0" TickFrequency="1" TickPlacement="Both" IsSnapToTickEnabled="True"/>
-
-                        </DockPanel>
-                        <TextBlock TextWrapping="Wrap">See details at https://multipoolminer.io/docs</TextBlock>
-
-                        <DockPanel Margin="0,10,0,0">
-                            <Label FontWeight="Bold">Proxy:</Label>
-                            <TextBox Name="Proxy"></TextBox>
-                        </DockPanel>
-                        <TextBlock TextWrapping="Wrap"></TextBlock>
-
-                        <Label FontWeight="Bold">Miner Status URL:</Label>
-                        <TextBox Name="MinerStatusURL"></TextBox>
-                        <TextBlock TextWrapping="Wrap">URL for reporting miner status. Leave blank to disable online monitoring. Default is https://multipoolminer.io/monitor/miner.php and should only be changed if you are running your own status monitoring site.</TextBlock>
-
-                    </StackPanel>
-                </TabItem>
-                <TabItem Header="Preview Config" Name="PreviewTab">
-                    <StackPanel>
-                        <TextBox Name="Preview" Height="710" IsReadOnly="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
-                    </StackPanel>
-                </TabItem>
-            </TabControl>
-        </DockPanel>
-
-    </Viewbox>
-
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Preview Config" Name="PreviewTab">
+                <StackPanel>
+                    <TextBox Name="Preview" Height="710" IsReadOnly="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
 </Window>
