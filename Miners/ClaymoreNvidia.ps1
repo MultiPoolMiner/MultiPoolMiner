@@ -6,9 +6,9 @@ param(
     [PSCustomObject]$Config
 )
 
-# Hardcoded per miner version, do not allow user to chage in config
+# Hardcoded per miner version, do not allow user to change in config
 $MinerFileVersion = "2018021501" #Format: YYYYMMMDD[TwoDigitCounter], higher value will trigger config file update
-$MinerBinaryInfo =  "Claymore Claymore Dual Ethereum AMD/NVIDIA GPU Miner v11.0"
+$MinerBinaryInfo =  "Claymore Dual Ethereum AMD/NVIDIA GPU Miner v11.0"
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\Ethash-Claymore\EthDcrMiner64.exe"
 $Type = "NVIDIA"
@@ -78,7 +78,8 @@ try {
 	        try {
 	            # Execute action, e.g force re-download of binary
 	            # Should be first action. If it fails no further update will take place, update will be retried on next loop
-	            if (Test-Path $Path) { Remove-Item $Path -Force -Confirm:$false -ErrorAction Stop }
+	            if (Test-Path $Path) { Remove-Item $Path -Force -Confirm:$false -ErrorAction Stop } # Remove miner binary to forece re-download
+		        if (Test-Path ".\Stats\$($Name)_*_hashrate.txt") { Remove-Item ".\Stats\$($Name)_*_hashrate.txt" -Force -Confirm:$false -ErrorAction SilentlyContinue} # Remove benchmark files, could by fine grained to remove bm files for some algos
 
 	            # Always update MinerFileVersion and download link
 	            $Config.Miners.$Name | Add-member MinerFileVersion "$MinerFileVersion" -Force
