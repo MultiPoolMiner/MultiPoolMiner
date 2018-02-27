@@ -542,7 +542,7 @@ while ($true) {
         $Miner = $_
 
         if ($Miner.GetStatus() -eq "Running") {
-            Write-Log "Closing miner ($($Miner.Name)) because it is no longer the most profitable. "
+            Write-Log "Stopping miner ($($Miner.Name)). "
             $Miner.SetStatus("Idle")
 
             #Remove watchdog timer
