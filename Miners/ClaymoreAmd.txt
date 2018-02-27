@@ -42,7 +42,7 @@
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\NeoScrypt-Claymore\\NeoScryptMiner.exe",
-        "Arguments":  "-r -1 -mport 13333 -pool $($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -wal $($Pools.NeoScrypt.User) -psw $($Pools.NeoScrypt.Pass)",
+        "Arguments":  "-r -1 -mport 13333 -pool $($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -wal $($Pools.NeoScrypt.User) -psw $($Pools.NeoScrypt.Pass) -powlim 50",
         "HashRates":  {"NeoScrypt":  "$($Stats.ClaymoreAmd_NeoScrypt_HashRate.Week)"},
         "API":  "Claymore",
         "Port":  "13333"
