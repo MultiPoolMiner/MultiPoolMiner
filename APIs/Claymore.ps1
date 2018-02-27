@@ -32,12 +32,14 @@ class Claymore : Miner {
             if (-not $HashRate_Name) {$HashRate_Name = [String]$this.Algorithm[0]}
             $HashRate_Value = [Double]($Data.result[2] -split ";")[0]
             if ($this.Algorithm -like "ethash*") {$HashRate_Value *= 1000}
+            if ($this.Algorithm -eq "neoscrypt") {$HashRate_Value *= 1000}
 
             $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
             $HashRate_Name = if ($HashRate_Name) {[String]($this.Algorithm -notlike $HashRate_Name)}
             $HashRate_Value = [Double]($Data.result[4] -split ";")[0]
             if ($this.Algorithm -like "ethash*") {$HashRate_Value *= 1000}
+            if ($this.Algorithm -eq "neoscrypt") {$HashRate_Value *= 1000}
 
             $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}                
 
