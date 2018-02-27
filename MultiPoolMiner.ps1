@@ -267,9 +267,11 @@ while ($true) {
     if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_} | Measure-Object Updated -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalMinutes) -gt $SyncWindow) {
         Write-Log -Level Warn "Pool prices are out of sync ($([Int]($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_} | Measure-Object Updated -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalMinutes)) minutes). "
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.StablePrice * (1 - ($Pools.$_.MarginOfError * $Config.SwitchingPrevention * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
+        $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Unbias $Pools.$_.StablePrice -Force}
     }
     else {
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.Price * (1 - ($Pools.$_.MarginOfError * $Config.SwitchingPrevention * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
+        $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Unbias $Pools.$_.Price -Force}
     }
 
     #Load information about the miners
@@ -297,6 +299,7 @@ while ($true) {
         $Miner_Profits_Comparison = [PSCustomObject]@{}
         $Miner_Profits_MarginOfError = [PSCustomObject]@{}
         $Miner_Profits_Bias = [PSCustomObject]@{}
+        $Miner_Profits_Unbias = [PSCustomObject]@{}
 
         $Miner_Types = $Miner.Type | Select-Object -Unique
         $Miner_Indexes = $Miner.Index | Select-Object -Unique
@@ -309,11 +312,13 @@ while ($true) {
             $Miner_Profits | Add-Member $_ ([Double]$Miner.HashRates.$_ * $Pools.$_.Price)
             $Miner_Profits_Comparison | Add-Member $_ ([Double]$Miner.HashRates.$_ * $Pools.$_.StablePrice)
             $Miner_Profits_Bias | Add-Member $_ ([Double]$Miner.HashRates.$_ * $Pools.$_.Price_Bias)
+            $Miner_Profits_Unbias | Add-Member $_ ([Double]$Miner.HashRates.$_ * $Pools.$_.Price_Unbias)
         }
 
         $Miner_Profit = [Double]($Miner_Profits.PSObject.Properties.Value | Measure-Object -Sum).Sum
         $Miner_Profit_Comparison = [Double]($Miner_Profits_Comparison.PSObject.Properties.Value | Measure-Object -Sum).Sum
         $Miner_Profit_Bias = [Double]($Miner_Profits_Bias.PSObject.Properties.Value | Measure-Object -Sum).Sum
+        $Miner_Profit_Unbias = [Double]($Miner_Profits_Unbias.PSObject.Properties.Value | Measure-Object -Sum).Sum
 
         $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
             $Miner_Profits_MarginOfError | Add-Member $_ ([Double]$Pools.$_.MarginOfError * (& {if ($Miner_Profit) {([Double]$Miner.HashRates.$_ * $Pools.$_.StablePrice) / $Miner_Profit}else {1}}))
@@ -327,10 +332,12 @@ while ($true) {
                 $Miner_Profits.$_ = $null
                 $Miner_Profits_Comparison.$_ = $null
                 $Miner_Profits_Bias.$_ = $null
+                $Miner_Profits_Unbias.$_ = $null
                 $Miner_Profit = $null
                 $Miner_Profit_Comparison = $null
                 $Miner_Profits_MarginOfError = $null
                 $Miner_Profit_Bias = $null
+                $Miner_Profit_Unbias = $null
             }
         }
 
@@ -346,10 +353,12 @@ while ($true) {
         $Miner | Add-Member Profits $Miner_Profits
         $Miner | Add-Member Profits_Comparison $Miner_Profits_Comparison
         $Miner | Add-Member Profits_Bias $Miner_Profits_Bias
+        $Miner | Add-Member Profits_Unbias $Miner_Profits_Unbias
         $Miner | Add-Member Profit $Miner_Profit
         $Miner | Add-Member Profit_Comparison $Miner_Profit_Comparison
         $Miner | Add-Member Profit_MarginOfError $Miner_Profit_MarginOfError
         $Miner | Add-Member Profit_Bias $Miner_Profit_Bias
+        $Miner | Add-Member Profit_Unbias $Miner_Profit_Unbias
 
         $Miner | Add-Member Type ($Miner_Types | Sort-Object) -Force
         $Miner | Add-Member Index ($Miner_Indexes | Sort-Object) -Force
@@ -398,6 +407,7 @@ while ($true) {
         $_.Profit_Comparison = 0
         $_.Profit_MarginOfError = 0
         $_.Profit_Bias = 0
+        $_.Profit_Unbias = 0
         $_.Best = $false
         $_.Best_Comparison = $false
     }
@@ -421,6 +431,7 @@ while ($true) {
             $ActiveMiner.Profit_Comparison = $Miner.Profit_Comparison
             $ActiveMiner.Profit_MarginOfError = $Miner.Profit_MarginOfError
             $ActiveMiner.Profit_Bias = $Miner.Profit_Bias
+            $ActiveMiner.Profit_Unbias = $Miner.Profit_Unbias
             $ActiveMiner.Speed = $Miner.HashRates.PSObject.Properties.Value #temp fix, must use 'PSObject.Properties' to preserve order
         }
         else {
@@ -440,6 +451,7 @@ while ($true) {
                 Profit_Comparison    = $Miner.Profit_Comparison
                 Profit_MarginOfError = $Miner.Profit_MarginOfError
                 Profit_Bias          = $Miner.Profit_Bias
+                Profit_Unbias        = $Miner.Profit_Unbias
                 Speed                = $Miner.HashRates.PSObject.Properties.Value #temp fix, must use 'PSObject.Properties' to preserve order
                 Speed_Live           = 0
                 Best                 = $false
@@ -456,7 +468,7 @@ while ($true) {
     }
 
     #Don't penalize active miners
-    $ActiveMiners | Where-Object {$_.GetStatus() -EQ "Running"} | ForEach-Object {$_.Profit_Bias = $_.Profit}
+    $ActiveMiners | Where-Object {$_.GetStatus() -EQ "Running"} | ForEach-Object {$_.Profit_Bias = $_.Profit_Unbias}
 
     #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
     $BestMiners = $ActiveMiners | Select-Object Type, Index -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.Type $_.Type | Measure-Object).Count -eq 0 -and (Compare-Object $Miner_GPU.Index $_.Index | Measure-Object).Count -eq 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Bias -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1)}
