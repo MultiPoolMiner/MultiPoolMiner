@@ -71,7 +71,7 @@ Function Create-Config {
     # Pools tab
 
     # Remove any existing config
-    $Config | Add-Member Pools ([pscustomobject]@{}) -Force
+    $Config | Add-Member Pools ([PSCustomObject]@{}) -Force
 
     # Generate the new config
     $Config | Add-Member PoolName @() -Force
