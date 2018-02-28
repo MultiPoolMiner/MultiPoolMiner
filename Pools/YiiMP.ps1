@@ -3,12 +3,44 @@
 param(
     [alias("WorkerName")]
     [String]$Worker, 
-    [TimeSpan]$StatSpan
+    [TimeSpan]$StatSpan,
+    [bool]$Info = $false
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $YiiMPCoins_Request = [PSCustomObject]@{}
+
+if ($Info) {
+    # Just return info about the pool for use in setup
+    $SupportedAlgorithms = @()
+    $Currencies = @()
+    try {
+        $YiiMPCoins_Request = Invoke-RestMethod "http://api.yiimp.eu/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop 
+        $Currencies = $YiiMPCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Select-Object -Unique
+        $Currencies | Foreach-Object {
+            $SupportedAlgorithms += Get-Algorithm $YiiMPCoins_Request.$_.algo
+        }
+    } Catch {
+        Write-Warning "Unable to load supported algorithms and currencies for $Name - may not be able to configure all pool settings"
+    }
+
+    $Settings = @()
+    $Settings += @{Name='Worker'; Required=$true; Description='Worker name to report to pool'}
+
+    $Currencies | Foreach-Object {
+        $Settings += @{Name=$_; Required = $false; Description = "$_ payout address"}
+    }
+
+    return [PSCustomObject]@{
+        Name = $Name
+        Website = "http://yiimp.eu"
+        Description = "No automatic conversion. Payout in mined coins."
+        Algorithms = $SupportedAlgorithms
+        Note = "No automatic conversion" # Note is shown beside each pool in setup
+        Settings = $Settings
+    }
+}
 
 try {
     $YiiMPCoins_Request = Invoke-RestMethod "http://api.yiimp.eu/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop

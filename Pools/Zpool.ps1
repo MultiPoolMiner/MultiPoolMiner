@@ -5,12 +5,50 @@ param(
     [String]$BTC, 
     [alias("WorkerName")]
     [String]$Worker, 
-    [TimeSpan]$StatSpan
+    [TimeSpan]$StatSpan,
+    [bool]$Info = $false
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Zpool_Request = [PSCustomObject]@{}
+
+if ($Info) {
+    # Just return info about the pool for use in setup
+    $SupportedAlgorithms = @()
+    $Currencies = @()
+    try {
+        $Zpool_Request = Invoke-RestMethod 'http://www.zpool.ca/api/status' -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Foreach-Object {
+            $SupportedAlgorithms += Get-Algorithm $Zpool_Request.$_.name
+        }
+    } Catch {
+        Write-Warning "Unable to load supported algorithms for $Name - may not be able to configure all pool settings"
+    }
+
+    try {
+        $ZpoolCoins_Request = Invoke-RestMethod 'http://www.zpool.ca/api/currencies' -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $Currencies = $ZpoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Select-Object -Unique 
+    } Catch {
+        Write-Warning "Unable to load currencies for $Name - may not be able to configure all pool settings"
+    }
+
+    $Settings = @()
+    $Settings += @{Name='Worker'; Required=$true; Description='Worker name to report to pool'}
+    $Settings += @{Name='BTC'; Required=$false; Description='Bitcoin payout address'}
+    $Currencies | Foreach-Object {
+        $Settings += @{Name=$_; Required = $false; Description = "$_ payout address"}
+    }
+
+    return [PSCustomObject]@{
+        Name = $Name
+        Website = 'https://zpool.ca'
+        Description = 'Autoconverts to BTC or payout in mined coins'
+        Algorithms = $SupportedAlgorithms
+        Note = '' # Note is shown beside each pool in setup
+        Settings = $Settings
+    }
+}
 
 try {
     $Zpool_Request = Invoke-RestMethod "http://www.zpool.ca/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop

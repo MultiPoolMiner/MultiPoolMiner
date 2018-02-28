@@ -5,12 +5,52 @@ param(
     [String]$BTC, 
     [alias("WorkerName")]
     [String]$Worker, 
-    [TimeSpan]$StatSpan
+    [TimeSpan]$StatSpan,
+    [bool]$Info = $false
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $HashRefinery_Request = [PSCustomObject]@{}
+
+if ($Info) {
+    # Just return info about the pool for use in setup
+    $SupportedAlgorithms = @()
+    # Use try catch here to still return some info about the pool even if the API is down
+    try {
+        $HashRefinery_Request = Invoke-RestMethod "http://pool.hashrefinery.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Foreach-Object { 
+            $SupportedAlgorithms += Get-Algorithm $_
+        }
+    } Catch {
+        Write-Warning "Unable to load supported algorithms for $Name - may not be able to configure all pool settings"
+        $SupportedAlgorithms = @()
+    }
+
+    try {
+        $HashRefineryCoins_Request = Invoke-RestMethod "http://pool.hashrefinery.com/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $Currencies = @("BTC") + ($HashRefineryCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique
+    } Catch {
+        Write-Warning "Unable to load available currencies for $Name - may not be able to configure all pool settings"
+        $Currencies = @("BTC")
+    }
+
+    $Settings = @()
+    $Settings += @{Name='Worker'; Required=$true; Description='Worker name to report to pool'}
+
+    $Currencies | Foreach-Object {
+        $Settings += @{Name=$_; Required = $false; Description = "$_ payout address"}
+    }
+
+    return [PSCustomObject]@{
+        Name = $Name
+        Website = "http://pool.hashrefinery.com"
+        Description = "Supports autoexchange to BTC or payout in mined coins"
+        Algorithms = $SupportedAlgorithms
+        Note = ""
+        Settings = $Settings
+    }
+}
 
 try {
     $HashRefinery_Request = Invoke-RestMethod "http://pool.hashrefinery.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
