@@ -468,6 +468,7 @@ class Miner {
     $Profit_Comparison
     $Profit_MarginOfError
     $Profit_Bias
+    $Profit_Unbias
     $Speed
     $Speed_Live
     $Best
