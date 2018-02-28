@@ -5,6 +5,117 @@ Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
 
+Function Get-BittrexMarkets {
+    # Get a list of markets. This list includes both the long and short names of each currency.
+    $filename = 'Cache\BittrexMarkets.json'
+
+    # Use cached data if it's less than 1 day old
+    if(Test-Path $filename) {
+        $lastupdated = (Get-Item $filename).LastWriteTime
+        $timespan = New-TimeSpan -Days 1
+
+        if(((Get-Date) - $lastupdated) -lt $timespan) {
+            Write-Log 'Using cached market list...'
+            $markets = Get-Content $filename | ConvertFrom-Json
+            return $markets
+        }
+    } 
+
+    Write-Log 'Updating markets from API...'
+    try {
+        $Request = Invoke-RestMethod "https://bittrex.com/api/v1.1/public/getmarkets" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    } catch {
+        Write-Log -Level Warn "Bittrex exchange API has failed. "
+        Return 0
+    }
+    
+    $markets = $Request.result | Where-Object {$_.BaseCurrency -eq 'BTC'}
+    Write-Log "$($markets.count) markets loaded"
+    $markets | ConvertTo-Json | Set-Content $filename
+
+    return $markets
+}
+
+function Get-BTCValue {
+    param (
+        [Parameter(Mandatory=$true)][string]$altcoin,
+        [Parameter(Mandatory=$true)][double]$amount
+
+    )
+    # This gets the exchange rate from bittrex.com for various altcoins, and returns an equivelent BTC value
+    # Exchange rates are cached to avoid abusing their API.  If the cached rates are more than 1 hour old, they will be refreshed.
+    $VerbosePreference = 'continue'
+    $filename = 'Cache\ExchangeRates.json'
+    
+    # Cache for up to 2 hours
+    $timespan = New-TimeSpan -Hour 2 
+    
+    $ExchangeRates = @{}
+    if(Test-Path $filename) {
+        $ExchangeRateData = Get-Content $filename | ConvertFrom-Json
+        # ConvertFrom-Json gives a PSObject, this turns it back into a hashtable. https://stackoverflow.com/questions/3740128/pscustomobject-to-hashtable
+        $ExchangeRateData.psobject.properties | Foreach {$ExchangeRates[$_.Name] = $_.Value}
+    }
+
+    # Try to return a cached exchange rate
+    if($ExchangeRates[$altcoin].LastUpdated -and ((Get-Date) - $ExchangeRates[$altcoin].LastUpdated) -lt $timespan) {
+        Return $amount * $ExchangeRates[$altcoin].rate
+    }
+
+    # Find the market for the coin
+    $markets = Get-BittrexMarkets | Where-Object {$_.MarketCurrencyLong -eq $altcoin}
+    if($markets.count -eq 0) {
+        Write-Log -Level Info "No market found for $altcoin, unable to get exchange rate"
+        Return 0
+    }
+
+    # Get the exchange rate
+    Write-Log "Updating exchange rate for $altcoin"
+    try {
+        $Request = Invoke-RestMethod "https://bittrex.com/api/v1.1/public/getticker?market=$($markets[0].MarketName)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    } catch {
+        Write-Log -Level Warn "Bittrex exchange API has failed."
+        Return 0
+    }
+    
+    # Write the exchange rate to the cache
+    $ExchangeRates[$altcoin] = @{'rate' = $Request.result.Last; 'lastupdated' = (Get-Date).ToUniversalTime()}
+    $ExchangeRates | ConvertTo-Json | Set-Content $filename
+
+    Return $ExchangeRates[$altcoin].rate * $amount
+}
+
+
+function Get-Balances {
+    [CmdletBinding()]
+    param(
+        [String]$Wallet,
+        [String]$API_Key, # for miningpoolhub
+        $Rates
+    )
+    Write-Log 'Getting balances...'
+    $balances = Get-ChildItemContent Balances -Parameters @{Wallet = $Wallet; API_Key = $API_Key}
+    
+    # Add the local currency rates if available
+    if($Rates) {
+        $balances | Where-Object {
+            if($_.Content.currency -eq 'BTC') {
+                ForEach($Rate in ($Rates.PSObject.Properties)) {
+                    $_.Content | Add-Member "Total_$($Rate.Name)" ([Double]$Rate.Value * $_.Content.total)
+                }
+            } else {
+                # Try to get exchange rate to BTC
+                $btcvalue = Get-BTCValue -altcoin $_.Content.currency -amount $_.Content.total
+                ForEach($Rate in ($Rates.PSObject.Properties)) {
+                    $_.Content | Add-Member "Total_$($Rate.Name)" ([Double]$Rate.Value * $btcvalue)
+                }
+            }
+        }
+    }
+
+    $balances
+}
+
 Function Write-Log {
     [CmdletBinding()]
     Param(
