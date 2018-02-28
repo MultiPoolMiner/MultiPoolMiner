@@ -47,7 +47,8 @@ if ($Info) {
         Note = "No automatic conversion" # Note is shown beside each pool in setup
         Settings = $Settings
     }
-}    
+}
+
 try {
     $AltMiner_Request = Invoke-RestMethod "https://altminer.net/api/status" -UseBasicParsing -Headers $Headers -TimeoutSec 10 -ErrorAction Stop
     $AltMinerCoins_Request = Invoke-RestMethod "https://altminer.net/api/currencies" -UseBasicParsing -Headers $Headers -TimeoutSec 10 -ErrorAction Stop
