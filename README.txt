@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 23/02/2018 (dd/mm/yyyy) - v1.22.12 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 27/02/2018 (dd/mm/yyyy) - v1.22.13 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -98,7 +98,7 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 	To identify your mining rig.	
 
 -wallet
-	Your Bitcoin payout address. Required when mining on Zpool, Hash Refinery and Nicehash.
+	Your Bitcoin payout address. Required when mining on Zpool, Hash Refinery, Nicehash, AhashPool, BlockMunch and BlazePool.
 	
 -SSL
 	Specifying the -ssl command (without a boolean value of true or false) will restrict the miner application list to include only the miners that support secure connection.
