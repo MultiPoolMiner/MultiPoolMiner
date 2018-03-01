@@ -8,3 +8,6 @@ downloads/
 *.rar
 Pools/MiningDutch.ps1
 Config.txt
+Cache/
+Data/
+Launchersettings.json
