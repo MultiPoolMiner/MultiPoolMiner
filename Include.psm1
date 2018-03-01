@@ -1,8 +1,5 @@
-﻿$OldVerbose = $VerbosePreference
-$VerbosePreference = 'SilentlyContinue'
-Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore -Verbose:$false
+﻿Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore -Verbose:$false
 Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1" -ErrorAction Ignore -Verbose:$false
-$VerbosePreference = $OldVerbose
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
@@ -129,15 +126,10 @@ Function Write-Log {
     Begin { }
     Process {
 
-        if (-not $PSBoundParameters.ContainsKey('Verbose')) {
-            $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')
-        }
-        if (-not $PSBoundParameters.ContainsKey('Debug')) {
-            $DebugPreference = $PSCmdlet.GetVariableValue('DebugPreference')
-        }
-        if (-not $PSBoundParameters.ContainsKey('InformationPreference')) {
-            $InformationPreference = $PSCmdlet.GetVariableValue('InformationPreference')
-        }
+        # Inherit the same verbosity settings as the script importing this
+        if (-not $PSBoundParameters.ContainsKey('InformationPreference')) { $InformationPreference = $PSCmdlet.GetVariableValue('InformationPreference') }
+        if (-not $PSBoundParameters.ContainsKey('Verbose')) { $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference') }
+        if (-not $PSBoundParameters.ContainsKey('Debug')) { $DebugPreference = $PSCmdlet.GetVariableValue('DebugPreference') }
 
         $filename = ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd").txt"
         $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
