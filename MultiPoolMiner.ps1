@@ -692,7 +692,7 @@ while ($true) {
         if ($Miner.New) {$Miner.Benchmarked++}
 
         $Miner_Data = $Miner.GetMinerData(($Miner.New -and $Miner.Benchmarked -lt $Strikes))
-        $Miner_Data.Lines | ForEach-Object {Write-Log -Level Verbose "$($Miner.Name): $_"}
+        $Miner_Data.Lines | ForEach-Object {Write-Log -Level Debug "$($Miner.Name): $_"}
 
         if ($Miner.GetStatus() -eq "Running") {
             $Miner.Speed_Live = $Miner_Data.HashRate.PSObject.Properties.Value
