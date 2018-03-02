@@ -1,5 +1,10 @@
-﻿Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore -Verbose:$false
-Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1" -ErrorAction Ignore -Verbose:$false
+﻿# Disable verbose while importing module
+$OldVerbosePreference = $VerbosePreference
+$VerbosePreference = 'SilentlyContinue'
+
+
+#Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore -Verbose:$false
+#Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1" -ErrorAction Ignore -Verbose:$false
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
@@ -711,3 +716,6 @@ class Miner {
         }
     }
 }
+
+# Reset verbose
+$VerbosePreference = $OldVerbosePreference
