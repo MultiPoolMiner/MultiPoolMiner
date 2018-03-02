@@ -161,11 +161,12 @@ while ($true) {
     Get-ChildItem "Pools" | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
         $Config.Pools | Add-Member $_.BaseName (
             [PSCustomObject]@{
-                BTC     = $Wallet
-                User    = $UserName
-                Worker  = $WorkerName
-                API_ID  = $API_ID
-                API_Key = $API_Key
+                BTC       = $Wallet
+                User      = $UserName
+                Worker    = $WorkerName
+                API_ID    = $API_ID
+                API_Key   = $API_Key
+                DonateRun = $false
             }
         )
     }
@@ -181,12 +182,14 @@ while ($true) {
     if ($Config.Donate -lt 10) {$Config.Donate = 10}
     if ($Timer.AddDays(-1) -ge $LastDonated) {$LastDonated = $Timer}
     if ($Timer.AddDays(-1).AddMinutes($Config.Donate) -ge $LastDonated) {
+        Write-Log "Starting donation run. Note: MPM will use ALL available pools. "
         Get-ChildItem "Pools" | ForEach-Object {
             $Config.Pools | Add-Member $_.BaseName (
                 [PSCustomObject]@{
-                    BTC    = $WalletDonate
-                    User   = $UserNameDonate
-                    Worker = $WorkerNameDonate
+                    BTC       = $WalletDonate
+                    User      = $UserNameDonate
+                    Worker    = $WorkerNameDonate
+                    DonateRun = $true
                 }
             ) -Force
         }
