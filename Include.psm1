@@ -601,7 +601,9 @@ class Miner {
 
     hidden StartMining() {
         $this.Status = [MinerStatus]::Failed
-        $this.LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss")_$($this.Name)-$($this.Port).txt")
+        # Create log file and get full path. This makes sure the file exists when other programs try to read it or resolve to a relative path
+        $this.LogFile = (Resolve-Path (New-Item -ItemType File -Path ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss")_$($this.Name)-$($this.Port).txt")).Path
+        #$this.LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss")_$($this.Name)-$($this.Port).txt")
         $this.New = $true
         $this.Activated++
 

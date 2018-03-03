@@ -399,36 +399,27 @@ namespace PInvoke.Win32 {
         $synchash.activeminerslastupdated = Get-Date
 
         While ($syncHash.GUIRunning) {
-            if($syncHash.Running -and (Test-Path ".\Data\ActiveMiners.xml")) {
-                if((Get-ChildItem ".\Data\ActiveMiners.xml").LastWriteTime -gt $synchash.activeminerslastupdated) {
-                    $miners = Import-CliXml .\Data\Miners.xml
-                    $synchash.activeminers = Import-CliXml .\Data\ActiveMiners.xml | Where-Object {$_.Activated -GT 0 -and $_.Status -eq [MinerStatus]::Running} | ForEach-Object {
-			            $ActiveMiner = $_
-                        # Find the matching entry in $Miners, to get pool information. Perhaps there is a better way to do this?
-                        $MatchingMiner = $Miners | Where-Object {$_.Name -eq $ActiveMiner.Name -and $_.Path -eq $ActiveMiner.Path -and $_.Arguments -eq $ActiveMiner.Arguments -and $_.API -eq $ActiveMiner.API -and $_.Port -eq $ActiveMiner.Port}
-                        [pscustomobject]@{
-                            Name = $_.Name
-                            Active = "{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f ((Get-Date) - $_.Process.StartTime)
-                            Type = (@($_.Type) -join ',')
-                            Pool = (@($MatchingMiner.Pools.PsObject.Properties.Value.Name) -join ',')
-                            Algorithm = (@($_.Algorithm) -join ',')
-                            CurrentSpeed = (@($_.Speed_Live | Foreach-Object {"$($_ | ConvertTo-Hash)/s"}) -join ',')
-                            BenchmarkedSpeed = (@($_.Speed | Foreach-Object {"$($_ | ConvertTo-Hash)/s"}) -join ',')
-                            BTCday = "{0:N8}" -f $_.Profit
-                            PID = $_.Process.Id
-                            Path = Resolve-Path -Relative $_.Path
-                        }
+            if($syncHash.Running -and (Test-Path ".\Data\ActiveMiners.json")) {
+                if((Get-ChildItem ".\Data\ActiveMiners.json").LastWriteTime -gt $synchash.activeminerslastupdated) {
+                    $synchash.activeminers = Get-Content ".\Data\ActiveMiners.json" | ConvertFrom-Json
+                    # Convert the arrays to comma separated strings
+                    $synchash.activeminers | Foreach-Object {
+                        $_.Type = $_.Type -join ','
+                        $_.Pool = $_.Pool -join ','
+                        $_.Algorithm = $_.Algorithm -join ','
+                        $_.CurrentSpeed = $_.CurrentSpeed -join ','
+                        $_.BenchmarkedSpeed = $_.BenchmarkedSpeed -join ','
                     }
+
                     $synchash.activeminerslastupdated = Get-Date
-
-
+                    $synchash.TotalProfit = ($synchash.activeminers | Measure-Object -Sum Profit).Sum
                 }
             } else {
                 $synchash.activeminers = @{}
+                $synchash.TotalProfit = 0
             }
             # Update profit per day in status bar
-            $synchash.TotalBTCday = ($synchash.activeminers | Measure-Object -Sum BTCday).Sum
-            $synchash.ProfitPerDay.Dispatcher.Invoke([action]{$synchash.ProfitPerDay.text = $synchash.TotalBTCday})
+            $synchash.ProfitPerDay.Dispatcher.Invoke([action]{$synchash.ProfitPerDay.text = $synchash.TotalProfit})
             $synchash.ActiveMinersList.Dispatcher.Invoke([action]{$syncHash.ActiveMinersList.ItemsSource = $synchash.activeminers})
             $synchash.miningUpdateError = $Error
             Start-Sleep 10
