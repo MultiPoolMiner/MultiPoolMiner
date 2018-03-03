@@ -81,6 +81,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Selec
         "blakecoin" {$Divisor *= 1000}
         "decred" {$Divisor *= 1000}
         "equihash" {$Divisor /= 1000}
+        "keccak" {$Divisor *= 1000}
         "quark" {$Divisor *= 1000}
         "qubit" {$Divisor *= 1000}
         "scrypt" {$Divisor *= 1000}

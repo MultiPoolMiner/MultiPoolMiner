@@ -79,7 +79,7 @@ $YiiMP_Currencies | Where-Object {$YiiMPCoins_Request.$_.hashrate -gt 0} | ForEa
         "x11" {$Divisor *= 1000}
     }
 
-    $Stat = Set-Stat -Name "$($Name)_$($YiiMP_Algorithm_Norm)_Profit" -Value ([Double]$YiiMPCoins_Request.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
+    $Stat = Set-Stat -Name "$($Name)_$($_)_Profit" -Value ([Double]$YiiMPCoins_Request.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
     $YiiMP_Regions | ForEach-Object {
         $YiiMP_Region = $_
