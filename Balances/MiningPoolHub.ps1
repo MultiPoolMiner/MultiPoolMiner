@@ -1,16 +1,18 @@
 ﻿using module ..\Include.psm1
 
+param($Config)
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$MyConfig = $Config.Pools.$Name
 
 $Request = [PSCustomObject]@{}
 
-if(!$API_Key) {
+if(!$MyConfig.API_Key) {
     Write-Log -Level Warn "Pool API ($Name) has failed - no API key specified."
     return
 }
 
 try {
-    $Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getuserallbalances&api_key=$API_Key" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getuserallbalances&api_key=$($MyConfig.API_Key)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
     
 }
 catch {

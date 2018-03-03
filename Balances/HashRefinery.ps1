@@ -1,16 +1,18 @@
 ﻿using module ..\Include.psm1
 
+param($Config)
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$MyConfig = $Config.Pools.$Name
 
 $Request = [PSCustomObject]@{}
 
-if(!$Wallet) {
+if(!$MyConfig.BTC) {
   Write-Log -Level Warn "Pool API ($Name) has failed - no wallet address specified."
   return
 }
 
 try {
-    $Request = Invoke-RestMethod "http://pool.hashrefinery.com/api/wallet?address=$Wallet" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $Request = Invoke-RestMethod "http://pool.hashrefinery.com/api/wallet?address=$($MyConfig.BTC)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
     
 }
 catch {

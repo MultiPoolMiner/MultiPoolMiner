@@ -241,6 +241,9 @@ $guiCmd = [PowerShell]::Create().AddScript({
             $synchash.scriptRunnerError = $Error
             Start-Sleep 2
         }
+        # GUI no longer running, kill any miners that still are
+        Get-Process | Where-Object {$_.Path -like "$($synchash.workingdirectory)\Bin\*"} | Stop-Process
+
     })
     $scriptrunner.Runspace = $newRunspace
     [void]$Jobs.Add(([pscustomobject]@{ScriptRunner = $scriptRunner; Runspace = $scriptrunner.BeginInvoke() }))
@@ -329,10 +332,10 @@ namespace PInvoke.Win32 {
         $Balances = [PSCustomObject]
 
         While ($synchash.GUIRunning) {
-            . .\Config.ps1
+            $Config = Get-ChildItemContent "Config.txt" | Select-Object -ExpandProperty Content
 
             # Don't include BTC as one of the currencies to show
-            [array]$Currency = $Currency | Where-Object {$_ -ne "BTC"}
+            [array]$Currency = $Config.Currency | Where-Object {$_ -ne "BTC"}
 
             # Set columns for currencies
             $synchash.PoolBalancesListTotal1Header = if($currency[0]) {"Total $($Currency[0])"} else {""}
@@ -352,7 +355,7 @@ namespace PInvoke.Win32 {
             $synchash.ExchangeRates.Dispatcher.Invoke([action]{$synchash.ExchangeRates.Text = $synchash.exchangerate})
 
             # Get pool balances and format the way the listview expects
-            Get-Balances -Wallet $Wallet -API_Key $API_Key -Rates $Rates | ForEach-Object {$Balances | Add-Member $_.Name $_.Content -Force}
+            Get-Balances -Rates $Rates -Config $Config | ForEach-Object {$Balances | Add-Member $_.Name $_.Content -Force}
             $BalanceNames = $Balances | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name
             $synchash.balances = $BalanceNames | Select-Object -Property @{Name='Name';Expression={$_}}, @{Name='Updated';Expression={$Balances.$_.lastupdated}},
                 @{Name='Confirmed';Expression={"{0:N8}" -f $Balances.$_.balance}},
@@ -386,6 +389,12 @@ namespace PInvoke.Win32 {
         # Can't figure out how to use 'using module' in a script like this - complains that it has to be the first statement in the script.
         # But that's ok - using Import-Module gets everything except the Miner class, which isn't needed here.
         Import-Module .\Include.psm1
+        # We do however need the enum for statuses. Since it doesn't get imported, need to duplicate it here.
+        enum MinerStatus {
+            Running
+            Idle
+            Failed
+        }
 
         $synchash.activeminerslastupdated = Get-Date
 
@@ -393,8 +402,8 @@ namespace PInvoke.Win32 {
             if($syncHash.Running -and (Test-Path ".\Data\ActiveMiners.xml")) {
                 if((Get-ChildItem ".\Data\ActiveMiners.xml").LastWriteTime -gt $synchash.activeminerslastupdated) {
                     $miners = Import-CliXml .\Data\Miners.xml
-                    $synchash.activeminers = Import-CliXml .\Data\ActiveMiners.xml | Where-Object {$_.Activated -GT 0 -and $_.Status -eq "Running"} | ForEach-Object {
-			$ActiveMiner = $_
+                    $synchash.activeminers = Import-CliXml .\Data\ActiveMiners.xml | Where-Object {$_.Activated -GT 0 -and $_.Status -eq [MinerStatus]::Running} | ForEach-Object {
+			            $ActiveMiner = $_
                         # Find the matching entry in $Miners, to get pool information. Perhaps there is a better way to do this?
                         $MatchingMiner = $Miners | Where-Object {$_.Name -eq $ActiveMiner.Name -and $_.Path -eq $ActiveMiner.Path -and $_.Arguments -eq $ActiveMiner.Arguments -and $_.API -eq $ActiveMiner.API -and $_.Port -eq $ActiveMiner.Port}
                         [pscustomobject]@{
@@ -421,6 +430,7 @@ namespace PInvoke.Win32 {
             $synchash.TotalBTCday = ($synchash.activeminers | Measure-Object -Sum BTCday).Sum
             $synchash.ProfitPerDay.Dispatcher.Invoke([action]{$synchash.ProfitPerDay.text = $synchash.TotalBTCday})
             $synchash.ActiveMinersList.Dispatcher.Invoke([action]{$syncHash.ActiveMinersList.ItemsSource = $synchash.activeminers})
+            $synchash.miningUpdateError = $Error
             Start-Sleep 10
         }
     })

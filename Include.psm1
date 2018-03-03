@@ -92,14 +92,10 @@ function Get-BTCValue {
 
 
 function Get-Balances {
-    [CmdletBinding()]
-    param(
-        [String]$Wallet,
-        [String]$API_Key, # for miningpoolhub
-        $Rates
-    )
+    param($Config, $Rates)
+
     Write-Log 'Getting balances...'
-    $balances = Get-ChildItemContent Balances -Parameters @{Wallet = $Wallet; API_Key = $API_Key}
+    $balances = Get-ChildItemContent Balances -Parameters @{Config = $Config}
     
     # Add the local currency rates if available
     if($Rates) {
