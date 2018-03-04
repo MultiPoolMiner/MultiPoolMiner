@@ -3,7 +3,9 @@
 class Nicehash : Miner {
     hidden StartMining() {
         $this.Status = [MinerStatus]::Failed
-
+        # Create log file and get full path. This makes sure the file exists when other programs try to read it or resolve to a relative path
+        # Unfortunately, exvacator doesn't actually log there, but at least this makes it not break things.
+        $this.LogFile = (Resolve-Path (New-Item -ItemType File -Path ".\Logs\$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss")_$($this.Name)-$($this.Port).txt")).Path
         $this.New = $true
         $this.Activated++
 
