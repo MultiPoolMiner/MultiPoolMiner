@@ -43,9 +43,12 @@ $AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
         "decred" {$Divisor *= 1000}
         "equihash" {$Divisor /= 1000}
         "keccak" {$Divisor *= 1000}
+        "lbry" {$Divisor *= 1000}
+        "myrgr" {$Divisor *= 1000}
         "quark" {$Divisor *= 1000}
         "qubit" {$Divisor *= 1000}
         "scrypt" {$Divisor *= 1000}
+        "skein" {$Divisor *= 1000}
         "x11" {$Divisor *= 1000}
     }
 
