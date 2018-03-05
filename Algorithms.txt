@@ -24,6 +24,7 @@
     "lyra2v2":  "Lyra2RE2",
     "lyra2z":  "Lyra2z",
     "maxcoin":  "Keccak",
+    "keccakc":  "Keccakc",
     "myrgr":  "MyriadGroestl",
     "myriadcoingroestl":  "MyriadGroestl",
     "myriadgroestl":  "MyriadGroestl",
