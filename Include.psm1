@@ -366,6 +366,7 @@ function Expand-WebRequest {
     $FileName = Join-Path ".\Downloads" (Split-Path $Uri -Leaf)
 
     if (Test-Path $FileName) {Remove-Item $FileName}
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
 
     if (".msi", ".exe" -contains ([IO.FileInfo](Split-Path $Uri -Leaf)).Extension) {
