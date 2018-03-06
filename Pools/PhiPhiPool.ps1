@@ -65,7 +65,7 @@ $PhiPhiPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = "$PhiPhiPool_Algorithm.$PhiPhiPool_Host"
+                Host          = "$PhiPhiPool_Host"
                 Port          = $PhiPhiPool_Port
                 User          = Get-Variable $_ -ValueOnly
                 Pass          = "$Worker,c=$_"
