@@ -7,19 +7,22 @@ param(
 )
 
 # Hardcoded per miner version, do not allow user to change in config
-$MinerFileVersion = "20180030500" #Format: YYYYMMMDD[TwoDigitCounter], higher value will trigger config file update
+$MinerFileVersion = "2018030500" #Format: YYYYMMMDD[TwoDigitCounter], higher value will trigger config file update
 $MinerBinaryInfo =  "Claymore Dual Ethereum AMD/NVIDIA GPU Miner v11.2"
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\Ethash-Claymore\EthDcrMiner64.exe"
 $Type = "NVIDIA"
 $API = "Claymore"
 $Uri = ""
-$UriInfo = "Requires manual download and installation via 'https://bitcointalk.org/index.php?topic=1433925.0'"
+$UriInfo = "Requires manual download and installation. See 'https://bitcointalk.org/index.php?topic=1433925.0'"
 
 try {
     if (-not $Config.Miners.$Name.MinerFileVersion) {
+        # Read existing config file, do not use $Config because variables are expanded (e.g. $Wallet)
+        $NewConfig = Get-Content -Path 'config.txt' -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        
         # Create default miner config
-        $Config.Miners | Add-Member $Name ([PSCustomObject]@{
+        $NewConfig.Miners | Add-Member $Name ([PSCustomObject]@{
             "MinerFileVersion" = "$MinerFileVersion"
             "MinerBinaryInfo" = "$MinerBinaryInfo"
             "Uri" = "$Uri"
@@ -69,37 +72,48 @@ try {
                 "ethash2gb;pascal;-dcoin pasc -dcri 80" = ""
             }
             "CommonCommands" = " -logsmaxsize 1"
-        })
+        }) -Force
+
         # Save config to file
-        $Config | ConvertTo-Json -Depth 10 | Set-Content "Config.txt" -Force -ErrorAction Stop
+        $NewConfig | ConvertTo-Json -Depth 10 | Set-Content "config.txt" -Force -ErrorAction Stop
+        # Apply config
+        $Config = Get-ChildItemContent "Config.txt" -ErrorAction Stop | Select-Object -ExpandProperty Content
     }
     else {
         if ($MinerFileVersion -gt $Config.Miners.$Name.MinerFileVersion) {
-        try {
-            # Execute action, e.g force re-download of binary
-            # Should be first action. If it fails no further update will take place, update will be retried on next loop
-            if (Test-Path $Path) { Remove-Item $Path -Force -Confirm:$false -ErrorAction Stop } # Remove miner binary to forece re-download
-            if (Test-Path ".\Stats\$($Name)_*_hashrate.txt") { Remove-Item ".\Stats\$($Name)_*_hashrate.txt" -Force -Confirm:$false -ErrorAction SilentlyContinue} # Remove benchmark files, could by fine grained to remove bm files for some algos
+            try {
+                # Read existing config file, do not use $Config because variables are expanded (e.g. $Wallet)
+                $NewConfig = Get-Content -Path 'config.txt' | ConvertFrom-Json -InformationAction SilentlyContinue
+                
+                # Execute action, e.g force re-download of binary
+                # Should be first action. If it fails no further update will take place, update will be retried on next loop
+                if ($Uri) {
+                    if (Test-Path $Path) { Remove-Item $Path -Force -Confirm:$false -ErrorAction Stop } # Remove miner binary to forece re-download
+                    if (Test-Path ".\Stats\$($Name)_*_hashrate.txt") { Remove-Item ".\Stats\$($Name)_*_hashrate.txt" -Force -Confirm:$false -ErrorAction SilentlyContinue} # Remove benchmark files, could by fine grained to remove bm files for some algos
+                }
 
-            # Always update MinerFileVersion and download link
-            $Config.Miners.$Name | Add-member MinerFileVersion "$MinerFileVersion" -Force
-            $Config.Miners.$Name | Add-member Uri "$Uri" -Force
+                # Always update MinerFileVersion and download link, -Force to enforce setting
+                $NewConfig.Miners.$Name | Add-member MinerFileVersion "$MinerFileVersion" -Force
+                $NewConfig.Miners.$Name | Add-member Uri "$Uri" -Force
 
-            # Add config item if not in existing config file
-            $Config.Miners.$Name.Commands | Add-Member "ethash;pascal;-dcoin pasc -dcri 40" "" -ErrorAction SilentlyContinue
-            $Config.Miners.$Name.Commands | Add-Member "ethash;pascal;-dcoin pasc -dcri 60" "" -ErrorAction SilentlyContinue
-            $Config.Miners.$Name.Commands | Add-Member "ethash;pascal;-dcoin pasc -dcri 80" "" -ErrorAction SilentlyContinue
-            $Config.Miners.$Name.Commands | Add-Member "ethash2gb;pascal;-dcoin pasc -dcri 40" "" -ErrorAction SilentlyContinue
-            $Config.Miners.$Name.Commands | Add-Member "ethash2gb;pascal;-dcoin pasc -dcri 60" "" -ErrorAction SilentlyContinue
-            $Config.Miners.$Name.Commands | Add-Member "ethash2gb;pascal;-dcoin pasc -dcri 80" "" -ErrorAction SilentlyContinue
+                # Remove config item if in existing config file, -ErrorAction SilentlyContinue to ignore errors if item does not exist
+                $NewConfig.Miners.$Name | Foreach-Object {
+                    $_.Commands.PSObject.Properties.Remove("ethash;pascal;-dcoin pasc -dcri 20")
+                } -ErrorAction SilentlyContinue
 
-            # Remove config item if in existing config file
-            #$Config.Miners.$Name | Foreach-Object { $Config.Miners.$Name.PSObject.Properties.Remove("Dummy") } -ErrorAction SilentlyContinue
+                # Add config item if not in existing config file, -ErrorAction SilentlyContinue to ignore errors if item exists
+                $NewConfig.Miners.$Name.Commands | Add-Member "ethash;pascal;-dcoin pasc -dcri 60" "" -ErrorAction SilentlyContinue
+                $NewConfig.Miners.$Name.Commands | Add-Member "ethash;pascal;-dcoin pasc -dcri 80" "" -ErrorAction SilentlyContinue
+                $NewConfig.Miners.$Name.Commands | Add-Member "ethash2gb;pascal;-dcoin pasc -dcri 40" "" -ErrorAction SilentlyContinue
+                $NewConfig.Miners.$Name.Commands | Add-Member "ethash2gb;pascal;-dcoin pasc -dcri 60" "" -ErrorAction SilentlyContinue
+                $NewConfig.Miners.$Name.Commands | Add-Member "ethash2gb;pascal;-dcoin pasc -dcri 80" "" -ErrorAction SilentlyContinue
 
-            # Update config file
-            $Config | ConvertTo-Json -Depth 10 | Set-Content "Config.txt" -Force -ErrorAction Stop
+                # Save config to file
+                $NewConfig | ConvertTo-Json -Depth 10 | Set-Content "config.txt" -Force -ErrorAction Stop
+                # Apply config
+                $Config = Get-ChildItemContent "Config.txt" | Select-Object -ExpandProperty Content
             }
-        catch {}
+            catch {}
         }
     }
 
