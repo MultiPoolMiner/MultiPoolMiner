@@ -193,6 +193,9 @@ while ($true) {
         }
         $Config | Add-Member ExcludePoolName @() -Force
     }
+    else {
+        Write-Log ("Mining for you. Donation run will start in {0:hh} hour(s) {0:mm} minute(s). " -f $($LastDonated.AddDays(1) - ($Timer.AddMinutes($Config.Donate))))
+    }
 
     #Clear pool cache if the configuration has changed
     if (($ConfigBackup | ConvertTo-Json -Compress) -ne ($Config | ConvertTo-Json -Compress)) {$AllPools = $null}
