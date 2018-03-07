@@ -116,11 +116,6 @@ else {
     }
 }
 
-if (-not $Config.Miners.SubtractMinerFees) {
-    $MinerFeeInPercentSingleMode = 0
-    $MinerFeeInPercentDualMode = 0
-}
-
 $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
 
     $Command = $Config.Miners.$Name.Commands.$_
@@ -138,7 +133,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
             $SecondaryAlgorithm = $_.Split(";") | Select -Index 1
             $SecondaryAlgorithm_Norm = Get-Algorithm $SecondaryAlgorithm
         
-            $MinerName = "$($Name)$($MainAlgorithm_Norm -replace 'ethash','')$($SecondaryAlgorithm_Norm)$($Dcri)"
+            $MinerName = "$($Name)$($MainAlgorithm_Norm -replace '^ethash','')$($SecondaryAlgorithm_Norm)$($Dcri)"
 
             $HashRateMainAlgorithm = ($Stats."$($MinerName)_$($MainAlgorithm_Norm)_HashRate".Week)
             $HashRateSecondaryAlgorithm = ($Stats."$($MinerName)_$($SecondaryAlgorithm_Norm)_HashRate".Week)
@@ -154,7 +149,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                     Name      = $MinerName
                     Type      = $Type
                     Path      = $Config.Miners.$Name.Path
-                    Arguments = ("-mode 0 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host) $($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools."$SecondaryAlgorithm_Norm".Host) $($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass) -platform 2 $($DcriCmd) $Command $($Config.Miners.$Name.CommonCommands)" -replace "\s+", " ").trim()
+                    Arguments = ("-mode 0 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass) -platform 2 $($DcriCmd) $Command $($Config.Miners.$Name.CommonCommands)" -replace "\s+", " ").trim()
                     HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm; "$SecondaryAlgorithm_Norm" = $HashRateSecondaryAlgorithm}
                     API       = $Api
                     Port      = $Config.Miners.$Name.Port
@@ -166,7 +161,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                         Name      = $MinerName
                         Type      = $Type
                         Path      = $Config.Miners.$Name.Path
-                        Arguments = ("-mode 0 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host) $($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host) $($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass) -platform 2 $($DcriCmd) $Command $($CommonCommands)" -replace "\s+", " ").trim()
+                        Arguments = ("-mode 0 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass) -platform 2 $($DcriCmd) $Command $($CommonCommands)" -replace "\s+", " ").trim()
                         HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm; "$SecondaryAlgorithm_Norm" = $HashRateSecondaryAlgorithm}
                         API       = $Api
                         Port      = $Config.Miners.$Name.Port
@@ -176,8 +171,8 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
             }
         }
         else {
-            $MinerName = "$($Name)$($MainAlgorithm_Norm -replace 'ethash','')"
-            $HashRateMainAlgorithm = ($Stats."$($MinerName)_HashRate".Week)
+            $MinerName = "$($Name)$($MainAlgorithm_Norm -replace '^ethash','')"
+            $HashRateMainAlgorithm = ($Stats."$($Name)_$($MainAlgorithm_Norm)_HashRate".Week)
 
             if($Config.Miners.SubtractMinerFees) {
                 $HashRateMainAlgorithm = $HashRateMainAlgorithm * (100 - $Config.Miners.$Name.$MinerFeeInPercentSingleMode)
@@ -188,7 +183,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                 Name      = $MinerName
                 Type      = $Type
                 Path      = $Config.Miners.$Name.Path
-                Arguments = ("-mode 1 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host) $($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins 1 -platform 2 $Command $($Config.Miners.$Name.CommonCommands)" -replace "\s+", " ").trim()
+                Arguments = ("-mode 1 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins 1 -platform 2 $Command $($Config.Miners.$Name.CommonCommands)" -replace "\s+", " ").trim()
                 HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm}
                 API       = $Api
                 Port      = $Config.Miners.$Name.Port
