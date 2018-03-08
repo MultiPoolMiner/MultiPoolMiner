@@ -127,7 +127,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                 }
             }
         }
-        else {
+        elseif ($ZergPoolCoins_Request.$ZergPool_Currency.noautotrade -eq 0) {
             $ZergPool_Currencies | ForEach-Object {
                 #Option 3
                 [PSCustomObject]@{
