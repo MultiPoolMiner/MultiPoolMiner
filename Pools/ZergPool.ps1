@@ -128,7 +128,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
             }
         }
         else {
-            $ZergPool_Currencies | ForEach-Object {
+            $ZergPool_Currencies | Where-Object noautotrade -eq 0 | ForEach-Object {
                 #Option 3
                 [PSCustomObject]@{
                     Algorithm     = $ZergPool_Algorithm_Norm
