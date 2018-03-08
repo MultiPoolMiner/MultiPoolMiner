@@ -109,7 +109,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
 
         if (Get-Variable $ZergPool_Currency -ValueOnly -ErrorAction SilentlyContinue) {
             $ZergPool_Currency | ForEach-Object {
-                #Option 3
+                #Option 2
                 [PSCustomObject]@{
                     Algorithm     = $ZergPool_Algorithm_Norm
                     Info          = $ZergPool_Coin
@@ -129,7 +129,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
         }
         else {
             $ZergPool_Currencies | ForEach-Object {
-                #Option 2
+                #Option 3
                 [PSCustomObject]@{
                     Algorithm     = $ZergPool_Algorithm_Norm
                     Info          = $ZergPool_Coin
