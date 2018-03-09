@@ -97,9 +97,9 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
         "blakecoin" {$Divisor *= 1000}
         "decred" {$Divisor *= 1000}
         "equihash" {$Divisor /= 1000}
-        "neoscrypt" {$Divisor *= 1000}
         "keccak" {$Divisor *= 1000}
         "keccakc" {$Divisor *= 1000}
+        "neoscrypt" {$Divisor *= 1000}
         "phi" {$Divisor *= 1000}
         "quark" {$Divisor *= 1000}
         "qubit" {$Divisor *= 1000}
