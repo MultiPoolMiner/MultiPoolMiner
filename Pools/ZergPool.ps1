@@ -45,6 +45,9 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
         "decred" {$Divisor *= 1000}
         "equihash" {$Divisor /= 1000}
         "keccak" {$Divisor *= 1000}
+        "keccakc" {$Divisor *= 1000}
+        "neoscrypt" {$Divisor *= 1000}
+        "phi" {$Divisor *= 1000}
         "quark" {$Divisor *= 1000}
         "qubit" {$Divisor *= 1000}
         "scrypt" {$Divisor *= 1000}
@@ -95,6 +98,9 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
         "decred" {$Divisor *= 1000}
         "equihash" {$Divisor /= 1000}
         "keccak" {$Divisor *= 1000}
+        "keccakc" {$Divisor *= 1000}
+        "neoscrypt" {$Divisor *= 1000}
+        "phi" {$Divisor *= 1000}
         "quark" {$Divisor *= 1000}
         "qubit" {$Divisor *= 1000}
         "scrypt" {$Divisor *= 1000}
@@ -120,7 +126,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                     Host          = if ($ZergPool_Region -eq "us") {$ZergPool_Host}else {"$ZergPool_Region.$ZergPool_Host"}
                     Port          = $ZergPool_Port
                     User          = Get-Variable $_ -ValueOnly
-                    Pass          = "$Worker,c=$_,mc=$ZergPool_Currency"
+                    Pass          = "$Worker, c=$_, mc=$ZergPool_Currency"
                     Region        = $ZergPool_Region_Norm
                     SSL           = $false
                     Updated       = $Stat.Updated
@@ -140,7 +146,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                     Host          = if ($ZergPool_Region -eq "us") {$ZergPool_Host}else {"$ZergPool_Region.$ZergPool_Host"}
                     Port          = $ZergPool_Port
                     User          = Get-Variable $_ -ValueOnly
-                    Pass          = "$Worker,c=$_,mc=$ZergPool_Currency"
+                    Pass          = "$Worker, c=$_, mc=$ZergPool_Currency"
                     Region        = $ZergPool_Region_Norm
                     SSL           = $false
                     Updated       = $Stat.Updated
