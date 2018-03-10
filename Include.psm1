@@ -1,16 +1,8 @@
-<<<<<<< HEAD
-﻿# Disable verbose while importing module
+# Disable verbose while importing module
 $OldVerbosePreference = $VerbosePreference
 $VerbosePreference = 'SilentlyContinue'
 
-
-#Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore -Verbose:$false
-#Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1" -ErrorAction Ignore -Verbose:$false
-
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
-=======
-﻿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
->>>>>>> upstream/master
 
 Add-Type -Path .\OpenCL\*.cs
 
@@ -130,17 +122,15 @@ Function Write-Log {
 
     Begin { }
     Process {
-<<<<<<< HEAD
 
         # Inherit the same verbosity settings as the script importing this
         if (-not $PSBoundParameters.ContainsKey('InformationPreference')) { $InformationPreference = $PSCmdlet.GetVariableValue('InformationPreference') }
         if (-not $PSBoundParameters.ContainsKey('Verbose')) { $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference') }
         if (-not $PSBoundParameters.ContainsKey('Debug')) { $DebugPreference = $PSCmdlet.GetVariableValue('DebugPreference') }
-=======
+
         # Get mutex named MPMWriteLog. Mutexes are shared across all threads and processes.
         # This lets us ensure only one thread is trying to write to the file at a time.
         $mutex = New-Object System.Threading.Mutex($false, "MPMWriteLog")
->>>>>>> upstream/master
 
         $filename = ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd").txt"
         $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
