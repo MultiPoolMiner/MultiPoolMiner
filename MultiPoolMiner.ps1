@@ -64,8 +64,6 @@ $Strikes = 3
 $SyncWindow = 5 #minutes
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
-Import-Module NetSecurity -ErrorAction Ignore
-Import-Module Defender -ErrorAction Ignore
 
 $Algorithm = $Algorithm | ForEach-Object {Get-Algorithm $_}
 $ExcludeAlgorithm = $ExcludeAlgorithm | ForEach-Object {Get-Algorithm $_}
