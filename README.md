@@ -417,10 +417,10 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 ###### A2. Use the -excludeminername command to exclude certain miners you don't want to use. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
 
 ###### Q3. Miner says CL device is missing (or not found). How do I resolve this issue?
-###### A3. You most likely have NVIDIA cards in your rig. Open the start.bat in a text editor and look for ‘-type amd,nvidia,cpu’ and change it to ‘-type nvidia,cpu’. This will disable the AMD exclusive miners and save you plenty of time when benchmarking. You can also exclude the cpu option if you don’t want to mine with your processor.
+###### A3. You most likely have NVIDIA cards in your rig. Open the start.bat in a text editor and look for â€˜-type amd,nvidia,cpuâ€™ and change it to â€˜-type nvidia,cpuâ€™. This will disable the AMD exclusive miners and save you plenty of time when benchmarking. You can also exclude the cpu option if you donâ€™t want to mine with your processor.
 
 ###### Q4. I only want to mine certain algorithms even if they are not the most profitable. I want to exclude algorithms. How do I do that?
-###### A4. Open the start.bat in a text editor and look for ‘-algorithm cryptonight,ethash,equihash,groestl,lyra2z,neoscrypt,pascal’. Delete the algorithms you don't want to mine. This can save you some time when benchmarking. You can include any of these or even all of them if you please but bear in mind this can result your earnings to be spread across many pools! 
+###### A4. Open the start.bat in a text editor and look for â€˜-algorithm cryptonight,ethash,equihash,groestl,lyra2z,neoscrypt,pascalâ€™. Delete the algorithms you don't want to mine. This can save you some time when benchmarking. You can include any of these or even all of them if you please but bear in mind this can result your earnings to be spread across many pools! 
 
 ###### Q5. MultiPoolMiner is XX% more profitable. What does this mean?
 ###### A5. It is showing you the stat for MultiPoolMiner vs the one miner. It means that the calculated earnings of MultiPoolMiner switching to different algorithms would be that much more profitable than if it had just mined that one particular algorithm the whole time. The number is still only an estimate of your earnings on the pool and may not directly reflect what you actually get paid. On MiningPoolHub and other multiple algorithm pools, coins have fluctuating values and MultiPoolMiner switches to the one that is the most profitable at that time. Because each pool has different delays in exchange and payout, the amount you actually earn my be very different. If there is a significant difference in percentage, you might want to reset the profitability stats by running the ResetProfit.bat file. Your actual (but still estimated) earning is shown in the second row.
@@ -495,10 +495,7 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 	decred, pascal, decrednicehash
     
 ###### Q23. How to download and install missing miner binaries?
-###### A23. Some miners binaries cannot be downloaded automatically by MPM (e.g. there is no direct download). In these cases you need to download and install them manually.
-    First find the download link "Uri" in the miner file (they are all in the folder 'Miners') and download the binaries.
-    Next locate the destination path "$Path". You need to create the required subdirectory in the 'Miners' folder.
-    Finally unpack the downloaded binary to the destination directory. If the packed file contains subdirectories you must also copy them.
+###### A23. Some miners binaries cannot be downloaded automatically by MPM (e.g. there is no direct download). In these cases you need to download and install them manually. First find the download link "Uri" in the miner file (they are all in the folder 'Miners') and download the binaries. Next locate the destination path "$Path". You need to create the required subdirectory in the 'Miners' folder.  Finally unpack the downloaded binary to the destination directory. If the packed file contains subdirectories you must also copy them.
 
 
 ## REPORTING AND MONITORING
