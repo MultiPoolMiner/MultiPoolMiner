@@ -156,7 +156,7 @@ while ($true) {
     }
     
     #Error in Config.txt
-    if (-not ($Config -is [PSCustomObject])) {
+    if ($Config -isnot [PSCustomObject]) {
         Write-Log -Level Error "*********************************************************** "
         Write-Log -Level Error "Critical error: Config.txt is invalid. MPM cannot continue. "
         Write-Log -Level Error "*********************************************************** "
