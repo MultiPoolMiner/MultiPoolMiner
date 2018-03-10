@@ -63,47 +63,52 @@ Choose your region or the region closest to you.
 
 The following pools are currently supported:
 
-- AHashPool
-  WebSite: https://www.ahashpool.com/ 
+- AHashPool https://www.ahashpool.com/
+
   Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
 
-- BlazePool
-  WebSite: http://www.blazepool.com/ 
+- BlazePool http://www.blazepool.com/
+
   Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
 
-- BlockMunch / BlockmunchCoins
-  WebSite: http://www.blockmunch.club/
+- BlockMunch / BlockmunchCoins http://www.blockmunch.club/
+
   Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
+  
   Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
-- HashRefinery
-  WebSite: http://pool.hashrefinery.com
+- HashRefinery http://pool.hashrefinery.com
+
   Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
 
-- MiningPoolHub / MiningPooHubCoins
-  WebSite: https://miningpoolhub.com/ 
+- MiningPoolHub / MiningPooHubCoins https://miningpoolhub.com/
+
   - 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm
   - 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). 
   Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
+  
   Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
+  
   Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
-- Nicehash 
-  WebSite: https://www.nicehash.com/
+- Nicehash https://www.nicehash.com/
+
   Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
 
-- YiiMP
-  WebSite: http://yiimp.eu/
+- YiiMP http://yiimp.eu/
+
   Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config.txt (see below)
 
-- ZergPool / ZergPoolCoins
-  WebSite: http://zergpool.eu
+- ZergPool / ZergPoolCoins http://zergpool.eu
+
   Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
+  
   Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
-- Zpool / ZpoolCoins
-  WebSite: http://www.zpool.ca/
+- Zpool / ZpoolCoins http://www.zpool.ca/
+
   Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
+  
   Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
 ***IMPORTANT**: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
