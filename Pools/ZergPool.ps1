@@ -40,17 +40,18 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
     $Divisor = 1000000
 
     switch ($ZergPool_Algorithm_Norm) {
-        "blake2s"   {$Divisor *= 1000}
+        "blake2s" {$Divisor *= 1000}
         "blakecoin" {$Divisor *= 1000}
-        "decred"    {$Divisor *= 1000}
-        "equihash"  {$Divisor /= 1000}
+        "decred" {$Divisor *= 1000}
+        "equihash" {$Divisor /= 1000}
         "neoscrypt" {$Divisor *= 1000}
-        "keccak"    {$Divisor *= 1000}
-        "phi"       {$Divisor *= 1000}
-        "quark"     {$Divisor *= 1000}
-        "qubit"     {$Divisor *= 1000}
-        "scrypt"    {$Divisor *= 1000}
-        "x11"       {$Divisor *= 1000}
+        "keccak" {$Divisor *= 1000}
+        "keccakc" {$Divisor *= 1000}
+        "phi" {$Divisor *= 1000}
+        "quark" {$Divisor *= 1000}
+        "qubit" {$Divisor *= 1000}
+        "scrypt" {$Divisor *= 1000}
+        "x11" {$Divisor *= 1000}
     }
 
     if ((Get-Stat -Name "$($Name)_$($ZergPool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($ZergPool_Algorithm_Norm)_Profit" -Value ([Double]$ZergPool_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
@@ -72,7 +73,7 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
                 Host          = if ($ZergPool_Region -eq "us") {$ZergPool_Host}else {"$ZergPool_Region.$ZergPool_Host"}
                 Port          = $ZergPool_Port
                 User          = Get-Variable $_ -ValueOnly
-                Pass          = "$Worker,c=$_"
+                Pass          = "$Worker, c=$_"
                 Region        = $ZergPool_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated

@@ -43,17 +43,18 @@ $ZergPoolCoins_MiningCurrencies | Where-Object {($Coins.count -eq 0 -or $Coins -
     $Divisor = 1000000000
 
     switch ($ZergPoolCoins_Algorithm_Norm) {
-        "blake2s"   {$Divisor *= 1000}
+        "blake2s" {$Divisor *= 1000}
         "blakecoin" {$Divisor *= 1000}
-        "decred"    {$Divisor *= 1000}
-        "equihash"  {$Divisor /= 1000}
+        "decred" {$Divisor *= 1000}
+        "equihash" {$Divisor /= 1000}
         "neoscrypt" {$Divisor *= 1000}
-        "keccak"    {$Divisor *= 1000}
-        "phi"       {$Divisor *= 1000}
-        "quark"     {$Divisor *= 1000}
-        "qubit"     {$Divisor *= 1000}
-        "scrypt"    {$Divisor *= 1000}
-        "x11"       {$Divisor *= 1000}
+        "keccak" {$Divisor *= 1000}
+        "keccakc" {$Divisor *= 1000}
+        "phi" {$Divisor *= 1000}
+        "quark" {$Divisor *= 1000}
+        "qubit" {$Divisor *= 1000}
+        "scrypt" {$Divisor *= 1000}
+        "x11" {$Divisor *= 1000}
     }
 
     $Stat = Set-Stat -Name "$($Name)_$($_)_Profit" -Value ([Double]$ZergPoolCoins_Request.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
@@ -74,7 +75,7 @@ $ZergPoolCoins_MiningCurrencies | Where-Object {($Coins.count -eq 0 -or $Coins -
                 Host          = if ($ZergPoolCoins_Region -eq "us") {$ZergPoolCoins_Host}else {"$ZergPoolCoins_Region.$ZergPoolCoins_Host"}
                 Port          = $ZergPoolCoins_Port
                 User          = Get-Variable $_ -ValueOnly
-                Pass          = "$Worker,c=$_,mc=$ZergPoolCoins_Currency"
+                Pass          = "$Worker, c=$_, mc=$ZergPoolCoins_Currency"
                 Region        = $ZergPoolCoins_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated
@@ -93,7 +94,7 @@ $ZergPoolCoins_MiningCurrencies | Where-Object {($Coins.count -eq 0 -or $Coins -
                     Host          =  if ($ZergPoolCoins_Region -eq "us") {$ZergPoolCoins_Host}else {"$ZergPoolCoins_Region.$ZergPoolCoins_Host"}
                     Port          = $ZergPoolCoins_Port
                     User          = Get-Variable $_ -ValueOnly
-                    Pass          = "$Worker,c=$_,mc=$ZergPoolCoins_Currency"
+                    Pass          = "$Worker, c=$_, mc=$ZergPoolCoins_Currency"
                     Region        = $ZergPoolCoins_Region_Norm
                     SSL           = $false
                     Updated       = $Stat.Updated
