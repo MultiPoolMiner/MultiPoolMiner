@@ -186,6 +186,10 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 -minerstatusurl https://multipoolminer.io/monitor/miner.php
 	Report and monitor your mining rig's status by including the command above. Wallet address must be set even if you are only using MiningPoolHub as a pool. You can access the reported information by entering your wallet address on the https://multipoolminer.io/monitor web address. By using this service you understand and accept the terms and conditions detailed in this document (further below). 
 
+-minerstatuskey
+
+By default the MPM monitor uses the BTC address (-wallet) to identify your mining machine (rig). Use --minerstatuskey [your-miner-status-key] to anonymize your rig. To get your minerstatuskey goto to https://multipoolminer.io/monitor
+
 -switchingprevention
 	Since version 2.6, the delta value (integer) that was used to determine how often MultiPoolMiner is allowed to switch, is now user-configurable on a scale of 1 to infinity on an intensity basis. Default is 1 (Start.bat default is 2). Recommended values are 1-10 where 1 means the most frequent switching and 10 means the least switching. Please note setting this value to zero (0) will not turn this function off! Please see further explanation in MULTIPOOLMINER'S LOGIC section below. 
 	
@@ -308,7 +312,7 @@ Note: Not all pools support this, for more information consult the pools web pag
         "BTC": "$Wallet",
     }
 
-To limit mining to well defined coins add a line "Coins":  ["<CoinName>", "<AnotherCoinName>","YetAnotherCoinName","..."]
+To limit mining to well defined coins add a line "Coins":  ["CoinName", "AnotherCoinName","YetAnotherCoinName","..."]
 To allow mining all coins remove the line "Coins": [...]
 
 E.g. to mine only the coins 'Pizza' and 'Vivo on Zpool change it to:
@@ -325,7 +329,7 @@ This is currently not used. For now just leave it as it is.
 
 General section
 
-Most of these parameters are automatically filled with values taht were passed to MPM via the start batch file.
+Most of these parameters are automatically filled with values that were passed to MPM via the start batch file.
 For now just leave it as it is.
 
 
@@ -487,7 +491,7 @@ A22. Make sure NOT to include any of the the following parameters in your start.
 
 REPORTING AND MONITORING TERMS AND CONDITIONS & PRIVACY POLICY:
 
-By enabling the Monitoring Service by setting the -MinerStatusURL to point to https://multipoolminer.io/monitor/miner.php as described in the Command Line Options section, you agree that the https://multipoolminer.io website can store relevant information about your mining rig(s) in its database that is directly accessible by anyone accessing the https://multipoolminer.io/monitor webpage with the corresponding wallet address (your BTC address set with the -wallet command). The following data is stored for each mining machine (rig) and overwritten in the database in each script-cycle determined by the -interval command:
+By enabling the Monitoring Service by setting the -MinerStatusURL to point to https://multipoolminer.io/monitor/miner.php as described in the Command Line Options section, you agree that the https://multipoolminer.io website can store relevant information about your mining rig(s) in its database that is directly accessible by anyone accessing the https://multipoolminer.io/monitor webpage with the corresponding wallet address (your BTC address set with the -wallet parameter, alternatively you can use -minerstatuskey parameter). The following data is stored for each mining machine (rig) and overwritten in the database in each script-cycle determined by the *-interval* parameter:
 
 BTC address: all data is stored under and identified by the Bitcoin address set with the -wallet command
 WorkerName: the name of the worker you set using the -workername command, also used for sorting
