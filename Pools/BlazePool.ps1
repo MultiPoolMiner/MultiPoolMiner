@@ -26,6 +26,8 @@ if (($BlazePool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignor
 }
 
 $BlazePool_Regions = "us"
+
+#Pool allows payout in BTC only
 $BlazePool_Currencies = @("BTC") | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 $BlazePool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$BlazePool_Request.$_.hashrate -gt 0 -and [Double]$BlazePool_Request.$_.estimate_current  -gt 0} | ForEach-Object {

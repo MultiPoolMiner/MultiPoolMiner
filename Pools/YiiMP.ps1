@@ -24,6 +24,8 @@ if (($YiiMPCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Igno
 }
 
 $YiiMP_Regions = "us"
+
+#Pool allows payout in any currency available in API. Define the desired payout currency in $Config.$Pool.<Currency>
 $YiiMP_Currencies = ($YiiMPCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 $YiiMP_Currencies | Where-Object {$YiiMPCoins_Request.$_.hashrate -gt 0} | ForEach-Object {

@@ -26,6 +26,8 @@ if (($AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignor
 }
 
 $AHashPool_Regions = "us"
+
+#Pool allows payout in BTC only
 $AHashPool_Currencies = @("BTC") | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 $AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$AHashPool_Request.$_.hashrate -gt 0} | ForEach-Object {
