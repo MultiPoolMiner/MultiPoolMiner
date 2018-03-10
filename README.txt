@@ -485,6 +485,12 @@ A21. MultiPoolMiner is open-source and used by many users/rigs. It also download
 Q22. How to disable dual-mining?
 A22. Make sure NOT to include any of the the following parameters in your start.bat after -algorithm or add them after the -ExludeAlgorithm command:
 	decred, pascal, decrednicehash
+    
+Q23. How to manually download miner binaries?
+A23. Some miners binaries cannot be downloaded automatically by MPM (e.g. there is no direct download). In these cases you need to download and install them manually.
+     First find the download link "Uri" in the miner file (they are all in the folder 'Miners') and download the binaries.
+     Next locate the destination path "$Path". You need to create the required subdirectory in the 'Miners' folder.
+     Finally unpack the downloaded binary to the destination directory. If the packed file contains subdirectories you must also copy them.
 
 
 ====================================================================
