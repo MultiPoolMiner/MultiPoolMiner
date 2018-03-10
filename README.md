@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 27/02/2018 - v1.22.14 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 27/02/2018 - v1.23.00 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -62,17 +62,49 @@ Choose your region or the region closest to you.
 **-poolname [miningpoolhub,miningpoolhubcoins,zpool,hashrefinery,nicehash,ahashpool]**
 
 The following pools are currently supported:
-- MiningPoolHub https://miningpoolhub.com/ 
 
-The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
+- AHashPool
+  WebSite: https://www.ahashpool.com/ 
+  Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
 
-- Zpool http://www.zpool.ca/ (Bitcoin address must be provided using the -wallet command, see below)
-- Hash Refinery http://pool.hashrefinery.com (Bitcoin address must be provided using the -wallet command, see below)
-- Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -wallet command, see below)
-- A Hash Pool https://www.ahashpool.com/ (Bitcoin address must be provided using the -wallet command, see below)
-- BlockMunch http://www.blockmunch.club/ (Bitcoin address must be provided using the -wallet command, see below)
-- BlazePool http://www.blazepool.com/ (Bitcoin address must be provided using the -wallet command, see below)
-- YiiMP http://yiimp.eu/ (Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config.txt. Detailled documentation will follow. For now read https://github.com/MultiPoolMiner/MultiPoolMiner/issues/1105)
+- BlazePool
+  WebSite: http://www.blazepool.com/ 
+  Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
+
+- BlockMunch / BlockmunchCoins
+  WebSite: http://www.blockmunch.club/
+  Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
+  Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
+
+- HashRefinery
+  WebSite: http://pool.hashrefinery.com
+  Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
+
+- MiningPoolHub / MiningPooHubCoins
+  WebSite: https://miningpoolhub.com/ 
+  - 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm
+  - 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). 
+  Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
+  Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
+  Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
+
+- Nicehash 
+  WebSite: https://www.nicehash.com/
+  Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
+
+- YiiMP
+  WebSite: http://yiimp.eu/
+  Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config.txt (see below)
+
+- ZergPool / ZergPoolCoins
+  WebSite: http://zergpool.eu
+  Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
+  Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
+
+- Zpool / ZpoolCoins
+  WebSite: http://www.zpool.ca/
+  Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
+  Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
 ***IMPORTANT**: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
 
@@ -164,11 +196,125 @@ Since version 2.6, the delta value (integer) that was used to determine how ofte
     
     set "command=& .\multipoolminer.ps1 -wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -username aaronsace -workername multipoolminer -region europe -currency btc,usd,eur -type amd,nvidia,cpu -poolname miningpoolhub,zpool,nicehash -algorithm cryptonight,decred,decrednicehash,ethash,ethash2gb,equihash,groestl,lbry,lyra2re2,lyra2z,neoscrypt,pascal,sib,skunk -donate 24 -watchdog -minerstatusurl https://multipoolminer.io/monitor/miner.php -switchingprevention 2"
 
+    start pwsh -noexit -executionpolicy bypass -command "& .\reader.ps1 -log 'MultiPoolMiner_\d\d\d\d-\d\d-\d\d\.txt' -sort '^[^_]*_' -quickstart"
+
     pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
     
     pause
 
 
+
+## ADVANCED CONFIGURATION
+
+### Advanced config options are available via Config.txt
+
+Current versions support advanced configuration via 'Config.txt' in the MPM main directory.
+Config.txt is a JSON file and human readable / editable. A good primer for undertstanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
+The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like http://jsonviewer.stack.hu/.
+
+### Default content of 'Config.txt'
+
+{
+    "Pools": {
+        "MiningPoolHub": {
+            "User": "$UserName",
+            "Worker": "$WorkerName",
+            "API_ID": "$API_ID",
+            "API_Key": "$API_Key"
+        },
+            "MiningPoolHubCoins": {
+            "User": "$UserName",
+            "Worker": "$WorkerName",
+            "API_ID": "$API_ID",
+            "API_Key": "$API_Key"
+        },
+            "NiceHash": {
+            "BTC": "$Wallet",
+            "Worker": "$WorkerName"
+        },
+            "Zpool": {
+            "BTC": "$Wallet",
+            "Worker": "$WorkerName"
+        }
+    },
+    "Miners": {
+    },
+    "Interval": "$Interval",
+    "Region": "$Region",
+    "SSL": "$SSL",
+    "Type": "$Type",
+    "Algorithm": "$Algorithm",
+    "MinerName": "$MinerName",
+    "PoolName": "$PoolName",
+    "ExcludeAlgorithm": "$ExcludeAlgorithm",
+    "ExcludeMinerName": "$ExcludeMinerName",
+    "ExcludePoolName": "$ExcludePoolName",
+    "Currency": "$Currency",
+    "Donate": "$Donate",
+    "Proxy": "$Proxy",
+    "Delay": "$Delay",
+    "Watchdog": "$Watchdog",
+    "MinerStatusURL": "$MinerStatusURL",
+    "MinerStatusKey": "$MinerStatusKey",
+    "SwitchingPrevention": "$SwitchingPrevention"
+}
+
+There is a section for Pools, Miners and a general section
+
+#### Advanced config for Pools
+
+Settings for each configured pool are stored in its own subsection.
+
+##### To change payout currency of a pool
+
+If a pool allows payout in another currency than BTC you can change this.
+Note: Not all pools support this, for more information consult the pools web page
+
+    "Zpool": {
+        "BTC": "$Wallet",
+        "Worker": "$WorkerName"
+    }
+
+The payout currency is defined by this line:
+"BTC": "$Wallet",
+
+E.g. to change the payout currency for Zpool to LiteCoin replace the line for BTC with "LTC":  "<YOUR_LITECOIN_ADDRESS>",
+
+    "Zpool": {
+        "LTC":  "<YOUR_LITECOIN_ADDRESS>",
+        "Worker": "$WorkerName"
+    }
+    
+##### To mine only selected coins
+
+The pools ending in ...Coins allow mining selected coins only, e.g mine only ZClassic on MPH Pool
+Note: Not all pools support this, for more information consult the pools web page
+
+
+    "ZpoolCoins":  {
+        "Worker":  "$WorkerName",
+        "BTC": "$Wallet",
+    }
+
+To limit mining to well defined coins add a line "Coins":  ["<CoinName>", "<AnotherCoinName>","YetAnotherCoinName","..."]
+To allow mining all coins remove the line "Coins": [...]
+
+E.g. to mine only the coins 'Pizza' and 'Vivo on Zpool change it to:
+
+    "ZpoolCoins":  {
+        "Worker":  "$WorkerName",
+        "BTC": "$Wallet",
+        "Coins":  ["Pizza", "Vivo"]
+    }
+                                   
+#### Advanced config for Miners
+
+This is currently not used. For now just leave it as it is.
+
+#### General section
+
+Most of these parameters are automatically filled with values taht were passed to MPM via the start batch file.
+For now just leave it as it is.
 
 
 ## MULTIPOOLMINER'S LOGIC
