@@ -214,11 +214,14 @@ Since version 2.6, the delta value (integer) that was used to determine how ofte
 ### Advanced config options are available via Config.txt
 
 Current versions support advanced configuration via 'Config.txt' in the MPM main directory.
-Config.txt is a JSON file and human readable / editable. A good primer for undertstanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
+
+Config.txt is a JSON file and human readable / editable. A good primer for understanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
+
 The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like http://jsonviewer.stack.hu/.
 
 ### Default content of 'Config.txt'
 
+```
 {
     "Pools": {
         "MiningPoolHub": {
@@ -263,16 +266,18 @@ The JSON file structure is very fragile - every comma counts, so be careful when
     "MinerStatusKey": "$MinerStatusKey",
     "SwitchingPrevention": "$SwitchingPrevention"
 }
+```
 
-There is a section for Pools, Miners and a general section
+There is a section for "Pools", "Miners" and a general section
 
-#### Advanced config for Pools
+### Advanced config for Pools
 
 Settings for each configured pool are stored in its own subsection.
 
-##### To change payout currency of a pool
+#### To change payout currency of a pool
 
 If a pool allows payout in another currency than BTC you can change this.
+
 Note: Not all pools support this, for more information consult the pools web page
 
     "Zpool": {
@@ -290,9 +295,10 @@ E.g. to change the payout currency for Zpool to LiteCoin replace the line for BT
         "Worker": "$WorkerName"
     }
     
-##### To mine only selected coins
+#### To mine only selected coins
 
 The pools ending in ...Coins allow mining selected coins only, e.g mine only ZClassic on MPH Pool
+
 Note: Not all pools support this, for more information consult the pools web page
 
 
@@ -301,7 +307,8 @@ Note: Not all pools support this, for more information consult the pools web pag
         "BTC": "$Wallet",
     }
 
-To limit mining to well defined coins add a line "Coins":  ["<CoinName>", "<AnotherCoinName>","YetAnotherCoinName","..."]
+To limit mining to well defined coins add a line "Coins":  ["CoinName", "AnotherCoinName","YetAnotherCoinName","..."]
+
 To allow mining all coins remove the line "Coins": [...]
 
 E.g. to mine only the coins 'Pizza' and 'Vivo on Zpool change it to:
@@ -312,13 +319,14 @@ E.g. to mine only the coins 'Pizza' and 'Vivo on Zpool change it to:
         "Coins":  ["Pizza", "Vivo"]
     }
                                    
-#### Advanced config for Miners
+### Advanced config for Miners
 
 This is currently not used. For now just leave it as it is.
 
-#### General section
+### General section
 
 Most of these parameters are automatically filled with values taht were passed to MPM via the start batch file.
+
 For now just leave it as it is.
 
 
