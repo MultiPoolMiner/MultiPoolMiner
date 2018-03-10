@@ -154,6 +154,14 @@ while ($true) {
             SwitchingPrevention = $SwitchingPrevention
         }
     }
+    
+    #Error in Config.txt
+    if (-not ($Config -is [PSCustomObject])) {
+        Write-Log -Level Error "*********************************************************** "
+        Write-Log -Level Error "Critical error: Config.txt is invalid. MPM cannot continue. "
+        Write-Log -Level Error "*********************************************************** "
+        Exit
+    }
 
     #For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
     if ($Wallet -and -not $Config.MinerStatusKey) {$Config.MinerStatusKey = $Wallet}
