@@ -104,6 +104,12 @@ $WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHh
 $UserNameDonate = @("aaronsace", "fonyo")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
 $WorkerNameDonate = "multipoolminer"
 
+
+#Initialize the API
+Import-Module .\API.psm1
+Start-APIServer
+$API.Version = $Version
+
 while ($true) {
     #Load the config
     $ConfigBackup = $Config
@@ -196,6 +202,9 @@ while ($true) {
         }
         $Config | Add-Member ExcludePoolName @() -Force
     }
+
+    #Give API access to the current running configuration
+    $API.Config = $Config
 
     #Clear pool cache if the configuration has changed
     if (($ConfigBackup | ConvertTo-Json -Compress) -ne ($Config | ConvertTo-Json -Compress)) {$AllPools = $null}
@@ -653,6 +662,12 @@ while ($true) {
         $MinerComparisons | Out-Host
     }
 
+    # Update API Data
+    $API.ActiveMiners = $ActiveMiners
+    $API.RunningMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Running}
+    $API.Pools = $Pools
+    $API.Miners = $Miners
+
     #Reduce Memory
     Get-Job -State Completed | Remove-Job
     [GC]::Collect()
@@ -661,6 +676,7 @@ while ($true) {
     Write-Log "Start waiting before next run. "
     for ($i = $Strikes; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
+        if($API.Stop) { Exit }
         Start-Sleep 10
         $Timer = (Get-Date).ToUniversalTime()
     }
