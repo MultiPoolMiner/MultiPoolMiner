@@ -74,7 +74,7 @@ $ZergPoolCoins_MiningCurrencies | Where-Object {($Coins.count -eq 0 -or $Coins -
                 Protocol      = "stratum+tcp"
                 Host          = if ($ZergPoolCoins_Region -eq "us") {$ZergPoolCoins_Host}else {"$ZergPoolCoins_Region.$ZergPoolCoins_Host"}
                 Port          = $ZergPoolCoins_Port
-                User          = Get-Variable $_ -ValueOnly
+                User          = Get-Variable $ZergPoolCoins_Currency -ValueOnly
                 Pass          = "$Worker, c=$ZergPoolCoins_Currency, mc=$ZergPoolCoins_Currency"
                 Region        = $ZergPoolCoins_Region_Norm
                 SSL           = $false
