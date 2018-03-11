@@ -59,7 +59,6 @@ param(
     [Double]$SwitchingPrevention = 1 #zero does not prevent miners switching
 )
 
-<<<<<<< HEAD
 $VerbosePreference = 'Continue'
 $DebugPreference = 'Continue'
 $InformationPreference = 'Continue'
