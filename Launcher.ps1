@@ -126,7 +126,8 @@ $guiCmd = [PowerShell]::Create().AddScript({
     })
 
     $syncHash.Setup.add_Click({
-        Start-Process (@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) -ArgumentList "-executionpolicy bypass `"$(Convert-Path ".\Setup.ps1")`""
+        # Setup uses WPF, requires powershell 5 not powershell core
+        Start-Process powershell.exe -ArgumentList "-executionpolicy bypass `"$(Convert-Path ".\Setup.ps1")`""
     })
 
     $syncHash.ShowMiners.add_Click({
@@ -192,7 +193,7 @@ $guiCmd = [PowerShell]::Create().AddScript({
                     # Script is already running, do nothing
                 } else {
                     # Start the script
-                    $FilePath = (@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition)
+                    $FilePath = "pwsh.exe"
                     $ArgumentList = "-executionpolicy bypass `"$(Convert-Path ".\MultiPoolMiner.ps1")`""
                     $WorkingDirectory = $synchash.workingdirectory
     

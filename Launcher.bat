@@ -1,1 +1,1 @@
-start powershell -version 5.0 -executionpolicy bypass -command "& .\Launcher.ps1" 
+start powershell -version 5.0 -executionpolicy bypass -command "& .\Launcher.ps1 -Debug" 
