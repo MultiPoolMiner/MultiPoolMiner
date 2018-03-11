@@ -59,18 +59,21 @@ param(
     [Double]$SwitchingPrevention = 1 #zero does not prevent miners switching
 )
 
+<<<<<<< HEAD
 $VerbosePreference = 'Continue'
 $DebugPreference = 'Continue'
 $InformationPreference = 'Continue'
 
 
-$Version = "2.7.2.6"
+$Version = "2.7.2.7"
 $Strikes = 3
 $SyncWindow = 5 #minutes
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 Import-Module NetSecurity -ErrorAction Ignore
 Import-Module Defender -ErrorAction Ignore
+Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore
+Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1" -ErrorAction Ignore
 
 $Algorithm = $Algorithm | ForEach-Object {Get-Algorithm $_}
 $ExcludeAlgorithm = $ExcludeAlgorithm | ForEach-Object {Get-Algorithm $_}
