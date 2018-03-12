@@ -399,7 +399,7 @@ A new install of MultiPoolMiner has no historical information on which to build 
 KNOWN ISSUES:
 
 There are known issues with the following miners not submitting shares or show higher hashrate than what they actually do:
-- CCminerLyra2Z
+- CCminerLyra2z
 - CCminerLyra2RE2
 This is not a fault of MultiPoolMiner and nothing can be done on our end. Please raise an issue on their respective github pages. See FAQ#2 on how to exclude these if you wish to do so.
 
