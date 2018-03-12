@@ -401,7 +401,7 @@ In practice, this explains why when you first launch MPM it may pick a pool/algo
 ## KNOWN ISSUES
 
 There are known issues with the following miners not submitting shares or show higher hashrate than what they actually do:
-- CCminerLyraZ
+- CCminerLyra2z
 - CCminerLyra2RE2
 
 This is not a fault of MultiPoolMiner and nothing can be done on our end. Please raise an issue on their respective github pages. See FAQ#2 on how to exclude these if you wish to do so.
