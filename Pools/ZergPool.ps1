@@ -44,7 +44,6 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
         "blakecoin" {$Divisor *= 1000}
         "decred" {$Divisor *= 1000}
         "equihash" {$Divisor /= 1000}
-        "neoscrypt" {$Divisor *= 1000}
         "keccak" {$Divisor *= 1000}
         "keccakc" {$Divisor *= 1000}
         "phi" {$Divisor *= 1000}
