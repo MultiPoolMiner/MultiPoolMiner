@@ -31,7 +31,7 @@ $Blockmunch_Regions = "us"
 #Pool allows payout in BTC, DOGE, LTC & any currency available in API. Define desired payout currency in $Config.$Pool.<Currency>
 $Blockmunch_Currencies = @("BTC","DOGE","LTC") + ($BlockmunchCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
-$Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Blockmunch_Request.$_.hashrate -gt 0} | ForEach-Object {
+$Blockmunch_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$DisabledAlgorithms -inotcontains (Get-Algorithm $Blockmunch_Request.$_.name) -and $Blockmunch_Request.$_.hashrate -gt 0} | ForEach-Object {
     $Blockmunch_Host = "blockmunch.club"
     $Blockmunch_Port = $Blockmunch_Request.$_.port
     $Blockmunch_Algorithm = $Blockmunch_Request.$_.name

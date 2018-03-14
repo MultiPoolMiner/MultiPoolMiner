@@ -32,7 +32,7 @@ $BlockmunchCoins_Currencies = @("BTC","DOGE","LTC") + ($BlockmunchCoins_Request 
 
 #Mine any coin defined in array $Config.$Pool.Coins[]
 $BlockmunchCoins_MiningCurrencies = ($BlockmunchCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Where-Object {$Coins.count -eq 0 -or $Coins -icontains $BlockmunchCoins_Request.$_.name} | Select-Object -Unique
-$BlockmunchCoins_MiningCurrencies | Where-Object {$BlockmunchCoins_Request.$_.hashrate -gt 0} | ForEach-Object {
+$BlockmunchCoins_MiningCurrencies | Where-Object {$DisabledCoins -inotcontains $BlockmunchCoins_Request.$_.name -and $DisabledAlgorithms -inotcontains (Get-Algorithm $BlockmunchCoins_Request.$_.algo) -and $BlockmunchCoins_Request.$_.hashrate -gt 0} | ForEach-Object {
     $BlockmunchCoins_Host = "blockmunch.club"
     $BlockmunchCoins_Port = $BlockmunchCoins_Request.$_.port
     $BlockmunchCoins_Algorithm = $BlockmunchCoins_Request.$_.algo
