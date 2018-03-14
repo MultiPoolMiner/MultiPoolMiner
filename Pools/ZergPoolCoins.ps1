@@ -49,7 +49,6 @@ $ZergPoolCoins_MiningCurrencies | Where-Object {$DisabledCoins -inotcontains $Ze
         "equihash" {$Divisor /= 1000}
         "keccak" {$Divisor *= 1000}
         "keccakc" {$Divisor *= 1000}
-        "phi" {$Divisor *= 1000}
         "quark" {$Divisor *= 1000}
         "qubit" {$Divisor *= 1000}
         "scrypt" {$Divisor *= 1000}
