@@ -272,7 +272,7 @@ The JSON file structure is very fragile - every comma counts, so be careful when
 }
 ```
 
-There is a section for "Pools", "Miners" and a general section
+There is a section for Pools, Miners and a general section
 
 ### Advanced config for Pools
 
@@ -281,8 +281,9 @@ Settings for each configured pool are stored in its own subsection.
 #### To change payout currency of a pool
 
 If a pool allows payout in another currency than BTC you can change this.
-
 Note: Not all pools support this, for more information consult the pools web page
+
+The default pool config might look like this:
 
     "Zpool": {
         "BTC": "$Wallet",
@@ -299,30 +300,75 @@ E.g. to change the payout currency for Zpool to LiteCoin replace the line for BT
         "Worker": "$WorkerName"
     }
     
-#### To mine only selected coins
+#### To disable mining some algorithms on a pool
 
-The pools ending in ...Coins allow mining selected coins only, e.g mine only ZClassic on MPH Pool
+It might be desirable to prevent a pool from using a specific algorithm or a set of algorithms, e.g. if there is a known problem with it at the pool (e.g. jumping prices on keccak @nicehash)
 
+The default pool config might look like this:
+
+    "NiceHash":  {
+        "Worker":  "$WorkerName",
+        "BTC": "$Wallet"
+    }
+
+To prevent the pool from using an algorithm / a set of algorithms add a line like "DisabledAlgorithms":  ["disabled_algo", "another_disabled_algo"]
+
+E.g. if you do not want to use Keccac and Equihash on NiceHash change the pool config to:
+
+    "NiceHash":  {
+        "Worker":  "$WorkerName",
+        "BTC": "$Wallet",
+        "DisabledAlgorithms":  ["Keccak", "Equihash","..."]
+    }
+
+To allow mining all algorithms remove the line "DisabledAlgorithms":  [...]
+
+#### To disable mining some coins on a pool
+
+The pools ending in ...Coins allow mining selected coins only, e.g do not mine ZClassic on MPH Pool
 Note: Not all pools support this, for more information consult the pools web page
 
+The default pool config might look like this:
+    "ZpoolCoins":  {
+        "Worker":  "$WorkerName",
+        "BTC": "$Wallet"
+    }
+
+To limit mining to well defined coins add a line like "DisabledCoins":  ["DisabledCoinName", "AnotherDisabledCoinName", "YetAnotherDisabledCoinName","..."]
+
+E.g. if you do not want to mine the coins 'Pizza' and 'Vivo on Zpool change the pool config to:
 
     "ZpoolCoins":  {
         "Worker":  "$WorkerName",
         "BTC": "$Wallet",
+        "DisabledCoins":  ["Pizza", "Vivo"]
     }
 
-To limit mining to well defined coins add a line "Coins":  ["CoinName", "AnotherCoinName","YetAnotherCoinName","..."]
+To allow mining all coins remove the line "DisabledCoins":  [...]
 
-To allow mining all coins remove the line "Coins": [...]
+#### To mine only selected coins on a pool
 
-E.g. to mine only the coins 'Pizza' and 'Vivo on Zpool change it to:
+The pools ending in ...Coins allow mining selected coins only, e.g mine only ZClassic on MPH Pool
+Note: Not all pools support this, for more information consult the pools web page
+
+The default pool config might look like this:
+    "ZpoolCoins":  {
+        "Worker":  "$WorkerName",
+        "BTC": "$Wallet"
+    }
+
+To limit mining to well defined coins add a line like "Coins":  ["CoinName", "AnotherCoinName", "YetAnotherCoinName","..."]
+
+E.g. to mine only the coins 'Pizza' and 'Vivo on Zpool change the pool config to:
 
     "ZpoolCoins":  {
         "Worker":  "$WorkerName",
         "BTC": "$Wallet",
         "Coins":  ["Pizza", "Vivo"]
     }
-                                   
+
+To allow mining all coins remove the line "Coins":  [...]
+
 ### Advanced config for Miners
 
 This is currently not used. For now just leave it as it is.
