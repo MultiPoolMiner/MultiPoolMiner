@@ -72,7 +72,7 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
                 Host          = if ($ZergPool_Region -eq "us") {$ZergPool_Host}else {"$ZergPool_Region.$ZergPool_Host"}
                 Port          = $ZergPool_Port
                 User          = Get-Variable $_ -ValueOnly
-                Pass          = "$Worker, c=$_"
+                Pass          = "$Worker,c=$_"
                 Region        = $ZergPool_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated
