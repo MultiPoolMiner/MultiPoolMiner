@@ -74,7 +74,7 @@ $ZergPoolCoins_MiningCurrencies | Where-Object {$DisabledCoins -inotcontains $Ze
                 Host          = if ($ZergPoolCoins_Region -eq "us") {$ZergPoolCoins_Host}else {"$ZergPoolCoins_Region.$ZergPoolCoins_Host"}
                 Port          = $ZergPoolCoins_Port
                 User          = Get-Variable $ZergPoolCoins_Currency -ValueOnly
-                Pass          = "$Worker, c=$ZergPoolCoins_Currency, mc=$ZergPoolCoins_Currency"
+                Pass          = "$Worker,c=$ZergPoolCoins_Currency,mc=$ZergPoolCoins_Currency"
                 Region        = $ZergPoolCoins_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated
@@ -93,7 +93,7 @@ $ZergPoolCoins_MiningCurrencies | Where-Object {$DisabledCoins -inotcontains $Ze
                     Host          =  if ($ZergPoolCoins_Region -eq "us") {$ZergPoolCoins_Host}else {"$ZergPoolCoins_Region.$ZergPoolCoins_Host"}
                     Port          = $ZergPoolCoins_Port
                     User          = Get-Variable $_ -ValueOnly
-                    Pass          = "$Worker, c=$_, mc=$ZergPoolCoins_Currency"
+                    Pass          = "$Worker,c=$_,mc=$ZergPoolCoins_Currency"
                     Region        = $ZergPoolCoins_Region_Norm
                     SSL           = $false
                     Updated       = $Stat.Updated
