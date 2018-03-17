@@ -7,8 +7,8 @@ param(
 )
 
 # Hardcoded per miner version, do not allow user to change in config
-$MinerFileVersion = "2018030500" #Format: YYYYMMMDD[TwoDigitCounter], higher value will trigger config file update
-$MinerBinaryInfo =  "Claymore Dual Ethereum AMD/NVIDIA GPU Miner v11.2"
+$MinerFileVersion = "2018031700" #Format: YYYYMMMDD[TwoDigitCounter], higher value will trigger config file update
+$MinerBinaryInfo =  "Claymore Dual Ethereum AMD/NVIDIA GPU Miner v11.5"
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\Ethash-Claymore\EthDcrMiner64.exe"
 $Type = "NVIDIA"
@@ -32,9 +32,10 @@ if (-not $Config.Miners.$Name.MinerFileVersion) {
         "MinerFeeInPercentSingleMode" = 1.0
         "MinerFeeInPercentDualMode" = 1.5
         "MinerFeeInfo" = "Single mode: 1%, dual mode 1.5%, 2GB cards: 0%; Second coin (Decred/Siacoin/Lbry/Pascal/Blake2s/Keccak) is mined without developer fee."
-        #"IgnoreHWModel" = @("GPU Model Name", "GTX10603GB") # Currently unused, example only. Strings here should match GPU model name reformatted with (Get-Culture).TextInfo.ToTitleCase(($_.Name)) -replace "[^A-Z0-9]"
-        #"IgnoreAmdGpuID" = @(0, 1) # Currently unused, example only
-        #"IgnoreNvidiaGpuID" =  @(0, 1) # Currently unused, example only
+        #"IgnoreHWModel" = @("GPU Model Name", "Another GPU Model Name") # Strings here must match GPU model name reformatted with (Get-Culture).TextInfo.ToTitleCase(($_.Name)) -replace "[^A-Z0-9]"
+        "IgnoreHWModel" = @("GeforceGTX1070")
+        #"IgnoreDeviceIDs" = @(0, 1) # in hex
+        "IgnoreDeviceIDs" = @(1)
         "Commands" = [PSCustomObject]@{
             "ethash" = ""
             "ethash2gb" = ""
@@ -116,6 +117,18 @@ else {
     }
 }
 
+# Get device list
+$DeviceID = 0
+$DeviceIDs = @() # array of all Nvidia devices, ids will be in hex format
+$DeviceIDs2gb = @() # array of all Nvidia devices with more than 3MiB vram, ids will be in hex format
+[OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | ForEach-Object {
+    if ($Config.Miners.$Name.IgnoreDeviceIDs -notcontains $DeviceID -and $Config.Miners.$Name.IgnoreHWModel -inotcontains ((Get-Culture).TextInfo.ToTitleCase($_.Name) -replace "[^A-Z0-9]")) {
+        $DeviceIDs += [Convert]::ToString($DeviceID, 16)
+        if ($_.GlobalMemsize -ge 3000000000) {$DeviceIDs2gb += [Convert]::ToString($DeviceID, 16)}
+    }
+    $DeviceID++
+}
+
 $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
 
     $Command = $Config.Miners.$Name.Commands.$_
@@ -123,6 +136,9 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
     $MainAlgorithm_Norm = Get-Algorithm $MainAlgorithm
 
     if ($Pools.$($MainAlgorithm_Norm)) {
+    
+        if($Pools.$MainAlgorithm_Norm.Name -eq 'NiceHash') {$EthereumStratumMode = "3"} else {$EthereumStratumMode = "2"}
+        if ($MainAlgorithm_Norm -eq "Ethash") {$Devices = $DeviceIDs -join ''} else {$Devices = $DeviceIDs2gb -join ''}
         
         $DcriCmd = $_.Split(";") | Select -Index 2
         
@@ -149,7 +165,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                     Name      = $MinerName
                     Type      = $Type
                     Path      = $Config.Miners.$Name.Path
-                    Arguments = ("-mode 0 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass) -platform 2 $($DcriCmd) $Command $($Config.Miners.$Name.CommonCommands)" -replace "\s+", " ").trim()
+                    Arguments = ("-mode 0 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -platform 2 $DcriCmd -di $Devices $($Config.Miners.$Name.CommonCommands) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$Command" -replace "\s+", " ").trim()
                     HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm; "$SecondaryAlgorithm_Norm" = $HashRateSecondaryAlgorithm}
                     API       = $Api
                     Port      = $Config.Miners.$Name.Port
@@ -161,7 +177,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                         Name      = $MinerName
                         Type      = $Type
                         Path      = $Config.Miners.$Name.Path
-                        Arguments = ("-mode 0 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass) -platform 2 $($DcriCmd) $Command $($CommonCommands)" -replace "\s+", " ").trim()
+                        Arguments = ("-mode 0 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -platform 2 $DcriCmd -di $Devices $($Config.Miners.$Name.CommonCommands) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$Command" -replace "\s+", " ").trim()
                         HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm; "$SecondaryAlgorithm_Norm" = $HashRateSecondaryAlgorithm}
                         API       = $Api
                         Port      = $Config.Miners.$Name.Port
@@ -183,7 +199,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                 Name      = $MinerName
                 Type      = $Type
                 Path      = $Config.Miners.$Name.Path
-                Arguments = ("-mode 1 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm 3 -allpools 1 -allcoins 1 -platform 2 $Command $($Config.Miners.$Name.CommonCommands)" -replace "\s+", " ").trim()
+                Arguments = ("-mode 1 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm $EthereumStratumMode -allpools 1 -allcoins 1 -platform 2 -di $Devices $($Config.Miners.$Name.CommonCommands)$Command" -replace "\s+", " ").trim()
                 HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm}
                 API       = $Api
                 Port      = $Config.Miners.$Name.Port
