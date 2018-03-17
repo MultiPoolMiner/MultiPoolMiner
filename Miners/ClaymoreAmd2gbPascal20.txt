@@ -1,7 +1,7 @@
 {
     "Type":  "AMD",
     "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
-    "Arguments":  "\"-r -1 -mport -13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -allpools 1 -allcoins 1 -dpool $($Pools.Pascal.Host):$($Pools.Pascal.Port) -dwal $($Pools.Pascal.User) -dpsw $($Pools.Pascal.Pass) -dcoin pasc -dcri 20 -platform 1\"",
+    "Arguments":  "\"-r -1 -mport -13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm $(if($Pools.Ethash.Name -eq 'NiceHash'){3}else{2}) -allpools 1 -allcoins 1 -dpool $($Pools.Pascal.Host):$($Pools.Pascal.Port) -dwal $($Pools.Pascal.User) -dpsw $($Pools.Pascal.Pass) -dcoin pasc -dcri 20 -platform 1\"",
     "HashRates":  {
                       "Ethash2gb":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'}).Count -eq 0) {0} else {$Stats.ClaymoreAmd2gbPascal20_Ethash2gb_HashRate.Week})\"",
                       "Pascal":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'}).Count -eq 0) {0} else {$Stats.ClaymoreAmd2gbPascal20_Pascal_HashRate.Week})\""
