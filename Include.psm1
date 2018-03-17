@@ -265,7 +265,7 @@ filter ConvertTo-Hash {
 
 function ConvertTo-LocalCurrency { 
     [CmdletBinding()]
-    # To get same numbering scheme reagardless of value BTC value (size) to determine formatting
+    # To get same numbering scheme regardless of value BTC value (size) to determine formatting
     # Use $Offset to add/remove decimal places
 
     param(
