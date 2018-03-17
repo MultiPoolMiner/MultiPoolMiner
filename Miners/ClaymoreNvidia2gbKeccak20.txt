@@ -1,7 +1,7 @@
 {
     "Type":  "NVIDIA",
     "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
-    "Arguments":  "\"-r -1 -mport -23333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm $(if($Pools.Ethash.Name -eq 'NiceHash'){3}else{2}) -allpools 1 -allcoins 1 -dpool $($Pools.Keccak.Host):$($Pools.Keccak.Port) -dwal $($Pools.Keccak.User) -dpsw $($Pools.Keccak.Pass) -dcoin keccak -dcri 20 -platform 2\"",
+    "Arguments":  "\"-r -1 -mport -23333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm $(if($Pools.Ethash2gb.Name -eq 'NiceHash'){3}else{2}) -allpools 1 -allcoins 1 -dpool $($Pools.Keccak.Host):$($Pools.Keccak.Port) -dwal $($Pools.Keccak.User) -dpsw $($Pools.Keccak.Pass) -dcoin keccak -dcri 20 -platform 2\"",
     "HashRates":  {
                       "Ethash2gb":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'}).Count -eq 0) {0} else {$Stats.ClaymoreNvidia2gbKeccak20_Ethash2gb_HashRate.Week})\"",
                       "Keccak":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'}).Count -eq 0) {0} else {$Stats.ClaymoreNvidia2gbKeccak20_Keccak_HashRate.Week})\""
