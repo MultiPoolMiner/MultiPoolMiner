@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 27/02/2018 - v1.23.00 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 18/03/2018 - v1.24.00 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -40,7 +40,7 @@ Done. You are all set to mine the most profitable coins and maximise your profit
 ## IMPORTANT NOTES
 
 - It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
-- Having PowerShell 6 installed is now a requirement. [Windows 64bit](https://github.com/PowerShell/PowerShell/releases/download/v6.0.1/PowerShell-6.0.1-win-x64.msi), [All other versions](https://github.com/PowerShell/PowerShell/releases)
+- Having PowerShell 6 installed is now a requirement. [Windows 64bit](https://github.com/PowerShell/PowerShell/releases/download/v6.0.2/PowerShell-6.0.2-win-x64.msi), [All other versions](https://github.com/PowerShell/PowerShell/releases)
 - Microsoft .NET Framework 4.5.1 or later is required for MultiPoolMiner to function properly. [Web Installer](https://www.microsoft.com/en-us/download/details.aspx?id=40773)
 - CCMiner (NVIDIA cards only) may need 'MSVCR120.dll' if you don't already have it: https://www.microsoft.com/en-gb/download/details.aspx?id=40784. Make sure that you install both the x86 and the x64 versions. 
 - CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145. Make sure that you install both the x86 and the x64 versions. 
@@ -221,7 +221,7 @@ Current versions support advanced configuration via 'Config.txt' in the MPM main
 
 Config.txt is a JSON file and human readable / editable. A good primer for understanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
 
-The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like http://jsonviewer.stack.hu/.
+Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like http://jsonviewer.stack.hu/ (copy/paste the complete file).
 
 ### Default content of 'Config.txt'
 
@@ -291,12 +291,12 @@ The default pool config might look like this:
     }
 
 The payout currency is defined by this line:
-"BTC": "$Wallet",
+"BTC": "$Wallet", (MPM will use the the wallet address from the start.bat file)
 
-E.g. to change the payout currency for Zpool to LiteCoin replace the line for BTC with "LTC":  "<YOUR_LITECOIN_ADDRESS>",
+E.g. to change the payout currency for Zpool to LiteCoin replace the line for BTC with "LTC": "<YOUR_LITECOIN_ADDRESS>", (of course you  need to insert a real LTC address)
 
     "Zpool": {
-        "LTC":  "<YOUR_LITECOIN_ADDRESS>",
+        "LTC": "<YOUR_LITECOIN_ADDRESS>",
         "Worker": "$WorkerName"
     }
     
@@ -306,22 +306,22 @@ It might be desirable to prevent a pool from using a specific algorithm or a set
 
 The default pool config might look like this:
 
-    "NiceHash":  {
-        "Worker":  "$WorkerName",
+    "NiceHash": {
+        "Worker": "$WorkerName",
         "BTC": "$Wallet"
     }
 
-To prevent the pool from using an algorithm / a set of algorithms add a line like "DisabledAlgorithms":  ["disabled_algo", "another_disabled_algo"]
+To prevent the pool from using an algorithm / a set of algorithms add a line like "DisabledAlgorithms": ["disabled_algo", "another_disabled_algo"]
 
 E.g. if you do not want to use Keccac and Equihash on NiceHash change the pool config to:
 
-    "NiceHash":  {
-        "Worker":  "$WorkerName",
+    "NiceHash": {
+        "Worker": "$WorkerName",
         "BTC": "$Wallet",
-        "DisabledAlgorithms":  ["Keccak", "Equihash","..."]
+        "DisabledAlgorithms": ["Keccak", "Equihash"]
     }
 
-To allow mining all algorithms remove the line "DisabledAlgorithms":  [...]
+To allow mining all algorithms remove the line "DisabledAlgorithms": [...]
 
 #### To disable mining some coins on a pool
 
@@ -329,22 +329,22 @@ The pools ending in ...Coins allow mining selected coins only, e.g do not mine Z
 Note: Not all pools support this, for more information consult the pools web page
 
 The default pool config might look like this:
-    "ZpoolCoins":  {
-        "Worker":  "$WorkerName",
+    "ZpoolCoins": {
+        "Worker": "$WorkerName",
         "BTC": "$Wallet"
     }
 
-To limit mining to well defined coins add a line like "DisabledCoins":  ["DisabledCoinName", "AnotherDisabledCoinName", "YetAnotherDisabledCoinName","..."]
+To limit mining to well defined coins add a line like "DisabledCoins": ["DisabledCoinName", "AnotherDisabledCoinName", "YetAnotherDisabledCoinName", "..."]
 
-E.g. if you do not want to mine the coins 'Pizza' and 'Vivo on Zpool change the pool config to:
+E.g. if you do not want to mine the coins 'Pizza' and 'Vivo' on Zpool change the pool config to:
 
-    "ZpoolCoins":  {
-        "Worker":  "$WorkerName",
+    "ZpoolCoins": {
+        "Worker": "$WorkerName",
         "BTC": "$Wallet",
-        "DisabledCoins":  ["Pizza", "Vivo"]
+        "DisabledCoins": ["Pizza", "Vivo"]
     }
 
-To allow mining all coins remove the line "DisabledCoins":  [...]
+To allow mining all coins remove the line "DisabledCoins": [...]
 
 #### To mine only selected coins on a pool
 
@@ -352,22 +352,22 @@ The pools ending in ...Coins allow mining selected coins only, e.g mine only ZCl
 Note: Not all pools support this, for more information consult the pools web page
 
 The default pool config might look like this:
-    "ZpoolCoins":  {
-        "Worker":  "$WorkerName",
+    "ZpoolCoins": {
+        "Worker": "$WorkerName",
         "BTC": "$Wallet"
     }
 
-To limit mining to well defined coins add a line like "Coins":  ["CoinName", "AnotherCoinName", "YetAnotherCoinName","..."]
+To limit mining to well defined coins add a line like "Coins": ["CoinName", "AnotherCoinName", "YetAnotherCoinName","..."]
 
-E.g. to mine only the coins 'Pizza' and 'Vivo on Zpool change the pool config to:
+E.g. to mine only the coins 'Pizza' and 'Vivo' on Zpool change the pool config to:
 
-    "ZpoolCoins":  {
-        "Worker":  "$WorkerName",
+    "ZpoolCoins": {
+        "Worker": "$WorkerName",
         "BTC": "$Wallet",
-        "Coins":  ["Pizza", "Vivo"]
+        "Coins": ["Pizza", "Vivo"]
     }
 
-To allow mining all coins remove the line "Coins":  [...]
+To allow mining all coins remove the line "Coins": [...]
 
 ### Advanced config for Miners
 
@@ -377,7 +377,7 @@ This is currently not used. For now just leave it as it is.
 
 Most of these parameters are automatically filled with values that were passed to MPM via the start batch file.
 
-For now just leave it as it is.
+For now just leave them as they are.
 
 
 ## MULTIPOOLMINER'S LOGIC
