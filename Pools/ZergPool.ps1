@@ -68,7 +68,7 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = if ($ZergPool_Region -eq "us") {$ZergPool_Host}else {"$ZergPool_Region.$ZergPool_Host"}
+                Host          = "$ZergPool_Algorithm.$ZergPool_Host"
                 Port          = $ZergPool_Port
                 User          = Get-Variable $_ -ValueOnly
                 Pass          = "$Worker,c=$_"
