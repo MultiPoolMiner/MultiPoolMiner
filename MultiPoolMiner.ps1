@@ -56,7 +56,9 @@ param(
     [Parameter(Mandatory = $false)]
     [String]$MinerStatusKey = "",
     [Parameter(Mandatory = $false)]
-    [Double]$SwitchingPrevention = 1 #zero does not prevent miners switching
+    [Double]$SwitchingPrevention = 1, #zero does not prevent miners switching
+    [Parameter(Mandatory = $false)]
+    [Switch]$AutoUpdate = $true
 )
 
 $Version = "2.7.2.7"
@@ -96,7 +98,7 @@ if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpC
 }
 
 #Check for software updates
-$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1
+if ($AutoUpdate -and (Test-Path .\Updater.ps1)) {$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1}
 
 #Set donation parameters
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
