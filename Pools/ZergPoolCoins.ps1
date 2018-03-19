@@ -70,7 +70,7 @@ $ZergPoolCoins_MiningCurrencies | Where-Object {$DisabledCoins -inotcontains $Ze
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = if ($ZergPoolCoins_Region -eq "us") {$ZergPoolCoins_Host}else {"$ZergPoolCoins_Region.$ZergPoolCoins_Host"}
+                Host          = "$ZergPoolCoins_Algorithm.$ZergPoolCoins_Host"
                 Port          = $ZergPoolCoins_Port
                 User          = Get-Variable $ZergPoolCoins_Currency -ValueOnly
                 Pass          = "$Worker,c=$ZergPoolCoins_Currency,mc=$ZergPoolCoins_Currency"
@@ -89,7 +89,7 @@ $ZergPoolCoins_MiningCurrencies | Where-Object {$DisabledCoins -inotcontains $Ze
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+tcp"
-                    Host          =  if ($ZergPoolCoins_Region -eq "us") {$ZergPoolCoins_Host}else {"$ZergPoolCoins_Region.$ZergPoolCoins_Host"}
+                    Host          = "$ZergPoolCoins_Algorithm.$ZergPoolCoins_Host"
                     Port          = $ZergPoolCoins_Port
                     User          = Get-Variable $_ -ValueOnly
                     Pass          = "$Worker,c=$_,mc=$ZergPoolCoins_Currency"
