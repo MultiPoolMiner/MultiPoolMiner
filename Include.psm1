@@ -244,7 +244,12 @@ function Get-ChildItemContent {
             if ($Content -eq $null) {$Content = $_ | Get-Content}
         }
         $Content | ForEach-Object {
-            [PSCustomObject]@{Name = $Name; Content = $_}
+            if ($_.Name) {
+                [PSCustomObject]@{Name = $_.Name; Content = $_}
+            }
+            else {
+                [PSCustomObject]@{Name = $Name; Content = $_}
+            }
         }
     }
 }
