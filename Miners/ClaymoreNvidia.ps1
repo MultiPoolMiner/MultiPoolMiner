@@ -165,7 +165,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                     Name      = $MinerName
                     Type      = $Type
                     Path      = $Config.Miners.$Name.Path
-                    Arguments = ("-mode 0 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -platform 2 $DcriCmd -di $Devices $($Config.Miners.$Name.CommonCommands) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$Command" -replace "\s+", " ").trim()
+                    Arguments = ("-mode 0 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -platform 2 $DcriCmd -eres 0 -di $Devices $($Config.Miners.$Name.CommonCommands) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$Command" -replace "\s+", " ").trim()
                     HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm; "$SecondaryAlgorithm_Norm" = $HashRateSecondaryAlgorithm}
                     API       = $Api
                     Port      = $Config.Miners.$Name.Port
@@ -177,7 +177,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                         Name      = $MinerName
                         Type      = $Type
                         Path      = $Config.Miners.$Name.Path
-                        Arguments = ("-mode 0 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -platform 2 $DcriCmd -di $Devices $($Config.Miners.$Name.CommonCommands) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$Command" -replace "\s+", " ").trim()
+                        Arguments = ("-mode 0 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -platform 2 $DcriCmd -eres 0 -di $Devices $($Config.Miners.$Name.CommonCommands) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$Command" -replace "\s+", " ").trim()
                         HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm; "$SecondaryAlgorithm_Norm" = $HashRateSecondaryAlgorithm}
                         API       = $Api
                         Port      = $Config.Miners.$Name.Port
@@ -199,7 +199,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                 Name      = $MinerName
                 Type      = $Type
                 Path      = $Config.Miners.$Name.Path
-                Arguments = ("-mode 1 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm $EthereumStratumMode -allpools 1 -allcoins 1 -platform 2 -di $Devices $($Config.Miners.$Name.CommonCommands)$Command" -replace "\s+", " ").trim()
+                Arguments = ("-mode 1 -mport -$($Config.Miners.$Name.Port) -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -esm $EthereumStratumMode -allpools 1 -allcoins 1 -platform 2 -eres 0 -di $Devices $($Config.Miners.$Name.CommonCommands)$Command" -replace "\s+", " ").trim()
                 HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm}
                 API       = $Api
                 Port      = $Config.Miners.$Name.Port
