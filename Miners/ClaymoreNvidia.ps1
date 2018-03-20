@@ -156,7 +156,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
 
             #Second coin (Decred/Siacoin/Lbry/Pascal/Blake2s/Keccak) is mined without developer fee.
             if($Config.Miners.SubtractMinerFees) {
-                $HashRateMainAlgorithm = $HashRateMainAlgorithm * (100 - $Config.Miners.$Name.$MinerFeeInPercentDualMode)
+                $HashRateMainAlgorithm = $HashRateMainAlgorithm * (100 - $Config.Miners.$Name.MinerFeeInPercentDualMode)
             }
 
             if ($Pools.$($SecondaryAlgorithm_Norm)) {
@@ -170,9 +170,8 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                     API       = $Api
                     Port      = $Config.Miners.$Name.Port
                     URI       = $Uri
-                    Fee       = if($Config.Miners.SubtractMinerFees) {$Config.Miners.$Name.$MinerFeeInPercentDualMode}
-                    Pool      = $Pools.$MainAlgorithm_Norm.Name
-                }
+                    Fee       = if ($Config.Miners.SubtractMinerFees) {$Config.Miners.$Name.MinerFeeInPercentDualMode} else {$null}
+                    Pool      = $Pools.$MainAlgorithm_Norm.Name                }
                 if ($SecondaryAlgorithm_Norm -eq "Sia" -or $SecondaryAlgorithm_Norm -eq "Decred") {
                     $SecondaryAlgorithm_Norm = "$($SecondaryAlgorithm_Norm)NiceHash"
                     [PSCustomObject]@{
@@ -184,9 +183,8 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                         API       = $Api
                         Port      = $Config.Miners.$Name.Port
                         URI       = $Uri
-                        Fee       = if($Config.Miners.SubtractMinerFees) {$Config.Miners.$Name.$MinerFeeInPercentDualMode}
-                        Pool      = $Pools.$MainAlgorithm_Norm.Name
-                        
+                        Fee       = if ($Config.Miners.SubtractMinerFees) {$Config.Miners.$Name.MinerFeeInPercentDualMode} else {$null}
+                        Pool      = $Pools.$MainAlgorithm_Norm.Name                        
                     }
                 }
             }
@@ -196,7 +194,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
             $HashRateMainAlgorithm = ($Stats."$($Name)_$($MainAlgorithm_Norm)_HashRate".Week)
 
             if($Config.Miners.SubtractMinerFees) {
-                $HashRateMainAlgorithm = $HashRateMainAlgorithm * (100 - $Config.Miners.$Name.$MinerFeeInPercentSingleMode)
+                $HashRateMainAlgorithm = $HashRateMainAlgorithm * (100 - $Config.Miners.$Name.MinerFeeInPercentSingleMode)
             }
 
             # Single mining mode
@@ -209,7 +207,7 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                 API       = $Api
                 Port      = $Config.Miners.$Name.Port
                 URI       = $Uri
-                Fee       = if($Config.Miners.SubtractMinerFees) {$Config.Miners.$Name.$MinerFeeInPercentSingleMode}
+                Fee       = if($Config.Miners.SubtractMinerFees) {$Config.Miners.$Name.$MinerFeeInPercentSingleMode} else {$null}
                 Pool      = $Pools.$MainAlgorithm_Norm.Name
             }
         }
