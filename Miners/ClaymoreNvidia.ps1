@@ -170,6 +170,8 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                     API       = $Api
                     Port      = $Config.Miners.$Name.Port
                     URI       = $Uri
+                    Fee       = if($Config.Miners.SubtractMinerFees) {$Config.Miners.$Name.$MinerFeeInPercentDualMode}
+                    Pool      = $Pools.$MainAlgorithm_Norm.Name
                 }
                 if ($SecondaryAlgorithm_Norm -eq "Sia" -or $SecondaryAlgorithm_Norm -eq "Decred") {
                     $SecondaryAlgorithm_Norm = "$($SecondaryAlgorithm_Norm)NiceHash"
@@ -182,6 +184,9 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                         API       = $Api
                         Port      = $Config.Miners.$Name.Port
                         URI       = $Uri
+                        Fee       = if($Config.Miners.SubtractMinerFees) {$Config.Miners.$Name.$MinerFeeInPercentDualMode}
+                        Pool      = $Pools.$MainAlgorithm_Norm.Name
+                        
                     }
                 }
             }
@@ -204,6 +209,8 @@ $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction
                 API       = $Api
                 Port      = $Config.Miners.$Name.Port
                 URI       = $Uri
+                Fee       = if($Config.Miners.SubtractMinerFees) {$Config.Miners.$Name.$MinerFeeInPercentSingleMode}
+                Pool      = $Pools.$MainAlgorithm_Norm.Name
             }
         }
     }
