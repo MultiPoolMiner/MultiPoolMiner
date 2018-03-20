@@ -7,7 +7,7 @@ param(
 )
 
 # Hardcoded per miner version, do not allow user to change in config
-$MinerFileVersion = "2018031700" #Format: YYYYMMMDD[TwoDigitCounter], higher value will trigger config file update
+$MinerFileVersion = "2018031700" #Format: YYYYMMDD[TwoDigitCounter], higher value will trigger config file update
 $MinerBinaryInfo =  "Claymore Dual Ethereum AMD/NVIDIA GPU Miner v11.5"
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\Ethash-Claymore\EthDcrMiner64.exe"
