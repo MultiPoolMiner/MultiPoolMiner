@@ -9,14 +9,16 @@ param(
 
 # Hardcoded per miner version, do not allow user to change in config
 $MinerFileVersion = "2018032200" #Format: YYYYMMDD[TwoDigitCounter], higher value will trigger config file update
-$MinerBinaryInfo =  "Ccminer (x64) 2.2.5 by Tpruvot"
+$MinerBinaryInfo =  "dstm's ZCash Cuda miner 0.6"
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Path = ".\Bin\NVIDIA-TPruvot\ccminer-x64.exe"
+$Path = ".\Bin\Equihash-DSTM\zm.exe"
 $Type = "NVIDIA"
-$API = "Ccminer"
-$Uri = "https://github.com/MSFTserver/ccminer/releases/download/2.2.5-rvn/ccminer-x64-2.2.5-rvn-cuda9.7z"
-$UriManual = ""
-$WebLink = "https://bitcointalk.org/?topic=770064" # See here for more information about the miner
+$API = "DSTM"
+$Uri = ""
+$UriManual = "https://mega.nz/#!1kRxQRSD!I3ryiEI5eT7datW842QNESyBQpZY6PILYS4HNIEHpYY"
+$WebLink = "https://bitcointalk.org/index.php?topic=2021765.0" # See here for more information about the miner
+$PrerequisitePath = "$env:SystemRoot\System32\msvcr120.dll"
+$PrerequisiteURI  = "http://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe"                
 
 # Create default miner config, required for setup
 $DefaultMinerConfig = [PSCustomObject]@{
@@ -26,42 +28,16 @@ $DefaultMinerConfig = [PSCustomObject]@{
     "UriInfo" = "$UriManual"
     "Type" = "$Type"
     "Path" = "$Path"
-    "Port" = 4068
+    "Port" = 42000
+    "MinerFeeInPercent" = 2.0
     #"IgnoreHWModel" = @("GPU Model Name", "Another GPU Model Name", e.g "GeforceGTX1070") # Available model names are in $Devices.$Type.Name_Norm, Strings here must match GPU model name reformatted with (Get-Culture).TextInfo.ToTitleCase(($_.Name)) -replace "[^A-Z0-9]"
     "IgnoreHWModel" = @()
     #"IgnoreDeviceID" = @(0, 1) # Available deviceIDs are in $Devices.$Type.DeviceIDs
     "IgnoreDeviceID" = @()
     "Commands" = [PSCustomObject]@{
-        "bitcore" = "" #Bitcore
-        "blake2s" = "" #Blake2s
-        "blakecoin" = "" #Blakecoin
-        "vanilla" = "" #BlakeVanilla
-        "c11" = "" #C11
-        "cryptonight" = "" #CryptoNight
-        "decred" = "" #Decred
         "equihash" = "" #Equihash
-        "groestl" = "" #Groestl
-        "hmq1725" = "" #HMQ1725
-        "jha" = "" #JHA
-        "keccak" = "" #Keccak
-        "lbry" = "" #Lbry
-        "lyra2v2" = "" #Lyra2RE2
-        "lyra2z" = "" #Lyra2z
-        "myr-gr" = "" #MyriadGroestl
-        "neoscrypt" = "" #NeoScrypt
-        "nist5" = "" #Nist5
-        "phi" = "" #PHI
-        "sib" = "" #Sib
-        "skein" = "" #Skein
-        "skunk" = "" #Skunk
-        "timetravel" = "" #Timetravel
-        "tribus" = "" #Tribus
-        "veltor" = "" #Veltor
-        "x11evo" = "" #X11evo
-        "x16r" = "" #Raven
-        "x17" = "" #X17
     }
-    "CommonCommands" = " --submit-stale"
+    "CommonCommands" = " --color"
 }
 
 if (-not $Config.Miners.$Name.MinerFileVersion) {
@@ -184,7 +160,7 @@ $Devices.$Type | ForEach-Object {
         }
     }
 
-    $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#> -and $DeviceIDs} | ForEach-Object {
+    $Config.Miners.$Name.Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_) -and $DeviceIDs} | ForEach-Object {
 
         $Algorithm_Norm = Get-Algorithm $_
 
@@ -194,22 +170,34 @@ $Devices.$Type | ForEach-Object {
         }
         else {
             $MinerName = $Name
-            $Commands = $Config.Miners.$Name.Commands.$_.Split(";") | Select -Index 0 # additional command line options for algorithm
-        }
+            $Commands = $Config.Miners.$Name.Commands.$_ # additional command line options for algorithm
+        }    
 
+        $HashRate = $Stats."$($MinerName)_$($Algorithm_Norm)_HashRate".Week
+
+        if ($Config.IgnoreMinerFees -or $Config.Miners.$Name.$MinerFeeInPercent -eq 0) {
+            $Fees = @($null)
+        }
+        else {
+            $HashRate = $HashRate * (1 - $Config.Miners.$Name.MinerFeeInPercent / 100)
+            $Fees = @($Config.Miners.$Name.MinerFeeInPercent)
+        }
+        
         $MinerPort = $Config.Miners.$Name.Port + $Devices.$Type.IndexOf($DeviceTypeModel) # make port unique
         
         [PSCustomObject]@{
-            Name      = $MinerName
-            Type      = $Type
-            Path      = $Path
-            Arguments = ("-a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$Commands$($Config.Miners.$Name.CommonCommands) -b 127.0.0.1:$($MinerPort) -d $($DeviceIDs -join ',')" -replace "\s+", " ").trim()
-            HashRates = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($MinerName)_$($Algorithm_Norm)_HashRate".Week}
-            API       = $Api
-            Port      = $MinerPort
-            URI       = $Uri
-            Fees      = @($null)
-            Index     = $DeviceIDs -join ';'
+            Name             = $MinerName
+            Type             = $Type
+            Path             = $Path
+            Arguments        = ("--server $(if ($Pools.$Algorithm_Norm.SSL) {'ssl://'})$($Pools.Equihash.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$Commands$($Config.Miners.$Name.CommonCommands) --telemetry=0.0.0.0:$($MinerPort) --dev $($DeviceIDs -join ' ')" -replace "\s+", " ").trim()
+            HashRates        = [PSCustomObject]@{$Algorithm_Norm = $HashRate}
+            API              = $Api
+            Port             = $MinerPort
+            URI              = $Uri
+            Fees             = $Fees
+            Index            = $DeviceIDs -join ';'
+            PrerequisitePath = $PrerequisitePath
+            PrerequisiteURI  = $PrerequisiteURI               
         }
     }
 }

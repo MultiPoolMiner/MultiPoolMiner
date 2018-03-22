@@ -5,15 +5,44 @@ param(
     [String]$User, 
     [alias("WorkerName")]
     [String]$Worker, 
-    [TimeSpan]$StatSpan
+    [TimeSpan]$StatSpan,
+    [bool]$Info = $false
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $MiningPoolHubCoins_Request = [PSCustomObject]@{}
 
+if ($Info) {
+    # Just return info about the pool for use in setup
+    $SupportedAlgorithms = @()
+    try {
+        $MiningPoolHub_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $MiningPoolHub_Request.return | Foreach-Object {
+            $SupportedAlgorithms += Get-Algorithm $_.algo
+        }
+    } Catch {
+        Write-Warning "Unable to load supported algorithms for $Name - may not be able to configure all pool settings"
+        $SupportedAlgorithms = @()
+    }
+
+    return [PSCustomObject]@{
+        Name = $Name
+        Website = "https://miningpoolhub.com"
+        Description = "This version lets MultiPoolMiner determine which coin to miner. The regular MiningPoolHub pool may work better, since it lets the pool avoid switching early and losing shares."
+        Algorithms = $SupportedAlgorithms
+        Note = "Registration required" # Note is shown beside each pool in setup
+        # Define the settings this pool uses.
+        Settings = @(
+            @{Name='Username'; Required=$true; Description='MiningPoolHub username'},
+            @{Name='Worker'; Required=$true; Description='Worker name to report to pool'},
+            @{Name='API_Key'; Required=$false; Description='Used to retrieve balances'}
+        )
+    }
+}
+
 try {
-    $MiningPoolHubCoins_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getminingandprofitsstatistics&$(Get-Date -Format "yyyy-MM-dd_HH-mm")" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $MiningPoolHubCoins_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getminingandprofitsstatistics" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
@@ -27,7 +56,7 @@ if (($MiningPoolHubCoins_Request.return | Measure-Object).Count -le 1) {
 
 $MiningPoolHubCoins_Regions = "europe", "us", "asia"
 
-$MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-Object {
+$MiningPoolHubCoins_Request.return | Where-Object {$DisabledCoins -inotcontains $_.coin_name -and $DisabledAlgorithms -inotcontains (Get-Algorithm $_.algo) -and $_.pool_hash -gt 0} |ForEach-Object {
     $MiningPoolHubCoins_Hosts = $_.host_list.split(";")
     $MiningPoolHubCoins_Port = $_.port
     $MiningPoolHubCoins_Algorithm = $_.algo

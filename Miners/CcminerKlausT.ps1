@@ -9,21 +9,21 @@ param(
 
 # Hardcoded per miner version, do not allow user to change in config
 $MinerFileVersion = "2018032200" #Format: YYYYMMDD[TwoDigitCounter], higher value will trigger config file update
-$MinerBinaryInfo =  "Ccminer (x64) 2.2.5 by Tpruvot"
+$MinerBinaryInfo =  "Ccminer (x64) 8.21 by KlausT"
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Path = ".\Bin\NVIDIA-TPruvot\ccminer-x64.exe"
+$Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
 $Type = "NVIDIA"
 $API = "Ccminer"
-$Uri = "https://github.com/MSFTserver/ccminer/releases/download/2.2.5-rvn/ccminer-x64-2.2.5-rvn-cuda9.7z"
-$UriManual = ""
-$WebLink = "https://bitcointalk.org/?topic=770064" # See here for more information about the miner
+$Uri = "https://github.com/KlausT/ccminer/releases/download/8.21/ccminer-821-cuda91-x64.zip"
+$UriManual = ""    
+$WebLink = "https://github.com/KlausT/ccminer" # See here for more information about the miner
 
 # Create default miner config, required for setup
 $DefaultMinerConfig = [PSCustomObject]@{
     "MinerFileVersion" = "$MinerFileVersion"
     "MinerBinaryInfo" = "$MinerBinaryInfo"
     "Uri" = "$Uri"
-    "UriInfo" = "$UriManual"
+    "UriInfo" = "$UriManual"    
     "Type" = "$Type"
     "Path" = "$Path"
     "Port" = 4068
@@ -32,36 +32,11 @@ $DefaultMinerConfig = [PSCustomObject]@{
     #"IgnoreDeviceID" = @(0, 1) # Available deviceIDs are in $Devices.$Type.DeviceIDs
     "IgnoreDeviceID" = @()
     "Commands" = [PSCustomObject]@{
-        "bitcore" = "" #Bitcore
-        "blake2s" = "" #Blake2s
-        "blakecoin" = "" #Blakecoin
-        "vanilla" = "" #BlakeVanilla
-        "c11" = "" #C11
-        "cryptonight" = "" #CryptoNight
-        "decred" = "" #Decred
-        "equihash" = "" #Equihash
         "groestl" = "" #Groestl
-        "hmq1725" = "" #HMQ1725
-        "jha" = "" #JHA
-        "keccak" = "" #Keccak
-        "lbry" = "" #Lbry
-        "lyra2v2" = "" #Lyra2RE2
-        "lyra2z" = "" #Lyra2z
         "myr-gr" = "" #MyriadGroestl
         "neoscrypt" = "" #NeoScrypt
-        "nist5" = "" #Nist5
-        "phi" = "" #PHI
-        "sib" = "" #Sib
-        "skein" = "" #Skein
-        "skunk" = "" #Skunk
-        "timetravel" = "" #Timetravel
-        "tribus" = "" #Tribus
-        "veltor" = "" #Veltor
-        "x11evo" = "" #X11evo
-        "x16r" = "" #Raven
-        "x17" = "" #X17
     }
-    "CommonCommands" = " --submit-stale"
+    "CommonCommands" = ""
 }
 
 if (-not $Config.Miners.$Name.MinerFileVersion) {
@@ -198,7 +173,7 @@ $Devices.$Type | ForEach-Object {
         }
 
         $MinerPort = $Config.Miners.$Name.Port + $Devices.$Type.IndexOf($DeviceTypeModel) # make port unique
-        
+
         [PSCustomObject]@{
             Name      = $MinerName
             Type      = $Type
