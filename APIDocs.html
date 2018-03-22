@@ -1,0 +1,55 @@
+﻿<html>
+  <body>
+    <h1>MultiPoolMiner API</h1>
+    
+    API data is available at http://localhost:3999/&lt;resource&gt;
+
+    <h2>Resources</h2>
+    
+    <h3>Version</h3>
+    <a href="http://localhost:3999/version">/version</a>
+    <p>Returns the version number of MultiPoolMiner.</p>
+    
+    <h3>Running Miners</h3>
+    <a href="http://localhost:3999/runningminers">/runningminers</a>
+    <p>Returns data about the miners that are currently running.</p>
+    
+    <h3>Active Miners</h3>
+    <a href="http://localhost:3999/activeminers">/activeminers</a>
+    <p>Gives data about all miners that are enabled.</p>
+    
+    <h3>Failed Miners</h3>
+    <a href="http://localhost:3999/failedminers">/failedminers</a>
+    <p>Gives data about all miners that are failed.</p>
+    
+    <h3>Pools</h3>
+    <a href="http://localhost:3999/pools">/pools</a>
+    <p>Dump of the $pools variable</p>
+    
+    <h3>Miners</h3>
+    <a href="http://localhost:3999/miners">/miners</a>
+    <p>Dump of the $miners variable</p>
+    
+    <h3>Config</h3>
+    <a href="http://localhost:3999/config">/config</a>
+    <p>Shows the full configuration for the running script, after all variable substitution and pool entries are added</p>
+    
+    <h3>Debug</h3>
+    <a href="http://localhost:3999/debug">/debug</a>
+    <p>Shows all data added to the $API hashtable, used only for debugging.</p>
+    
+    <h3>Devices</h3>
+    <a href="http://localhost:3999/devices">/devices</a>
+    <p>Dump of the $devices variable, used only for debugging. Shows information about all found mining devices, used only for debugging.</p>
+    
+    <h3>Stats</h3>
+    <a href="http://localhost:3999/stats">/stats</a>
+    <p>Dump of the $stats variable, used only for debugging. Stats data is used for internal MPM calculations.</p>
+    
+    <h3>Stop</h3>
+    <a href="http://localhost:3999/stop">/stop</a>
+    <p>Tells the script to stop running.</p>
+    
+    <a href="https://multipoolminer.io">MultiPoolMiner.io</a>
+  </body>
+</html>
