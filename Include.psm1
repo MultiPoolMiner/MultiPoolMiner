@@ -2,7 +2,140 @@
 
 Add-Type -Path .\OpenCL\*.cs
 
-Function Write-Log {
+function Get-Devices {
+    [CmdletBinding()]
+	
+    $Devices = [PSCustomObject]@{}
+    $DeviceID = 0
+    
+    $OpenGlDevices = [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)}
+    $OpenGlDevices | ForEach-Object {
+
+        $Vendor = $_.Vendor
+        $Name_Norm = (Get-Culture).TextInfo.ToTitleCase(($_.Name)) -replace "[^A-Z0-9]"
+
+        if ($_.Type -eq "Cpu") {
+            $Type = "CPU"
+        }
+        else {
+            Switch ($Vendor) {
+                "Advanced Micro Devices, Inc." {$Type = "AMD"}
+                "Intel(R) Corporation"         {$Type = "INTEL"}
+                "NVIDIA Corporation"           {$Type = "NVIDIA"}
+            }
+        }        
+
+        $Device = @([PSCustomObject]$_)
+        $Device | Add-Member Name_Norm $Name_Norm
+
+        if (-not $Devices.$Type) {
+            $DeviceID = 0
+            $Device | Add-Member DeviceIDs @($DeviceID)
+            $Devices | Add-Member $Type $Device
+        }
+        else {
+            if ($Devices.$Type.Name_Norm -notcontains $Name_Norm) {
+                $Device | Add-Member DeviceIDs @($DeviceID)
+                $Devices.$Type += $Device
+            }
+            else {
+                $Devices.$Type | Where-Object {$_.Name_Norm -eq $Name_Norm} | ForEach-Object {$_.DeviceIDs += $DeviceID}
+            }
+        }
+        $DeviceID++
+    }
+    $Devices
+}
+
+function Get-CommandPerDevice {
+
+# Supported parameter syntax:
+# -param-name[ value1[,value2[,..]]]
+# -param-name[=value1[,value2[,..]]]
+# --param-name[==value1[,value2[,..]]]
+# --param-name[=value1[,value2[,..]]]
+
+[CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [String]$Command,
+        [Parameter(Mandatory = $false)]
+        [Int[]]$Devices
+    )
+    
+    if ($Devices.count -gt 0) {
+        # Only required if more than one different card in system
+        $Tokens = @()
+
+        ($Command + " ") -split "(?= --)" -split "(?= -)" | ForEach {
+            $Token = $_.Trim()
+            if ($Token.length -gt 0) {
+                if ($Token -match "^-[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}[\s]{1,}.*,") {
+                    # -param-name[ value1[,value2[,..]]]
+                    $Tokens += [PSCustomObject]@{
+                        Parameter = $Token.Split(" ")[0]
+                        ParamValueSeparator = " "
+                        ValueSeparator = ","
+                        Values = @($Token.Split(" ")[1].Split(","))
+                    }
+                }
+                elseif ($Token -match "^-[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}=[^=].*,") {
+                    # -param-name[=value1[,value2[,..]]]
+                    $Tokens += [PSCustomObject]@{
+                        Parameter = $Token.Split("=")[0]
+                        ParamValueSeparator = "="
+                        ValueSeparator = ","
+                        Values = @($Token.Split("=")[1].Split(","))
+                    }
+                }
+                elseif ($Token -match "^--[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}==[^=].*,") {
+                    # --param-name[==value1[,value2[,..]]]
+                    $Tokens += [PSCustomObject]@{
+                        Parameter = $Token.Split("==")[0]
+                        ParamValueSeparator = "=="
+                        ValueSeparator = ","
+                        Values = @($Token.Split("==")[2].Split(","))
+                    }
+                }
+                elseif ($Token -match "^--[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}=[^=].*,") {
+                    # --param-name[=value1[,value2[,..]]]
+                    $Tokens += [PSCustomObject]@{
+                        Parameter = $Token.Split("=")[0]
+                        ParamValueSeparator = "="
+                        ValueSeparator = ","
+                        Values = @($Token.Split("=")[1].Split(","))
+                    }
+                }
+                else {
+                    $Tokens += [PSCustomObject]@{Parameter = $Token}
+                }
+
+            }
+        }
+        
+        # Build command token for selected gpu device
+        [String]$Command = ""
+        $Tokens | ForEach-Object {
+            if ($_.Values.Count) {
+                $Token = $_
+                $Values = @()
+                $Devices | ForEach {
+                    if ($Token.Values[$_]) {$Values += $Token.Values[$_]}
+                    else {$Values += ""}
+                }
+                if ($Values -match "\w") {$Command += " $($Token.Parameter)$($Token.ParamValueSeparator)$($Values -join $($Token.ValueSeparator))"}
+            }
+            else {
+                $Command += " $($_.Parameter)"
+            }
+        }
+    }
+    
+    $Command
+}
+
+function Write-Log {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
@@ -494,6 +627,7 @@ class Miner {
     hidden [MinerStatus]$Status = [MinerStatus]::Idle
     $Benchmarked
     $LogFile
+    [Array]$Pools = @()
 
     hidden StartMining() {
         $this.Status = [MinerStatus]::Failed
