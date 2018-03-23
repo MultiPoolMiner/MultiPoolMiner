@@ -27,8 +27,8 @@ if (($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction I
 
 $ZergPoolCoins_Regions = "us", "europe"
 
-#Pool allows payout in BTC,"LTC" & any currency available in API. Define desired payout currency in $Config.$Pool.<Currency>
-$ZergPoolCoins_Currencies = @("BTC","LTC") + ($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
+#Pool allows payout in BTC, LTC & any currency available in API. Define desired payout currency in $Config.$Pool.<Currency>
+$ZergPoolCoins_Currencies = @("BTC", "LTC") + ($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 #Mine any coin defined in array $Config.$Pool.Coins[]
 $ZergPoolCoins_MiningCurrencies = ($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique
