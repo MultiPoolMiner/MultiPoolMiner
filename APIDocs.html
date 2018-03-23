@@ -10,21 +10,25 @@
     <a href="http://localhost:3999/version">/version</a>
     <p>Returns the version number of MultiPoolMiner.</p>
     
+    <h3>Miners</h3>
+    <a href="http://localhost:3999/miners">/miners</a>
+    <p>Dump of the $Miners variable</p>
+    
     <h3>Running Miners</h3>
     <a href="http://localhost:3999/runningminers">/runningminers</a>
-    <p>Returns data about the miners that are currently running.</p>
+    <p>Shows data about the miners that are currently running.</p>
     
     <h3>Active Miners</h3>
     <a href="http://localhost:3999/activeminers">/activeminers</a>
-    <p>Gives data about all miners that are enabled</p>
+    <p>Shows data about all miners that are enabled.</p>
+    
+    <h3>Failed Miners</h3>
+    <a href="http://localhost:3999/failedminers">/failedminers</a>
+    <p>Shows data about all miners that are failed.</p>
     
     <h3>Pools</h3>
     <a href="http://localhost:3999/pools">/pools</a>
-    <p>Dump of the $pools variable</p>
-    
-    <h3>Miners</h3>
-    <a href="http://localhost:3999/miners">/miners</a>
-    <p>Dump of the $miners variable</p>
+    <p>Dump of the $Pools variable</p>
     
     <h3>Config</h3>
     <a href="http://localhost:3999/config">/config</a>
@@ -34,6 +38,18 @@
     <a href="http://localhost:3999/debug">/debug</a>
     <p>Shows all data added to the $API hashtable, used only for debugging.</p>
     
+    <h3>Devices</h3>
+    <a href="http://localhost:3999/devices">/devices</a>
+    <p>Dump of the $Devices variable, used only for debugging. Shows information about all found mining devices, used only for debugging.</p>
+    
+    <h3>Stats</h3>
+    <a href="http://localhost:3999/stats">/stats</a>
+    <p>Dump of the $Stats variable, used only for debugging. Stats data is used for internal MPM calculations.</p>
+
+    <h3>WatchdogTimers</h3>
+    <a href="http://localhost:3999/watchdogtimers">/watchdogtimers</a>
+    <p>Dump of the $WatchdogTimers variable, used only for debugging. WatchdogTimers data is used for internal MPM calculations.</p>
+
     <h3>Stop</h3>
     <a href="http://localhost:3999/stop">/stop</a>
     <p>Tells the script to stop running.</p>
