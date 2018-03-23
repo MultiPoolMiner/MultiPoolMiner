@@ -28,7 +28,7 @@ if (($BlockmunchCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction
 $BlockmunchCoins_Regions = "us"
 
 #Pool allows payout in BTC, DOGE, LTC & any currency available in API. Define desired payout currency in $Config.$Pool.<Currency>
-$BlockmunchCoins_Currencies = @("BTC","DOGE","LTC") + ($BlockmunchCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
+$BlockmunchCoins_Currencies = @("BTC", "DOGE", "LTC") + ($BlockmunchCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 #Mine any coin defined in array $Config.$Pool.Coins[]
 $BlockmunchCoins_MiningCurrencies = ($BlockmunchCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Where-Object {$Coins.count -eq 0 -or $Coins -icontains $BlockmunchCoins_Request.$_.name} | Select-Object -Unique
