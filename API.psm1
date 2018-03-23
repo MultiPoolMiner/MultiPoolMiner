@@ -52,6 +52,10 @@ Function Start-APIServer {
                     $Data = $API.RunningMiners | ConvertTo-Json
                     Break
                 }
+                "/failedminers" {
+                    $Data = $API.FailedMiners | ConvertTo-Json
+                    Break
+                }
                 "/pools" {
                     $Data = $API.Pools | ConvertTo-Json
                     Break
@@ -66,6 +70,18 @@ Function Start-APIServer {
                 }
                 "/debug" {
                     $Data = $API | ConvertTo-Json
+                    Break
+                }
+                "/devices" {
+                    $Data = $API.Devices | ConvertTo-Json
+                    Break
+                }
+                "/stats" {
+                    $Data = $API.Stats | ConvertTo-Json
+                    Break
+                }
+                "/watchdogtimers" {
+                    $Data = $API.WatchdogTimers | ConvertTo-Json
                     Break
                 }
                 "/stop" {
