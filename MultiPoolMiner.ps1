@@ -56,7 +56,9 @@ param(
     [Parameter(Mandatory = $false)]
     [String]$MinerStatusKey = "",
     [Parameter(Mandatory = $false)]
-    [Double]$SwitchingPrevention = 1 #zero does not prevent miners switching
+    [Double]$SwitchingPrevention = 1, #zero does not prevent miners switching
+    [Parameter(Mandatory = $false)]
+    [Switch]$AutoUpdate = $true
 )
 
 $Version = "2.7.2.7"
@@ -96,7 +98,7 @@ if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpC
 }
 
 #Check for software updates
-$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1
+if ($AutoUpdate -and (Test-Path .\Updater.ps1)) {$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1}
 
 #Set donation parameters
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
@@ -165,6 +167,15 @@ while ($true) {
         }
     }
 
+    #Error in Config.txt
+    if ($Config -isnot [PSCustomObject]) {
+        Write-Log -Level Error "*********************************************************** "
+        Write-Log -Level Error "Critical error: Config.txt is invalid. MPM cannot continue. "
+        Write-Log -Level Error "*********************************************************** "
+        Start-Sleep 10
+        Exit
+    }
+
     #For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
     if ($Wallet -and -not $Config.MinerStatusKey) {$Config.MinerStatusKey = $Wallet}
 
@@ -180,12 +191,6 @@ while ($true) {
         )
     }
 
-    Get-ChildItem "Miners" | Where-Object {-not $Config.Miners.($_.BaseName)} | ForEach-Object {
-        $Config.Miners | Add-Member $_.BaseName (
-            [PSCustomObject]@{
-            }
-        )
-    }
     #Activate or deactivate donation
     if ($Config.Donate -lt 10) {$Config.Donate = 10}
     if ($Timer.AddDays(-1) -ge $LastDonated) {$LastDonated = $Timer}
@@ -245,7 +250,7 @@ while ($true) {
     Write-Log "Loading pool information. "
     $NewPools = @()
     if (Test-Path "Pools") {
-        $NewPools = Get-ChildItem "Pools" | Where-Object {$Config.Pools.$($_.BaseName)} | ForEach-Object {
+        $NewPools = Get-ChildItem "Pools" | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | ForEach-Object {
             $Pool_Name = $_.BaseName
             $Pool_Parameters = @{StatSpan = $StatSpan}
             $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
@@ -297,7 +302,7 @@ while ($true) {
     # select only the ones that have a HashRate matching our algorithms, and that only include algorithms we have pools for
     # select only the miners that match $Config.MinerName, if specified, and don't match $Config.ExcludeMinerName
     $AllMiners = if (Test-Path "Miners") {
-        Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config.Miners} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru} | 
+        Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | 
             Where-Object {$Config.Type.Count -eq 0 -or (Compare-Object $Config.Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
             Where-Object {($Config.Algorithm.Count -eq 0 -or (Compare-Object $Config.Algorithm $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0) -and ((Compare-Object $Pools.PSObject.Properties.Name $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0)} | 
             Where-Object {$Config.ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $Config.ExcludeAlgorithm $_.HashRates.PSObject.Properties.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0} | 
