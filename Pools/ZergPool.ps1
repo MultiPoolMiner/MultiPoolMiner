@@ -29,7 +29,7 @@ if ((($ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignor
 $ZergPool_Regions = "us", "europe"
 
 #Pool allows payout in BTC, LTC & any currency available in API. Define desired payout currency in $Config.$Pool.<Currency>
-$ZergPool_Currencies = @("BTC","LTC") + ($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
+$ZergPool_Currencies = @("BTC", "LTC") + ($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$DisabledAlgorithms -inotcontains (Get-Algorithm $ZergPool_Request.$_.name) -and $ZergPool_Request.$_.hashrate -gt 0} | ForEach-Object {
     $ZergPool_Host = "mine.zergpool.com"
     $ZergPool_Port = $ZergPool_Request.$_.port
