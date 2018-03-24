@@ -6,6 +6,5 @@
                       "Lyra2RE2":  "\"$($Stats.MkxminerAmd_Lyra2re2_HashRate.Week)\""
                   },
     "API":  "Wrapper",
-    "Port":  "13333",
-    "URI":  "https://filebin.net/vvgg69m5dbaf5suu/mkxminer301.zip"
+    "Port":  "13333"
 }
