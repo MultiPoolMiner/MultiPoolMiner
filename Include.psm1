@@ -8,21 +8,19 @@ Add-Type -Path .\OpenCL\*.cs
 function Get-Devices {
     [CmdletBinding()]
 	
-    $OpenGlDevices = [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)}
-
     $Devices = [PSCustomObject]@{}
     $DeviceID = 0
     
+    $OpenGlDevices = [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)}
     $OpenGlDevices | ForEach-Object {
 
-        $Vendor = $_.Vendor
         $Name_Norm = (Get-Culture).TextInfo.ToTitleCase(($_.Name)) -replace "[^A-Z0-9]"
 
         if ($_.Type -eq "Cpu") {
             $Type = "CPU"
         }
         else {
-            Switch ($Vendor) {
+            Switch ($_.Vendor) {
                 "Advanced Micro Devices, Inc." {$Type = "AMD"}
                 "Intel(R) Corporation"         {$Type = "INTEL"}
                 "NVIDIA Corporation"           {$Type = "NVIDIA"}
@@ -30,26 +28,28 @@ function Get-Devices {
         }        
 
         $Device = @([PSCustomObject]$_)
-        $Device | Add-Member Name_Norm $Name_Norm
 
         if (-not $Devices.$Type) {
             $DeviceID = 0
+            $Device | Add-Member Name_Norm $Name_Norm
             $Device | Add-Member DeviceIDs @($DeviceID)
             $Devices | Add-Member $Type $Device
         }
         else {
-            if ($Devices.$Type.Name_Norm -notcontains $Name_Norm) {
+            if ($Devices.$Type.Name_Norm -inotcontains $Name_Norm) {
+                $Device | Add-Member Name_Norm $Name_Norm
                 $Device | Add-Member DeviceIDs @($DeviceID)
                 $Devices.$Type += $Device
             }
             else {
-                $Devices.$Type | Where-Object {$_.Name_Norm -eq $Name_Norm} | ForEach-Object {$_.DeviceIDs += $DeviceID}
+                $Devices.$Type.$Name_Norm.$DeviceIDs += $DeviceID
             }
         }
         $DeviceID++
     }
     $Devices
 }
+
 
 Function Write-Log {
     [CmdletBinding()]
