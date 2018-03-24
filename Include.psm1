@@ -29,19 +29,19 @@ function Get-Devices {
 
         $Device = @([PSCustomObject]$_)
 
-        if (-not $Devices.$Type) {
+        if (-not $Devices.$Type) { # New hardware patform
             $DeviceID = 0
             $Device | Add-Member Name_Norm $Name_Norm
             $Device | Add-Member DeviceIDs @($DeviceID)
             $Devices | Add-Member $Type $Device
         }
         else {
-            if ($Devices.$Type.Name_Norm -inotcontains $Name_Norm) {
+            if ($Devices.$Type.Name_Norm -inotcontains $Name_Norm) { # New card model
                 $Device | Add-Member Name_Norm $Name_Norm
                 $Device | Add-Member DeviceIDs @($DeviceID)
                 $Devices.$Type += $Device
             }
-            else {
+            else { # Existing card model
                 $Devices.$Type.$Name_Norm.$DeviceIDs += $DeviceID
             }
         }
