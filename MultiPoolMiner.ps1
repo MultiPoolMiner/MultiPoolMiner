@@ -173,7 +173,7 @@ while ($true) {
     #For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
     if ($Wallet -and -not $Config.MinerStatusKey) {$Config.MinerStatusKey = $Wallet}
 
-    Get-ChildItem "Pools" | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
+    Get-ChildItem "Pools" -File | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
         $Config.Pools | Add-Member $_.BaseName (
             [PSCustomObject]@{
                 BTC     = $Wallet
@@ -189,7 +189,7 @@ while ($true) {
     if ($Config.Donate -lt 10) {$Config.Donate = 10}
     if ($Timer.AddDays(-1) -ge $LastDonated) {$LastDonated = $Timer}
     if ($Timer.AddDays(-1).AddMinutes($Config.Donate) -ge $LastDonated) {
-        Get-ChildItem "Pools" | ForEach-Object {
+        Get-ChildItem "Pools" -File | ForEach-Object {
             $Config.Pools | Add-Member $_.BaseName (
                 [PSCustomObject]@{
                     BTC    = $WalletDonate
@@ -239,7 +239,7 @@ while ($true) {
     Write-Log "Loading pool information. "
     $NewPools = @()
     if (Test-Path "Pools") {
-        $NewPools = Get-ChildItem "Pools" | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | ForEach-Object {
+        $NewPools = Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | ForEach-Object {
             $Pool_Name = $_.BaseName
             $Pool_Parameters = @{StatSpan = $StatSpan}
             $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
