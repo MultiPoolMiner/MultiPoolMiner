@@ -7,5 +7,4 @@
                   },
     "API":  "Wrapper",
     "Port":  "13333",
-    "URI":  "https://filebin.net/vvgg69m5dbaf5suu/mkxminer301.zip"
 }
