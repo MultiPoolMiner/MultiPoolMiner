@@ -58,6 +58,14 @@ function Get-CommandPerDevice {
 # --param-name[==value1[,value2[,..]]]
 # --param-name[=value1[,value2[,..]]]
 
+function Get-CommandPerDevice {
+
+# Supported parameter syntax:
+# -param-name[ value1[,value2[,..]]]
+# -param-name[=value1[,value2[,..]]]
+# --param-name[==value1[,value2[,..]]]
+# --param-name[=value1[,value2[,..]]]
+
 [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
@@ -67,15 +75,13 @@ function Get-CommandPerDevice {
         [Int[]]$Devices
     )
     
-    if ($Devices.count -gt 0) {
-        # Only required if more than one different card in system
+    if ($Devices.count -gt 0) { # Only required if more than one different card in system
         $Tokens = @()
 
         ($Command + " ") -split "(?= --)" -split "(?= -)" | ForEach {
             $Token = $_.Trim()
             if ($Token.length -gt 0) {
-                if ($Token -match "^-[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}[\s]{1,}.*,") {
-                    # -param-name[ value1[,value2[,..]]]
+                if ($Token -match "^-[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}[\s]{1,}.*,") { # -param-name[ value1[,value2[,..]]]
                     $Tokens += [PSCustomObject]@{
                         Parameter = $Token.Split(" ")[0]
                         ParamValueSeparator = " "
@@ -83,8 +89,7 @@ function Get-CommandPerDevice {
                         Values = @($Token.Split(" ")[1].Split(","))
                     }
                 }
-                elseif ($Token -match "^-[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}=[^=].*,") {
-                    # -param-name[=value1[,value2[,..]]]
+                elseif ($Token -match "^-[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}=[^=].*,") { # -param-name[=value1[,value2[,..]]]
                     $Tokens += [PSCustomObject]@{
                         Parameter = $Token.Split("=")[0]
                         ParamValueSeparator = "="
@@ -92,8 +97,7 @@ function Get-CommandPerDevice {
                         Values = @($Token.Split("=")[1].Split(","))
                     }
                 }
-                elseif ($Token -match "^--[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}==[^=].*,") {
-                    # --param-name[==value1[,value2[,..]]]
+                elseif ($Token -match "^--[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}==[^=].*,") { # --param-name[==value1[,value2[,..]]]
                     $Tokens += [PSCustomObject]@{
                         Parameter = $Token.Split("==")[0]
                         ParamValueSeparator = "=="
@@ -101,8 +105,7 @@ function Get-CommandPerDevice {
                         Values = @($Token.Split("==")[2].Split(","))
                     }
                 }
-                elseif ($Token -match "^--[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}=[^=].*,") {
-                    # --param-name[=value1[,value2[,..]]]
+                elseif ($Token -match "^--[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}=[^=].*,") { # --param-name[=value1[,value2[,..]]]
                     $Tokens += [PSCustomObject]@{
                         Parameter = $Token.Split("=")[0]
                         ParamValueSeparator = "="
