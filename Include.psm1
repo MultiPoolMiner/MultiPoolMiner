@@ -194,8 +194,8 @@ function Get-Stat {
         [String]$Name
     )
 
-    if (-not (Test-Path "Stats" -File)) {New-Item "Stats" -ItemType "directory" | Out-Null}
-    Get-ChildItem "Stats" | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
+    if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
+    Get-ChildItem "Stats" -File | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
 }
 
 function Get-ChildItemContent {
