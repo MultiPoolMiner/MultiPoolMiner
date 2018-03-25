@@ -133,7 +133,7 @@ function Get-CommandPerDevice {
                 if ($Values -match "\w") {$Command += " $($Token.Parameter)$($Token.ParamValueSeparator)$($Values -join $($Token.ValueSeparator))"}
             }
             else {
-                $Command += " $($_.Parameter)"
+                $Command += "$($_.Parameter)"
             }
         }
     }
