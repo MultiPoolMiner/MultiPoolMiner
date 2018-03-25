@@ -60,11 +60,13 @@ function Get-CommandPerDevice {
 
 function Get-CommandPerDevice {
 
-# Supported parameter syntax:
-# -param-name[ value1[,value2[,..]]]
-# -param-name[=value1[,value2[,..]]]
-# --param-name[==value1[,value2[,..]]]
-# --param-name[=value1[,value2[,..]]]
+# rewrites the command parameters
+# if a parameter has multiple values, only the values for the available devices are returned
+# parameters without values are valid for all devices an are left untouched
+# supported parameter syntax:
+# $Command = "-z 1  -y  2 ,c=BTC -a 0,1,2,3,4,5  -b=0,1,2,3,4,5 --c==0,1,2,3,4,5 --d --e=0,1,2,3,4,5 -f -g 0 1 2 3 4 5   -h 0 1 2 3 4 5 -i=,1,,3,,5 --j=0,1,,,4,5 --k==0,,,4,5 -l"
+# $Devices = @(0;1;2;5;6)
+# Result: "-z 1  -y  2 ,c=BTC -a 0,1,2,5  -b=0,1,2,5 --c==0,1,2,5 --d --e=0,1,2,5 -f -g 0 1 2 5   -h 0 1 2 5 -i=1,5 --j=0,1,5 --k==0,5 -l"
 
 [CmdletBinding()]
     param(
@@ -74,70 +76,62 @@ function Get-CommandPerDevice {
         [Parameter(Mandatory = $false)]
         [Int[]]$Devices
     )
-    
-    if ($Devices.count -gt 0) { # Only required if more than one different card in system
-        $Tokens = @()
 
-        ($Command + " ") -split "(?= --)" -split "(?= -)" | ForEach {
-            $Token = $_.Trim()
-            if ($Token.length -gt 0) {
-                if ($Token -match "^-[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}[\s]{1,}.*,") { # -param-name[ value1[,value2[,..]]]
-                    $Tokens += [PSCustomObject]@{
-                        Parameter = $Token.Split(" ")[0]
-                        ParamValueSeparator = " "
-                        ValueSeparator = ","
-                        Values = @($Token.Split(" ")[1].Split(","))
-                    }
-                }
-                elseif ($Token -match "^-[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}=[^=].*,") { # -param-name[=value1[,value2[,..]]]
-                    $Tokens += [PSCustomObject]@{
-                        Parameter = $Token.Split("=")[0]
-                        ParamValueSeparator = "="
-                        ValueSeparator = ","
-                        Values = @($Token.Split("=")[1].Split(","))
-                    }
-                }
-                elseif ($Token -match "^--[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}==[^=].*,") { # --param-name[==value1[,value2[,..]]]
-                    $Tokens += [PSCustomObject]@{
-                        Parameter = $Token.Split("==")[0]
-                        ParamValueSeparator = "=="
-                        ValueSeparator = ","
-                        Values = @($Token.Split("==")[2].Split(","))
-                    }
-                }
-                elseif ($Token -match "^--[a-zA-Z0-9]{1}[a-zA-Z0-9-\+]{0,}=[^=].*,") { # --param-name[=value1[,value2[,..]]]
-                    $Tokens += [PSCustomObject]@{
-                        Parameter = $Token.Split("=")[0]
-                        ParamValueSeparator = "="
-                        ValueSeparator = ","
-                        Values = @($Token.Split("=")[1].Split(","))
-                    }
-                }
-                else {
-                    $Tokens += [PSCustomObject]@{Parameter = $Token}
-                }
+    $Tokens = @()
 
+    $Command -split "(?=\s{1,}--|\s{1,}-|\s{1,},)" | ForEach {
+        $Token = $_
+        $Prefix = $null
+        $ParamValueSeparator = $null
+        $ValueSeparator = $null
+        $Values = $null
+        $SpacesAfter = $null
+
+        if ($Token.TrimStart().Length -gt 0) {
+
+            if ($Token.TrimStart() -match "(?:^[-=]{1,})") { # supported prefix characters are listed in brackets: [-=]{1,}
+
+                $Prefix = "$($Token -split $Matches[0] | Select -Index 0)$($Matches[0])"
+                $Token = $Token -split $Matches[0] | Select -Last 1
+
+                if ($Token -match "(?:[ =]{1,})") { # supported separators are listed in brackets: [ =]{1,}
+                    $ParamValueSeparator = $Matches[0]
+                    $Parameter = $Token -split $ParamValueSeparator | Select -Index 0
+                    $Values = $Token.Substring(("$($Parameter)$($ParamValueSeparator)").length)
+
+                    if ($Values -match "(?:[,; ]{1})") { # supported separators are listed in brackets: [,; ]{1}
+                        $ValueSeparator = $Matches[0]
+                        $Values = @($Values.Split("$ValueSeparator", [System.StringSplitOptions]::RemoveEmptyEntries))
+                    } 
+                }
+                else {$Parameter = $Token}
             }
+            else {$Parameter = $Token}
         }
-        
-        # Build command token for selected gpu device
-        [String]$Command = ""
-        $Tokens | ForEach-Object {
-            if ($_.Values.Count) {
-                $Token = $_
-                $Values = @()
-                $Devices | ForEach {
-                    if ($Token.Values[$_]) {$Values += $Token.Values[$_]}
-                    else {$Values += ""}
-                }
-                if ($Values -match "\w") {$Command += " $($Token.Parameter)$($Token.ParamValueSeparator)$($Values -join $($Token.ValueSeparator))"}
-            }
-            else {
-                $Command += "$($_.Parameter)"
-            }
+        else {$Parameter = $Token}
+
+        $Tokens += [PSCustomObject]@{
+            Parameter = "$($Prefix)$($Parameter)"
+            ParamValueSeparator = $ParamValueSeparator
+            ValueSeparator = $ValueSeparator
+            Values = $Values
         }
     }
-    
+
+    # Build command token for selected gpu device
+    [String]$Command = ""
+    $Tokens | ForEach-Object {
+        $Values = $null
+        if ($_.Values.Count) {
+            $Values = "$(($_.Values | Where {$Devices -contains $_}) -join $($_.ValueSeparator))"
+            if ($Values) {
+                $Command += "$($_.Parameter)$($_.ParamValueSeparator)$Values"
+            }
+        }
+        else {
+            $Command += "$($_.Parameter)"
+        }
+    }
     $Command
 }
 
