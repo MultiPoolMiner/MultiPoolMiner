@@ -42,7 +42,7 @@ function Get-Devices {
                 $Devices.$Type += $Device
             }
             else { # Existing card model
-                $Devices.$Type.$Name_Norm.$DeviceIDs += $DeviceID
+                $Devices.$Type | Where-Object {$_.Name_Norm -eq $Name_Norm} | ForEach-Object {$_.DeviceIDs += $DeviceID}
             }
         }
         $DeviceID++
