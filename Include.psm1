@@ -29,7 +29,7 @@ function Get-Devices {
 
         $Device = @([PSCustomObject]$_)
 
-        if (-not $Devices.$Type) { # New hardware patform
+        if (-not $Devices.$Type) { # New hardware platform, start counting deviceIDs from 0
             $DeviceID = 0
             $Device | Add-Member Name_Norm $Name_Norm
             $Device | Add-Member DeviceIDs @($DeviceID)
