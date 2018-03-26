@@ -7,5 +7,5 @@
                   },
     "API":  "Bminer",
     "Port":  "1880",
-    "URI":  "https://www.bminercontent.com/releases/bminer-v5.5.0-aba7617-amd64.zip"
+    "URI":  "https://www.bminercontent.com/releases/bminer-v6.0.0-d111154-amd64.zip"
 }
