@@ -58,7 +58,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Double]$SwitchingPrevention = 1 #zero does not prevent miners switching
 )
-
+write-log -level warn "Main script A memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
 $VerbosePreference = 'Continue'
 $DebugPreference = 'Continue'
 $InformationPreference = 'Continue'
@@ -95,7 +95,7 @@ if (-not (Test-Path "Data")) {New-Item "Data" -ItemType "directory" | Out-Null}
 
 #Start the log
 Start-Transcript ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
-
+write-log -level warn "Main script B memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
 #Set process priority to BelowNormal to avoid hash rate drops on systems with weak CPUs
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
 
@@ -118,8 +118,9 @@ $WorkerNameDonate = "multipoolminer"
 Import-Module .\API.psm1
 Start-APIServer
 $API.Version = $Version
-
+write-log -level warn "Main script C memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
 while ($true) {
+    write-log -level warn "Main script D memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     #Load the config
     $ConfigBackup = $Config
     if (Test-Path "Config.txt") {
@@ -200,7 +201,7 @@ while ($true) {
             }
         )
     }
-
+    write-log -level warn "Main script E memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     #Activate or deactivate donation
     if ($Config.Donate -lt 10) {$Config.Donate = 10}
     if ($Timer.AddDays(-1) -ge $LastDonated) {$LastDonated = $Timer}
@@ -225,7 +226,7 @@ while ($true) {
 
     if ($Config.Proxy) {$PSDefaultParameterValues["*:Proxy"] = $Config.Proxy}
     else {$PSDefaultParameterValues.Remove("*:Proxy")}
-
+    write-log -level warn "Main script F memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     # Disable verbose while importing APIs
     $OldVerbosePreference = $VerbosePreference
     $VerbosePreference = 'SilentlyContinue'
@@ -252,12 +253,12 @@ while ($true) {
     catch {
         Write-Log -Level Warn "Coinbase is down. "
     }
-
+    write-log -level warn "Main script G memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     #Load the stats
     Write-Log "Loading saved statistics. "
     $Stats = [PSCustomObject]@{}
     if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
-
+    write-log -level warn "Main script H memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     #Load information about the pools
     Write-Log "Loading pool information. "
     $NewPools = @()
@@ -269,21 +270,21 @@ while ($true) {
             Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters
         } | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
     }
-
+    write-log -level warn "Main script I memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     # This finds any pools that were already in $AllPools (from a previous loop) but not in $NewPools. Add them back to the list. Their API likely didn't return in time, but we don't want to cut them off just yet
     # since mining is probably still working.  Then it filters out any algorithms that aren't being used.
     $AllPools = @($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object {$AllPools | Where-Object Name -EQ $_}) | 
         Where-Object {$Config.Algorithm.Count -eq 0 -or (Compare-Object $Config.Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
         Where-Object {$Config.ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $Config.ExcludeAlgorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0} | 
         Where-Object {$Config.ExcludePoolName.Count -eq 0 -or (Compare-Object $Config.ExcludePoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
-
+    write-log -level warn "Main script J memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     #Apply watchdog to pools
     $AllPools = $AllPools | Where-Object {
         $Pool = $_
         $Pool_WatchdogTimers = $WatchdogTimers | Where-Object PoolName -EQ $Pool.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset)
         ($Pool_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>3 -and ($Pool_WatchdogTimers | Where-Object {$Pool.Algorithm -contains $_.Algorithm} | Measure-Object | Select-Object -ExpandProperty Count) -lt <#statge#>2
     }
-
+    write-log -level warn "Main script K memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     #Update the active pools
     if ($AllPools.Count -eq 0) {
         Write-Log -Level Warn "No pools available. "
@@ -292,7 +293,7 @@ while ($true) {
         continue
     }
     $Pools = [PSCustomObject]@{}
-
+    write-log -level warn "Main script L memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     Write-Log "Selecting best pool for each algorithm. "
     $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Sort-Object -Descending {$Config.PoolName.Count -eq 0 -or (Compare-Object $Config.PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}, {($Timer - $_.Updated).TotalMinutes -le ($SyncWindow * $Strikes)}, {$_.StablePrice * (1 - $_.MarginOfError)}, {$_.Region -EQ $Config.Region}, {$_.SSL -EQ $Config.SSL} | Where-Object Algorithm -EQ $_ | Select-Object -First 1)}
     if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_.Name} | Select-Object -Unique | ForEach-Object {$AllPools | Where-Object Name -EQ $_ | Measure-Object Updated -Maximum | Select-Object -ExpandProperty Maximum} | Measure-Object -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalMinutes) -gt $SyncWindow) {
@@ -304,7 +305,7 @@ while ($true) {
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.Price * (1 - ($Pools.$_.MarginOfError * $Config.SwitchingPrevention * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Unbias $Pools.$_.Price -Force}
     }
-
+    write-log -level warn "Main script M memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     #Load information about the miners
     #Messy...?
     Write-Log "Getting miner information. "
@@ -319,6 +320,7 @@ while ($true) {
             Where-Object {$Config.MinerName.Count -eq 0 -or (Compare-Object $Config.MinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
             Where-Object {$Config.ExcludeMinerName.Count -eq 0 -or (Compare-Object $Config.ExcludeMinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
     }
+    write-log -level warn "Main script N memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     Write-Log "Calculating profit for each miner. "
     $AllMiners | ForEach-Object {
         $Miner = $_
@@ -406,6 +408,7 @@ while ($true) {
     if ($Downloader.State -ne "Running") {
         $Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList (@($AllMiners | Where-Object {$_.PrerequisitePath} | Select-Object @{name = "URI"; expression = {$_.PrerequisiteURI}}, @{name = "Path"; expression = {$_.PrerequisitePath}}, @{name = "Searchable"; expression = {$false}}) + @($AllMiners | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($AllMiners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}}) | Select-Object * -Unique) -FilePath .\Downloader.ps1
     }
+    write-log -level warn "Main script O memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     # Open firewall ports for all miners
     if (Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue -Verbose:$false) {
         if ((Get-Command "Get-MpComputerStatus" -ErrorAction SilentlyContinue -Verbose:$false) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue -Verbose:$false)) {
@@ -433,6 +436,7 @@ while ($true) {
         Start-Sleep $Config.Interval
         continue
     }
+    write-log -level warn "Main script P memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     $ActiveMiners | ForEach-Object {
         $_.Profit = 0
         $_.Profit_Comparison = 0
@@ -492,6 +496,7 @@ while ($true) {
             }
         }
     }
+    write-log -level warn "Main script Q memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     $ActiveMiners | Where-Object Device_Auto | ForEach-Object {
         $Miner = $_
         $Miner.Device = ($Miners | Where-Object {(Compare-Object $Miner.Type $_.Type -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}).Device | Select-Object -Unique | Sort-Object
@@ -500,7 +505,7 @@ while ($true) {
 
     #Don't penalize active miners
     $ActiveMiners | Where-Object {$_.GetStatus() -EQ "Running"} | ForEach-Object {$_.Profit_Bias = $_.Profit_Unbias}
-
+    write-log -level warn "Main script R memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
     $BestMiners = $ActiveMiners | Select-Object Type, Index -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.Type $_.Type | Measure-Object).Count -eq 0 -and (Compare-Object $Miner_GPU.Index $_.Index | Measure-Object).Count -eq 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Bias -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1)}
     $BestDeviceMiners = $ActiveMiners | Select-Object Device -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.Device $_.Device | Measure-Object).Count -eq 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Bias -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1)}
@@ -526,6 +531,7 @@ while ($true) {
             }
         }
     }
+    write-log -level warn "Main script S memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     $BestMiners_Combos += $Miners_Device_Combos | ForEach-Object {
         $Miner_Device_Combo = $_.Combination
         [PSCustomObject]@{
@@ -536,6 +542,7 @@ while ($true) {
             }
         }
     }
+    write-log -level warn "Main script T memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     $BestMiners_Combos_Comparison = $Miners_Type_Combos | ForEach-Object {
         $Miner_Type_Combo = $_.Combination
         $Miners_Index_Combos | ForEach-Object {
@@ -553,6 +560,7 @@ while ($true) {
             }
         }
     }
+    write-log -level warn "Main script U memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     $BestMiners_Combos_Comparison += $Miners_Device_Combos | ForEach-Object {
         $Miner_Device_Combo = $_.Combination
         [PSCustomObject]@{
@@ -563,6 +571,7 @@ while ($true) {
             }
         }
     }
+    write-log -level warn "Main script V memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     $BestMiners_Combo = $BestMiners_Combos | Sort-Object -Descending {($_.Combination | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_.Combination | Measure-Object Profit_Bias -Sum).Sum}, {($_.Combination | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1 | Select-Object -ExpandProperty Combination
     $BestMiners_Combo_Comparison = $BestMiners_Combos_Comparison | Sort-Object -Descending {($_.Combination | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_.Combination | Measure-Object Profit_Comparison -Sum).Sum}, {($_.Combination | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1 | Select-Object -ExpandProperty Combination
     $BestMiners_Combo | ForEach-Object {$_.Best = $true}
@@ -592,9 +601,11 @@ while ($true) {
             }
         }
     }
+    write-log -level warn "Main script W memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     Get-Process -Name @($ActiveMiners | ForEach-Object {([IO.FileInfo]($_.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName}) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best -EQ $true | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {([IO.FileInfo]($_.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName}) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Config.Delay #Wait to prevent BSOD
+    write-log -level warn "Main script X memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         if ($_.GetStatus() -ne "Running") {
             Write-Log "Starting miner ($($_.Name)): '$($_.Path) $($_.Arguments)'"
@@ -622,7 +633,7 @@ while ($true) {
             }
         }
     }
-
+    write-log -level warn "Main script Y memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     if ($Config.MinerStatusURL -and $Config.MinerStatusKey) {& .\ReportStatus.ps1 -Key $Config.MinerStatusKey -WorkerName $Config.WorkerName -ActiveMiners $ActiveMiners -Miners $Miners -MinerStatusURL $Config.MinerStatusURL}
 
     #Clear-Host
@@ -653,7 +664,7 @@ while ($true) {
         @{Label = "Algorithm"; Expression = {$_.Algorithm}}, 
         @{Label = "Watchdog Timer"; Expression = {"{0:n0} Seconds" -f ($Timer - $_.Kicked | Select-Object -ExpandProperty TotalSeconds)}; Align = 'right'}
     ) | Out-Host
-
+    write-log -level warn "Main script Z memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     #Display profit comparison
     if ($Downloader.State -eq "Running") {$Downloader | Wait-Job -Timeout 10 | Out-Null}
     if (($BestMiners_Combo | Where-Object Profit -EQ $null | Measure-Object).Count -eq 0 -and $Downloader.State -ne "Running") {
@@ -679,7 +690,7 @@ while ($true) {
 
         $MinerComparisons | Out-Host
     }
-
+    write-log -level warn "Main script ZA memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     # Export data to files - this can be used by an external process to get status information
     $ActiveMiners | Where-Object {$_.GetActivateCount() -GT 0 -and $_.GetStatus() -eq "Running"} | Foreach-Object {
         $ActiveMiner = $_
@@ -698,7 +709,7 @@ while ($true) {
             LogFile = Resolve-Path -Relative $ActiveMiner.LogFile
         }
     } | ConvertTo-Json | Out-File 'Data\ActiveMiners.json'
-
+    write-log -level warn "Main script ZB memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     # These are mostly for debugging
 	$ActiveMiners | Export-Clixml -Path 'Data\ActiveMiners.xml'
 	$Miners | Export-Clixml -Path 'Data\Miners.xml'
@@ -709,11 +720,11 @@ while ($true) {
     $API.RunningMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Running}
     $API.Pools = $Pools
     $API.Miners = $Miners
-
+    write-log -level warn "Main script ZC memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     #Reduce Memory
     Get-Job -State Completed | Remove-Job
     [GC]::Collect()
-
+    write-log -level warn "Main script ZD memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
     Write-Log "Start waiting before next run. "
     for ($i = $Strikes; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
@@ -723,7 +734,7 @@ while ($true) {
         $Timer = (Get-Date).ToUniversalTime()
     }
     Write-Log "Finish waiting before next run. "
-
+    write-log -level warn "Main script ZE memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     #Save current hash rates
     Write-Log "Saving hash rates. "
     $ActiveMiners | ForEach-Object {
@@ -763,6 +774,7 @@ while ($true) {
             }
         }
     }
+    write-log -level warn "Main script ZF memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     Write-Log "Starting next run. "
 }
 
