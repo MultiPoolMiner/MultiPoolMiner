@@ -70,7 +70,7 @@ The following pools are currently supported (in alphabetical order):
 
   Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
 
-- BlockMasters / BlockMastersCoins http://www.blockmunch.co/
+- BlockMasters / BlockMastersCoins http://www.blockmaster.co/
 
   Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
   
