@@ -312,7 +312,7 @@ function Get-Stat {
     )
 
     if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
-    Get-ChildItem "Stats" | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
+    Get-ChildItem "Stats" -File | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
 }
 
 function Get-ChildItemContent {
@@ -339,7 +339,7 @@ function Get-ChildItemContent {
         return $Expression
     }
 
-    Get-ChildItem $Path | ForEach-Object {
+    Get-ChildItem $Path -File | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
         if ($_.Extension -eq ".ps1") {
@@ -361,7 +361,12 @@ function Get-ChildItemContent {
             if ($Content -eq $null) {$Content = $_ | Get-Content}
         }
         $Content | ForEach-Object {
-            [PSCustomObject]@{Name = $Name; Content = $_}
+            if ($_.Name) {
+                [PSCustomObject]@{Name = $_.Name; Content = $_}
+            }
+            else {
+                [PSCustomObject]@{Name = $Name; Content = $_}
+            }
         }
     }
 }
@@ -382,7 +387,7 @@ filter ConvertTo-Hash {
 
 function ConvertTo-LocalCurrency { 
     [CmdletBinding()]
-    # To get same numbering scheme reagardless of value BTC value (size) to dermine formatting
+    # To get same numbering scheme regardless of value BTC value (size) to determine formatting
     # Use $Offset to add/remove decimal places
 
     param(
@@ -627,7 +632,8 @@ class Miner {
         }
 
         if (-not $this.Process) {
-            $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -LogPath $this.LogFile -Priority ($this.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
+            $this.LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\$($this.Name)-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt")
+            $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -LogPath $this.LogFile -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
 
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
                 $this.Status = [MinerStatus]::Running
