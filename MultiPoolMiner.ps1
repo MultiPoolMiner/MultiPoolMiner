@@ -207,7 +207,7 @@ while ($true) {
     if ($Config.Proxy) {$PSDefaultParameterValues["*:Proxy"] = $Config.Proxy}
     else {$PSDefaultParameterValues.Remove("*:Proxy")}
 
-    Get-ChildItem "APIs" | ForEach-Object {. $_.FullName}
+    Get-ChildItem "APIs" -File | ForEach-Object {. $_.FullName}
 
     $Timer = (Get-Date).ToUniversalTime()
 
