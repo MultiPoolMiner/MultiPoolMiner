@@ -1,4 +1,4 @@
-# MultiPoolMiner
+﻿# MultiPoolMiner
 ###### created by aaronsace 
 ###### **WEBSITE: [MultiPoolMiner.io](https://multipoolminer.io)**
 ###### **GITHUB: [https://github.com/MultiPoolMiner/](https://github.com/MultiPoolMiner/MultiPoolMiner/releases)**
@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 18/03/2018 - v1.22.15 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 26/03/2018 - v1.22.16 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -15,7 +15,7 @@ README.md is based on README.txt - updated on 18/03/2018 - v1.22.15 - latest ver
 
 - **Monitors crypto mining pools and coins in real-time and finds the most profitable for your machine**
 - **Controls any miner that is available via command line**
-- **Supports benchmarking, multiple platforms (AMD, NVIDIA and CPU) and mining on MiningPoolHub, Zpool, Hash Refinery, Nicehash, A Hash Pool, BlockMunch, ItalYiiMP and YiiMP pools**
+- **Supports benchmarking, multiple platforms (AMD, NVIDIA and CPU) and mining on A Hash Pool, BlazePool, BlockMasters, Hash Refinery, MiningPoolHub, Nicehash, YiiMP, ZergPool and Zpool pools**
 - **Includes Watchdog Timer to detect and handle miner failures**
 
 *Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH*
@@ -61,18 +61,17 @@ Choose your region or the region closest to you.
 
 **-poolname [miningpoolhub,miningpoolhubcoins,zpool,hashrefinery,nicehash,ahashpool]**
 
-The following pools are currently supported:
-- MiningPoolHub https://miningpoolhub.com/ 
-
-The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
-
-- Zpool http://www.zpool.ca/ (Bitcoin address must be provided using the -wallet command, see below)
-- Hash Refinery http://pool.hashrefinery.com (Bitcoin address must be provided using the -wallet command, see below)
-- Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -wallet command, see below)
+The following pools are currently supported (in alphabetical order):
 - A Hash Pool https://www.ahashpool.com/ (Bitcoin address must be provided using the -wallet command, see below)
-- BlockMunch http://www.blockmunch.club/ (Bitcoin address must be provided using the -wallet command, see below)
 - BlazePool http://www.blazepool.com/ (Bitcoin address must be provided using the -wallet command, see below)
+- BlockMasters http://www.blockmunch.co/ (Bitcoin address must be provided using the -wallet command, or any currency available in API (Advanced configuration via Config.txt))
+- Hash Refinery http://pool.hashrefinery.com (Bitcoin address must be provided using the -wallet command, see below)
+- MiningPoolHub https://miningpoolhub.com/ 
+  The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
+- Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -wallet command, see below)
 - YiiMP http://yiimp.eu/ (Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config.txt. Detailled documentation will follow. For now read https://github.com/MultiPoolMiner/MultiPoolMiner/issues/1105)
+- ZergPool http://zergpool.eu (Bitcoin address must be provided using the -wallet command, or any currency available in API (Advanced configuration via Config.txt))
+- Zpool http://www.zpool.ca/ (Bitcoin address must be provided using the -wallet command, see below)
 
 ***IMPORTANT**: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
 
@@ -86,7 +85,7 @@ Your username you use to login to MiningPoolHub.
 To identify your mining rig.
 
 **-wallet**
-Your Bitcoin payout address. Required when mining on Zpool, Hash Refinery, Nicehash, AhashPool, BlockMunch and BlazePool.
+Your Bitcoin payout address. Required when mining on AhashPool, BlazePool, Hash Refinery, Nicehash and Zpool.
 	
 **-SSL**
 Specifying the -ssl command (without a boolean value of true or false) will restrict the miner application list to include only the miners that support secure connection.
