@@ -84,7 +84,7 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 	## MiningPoolHub https://miningpoolhub.com/ 
 	        The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
 	## Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -wallet command, see below)
-    ## YiiMP http://yiimp.eu/ (Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config.txt. Detailled documentation will follow. For now read https://github.com/MultiPoolMiner/MultiPoolMiner/issues/1105)
+	## YiiMP http://yiimp.eu/ (Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config.txt. Detailled documentation will follow. For now read https://github.com/MultiPoolMiner/MultiPoolMiner/issues/1105)
 	## ZergPool http://zergpool.eu (Bitcoin address must be provided using the -wallet command, or any currency available in API (Advanced configuration via Config.txt))
 	## Zpool http://www.zpool.ca/ (Bitcoin address must be provided using the -wallet command, see below)
 	
