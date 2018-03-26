@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-TPruvot\ccminer-x64.exe"
-$Uri = "https://github.com/tpruvot/ccminer/releases/download/2.2.4-tpruvot/ccminer-x64-2.2.4-cuda9.7z"
+$Uri = "https://github.com/MSFTserver/ccminer/releases/download/2.2.5-rvn/ccminer-x64-2.2.5-rvn-cuda9.7z"
 
 $Commands = [PSCustomObject]@{
     "bitcore" = "" #Bitcore
@@ -17,6 +17,7 @@ $Commands = [PSCustomObject]@{
     "hmq1725" = "" #HMQ1725
     "jha" = "" #JHA
     "keccak" = "" #Keccak
+    "keccakc" = "" #Keccakc
     "lbry" = "" #Lbry
     "lyra2v2" = "" #Lyra2RE2
     "lyra2z" = "" #Lyra2z
@@ -32,6 +33,7 @@ $Commands = [PSCustomObject]@{
     "tribus" = "" #Tribus
     "veltor" = "" #Veltor
     "x11evo" = "" #X11evo
+    "x16r" = "" #Raven
     "x17" = "" #X17
     #"yescrypt" = "" #Yescrypt
     #"xevan" = "" #Xevan
@@ -43,7 +45,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     [PSCustomObject]@{
         Type = "NVIDIA"
         Path = $Path
-        Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass) --submit-stale$($Commands.$_)"
+        Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_) --submit-stale"
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Ccminer"
         Port = 4068

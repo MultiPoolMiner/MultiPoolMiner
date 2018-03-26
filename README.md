@@ -7,7 +7,8 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 18/03/2018 - v1.24.01 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+
+README.md is based on README.txt - updated on 26/03/2018 - v1.24.01 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -189,6 +190,7 @@ Since version 2.6, the delta value (integer) that was used to determine how ofte
 
 **-autoupdate:false**
 By default MPM will perform an automatic update on startup if a newer version is found. Set to 'false' to disable automatic update to latest MPM version. 
+
 
 ## SAMPLE USAGE
 ###### (check "start.bat" file in root folder)
@@ -535,8 +537,7 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 ###### A21. MultiPoolMiner is open-source and used by many users/rigs. It also downloads miners from github releases that are open-sourced projects. That means the code is readable and you can see for yourself it does not contain any viruses. Your antivirus generates false positives as the miner software used by MultiPoolMiner are often included in malicious programs to create botnets for someone who wants to earn a quick buck. There are other closed-source miner program included in the package such as the Claymore miners. These come from legendary ranked or trusted/respected members of the bitcointalk community and used by a large number of users/rigs worldwide. You can exlude these miners if you wish by following the instructions in FAQ#2 and delete their software from your system. 
 
 ###### Q22. How to disable dual-mining?
-###### A22. Make sure NOT to include any of the the following parameters in your start.bat after *-algorithm* or add them after the *-ExludeAlgorithm* command: 
-	decred, pascal, decrednicehash
+###### A22. Make sure NOT to include any of the the following parameters in your start.bat after *-algorithm* or add them after the *-ExludeAlgorithm* command: decred, pascal, decrednicehash
     
 ###### Q23. How to download and install missing miner binaries?
 ###### A23. Some miners binaries cannot be downloaded automatically by MPM (e.g. there is no direct download). In these cases you need to download and install them manually. First find the download link "Uri" in the miner file (they are all in the folder 'Miners') and download the binaries. Next locate the destination path "$Path". You need to create the required subdirectory in the 'Miners' folder.  Finally unpack the downloaded binary to the destination directory. If the packed file contains subdirectories you must also copy them.
