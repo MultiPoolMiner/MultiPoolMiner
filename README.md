@@ -70,7 +70,7 @@ The following pools are currently supported (in alphabetical order):
 
   Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
 
-- BlockMasters / BlockMastersCoins http://www.blockmaster.co/
+- BlockMasters / BlockMastersCoins http://www.blockmasters.co/
 
   Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
   
@@ -538,7 +538,7 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 
 ###### Q22. How to disable dual-mining?
 ###### A22. Make sure NOT to include any of the the following parameters in your start.bat after *-algorithm* or add them after the *-ExludeAlgorithm* command: decred, pascal, decrednicehash
-    
+
 ###### Q23. How to download and install missing miner binaries?
 ###### A23. Some miners binaries cannot be downloaded automatically by MPM (e.g. there is no direct download). In these cases you need to download and install them manually. First find the download link "Uri" in the miner file (they are all in the folder 'Miners') and download the binaries. Next locate the destination path "$Path". You need to create the required subdirectory in the 'Miners' folder.  Finally unpack the downloaded binary to the destination directory. If the packed file contains subdirectories you must also copy them.
 
