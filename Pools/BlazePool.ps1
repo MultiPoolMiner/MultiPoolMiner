@@ -63,7 +63,7 @@ $BlazePool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
                 Host          = $BlazePool_Host
                 Port          = $BlazePool_Port
                 User          = Get-Variable $_ -ValueOnly
-                Pass          = "$Worker,c=$_"
+                Pass          = "ID=$Worker,c=$_"
                 Region        = $BlazePool_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated
