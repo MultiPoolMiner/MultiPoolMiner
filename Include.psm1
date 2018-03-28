@@ -51,88 +51,53 @@ function Get-Devices {
 }
 
 function Get-CommandPerDevice {
+    # rewrites the command parameters
+    # if a parameter has multiple values, only the values for the available devices are returned
+    # parameters without values are valid for all devices an are left untouched
+    # supported parameter syntax:
+    #$Command = ",c=BTC -9 1  -y  2 -a 00,11,22,33,44,55  -b=00,11,22,33,44,55 --c==00,11,22,33,44,55 --d --e=00,11,22,33,44,55 -f -g 00 11 22 33 44 55 ,c=LTC  -h 00 11 22 33 44 55 -i=,11,,33,,55 --j=00,11,,,44,55 --k==00,,,33,44,55 -l -zzz=0123,1234,2345,3456,4567,5678,6789 -u 0  --p all ,something=withcomma blah *blah *blah"
+    #$Devices = @(0;1;4)
+    # Result: ",c=BTC -9 1  -y  2 -a 00,11,44  -b=00,11,44 --c==00,11,44 --d --e=00,11,44 -f -g 00 11 44 ,c=LTC  -h 00 11 44 -i=,11 --j=00,11,44 --k==00,,44 -l -zzz=0123,1234,4567 -u 0  --p all ,something=withcomma blah *blah *blah"
+    #$Devices = @(1)
+    # Result: ",c=BTC -9 1  -y  2 -a 11  -b=11 --c==11 --d --e=11 -f -g 11 ,c=LTC  -h 11 -i=11 --j=11 --k== -l -zzz=1234 -u 0  --p all ,something=withcomma blah *blah *blah"
+    #$Devices = @(0;2;9)
+    # Result: ",c=BTC -9 1  -y  2 -a 00,22  -b=00,22 --c==00,22 --d --e=00,22 -f -g 00 22 ,c=LTC  -h 00 22 -i= --j=00 --k==00 -l -zzz=0123,2345 -u 0  --p all ,something=withcomma blah *blah *blah"
 
-# Supported parameter syntax:
-# -param-name[ value1[,value2[,..]]]
-# -param-name[=value1[,value2[,..]]]
-# --param-name[==value1[,value2[,..]]]
-# --param-name[=value1[,value2[,..]]]
+    $CommandPerDevice = ""
 
-function Get-CommandPerDevice {
-
-# rewrites the command parameters
-# if a parameter has multiple values, only the values for the available devices are returned
-# parameters without values are valid for all devices an are left untouched
-# supported parameter syntax:
-# $Command = "-z 1  -y  2 ,c=BTC -a 0,1,2,3,4,5  -b=0,1,2,3,4,5 --c==0,1,2,3,4,5 --d --e=0,1,2,3,4,5 -f -g 0 1 2 3 4 5   -h 0 1 2 3 4 5 -i=,1,,3,,5 --j=0,1,,,4,5 --k==0,,,4,5 -l"
-# $Devices = @(0;1;2;5;6)
-# Result: "-z 1  -y  2 ,c=BTC -a 0,1,2,5  -b=0,1,2,5 --c==0,1,2,5 --d --e=0,1,2,5 -f -g 0 1 2 5   -h 0 1 2 5 -i=1,5 --j=0,1,5 --k==0,5 -l"
-
-[CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]
-        [AllowEmptyString()]
-        [String]$Command,
-        [Parameter(Mandatory = $false)]
-        [Int[]]$Devices
-    )
-
-    $Tokens = @()
-
-    $Command -split "(?=\s{1,}--|\s{1,}-|\s{1,},)" | ForEach {
+    $Command -split "(?=\s{1,}--|\s{1,}-| ,|^,)" | ForEach-Object {
         $Token = $_
         $Prefix = $null
-        $ParamValueSeparator = $null
+        $ParameterValueSeparator = $null
         $ValueSeparator = $null
         $Values = $null
-        $SpacesAfter = $null
 
-        if ($Token.TrimStart().Length -gt 0) {
+        if ($Token.TrimStart() -match "(?:^[-=]{1,})") { # supported prefix characters are listed in brackets: [-=]{1,}
 
-            if ($Token.TrimStart() -match "(?:^[-=]{1,})") { # supported prefix characters are listed in brackets: [-=]{1,}
+            $Prefix = "$($Token -split $Matches[0] | Select -Index 0)$($Matches[0])"
+            $Token = $Token -split $Matches[0] | Select -Last 1
 
-                $Prefix = "$($Token -split $Matches[0] | Select -Index 0)$($Matches[0])"
-                $Token = $Token -split $Matches[0] | Select -Last 1
+            if ($Token -match "(?:[ =]{1,})") { # supported separators are listed in brackets: [ =]{1,}
+                $ParameterValueSeparator = $Matches[0]
+                $Parameter = $Token -split $ParameterValueSeparator | Select -Index 0
+                $Values = $Token.Substring(("$($Parameter)$($ParameterValueSeparator)").length)
 
-                if ($Token -match "(?:[ =]{1,})") { # supported separators are listed in brackets: [ =]{1,}
-                    $ParamValueSeparator = $Matches[0]
-                    $Parameter = $Token -split $ParamValueSeparator | Select -Index 0
-                    $Values = $Token.Substring(("$($Parameter)$($ParamValueSeparator)").length)
-
-                    if ($Values -match "(?:[,; ]{1})") { # supported separators are listed in brackets: [,; ]{1}
-                        $ValueSeparator = $Matches[0]
-                        $Values = @($Values.Split("$ValueSeparator", [System.StringSplitOptions]::RemoveEmptyEntries))
-                    } 
+                if ($Values -match "(?:[,; ]{1})") { # supported separators are listed in brackets: [,; ]{1}
+                    $ValueSeparator = $Matches[0]
+                    $RelevantValues = @()
+                    $Devices | Foreach-Object {
+                        if ($Values.Split($ValueSeparator) | Select -Index $_) {$RelevantValues += ($Values.Split($ValueSeparator) | Select -Index $_)}
+                        else {$RelevantValues += ""}
+                    }                    
+                    $CommandPerDevice += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$(($RelevantValues -join $ValueSeparator).TrimEnd($ValueSeparator))"
                 }
-                else {$Parameter = $Token}
+                else {$CommandPerDevice += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$($Values)"}
             }
-            else {$Parameter = $Token}
+            else {$CommandPerDevice += "$($Prefix)$($Token)"}
         }
-        else {$Parameter = $Token}
-
-        $Tokens += [PSCustomObject]@{
-            Parameter = "$($Prefix)$($Parameter)"
-            ParamValueSeparator = $ParamValueSeparator
-            ValueSeparator = $ValueSeparator
-            Values = $Values
-        }
+        else {$CommandPerDevice += $Token}
     }
-
-    # Build command token for selected gpu device
-    [String]$Command = ""
-    $Tokens | ForEach-Object {
-        $Values = $null
-        if ($_.Values.Count) {
-            $Values = "$(($_.Values | Where {$Devices -contains $_}) -join $($_.ValueSeparator))"
-            if ($Values) {
-                $Command += "$($_.Parameter)$($_.ParamValueSeparator)$Values"
-            }
-        }
-        else {
-            $Command += "$($_.Parameter)"
-        }
-    }
-    $Command
+    $CommandPerDevice
 }
 
 Function Write-Log {
