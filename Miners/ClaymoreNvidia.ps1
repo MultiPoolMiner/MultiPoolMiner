@@ -10,7 +10,7 @@ $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty
 $Path = ".\Bin\Ethash-Claymore\EthDcrMiner64.exe"
 $Type = "NVIDIA"
 $API = "Claymore"
-$Uri = ""
+#$Uri = "https://bitcointalk.org/index.php?topic=1433925.0"
 $Port = 23333
 $MinerFeeInPercentSingleMode = 1.0
 $MinerFeeInPercentDualMode = 1.5
@@ -73,7 +73,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
     $MainAlgorithm = $_.Split(";") | Select -Index 0
     $MainAlgorithm_Norm = Get-Algorithm $MainAlgorithm
     
-    Switch ($MainAlgorithm_Norm) { # default is all devices, only ethash has a minimum memory limit
+    Switch ($MainAlgorithm_Norm) { # default is all devices, ethash has a 4GB minimum memory limit
         "Ethash"    {$DeviceIDs = $DeviceIDs4gb}
         "Ethash3gb" {$DeviceIDs = $DeviceIDs3gb}
         default     {$DeviceIDs = $DeviceIDsAll}
@@ -127,7 +127,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
                     Name      = $Miner_Name
                     Type      = $Type
                     Path      = $Path
-                    Arguments = ("-mode 0 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$MainAlgorithmCommand -esm $EthereumStratumMode -allpools 1 -allcoins exp -dcoin $SecondaryAlgorithm -dcri $SecondaryAlgorithmIntensity -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$SecondaryAlgorithmCommand$($CommonCommands | Select -Index 1) -platform 2 -di $($DeviceIDs -join '')" -replace "\s+", " ").trim()
+                    Arguments = ("-mode 0 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$MainAlgorithmCommand$($CommonCommands | Select -Index 1) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dcoin $SecondaryAlgorithm -dcri $SecondaryAlgorithmIntensity -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$SecondaryAlgorithmCommand$($CommonCommands | Select -Index 1) -platform 2 -di $($DeviceIDs -join '')" -replace "\s+", " ").trim()
                     HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm; "$SecondaryAlgorithm_Norm" = $HashRateSecondaryAlgorithm}
                     API       = $Api
                     Port      = $MinerPort
