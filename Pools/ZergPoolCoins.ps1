@@ -31,7 +31,7 @@ $ZergPoolCoins_Regions = "us", "europe"
 $ZergPoolCoins_Currencies = @("BTC", "LTC") + ($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 #Mine any coin defined in array $Config.$Pool.Coins[]
-$ZergPoolCoins_MiningCurrencies = ($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique
+$ZergPoolCoins_MiningCurrencies = ($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Foreach-Object {if ($ZergPoolCoins_Request.$_.Symbol) {$ZergPoolCoins_Request.$_.Symbol} else {$_}} | Select-Object -Unique # filter ...-algo
 $ZergPoolCoins_MiningCurrencies | Where-Object {$DisabledCoins -inotcontains $ZergPoolCoins_Request.$_.name -and $DisabledAlgorithms -inotcontains (Get-Algorithm $ZergPoolCoins_Request.$_.algo) -and ($Coins.count -eq 0 -or $Coins -icontains $ZergPoolCoins_Request.$_.name) -and $ZergPoolCoins_Request.$_.hashrate -gt 0} | ForEach-Object {
     $ZergPoolCoins_Host = "mine.zergpool.com"
     $ZergPoolCoins_Port = $ZergPoolCoins_Request.$_.port
