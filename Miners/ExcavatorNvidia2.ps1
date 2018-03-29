@@ -53,7 +53,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
                 Path = $Path
                 Arguments = "-p $Port -c $($Pools.$(Get-Algorithm $_).Name)_$(Get-Algorithm $_)_$($Pools.$(Get-Algorithm $_).User)_$($Threads)_Nvidia.json -na"
                 HashRates = [PSCustomObject]@{$(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
-                API = "NiceHash"
+                API = "Excavator"
                 Port = $Port
                 URI = $Uri
                 PrerequisitePath = "$env:SystemRoot\System32\msvcr120.dll"
@@ -91,7 +91,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
                 Path = $Path
                 Arguments = "-p $Port -c $($Pools."$(Get-Algorithm $_)NiceHash".Name)_$(Get-Algorithm $_)_$($Pools."$(Get-Algorithm $_)NiceHash".User)_$($Threads)_Nvidia.json -na"
                 HashRates = [PSCustomObject]@{"$(Get-Algorithm $_)NiceHash" = $Stats."$($Name)_$(Get-Algorithm $_)NiceHash_HashRate".Week}
-                API = "NiceHash"
+                API = "Excavator"
                 Port = $Port
                 URI = $Uri
                 PrerequisitePath = "$env:SystemRoot\System32\msvcr120.dll"

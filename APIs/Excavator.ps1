@@ -1,6 +1,6 @@
 ﻿using module ..\Include.psm1
 
-class Nicehash : Miner {
+class Excavator : Miner {
     hidden StartMining() {
         $this.Status = [MinerStatus]::Failed
 
