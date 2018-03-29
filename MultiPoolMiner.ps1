@@ -106,6 +106,12 @@ $WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHh
 $UserNameDonate = @("aaronsace", "fonyo")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
 $WorkerNameDonate = "multipoolminer"
 
+
+#Initialize the API
+Import-Module .\API.psm1
+Start-APIServer
+$API.Version = $Version
+
 while ($true) {
     #Load the config
     $ConfigBackup = $Config
@@ -201,6 +207,9 @@ while ($true) {
         $Config | Add-Member ExcludePoolName @() -Force
     }
 
+    #Give API access to the current running configuration
+    $API.Config = $Config
+
     #Clear pool cache if the configuration has changed
     if (($ConfigBackup | ConvertTo-Json -Compress) -ne ($Config | ConvertTo-Json -Compress)) {$AllPools = $null}
 
@@ -234,6 +243,8 @@ while ($true) {
     Write-Log "Loading saved statistics. "
     $Stats = [PSCustomObject]@{}
     if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
+    #Give API access to the current stats
+    $API.Stats = $Stats
 
     #Load information about the pools
     Write-Log "Loading pool information. "
@@ -281,6 +292,8 @@ while ($true) {
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.Price * (1 - ($Pools.$_.MarginOfError * $Config.SwitchingPrevention * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Unbias $Pools.$_.Price -Force}
     }
+    #Give API access to the pools information
+    $API.Pools = $Pools
 
     #Load information about the miners
     #Messy...?
@@ -410,6 +423,9 @@ while ($true) {
         Start-Sleep $Config.Interval
         continue
     }
+    #Give API access to the miners information
+    $API.Miners = $Miners
+
     $ActiveMiners | ForEach-Object {
         $_.Profit = 0
         $_.Profit_Comparison = 0
@@ -656,6 +672,13 @@ while ($true) {
 
         $MinerComparisons | Out-Host
     }
+    #Give API access to WatchdogTimers information
+    $API.WatchdogTimers = $WatchdogTimers
+
+    #Update API miner information
+    $API.ActiveMiners = $ActiveMiners
+    $API.RunningMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Running}
+    $API.FailedMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Failed}
 
     #Reduce Memory
     Get-Job -State Completed | Remove-Job
@@ -665,6 +688,7 @@ while ($true) {
     Write-Log "Start waiting before next run. "
     for ($i = $Strikes; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
+        if ($API.Stop) {Exit}
         Start-Sleep 10
         $Timer = (Get-Date).ToUniversalTime()
     }
