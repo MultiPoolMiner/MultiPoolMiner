@@ -1,6 +1,6 @@
 ﻿using module ..\Include.psm1
 
-class Nicehash : Miner {
+class Excavator : Miner {
     hidden StartMining() {
         $this.Status = [MinerStatus]::Failed
         # Create log file and get full path. This makes sure the file exists when other programs try to read it or resolve to a relative path

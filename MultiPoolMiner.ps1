@@ -265,7 +265,12 @@ while ($true) {
     Write-Log "Loading saved statistics. "
     $Stats = [PSCustomObject]@{}
     if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
+
     write-log -level warn "Main script H memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
+
+    #Give API access to the current stats
+    $API.Stats = $Stats
+
     #Load information about the pools
     Write-Log "Loading pool information. "
     $NewPools = @()
@@ -312,7 +317,12 @@ while ($true) {
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.Price * (1 - ($Pools.$_.MarginOfError * $Config.SwitchingPrevention * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Unbias $Pools.$_.Price -Force}
     }
+
     write-log -level warn "Main script M memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
+
+    #Give API access to the pools information
+    $API.Pools = $Pools
+
     #Load information about the miners
     #Messy...?
     Write-Log "Getting miner information. "
@@ -443,7 +453,12 @@ while ($true) {
         Start-Sleep $Config.Interval
         continue
     }
+
     write-log -level warn "Main script P memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
+
+    #Give API access to the miners information
+    $API.Miners = $Miners
+
     $ActiveMiners | ForEach-Object {
         $_.Profit = 0
         $_.Profit_Comparison = 0
@@ -697,6 +712,7 @@ while ($true) {
 
         $MinerComparisons | Out-Host
     }
+
     write-log -level warn "Main script ZA memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
     # Export data to files - this can be used by an external process to get status information
     $ActiveMiners | Where-Object {$_.GetActivateCount() -GT 0 -and $_.GetStatus() -eq "Running"} | Foreach-Object {
@@ -722,12 +738,17 @@ while ($true) {
 	$Miners | Export-Clixml -Path 'Data\Miners.xml'
 	$Pools | Export-Clixml -Path 'Data\Pools.xml'
 	$AllPools | Export-Clixml -Path 'Data\AllPools.xml'
-    # Update API Data
+
+    write-log -level warn "Main script ZC memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
+
+    #Give API access to WatchdogTimers information
+    $API.WatchdogTimers = $WatchdogTimers
+
+    #Update API miner information
     $API.ActiveMiners = $ActiveMiners
     $API.RunningMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Running}
-    $API.Pools = $Pools
-    $API.Miners = $Miners
-    write-log -level warn "Main script ZC memory usage: $((Get-Process -ID $PID | Select-Object -ExpandProperty WorkingSet)/1MB) MB"
+    $API.FailedMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Failed}
+
     #Reduce Memory
     Get-Job -State Completed | Remove-Job
     [GC]::Collect()
@@ -736,7 +757,7 @@ while ($true) {
     Write-Log "Start waiting before next run. "
     for ($i = $Strikes; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
-        if($API.Stop) { Exit }
+        if ($API.Stop) {Exit}
         Start-Sleep 10
         $Timer = (Get-Date).ToUniversalTime()
     }
