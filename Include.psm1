@@ -223,7 +223,7 @@ function Get-ChildItemContent {
         return $Expression
     }
 
-    Get-ChildItem $Path -File | ForEach-Object {
+    Get-ChildItem $Path -File -ErrorAction SilentlyContinue | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
         if ($_.Extension -eq ".ps1") {
