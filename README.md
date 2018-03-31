@@ -334,17 +334,17 @@ The default pool config might look like this:
         "BTC": "$Wallet"
     }
 
-To limit mining to well defined coins add a line like "DisabledCoins": ["DisabledCoinName", "AnotherDisabledCoinName", "YetAnotherDisabledCoinName", "..."]
+To limit mining to well defined coins add a line like "DisabledCoin": ["DisabledCoinName", "AnotherDisabledCoinName", "YetAnotherDisabledCoinName", "..."]
 
 E.g. if you do not want to mine the coins 'Pizza' and 'Vivo' on Zpool change the pool config to:
 
     "ZpoolCoins": {
         "Worker": "$WorkerName",
         "BTC": "$Wallet",
-        "DisabledCoins": ["Pizza", "Vivo"]
+        "DisabledCoin": ["Pizza", "Vivo"]
     }
 
-To allow mining all coins remove the line "DisabledCoins": [...]
+To allow mining all coins remove the line "DisabledCoin": [...]
 
 #### To mine only selected coins on a pool
 

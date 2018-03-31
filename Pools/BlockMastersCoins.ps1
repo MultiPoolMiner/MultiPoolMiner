@@ -33,7 +33,7 @@ $BlockMastersCoins_Currencies = @("BTC", "DOGE", "LTC") + ($BlockMastersCoins_Re
 
 #Mine any coin defined in array $Config.$Pool.Coins[]
 $BlockMastersCoins_MiningCurrencies = ($BlockMastersCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Where-Object {$Coins.count -eq 0 -or $Coins -icontains $BlockMastersCoins_Request.$_.name} | Select-Object -Unique
-$BlockMastersCoins_MiningCurrencies | Where-Object {$DisabledCoins -inotcontains $BlockMastersCoins_Request.$_.name -and $DisabledAlgorithm -inotcontains (Get-Algorithm $BlockMastersCoins_Request.$_.algo) -and $BlockMastersCoins_Request.$_.hashrate -gt 0} | ForEach-Object {
+$BlockMastersCoins_MiningCurrencies | Where-Object {$DisabledCoin -inotcontains $BlockMastersCoins_Request.$_.name -and $DisabledAlgorithm -inotcontains (Get-Algorithm $BlockMastersCoins_Request.$_.algo) -and $BlockMastersCoins_Request.$_.hashrate -gt 0} | ForEach-Object {
     $BlockMastersCoins_Host = "BlockMasters.co"
     $BlockMastersCoins_Port = $BlockMastersCoins_Request.$_.port
     $BlockMastersCoins_Algorithm = $BlockMastersCoins_Request.$_.algo
