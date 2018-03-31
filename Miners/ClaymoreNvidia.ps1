@@ -199,8 +199,8 @@ $DeviceID = 0
 # Get device list
 [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | ForEach-Object {
     # Get DeviceIDs, filter out all disabled hw models and IDs
-    if ($Config.Miners.IgnoreDeviceIDs -notcontains $DeviceID -and $Config.Miners.IgnoreHWModel -inotcontains ((Get-Culture).TextInfo.ToTitleCase($_.Name) -replace "[^A-Z0-9]")) {
-        if ($Config.Miners.$Name.IgnoreDeviceIDs -notcontains $DeviceID -and $Config.Miners.$Name.IgnoreHWModel -inotcontains ((Get-Culture).TextInfo.ToTitleCase($_.Name) -replace "[^A-Z0-9]")) {
+    if ($Config.Miners.IgnoreDeviceID -notcontains $DeviceID -and $Config.Miners.IgnoreHWModel -inotcontains ((Get-Culture).TextInfo.ToTitleCase($_.Name) -replace "[^A-Z0-9]")) {
+        if ($Config.Miners.$Name.IgnoreDeviceID -notcontains $DeviceID -and $Config.Miners.$Name.IgnoreHWModel -inotcontains ((Get-Culture).TextInfo.ToTitleCase($_.Name) -replace "[^A-Z0-9]")) {
             $DeviceIDs2gb += [Convert]::ToString($DeviceID, 16)
             if ($_.GlobalMemsize -ge 3000000000) {$DeviceIDs3gb += [Convert]::ToString($DeviceID, 16)}
         }
