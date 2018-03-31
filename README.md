@@ -311,17 +311,17 @@ The default pool config might look like this:
         "BTC": "$Wallet"
     }
 
-To prevent the pool from using an algorithm / a set of algorithms add a line like "DisabledAlgorithms": ["disabled_algo", "another_disabled_algo"]
+To prevent the pool from using an algorithm / a set of algorithms add a line like "DisabledAlgorithm": ["disabled_algo", "another_disabled_algo"]
 
 E.g. if you do not want to use Keccac and Equihash on NiceHash change the pool config to:
 
     "NiceHash": {
         "Worker": "$WorkerName",
         "BTC": "$Wallet",
-        "DisabledAlgorithms": ["Keccak", "Equihash"]
+        "DisabledAlgorithm": ["Keccak", "Equihash"]
     }
 
-To allow mining all algorithms remove the line "DisabledAlgorithms": [...]
+To allow mining all algorithms remove the line "DisabledAlgorithm": [...]
 
 #### To disable mining some coins on a pool
 
