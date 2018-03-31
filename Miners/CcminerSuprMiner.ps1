@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-SuprMiner\ccminer.exe"
-$Uri = "https://github.com/ocminer/suprminer/releases/download/1.2/suprminer-1.2.7z"
+$Uri = "https://github.com/ocminer/suprminer/releases/download/1.3/suprminer-1.3b.7z"
 
 $Commands = [PSCustomObject]@{
     "x16r"  = "" #X16R RavenCoin
