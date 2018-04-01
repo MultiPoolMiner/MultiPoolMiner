@@ -497,6 +497,10 @@ class Miner {
     $LogFile
     $Pool
 
+    [String[]]GetProcessNames() {
+        return @(([IO.FileInfo]($this.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName)
+    }
+
     hidden StartMining() {
         $this.Status = [MinerStatus]::Failed
 
