@@ -285,7 +285,7 @@ function ConvertTo-LocalCurrency {
 
     $Number = $Number * $BTCRate
 
-    switch ([math]::truncate(10 - $Offset - [math]::log($BTCRate, [Math]::Pow(10, 1)))) {
+    switch ([math]::truncate(10 - $Offset - [math]::log($BTCRate, 10))) {
         0 {$Number.ToString("N0")}
         1 {$Number.ToString("N1")}
         2 {$Number.ToString("N2")}
