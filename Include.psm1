@@ -8,26 +8,26 @@ Add-Type -Path .\OpenCL\*.cs
 function Get-Devices {
     [CmdletBinding()]
 	
-    $Devices = [PSCustomObject]@{}
+    $Devices  = [PSCustomObject]@{}
     $DeviceID = 0
     
-    $OpenGlDevices = [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)}
+    $OpenGlDevices = @([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)})
     $OpenGlDevices | ForEach-Object {
+
+        $Device = @([PSCustomObject]$_)
 
         $Name_Norm = (Get-Culture).TextInfo.ToTitleCase(($_.Name)) -replace "[^A-Z0-9]"
 
-        if ($_.Type -eq "Cpu") {
+        if ($Device.Type -eq "Cpu") {
             $Type = "CPU"
         }
         else {
-            Switch ($_.Vendor) {
+            Switch ($Device.Vendor) {
                 "Advanced Micro Devices, Inc." {$Type = "AMD"}
                 "Intel(R) Corporation"         {$Type = "INTEL"}
                 "NVIDIA Corporation"           {$Type = "NVIDIA"}
             }
         }        
-
-        $Device = @([PSCustomObject]$_)
 
         if (-not $Devices.$Type) { # New hardware platform, start counting deviceIDs from 0
             $DeviceID = 0
