@@ -7,5 +7,5 @@
                   },
     "API":  "Cast",
     "Port":  "7777",
-    "URI":  "http://www.gandalph3000.com/download/cast_xmr-vega-win64_085.zip"
+    "URI":  "http://www.gandalph3000.com/download/cast_xmr-vega-win64_092.zip"
 }
