@@ -1,4 +1,4 @@
-Function Start-APIServer {
+﻿Function Start-APIServer {
     # Create a global synchronized hashtable that all threads can access to pass data between the main script and API
     $Global:API = [hashtable]::Synchronized(@{})
   
@@ -59,6 +59,14 @@ Function Start-APIServer {
                 }
                 "/pools" {
                     $Data = $API.Pools | ConvertTo-Json
+                    Break
+                }
+                "/newpools" {
+                    $Data = $API.NewPools | ConvertTo-Json
+                    Break
+                }
+                "/allpools" {
+                    $Data = $API.AllPools | ConvertTo-Json
                     Break
                 }
                 "/miners" {
