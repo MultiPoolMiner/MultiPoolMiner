@@ -106,6 +106,12 @@ $WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHh
 $UserNameDonate = @("aaronsace", "fonyo")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
 $WorkerNameDonate = "multipoolminer"
 
+
+#Initialize the API
+Import-Module .\API.psm1
+Start-APIServer
+$API.Version = $Version
+
 while ($true) {
     #Load the config
     $ConfigBackup = $Config
@@ -201,6 +207,9 @@ while ($true) {
         $Config | Add-Member ExcludePoolName @() -Force
     }
 
+    #Give API access to the current running configuration
+    $API.Config = $Config
+
     #Clear pool cache if the configuration has changed
     if (($ConfigBackup | ConvertTo-Json -Compress) -ne ($Config | ConvertTo-Json -Compress)) {$AllPools = $null}
 
@@ -234,6 +243,8 @@ while ($true) {
     Write-Log "Loading saved statistics. "
     $Stats = [PSCustomObject]@{}
     if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
+    #Give API access to the current stats
+    $API.Stats = $Stats
 
     #Load information about the pools
     Write-Log "Loading pool information. "
@@ -247,12 +258,18 @@ while ($true) {
         } | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
     }
 
+    #Give API access to the current running configuration
+    $API.NewPools = $NewPools
+
     # This finds any pools that were already in $AllPools (from a previous loop) but not in $NewPools. Add them back to the list. Their API likely didn't return in time, but we don't want to cut them off just yet
     # since mining is probably still working.  Then it filters out any algorithms that aren't being used.
     $AllPools = @($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object {$AllPools | Where-Object Name -EQ $_}) | 
         Where-Object {$Config.Algorithm.Count -eq 0 -or (Compare-Object $Config.Algorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
         Where-Object {$Config.ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $Config.ExcludeAlgorithm $_.Algorithm -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0} | 
         Where-Object {$Config.ExcludePoolName.Count -eq 0 -or (Compare-Object $Config.ExcludePoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
+    
+    #Give API access to the current running configuration
+    $API.AllPools = $AllPools
 
     #Apply watchdog to pools
     $AllPools = $AllPools | Where-Object {
@@ -281,6 +298,8 @@ while ($true) {
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Bias ($Pools.$_.Price * (1 - ($Pools.$_.MarginOfError * $Config.SwitchingPrevention * [Math]::Pow($DecayBase, $DecayExponent)))) -Force}
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Unbias $Pools.$_.Price -Force}
     }
+    #Give API access to the pools information
+    $API.Pools = $Pools
 
     #Load information about the miners
     #Messy...?
@@ -377,6 +396,8 @@ while ($true) {
         $Miner.Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Miner.Path)
         if ($Miner.PrerequisitePath) {$Miner.PrerequisitePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Miner.PrerequisitePath)}
 
+        if ($Miner.Arguments -isnot [String]) {$Miner.Arguments = $Miner.Arguments | ConvertTo-Json -Compress}
+
         if (-not $Miner.API) {$Miner | Add-Member API "Miner" -Force}
     }
     $Miners = $AllMiners | Where-Object {(Test-Path $_.Path) -and ((-not $_.PrerequisitePath) -or (Test-Path $_.PrerequisitePath))}
@@ -410,6 +431,9 @@ while ($true) {
         Start-Sleep $Config.Interval
         continue
     }
+    #Give API access to the miners information
+    $API.Miners = $Miners
+
     $ActiveMiners | ForEach-Object {
         $_.Profit = 0
         $_.Profit_Comparison = 0
@@ -466,6 +490,7 @@ while ($true) {
                 Best_Comparison      = $false
                 New                  = $false
                 Benchmarked          = 0
+                Pool                 = $Miner.Pools.PSObject.Properties.Value.Name
             }
         }
     }
@@ -569,7 +594,7 @@ while ($true) {
             }
         }
     }
-    Get-Process -Name @($ActiveMiners | ForEach-Object {([IO.FileInfo]($_.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName}) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best -EQ $true | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {([IO.FileInfo]($_.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName}) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}
+    Get-Process -Name @($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best -EQ $true | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {$_.GetProcessNames()}) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Config.Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
@@ -600,7 +625,7 @@ while ($true) {
         }
     }
 
-    if ($Config.MinerStatusURL -and $Config.MinerStatusKey) {& .\ReportStatus.ps1 -Key $Config.MinerStatusKey -WorkerName $WorkerName -ActiveMiners $ActiveMiners -Miners $Miners -MinerStatusURL $Config.MinerStatusURL}
+    if ($Config.MinerStatusURL -and $Config.MinerStatusKey) {& .\ReportStatus.ps1 -Key $Config.MinerStatusKey -WorkerName $WorkerName -ActiveMiners $ActiveMiners -MinerStatusURL $Config.MinerStatusURL}
 
     Clear-Host
 
@@ -656,6 +681,13 @@ while ($true) {
 
         $MinerComparisons | Out-Host
     }
+    #Give API access to WatchdogTimers information
+    $API.WatchdogTimers = $WatchdogTimers
+
+    #Update API miner information
+    $API.ActiveMiners = $ActiveMiners
+    $API.RunningMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Running}
+    $API.FailedMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Failed}
 
     #Reduce Memory
     Get-Job -State Completed | Remove-Job
@@ -665,6 +697,7 @@ while ($true) {
     Write-Log "Start waiting before next run. "
     for ($i = $Strikes; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
+        if ($API.Stop) {Exit}
         Start-Sleep 10
         $Timer = (Get-Date).ToUniversalTime()
     }

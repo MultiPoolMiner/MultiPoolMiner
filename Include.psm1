@@ -11,6 +11,11 @@ Function Write-Log {
 
     Begin { }
     Process {
+        # Inherit the same verbosity settings as the script importing this
+        if (-not $PSBoundParameters.ContainsKey('InformationPreference')) { $InformationPreference = $PSCmdlet.GetVariableValue('InformationPreference') }
+        if (-not $PSBoundParameters.ContainsKey('Verbose')) { $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference') }
+        if (-not $PSBoundParameters.ContainsKey('Debug')) { $DebugPreference = $PSCmdlet.GetVariableValue('DebugPreference') }
+
         # Get mutex named MPMWriteLog. Mutexes are shared across all threads and processes.
         # This lets us ensure only one thread is trying to write to the file at a time.
         $mutex = New-Object System.Threading.Mutex($false, "MPMWriteLog")
@@ -223,7 +228,7 @@ function Get-ChildItemContent {
         return $Expression
     }
 
-    Get-ChildItem $Path -File | ForEach-Object {
+    Get-ChildItem $Path -File -ErrorAction SilentlyContinue | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
         if ($_.Extension -eq ".ps1") {
@@ -285,7 +290,7 @@ function ConvertTo-LocalCurrency {
 
     $Number = $Number * $BTCRate
 
-    switch ([math]::truncate(10 - $Offset - [math]::log($BTCRate, [Math]::Pow(10, 1)))) {
+    switch ([math]::truncate(10 - $Offset - [math]::log($BTCRate, 10))) {
         0 {$Number.ToString("N0")}
         1 {$Number.ToString("N1")}
         2 {$Number.ToString("N2")}
@@ -382,10 +387,10 @@ function Expand-WebRequest {
         $Path_Old = (Join-Path (Split-Path $Path) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
         $Path_New = (Join-Path (Split-Path $Path) (Split-Path $Path -Leaf))
 
-        if (Test-Path $Path_Old) {Remove-Item $Path_Old -Recurse}
+        if (Test-Path $Path_Old) {Remove-Item $Path_Old -Recurse -Force}
         Start-Process "7z" "x `"$([IO.Path]::GetFullPath($FileName))`" -o`"$([IO.Path]::GetFullPath($Path_Old))`" -y -spe" -Wait
 
-        if (Test-Path $Path_New) {Remove-Item $Path_New -Recurse}
+        if (Test-Path $Path_New) {Remove-Item $Path_New -Recurse -Force}
         if (Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $false) {
             Rename-Item $Path_Old (Split-Path $Path -Leaf)
         }
@@ -495,6 +500,11 @@ class Miner {
     hidden [MinerStatus]$Status = [MinerStatus]::Idle
     $Benchmarked
     $LogFile
+    $Pool
+
+    [String[]]GetProcessNames() {
+        return @(([IO.FileInfo]($this.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName)
+    }
 
     hidden StartMining() {
         $this.Status = [MinerStatus]::Failed
