@@ -1,7 +1,7 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-TPruvot\ccminer-x64.exe"
-$Uri = "https://github.com/tpruvot/ccminer/releases/download/2.2.5-tpruvot/ccminer-x86-2.2.5-cuda9.7z"
+$Path = ".\Bin\NVIDIA-Alexis78\ccminer-alexis.exe"
+$Uri = "https://github.com/nemosminer/ccminer-hcash/releases/download/alexishsr/ccminer-hsr-alexis-x86-cuda8.7z"
 
 $Commands = [PSCustomObject]@{
     #GPU - profitable 27/03/2018
@@ -15,7 +15,6 @@ $Commands = [PSCustomObject]@{
     "c11" = "" #C11
     "deep" = "" #deep
     "dmd-gr" = "" #dmd-gr
-    "equihash" = "" #Equihash
     "fresh" = "" #fresh
     "fugue256" = "" #Fugue256
     "groestl" = "" #Groestl
@@ -23,13 +22,11 @@ $Commands = [PSCustomObject]@{
     "hmq1725" = "" #HMQ1725
     "hsr" = "" #HSR, HShare
     "keccak" = "" #Keccak
-    "keccakc" = "" #keccakc
     "jackpot" = "" #JackPot
     "jha" = "" #JHA
     "luffa" = "" #Luffa
-    "lyra2v2" = "" #Lyra2RE2
-    "lyra2h" = "" #lyra2h
-    "lyra2re" = "" #lyra2re
+    "lyra2" = "" #Lyra2
+    "lyra2v2" = "" #lyra2v2
     "lyra2z" = "" #Lyra2z, ZCoin
     "mjollnir" = "" #Mjollnir
     "myr-gr" = "" #MyriadGroestl
@@ -37,8 +34,6 @@ $Commands = [PSCustomObject]@{
     "nist5" = "" #Nist5
     "pentablake" = "" #pentablake
     "penta" = "" #Pentablake
-    "phi" = "" #PHI
-    "polytimos" = "" #Polytimos
     "scryptjane:nf" = "" #scryptjane:nf
     "sha256t" = "" #sha256t
     "sib" = "" #Sib
@@ -47,33 +42,30 @@ $Commands = [PSCustomObject]@{
     "skunk" = "" #Skunk
     "s3" = "" #S3
     "timetravel" = "" #Timetravel
-    "tribus" = "" #Tribus
     "vanilla" = "" #BlakeVanilla
     "veltor" = "" #Veltor
+    #"whirlcoin" = "" #WhirlCoin
     #"whirlpool" = "" #Whirlpool
     #"whirlpoolx" = "" #whirlpoolx
     "wildkeccak" = "" #wildkeccak
     "x11evo" = "" #X11evo
-    "x12" = "" #X12
-    "x16r" = "" #X16r
-    "X16s" = "" #X16s
     "x17" = "" #x17
     "zr5" = "" #zr5
 
     # ASIC - never profitable 27/03/2018
-    "blake2s" = "" #Blake2s
-    "lbry" = "" #Lbry
-    "decred" = "" #Decred
-    "quark" = "" #Quark
-    "qubit" = "" #Qubit
+    #"blake2s" = "" #Blake2s
+    #"lbry" = "" #Lbry
+    #"decred" = "" #Decred
+    #"quark" = "" #Quark
+    #"qubit" = "" #Qubit
     #"scrypt" = "" #Scrypt
-    "scrypt:N" = "" #scrypt:N
-    "sha256d" = "" #sha256d
-    "sia" = "" #SiaCoin
+    #"scrypt:N" = "" #scrypt:N
+    #"sha256d" = "" #sha256d
+    #"sia" = "" #SiaCoin
     #"x11" = "" #X11
-    "x13" = "" #x13
-    "x14" = "" #x14
-    "x15" = "" #x15
+    #"x13" = "" #x13
+    #"x14" = "" #x14
+    #"x15" = "" #x15
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -82,7 +74,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     [PSCustomObject]@{
         Type = "NVIDIA"
         Path = $Path
-        Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_) --submit-stale"
+        Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_)"
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Ccminer"
         Port = 4068

@@ -4,36 +4,59 @@ $Path = ".\Bin\CPU-TPruvot\cpuminer-gw64-avx2.exe"
 $Uri = "https://github.com/tpruvot/cpuminer-multi/releases/download/v1.3.1-multi/cpuminer-multi-rel1.3.1-x64.zip"
 
 $Commands = [PSCustomObject]@{
-    #"bitcore" = "" #Bitcore
-    "blake2s" = "" #Blake2s
-    "blakecoin" = "" #Blakecoin
-    "vanilla" = "" #BlakeVanilla
-    "c11" = "" #C11
+    # CPU Only algos 3/27/2018
+    "yescrypt" = "" #Yescrypt
+    #"axiom" = "" #axiom
+    
+    # CPU & GPU - still profitable 27/03/2018
     "cryptonight" = "" #CryptoNight
-    "decred" = "" #Decred
+    "hmq1725" = "" #HMQ1725
+    "shavite3" = "" #shavite3
+
+    #GPU - never profitable 27/03/2018
+    #"bastion" = "" #bastion
+    #"bitcore" = "" #Bitcore
+    #"blake" = "" #blake
+    #"blake2s" = "" #Blake2s
+    #"blakecoin" = "" #Blakecoin
+    #"bmw" = "" #bmw
+    #"c11" = "" #C11
+    #"cryptolight" = "" #cryptolight
+    #"decred" = "" #Decred
+    #"dmd-gr" = "" #dmd-gr
     #"equihash" = "" #Equihash
     #"ethash" = "" #Ethash
-    "groestl" = "" #Groestl
-    #"hmq1725" = "" #HMQ1725
+    #"groestl" = "" #Groestl
     #"jha" = "" #JHA
-    "keccak" = "" #Keccak
+    #"keccak" = "" #Keccak
+    #"keccakc" = "" #keccakc
     #"lbry" = "" #Lbry
-    "lyra2rev2" = "" #Lyra2RE2
-    #"lyra2z" = "" #Lyra2z
-    "myr-gr" = "" #MyriadGroestl
-    "neoscrypt" = "" #NeoScrypt
-    "nist5" = "" #Nist5
+    #"lyra2re" = "" #lyra2re
+    #"lyra2v2" = "" #Lyra2RE2
+    #"myr-gr" = "" #MyriadGroestl
+    #"neoscrypt" = "" #NeoScrypt
+    #"nist5" = "" #Nist5
     #"pascal" = "" #Pascal
-    "sib" = "" #Sib
-    "skein" = "" #Skein
+    #"pentablake" = "" #pentablake
+    #"pluck" = "" #pluck
+    #"scrypt:N" = "" #scrypt:N
+    #"scryptjane:nf" = "" #scryptjane:nf
+    #"sha256d" = "" #sha256d
+    #"sib" = "" #Sib
+    #"skein" = "" #Skein
+    #"skein2" = "" #skein2
     #"skunk" = "" #Skunk
-    "timetravel" = "" #Timetravel
+    #"timetravel" = "" #Timetravel
     #"tribus" = "" #Tribus
+    #"vanilla" = "" #BlakeVanilla
     #"veltor" = "" #Veltor
-    "x11evo" = "" #X11evo
-    "x17" = "" #X17
-    "xevan" = "" #Xevan
-    "yescrypt" = "" #Yescrypt
+    #"x11" = "" #X11
+    #"x11evo" = "" #X11evo
+    #"x13" = "" #x13
+    #"x14" = "" #x14
+    #"x15" = "" #x15
+    #"x16r" = "" #x16r
+    #"zr5" = "" #zr5
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
