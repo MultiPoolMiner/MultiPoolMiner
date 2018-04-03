@@ -48,6 +48,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Selec
         "quark" {$Divisor *= 1000}
         "qubit" {$Divisor *= 1000}
         "scrypt" {$Divisor *= 1000}
+        "sha256t" {$Divisor *= 1000}
         "x11" {$Divisor *= 1000}
     }
 
