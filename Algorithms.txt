@@ -166,6 +166,7 @@
     "yescrypt":  "Yescrypt",
     "yescryptr8":  "YescryptR8",
     "yescryptr16":  "YescryptR16",
+    "yenten":  "YescryptR16",
     "yescryptr32":  "YescryptR32",
     "zr5":  "zr5",
     "ziftr":  "zr5",
