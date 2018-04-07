@@ -7,5 +7,5 @@
                   },
     "API":  "XMRig",
     "Port":  "3336",
-    "URI":  "https://github.com/xmrig/xmrig-amd/releases/download/v2.4.5/xmrig-amd-2.4.5-win64.zip"
+    "URI":  "https://github.com/xmrig/xmrig-amd/releases/download/v2.5.2/xmrig-amd-2.5.2-win64.zip"
 }
