@@ -1,4 +1,4 @@
-﻿# MultiPoolMiner
+﻿# MultiPoolMiner®
 ###### created by aaronsace 
 ###### **WEBSITE: [MultiPoolMiner.io](https://multipoolminer.io)**
 ###### **GITHUB: [https://github.com/MultiPoolMiner/](https://github.com/MultiPoolMiner/MultiPoolMiner/releases)**
