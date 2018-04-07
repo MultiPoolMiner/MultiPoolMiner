@@ -27,7 +27,7 @@ if (($NiceHash_Request.result.simplemultialgo | Measure-Object).Count -le 1) {
 
 $NiceHash_Regions = "eu", "usa", "hk", "jp", "in", "br"
 
-$NiceHash_Request.result.simplemultialgo | Where-Object {$DisabledAlgorithm -inotcontains (Get-Algorithm $_.name)} | ForEach-Object {
+$NiceHash_Request.result.simplemultialgo | Where-Object {$ExcludeAlgorithm -inotcontains (Get-Algorithm $_.name)} | ForEach-Object {
     $NiceHash_Host = "nicehash.com"
     $NiceHash_Port = $_.port
     $NiceHash_Algorithm = $_.name

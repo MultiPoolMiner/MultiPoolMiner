@@ -31,7 +31,7 @@ $BlockMasters_Regions = "us"
 #Pool allows payout in BTC, DOGE, LTC & any currency available in API. Define desired payout currency in $Config.$Pool.<Currency>
 $BlockMasters_Currencies = @("BTC", "DOGE", "LTC") + ($BlockMastersCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
-$BlockMasters_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$DisabledAlgorithm -inotcontains (Get-Algorithm $BlockMasters_Request.$_.name) -and $BlockMasters_Request.$_.hashrate -gt 0} | ForEach-Object {
+$BlockMasters_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$ExcludeAlgorithm -inotcontains (Get-Algorithm $BlockMasters_Request.$_.name) -and $BlockMasters_Request.$_.hashrate -gt 0} | ForEach-Object {
     $BlockMasters_Host = "blockmasters.co"
     $BlockMasters_Port = $BlockMasters_Request.$_.port
     $BlockMasters_Algorithm = $BlockMasters_Request.$_.name
