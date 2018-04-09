@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\CryptoNight-FireIce\xmr-stak.exe"
-$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/v2.2.0/xmr-stak-win64.zip"
+$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.4.2/xmr-stak-win64.zip"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 3335
@@ -17,7 +17,7 @@ $Port = 3335
                 pool_weight     = 1
             }
         )
-        currency        = "monero"
+        currency        = "monero7"
         call_timeout    = 10
         retry_time      = 10
         giveup_limit    = 0
