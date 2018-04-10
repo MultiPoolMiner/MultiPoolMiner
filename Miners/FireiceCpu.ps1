@@ -15,6 +15,7 @@ $Port = 3334
                 use_tls         = $Pools.CryptoNight.SSL
                 tls_fingerprint = ""
                 pool_weight     = 1
+                rig_id = ""
             }
         )
         currency        = "monero7"
@@ -40,7 +41,7 @@ $Port = 3334
 [PSCustomObject]@{
     Type      = "CPU"
     Path      = $Path
-    Arguments = "-c $($Pools.CryptoNight.Name)_CryptoNight_$($Pools.CryptoNight.User)_Cpu.txt --noUAC --noAMD --noNVIDIA"
+    Arguments = "-C $($Pools.CryptoNight.Name)_CryptoNight_$($Pools.CryptoNight.User)_Cpu.txt --noUAC --noAMD --noNVIDIA"
     HashRates = [PSCustomObject]@{CryptoNight = $Stats."$($Name)_CryptoNight_HashRate".Week}
     API       = "XMRig"
     Port      = $Port
