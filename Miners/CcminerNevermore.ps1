@@ -5,6 +5,7 @@ $Uri = "https://github.com/brian112358/nevermore-miner/releases/download/v0.2.2/
 
 $Commands = [PSCustomObject]@{
     "x16r"  = "" #X16R RavenCoin
+    "x16s"  = "" #X16S PigeonCoin
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
