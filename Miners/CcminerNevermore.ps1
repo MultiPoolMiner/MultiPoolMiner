@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-Nevermore\ccminer.exe"
-$Uri = "https://github.com/nemosminer/ccminernevermore/releases/download/0.2-nevermore/ccminernevermore0.2x64.zip"
+$Uri = "https://github.com/brian112358/nevermore-miner/releases/download/v0.2.2/nevermore-v0.2.2-win64.zip"
 
 $Commands = [PSCustomObject]@{
     "x16r"  = "" #X16R RavenCoin
