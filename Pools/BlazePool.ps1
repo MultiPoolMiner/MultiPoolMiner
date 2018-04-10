@@ -43,6 +43,7 @@ $BlazePool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
         "blakecoin" {$Divisor *= 1000}
         "decred"    {$Divisor *= 1000}
         "keccak"    {$Divisor *= 1000}
+        "qubit"     {$Divisor *= 1000}
     }
     
     if ((Get-Stat -Name "$($Name)_$($BlazePool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($BlazePool_Algorithm_Norm)_Profit" -Value ([Double]$BlazePool_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
