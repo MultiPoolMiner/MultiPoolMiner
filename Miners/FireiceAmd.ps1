@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\CryptoNight-FireIce\xmr-stak.exe"
-$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/v2.2.0/xmr-stak-win64.zip"
+$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.4.2/xmr-stak-win64.zip"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 3336
@@ -15,9 +15,10 @@ $Port = 3336
                 use_tls         = $Pools.CryptoNight.SSL
                 tls_fingerprint = ""
                 pool_weight     = 1
+                rig_id = ""
             }
         )
-        currency        = "monero"
+        currency        = "monero7"
         call_timeout    = 10
         retry_time      = 10
         giveup_limit    = 0
@@ -40,7 +41,7 @@ $Port = 3336
 [PSCustomObject]@{
     Type      = "AMD"
     Path      = $Path
-    Arguments = "-c $($Pools.CryptoNight.Name)_CryptoNight_$($Pools.CryptoNight.User)_Amd.txt --noUAC --noCPU --noNVIDIA"
+    Arguments = "-C $($Pools.CryptoNight.Name)_CryptoNight_$($Pools.CryptoNight.User)_Amd.txt --noUAC --noCPU --noNVIDIA -i $($Port)"
     HashRates = [PSCustomObject]@{CryptoNight = $Stats."$($Name)_CryptoNight_HashRate".Week}
     API       = "XMRig"
     Port      = $Port
