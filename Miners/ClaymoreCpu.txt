@@ -1,7 +1,7 @@
-{
+﻿{
     "Type":  "CPU",
     "Path":  ".\\Bin\\CryptoNight-Claymore-Cpu\\NsCpuCNMiner64.exe",
-    "Arguments":  "\"-r -1 -mport -3333 -o $($Pools.CryptoNight.Protocol)://$($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port) -u $($Pools.CryptoNight.User) -p $($Pools.CryptoNight.Pass)\"",
+    "Arguments":  "\"-r -1 -mport -3333 -pow7 1 -o $($Pools.CryptoNight.Protocol)://$($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port) -u $($Pools.CryptoNight.User) -p $($Pools.CryptoNight.Pass)\"",
     "HashRates":  {
                       "CryptoNight":  "\"$($Stats.ClaymoreCPU_CryptoNight_HashRate.Week)\""
                   },
