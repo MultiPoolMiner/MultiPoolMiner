@@ -42,14 +42,14 @@ $BlazePool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
         "blake2s"{$Divisor *= 1000}
         "blakecoin"{$Divisor *= 1000}
         "decred"{$Divisor *= 1000}
+        "equihash"{$Divisor /= 1000}
         "keccak"{$Divisor *= 1000}
         "keccakc"{$Divisor *= 1000}
         "quark"{$Divisor *= 1000}
         "qubit"{$Divisor *= 1000}
-        "vanilla"{$Divisor *= 1000}
         "scrypt"{$Divisor *= 1000}
+        "vanilla"{$Divisor *= 1000}
         "x11"{$Divisor *= 1000}
-        "equihash"{$Divisor /= 1000}
         "yescrypt"{$Divisor /= 1000}
     }
     
