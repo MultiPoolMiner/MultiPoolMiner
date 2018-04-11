@@ -436,6 +436,25 @@ function Invoke-TcpRequest {
     $Response
 }
 
+function Get-CryptonightAlgorithm { # temp fix for Cryptonight hard fork
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [String]$Coinname = ""
+    )
+
+    Switch ($Coinname) {
+        "Monero"     {$Algorithm = "CryptonightV7"}
+        "Aeon"       {$Algorithm = "CryptonightV7"}
+        "Graft"      {$Algorithm = "CryptonightV7"}
+        "Stellite"   {$Algorithm = "CryptonightV7"}
+        "Sumokoin"   {$Algorithm = "Cryptonight-Heavy"}
+        "Turtlecoin" {$Algorithm = "Cryptonight-Lite"}
+        default      {$Algorithm = "Cryptonight"}
+    }
+    return $Algorithm
+}
+
 function Get-Algorithm {
     [CmdletBinding()]
     param(

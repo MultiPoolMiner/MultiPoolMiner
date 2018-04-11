@@ -32,8 +32,13 @@ $MiningPoolHub_Request.return | ForEach-Object {
     $MiningPoolHub_Port = $_.algo_switch_port
     $MiningPoolHub_Algorithm = $_.algo
     $MiningPoolHub_Algorithm_Norm = Get-Algorithm $MiningPoolHub_Algorithm
-    $MiningPoolHub_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.current_mining_coin -replace "-", " " -replace "_", " ")) -replace " "
+    $MiningPoolHub_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.coin_name -replace "-", " " -replace "_", " ")) -replace " "
 
+    if ($MiningPoolHub_Algorithm_Norm -eq "Cryptonight") { # temp fix
+        $MiningPoolHub_Algorithm = Get-CryptonightAlgorithm $MiningPoolHub_Coin
+        $MiningPoolHub_Algorithm_Norm = Get-Algorithm $MiningPoolHub_Algorithm
+    }
+    
     if ($MiningPoolHub_Algorithm_Norm -eq "Sia") {$MiningPoolHub_Algorithm_Norm = "SiaClaymore"} #temp fix
 
     $Divisor = 1000000000
@@ -61,7 +66,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 Updated       = $Stat.Updated
             }
 
-            if ($MiningPoolHub_Algorithm_Norm -eq "Cryptonight" -or $MiningPoolHub_Algorithm_Norm -eq "Equihash") {
+            if ($MiningPoolHub_Algorithm_Norm -eq "Cryptonight*" -or $MiningPoolHub_Algorithm_Norm -eq "Equihash") {
                 [PSCustomObject]@{
                     Algorithm     = $MiningPoolHub_Algorithm_Norm
                     Info          = $MiningPoolHub_Coin
