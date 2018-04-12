@@ -13,9 +13,9 @@
     {
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\CryptoNight-NVIDIA\\xmrig-nvidia.exe",
-        "Arguments":  "\"--api-port 3335 -a cryptonight-lite -o $($Pools.CryptoNight-Lite.Protocol)://$($Pools.CryptoNight-Lite.Host):$($Pools.CryptoNight-Lite.Port) -u $($Pools.CryptoNight-Lite.User) -p $($Pools.CryptoNight-Lite.Pass) --keepalive --nicehash --donate-level 1\"",
+        "Arguments":  "\"--api-port 3335 -a cryptonight-lite -o $($Pools.CryptoNightLite.Protocol)://$($Pools.CryptoNightLite.Host):$($Pools.CryptoNightLite.Port) -u $($Pools.CryptoNightLite.User) -p $($Pools.CryptoNightLite.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
-                          "CryptoNight-Lite":  "\"$(if ($Pools.CryptoNight-Lite.SSL) {0}else {$Stats.XmrigNvidia_CryptoNight-Lite_HashRate.Week})\""
+                          "CryptoNightLite":  "\"$(if ($Pools.CryptoNightLite.SSL) {0}else {$Stats.XmrigNvidia_CryptoNightLite_HashRate.Week})\""
                       },
         "API":  "XMRig",
         "Port":  "3335",
@@ -24,9 +24,9 @@
     {
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\CryptoNight-NVIDIA\\xmrig-nvidia.exe",
-        "Arguments":  "\"--api-port 3335 -a cryptonight-heavy -o $($Pools.CryptoNight-Heavy.Protocol)://$($Pools.CryptoNight-Heavy.Host):$($Pools.CryptoNight-Heavy.Port) -u $($Pools.CryptoNight-Heavy.User) -p $($Pools.CryptoNight-Heavy.Pass) --keepalive --nicehash --donate-level 1\"",
+        "Arguments":  "\"--api-port 3335 -a cryptonight-heavy -o $($Pools.CryptoNightHeavy.Protocol)://$($Pools.CryptoNightHeavy.Host):$($Pools.CryptoNightHeavy.Port) -u $($Pools.CryptoNightHeavy.User) -p $($Pools.CryptoNightHeavy.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
-                          "CryptoNight-Heavy":  "\"$(if ($Pools.CryptoNight-Heavy.SSL) {0}else {$Stats.XmrigNvidia_CryptoNight-Heavy_HashRate.Week})\""
+                          "CryptoNightHeavy":  "\"$(if ($Pools.CryptoNightHeavy.SSL) {0}else {$Stats.XmrigNvidia_CryptoNightHeavy_HashRate.Week})\""
                       },
         "API":  "XMRig",
         "Port":  "3335",
