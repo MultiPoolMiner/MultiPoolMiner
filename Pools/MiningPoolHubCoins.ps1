@@ -34,7 +34,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
     $MiningPoolHubCoins_Algorithm_Norm = Get-Algorithm $MiningPoolHubCoins_Algorithm
     $MiningPoolHubCoins_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.coin_name -replace "-", " " -replace "_", " ")) -replace " "
 
-    if ($MiningPoolHubCoins_Algorithm_Norm -eq "Cryptonight") { # temp fix
+    if ($MiningPoolHubCoins_Algorithm_Norm -eq "Cryptonight*") { # temp fix
         $MiningPoolHubCoins_Algorithm = Get-CryptonightAlgorithm $MiningPoolHubCoins_Coin
         $MiningPoolHubCoins_Algorithm_Norm = Get-Algorithm $MiningPoolHubCoins_Algorithm
     }
