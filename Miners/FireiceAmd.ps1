@@ -28,7 +28,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
                     rig_id = ""
                 }
             )
-            currency        = $_
+            currency        = "$_"
             call_timeout    = 10
             retry_time      = 10
             giveup_limit    = 0
