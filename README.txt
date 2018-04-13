@@ -318,7 +318,7 @@ The default pool config might look like this:
         "BTC": "$Wallet"
     }
 
-To prevent the pool from using an algorithm / a set of algorithms add a line like "ExcludeAlgorithm": ["excluded_algo", "another_excluded_algo"]
+To prevent the pool from using an algorithm / a set of algorithms add a line like "ExcludeAlgorithm": ["ExcludeAlgo", "AnotherExcludedAlgo"]
 
 E.g. if you do not want to use Keccac and Equihash on NiceHash change the pool config to:
 
@@ -332,7 +332,7 @@ To allow mining all algorithms remove the line "ExcludeAlgorithm": [...]
 
 To disable mining some coins coins on a pool
 
-The pools ending in ...Coins allow mining selected coins only, e.g do not mine ZClassic on MPH Pool
+The pools ending in ...Coins and MoningPoolHub (non-Coins) allow mining selected coins only, e.g do not mine ZClassic on MPH Pool
 Note: Not all pools support this, for more information consult the pools web page
 
 The default pool config might look like this:
@@ -342,17 +342,17 @@ The default pool config might look like this:
         "BTC": "$Wallet"
     }
 
-To limit mining to well defined coins add a line like "DisabledCoin": ["DisabledCoinName", "AnotherDisabledCoinName", "YetAnotherDisabledCoinName", "..."]
+To limit mining to well defined coins add a line like "ExcludeCoin": ["ExcludeCoinName", "AnotherExcludeCoinName", "YetAnotherExcludeCoinName", "..."]
 
 E.g. if you do not want to mine the coins 'Pizza' and 'Vivo' on Zpool change the pool config to:
 
     "ZpoolCoins": {
         "Worker": "$WorkerName",
         "BTC": "$Wallet",
-        "DisabledCoin": ["Pizza", "Vivo"]
+        "ExcludeCoin": ["Pizza", "Vivo"]
     }
 
-To allow mining all coins remove the line "DisabledCoin": [...]
+To allow mining all coins remove the line "ExcludeCoin": [...]
 
 To mine only selected coins on a pool
 
@@ -365,17 +365,17 @@ The default pool config might look like this:
         "BTC": "$Wallet"
     }
 
-To limit mining to well defined coins add a line like "Coins": ["CoinName", "AnotherCoinName", "YetAnotherCoinName", "..."]
+To limit mining to well defined coins add a line like "Coin": ["CoinName", "AnotherCoinName", "YetAnotherCoinName", "..."]
 
 E.g. to mine only the coins 'Pizza' and 'Vivo' on Zpool change the pool config to:
 
     "ZpoolCoins": {
         "Worker": "$WorkerName",
         "BTC": "$Wallet",
-        "Coins": ["Pizza", "Vivo"]
+        "Coin": ["Pizza", "Vivo"]
     }
                                    
-To allow mining all coins remove the line "Coins": [...]
+To allow mining all coins remove the line "Coin": [...]
 
 Advanced config for Miners
 

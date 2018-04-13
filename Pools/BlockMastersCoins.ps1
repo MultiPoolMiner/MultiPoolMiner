@@ -32,8 +32,8 @@ $BlockMastersCoins_Regions = "us"
 $BlockMastersCoins_Currencies = @("BTC", "DOGE", "LTC") + ($BlockMastersCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 #Mine any coin defined in array $Config.$Pool.Coins[]
-$BlockMastersCoins_MiningCurrencies = ($BlockMastersCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Where-Object {$Coins.count -eq 0 -or $Coins -icontains $BlockMastersCoins_Request.$_.name} | Select-Object -Unique
-$BlockMastersCoins_MiningCurrencies | Where-Object {$DisabledCoin -inotcontains $BlockMastersCoins_Request.$_.name -and $ExcludeAlgorithm -inotcontains (Get-Algorithm $BlockMastersCoins_Request.$_.algo) -and $BlockMastersCoins_Request.$_.hashrate -gt 0} | ForEach-Object {
+$BlockMastersCoins_MiningCurrencies = ($BlockMastersCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Where-Object {$Coin.count -eq 0 -or $Coin -icontains $BlockMastersCoins_Request.$_.name} | Select-Object -Unique
+$BlockMastersCoins_MiningCurrencies | Where-Object {$ExcludeCoin -inotcontains $BlockMastersCoins_Request.$_.name -and $ExcludeAlgorithm -inotcontains (Get-Algorithm $BlockMastersCoins_Request.$_.algo) -and $BlockMastersCoins_Request.$_.hashrate -gt 0} | ForEach-Object {
     $BlockMastersCoins_Host = "BlockMasters.co"
     $BlockMastersCoins_Port = $BlockMastersCoins_Request.$_.port
     $BlockMastersCoins_Algorithm = $BlockMastersCoins_Request.$_.algo

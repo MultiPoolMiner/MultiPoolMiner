@@ -31,9 +31,9 @@ $ZpoolCoins_Regions = "us"
 $ZpoolCoins_Currencies = @("BTC") + ($ZpoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 #Mine any coin defined in array $Config.$Pool.Coins[]
-$ZpoolCoins_MiningCurrencies = ($ZpoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Where-Object {$Coins.count -eq 0 -or $Coins -icontains $ZpoolCoins_Request.$_.name} | Select-Object -Unique
+$ZpoolCoins_MiningCurrencies = ($ZpoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Where-Object {$Coin.count -eq 0 -or $Coin -icontains $ZpoolCoins_Request.$_.name} | Select-Object -Unique
 #On Zpool all $ZpoolCoins_Request.$_.hashrate is 0, use workers instead
-$ZpoolCoins_MiningCurrencies | Where-Object {$DisabledCoin -inotcontains $ZpoolCoins_Request.$_.name -and $ExcludeAlgorithm -inotcontains (Get-Algorithm $ZpoolCoins_Request.$_.algo) -and $ZpoolCoins_Request.$_.workers -gt 0} | ForEach-Object {
+$ZpoolCoins_MiningCurrencies | Where-Object {$ExcludeCoin -inotcontains $ZpoolCoins_Request.$_.name -and $ExcludeAlgorithm -inotcontains (Get-Algorithm $ZpoolCoins_Request.$_.algo) -and $ZpoolCoins_Request.$_.workers -gt 0} | ForEach-Object {
     $ZpoolCoins_Host = "mine.zpool.ca"
     $ZpoolCoins_Port = $ZpoolCoins_Request.$_.port
     $ZpoolCoins_Algorithm = $ZpoolCoins_Request.$_.algo

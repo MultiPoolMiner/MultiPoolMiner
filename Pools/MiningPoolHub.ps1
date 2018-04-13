@@ -27,7 +27,7 @@ if (($MiningPoolHub_Request.return | Measure-Object).Count -le 1) {
 
 $MiningPoolHub_Regions = "europe", "us", "asia"
 
-$MiningPoolHub_Request.return | Where-Object {$DisabledCoin -inotcontains $_.current_mining_coin -and $ExcludeAlgorithm -inotcontains (Get-Algorithm $_.algo)} | ForEach-Object {
+$MiningPoolHub_Request.return | Where-Object {$ExcludeAlgorithm -inotcontains (Get-Algorithm $_.algo) -and $ExcludeCoin -inotcontains $_.current_mining_coin -and ($Coin.count -eq 0 -or $Coin -icontains $_.current_mining_coin)} | ForEach-Object {
     $MiningPoolHub_Hosts = $_.all_host_list.split(";")
     $MiningPoolHub_Port = $_.algo_switch_port
     $MiningPoolHub_Algorithm = $_.algo
