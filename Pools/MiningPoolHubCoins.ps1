@@ -25,9 +25,10 @@ if (($MiningPoolHubCoins_Request.return | Measure-Object).Count -le 1) {
     return
 }
 
-$MiningPoolHubCoins_Regions = "europe", "us", "asia"
+$MiningPoolHubCoins_Regions = "europe", "us-east", "asia"
 
-$MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-Object {
+$MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} | ForEach-Object {
+    $MiningPoolHubCoins_Host = $_.host
     $MiningPoolHubCoins_Hosts = $_.host_list.split(";")
     $MiningPoolHubCoins_Port = $_.port
     $MiningPoolHubCoins_Algorithm = $_.algo
@@ -53,7 +54,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+tcp"
-                    Host          = "$($MiningPoolHubCoins_Region).cryptonight-$($MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Region*"} | Select-Object -First 1)"
+                    Host          = "$($MiningPoolHubCoins_Region).cryptonight-$($MiningPoolHubCoins_Host)"
                     Port          = $MiningPoolHubCoins_Port
                     User          = "$User.$Worker"
                     Pass          = "x"
@@ -68,7 +69,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+ssl"
-                    Host          = "$($MiningPoolHubCoins_Region).cryptonight-$($MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Region*"} | Select-Object -First 1)"
+                    Host          = "$($MiningPoolHubCoins_Region).cryptonight-$($MiningPoolHubCoins_Host)"
                     Port          = $MiningPoolHubCoins_Port
                     User          = "$User.$Worker"
                     Pass          = "x"
