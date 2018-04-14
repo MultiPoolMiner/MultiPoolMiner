@@ -25,7 +25,7 @@ if (($MiningPoolHub_Request.return | Measure-Object).Count -le 1) {
     return
 }
 
-$MiningPoolHub_Regions = "europe", "us", "asia"
+$MiningPoolHub_Regions = "europe", "us-east", "asia"
 
 $MiningPoolHub_Request.return | ForEach-Object {
     $MiningPoolHub_Hosts = $_.all_host_list.split(";")
