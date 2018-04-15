@@ -25,7 +25,7 @@ if (($MiningPoolHub_Request.return | Measure-Object).Count -le 1) {
     return
 }
 
-$MiningPoolHub_Regions = "europe", "us", "asia"
+$MiningPoolHub_Regions = "europe", "us-east", "asia"
 
 $MiningPoolHub_Request.return | Where-Object {$ExcludeAlgorithm -inotcontains (Get-Algorithm $_.algo) -and $ExcludeCoin -inotcontains $_.current_mining_coin -and ($Coin.count -eq 0 -or $Coin -icontains $_.current_mining_coin)} | ForEach-Object {
     $MiningPoolHub_Hosts = $_.all_host_list.split(";")
@@ -42,7 +42,7 @@ $MiningPoolHub_Request.return | Where-Object {$ExcludeAlgorithm -inotcontains (G
 
     $MiningPoolHub_Regions | ForEach-Object {
         $MiningPoolHub_Region = $_
-        $MiningPoolHub_Region_Norm = Get-Region $MiningPoolHub_Region
+        $MiningPoolHub_Region_Norm = Get-Region ($MiningPoolHub_Region -replace "^us-east$", "us")
 
         if ($User) {
             [PSCustomObject]@{
