@@ -43,7 +43,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} | ForEach
 
     $MiningPoolHubCoins_Regions | ForEach-Object {
         $MiningPoolHubCoins_Region = $_
-        $MiningPoolHubCoins_Region_Norm = Get-Region $MiningPoolHubCoins_Region
+        $MiningPoolHubCoins_Region_Norm = Get-Region ($MiningPoolHubCoins_Region -replace "^us-east$", "us") 
 
         if ($User) {
             if ($MiningPoolHubCoins_Algorithm_Norm -eq "CryptonightV7") {
