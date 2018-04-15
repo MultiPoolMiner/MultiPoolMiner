@@ -28,7 +28,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
                     rig_id = ""
                 }
             )
-            currency        = if ($Pools.$Algorithm_Norm.Info) {"$($Pools.$Algorithm_Norm.Info -replace '^monero$', 'monero7')"} else {"$_"}
+            currency        = if ($Pools.$Algorithm_Norm.Info) {"$($Pools.$Algorithm_Norm.Info -replace '^monero$', 'monero7' -replace '^aeon$', 'aeon7')"} else {"$_"}
             call_timeout    = 10
             retry_time      = 10
             giveup_limit    = 0
