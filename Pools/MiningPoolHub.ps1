@@ -42,7 +42,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
 
     $MiningPoolHub_Regions | ForEach-Object {
         $MiningPoolHub_Region = $_
-        $MiningPoolHub_Region_Norm = Get-Region $MiningPoolHub_Region
+        $MiningPoolHub_Region_Norm = Get-Region ($MiningPoolHub_Region -replace "^us-east$", "us")
 
         if ($User) {
             [PSCustomObject]@{
