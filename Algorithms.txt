@@ -5,6 +5,7 @@
     "blakecoin":  "Blakecoin",
     "blakevanilla":  "BlakeVanilla",
     "c11":  "C11",
+    "cryptolight":  "CryptoNightLite",
     "cryptonight":  "CryptoNight",
     "cryptonight_heavy":  "CryptoNightHeavy",
     "cryptonight_lite":  "CryptoNightLite",
