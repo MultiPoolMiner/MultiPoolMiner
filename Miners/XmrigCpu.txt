@@ -7,5 +7,5 @@
                   },
     "API":  "XMRig",
     "Port":  "3334",
-    "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.4.5/xmrig-2.4.5-msvc-win64.zip"
+    "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.5.2/xmrig-2.5.2-msvc-win64.zip"
 }
