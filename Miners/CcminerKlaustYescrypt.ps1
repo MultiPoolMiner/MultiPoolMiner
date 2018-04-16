@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.21/ccminer-821-cuda91-x64.zip"
+$Path = ".\Bin\NVIDIA-KlausTYescrypt\ccminer.exe"
+$Uri = "https://github.com/iwtym/iwtym-yescrypt/archive/master.zip"
 
 $Commands = [PSCustomObject]@{
     #GPU - profitable 27/03/2018
