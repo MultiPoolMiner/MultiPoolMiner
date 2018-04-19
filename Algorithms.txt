@@ -1,4 +1,5 @@
 {
+
     "allium":  "Allium",
     "garlicoin":  "Allium",
     "anime":  "Anime",
@@ -169,6 +170,6 @@
     "yenten":  "YescryptR16",
     "yescryptr32":  "YescryptR32",
     "zr5":  "zr5",
-    "ziftr":  "zr5",
+    "ziftr":  "zr5"
 }
 
