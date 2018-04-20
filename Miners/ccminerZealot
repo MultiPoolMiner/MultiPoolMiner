@@ -1,0 +1,63 @@
+ using module ..\Include.psm1
+
+$Path = ".\Bin\NVIDIA-Zealot\z-enemy.exe"
+$Uri = "https://mega.nz/#!5WACFRTT!tV1vUsFdBIDqCzBrcMoXVR2G9YHD6xqct5QB2nBiuzM"
+
+$Commands = [PSCustomObject]@{
+    "bitcore" = "" #Bitcore
+    #"blake2s" = "" #Blake2s - Not Supported
+    #"blakecoin" = "" #Blakecoin - Not Supported
+    #"c11" = "" #C11 - Not Supported
+    "cryptonight" = "" #CryptoNight - NOT TESTED
+    "decred" = "" #Decred - NOT TESTED
+    #"equihash" = "" #Equihash - Not Supported
+    #"ethash" = "" #Ethash - Not Supported
+    #"groestl" = "" #Groestl - Not Supported
+    #"hmq1725" = "" #HMQ1725 - Not Supported
+    #"hsr" = "" #HSR - Not Supported
+    "jha" = "" #JHA - NOT TESTED
+    #"keccak" = "" #Keccak - Not Supported
+    #"keccakc" = "" #Keccakc - Not Supported
+    #"lbry" = "" #Lbry - Not Supported
+    #"lyra2v2" = "" #Lyra2RE2 - Not Supported
+    #"lyra2z" = "" #Lyra2z - Not Supported
+    #"myr-gr" = "" #MyriadGroestl - Not Supported
+    #"neoscrypt" = "" #NeoScrypt - Not Supported
+    #"nist5" = "" #Nist5 - Not Supported
+    #"pascal" = "" #Pascal - Not Supported
+    "phi" = "" #PHI - Next lowest is ccminerSuprminer
+    "poly" = "" #Polytmos - NOT TESTED
+    #"qubit" = "" #qubit - Not Supported
+    #"quark" = "" #Quark - Not Supported
+    #"sib" = "" #Sib - Not Supported
+    #"skein" = "" #Skein - Not Supported
+    #"skunk" = "" #Skunk - Not Supported
+    #"timetravel" = "" #Timetravel - Not Supported
+    #"tribus" = "" #Tribus - Not Supported
+    "vanilla" = "" #BlakeVanilla - NOT TESTED
+    "veltor" = "" #Veltor - NOT TESTED
+    #"x11" = "" #X11 - Not Supported
+    #"x11evo" = "" #X11evo - Not Supported
+    "x12" = "" #X12 - NOT TESTED
+    #"x13" = "" #X13 - Not Supported
+    "x14" = "" #X14 - NOT TESTED
+    "x16r" = "" #Rave
+    "x16s" = "" #Pigeon
+    #"x17" = "" #X17 - Not Supported
+    #"xevan" = "" #Xevan - Not Supported
+    #"yescrypt" = "" #Yescrypt - Not Supported
+}
+
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+
+$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
+    [PSCustomObject]@{
+        Type = "NVIDIA"
+        Path = $Path
+        Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_)"
+        HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
+        API = "Ccminer"
+        Port = 4068
+        URI = $Uri
+    }
+} 
