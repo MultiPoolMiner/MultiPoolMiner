@@ -42,9 +42,9 @@ $Commands = [PSCustomObject]@{
     "scryptjane:nf" = "" #scryptjane:nf
     "sha256t" = "" #sha256t
     "sib" = "" #Sib
-    "skein" = "" #Skein
+    #"skein" = "" #Skein
     "skein2" = "" #skein2
-    "skunk" = "" #Skunk
+    #"skunk" = "" #Skunk
     "s3" = "" #S3
     "timetravel" = "" #Timetravel
     "tribus" = "" #Tribus
@@ -61,19 +61,19 @@ $Commands = [PSCustomObject]@{
     "zr5" = "" #zr5
 
     # ASIC - never profitable 27/03/2018
-    "blake2s" = "" #Blake2s
-    "lbry" = "" #Lbry
-    "decred" = "" #Decred
-    "quark" = "" #Quark
-    "qubit" = "" #Qubit
+    #"blake2s" = "" #Blake2s
+    #"lbry" = "" #Lbry
+    #"decred" = "" #Decred
+    #"quark" = "" #Quark
+    #"qubit" = "" #Qubit
     #"scrypt" = "" #Scrypt
-    "scrypt:N" = "" #scrypt:N
-    "sha256d" = "" #sha256d
-    "sia" = "" #SiaCoin
+    #"scrypt:N" = "" #scrypt:N
+    #"sha256d" = "" #sha256d
+    #"sia" = "" #SiaCoin
     #"x11" = "" #X11
-    "x13" = "" #x13
-    "x14" = "" #x14
-    "x15" = "" #x15
+    #"x13" = "" #x13
+    #"x14" = "" #x14
+    #"x15" = "" #x15
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName

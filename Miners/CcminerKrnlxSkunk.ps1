@@ -4,7 +4,7 @@ $Path = ".\Bin\Skunk-NVIDIAkrnlx\ccminer-x64-80.exe"
 $URI = "http://ccminer.org/preview/ccminer-skunk-krnlx-80.7z"
 
 $Commands = [PSCustomObject]@{
-    "skunk" = "" #Skunk
+    #"skunk" = "" #Skunk
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
