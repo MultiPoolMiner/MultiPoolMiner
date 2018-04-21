@@ -4,14 +4,10 @@ $Path = ".\Bin\NVIDIA-TPruvot\ccminer.exe"
 $Uri = "https://github.com/tpruvot/ccminer/releases/download/2.2.5-tpruvot/ccminer-x86-2.2.5-cuda9.7z"
 
 $Commands = [PSCustomObject]@{
-    #GPU - profitable 27/03/2018
+    #GPU - profitable 20/04/2018
     "bastion" = "" #bastion
     "bitcore" = "" #Bitcore
-    "blake" = "" #blake
-    "blakecoin" = "" #Blakecoin
     "bmw" = "" #bmw
-    "cryptolight" = "" #cryptolight
-    "cryptonight" = "" #CryptoNight
     #"c11" = "" #C11
     "deep" = "" #deep
     "dmd-gr" = "" #dmd-gr
@@ -32,23 +28,19 @@ $Commands = [PSCustomObject]@{
     "lyra2re" = "" #lyra2re
     "lyra2z" = "" #Lyra2z, ZCoin
     "mjollnir" = "" #Mjollnir
-    "myr-gr" = "" #MyriadGroestl
     "neoscrypt" = "" #NeoScrypt
-    "nist5" = "" #Nist5
     "pentablake" = "" #pentablake
     "penta" = "" #Pentablake
     "phi" = "" #PHI
     "polytimos" = "" #Polytimos
     "scryptjane:nf" = "" #scryptjane:nf
     "sha256t" = "" #sha256t
-    "sib" = "" #Sib
     #"skein" = "" #Skein
     "skein2" = "" #skein2
     #"skunk" = "" #Skunk
     "s3" = "" #S3
     "timetravel" = "" #Timetravel
     "tribus" = "" #Tribus
-    "vanilla" = "" #BlakeVanilla
     "veltor" = "" #Veltor
     #"whirlpool" = "" #Whirlpool
     #"whirlpoolx" = "" #whirlpoolx
@@ -60,16 +52,22 @@ $Commands = [PSCustomObject]@{
     #"x17" = "" #x17
     "zr5" = "" #zr5
 
-    # ASIC - never profitable 27/03/2018
+    # ASIC - never profitable 20/04/2018
+    #"blake" = "" #blake
+    #"blakecoin" = "" #Blakecoin
     #"blake2s" = "" #Blake2s
     #"lbry" = "" #Lbry
     #"decred" = "" #Decred
     #"quark" = "" #Quark
     #"qubit" = "" #Qubit
+    #"myr-gr" = "" #MyriadGroestl
+    #"nist5" = "" #Nist5
     #"scrypt" = "" #Scrypt
     #"scrypt:N" = "" #scrypt:N
     #"sha256d" = "" #sha256d
     #"sia" = "" #SiaCoin
+    #"sib" = "" #Sib
+    #"vanilla" = "" #BlakeVanilla
     #"x11" = "" #X11
     #"x13" = "" #x13
     #"x14" = "" #x14

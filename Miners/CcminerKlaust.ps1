@@ -4,9 +4,7 @@ $Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
 $Uri = "https://github.com/KlausT/ccminer/releases/download/8.21/ccminer-821-cuda91-x64.zip"
 
 $Commands = [PSCustomObject]@{
-    #GPU - profitable 27/03/2018
-    "blake" = "" #blake
-    "blakecoin" = "" #Blakecoin
+    #GPU - profitable 20/04/2018
     "c11" = "" #C11
     "deep" = "" #deep
     "dmd-gr" = "" #dmd-gr
@@ -18,24 +16,26 @@ $Commands = [PSCustomObject]@{
     "jackpot" = "" #Jackpot
     "luffa" = "" #Luffa
     "lyra2v2" = "" #Lyra2RE2
-    "myr-gr" = "" #MyriadGroestl
     "neoscrypt" = "" #NeoScrypt
-    "nist5" = "" #Nist5
     "pentablake" = "" #pentablake
     "penta" = "" #Pentablake
     "skein" = "" #Skein
     "s3" = "" #S3
     "timetravel" = "" #Timetravel
     "tribus" = "" #Tribus
-    "vanilla" = "" #BlakeVanilla
     "veltor" = "" #Veltor
     #"whirlpool" = "" #Whirlpool
     #"whirlpoolx" = "" #whirlpoolx
 
-    # ASIC - never profitable 27/03/2018
+    # ASIC - never profitable 20/04/2018
+    #"blake" = "" #blake
+    #"blakecoin" = "" #Blakecoin
     #"blake2s" = "" #Blake2s
+    #"myr-gr" = "" #MyriadGroestl
+    #"nist5" = "" #Nist5
     #"quark" = "" #Quark
     #"qubit" = "" #Qubit
+    #"vanilla" = "" #BlakeVanilla
     #"sha256d" = "" #sha256d
     #"sia" = "" #SiaCoin
     #"x11" = "" #X11

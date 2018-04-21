@@ -4,10 +4,8 @@ $Path = ".\Bin\NVIDIA-SP\ccminer.exe"
 $Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z"
 
 $Commands = [PSCustomObject]@{
-    #GPU - profitable 27/03/2018
+    #GPU - profitable 20/04/2018
     "bastion" = "" #bastion
-    "blake" = "" #blake
-    "blakecoin" = "" #Blakecoin
     "c11" = "" #C11
     "deep" = "" #deep
     "dmd-gr" = "" #dmd-gr
@@ -22,16 +20,13 @@ $Commands = [PSCustomObject]@{
     "lyra2" = "" #lyra2h
     #"lyra2v2" = "" #Lyra2RE2
     "mjollnir" = "" #Mjollnir
-    "myr-gr" = "" #MyriadGroestl
     "neoscrypt" = "" #NeoScrypt
-    "nist5" = "" #Nist5
     "pentablake" = "" #pentablake
     "phi" = "" #PHI
     "scryptjane:nf" = "" #scryptjane:nf
     #"skein" = "" #Skein
     "s3" = "" #S3
     "spreadx11" = "" #Spread
-    "vanilla" = "" #BlakeVanilla
     #"whirl" = "" #Whirlpool
     #"whirlpool" = "" #Whirlpool
     #"whirlpoolx" = "" #whirlpoolx
@@ -39,15 +34,20 @@ $Commands = [PSCustomObject]@{
     "yescrypt" = "" #Yescrypt
 
     # ASIC - never profitable 27/03/2018
+    #"blake" = "" #blake
+    #"blakecoin" = "" #Blakecoin
     #"blake2s" = "" #Blake2s
-    #"lbry" = "" #Lbry
     #"decred" = "" #Decred
+    #"lbry" = "" #Lbry
+    #"myr-gr" = "" #MyriadGroestl
+    #"nist5" = "" #Nist5
     #"quark" = "" #Quark
     #"qubit" = "" #Qubit
     #"scrypt" = "" #Scrypt
     #"scrypt:N" = "" #scrypt:N
     #"sha256d" = "" #sha256d Bitcoin
     #"sia" = "" #SiaCoin
+    #"vanilla" = "" #BlakeVanilla
     #"x11" = "" #X11
     #"x13" = "" #x13
     #"x14" = "" #x14

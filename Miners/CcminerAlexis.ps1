@@ -4,7 +4,7 @@ $Path = ".\Bin\NVIDIA-Alexis78\ccminer-alexis.exe"
 $Uri = "https://github.com/nemosminer/ccminer-hcash/releases/download/alexishsr/ccminer-hsr-alexis-x86-cuda8.7z"
 
 $Commands = [PSCustomObject]@{
-    #GPU - profitable 27/03/2018
+    #GPU - profitable 20/04/2018
     "bastion" = "" #bastion
     "bitcore" = "" #Bitcore
     "bmw" = "" #bmw
