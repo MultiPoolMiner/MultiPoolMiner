@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-SilentMinerX16r\ccminer.exe"
-$Uri = "https://github.com/iwtym/iwtym-silentminer/raw/master/ccminer.exe"
+$Uri = "https://github.com/iwtym/iwtym-silentminer/archive/master.zip"
 
 $Commands = [PSCustomObject]@{
     "X16r" = "" #X16r RavenCoin
