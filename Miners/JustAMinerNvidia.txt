@@ -4,7 +4,7 @@
         "Path":  ".\\Bin\\NVIDIA-JAM\\hsrminer_neoscrypt_fork_hp.exe",
         "Arguments":  "\"-o $($Pools.NeoScrypt.Protocol)://$($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -u $($Pools.NeoScrypt.User) -p $($Pools.NeoScrypt.Pass)\"",
         "HashRates":  {
-                          "HSR":  "\"$($Stats.JamNvidia_NeoScrypt_HashRate.Week)\""
+                          "NeoScrypt":  "\"$($Stats.JamNvidia_NeoScrypt_HashRate.Week)\""
                       },
         "API":  "Wrapper",
         "Port":  "23333",
