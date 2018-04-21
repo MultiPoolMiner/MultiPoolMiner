@@ -1,6 +1,6 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-Lyra2Z-ZFast\ccminer.exe"
+$Path = ".\Bin\NVIDIA-ZFastLyra2Z\zFastminer-v229.exe"
 $Uri = "https://github.com/iwtym/iwtym-zfastminer/archive/master.zip"
 
 $Commands = [PSCustomObject]@{
