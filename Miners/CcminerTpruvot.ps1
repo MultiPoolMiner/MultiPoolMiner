@@ -57,7 +57,7 @@ $Commands = [PSCustomObject]@{
     "x12" = "" #X12
     "x16r" = "" #X16r
     "X16s" = "" #X16s
-    "x17" = "" #x17
+    #"x17" = "" #x17
     "zr5" = "" #zr5
 
     # ASIC - never profitable 27/03/2018
