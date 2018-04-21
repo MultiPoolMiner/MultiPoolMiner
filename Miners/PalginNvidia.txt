@@ -1,5 +1,4 @@
-[
-    {
+{
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\HSR-Palgin\\hsrminer_hsr.exe",
         "Arguments":  "\"-o $($Pools.HSR.Protocol)://$($Pools.Hsr.Host):$($Pools.Hsr.Port) -u $($Pools.Hsr.User) -p $($Pools.Hsr.Pass)\"",
@@ -9,5 +8,4 @@
         "API":  "Wrapper",
         "Port":  "23333",
         "URI":  "https://github.com/palginpav/hsrminer/blob/master/HSR%20algo/Windows/hsrminer_hsr.zip"
-    }
-]
+}
