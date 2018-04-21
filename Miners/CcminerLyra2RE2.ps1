@@ -4,7 +4,7 @@ $Path = ".\Bin\Lyra2RE2-NVIDIA\ccminer.exe"
 $Uri = "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip"
 
 $Commands = [PSCustomObject]@{
-    "lyra2v2" = "" #Lyra2RE2
+    #"lyra2v2" = "" #Lyra2RE2
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
