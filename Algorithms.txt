@@ -126,6 +126,8 @@
     "scrypt-jane-n-f":  "ScryptJaneNF",
     "scrypt-janen-f":  "ScryptJaneNF",
     "scryptjanenf":  "ScryptJaneNF",
+    "scryptjane:nf":  "ScryptJaneNF",
+    "scrypt-jane":  "ScryptJaneNF",
     "sha256":  "SHA256",
     "sha256d":  "SHA256d",
     "sha256t":  "SHA256t",
