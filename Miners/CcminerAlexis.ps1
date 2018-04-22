@@ -5,37 +5,14 @@ $Uri = "https://github.com/nemosminer/ccminer-hcash/releases/download/alexishsr/
 
 $Commands = [PSCustomObject]@{
     #GPU - profitable 20/04/2018
-    "bastion" = "" #bastion
-    "bitcore" = "" #Bitcore
-    "bmw" = "" #bmw
-    "c11" = "" #C11
-    "deep" = "" #deep
-    "dmd-gr" = "" #dmd-gr
-    "fresh" = "" #fresh
-    "fugue256" = "" #Fugue256
-    "groestl" = "" #Groestl
-    "heavy" = "" #heavy
-    "hmq1725" = "" #HMQ1725
+    "c11" = "" #c11
     "hsr" = "" #HSR, HShare
     "keccak" = "" #Keccak
-    "jackpot" = "" #JackPot
-    "jha" = "" #JHA
-    "luffa" = "" #Luffa
     "lyra2" = "" #Lyra2
     "lyra2v2" = "" #lyra2v2
-    "lyra2z" = "" #Lyra2z, ZCoin
-    "mjollnir" = "" #Mjollnir
     "neoscrypt" = "" #NeoScrypt
-    "pentablake" = "" #pentablake
-    "penta" = "" #Pentablake
-    "scryptjane:nf" = "" #scryptjane:nf
-    "sha256t" = "" #sha256t
     #"skein" = "" #Skein
     "skein2" = "" #skein2
-    #"skunk" = "" #Skunk
-    "s3" = "" #S3
-    "timetravel" = "" #Timetravel
-    "vanilla" = "" #BlakeVanilla
     "veltor" = "" #Veltor
     #"whirlcoin" = "" #WhirlCoin
     #"whirlpool" = "" #Whirlpool
@@ -43,7 +20,6 @@ $Commands = [PSCustomObject]@{
     "wildkeccak" = "" #wildkeccak
     "x11evo" = "" #X11evo
     "x17" = "" #x17
-    "zr5" = "" #zr5
 
     # ASIC - never profitable 20/04/2018
     #"blake2s" = "" #Blake2s
