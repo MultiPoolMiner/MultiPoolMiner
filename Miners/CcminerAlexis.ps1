@@ -17,7 +17,6 @@ $Commands = [PSCustomObject]@{
     #"whirlcoin" = "" #WhirlCoin
     #"whirlpool" = "" #Whirlpool
     #"whirlpoolx" = "" #whirlpoolx
-    "wildkeccak" = "" #wildkeccak
     "x11evo" = "" #X11evo
     "x17" = "" #x17
 
