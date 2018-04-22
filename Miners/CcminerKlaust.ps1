@@ -8,24 +8,22 @@ $Commands = [PSCustomObject]@{
     "c11" = "" #C11
     "deep" = "" #deep
     "dmd-gr" = "" #dmd-gr
-    "doom" = "" #Doom
     "fresh" = "" #fresh
     "fugue256" = "" #Fugue256
     "groestl" = "" #Groestl
-    "keccak" = "" #Keccak
     "jackpot" = "" #Jackpot
+    "keccak" = "" #Keccak
     "luffa" = "" #Luffa
     "lyra2v2" = "" #Lyra2RE2
     "neoscrypt" = "" #NeoScrypt
-    "pentablake" = "" #pentablake
     "penta" = "" #Pentablake
     "skein" = "" #Skein
     "s3" = "" #S3
-    "timetravel" = "" #Timetravel
     "tribus" = "" #Tribus
     "veltor" = "" #Veltor
     #"whirlpool" = "" #Whirlpool
     #"whirlpoolx" = "" #whirlpoolx
+    "X17" = "" #X17 Verge
 
     # ASIC - never profitable 20/04/2018
     #"blake" = "" #blake
