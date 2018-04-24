@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-RavenMiner\ccminer.exe"
-$Uri = "https://github.com/Ravencoin-Miner/Ravencoin/releases/download/v2.5.1/Ravencoin.Miner.v2.5.1.COLOR.zip"
+$Uri = "https://github.com/Ravencoin-Miner/Ravencoin/releases/download/v2.6/Ravencoin.Miner.v2.6.COLOR.zip"
 
 $Commands = [PSCustomObject]@{
     "x16r"  = "" #X16R RavenCoin
