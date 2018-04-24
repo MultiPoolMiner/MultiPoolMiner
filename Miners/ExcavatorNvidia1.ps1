@@ -3,22 +3,24 @@
 $Threads = 1
 
 $Path = ".\Bin\Excavator\excavator.exe"
-$Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.1a/excavator_v1.5.1a_NVIDIA_Win64.zip"
+$Uri = "https://github.com/nicehash/excavator/releases/download/v1.4.4a/excavator_v1.4.4a_NVIDIA_Win64.zip"
 
 $Commands = [PSCustomObject]@{
-    "blake2s" = @() #Blake2s
-    "decred" = @() #Decred
-    "daggerhashimoto" = @() #Ethash
+    #GPU - profitable 23/04/2018
     "equihash" = @() #Equihash
-    "lbry" = @() #Lbry
     "lyra2rev2" = @() #Lyra2RE2
     "neoscrypt" = @() #NeoScrypt
-    "nist5" = @() #nist5
-    "pascal" = @() #Pascal
-    "cryptonight" = @() #Cryptonight
     "keccak" = @() #Keccak
     "cryptonightv7" = @() #CryptonightV7
-    
+
+    # ASIC - never profitable 23/04/2018
+    #"blake2s" = @() #Blake2s
+    #"decred" = @() #Decred
+    #"daggerhashimoto" = @() #Ethash
+    #"lbry" = @() #Lbry
+    #"pascal" = @() #Pascal
+    #"cryptonight" = @() #Cryptonight
+
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
