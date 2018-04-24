@@ -1,31 +1,32 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\CPU-JayDDee\cpuminer-aes-sse42.exe"
-$Uri = "https://github.com/JayDDee/cpuminer-opt/files/1865696/cpuminer-opt-3.8.6-windows.zip"
+$Uri = "https://github.com/JayDDee/cpuminer-opt/files/1939225/cpuminer-opt-3.8.8-windows.zip"
 
 $Commands = [PSCustomObject]@{
-    # CPU Only algos 3/27/2018
+    # CPU Only algos 23/04/2018
     "anime" = "" #Anime 
     "argon2" = "" #Argon2
     "argon2d-crds" = "" #Argon2Credits
     "argon2d-dyn" = "" #Argon2Dynamic
+    "argon2d-uis" = "" #Argon2Unitus
     #"axiom" = "" #axiom
     "drop" = "" #drop    
     "lyra2z330" = "" #lyra2z330
     "m7m" = "" #m7m
+
+    # CPU & GPU - still profitable 23/04/2018
+    "lyra2z" = "" #Lyra2z, ZCoin
+    "hmq1725" = "" #HMQ1725
+    "shavite3" = "" #shavite3
+    "x12" = "" #x12
+    "cryptonightv7" = "" #CryptoNightV7XMR
     "yescrypt" = "" #Yescrypt
     "yescryptr8" = "" #yescryptr8
     "yescryptr16" = "" #yescryptr16, YENTEN
     "yescryptr32" = "" #yescryptr32, WAVI
 
-    # CPU & GPU - still profitable 27/03/2018
-    "cryptonight" = "" #CryptoNight
-    "lyra2z" = "" #Lyra2z, ZCoin
-    "hmq1725" = "" #HMQ1725
-    "shavite3" = "" #shavite3
-    "x12" = "" #x12
-
-    #GPU - never profitable 27/03/2018
+    #GPU or ASIC - never profitable 23/04/2018
     #"allium" = "" #Allium
     #"bastion" = "" #bastion
     #"bitcore" = "" #Bitcore
@@ -34,6 +35,7 @@ $Commands = [PSCustomObject]@{
     #"blake2s" = "" #Blake2s
     #"bmw" = "" #bmw
     #"cryptolight" = "" #cryptolight
+    #"cryptonight" = "" #CryptoNight
     #"c11" = "" #C11
     #"decred" = "" #Decred
     #"deep" = "" #deep
