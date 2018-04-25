@@ -28,7 +28,7 @@ if ((($HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction I
 
 $HashRefinery_Regions = "us"
 
-#Pool allows payout in BTC only
+#Pool allows payout in BTC and LTC only
 $HashRefinery_Currencies = @("BTC", "LTC") + ($HashRefineryCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 $HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$ExcludeAlgorithm -inotcontains (Get-Algorithm $HashRefinery_Request.$_.name) -and $Hashrefinery_Request.$_.hashrate -gt 0} | ForEach-Object {
