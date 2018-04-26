@@ -55,7 +55,7 @@ $ZergPoolCoins_MiningCurrencies | Where-Object {$ExcludeCoin -inotcontains $Zerg
         "x11" {$Divisor *= 1000}
     }
 
-    $Stat = Set-Stat -Name "$($Name)_$($_)_Profit" -Value ([Double]$ZergPoolCoins_Request.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
+    $Stat = Set-Stat -Name "$($Name)_$($ZergPoolCoins_Algorithm_Norm)_Profit" -Value ([Double]$ZergPoolCoins_Request.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
     $ZergPoolCoins_Regions | ForEach-Object {
         $ZergPoolCoins_Region = $_
