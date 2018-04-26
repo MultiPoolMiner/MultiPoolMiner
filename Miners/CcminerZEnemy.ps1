@@ -7,7 +7,7 @@ $Commands = [PSCustomObject]@{
     "bitcore" = "" #Bitcore BTX
     "phi" = "" #Phi Phi1612 LuxCoin
     "x16r" = "" #X16r RavenCoin
-    "X16s" = "" #X16s PigeonCoin
+    #"X16s" = "" #X16s PigeonCoin
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName

@@ -4,7 +4,7 @@ $Path = ".\Bin\NVIDIA-Nevermore\ccminer.exe"
 $Uri = "https://github.com/brian112358/nevermore-miner/releases/download/v0.2.2/nevermore-v0.2.2-win64.zip"
 
 $Commands = [PSCustomObject]@{
-    "X16r" = "" #X16r RavenCoin
+    #"X16r" = "" #X16r RavenCoin
     "X16s" = "" #X16s PigeonCoin
 }
 

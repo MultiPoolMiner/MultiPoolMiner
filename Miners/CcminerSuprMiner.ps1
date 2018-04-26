@@ -4,7 +4,7 @@ $Path = ".\Bin\NVIDIA-SuprMiner\ccminer.exe"
 $Uri = "https://github.com/ocminer/suprminer/releases/download/1.5/suprminer-1.5.7z"
 
 $Commands = [PSCustomObject]@{
-    "x16r"  = "" #X16R RavenCoin
+    #"x16r"  = "" #X16R RavenCoin
     "x16s"  = "" #X16S PigeonCoin
 }
 
