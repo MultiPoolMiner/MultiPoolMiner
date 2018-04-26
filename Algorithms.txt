@@ -46,6 +46,7 @@
     "cryptolight":  "CryptoLight",
     "cryptonight-lite":  "CryptoLight",
     "cryptonightV7":  "CryptoNightV7",
+    "monero":  "CryptoNightV7",
     "daggerhashimoto":  "Ethash",
     "eth":  "Ethash",
     "ethash":  "Ethash",
