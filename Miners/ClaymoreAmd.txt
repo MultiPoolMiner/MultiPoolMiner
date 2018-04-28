@@ -2,14 +2,23 @@
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\CryptoNight-Claymore\\NsGpuCNMiner.exe",
-        "Arguments":  "\"-r -1 -mport -13333 -xpool $($Pools.CryptoNight.Protocol)://$($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port) -xwal $($Pools.CryptoNight.User) -xpsw $($Pools.CryptoNight.Pass)\"",
+        "Arguments":  "\"-r -1 -mport -13333 -pow7 1 -xpool $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -xwal $($Pools.CryptoNightV7.User) -xpsw $($Pools.CryptoNightV7.Pass)\"",
         "HashRates":  {
-                          "CryptoNight":  "\"$($Stats.ClaymoreAmd_CryptoNight_HashRate.Week)\""
+                          "CryptoNightV7":  "\"$($Stats.ClaymoreAmd_CryptoNightV7_HashRate.Week)\""
                       },
         "API":  "Claymore",
         "Port":  "13333"
     },
     {
+        "Type":  "AMD",
+        "Path":  ".\\Bin\\CryptoNight-Claymore\\NsGpuCNMiner.exe",
+        "Arguments":  "\"-r -1 -mport -13333 -pow7 0 -xpool $($Pools.CryptoNight.Protocol)://$($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port) -xwal $($Pools.CryptoNight.User) -xpsw $($Pools.CryptoNight.Pass)\"",
+        "HashRates":  {
+                          "CryptoNight":  "\"$($Stats.ClaymoreAmd_CryptoNight_HashRate.Week)\""
+                      },
+        "API":  "Claymore",
+        "Port":  "13333"
+    },    {
         "Type":  "AMD",
         "Path":  ".\\Bin\\Equihash-Claymore\\ZecMiner64.exe",
         "Arguments":  "\"-r -1 -mport -13333 -zpool $($Pools.Equihash.Protocol)://$($Pools.Equihash.Host):$($Pools.Equihash.Port) -zwal $($Pools.Equihash.User) -zpsw $($Pools.Equihash.Pass) -allpools 1\"",
