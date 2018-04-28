@@ -115,4 +115,3 @@ $MiningPoolHub_Request.return | ForEach-Object {
         }
     }
 }
-Sleep 0

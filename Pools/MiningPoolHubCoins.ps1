@@ -134,4 +134,3 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} | ForEach
         }
     }
 }
-Sleep 0
