@@ -39,6 +39,7 @@ $ZpoolCoins_MiningCurrencies | Where-Object {$ExcludeCoin -inotcontains $ZpoolCo
     $ZpoolCoins_Algorithm = $ZpoolCoins_Request.$_.algo
     $ZpoolCoins_Algorithm_Norm = Get-Algorithm $ZpoolCoins_Algorithm
     $ZpoolCoins_Coin = $ZpoolCoins_Request.$_.name
+    $ZpoolCoins_Currency = $_
 
     $Divisor = 1000000
 
@@ -53,8 +54,8 @@ $ZpoolCoins_MiningCurrencies | Where-Object {$ExcludeCoin -inotcontains $ZpoolCo
         "x11" {$Divisor *= 1000}
     }
 
-    if ((Get-Stat -Name "$($Name)_$($ZpoolCoins_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($ZpoolCoins_Algorithm_Norm)_Profit" -Value ([Double]$ZpoolCoins_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
-    else {$Stat = Set-Stat -Name "$($Name)_$($ZpoolCoins_Algorithm_Norm)_Profit" -Value ([Double]$ZpoolCoins_Request.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
+    if ((Get-Stat -Name "$($Name)_$($ZpoolCoins_Currency)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($ZpoolCoins_Currency)_Profit" -Value ([Double]$ZpoolCoins_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
+    else {$Stat = Set-Stat -Name "$($Name)_$($ZpoolCoins_Currency)_Profit" -Value ([Double]$ZpoolCoins_Request.$ZpoolCoins_Currency.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
 
     $ZpoolCoins_Regions | ForEach-Object {
         $ZpoolCoins_Region = $_
@@ -71,7 +72,7 @@ $ZpoolCoins_MiningCurrencies | Where-Object {$ExcludeCoin -inotcontains $ZpoolCo
                 Host          = "$ZpoolCoins_Algorithm.$ZpoolCoins_Host"
                 Port          = $ZpoolCoins_Port
                 User          = Get-Variable $_ -ValueOnly
-                Pass          = "$Worker,c=$_"
+                Pass          = "$Worker,c=$ZpoolCoins_Currency"
                 Region        = $ZpoolCoins_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated

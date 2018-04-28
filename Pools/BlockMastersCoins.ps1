@@ -39,6 +39,7 @@ $BlockMastersCoins_MiningCurrencies | Where-Object {$ExcludeCoin -inotcontains $
     $BlockMastersCoins_Algorithm = $BlockMastersCoins_Request.$_.algo
     $BlockMastersCoins_Algorithm_Norm = Get-Algorithm $BlockMastersCoins_Algorithm
     $BlockMastersCoins_Coin = $BlockMastersCoins_Request.$_.name
+    $BlockMastersCoins_Currency = $_
 
     $Divisor = 1000000
 
@@ -53,8 +54,8 @@ $BlockMastersCoins_MiningCurrencies | Where-Object {$ExcludeCoin -inotcontains $
         "x11" {$Divisor *= 1000}
     }
 
-    if ((Get-Stat -Name "$($Name)_$($BlockMastersCoins_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($BlockMastersCoins_Algorithm_Norm)_Profit" -Value ([Double]$BlockMastersCoins_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
-    else {$Stat = Set-Stat -Name "$($Name)_$($BlockMastersCoins_Algorithm_Norm)_Profit" -Value ([Double]$BlockMastersCoins_Request.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
+    if ((Get-Stat -Name "$($Name)_$($BlockMastersCoins_Currency)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($BlockMastersCoins_Currency)_Profit" -Value ([Double]$BlockMastersCoins_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
+    else {$Stat = Set-Stat -Name "$($Name)_$($BlockMastersCoins_Currency)_Profit" -Value ([Double]$BlockMastersCoins_Request.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
 
     $BlockMastersCoins_Regions | ForEach-Object {
         $BlockMastersCoins_Region = $_
