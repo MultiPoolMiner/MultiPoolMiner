@@ -67,7 +67,7 @@
     "x16s":  "X16S",
     "x17":  "X17",
     "xevan":  "Xevan",
-    "xmr":  "CryptoNight",
+    "xmr":  "CryptoNightV7",
     "yescrypt":  "Yescrypt",
     "zec":  "Equihash",
     "zuikkis":  "Scrypt"
