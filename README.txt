@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 29/03/2018 (dd/mm/yyyy) - v1.24.02 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 29/04/2018 (dd/mm/yyyy) - v1.24.03 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -318,7 +318,7 @@ The default pool config might look like this:
         "BTC": "$Wallet"
     }
 
-To prevent the pool from using an algorithm / a set of algorithms add a line like "ExcludeAlgorithm": ["ExcludeAlgo", "AnotherExcludedAlgo"]
+To prevent the pool from using an algorithm / a set of algorithms add a line like "ExcludeAlgorithm": ["Excluded_Algo", "Another_Excluded_Algo"]
 
 E.g. if you do not want to use Keccac and Equihash on NiceHash change the pool config to:
 
@@ -330,21 +330,20 @@ E.g. if you do not want to use Keccac and Equihash on NiceHash change the pool c
 
 To allow mining all algorithms remove the line "ExcludeAlgorithm": [...]
 
-To disable mining some coins coins on a pool
+To disable mining some coins on a pool
 
-The pools ending in ...Coins and MoningPoolHub (non-Coins) allow mining selected coins only, e.g do not mine ZClassic on MPH Pool
+The pools ending in ...Coins and MiningPoolHub (non-Coins) allow mining selected coins only, e.g do not mine ZClassic on MPH Pool
 Note: Not all pools support this, for more information consult the pools web page
 
 The default pool config might look like this:
-
-"ZpoolCoins": {
+    "ZpoolCoins": {
         "Worker": "$WorkerName",
         "BTC": "$Wallet"
     }
 
-To limit mining to well defined coins add a line like "ExcludeCoin": ["ExcludeCoinName", "AnotherExcludeCoinName", "YetAnotherExcludeCoinName", "..."]
+To limit mining to well defined coins add a line like "ExcludeCoin": ["Excluded_Coin", "Another_Excluded_Coin", "Yet_Another_Excluded_Coin", "..."]
 
-E.g. if you do not want to mine the coins 'Pizza' and 'Vivo' on Zpool change the pool config to:
+E.g. if you do not want to mine the coins 'Pizza' and 'Vivo' on ZpoolCoins change the pool config to:
 
     "ZpoolCoins": {
         "Worker": "$WorkerName",
@@ -356,25 +355,26 @@ To allow mining all coins remove the line "ExcludeCoin": [...]
 
 To mine only selected coins on a pool
 
-The pools ending in ...Coins allow mining selected coins only, e.g mine only ZClassic on MPH Pool
+Most pools ending in ...Coins allow mining selected coins only, e.g mine only 'Pizza' and 'Vivo' on ZpoolCoins pool
 Note: Not all pools support this, for more information consult the pools web page
 
 The default pool config might look like this:
+
     "ZpoolCoins": {
         "Worker": "$WorkerName",
         "BTC": "$Wallet"
     }
 
-To limit mining to well defined coins add a line like "Coin": ["CoinName", "AnotherCoinName", "YetAnotherCoinName", "..."]
+To limit mining to well defined coins add a line like "Coin": ["Coin", "Another_Coin", "Yet_Another_Coin", "..."]
 
-E.g. to mine only the coins 'Pizza' and 'Vivo' on Zpool change the pool config to:
+E.g. to mine only the coins 'Pizza' and 'Vivo' on ZpoolCoins change the pool config to:
 
     "ZpoolCoins": {
         "Worker": "$WorkerName",
         "BTC": "$Wallet",
         "Coin": ["Pizza", "Vivo"]
     }
-                                   
+
 To allow mining all coins remove the line "Coin": [...]
 
 Advanced config for Miners
