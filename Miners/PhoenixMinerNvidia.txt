@@ -8,7 +8,7 @@
                       },
         "API":  "Claymore",
         "Port":  "23334",
-        "URI":  "https://bitcointalk.org/index.php?topic=2647654.0"
+        "ManualURI":  "https://bitcointalk.org/index.php?topic=2647654.0"
     },
     {
         "Type":  "NVIDIA",
@@ -19,6 +19,6 @@
                       },
         "API":  "Claymore",
         "Port":  "23334",
-        "URI":  "https://bitcointalk.org/index.php?topic=2647654.0"
+        "ManualURI":  "https://bitcointalk.org/index.php?topic=2647654.0"
     }
 ]
