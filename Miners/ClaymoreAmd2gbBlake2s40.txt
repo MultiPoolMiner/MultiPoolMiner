@@ -1,5 +1,6 @@
 {
     "Type":  "AMD",
+    "ManualURI": "https://bitcointalk.org/index.php?topic=1433925.0",
     "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
     "Arguments":  "\"-r -1 -mport -13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -eres 0 -allpools 1 -allcoins 1 -dpool $($Pools.Blake2s.Host):$($Pools.Blake2s.Port) -dwal $($Pools.Blake2s.User) -dpsw $($Pools.Blake2s.Pass) -dcoin blake2s -dcri 40 -platform 1\"",
     "HashRates":  {

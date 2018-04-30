@@ -1,6 +1,7 @@
 ﻿[
     {
         "Type":  "CPU",
+        "ManualURI": "https://bitcointalk.org/index.php?topic=647251.0",
         "Path":  ".\\Bin\\CryptoNight-Claymore-Cpu\\NsCpuCNMiner64.exe",
         "Arguments":  "\"-r -1 -mport 3333 -pow7 1 -o $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -u $($Pools.CryptoNightV7.User) -p $($Pools.CryptoNightV7.Pass)\"",
         "HashRates":  {
@@ -12,6 +13,7 @@
     },
     {
         "Type":  "CPU",
+        "ManualURI": "https://bitcointalk.org/index.php?topic=647251.0",
         "Path":  ".\\Bin\\CryptoNight-Claymore-Cpu\\NsCpuCNMiner64.exe",
         "Arguments":  "\"-r -1 -mport 3333 -pow7 0 -o $($Pools.CryptoNight.Protocol)://$($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port) -u $($Pools.CryptoNight.User) -p $($Pools.CryptoNight.Pass)\"",
         "HashRates":  {
