@@ -1,7 +1,11 @@
 ﻿using module ..\Include.psm1
 
 class Xgminer : Miner {
-    [PSCustomObject]GetMinerData ([String[]]$Algorithm, [Bool]$Safe = $false) {
+    [PSCustomObject]GetMinerData ([Bool]$Safe = $false) {
+        $MinerData = ([Miner]$this).GetMinerData($Safe)
+
+        if ($this.GetStatus() -ne [MinerStatus]::Running) {return $MinerData}
+
         $Server = "localhost"
         $Timeout = 10 #seconds
 
@@ -21,7 +25,7 @@ class Xgminer : Miner {
                 break
             }
 
-            $HashRate_Name = [String]$Algorithm[0]
+            $HashRate_Name = [String]$this.Algorithm[0]
             $HashRate_Value = if ($Data.SUMMARY.HS_5s) {[Double]$Data.SUMMARY.HS_5s * [Math]::Pow(1000, 0)}
             elseif ($Data.SUMMARY.KHS_5s) {[Double]$Data.SUMMARY.KHS_5s * [Math]::Pow(1000, 1)}
             elseif ($Data.SUMMARY.MHS_5s) {[Double]$Data.SUMMARY.MHS_5s * [Math]::Pow(1000, 2)}
@@ -34,7 +38,7 @@ class Xgminer : Miner {
 
                 $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
-                $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
+                $this.Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
 
                 if (-not $Safe) {break}
             }
@@ -51,7 +55,7 @@ class Xgminer : Miner {
 
                 $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
 
-                $Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
+                $this.Algorithm | Where-Object {-not $HashRate.$_} | ForEach-Object {break}
             }
 
             if (-not $Safe) {break}
@@ -60,11 +64,10 @@ class Xgminer : Miner {
         } while ($HashRates.Count -lt 6)
 
         $HashRate = [PSCustomObject]@{}
-        $Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
-        $Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
+        $this.Algorithm | ForEach-Object {$HashRate | Add-Member @{$_ = [Int64]($HashRates.$_ | Measure-Object -Maximum -Minimum -Average | Where-Object {$_.Maximum - $_.Minimum -le $_.Average * $Delta}).Maximum}}
+        $this.Algorithm | Where-Object {-not $HashRate.$_} | Select-Object -First 1 | ForEach-Object {$this.Algorithm | ForEach-Object {$HashRate.$_ = [Int64]0}}
 
-        return [PSCustomObject]@{
-            HashRate = $HashRate
-        }
+        $MinerData | Add-Member HashRate $HashRate -Force
+        return $MinerData
     }
 }

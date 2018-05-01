@@ -1,7 +1,4 @@
-﻿Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore
-Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1" -ErrorAction Ignore
-
-Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+﻿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
 
@@ -145,7 +142,16 @@ Function Write-Log {
 
     Begin { }
     Process {
-        $filename = ".\Logs\MultiPoolMiner-$(Get-Date -Format "yyyy-MM-dd").txt"
+        # Inherit the same verbosity settings as the script importing this
+        if (-not $PSBoundParameters.ContainsKey('InformationPreference')) { $InformationPreference = $PSCmdlet.GetVariableValue('InformationPreference') }
+        if (-not $PSBoundParameters.ContainsKey('Verbose')) { $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference') }
+        if (-not $PSBoundParameters.ContainsKey('Debug')) { $DebugPreference = $PSCmdlet.GetVariableValue('DebugPreference') }
+
+        # Get mutex named MPMWriteLog. Mutexes are shared across all threads and processes.
+        # This lets us ensure only one thread is trying to write to the file at a time.
+        $mutex = New-Object System.Threading.Mutex($false, "MPMWriteLog")
+
+        $filename = ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd").txt"
         $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
         if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
@@ -172,7 +178,15 @@ Function Write-Log {
                 Write-Debug -Message $Message
             }
         }
-        "$date $LevelText $Message" | Out-File -FilePath $filename -Append
+
+        # Attempt to aquire mutex, waiting up to 1 second if necessary.  If aquired, write to the log file and release mutex.  Otherwise, display an error.
+        if ($mutex.WaitOne(1000)) {
+            "$date $LevelText $Message" | Out-File -FilePath $filename -Append -Encoding ascii
+            $mutex.ReleaseMutex()
+        }
+        else {
+            Write-Error -Message "Log file is locked, unable to write message to log."
+        }
     }
     End {}
 }
@@ -228,10 +242,10 @@ function Set-Stat {
             $ToleranceMax = $Stat.Week * (1 + [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
         }
 
-        if ($ChangeDetection -and $Value -eq $Stat.Live) {$Updated -eq $Stat.updated}
+        if ($ChangeDetection -and [Decimal]$Value -eq [Decimal]$Stat.Live) {$Updated = $Stat.updated}
 
         if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
-            Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin) ... $([Int]$ToleranceMax)). "
+            Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin) to $([Int]$ToleranceMax)). "
         }
         else {
             $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
@@ -262,7 +276,7 @@ function Set-Stat {
                 Week_Fluctuation = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + 
                 ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
                 Duration = $Stat.Duration + $Duration
-                Updated = (Get-Date).ToUniversalTime()
+                Updated = $Updated
             }
         }
     }
@@ -272,19 +286,19 @@ function Set-Stat {
         $Stat = [PSCustomObject]@{
             Live = $Value
             Minute = $Value
-            Minute_Fluctuation = 1
+            Minute_Fluctuation = 0
             Minute_5 = $Value
-            Minute_5_Fluctuation = 1
+            Minute_5_Fluctuation = 0
             Minute_10 = $Value
-            Minute_10_Fluctuation = 1
+            Minute_10_Fluctuation = 0
             Hour = $Value
-            Hour_Fluctuation = 1
+            Hour_Fluctuation = 0
             Day = $Value
-            Day_Fluctuation = 1
+            Day_Fluctuation = 0
             Week = $Value
-            Week_Fluctuation = 1
+            Week_Fluctuation = 0
             Duration = $Duration
-            Updated = (Get-Date).ToUniversalTime()
+            Updated = $Updated
         }
     }
 
@@ -318,7 +332,7 @@ function Get-Stat {
     )
 
     if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
-    Get-ChildItem "Stats" | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
+    Get-ChildItem "Stats" -File | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
 }
 
 function Get-ChildItemContent {
@@ -332,7 +346,7 @@ function Get-ChildItemContent {
 
     function Invoke-ExpressionRecursive ($Expression) {
         if ($Expression -is [String]) {
-            if ((Invoke-Expression "`"$Expression`"") -ne $Expression) {
+            if ($Expression -match '(\$|")') {
                 try {$Expression = Invoke-Expression $Expression}
                 catch {$Expression = Invoke-Expression "`"$Expression`""}
             }
@@ -345,7 +359,7 @@ function Get-ChildItemContent {
         return $Expression
     }
 
-    Get-ChildItem $Path | ForEach-Object {
+    Get-ChildItem $Path -File -ErrorAction SilentlyContinue | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
         if ($_.Extension -eq ".ps1") {
@@ -367,7 +381,12 @@ function Get-ChildItemContent {
             if ($Content -eq $null) {$Content = $_ | Get-Content}
         }
         $Content | ForEach-Object {
-            [PSCustomObject]@{Name = $Name; Content = $_}
+            if ($_.Name) {
+                [PSCustomObject]@{Name = $_.Name; Content = $_}
+            }
+            else {
+                [PSCustomObject]@{Name = $Name; Content = $_}
+            }
         }
     }
 }
@@ -388,7 +407,7 @@ filter ConvertTo-Hash {
 
 function ConvertTo-LocalCurrency { 
     [CmdletBinding()]
-    # To get same numbering scheme reagardless of value BTC value (size) to dermine formatting
+    # To get same numbering scheme regardless of value BTC value (size) to determine formatting
     # Use $Offset to add/remove decimal places
 
     param(
@@ -401,7 +420,8 @@ function ConvertTo-LocalCurrency {
     )
 
     $Number = $Number * $BTCRate
-    switch ([math]::truncate(10 - $Offset - [math]::log($BTCRate, [Math]::Pow(10, 1)))) {
+
+    switch ([math]::truncate(10 - $Offset - [math]::log($BTCRate, 10))) {
         0 {$Number.ToString("N0")}
         1 {$Number.ToString("N1")}
         2 {$Number.ToString("N2")}
@@ -456,48 +476,22 @@ function Start-SubProcess {
         [Parameter(Mandatory = $false)]
         [String]$ArgumentList = "", 
         [Parameter(Mandatory = $false)]
+        [String]$LogPath = "", 
+        [Parameter(Mandatory = $false)]
         [String]$WorkingDirectory = "", 
         [ValidateRange(-2, 3)]
         [Parameter(Mandatory = $false)]
         [Int]$Priority = 0
     )
 
-    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
+    $ScriptBlock = "Set-Location '$WorkingDirectory'; (Get-Process -Id `$PID).PriorityClass = '$(@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}[$Priority])'; "
+    $ScriptBlock += "& '$FilePath'"
+    if ($ArgumentList) {$ScriptBlock += " $ArgumentList"}
+    $ScriptBlock += " *>&1"
+    $ScriptBlock += " | Write-Output"
+    if ($LogPath) {$ScriptBlock += " | Tee-Object '$LogPath'"}
 
-    $Job = Start-Job -ArgumentList $PID, $FilePath, $ArgumentList, $WorkingDirectory {
-        param($ControllerProcessID, $FilePath, $ArgumentList, $WorkingDirectory)
-
-        $ControllerProcess = Get-Process -Id $ControllerProcessID
-        if ($ControllerProcess -eq $null) {return}
-
-        $ProcessParam = @{}
-        $ProcessParam.Add("FilePath", $FilePath)
-        $ProcessParam.Add("WindowStyle", 'Minimized')
-        if ($ArgumentList -ne "") {$ProcessParam.Add("ArgumentList", $ArgumentList)}
-        if ($WorkingDirectory -ne "") {$ProcessParam.Add("WorkingDirectory", $WorkingDirectory)}
-        $Process = Start-Process @ProcessParam -PassThru
-        if ($Process -eq $null) {
-            [PSCustomObject]@{ProcessId = $null}
-            return        
-        }
-
-        [PSCustomObject]@{ProcessId = $Process.Id; ProcessHandle = $Process.Handle}
-
-        $ControllerProcess.Handle | Out-Null
-        $Process.Handle | Out-Null
-
-        do {if ($ControllerProcess.WaitForExit(1000)) {$Process.CloseMainWindow() | Out-Null}}
-        while ($Process.HasExited -eq $false)
-    }
-
-    do {Start-Sleep 1; $JobOutput = Receive-Job $Job}
-    while ($JobOutput -eq $null)
-
-    $Process = Get-Process | Where-Object Id -EQ $JobOutput.ProcessId
-    $Process.Handle | Out-Null
-    $Process
-
-    if ($Process) {$Process.PriorityClass = $PriorityNames.$Priority}
+    Start-Job ([ScriptBlock]::Create($ScriptBlock))
 }
 
 function Expand-WebRequest {
@@ -509,11 +503,15 @@ function Expand-WebRequest {
         [String]$Path = ""
     )
 
+    # Set current path used by .net methods to the same as the script's path
+    [Environment]::CurrentDirectory = $ExecutionContext.SessionState.Path.CurrentFileSystemLocation
+
     if (-not $Path) {$Path = Join-Path ".\Downloads" ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName}
     if (-not (Test-Path ".\Downloads")) {New-Item "Downloads" -ItemType "directory" | Out-Null}
     $FileName = Join-Path ".\Downloads" (Split-Path $Uri -Leaf)
 
     if (Test-Path $FileName) {Remove-Item $FileName}
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
 
     if (".msi", ".exe" -contains ([IO.FileInfo](Split-Path $Uri -Leaf)).Extension) {
@@ -523,10 +521,10 @@ function Expand-WebRequest {
         $Path_Old = (Join-Path (Split-Path $Path) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
         $Path_New = (Join-Path (Split-Path $Path) (Split-Path $Path -Leaf))
 
-        if (Test-Path $Path_Old) {Remove-Item $Path_Old -Recurse}
+        if (Test-Path $Path_Old) {Remove-Item $Path_Old -Recurse -Force}
         Start-Process "7z" "x `"$([IO.Path]::GetFullPath($FileName))`" -o`"$([IO.Path]::GetFullPath($Path_Old))`" -y -spe" -Wait
 
-        if (Test-Path $Path_New) {Remove-Item $Path_New -Recurse}
+        if (Test-Path $Path_New) {Remove-Item $Path_New -Recurse -Force}
         if (Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $false) {
             Rename-Item $Path_Old (Split-Path $Path -Leaf)
         }
@@ -602,6 +600,12 @@ function Get-Region {
     else {$Region}
 }
 
+enum MinerStatus {
+    Running
+    Idle
+    Failed
+}
+
 class Miner {
     $Name
     $Path
@@ -609,7 +613,7 @@ class Miner {
     $Wrap
     $API
     $Port
-    $Algorithm
+    [Array]$Algorithm = @()
     $Type
     $Index
     $Device
@@ -618,28 +622,136 @@ class Miner {
     $Profit_Comparison
     $Profit_MarginOfError
     $Profit_Bias
+    $Profit_Unbias
     $Speed
     $Speed_Live
     $Best
     $Best_Comparison
-    $Process
+    hidden [System.Management.Automation.Job]$Process = $null
     $New
-    $Active
-    $Activated
-    $Status
+    hidden [TimeSpan]$Active = [TimeSpan]::Zero
+    hidden [Int]$Activated = 0
+    hidden [MinerStatus]$Status = [MinerStatus]::Idle
     $Benchmarked
+    $LogFile
+    $Pool
 
-    StartMining() {
-        $this.New = $true
-        $this.Activated++
-        if ($this.Process -ne $null) {$this.Active += $this.Process.ExitTime - $this.Process.StartTime}
-        $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($this -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
-        if ($this.Process -eq $null) {$this.Status = "Failed"}
-        else {$this.Status = "Running"}
+    [String[]]GetProcessNames() {
+        return @(([IO.FileInfo]($this.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName)
     }
 
-    StopMining() {
-        $this.Process.CloseMainWindow() | Out-Null
-        $this.Status = "Idle"
+    hidden StartMining() {
+        $this.Status = [MinerStatus]::Failed
+
+        $this.New = $true
+        $this.Activated++
+
+        if ($this.Process) {
+            if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
+                $this.Process | Remove-Job -Force
+            }
+
+            if (-not ($this.Process | Get-Job -ErrorAction SilentlyContinue)) {
+                $this.Active += $this.Process.PSEndTime - $this.Process.PSBeginTime
+                $this.Process = $null
+            }
+        }
+
+        if (-not $this.Process) {
+            $this.LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\$($this.Name)-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt")
+            $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -LogPath $this.LogFile -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
+
+            if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
+                $this.Status = [MinerStatus]::Running
+            }
+        }
+    }
+
+    hidden StopMining() {
+        $this.Status = [MinerStatus]::Failed
+
+        if ($this.Process) {
+            if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
+                $this.Process | Remove-Job -Force
+            }
+
+            if (-not ($this.Process | Get-Job -ErrorAction SilentlyContinue)) {
+                $this.Active += $this.Process.PSEndTime - $this.Process.PSBeginTime
+                $this.Process = $null
+                $this.Status = [MinerStatus]::Idle
+            }
+        }
+    }
+
+    [DateTime]GetActiveLast() {
+        if ($this.Process.PSBeginTime -and $this.Process.PSEndTime) {
+            return $this.Process.PSEndTime
+        }
+        elseif ($this.Process.PSBeginTime) {
+            return Get-Date
+        }
+        else {
+            return [DateTime]::MinValue
+        }
+    }
+
+    [TimeSpan]GetActiveTime() {
+        if ($this.Process.PSBeginTime -and $this.Process.PSEndTime) {
+            return $this.Active + ($this.Process.PSEndTime - $this.Process.PSBeginTime)
+        }
+        elseif ($this.Process.PSBeginTime) {
+            return $this.Active + ((Get-Date) - $this.Process.PSBeginTime)
+        }
+        else {
+            return $this.Active
+        }
+    }
+
+    [Int]GetActivateCount() {
+        return $this.Activated
+    }
+
+    [MinerStatus]GetStatus() {
+        if ($this.Process.State -eq "Running") {
+            return [MinerStatus]::Running
+        }
+        elseif ($this.Status -eq "Running") {
+            return [MinerStatus]::Failed
+        }
+        else {
+            return $this.Status
+        }
+    }
+
+    SetStatus([MinerStatus]$Status) {
+        if ($Status -eq $this.GetStatus()) {return}
+
+        switch ($Status) {
+            "Running" {
+                $this.StartMining()
+            }
+            "Idle" {
+                $this.StopMining()
+            }
+            Default {
+                $this.StopMining()
+                $this.Status = $Status
+            }
+        }
+    }
+
+    [PSCustomObject]GetMinerData ([Bool]$Safe = $false) {
+        $Lines = @()
+
+        if ($this.Process.HasMoreData) {
+            $this.Process | Receive-Job | ForEach-Object {
+                $Line = $_ -replace "`n|`r", ""
+                if ($Line -replace "\x1B\[[0-?]*[ -/]*[@-~]", "") {$Lines += $Line}
+            }
+        }
+
+        return [PSCustomObject]@{
+            Lines = $Lines
+        }
     }
 }

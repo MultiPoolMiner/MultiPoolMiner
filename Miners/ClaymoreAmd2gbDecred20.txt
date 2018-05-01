@@ -1,11 +1,26 @@
 [
     {
         "Type":  "AMD",
+        "ManualURI": "https://bitcointalk.org/index.php?topic=1433925.0",
         "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
-        "Arguments":  "-r -1 -mport -13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -allpools 1 -allcoins exp -dpool $($Pools.Decred.Host):$($Pools.Decred.Port) -dwal $($Pools.Decred.User) -dpsw $($Pools.Decred.Pass) -dcoin dcr -dcri 20 -platform 1",
-        "HashRates":  {"Ethash2gb":  "$($Stats.ClaymoreAmd2gbDecred20_Ethash2gb_HashRate.Week)","Decred":  "$($Stats.ClaymoreAmd2gbDecred20_Decred_HashRate.Week)"},
+        "Arguments":  "\"-r -1 -mport -13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -eres 0 -allpools 1 -allcoins 1 -dpool $($Pools.Decred.Host):$($Pools.Decred.Port) -dwal $($Pools.Decred.User) -dpsw $($Pools.Decred.Pass) -dcoin dcr -dcri 20 -platform 1\"",
+        "HashRates":  {
+                          "Ethash2gb":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'}).Count -eq 0) {0} else {$Stats.ClaymoreAmdDecred20_Ethash_HashRate.Week})\"",
+                          "Decred":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'}).Count -eq 0) {0} else {$Stats.ClaymoreAmdDecred20_Decred_HashRate.Week})\""
+                      },
+        "API":  "Claymore",
+        "Port":  "13333"
+    },
+    {
+        "Type":  "AMD",
+        "ManualURI": "https://bitcointalk.org/index.php?topic=1433925.0",
+        "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "Arguments":  "\"-r -1 -mport -13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -eres 0 -allpools 1 -allcoins 1 -dpool $($Pools.DecredNiceHash.Host):$($Pools.DecredNiceHash.Port) -dwal $($Pools.DecredNiceHash.User) -dpsw $($Pools.DecredNiceHash.Pass) -dcoin dcr -dcri 20 -platform 1\"",
+        "HashRates":  {
+                          "Ethash2gb":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'}).Count -eq 0) {0} else {$Stats.ClaymoreAmdDecred20_Ethash_HashRate.Week})\"",
+                          "DecredNiceHash":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'}).Count -eq 0) {0} else {$Stats.ClaymoreAmdDecred20_DecredNiceHash_HashRate.Week})\""
+                      },
         "API":  "Claymore",
         "Port":  "13333"
     }
 ]
-

@@ -1,21 +1,5 @@
 {
   "Pools": {
-    "AHashPool": {
-      "BTC": "$Wallet",
-      "Worker": "$WorkerName"
-    },
-    "Blockmunch": {
-      "BTC": "$Wallet",
-      "Worker": "$WorkerName"
-    },
-    "Hashrefinery": {
-      "BTC": "$Wallet",
-      "Worker": "$WorkerName"
-    },
-    "ItalYiiMP": {
-      "BTC": "$Wallet",
-      "Worker": "$WorkerName"
-    },
     "MiningPoolHub": {
       "User": "$UserName",
       "Worker": "$WorkerName",
