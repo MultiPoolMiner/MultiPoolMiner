@@ -49,7 +49,7 @@ $Commands = [PSCustomObject]@{
     "ethash2gb;pascal:60" = ""
     "ethash2gb;pascal:80" = ""
 }
-$CommonCommands = @(" -logsmaxsize 1", "") # array, first value for main algo, second value for secondary algo
+$CommonCommands = @("", "") # array, first value for main algo, second value for secondary algo
 
 $DeviceIDs4gb = @() # array of all devices with more than 4MiB VRAM, ids will be in hex format
 $DeviceIDs3gb = @() # array of all devices with more than 3MiB VRAM, ids will be in hex format
@@ -99,7 +99,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
                 Name      = $Miner_Name
                 Type      = $Type
                 Path      = $Path
-                Arguments = ("-mode 1 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$MainAlgorithmCommand$($CommonCommands | Select -Index 0) -esm $EthereumStratumMode -allpools 1 -allcoins 1 -platform 1 -di $($DeviceIDs -join '')" -replace "\s+", " ").trim()
+                Arguments = ("-mode 1 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$MainAlgorithmCommand$($CommonCommands | Select -Index 0) -esm $EthereumStratumMode -allpools 1 -allcoins 1 -platform 1 -logsmaxsize 1 -y 1 -di $($DeviceIDs -join '')" -replace "\s+", " ").trim()
                 HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm}
                 API       = $Api
                 Port      = $Port
