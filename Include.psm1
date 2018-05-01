@@ -50,6 +50,50 @@ function Get-Devices {
     $Devices
 }
 
+function Get-DeviceSet {
+    # Filters the deviceIDs and returns only deviceIDs for active miners
+    # $NumberingFormat: converts the device ID number to the base of $NumberingFormat, e.g. HEX (16)
+    # $StartNumberingFrom: change default numbering start from 0 -> $Offset
+
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [PSCustomObject]$Config,
+        [Parameter(Mandatory = $true)]
+        [PSCustomObject]$Devices,
+        [Parameter(Mandatory = $true)]        
+        [Int]$NumberingFormat,
+        [Parameter(Mandatory = $false)]        
+        [Int]$StartNumberingFrom
+    )
+	
+    if (-not $NumberingFormat) {$NumberingFormat = 10} # By default use decimal numbers
+
+    $DeviceSet  = [PSCustomObject]@{}
+    
+    $DeviceSet | Add-Member "All" @() # array of all devices, ids will be in hex format
+    $DeviceSet | Add-Member "3gb" @() # array of all devices with more than 3MiB VRAM, ids will be in hex format
+    $DeviceSet | Add-Member "4gb" @() # array of all devices with more than 4MiB VRAM, ids will be in hex format
+
+    # Get DeviceIDs, filter out all disabled hw models and IDs
+    if ($Config.MinerInstancePerCardModel -and (Get-Command "Get-CommandPerDevice" -ErrorAction SilentlyContinue)) { # separate miner instance per hardware model
+        if ($Config.Devices.$Type.IgnoreHWModel -inotcontains $DeviceTypeModel.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $DeviceTypeModel.Name_Norm) {
+            $DeviceTypeModel.DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | ForEach-Object {
+                $DeviceSet."All" += [Convert]::ToString(($_ + $StartNumberingFrom), $NumberingFormat)
+                if ($DeviceTypeModel.GlobalMemsize -ge 3000000000) {$DeviceSet."3gb" += [Convert]::ToString(($_ + $StartNumberingFrom), $NumberingFormat)}
+                if ($DeviceTypeModel.GlobalMemsize -ge 4000000000) {$DeviceSet."4gb" += [Convert]::ToString(($_ + $StartNumberingFrom), $NumberingFormat)}
+            }
+        }
+    }
+    else { # one miner instance per hw type
+        $DeviceSet."All" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | ForEach-Object {[Convert]::ToString(($_ + $StartNumberingFrom), $NumberingFormat)}
+        $DeviceSet."3gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 3000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | Foreach-Object {[Convert]::ToString(($_ + $StartNumberingFrom), $NumberingFormat)}
+        $DeviceSet."4gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 4000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | Foreach-Object {[Convert]::ToString(($_ + $StartNumberingFrom), $NumberingFormat)}
+    }
+    
+    $DeviceSet
+}
+
 function Get-CommandPerDevice {
     # rewrites the command parameters
     # if a parameter has multiple values, only the values for the available devices are returned
