@@ -1,6 +1,7 @@
 [
     {
         "Type":  "AMD",
+        "ManualURI": "https://bitcointalk.org/index.php?topic=1433925.0",
         "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
         "Arguments":  "\"-r -1 -mport -13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -eres 0 -allpools 1 -allcoins 1 -dpool $($Pools.Decred.Host):$($Pools.Decred.Port) -dwal $($Pools.Decred.User) -dpsw $($Pools.Decred.Pass) -dcoin dcr -dcri 40 -platform 1\"",
         "HashRates":  {
@@ -12,6 +13,7 @@
     },
     {
         "Type":  "AMD",
+        "ManualURI": "https://bitcointalk.org/index.php?topic=1433925.0",
         "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
         "Arguments":  "\"-r -1 -mport -13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -eres 0 -allpools 1 -allcoins 1 -dpool $($Pools.DecredNiceHash.Host):$($Pools.DecredNiceHash.Port) -dwal $($Pools.DecredNiceHash.User) -dpsw $($Pools.DecredNiceHash.Pass) -dcoin dcr -dcri 40 -platform 1\"",
         "HashRates":  {
