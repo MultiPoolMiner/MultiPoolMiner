@@ -13,8 +13,8 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 $BlockMasters_Request = [PSCustomObject]@{}
 
 try {
-    $BlockMasters_Request = Invoke-RestMethod "http://www.blockmasters.co/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-    $BlockMastersCoins_Request = Invoke-RestMethod "http://www.blockmasters.co/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $BlockMasters_Request = Invoke-RestMethod "http://blockmasters.co/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $BlockMastersCoins_Request = Invoke-RestMethod "http://blockmasters.co/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
