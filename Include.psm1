@@ -108,7 +108,7 @@ function Get-CommandPerDeviceSet {
         [String]$Command
     )
 
-    $CommandPerDevice = ""
+    $CommandPerDeviceSet = ""
 
     $Command -split "(?=\s{1,}--|\s{1,}-| ,|^,)" | ForEach-Object {
         $Token = $_
