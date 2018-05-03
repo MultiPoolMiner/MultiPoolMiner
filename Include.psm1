@@ -44,22 +44,18 @@ function Get-Devices {
         }
         $DeviceID++
     }
+
     $Devices
 }
 
 function Get-DeviceSet {
     # Filters the DeviceIDs and returns only DeviceIDs for active miners
-    # $Base: converts the device ID number to the base of $Base, e.g. HEX (16)
-    # $Offset: change default numbering start from 0 -> $Offset
-    # $Config, $Device and $DeviceType model variables are inherited from caller
+    # $DeviceIdBase: Returened  DeviceID numbers are of base $DeviceIdBase, e.g. HEX (16)
+    # $DeviceIdOffset: Change default numbering start from 0 -> $DeviceIdOffset
+    # $Config, $Device, $DeviceType, $DeviceIdBase & $DeviceIdOffset model variables are inherited from caller
 
     [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]        
-        [Int]$Base,
-        [Parameter(Mandatory = $false)]        
-        [Int]$Offset
-    )
+
     $DeviceSet  = [PSCustomObject]@{}
     $DeviceSet | Add-Member "All" @() # array of all devices, ids will be in hex format
     $DeviceSet | Add-Member "3gb" @() # array of all devices with more than 3MiB VRAM, ids will be in hex format
@@ -69,25 +65,48 @@ function Get-DeviceSet {
     if ($Config.MinerInstancePerCardModel -and (Get-Command "Get-CommandPerDevice" -ErrorAction SilentlyContinue)) { # separate miner instance per hardware model
         if ($Config.Devices.$Type.IgnoreHWModel -inotcontains $DeviceTypeModel.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $DeviceTypeModel.Name_Norm) {
             $DeviceTypeModel.DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | ForEach-Object {
-                $DeviceSet."All" += [Convert]::ToString(($_ + $Offset), $Base)
-                if ($DeviceTypeModel.GlobalMemsize -ge 3000000000) {$DeviceSet."3gb" += [Convert]::ToString(($_ + $Offset), $Base)}
-                if ($DeviceTypeModel.GlobalMemsize -ge 4000000000) {$DeviceSet."4gb" += [Convert]::ToString(($_ + $Offset), $Base)}
+                $DeviceSet."All" += [Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)
+                if ($DeviceTypeModel.GlobalMemsize -ge 3000000000) {$DeviceSet."3gb" += [Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
+                if ($DeviceTypeModel.GlobalMemsize -ge 4000000000) {$DeviceSet."4gb" += [Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
             }
         }
     }
     else { # one miner instance per hw type
-        $DeviceSet."All" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | ForEach-Object {[Convert]::ToString(($_ + $Offset), $Base)}
-        $DeviceSet."3gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 3000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | Foreach-Object {[Convert]::ToString(($_ + $Offset), $Base)}
-        $DeviceSet."4gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 4000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | Foreach-Object {[Convert]::ToString(($_ + $Offset), $Base)}
+        $DeviceSet."All" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | ForEach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
+        $DeviceSet."3gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 3000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | Foreach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
+        $DeviceSet."4gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 4000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | Foreach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
     }
     
     $DeviceSet
 }
 
-function Get-CommandPerDevice {
-    # rewrites the command parameters
-    # if a parameter has multiple values, only the values for the available devices are returned
-    # parameters without values are valid for all devices an are left untouched
+function Get-CommandPerDeviceSet {
+
+# rewrites the command parameters
+# if a parameter has multiple values, only the values for the available devices are returned
+# parameters without values are valid for all devices and are left untouched
+# $DeviceIDs, $DeviceIdBase and $DeviceIdOffset variables are inherited from caller
+
+# supported parameter syntax:
+#$Command = ",c=BTC -9 1  -y  2 -a 00,11,22,33,44,55  -b=00,11,22,33,44,55 --c==00,11,22,33,44,55 --d --e=00,11,22,33,44,55 -f -g 00 11 22 33 44 55 ,c=LTC  -h 00 11 22 33 44 55 -i=,11,,33,,55 --j=00,11,,,44,55 --k==00,,,33,44,55 -l -zzz=0123,1234,2345,3456,4567,5678,6789 -u 0  --p all ,something=withcomma blah *blah *blah"
+#$DeviceIDs = @(0;1;4)
+# Result: ",c=BTC -9 1  -y  2 -a 00,11,44  -b=00,11,44 --c==00,11,44 --d --e=00,11,44 -f -g 00 11 44 ,c=LTC  -h 00 11 44 -i=,11 --j=00,11,44 --k==00,,44 -l -zzz=0123,1234,4567 -u 0  --p all ,something=withcomma blah *blah *blah"
+#$DeviceIDs = @(1)
+# Result: ",c=BTC -9 1  -y  2 -a 11  -b=11 --c==11 --d --e=11 -f -g 11 ,c=LTC  -h 11 -i=11 --j=11 --k== -l -zzz=1234 -u 0  --p all ,something=withcomma blah *blah *blah"
+#$DeviceIDs = @(0;2;9)
+# Result: ",c=BTC -9 1  -y  2 -a 00,22  -b=00,22 --c==00,22 --d --e=00,22 -f -g 00 22 ,c=LTC  -h 00 22 -i= --j=00 --k==00 -l -zzz=0123,2345 -u 0  --p all ,something=withcomma blah *blah *blah"
+# $Command = ",c=BTC -a 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"
+# $DeviceIDs = @("0";"A";"B"); $DeviceIdBase = 16
+# Result: ",c=BTC -a 0,10,11"
+# $DeviceIDs = @("1";"A";"B"); $DeviceIdBase = 16; $DeviceIdOffset = 1
+# Result: ",c=BTC -a 0,9,10"
+
+[CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [String]$Command
+    )
 
     $CommandPerDevice = ""
 
@@ -111,19 +130,20 @@ function Get-CommandPerDevice {
                 if ($Values -match "(?:[,; ]{1})") { # supported separators are listed in brackets: [,; ]{1}
                     $ValueSeparator = $Matches[0]
                     $RelevantValues = @()
-                    $Devices | Foreach-Object {
-                        if ($Values.Split($ValueSeparator) | Select -Index $_) {$RelevantValues += ($Values.Split($ValueSeparator) | Select -Index $_)}
+                    $DeviceIDs | Foreach-Object {
+                        $DeviceID = [Convert]::ToInt32($_, $DeviceIdBase) - $DeviceIdOffset
+                        if ($Values.Split($ValueSeparator) | Select-Object -Index $DeviceId) {$RelevantValues += ($Values.Split($ValueSeparator) | Select-Object -Index $DeviceId)}
                         else {$RelevantValues += ""}
                     }                    
-                    $CommandPerDevice += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$(($RelevantValues -join $ValueSeparator).TrimEnd($ValueSeparator))"
+                    $CommandPerDeviceSet += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$(($RelevantValues -join $ValueSeparator).TrimEnd($ValueSeparator))"
                 }
-                else {$CommandPerDevice += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$($Values)"}
+                else {$CommandPerDeviceSet += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$($Values)"}
             }
-            else {$CommandPerDevice += "$($Prefix)$($Token)"}
+            else {$CommandPerDeviceSet += "$($Prefix)$($Token)"}
         }
-        else {$CommandPerDevice += $Token}
+        else {$CommandPerDeviceSet += $Token}
     }
-    $CommandPerDevice
+    $CommandPerDeviceSet
 }
 
 Function Write-Log {
