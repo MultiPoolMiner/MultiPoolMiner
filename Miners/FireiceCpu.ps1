@@ -1,13 +1,13 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\CryptoNight-FireIce\xmr-stak.exe"
-$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.4.2/xmr-stak-win64.zip"
+$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.4.3/xmr-stak-win64.zip"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 3334
 
 $Commands = [PSCustomObject]@{
-    "cryptonight" = "" #CryptoNight
+    # "cryptonight" = "" #CryptoNight is ASIC territory
     "cryptonight_lite" = "" # CryptoNight-Lite
     "cryptonightV7" = "" #CryptoNightV7
 }

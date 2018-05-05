@@ -8,7 +8,7 @@
                       },
         "API":  "XMRig",
         "Port":  "3334",
-        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.5.2/xmrig-2.5.2-msvc-win64.zip"
+        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.5.3/xmrig-2.5.3-msvc-win64.zip"
     },
     {
         "Type":  "CPU",
@@ -19,7 +19,7 @@
                       },
         "API":  "XMRig",
         "Port":  "3334",
-        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.5.2/xmrig-2.5.2-msvc-win64.zip"
+        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.5.3/xmrig-2.5.3-msvc-win64.zip"
     },
     {
         "Type":  "CPU",
@@ -30,6 +30,6 @@
                       },
         "API":  "XMRig",
         "Port":  "3334",
-        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.5.2/xmrig-2.5.2-msvc-win64.zip"
+        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.5.3/xmrig-2.5.3-msvc-win64.zip"
     }
 ]
