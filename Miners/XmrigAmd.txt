@@ -8,8 +8,8 @@
                       },
         "API":  "XMRig",
         "Port":  "3336",
-        "URI":  "https://github.com/xmrig/xmrig-amd/releases/download/v2.5.2/xmrig-amd-2.5.2-win64.zip"
-    },
+        "URI":  "https://github.com/xmrig/xmrig-amd/releases/download/v2.6.1/xmrig-amd-2.6.1-win64.zip"
+	},
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\CryptoNight-AMD\\xmrig-amd.exe",
@@ -19,7 +19,7 @@
                       },
         "API":  "XMRig",
         "Port":  "3336",
-        "URI":  "https://github.com/xmrig/xmrig-amd/releases/download/v2.5.2/xmrig-amd-2.5.2-win64.zip"
+        "URI":  "https://github.com/xmrig/xmrig-amd/releases/download/v2.6.1/xmrig-amd-2.6.1-win64.zip"
     },
     {
         "Type":  "AMD",
@@ -30,6 +30,6 @@
                       },
         "API":  "XMRig",
         "Port":  "3336",
-        "URI":  "https://github.com/xmrig/xmrig-amd/releases/download/v2.5.2/xmrig-amd-2.5.2-win64.zip"
+        "URI":  "https://github.com/xmrig/xmrig-amd/releases/download/v2.6.1/xmrig-amd-2.6.1-win64.zip"
     }
 ]

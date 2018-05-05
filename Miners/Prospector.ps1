@@ -6,7 +6,7 @@ $Uri = "https://github.com/semtexzv/Prospector/releases/download/0.0.13-ALPHA/pr
 $Commands = [PSCustomObject]@{
     "eth"  = @() #Ethash
     "sigt" = @() #Skunk
-    "xmr"  = @() #CryptoNight
+    # "xmr"  = @() #CryptoNight is ASIC territory
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
