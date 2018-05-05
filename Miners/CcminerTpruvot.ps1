@@ -10,7 +10,7 @@ $Commands = [PSCustomObject]@{
     "vanilla" = "" #BlakeVanilla
     "c11" = "" #C11
     #"cryptonight" = "" #CryptoNight is ASIC territory
-    "cryptolight" #CryptoNight Lite
+    "cryptolight" = "" #CryptoNight Lite
     "decred" = "" #Decred
     "equihash" = "" #Equihash
     #"ethash" = "" #Ethash
