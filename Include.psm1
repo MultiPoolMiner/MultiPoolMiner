@@ -31,7 +31,7 @@ function Get-Devices {
             $Name_Norm = (Get-Culture).TextInfo.ToTitleCase(($_.Name)) -replace "[^A-Z0-9]"
 
             if ($Devices.$Type.Name_Norm -inotcontains $Name_Norm) { # New card model
-                $Device = @([PSCustomObject]$_)
+                $Device = $_
                 $Device | Add-Member Name_Norm $Name_Norm
                 $Device | Add-Member DeviceIDs @()
                 $Devices.$Type += $Device
