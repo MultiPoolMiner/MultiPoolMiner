@@ -117,9 +117,7 @@ while ($true) {
     $ConfigBackup = $Config
 
     #Read existing config from file
-    if (Test-Path "Config.txt") {
-        $Config = Get-Content "Config.txt" | ConvertFrom-Json
-    }
+    $Config = Get-ChildItemContent "Config.txt" | Select-Object -ExpandProperty Content
 
     #On first run command line parameters take precedence
     if ($StatEnd -eq $Timer) {
