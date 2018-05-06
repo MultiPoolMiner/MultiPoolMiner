@@ -58,7 +58,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Double]$SwitchingPrevention = 1, #zero does not prevent miners switching
     [Parameter(Mandatory = $false)]
-    [Switch]$AutoUpdate = $true
+    [Switch]$NoAutoUpdate = $false
 )
 
 $Version = "2.7.2.7"
@@ -98,7 +98,7 @@ if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpC
 }
 
 #Check for software updates
-if ($AutoUpdate -and (Test-Path .\Updater.ps1)) {$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1}
+if (-not $NoAutoUpdate -and (Test-Path .\Updater.ps1)) {$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1}
 
 #Set donation parameters
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
@@ -116,7 +116,7 @@ while ($true) {
     #Load the config
     $ConfigBackup = $Config
     if (Test-Path "Config.txt") {
-        $Config = Get-ChildItemContent "Config.txt" -Parameters @{
+        $Config = Get-ChildItemContent "Config.txt" | Select-Object -ExpandProperty Content
             Wallet              = $Wallet
             UserName            = $UserName
             WorkerName          = $WorkerName
@@ -140,7 +140,11 @@ while ($true) {
             MinerStatusURL      = $MinerStatusURL
             MinerStatusKey      = $MinerStatusKey
             SwitchingPrevention = $SwitchingPrevention
-        } | Select-Object -ExpandProperty Content
+            NoAutoUpdate        = $NoAutoUpdate
+        }
+        $Parameters.Keys | ForEach-Object { # Command line parameters take precedence
+            if ($Parameters.$_) {$Config | Add-Member $_ $Parameters.$_ -Force}
+        }
     }
     else {
         $Config = [PSCustomObject]@{
@@ -164,6 +168,7 @@ while ($true) {
             MinerStatusURL      = $MinerStatusURL
             MinerStatusKey      = $MinerStatusKey
             SwitchingPrevention = $SwitchingPrevention
+            NoAutoUpdate        = $NoAutoUpdate
         }
     }
 
