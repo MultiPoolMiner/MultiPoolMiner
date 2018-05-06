@@ -1,6 +1,6 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\CPU-JayDDee\cpuminer-avx2-sha.exe"
+$Path = ".\Bin\CPU-JayDDee\cpuminer-avx.exe"
 $Uri = "https://github.com/JayDDee/cpuminer-opt/files/1939225/cpuminer-opt-3.8.8-windows.zip"
 
 $Commands = [PSCustomObject]@{
