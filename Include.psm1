@@ -10,21 +10,23 @@ function Get-Devices {
     $Devices = [PSCustomObject]@{}
 
     [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object { # Hardware platform
-
-        if ($_.Type -eq "Cpu") {
-            $Type = "CPU"
-        }
-        else {
-            Switch ($_.Vendor) {
-                "Advanced Micro Devices, Inc." {$Type = "AMD"}
-                "Intel(R) Corporation"         {$Type = "INTEL"}
-                "NVIDIA Corporation"           {$Type = "NVIDIA"}
-            }
-        }
-        $Devices | Add-Member $Type @()
-        $DeviceID = 0 # For each platform start counting DeviceIDs from 0
-
         [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object {
+
+            if ($_.Type -eq "Cpu") {
+                $Type = "CPU"
+            }
+            else {
+                Switch ($_.Vendor) {
+                    "Advanced Micro Devices, Inc." {$Type = "AMD"}
+                    "Intel(R) Corporation"         {$Type = "INTEL"}
+                    "NVIDIA Corporation"           {$Type = "NVIDIA"}
+                }
+            }
+
+            if (-not $Devices.$Type) {
+                $Devices | Add-Member $Type @()
+                $DeviceID = 0 # For each platform start counting DeviceIDs from 0
+            }
 
             $Name_Norm = (Get-Culture).TextInfo.ToTitleCase(($_.Name)) -replace "[^A-Z0-9]"
 
