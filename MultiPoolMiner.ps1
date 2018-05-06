@@ -61,6 +61,35 @@ param(
     [Switch]$NoAutoUpdate = $false
 )
 
+$Parameters = @{
+    Wallet                   = $Wallet
+    UserName                 = $UserName
+    WorkerName               = $WorkerName
+    API_ID                   = $API_ID
+    API_Key                  = $API_Key
+    Interval                 = $Interval
+    Region                   = $Region
+    SSL                      = $SSL
+    Type                     = $Type
+    Algorithm                = $Algorithm
+    MinerName                = $MinerName
+    PoolName                 = $PoolName
+    ExcludeAlgorithm         = $ExcludeAlgorithm
+    ExcludeMinerName         = $ExcludeMinerName
+    ExcludePoolName          = $ExcludePoolName
+    Currency                 = $Currency
+    Donate                   = $Donate
+    Proxy                    = $Proxy
+    Delay                    = $Delay
+    Watchdog                 = $Watchdog
+    ExcludeWatchdogAlgorithm = $ExcludeWatchdogAlgorithm
+    ExcludeWatchdogMinerName = $ExcludeWatchdogMinerName
+    MinerStatusURL           = $MinerStatusURL
+    MinerStatusKey           = $MinerStatusKey
+    SwitchingPrevention      = $SwitchingPrevention
+    NoAutoUpdate             = $NoAutoUpdate
+}
+
 $Version = "2.7.2.7"
 $Strikes = 3
 $SyncWindow = 5 #minutes
@@ -115,61 +144,16 @@ $API.Version = $Version
 while ($true) {
     #Load the config
     $ConfigBackup = $Config
+
+    #Read existing config from file
     if (Test-Path "Config.txt") {
-        $Config = Get-ChildItemContent "Config.txt" | Select-Object -ExpandProperty Content
-        $Parameters = @{        
-            Wallet              = $Wallet
-            UserName            = $UserName
-            WorkerName          = $WorkerName
-            API_ID              = $API_ID
-            API_Key             = $API_Key
-            Interval            = $Interval
-            Region              = $Region
-            SSL                 = $SSL
-            Type                = $Type
-            Algorithm           = $Algorithm
-            MinerName           = $MinerName
-            PoolName            = $PoolName
-            ExcludeAlgorithm    = $ExcludeAlgorithm
-            ExcludeMinerName    = $ExcludeMinerName
-            ExcludePoolName     = $ExcludePoolName
-            Currency            = $Currency
-            Donate              = $Donate
-            Proxy               = $Proxy
-            Delay               = $Delay
-            Watchdog            = $Watchdog
-            MinerStatusURL      = $MinerStatusURL
-            MinerStatusKey      = $MinerStatusKey
-            SwitchingPrevention = $SwitchingPrevention
-            NoAutoUpdate        = $NoAutoUpdate
-        }
-        $Parameters.Keys | ForEach-Object { # Command line parameters take precedence
-            if ($Parameters.$_) {$Config | Add-Member $_ $Parameters.$_ -Force}
-        }
+        $Config = Get-Content "Config.txt" | ConvertFrom-Json
     }
-    else {
-        $Config = [PSCustomObject]@{
-            Pools               = [PSCustomObject]@{}
-            Miners              = [PSCustomObject]@{}
-            Interval            = $Interval
-            Region              = $Region
-            SSL                 = $SSL
-            Type                = $Type
-            Algorithm           = $Algorithm
-            MinerName           = $MinerName
-            PoolName            = $PoolName
-            ExcludeAlgorithm    = $ExcludeAlgorithm
-            ExcludeMinerName    = $ExcludeMinerName
-            ExcludePoolName     = $ExcludePoolName
-            Currency            = $Currency
-            Donate              = $Donate
-            Proxy               = $Proxy
-            Delay               = $Delay
-            Watchdog            = $Watchdog
-            MinerStatusURL      = $MinerStatusURL
-            MinerStatusKey      = $MinerStatusKey
-            SwitchingPrevention = $SwitchingPrevention
-            NoAutoUpdate        = $NoAutoUpdate
+
+    #On first run command line parameters take precedence
+    if ($StatEnd -eq $Timer) {
+        $Parameters.Keys | ForEach-Object { 
+            if ($Parameters.$_) {$Config | Add-Member $_ $Parameters.$_ -Force}
         }
     }
 
