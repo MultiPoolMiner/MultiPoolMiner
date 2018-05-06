@@ -155,7 +155,7 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 -switchingprevention
 	Since version 2.6, the delta value (integer) that was used to determine how often MultiPoolMiner is allowed to switch, is now user-configurable on a scale of 1 to infinity on an intensity basis. Default is 1 (Start.bat default is 2). Recommended values are 1-10 where 1 means the most frequent switching and 10 means the least switching. Please note setting this value to zero (0) will not turn this function off! Please see further explanation in MULTIPOOLMINER'S LOGIC section below. 
 
--noautoupdate
+-disableautoupdate
     By default MPM will perform an automatic update on startup if a newer version is found. Set to 'true' to disable automatic update to latest MPM version. 
 
 
