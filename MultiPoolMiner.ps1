@@ -117,6 +117,7 @@ while ($true) {
     $ConfigBackup = $Config
     if (Test-Path "Config.txt") {
         $Config = Get-ChildItemContent "Config.txt" | Select-Object -ExpandProperty Content
+        $Parameters = @{        
             Wallet              = $Wallet
             UserName            = $UserName
             WorkerName          = $WorkerName
