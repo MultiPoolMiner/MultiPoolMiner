@@ -210,8 +210,8 @@ while ($true) {
     #Give API access to the current running configuration
     $API.Config = $Config
 
-    #Clear pool cache if the configuration has changed
-    if (($ConfigBackup | ConvertTo-Json -Compress) -ne ($Config | ConvertTo-Json -Compress)) {$AllPools = $null}
+    #Clear pool cache if the pool configuration has changed
+    if (($ConfigBackup.Pools | ConvertTo-Json -Compress) -ne ($Config.Pools | ConvertTo-Json -Compress)) {$AllPools = $null}
 
     if ($Config.Proxy) {$PSDefaultParameterValues["*:Proxy"] = $Config.Proxy}
     else {$PSDefaultParameterValues.Remove("*:Proxy")}
