@@ -10,7 +10,7 @@ function Get-Devices {
     $Devices = [PSCustomObject]@{}
 
     [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object { # Hardware platform
-        [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object {
+        [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object { # Device
 
             if ($_.Type -eq "Cpu") {
                 $Type = "CPU"
