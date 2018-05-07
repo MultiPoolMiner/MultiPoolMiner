@@ -221,7 +221,7 @@ Current versions support advanced configuration via 'Config.txt' in the MPM main
 
 Config.txt is a JSON file and human readable / editable. A good primer for understanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
 
-Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like http://jsonviewer.stack.hu/ (copy/paste the complete file).
+Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like https://codebeautify.org/jsonviewer/ (copy/paste the complete file).
 
 ### Default content of 'Config.txt'
 
