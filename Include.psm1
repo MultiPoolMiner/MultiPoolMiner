@@ -63,7 +63,7 @@ function Get-DeviceIDs {
         [Int]$DeviceIdOffset
     )
 
-    $DeviceIDs  = [PSCustomObject]@{}
+    $DeviceIDs = [PSCustomObject]@{}
     $DeviceIDs | Add-Member "All" @() # array of all devices, ids will be in hex format
     $DeviceIDs | Add-Member "3gb" @() # array of all devices with more than 3MiB VRAM, ids will be in hex format
     $DeviceIDs | Add-Member "4gb" @() # array of all devices with more than 4MiB VRAM, ids will be in hex format
