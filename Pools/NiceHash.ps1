@@ -62,7 +62,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
                 Updated       = $Stat.Updated
             }
 
-            if ($NiceHash_Algorithm_Norm -eq "Cryptonight" -or $NiceHash_Algorithm_Norm -eq "Equihash") {
+            if ($NiceHash_Algorithm_Norm -eq "CryptonightV7" -or $NiceHash_Algorithm_Norm -eq "Equihash") {
                 [PSCustomObject]@{
                     Algorithm     = $NiceHash_Algorithm_Norm
                     Info          = $NiceHash_Coin
