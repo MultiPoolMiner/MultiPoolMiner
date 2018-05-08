@@ -1,4 +1,4 @@
-﻿====================================================================
+====================================================================
   __  __       _ _   _ _____            _ __  __ _                 
  |  \/  |     | | | (_)  __ \          | |  \/  (_)                
  | \  / |_   _| | |_ _| |__) |__   ___ | | \  / |_ _ __   ___ _ __ 
@@ -89,11 +89,10 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
     ## BlockMasters / BlockMastersCoins
       WebSite: http://www.blockmasters.co/
       Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
-      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
     ## HashRefinery
       WebSite: http://pool.hashrefinery.com
-      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
+      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or LTC (Advanced configuration via Config.txt required, see below)
 
     ## MiningPoolHub / MiningPooHubCoins
       WebSite: https://miningpoolhub.com/ 
@@ -114,14 +113,12 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
     ## ZergPool / ZergPoolCoins
       WebSite: http://zergpool.eu
       Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
-      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
     ## Zpool
       WebSite: http://www.zpool.ca/
       Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
-      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
-      IMPORTANT: For the list of default configured pools consult 'start.bat.' This does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
+    IMPORTANT: For the list of default configured pools consult 'start.bat.' This does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
 
 
 -ExcludePoolName
@@ -497,4 +494,3 @@ PID: process ID of the miner application being used
 BTC/day: Estimated Bitcoin earnings per day
 
 The monitoring service can change, evolve, be unavailable any time without prior notice. The contents of the database will NOT be shared with any third-parties but we reserve the right to create metrics out of it and use its contents to improve or promote our services and MultiPoolMiner. Credits to @grantemsley for the codebase.
-
