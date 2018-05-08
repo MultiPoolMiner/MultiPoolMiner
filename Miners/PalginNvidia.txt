@@ -14,7 +14,7 @@
     {
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\NeoScrypt-Palgin\\hsrminer_neoscrypt.exe",
-        "HashSHA256": "C8E13F0B872FBB2A6679EB95456CBCF6C0F0BE84C5173DB948A4FEF9840AC425",
+        "HashSHA256": "8947D773886CCE727A8E7BE8D69E5E372163116CAC4BD87568CB996F757D420A",
         "Arguments":  "\"-o $($Pools.NeoScrypt.Protocol)://$($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -u $($Pools.NeoScrypt.User) -p $($Pools.NeoScrypt.Pass)\"",
         "HashRates":  {
                           "NeoScrypt":  "\"$($Stats.PalginNvidia_Neoscrypt_HashRate.Week)\""
