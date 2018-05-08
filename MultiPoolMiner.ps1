@@ -641,7 +641,7 @@ while ($true) {
     ) | Out-Host
 
     #Display active miners list
-    $ActiveMiners | Where-Object {$_.GetActivateCount() -GT 0} | Sort-Object {$_.GetStatus()} | Select-Object -First (1 + 6 + 6) | Format-Table -Wrap -GroupBy @{Label = "Status"; Expression = {$_.GetStatus()}} (
+    $ActiveMiners | Where-Object {$_.GetActivateCount() -GT 0} | Sort-Object -Property {$_.GetStatus()}, @{Expression = {$_.GetActiveLast()}; Ascending = $false} | Select-Object -First (1 + 6 + 6) | Format-Table -Wrap -GroupBy @{Label = "Status"; Expression = {$_.GetStatus()}} (
         @{Label = "Speed"; Expression = {$_.Speed_Live | ForEach-Object {"$($_ | ConvertTo-Hash)/s"}}; Align = 'right'}, 
         @{Label = "Active"; Expression = {"{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f $_.GetActiveTime()}}, 
         @{Label = "Launched"; Expression = {Switch ($_.GetActivateCount()) {0 {"Never"} 1 {"Once"} Default {"$_ Times"}}}}, 
