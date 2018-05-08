@@ -1,51 +1,29 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-Nanashi\ccminer.exe"
-$URI = "https://github.com/Nanashi-Meiyo-Meijin/ccminer/releases/download/v2.2-mod-r2/2.2-mod-r2-CUDA9.binary.zip"
+$Path = ".\Bin\NVIDIA-Alexis78hsr\ccminer-alexis.exe"
+$Uri = "https://github.com/nemosminer/ccminer-hcash/releases/download/alexishsr/ccminer-hsr-alexis-x86-cuda8.7z"
 
 $Commands = [PSCustomObject]@{
     #GPU - profitable 20/04/2018
-    "bastion" = "" #bastion
-    "bitcore" = "" #Bitcore
-    "bmw" = "" #bmw
-    #"c11" = "" #C11
-    "deep" = "" #deep
-    "dmd-gr" = "" #dmd-gr
-    "equihash" = "" #Equihash
-    "fresh" = "" #fresh
-    "fugue256" = "" #Fugue256
-    "groestl" = "" #Groestl
-    "heavy" = "" #heavy
-    "hmq1725" = "" #HMQ1725
-    "jha" = "" #JHA
+    "c11" = "" #c11
+    "hsr" = "" #HSR, HShare
     "keccak" = "" #Keccak
-    "keccakc" = "" #keccakc
-    "luffa" = "" #Luffa
-    "lyra2" = "" #lyra2re
-    #"lyra2v2" = "" #Lyra2RE2
-    "lyra2z" = "" #Lyra2z, ZCoin
-    "mjollnir" = "" #Mjollnir
-    "neoscrypt" = "" #NeoScrypt
-    "penta" = "" #Pentablake
-    "scryptjane:nf" = "" #scryptjane:nf
-    "sha256t" = "" #sha256t
+    "lyra2" = "" #Lyra2
+    "lyra2v2" = "" #lyra2v2
+    #"neoscrypt" = "" #NeoScrypt
     #"skein" = "" #Skein
     "skein2" = "" #skein2
-    "skunk" = "" #Skunk
-    "s3" = "" #S3
-    "timetravel" = "" #Timetravel
-    "tribus" = "" #Tribus
     "veltor" = "" #Veltor
+    #"whirlcoin" = "" #WhirlCoin
     #"whirlpool" = "" #Whirlpool
-    "wildkeccak" = "" #wildkeccak
+    #"whirlpoolx" = "" #whirlpoolx
     "x11evo" = "" #X11evo
     "x17" = "" #x17
-    "zr5" = "" #zr5
 
-    # ASIC - never profitable 27/03/2018
+    # ASIC - never profitable 20/04/2018
+    #"blake2s" = "" #Blake2s
     #"blake" = "" #blake
     #"blakecoin" = "" #Blakecoin
-    #"blake2s" = "" #Blake2s
     #"cryptolight" = "" #cryptolight
     #"cryptonight" = "" #CryptoNight
     #"decred" = "" #Decred
@@ -59,13 +37,10 @@ $Commands = [PSCustomObject]@{
     #"sha256d" = "" #sha256d
     #"sia" = "" #SiaCoin
     #"sib" = "" #Sib
-    #"vanilla" = "" #BlakeVanilla
     #"x11" = "" #X11
     #"x13" = "" #x13
     #"x14" = "" #x14
     #"x15" = "" #x15
-
-
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
