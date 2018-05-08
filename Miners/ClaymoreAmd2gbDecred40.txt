@@ -4,6 +4,7 @@
         "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethdcrminer64/Claymore.s.Dual.Ethereum.Decred_Siacoin_Lbry_Pascal_Blake2s_Keccak.AMD.NVIDIA.GPU.Miner.v11.7.-.Catalyst.15.12-18.x.-.CUDA.8.0_9.1_7.5_6.5.zip",
         "ManualURI": "https://bitcointalk.org/index.php?topic=1433925.0",
         "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "HashSHA256": "11743A7B0F8627CEB088745F950557E303C7350F8E4241814C39904278204580",
         "Arguments":  "\"-r -1 -mport -13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -eres 0 -allpools 1 -allcoins 1 -dpool $($Pools.Decred.Host):$($Pools.Decred.Port) -dwal $($Pools.Decred.User) -dpsw $($Pools.Decred.Pass) -dcoin dcr -dcri 40 -platform 1\"",
         "HashRates":  {
                           "Ethash2gb":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'}).Count -eq 0) {0} else {$Stats.ClaymoreAmdDecred40_Ethash_HashRate.Week})\"",
@@ -17,6 +18,7 @@
         "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethdcrminer64/Claymore.s.Dual.Ethereum.Decred_Siacoin_Lbry_Pascal_Blake2s_Keccak.AMD.NVIDIA.GPU.Miner.v11.7.-.Catalyst.15.12-18.x.-.CUDA.8.0_9.1_7.5_6.5.zip",
         "ManualURI": "https://bitcointalk.org/index.php?topic=1433925.0",
         "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
+        "HashSHA256": "11743A7B0F8627CEB088745F950557E303C7350F8E4241814C39904278204580",
         "Arguments":  "\"-r -1 -mport -13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -eres 0 -allpools 1 -allcoins 1 -dpool $($Pools.DecredNiceHash.Host):$($Pools.DecredNiceHash.Port) -dwal $($Pools.DecredNiceHash.User) -dpsw $($Pools.DecredNiceHash.Pass) -dcoin dcr -dcri 40 -platform 1\"",
         "HashRates":  {
                           "Ethash2gb":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'}).Count -eq 0) {0} else {$Stats.ClaymoreAmdDecred40_Ethash_HashRate.Week})\"",
