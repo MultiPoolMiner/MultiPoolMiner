@@ -2,6 +2,7 @@
     {
         "Type":  "CPU",
         "Path":  ".\\Bin\\CryptoNight-CPU\\xmrig.exe",
+        "HashSHA256": "52BF6E0EF72C84282F4DF411125384444C521ED9143E5D8C7E7E445D7D55E143",
         "Arguments":  "\"--api-port 3334 -a cryptonight -o $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -u $($Pools.CryptoNightV7.User) -p $($Pools.CryptoNightV7.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
                           "CryptoNightV7":  "\"$(if ($Pools.CryptoNightV7.SSL) {0}else {$Stats.XmrigCpu_CryptoNightV7_HashRate.Week})\""
@@ -13,6 +14,7 @@
     {
         "Type":  "CPU",
         "Path":  ".\\Bin\\CryptoNight-CPU\\xmrig.exe",
+        "HashSHA256": "52BF6E0EF72C84282F4DF411125384444C521ED9143E5D8C7E7E445D7D55E143",
         "Arguments":  "\"--api-port 3334 -a cryptonight-lite -o $($Pools.CryptoNightLite.Protocol)://$($Pools.CryptoNightLite.Host):$($Pools.CryptoNightLite.Port) -u $($Pools.CryptoNightLite.User) -p $($Pools.CryptoNightLite.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
                           "CryptoNightLite":  "\"$(if ($Pools.CryptoNightLite.SSL) {0}else {$Stats.XmrigCpu_CryptoNightLite_HashRate.Week})\""
@@ -24,6 +26,7 @@
     {
         "Type":  "CPU",
         "Path":  ".\\Bin\\CryptoNight-CPU\\xmrig.exe",
+        "HashSHA256": "52BF6E0EF72C84282F4DF411125384444C521ED9143E5D8C7E7E445D7D55E143",
         "Arguments":  "\"--api-port 3334 -a cryptonight-heavy -o $($Pools.CryptoNightHeavy.Protocol)://$($Pools.CryptoNightHeavy.Host):$($Pools.CryptoNightHeavy.Port) -u $($Pools.CryptoNightHeavy.User) -p $($Pools.CryptoNightHeavy.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
                           "CryptoNightHeavy":  "\"$(if ($Pools.CryptoNightHeavy.SSL) {0}else {$Stats.XmrigCpu_CryptoNightHeavy_HashRate.Week})\""
