@@ -89,6 +89,7 @@
     "monero":  "CryptoNightV7",
     "myr-gr":  "MyriadGroestl",
     "myrgr":  "MyriadGroestl",
+    "myriadcoin-groestl":  "MyriadGroestl",
     "myriadcoingroestl":  "MyriadGroestl",
     "myriadgroestl":  "MyriadGroestl",
     "neoscrypt":  "NeoScrypt",
