@@ -51,6 +51,10 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$Watchdog = $false,
     [Parameter(Mandatory = $false)]
+    [Array]$ExcludeWatchdogAlgorithm = @("X16R"), #Do not use watchdog for these algorithms, e.g due to its nature X16R will always trigger watchdog
+    [Parameter(Mandatory = $false)]
+    [Array]$ExcludeWatchdogMinerName = @(), #Do not use watchdog for these miners
+    [Parameter(Mandatory = $false)]
     [Alias("Uri", "Url")]
     [String]$MinerStatusUrl = "", #i.e https://multipoolminer.io/monitor/miner.php
     [Parameter(Mandatory = $false)]
@@ -117,53 +121,57 @@ while ($true) {
     $ConfigBackup = $Config
     if (Test-Path "Config.txt") {
         $Config = Get-ChildItemContent "Config.txt" -Parameters @{
-            Wallet              = $Wallet
-            UserName            = $UserName
-            WorkerName          = $WorkerName
-            API_ID              = $API_ID
-            API_Key             = $API_Key
-            Interval            = $Interval
-            Region              = $Region
-            SSL                 = $SSL
-            Type                = $Type
-            Algorithm           = $Algorithm
-            MinerName           = $MinerName
-            PoolName            = $PoolName
-            ExcludeAlgorithm    = $ExcludeAlgorithm
-            ExcludeMinerName    = $ExcludeMinerName
-            ExcludePoolName     = $ExcludePoolName
-            Currency            = $Currency
-            Donate              = $Donate
-            Proxy               = $Proxy
-            Delay               = $Delay
-            Watchdog            = $Watchdog
-            MinerStatusURL      = $MinerStatusURL
-            MinerStatusKey      = $MinerStatusKey
-            SwitchingPrevention = $SwitchingPrevention
+            Wallet                   = $Wallet
+            UserName                 = $UserName
+            WorkerName               = $WorkerName
+            API_ID                   = $API_ID
+            API_Key                  = $API_Key
+            Interval                 = $Interval
+            Region                   = $Region
+            SSL                      = $SSL
+            Type                     = $Type
+            Algorithm                = $Algorithm
+            MinerName                = $MinerName
+            PoolName                 = $PoolName
+            ExcludeAlgorithm         = $ExcludeAlgorithm
+            ExcludeMinerName         = $ExcludeMinerName
+            ExcludePoolName          = $ExcludePoolName
+            Currency                 = $Currency
+            Donate                   = $Donate
+            Proxy                    = $Proxy
+            Delay                    = $Delay
+            Watchdog                 = $Watchdog
+            WatchdogExcludeAlgorithm = $WatchdogExcludeAlgorithm
+            WatchdogExcludeMinerName = $WatchdogExcludeMinerName
+            MinerStatusURL           = $MinerStatusURL
+            MinerStatusKey           = $MinerStatusKey
+            SwitchingPrevention      = $SwitchingPrevention
         } | Select-Object -ExpandProperty Content
     }
     else {
         $Config = [PSCustomObject]@{
-            Pools               = [PSCustomObject]@{}
-            Miners              = [PSCustomObject]@{}
-            Interval            = $Interval
-            Region              = $Region
-            SSL                 = $SSL
-            Type                = $Type
-            Algorithm           = $Algorithm
-            MinerName           = $MinerName
-            PoolName            = $PoolName
-            ExcludeAlgorithm    = $ExcludeAlgorithm
-            ExcludeMinerName    = $ExcludeMinerName
-            ExcludePoolName     = $ExcludePoolName
-            Currency            = $Currency
-            Donate              = $Donate
-            Proxy               = $Proxy
-            Delay               = $Delay
-            Watchdog            = $Watchdog
-            MinerStatusURL      = $MinerStatusURL
-            MinerStatusKey      = $MinerStatusKey
-            SwitchingPrevention = $SwitchingPrevention
+            Pools                    = [PSCustomObject]@{}
+            Miners                   = [PSCustomObject]@{}
+            Interval                 = $Interval
+            Region                   = $Region
+            SSL                      = $SSL
+            Type                     = $Type
+            Algorithm                = $Algorithm
+            MinerName                = $MinerName
+            PoolName                 = $PoolName
+            ExcludeAlgorithm         = $ExcludeAlgorithm
+            ExcludeMinerName         = $ExcludeMinerName
+            ExcludePoolName          = $ExcludePoolName
+            Currency                 = $Currency
+            Donate                   = $Donate
+            Proxy                    = $Proxy
+            Delay                    = $Delay
+            Watchdog                 = $Watchdog
+            WatchdogExcludeAlgorithm = $WatchdogExcludeAlgorithm
+            WatchdogExcludeMinerName = $WatchdogExcludeMinerName
+            MinerStatusURL           = $MinerStatusURL
+            MinerStatusKey           = $MinerStatusKey
+            SwitchingPrevention      = $SwitchingPrevention
         }
     }
 
@@ -608,17 +616,19 @@ while ($true) {
                 $Miner_Name = $_.Name
                 $_.Algorithm | ForEach-Object {
                     $Miner_Algorithm = $_
-                    $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
-                    if (-not $WatchdogTimer) {
-                        $WatchdogTimers += [PSCustomObject]@{
-                            MinerName = $Miner_Name
-                            PoolName  = $Pools.$Miner_Algorithm.Name
-                            Algorithm = $Miner_Algorithm
-                            Kicked    = $Timer
+                    if ($Config.ExcludeWatchdogAlgorithm -inotcontains $Miner_Algorithm -and $Config.ExcludeWatchdogMinerName -inotcontains $Miner_Name) {
+                        $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
+                        if (-not $WatchdogTimer) {
+                            $WatchdogTimers += [PSCustomObject]@{
+                                MinerName = $Miner_Name
+                                PoolName  = $Pools.$Miner_Algorithm.Name
+                                Algorithm = $Miner_Algorithm
+                                Kicked    = $Timer
+                            }
                         }
-                    }
-                    elseif (-not ($WatchdogTimer.Kicked -GT $Timer.AddSeconds( - $WatchdogReset))) {
-                        $WatchdogTimer.Kicked = $Timer
+                        elseif (-not ($WatchdogTimer.Kicked -GT $Timer.AddSeconds( - $WatchdogReset))) {
+                            $WatchdogTimer.Kicked = $Timer
+                        }
                     }
                 }
             }
