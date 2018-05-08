@@ -1,6 +1,6 @@
 using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-Alexis78\ccminer-alexis.exe"
+$Path = ".\Bin\NVIDIA-Alexis78hsr\ccminer-alexis.exe"
 $Uri = "https://github.com/nemosminer/ccminer-hcash/releases/download/alexishsr/ccminer-hsr-alexis-x86-cuda8.7z"
 
 $Commands = [PSCustomObject]@{

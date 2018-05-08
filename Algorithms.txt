@@ -37,7 +37,6 @@
     "cryptonight-monero":  "CryptoNightV7",
     "cryptonight":  "CryptoNight",
     "cryptonightmonero":  "CryptoNightV7",
-    "cryptonightV7":  "CryptoNightV7",
     "cryptonightv7":  "CryptoNightV7",
     "daggerhashimoto":  "Ethash",
     "darkcoinmod":  "X11",
@@ -180,7 +179,7 @@
     "yescryptr8":  "YescryptR8",
     "zcoin":  "Lyra2z",
     "zec":  "Equihash",
-    "ziftr":  "zr5"
+    "ziftr":  "zr5",
     "zoin":  "Lyra2z330",
     "zr5":  "zr5",
     "zuikkis":  "Scrypt"
