@@ -41,7 +41,7 @@ $Algorithms | Foreach-Object {
         StablePrice = 1
         MarginOfError = 0
         Protocol = "stratum+tcp"
-        Host = "fake.host.name"
+        Host = "google.com"
         Port = 1234
         User = "fake"
         Pass = "fake,c=BTC"
