@@ -1,6 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-Nanashi\ccminer.exe"
+$HashSHA256 = "1974bab01a30826497a76b79e227f3eb1c9eb9ffa6756c801fcd630122bdb5c7"
 $URI = "https://github.com/Nanashi-Meiyo-Meijin/ccminer/releases/download/v2.2-mod-r2/2.2-mod-r2-CUDA9.binary.zip"
 
 $Commands = [PSCustomObject]@{
@@ -19,7 +20,7 @@ $Commands = [PSCustomObject]@{
     "hmq1725" = "" #HMQ1725
     "jha" = "" #JHA
     "keccak" = "" #Keccak
-    "keccakc" = "" #keccakc
+    #"keccakc" = "" #keccakc NOT supported
     "luffa" = "" #Luffa
     "lyra2" = "" #lyra2re
     #"lyra2v2" = "" #Lyra2RE2
