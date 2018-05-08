@@ -4,6 +4,7 @@
         "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/claymorecpu/Claymore.CryptoNote.CPU.Miner.v4.0.-.POOL.zip",
         "ManualURI": "https://bitcointalk.org/index.php?topic=647251.0",
         "Path":  ".\\Bin\\CryptoNight-Claymore-Cpu\\NsCpuCNMiner64.exe",
+        "HashSHA256": "D7D80BF3F32C20298CAD1D59CA8CB4508BAD43A9BE5E027579D7FC77A8E47BE0",
         "Arguments":  "\"-r -1 -mport 3333 -pow7 1 -o $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -u $($Pools.CryptoNightV7.User) -p $($Pools.CryptoNightV7.Pass)\"",
         "HashRates":  {
                           "CryptoNightV7":  "\"$($Stats.ClaymoreCPU_CryptoNightV7_HashRate.Week)\""
@@ -17,6 +18,7 @@
         "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/claymorecpu/Claymore.CryptoNote.CPU.Miner.v4.0.-.POOL.zip",
         "ManualURI": "https://bitcointalk.org/index.php?topic=647251.0",
         "Path":  ".\\Bin\\CryptoNight-Claymore-Cpu\\NsCpuCNMiner64.exe",
+        "HashSHA256": "D7D80BF3F32C20298CAD1D59CA8CB4508BAD43A9BE5E027579D7FC77A8E47BE0",
         "Arguments":  "\"-r -1 -mport 3333 -pow7 0 -o $($Pools.CryptoNight.Protocol)://$($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port) -u $($Pools.CryptoNight.User) -p $($Pools.CryptoNight.Pass)\"",
         "HashRates":  {
                           "CryptoNight":  "\"$($Stats.ClaymoreCPU_CryptoNight_HashRate.Week)\""
