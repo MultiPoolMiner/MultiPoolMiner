@@ -3,6 +3,7 @@
     "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ewbf/Zec.Miner.0.3.4b.zip",
     "ManualURI": "https://bitcointalk.org/index.php?topic=1707546.0",
     "Path":  ".\\Bin\\Equihash-EWBF\\miner.exe",
+    "HashSHA256": "84DD02DEBBF2B0C5ED7EEBF813305543265E34EC98635139787BF8B882E7C7B4",
     "Arguments":  "\"--eexit 1 --api --server $($Pools.Equihash.Host) --port $($Pools.Equihash.Port) --user $($Pools.Equihash.User) --pass $($Pools.Equihash.Pass) --fee 0 --intensity 64\"",
     "HashRates":  {
                       "Equihash":  "\"$(if ($Pools.Equihash.SSL) {0}else {$Stats.Ewbf_Equihash_HashRate.Week})\""
