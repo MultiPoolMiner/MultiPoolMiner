@@ -1,5 +1,6 @@
 {
     "Type":  "NVIDIA",
+    "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ewbf/Zec.Miner.0.3.4b.zip",
     "ManualURI": "https://bitcointalk.org/index.php?topic=1707546.0",
     "Path":  ".\\Bin\\Equihash-EWBF\\miner.exe",
     "Arguments":  "\"--eexit 1 --api --server $($Pools.Equihash.Host) --port $($Pools.Equihash.Port) --user $($Pools.Equihash.User) --pass $($Pools.Equihash.Pass) --fee 0 --intensity 64\"",
