@@ -1,11 +1,11 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-SuprMiner\ccminer.exe"
-$Uri = "https://github.com/ocminer/suprminer/releases/download/1.5/suprminer-1.5.7z"
+$Path = ".\Bin\NVIDIA-Nevermore\ccminer.exe"
+$Uri = "https://github.com/brian112358/nevermore-miner/releases/download/v0.2.2/nevermore-v0.2.2-win64.zip"
 
 $Commands = [PSCustomObject]@{
-    #"x16r"  = "" #X16R RavenCoin
-    "x16s"  = "" #X16S PigeonCoin
+    #"X16r" = "" #X16r RavenCoin
+    "X16s" = "" #X16s PigeonCoin
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -19,5 +19,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         API = "Ccminer"
         Port = 4068
         URI = $Uri
+        PrerequisitePath = "$env:SystemRoot\System32\msvcr120.dll"
+        PrerequisiteURI = "http://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe"
     }
 }
