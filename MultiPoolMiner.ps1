@@ -69,6 +69,9 @@ $Version = "2.7.2.7"
 $Strikes = 3
 $SyncWindow = 5 #minutes
 
+#Get miner hw info
+$Devices = Get-Devices
+
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 Import-Module NetSecurity -ErrorAction Ignore
 Import-Module Defender -ErrorAction Ignore
@@ -174,6 +177,9 @@ while ($true) {
             SwitchingPrevention      = $SwitchingPrevention
         }
     }
+
+    #Only use configured types that are present in system
+    $Config.Type = $Config.Type | Where-Object {$Devices.$_}
 
     #Error in Config.txt
     if ($Config -isnot [PSCustomObject]) {
