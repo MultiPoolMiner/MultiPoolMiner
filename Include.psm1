@@ -1,7 +1,4 @@
-﻿Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore
-Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1" -ErrorAction Ignore
-
-Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+﻿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
 
@@ -14,6 +11,15 @@ Function Write-Log {
 
     Begin { }
     Process {
+        # Inherit the same verbosity settings as the script importing this
+        if (-not $PSBoundParameters.ContainsKey('InformationPreference')) { $InformationPreference = $PSCmdlet.GetVariableValue('InformationPreference') }
+        if (-not $PSBoundParameters.ContainsKey('Verbose')) { $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference') }
+        if (-not $PSBoundParameters.ContainsKey('Debug')) { $DebugPreference = $PSCmdlet.GetVariableValue('DebugPreference') }
+
+        # Get mutex named MPMWriteLog. Mutexes are shared across all threads and processes.
+        # This lets us ensure only one thread is trying to write to the file at a time.
+        $mutex = New-Object System.Threading.Mutex($false, "MPMWriteLog")
+
         $filename = ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd").txt"
         $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
@@ -41,7 +47,15 @@ Function Write-Log {
                 Write-Debug -Message $Message
             }
         }
-        "$date $LevelText $Message" | Out-File -FilePath $filename -Append
+
+        # Attempt to aquire mutex, waiting up to 1 second if necessary.  If aquired, write to the log file and release mutex.  Otherwise, display an error.
+        if ($mutex.WaitOne(1000)) {
+            "$date $LevelText $Message" | Out-File -FilePath $filename -Append -Encoding ascii
+            $mutex.ReleaseMutex()
+        }
+        else {
+            Write-Error -Message "Log file is locked, unable to write message to log."
+        }
     }
     End {}
 }
@@ -187,7 +201,7 @@ function Get-Stat {
     )
 
     if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
-    Get-ChildItem "Stats" | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
+    Get-ChildItem "Stats" -File | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
 }
 
 function Get-ChildItemContent {
@@ -214,7 +228,7 @@ function Get-ChildItemContent {
         return $Expression
     }
 
-    Get-ChildItem $Path | ForEach-Object {
+    Get-ChildItem $Path -File -ErrorAction SilentlyContinue | ForEach-Object {
         $Name = $_.BaseName
         $Content = @()
         if ($_.Extension -eq ".ps1") {
@@ -236,7 +250,12 @@ function Get-ChildItemContent {
             if ($Content -eq $null) {$Content = $_ | Get-Content}
         }
         $Content | ForEach-Object {
-            [PSCustomObject]@{Name = $Name; Content = $_}
+            if ($_.Name) {
+                [PSCustomObject]@{Name = $_.Name; Content = $_}
+            }
+            else {
+                [PSCustomObject]@{Name = $Name; Content = $_}
+            }
         }
     }
 }
@@ -257,7 +276,7 @@ filter ConvertTo-Hash {
 
 function ConvertTo-LocalCurrency { 
     [CmdletBinding()]
-    # To get same numbering scheme reagardless of value BTC value (size) to dermine formatting
+    # To get same numbering scheme regardless of value BTC value (size) to determine formatting
     # Use $Offset to add/remove decimal places
 
     param(
@@ -271,7 +290,7 @@ function ConvertTo-LocalCurrency {
 
     $Number = $Number * $BTCRate
 
-    switch ([math]::truncate(10 - $Offset - [math]::log($BTCRate, [Math]::Pow(10, 1)))) {
+    switch ([math]::truncate(10 - $Offset - [math]::log($BTCRate, 10))) {
         0 {$Number.ToString("N0")}
         1 {$Number.ToString("N1")}
         2 {$Number.ToString("N2")}
@@ -353,11 +372,15 @@ function Expand-WebRequest {
         [String]$Path = ""
     )
 
+    # Set current path used by .net methods to the same as the script's path
+    [Environment]::CurrentDirectory = $ExecutionContext.SessionState.Path.CurrentFileSystemLocation
+
     if (-not $Path) {$Path = Join-Path ".\Downloads" ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName}
     if (-not (Test-Path ".\Downloads")) {New-Item "Downloads" -ItemType "directory" | Out-Null}
     $FileName = Join-Path ".\Downloads" (Split-Path $Uri -Leaf)
 
     if (Test-Path $FileName) {Remove-Item $FileName}
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
 
     if (".msi", ".exe" -contains ([IO.FileInfo](Split-Path $Uri -Leaf)).Extension) {
@@ -367,10 +390,10 @@ function Expand-WebRequest {
         $Path_Old = (Join-Path (Split-Path $Path) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
         $Path_New = (Join-Path (Split-Path $Path) (Split-Path $Path -Leaf))
 
-        if (Test-Path $Path_Old) {Remove-Item $Path_Old -Recurse}
+        if (Test-Path $Path_Old) {Remove-Item $Path_Old -Recurse -Force}
         Start-Process "7z" "x `"$([IO.Path]::GetFullPath($FileName))`" -o`"$([IO.Path]::GetFullPath($Path_Old))`" -y -spe" -Wait
 
-        if (Test-Path $Path_New) {Remove-Item $Path_New -Recurse}
+        if (Test-Path $Path_New) {Remove-Item $Path_New -Recurse -Force}
         if (Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $false) {
             Rename-Item $Path_Old (Split-Path $Path -Leaf)
         }
@@ -479,6 +502,12 @@ class Miner {
     hidden [Int]$Activated = 0
     hidden [MinerStatus]$Status = [MinerStatus]::Idle
     $Benchmarked
+    $LogFile
+    $Pool
+
+    [String[]]GetProcessNames() {
+        return @(([IO.FileInfo]($this.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName)
+    }
 
     hidden StartMining() {
         $this.Status = [MinerStatus]::Failed
@@ -498,7 +527,8 @@ class Miner {
         }
 
         if (-not $this.Process) {
-            $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -LogPath $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\$($this.Name)-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt") -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
+            $this.LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\$($this.Name)-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt")
+            $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -LogPath $this.LogFile -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
 
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
                 $this.Status = [MinerStatus]::Running

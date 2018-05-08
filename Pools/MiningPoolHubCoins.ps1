@@ -25,9 +25,10 @@ if (($MiningPoolHubCoins_Request.return | Measure-Object).Count -le 1) {
     return
 }
 
-$MiningPoolHubCoins_Regions = "europe", "us", "asia"
+$MiningPoolHubCoins_Regions = "europe", "us-east", "asia"
 
-$MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-Object {
+$MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} | ForEach-Object {
+    $MiningPoolHubCoins_Host = $_.host
     $MiningPoolHubCoins_Hosts = $_.host_list.split(";")
     $MiningPoolHubCoins_Port = $_.port
     $MiningPoolHubCoins_Algorithm = $_.algo
@@ -42,26 +43,25 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
 
     $MiningPoolHubCoins_Regions | ForEach-Object {
         $MiningPoolHubCoins_Region = $_
-        $MiningPoolHubCoins_Region_Norm = Get-Region $MiningPoolHubCoins_Region
+        $MiningPoolHubCoins_Region_Norm = Get-Region ($MiningPoolHubCoins_Region -replace "^us-east$", "us")
 
         if ($User) {
-            [PSCustomObject]@{
-                Algorithm     = $MiningPoolHubCoins_Algorithm_Norm
-                Info          = $MiningPoolHubCoins_Coin
-                Price         = $Stat.Live
-                StablePrice   = $Stat.Week
-                MarginOfError = $Stat.Week_Fluctuation
-                Protocol      = "stratum+tcp"
-                Host          = $MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHubCoins_Region*"} | Select-Object -First 1
-                Port          = $MiningPoolHubCoins_Port
-                User          = "$User.$Worker"
-                Pass          = "x"
-                Region        = $MiningPoolHubCoins_Region_Norm
-                SSL           = $false
-                Updated       = $Stat.Updated
-            }
-
-            if ($MiningPoolHubCoins_Algorithm_Norm -eq "Cryptonight" -or $MiningPoolHubCoins_Algorithm_Norm -eq "Equihash") {
+            if ($MiningPoolHubCoins_Algorithm_Norm -eq "CryptonightV7") {
+                [PSCustomObject]@{
+                    Algorithm     = $MiningPoolHubCoins_Algorithm_Norm
+                    Info          = $MiningPoolHubCoins_Coin
+                    Price         = $Stat.Live
+                    StablePrice   = $Stat.Week
+                    MarginOfError = $Stat.Week_Fluctuation
+                    Protocol      = "stratum+tcp"
+                    Host          = "$($MiningPoolHubCoins_Region).cryptonight-$($MiningPoolHubCoins_Host)"
+                    Port          = $MiningPoolHubCoins_Port
+                    User          = "$User.$Worker"
+                    Pass          = "x"
+                    Region        = $MiningPoolHubCoins_Region_Norm
+                    SSL           = $false
+                    Updated       = $Stat.Updated
+                }
                 [PSCustomObject]@{
                     Algorithm     = $MiningPoolHubCoins_Algorithm_Norm
                     Info          = $MiningPoolHubCoins_Coin
@@ -69,7 +69,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+ssl"
-                    Host          = $MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHubCoins_Region*"} | Select-Object -First 1
+                    Host          = "$($MiningPoolHubCoins_Region).cryptonight-$($MiningPoolHubCoins_Host)"
                     Port          = $MiningPoolHubCoins_Port
                     User          = "$User.$Worker"
                     Pass          = "x"
@@ -78,10 +78,9 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
                     Updated       = $Stat.Updated
                 }
             }
-
-            if ($MiningPoolHubCoins_Algorithm_Norm -eq "Ethash" -and $MiningPoolHubCoins_Coin -NotLike "*ethereum*") {
+            else {
                 [PSCustomObject]@{
-                    Algorithm     = "$($MiningPoolHubCoins_Algorithm_Norm)2gb"
+                    Algorithm     = $MiningPoolHubCoins_Algorithm_Norm
                     Info          = $MiningPoolHubCoins_Coin
                     Price         = $Stat.Live
                     StablePrice   = $Stat.Week
@@ -96,9 +95,27 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} |ForEach-
                     Updated       = $Stat.Updated
                 }
 
-                if ($MiningPoolHubCoins_Algorithm_Norm -eq "Cryptonight" -or $MiningPoolHubCoins_Algorithm_Norm -eq "Equihash") {
+                if ($MiningPoolHubCoins_Algorithm_Norm -eq "Ethash" -and $MiningPoolHubCoins_Coin -NotLike "*ethereum*") {
                     [PSCustomObject]@{
                         Algorithm     = "$($MiningPoolHubCoins_Algorithm_Norm)2gb"
+                        Info          = $MiningPoolHubCoins_Coin
+                        Price         = $Stat.Live
+                        StablePrice   = $Stat.Week
+                        MarginOfError = $Stat.Week_Fluctuation
+                        Protocol      = "stratum+tcp"
+                        Host          = $MiningPoolHubCoins_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHubCoins_Region*"} | Select-Object -First 1
+                        Port          = $MiningPoolHubCoins_Port
+                        User          = "$User.$Worker"
+                        Pass          = "x"
+                        Region        = $MiningPoolHubCoins_Region_Norm
+                        SSL           = $false
+                        Updated       = $Stat.Updated
+                    }
+                }
+
+                if ($MiningPoolHubCoins_Algorithm_Norm -eq "Equihash") {
+                    [PSCustomObject]@{
+                        Algorithm     = $MiningPoolHubCoins_Algorithm_Norm
                         Info          = $MiningPoolHubCoins_Coin
                         Price         = $Stat.Live
                         StablePrice   = $Stat.Week
