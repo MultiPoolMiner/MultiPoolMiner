@@ -1,6 +1,7 @@
 [
     {
         "Type":  "AMD",
+        "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/claymorecryptonoteamd/Claymore.CryptoNote.AMD.GPU.Miner.v11.3.-.POOL.-.Catalyst.15.12-18.x.zip",
         "ManualURI": "https://bitcointalk.org/index.php?topic=638915.0",
         "Path":  ".\\Bin\\CryptoNight-Claymore\\NsGpuCNMiner.exe",
         "Arguments":  "\"-r -1 -mport -13333 -pow7 1 -xpool $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -xwal $($Pools.CryptoNightV7.User) -xpsw $($Pools.CryptoNightV7.Pass)\"",
@@ -12,6 +13,7 @@
     },
     {
         "Type":  "AMD",
+        "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/claymorecryptonoteamd/Claymore.CryptoNote.AMD.GPU.Miner.v11.3.-.POOL.-.Catalyst.15.12-18.x.zip",
         "ManualURI": "https://bitcointalk.org/index.php?topic=638915.0",
         "Path":  ".\\Bin\\CryptoNight-Claymore\\NsGpuCNMiner.exe",
         "Arguments":  "\"-r -1 -mport -13333 -pow7 0 -xpool $($Pools.CryptoNight.Protocol)://$($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port) -xwal $($Pools.CryptoNight.User) -xpsw $($Pools.CryptoNight.Pass)\"",
@@ -23,6 +25,7 @@
     },    
     {
         "Type":  "AMD",
+        "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/zecminer64/Claymore.s.ZCash.AMD.GPU.Miner.v12.6.-.Catalyst.15.12-17.x.zip",
         "ManualURI": "https://bitcointalk.org/index.php?topic=1670733.0",
         "Path":  ".\\Bin\\Equihash-Claymore\\ZecMiner64.exe",
         "Arguments":  "\"-r -1 -mport -13333 -zpool $($Pools.Equihash.Protocol)://$($Pools.Equihash.Host):$($Pools.Equihash.Port) -zwal $($Pools.Equihash.User) -zpsw $($Pools.Equihash.Pass) -allpools 1\"",
@@ -34,6 +37,7 @@
     },
     {
         "Type":  "AMD",
+        "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethdcrminer64/Claymore.s.Dual.Ethereum.Decred_Siacoin_Lbry_Pascal_Blake2s_Keccak.AMD.NVIDIA.GPU.Miner.v11.7.-.Catalyst.15.12-18.x.-.CUDA.8.0_9.1_7.5_6.5.zip",
         "ManualURI": "https://bitcointalk.org/index.php?topic=1433925.0",
         "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
         "Arguments":  "\"-r -1 -mport -13333 -epool $($Pools.Ethash.Host):$($Pools.Ethash.Port) -ewal $($Pools.Ethash.User) -epsw $($Pools.Ethash.Pass) -esm 3 -eres 0 -allpools 1 -allcoins 1 -platform 1$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where-Object {$_.Type -eq 'GPU' -and $_.Vendor -eq 'Advanced Micro Devices, Inc.'} | ForEach-Object {if ($_.GlobalMemsize -ge 3000000000) {$DeviceIDs += $DeviceID}; $DeviceID++});if($DeviceIDs){' -di';$($DeviceIDs -join '')})\"",
@@ -45,6 +49,7 @@
     },
     {
         "Type":  "AMD",
+        "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethdcrminer64/Claymore.s.Dual.Ethereum.Decred_Siacoin_Lbry_Pascal_Blake2s_Keccak.AMD.NVIDIA.GPU.Miner.v11.7.-.Catalyst.15.12-18.x.-.CUDA.8.0_9.1_7.5_6.5.zip",
         "ManualURI": "https://bitcointalk.org/index.php?topic=1433925.0",
         "Path":  ".\\Bin\\Ethash-Claymore\\EthDcrMiner64.exe",
         "Arguments":  "\"-r -1 -mport -13333 -epool $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -ewal $($Pools.Ethash2gb.User) -epsw $($Pools.Ethash2gb.Pass) -esm 3 -eres 0 -allpools 1 -allcoins 1 -platform 1\"",
@@ -56,6 +61,7 @@
     },
     {
         "Type":  "AMD",
+        "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/neoscryptminer/Claymore.s.NeoScrypt.AMD.GPU.Miner.v1.2.zip",
         "ManualURI": "https://bitcointalk.org/index.php?topic=3012600.0",
         "Path":  ".\\Bin\\NeoScrypt-Claymore\\NeoScryptMiner.exe",
         "Arguments":  "\"-r -1 -mport 13333 -pool $($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -wal $($Pools.NeoScrypt.User) -psw $($Pools.NeoScrypt.Pass)\"",
