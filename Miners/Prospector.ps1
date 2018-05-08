@@ -1,6 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\Prospector\prospector.exe"
+$HashSHA256 = "7DA74533F67707BFE7FA12F8885A97A79F079DD58A30F039E63D7680CFE47CF1"
 $Uri = "https://github.com/semtexzv/Prospector/releases/download/0.0.13-ALPHA/prospector-0.0.13-ALPHA-win64.zip"
 
 $Commands = [PSCustomObject]@{
@@ -52,6 +53,7 @@ enabled = false" | Set-Content "$(Split-Path $Path)\$($Pools.$(Get-Algorithm $_)
         [PSCustomObject]@{
             Type = "AMD", "NVIDIA"
             Path = $Path
+            HashSHA256 = $HashSHA256
             Arguments = "-c $($Pools.$(Get-Algorithm $_).Name)_$(Get-Algorithm $_)_$($Pools.$(Get-Algorithm $_).User).toml"
             HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
             API = "Prospector"
@@ -63,6 +65,7 @@ enabled = false" | Set-Content "$(Split-Path $Path)\$($Pools.$(Get-Algorithm $_)
             [PSCustomObject]@{
                 Type = "AMD", "NVIDIA"
                 Path = $Path
+                HashSHA256 = $HashSHA256
                 Arguments = "-c $($Pools.$(Get-Algorithm $_).Name)_$(Get-Algorithm $_)2gb_$($Pools.$(Get-Algorithm $_).User).toml"
                 HashRates = [PSCustomObject]@{"$(Get-Algorithm $_)2gb" = $Stats."$($Name)_$(Get-Algorithm $_)2gb_HashRate".Week}
                 API = "Prospector"
