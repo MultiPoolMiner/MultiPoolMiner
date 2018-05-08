@@ -2,6 +2,7 @@
     {
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\HSR-Palgin\\hsrminer_hsr.exe",
+        "HashSHA256": "C8E13F0B872FBB2A6679EB95456CBCF6C0F0BE84C5173DB948A4FEF9840AC425",
         "Arguments":  "\"-o $($Pools.HSR.Protocol)://$($Pools.Hsr.Host):$($Pools.Hsr.Port) -u $($Pools.Hsr.User) -p $($Pools.Hsr.Pass)\"",
         "HashRates":  {
                           "HSR":  "\"$($Stats.PalginNvidia_Hsr_HashRate.Week)\""
@@ -13,6 +14,7 @@
     {
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\NeoScrypt-Palgin\\hsrminer_neoscrypt.exe",
+        "HashSHA256": "C8E13F0B872FBB2A6679EB95456CBCF6C0F0BE84C5173DB948A4FEF9840AC425",
         "Arguments":  "\"-o $($Pools.NeoScrypt.Protocol)://$($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -u $($Pools.NeoScrypt.User) -p $($Pools.NeoScrypt.Pass)\"",
         "HashRates":  {
                           "NeoScrypt":  "\"$($Stats.PalginNvidia_Neoscrypt_HashRate.Week)\""
