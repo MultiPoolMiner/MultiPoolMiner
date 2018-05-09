@@ -1,6 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-KlausTYescrypt\ccminer.exe"
+$HashSHA256 = ""
 $Uri = "https://github.com/iwtym/iwtym-yescrypt/archive/master.zip"
 
 $Commands = [PSCustomObject]@{
@@ -32,6 +33,7 @@ $Commands = [PSCustomObject]@{
     #"whirlpool" = "" #Whirlpool
     #"whirlpoolx" = "" #whirlpoolx
     #"x17" = "" #x17
+    "yescrypt" = "" #yescrypt
     "yescryptR8" = ""
     "yescryptR16" = "" #YescryptR16 #Yenten
     "yescryptR16v2" = "" #PPNP
