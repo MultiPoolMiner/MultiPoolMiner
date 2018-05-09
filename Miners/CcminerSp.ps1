@@ -30,7 +30,6 @@ $Commands = [PSCustomObject]@{
     #"whirlpool" = "" #Whirlpool
     #"whirlpoolx" = "" #whirlpoolx
     "x17" = "" #x17
-    "yescrypt" = "" #Yescrypt
 
     # ASIC - never profitable 27/03/2018
     #"blake" = "" #blake
