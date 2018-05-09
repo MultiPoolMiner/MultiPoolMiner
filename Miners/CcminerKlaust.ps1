@@ -20,7 +20,6 @@ $Commands = [PSCustomObject]@{
     "penta" = "" #Pentablake
     "skein" = "" #Skein
     "s3" = "" #S3
-    "tribus" = "" #Tribus
     "veltor" = "" #Veltor
     #"whirlpool" = "" #Whirlpool
     #"whirlpoolx" = "" #whirlpoolx
