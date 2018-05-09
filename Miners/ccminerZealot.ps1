@@ -1,11 +1,24 @@
-﻿using module ..\Include.psm1
+ using module ..\Include.psm1
 
-$Path = ".\Bin\Polytimos-NVIDIA\ccminer.exe"
-$HashSHA256 = "3B9F6A607F0E66974FFB1880B1E89062AC7D0794BE6CC596493CC475EE36DA6F"
-$URI = "https://github.com/punxsutawneyphil/ccminer/releases/download/polytimosv2/ccminer-polytimos_v2.zip"
+$Path = ".\Bin\NVIDIA-Zealot\z-enemy.exe"
+$HashSHA256 = "59e413741711e2984a1911db003fee807941f9a9f838cb96ff050194bc74bfce"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/zenemy108/z-enemy-1.08-release.zip"
+#$ManualUri = "https://mega.nz/#!5WACFRTT!tV1vUsFdBIDqCzBrcMoXVR2G9YHD6xqct5QB2nBiuzM"
 
 $Commands = [PSCustomObject]@{
-    "poly" = "" #Polytimos
+    "bitcore" = "" #Bitcore
+    "jha" = "" #JHA - NOT TESTED
+    "phi" = "" #PHI
+    "poly" = "" #Polytmos - NOT TESTED
+    "veltor" = "" #Veltor - NOT TESTED
+    "x12" = "" #X12 - NOT TESTED
+    "x14" = "" #X14 - NOT TESTED
+    "x16r" = "" #Rave
+    "x16s" = "" #Pigeon
+    # ASIC - never profitable 20/04/2018
+    #"cryptonight" = "" #CryptoNight - NOT TESTED
+    #"decred" = "" #Decred - NOT TESTED
+    #"vanilla" = "" #BlakeVanilla - NOT TESTED
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -21,4 +34,4 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         Port = 4068
         URI = $Uri
     }
-}
+} 

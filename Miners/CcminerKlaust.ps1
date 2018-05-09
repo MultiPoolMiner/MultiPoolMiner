@@ -1,6 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
+$HashSHA256 = "EBF91E27F54DE29F158A4F5EBECEDB7E7E03EB9010331B2E949335BF1144A886"
 $Uri = "https://github.com/KlausT/ccminer/releases/download/8.21/ccminer-821-cuda91-x64.zip"
 
 $Commands = [PSCustomObject]@{
@@ -19,7 +20,6 @@ $Commands = [PSCustomObject]@{
     "penta" = "" #Pentablake
     "skein" = "" #Skein
     "s3" = "" #S3
-    "tribus" = "" #Tribus
     "veltor" = "" #Veltor
     #"whirlpool" = "" #Whirlpool
     #"whirlpoolx" = "" #whirlpoolx
@@ -48,6 +48,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     [PSCustomObject]@{
         Type = "NVIDIA"
         Path = $Path
+        HashSHA256 = $HashSHA256
         Arguments = "-a $_ -b 4068 -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_)"
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Ccminer"
