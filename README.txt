@@ -1,4 +1,4 @@
-﻿====================================================================
+====================================================================
   __  __       _ _   _ _____            _ __  __ _                 
  |  \/  |     | | | (_)  __ \          | |  \/  (_)                
  | \  / |_   _| | |_ _| |__) |__   ___ | | \  / |_ _ __   ___ _ __ 
@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 05/05/2018 (dd/mm/yyyy) - v1.22.17 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 08/05/2018 (dd/mm/yyyy) - v1.23.01 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -66,7 +66,7 @@ IMPORTANT NOTES:
 - Logs and Stats are produced in text format; use them when submitting issues.
 - Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional or amend current miner files to support mining with more than 6 graphics cards.
 
-	
+
 ====================================================================
 
 
@@ -75,21 +75,55 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 -region [Europe/US/Asia]
 	Choose your region or the region closest to you.
 
--poolname [ahashpool,blazepool,blockmasters,hashrefinery,miningpoolhub,miningpoolhubcoins,nicehash,yiimp,zergpool,zpool]
+-poolname [ahashpool, ahashpoolcoins, blazepool, blockmasters, blockmasterscoins, hashrefinery, miningpoolhub, miningpoolhubcoins, nicehash, yiimp, zergpool, ZergPoolCoins, zpool]
 	The following pools are currently supported (in alphabetical order): 
-	## Ahashpool https://www.ahashpool.com/ (Bitcoin address must be provided using the -wallet command, see below)
-	## BlazePool http://www.blazepool.com/ (Bitcoin address must be provided using the -wallet command, see below)
-	## BlockMasters http://www.blockmunch.co/ (Bitcoin address must be provided using the -wallet command, or any currency available in API (Advanced configuration via Config.txt))
-	## Hash Refinery http://pool.hashrefinery.com (Bitcoin address must be provided using the -wallet command, see below)
-	## MiningPoolHub https://miningpoolhub.com/ 
-	        The 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm, while 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
-	## Nicehash https://www.nicehash.com/ (Bitcoin address must be provided using the -wallet command, see below)
-	## YiiMP http://yiimp.eu/ (Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config.txt. Detailled documentation will follow. For now read https://github.com/MultiPoolMiner/MultiPoolMiner/issues/1105)
-	## ZergPool http://zergpool.eu (Bitcoin address must be provided using the -wallet command, or any currency available in API (Advanced configuration via Config.txt))
-	## Zpool http://www.zpool.ca/ (Bitcoin address must be provided using the -wallet command, see below)
-	
-	IMPORTANT: The specified pool here will be used as default (preferred) but this does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.
-	
+
+    ## AHashPool / AHashPoolCoins
+      WebSite: https://www.ahashpool.com/ 
+      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
+
+    ## BlazePool
+      WebSite: http://www.blazepool.com/ 
+      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
+
+    ## BlockMasters / BlockMastersCoins
+      WebSite: http://www.blockmasters.co/
+      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
+      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
+
+    ## HashRefinery
+      WebSite: http://pool.hashrefinery.com
+      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
+
+    ## MiningPoolHub / MiningPooHubCoins
+      WebSite: https://miningpoolhub.com/ 
+      - 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm
+      - 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). 
+      Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
+      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
+      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
+
+    ## Nicehash 
+      WebSite: https://www.nicehash.com/
+      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
+
+    ## YiiMP
+      WebSite: http://yiimp.eu/
+      Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config.txt (see below)
+
+    ## ZergPool / ZergPoolCoins
+      WebSite: http://zergpool.eu
+      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
+      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
+
+    ## Zpool
+      WebSite: http://www.zpool.ca/
+      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
+      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
+
+      IMPORTANT: For the list of default configured pools consult 'start.bat.' This does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
+
+
 -ExcludePoolName
 	Same as the -poolname command but it is used to exclude unwanted mining pools (please see above).
 
@@ -109,12 +143,14 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 	Choose the relevant GPU(s) and/or CPU mining.
 
 -algorithm
-        Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
+	Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
 	The following algorithms are currently supported: 
-    Bitcore, Blakecoin, Blake2s, BlakeVanilla, C11, CryptoNightV7, Ethash, X11, Decred, Equihash, Groestl, HMQ1725, HSR, JHA, Keccak, Lbry, Lyra2RE2, Lyra2z, MyriadGroestl, NeoScrypt, Pascal, Phi, Polytimos, Quark, Qubit, Scrypt, SHA256, Sib, Skunk, Skein, Timetravel, Tribus, Veltor, X11, X11evo, X16R, X16S, X17, Yescrypt
+	   Bitcore, Blakecoin, Blake2s, BlakeVanilla, C11, CryptoNightV7, Ethash, X11, Decred, Equihash, Groestl, HMQ1725, HSR, JHA, Keccak, Lbry, Lyra2RE2, Lyra2z, MyriadGroestl, NeoScrypt, Pascal, Phi, Polytimos, Quark, Qubit, Scrypt, SHA256, Sib, Skunk, Skein, Timetravel, Tribus, Veltor, X11, X11evo, X16R, X16S, X17, Yescrypt
+	Note that the list of supported algorithms can change depending on the capabilities of the supported miner binaries. Some algos are now being mined with ASICs and are no longer profitable when mined with CPU/GPU and will get removed from MPM.
+
 	Special parameters: 
-	ethash2gb - can be profitable for older GPUs that have 2GB or less GDDR memory. It includes ethash coins that have a DAG file size of less than 2GB (and will be mined when most profitable). Ethereum and a few other coins have surpassed this size therefore cannot be mined with older cards.
-	decrednicehash - if you want to include non-dual, non-Claymore Decred mining on Nicehash. NH created their own implementation of Decred mining protocol.
+	   ethash2gb - can be profitable for older GPUs that have 2GB or less GDDR memory. It includes ethash coins that have a DAG file size of less than 2GB (and will be mined when most profitable). Ethereum and a few other coins have surpassed this size therefore cannot be mined with older cards.
+	   decrednicehash - if you want to include non-dual, non-Claymore Decred mining on Nicehash. NH created their own implementation of Decred mining protocol.
 	Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). WARNING! If you add all algorithms listed above, you may find your earnings spread across multiple pools regardless what pool(s) you specified with the -poolname command.
 	
 -ExcludeAlgorithm
@@ -126,7 +162,7 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 -ExcludeMinerName
 	Exclude certain miners you don't want to use. It is useful if a miner is causing issues with your machine. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
 	
--currency [BTC,USD,EUR,GBP,ETH ...]
+-currency [BTC, USD, EUR, GBP, ETH ...]
 	Choose the default currency or currencies your profit stats will be shown in.
 
 -interval
@@ -142,26 +178,35 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 	Specify your proxy address if applicable, i.e http://192.0.0.1:8080
 
 -watchdog
-        Include this command to enable the watchdog feature which detects and handles miner and other related failures.
+	Include this command to enable the watchdog feature which detects and handles miner and other related failures.
 	It works on a unified interval that is defaulted to 60 seconds. Watchdog timers expire if three of those intervals pass without being kicked. There are three stages as to what action is taken when watchdog timers expire and is determined by the number of related expired timers.
 	- Stage 1: when 1 timer expires relating to one miner/algorithm combination, the one miner/algorithm combination is kicked
 	- Stage 2: when 2 timers expire relating to one miner file, the one miner file is kicked
 	- Stage 3: when 3 timers expire relating to one pool, the pool is kicked
 	Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
 
+-ExcludeWatchdogAlgorithm
+	Exclude certain algorithms you don't want to be monitored by watchdog. Some algorithms, e.g. X16R, trigger watchdog constantly due to their nature. (default 'X16R')
+	
+-ExcludeWatchdogMinerName
+	Exclude certain miners you don't want to be monitored by watchdog.
+
 -minerstatusurl https://multipoolminer.io/monitor/miner.php
 	Report and monitor your mining rig's status by including the command above. Wallet address must be set even if you are only using MiningPoolHub as a pool. You can access the reported information by entering your wallet address on the https://multipoolminer.io/monitor web address. By using this service you understand and accept the terms and conditions detailed in this document (further below). 
+
+-minerstatuskey
+	By default the MPM monitor uses the BTC address (-wallet) to identify your mining machine (rig). Use --minerstatuskey [your-miner-status-key] to anonymize your rig. To get your minerstatuskey goto to https://multipoolminer.io/monitor
 
 -switchingprevention
 	Since version 2.6, the delta value (integer) that was used to determine how often MultiPoolMiner is allowed to switch, is now user-configurable on a scale of 1 to infinity on an intensity basis. Default is 1 (Start.bat default is 2). Recommended values are 1-10 where 1 means the most frequent switching and 10 means the least switching. Please note setting this value to zero (0) will not turn this function off! Please see further explanation in MULTIPOOLMINER'S LOGIC section below. 
 
--autoupdate:false
-    By default MPM will perform an automatic update on startup if a newer version is found. Set to 'false' to disable automatic update to latest MPM version. 
+-disableautoupdate
+	By default MPM will perform an automatic update on startup if a newer version is found. Set to 'true' to disable automatic update to latest MPM version. 
 
-
+	
 ====================================================================
-	
-	
+
+
 SAMPLE USAGE (check "start.bat" file in root folder):
 
 ############ START OF CONTENT OF START.BAT ############
@@ -185,6 +230,94 @@ pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
 
 pause
 ############ END OF CONTENT OF START.BAT ############
+
+
+====================================================================
+
+
+ADVANCED CONFIGURATION
+
+Advanced config options are available via Config.txt
+
+Current versions support advanced configuration via 'Config.txt' in the MPM main directory.
+Config.txt is a JSON file and human readable / editable. A good primer for understanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
+
+Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like https://codebeautify.org/jsonviewer/ (copy/paste the complete file).
+
+Default content of 'Config.txt'
+
+{
+    "Pools": {
+        "MiningPoolHub": {
+            "User": "$UserName",
+            "Worker": "$WorkerName",
+            "API_ID": "$API_ID",
+            "API_Key": "$API_Key"
+        },
+            "MiningPoolHubCoins": {
+            "User": "$UserName",
+            "Worker": "$WorkerName",
+            "API_ID": "$API_ID",
+            "API_Key": "$API_Key"
+        },
+            "NiceHash": {
+            "BTC": "$Wallet",
+            "Worker": "$WorkerName"
+        },
+            "Zpool": {
+            "BTC": "$Wallet",
+            "Worker": "$WorkerName"
+        }
+    },
+    "Miners": {
+    },
+    "Interval": "$Interval",
+    "Region": "$Region",
+    "SSL": "$SSL",
+    "Type": "$Type",
+    "Algorithm": "$Algorithm",
+    "MinerName": "$MinerName",
+    "PoolName": "$PoolName",
+    "ExcludeAlgorithm": "$ExcludeAlgorithm",
+    "ExcludeMinerName": "$ExcludeMinerName",
+    "ExcludePoolName": "$ExcludePoolName",
+    "Currency": "$Currency",
+    "Donate": "$Donate",
+    "Proxy": "$Proxy",
+    "Delay": "$Delay",
+    "Watchdog": "$Watchdog",
+    "MinerStatusURL": "$MinerStatusURL",
+    "MinerStatusKey": "$MinerStatusKey",
+    "SwitchingPrevention": "$SwitchingPrevention"
+}
+
+There is a section for Pools, Miners and a general section
+
+Advanced config for Pools
+
+Settings for each configured pool are stored in its own subsection. Theses settings are only valid for the named pool.
+
+To change payout currency of a pool
+
+If a pool allows payout in another currency than BTC you can change this.
+Note: Not all pools support this, for more information consult the pools web page
+
+The default pool config might look like this:
+
+    "Zpool": {
+        "BTC": "$Wallet",
+        "Worker": "$WorkerName"
+    }
+
+The payout currency is defined by this line:
+"BTC": "$Wallet", (MPM will use the the wallet address from the start.bat file)
+
+E.g. to change the payout currency for Zpool to LiteCoin replace the line for BTC with "LTC": "<YOUR_LITECOIN_ADDRESS>", (of course you  need to insert a real LTC address)
+
+    "Zpool": {
+        "LTC": "<YOUR_LITECOIN_ADDRESS>",
+        "Worker": "$WorkerName"
+    }
 
 
 ====================================================================
@@ -270,10 +403,10 @@ Q2. A miner crashes my computer or does not work correctly. I want to exclude it
 A2. Use the -excludeminername command to exclude certain miners you don't want to use. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
 
 Q3. Miner says CL device is missing (or not found). How do I resolve this issue?
-A3. You most likely have NVIDIA cards in your rig. Open the start.bat in a text editor and look for ‘-type amd,nvidia,cpu’ and change it to ‘-type nvidia,cpu’. This will disable the AMD exclusive miners and save you plenty of time when benchmarking. You can also exclude the cpu option if you don’t want to mine with your processor.
+A3. You most likely have NVIDIA cards in your rig. Open the start.bat in a text editor and look for 'type amd,nvidia,cpu' and change it to 'type nvidia,cpu'. This will disable the AMD exclusive miners and save you plenty of time when benchmarking. You can also exclude the cpu option if you don't want to mine with your processor.
 
 Q4. I only want to mine certain algorithms even if they are not the most profitable. I want to exclude algorithms. How do I do that?
-A4. Open the start.bat in a text editor and look for ‘-algorithm cryptonightv7,ethash,equihash,groestl,lyra2z,neoscrypt,pascal’. Delete the algorithms you don't want to mine. This can save you some time when benchmarking. You can include any of these or even all of them if you please but bear in mind this can result your earnings to be spread across many pools! 
+A4. Open the start.bat in a text editor and look for 'algorithm cryptonight,ethash,equihash,groestl,lyra2z,neoscrypt,pascal'. Delete the algorithms you don't want to mine. This can save you some time when benchmarking. You can include any of these or even all of them if you please but bear in mind this can result your earnings to be spread across many pools! 
 
 Q5. MultiPoolMiner is XX% more profitable. What does this mean?
 A5. It is showing you the stat for MultiPoolMiner vs the one miner. It means that the calculated earnings of MultiPoolMiner switching to different algorithms would be that much more profitable than if it had just mined that one particular algorithm the whole time. The number is still only an estimate of your earnings on the pool and may not directly reflect what you actually get paid. On MiningPoolHub and other multiple algorithm pools, coins have fluctuating values and MultiPoolMiner switches to the one that is the most profitable at that time. Because each pool has different delays in exchange and payout, the amount you actually earn my be very different. If there is a significant difference in percentage, you might want to reset the profitability stats by running the ResetProfit.bat file. Your actual (but still estimated) earning is shown in the second row.
@@ -337,11 +470,14 @@ Q21. My antivirus says the .zip package contains a virus or MultiPoolMiner tries
 A21. MultiPoolMiner is open-source and used by many users/rigs. It also downloads miners from github releases that are open-sourced projects. That means the code is readable and you can see for yourself it does not contain any viruses. Your antivirus generates false positives as the miner software used by MultiPoolMiner are often included in malicious programs to create botnets for someone who wants to earn a quick buck. There are other closed-source miner program included in the package such as the Claymore miners. These come from legendary ranked or trusted/respected members of the bitcointalk community and used by a large number of users/rigs worldwide. You can exlude these miners if you wish by following the instructions in FAQ#2 and delete their software from your system. 
 
 Q22. How to disable dual-mining?
-A22. Make sure NOT to include any of the the following parameters in your start.bat after -algorithm or add them after the -ExludeAlgorithm command:
-	decred, pascal, decrednicehash
+A22. Make sure NOT to include any of the the following parameters in your start.bat after -algorithm or add them after the -ExludeAlgorithm command: blake2s, decred, keccak, pascal, lbry, decrednicehash
+    
+Q23. How to manually download miner binaries?
+A23. Some miners binaries cannot be downloaded automatically by MPM (e.g. there is no direct download). In these cases you need to download and install them manually. First find the download link "Uri" in the miner file (they are all in the folder 'Miners') and download the binaries. Next locate the destination path "$Path". You need to create the required subdirectory in the 'Miners' folder. Finally unpack the downloaded binary to the destination directory. If the packed file contains subdirectories you must also copy them.
 
 
 ====================================================================
+
 
 REPORTING AND MONITORING TERMS AND CONDITIONS & PRIVACY POLICY:
 

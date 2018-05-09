@@ -1,7 +1,9 @@
 {
     "Type":  "AMD",
+    "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/mkxminer/mkxminer310.zip",
     "ManualURI": "https://bitcointalk.org/index.php?topic=2360168.0",
     "Path":  ".\\Bin\\Lyra2RE2-Mkxminer\\mkxminer.exe",
+    "HashSHA256": "1F0058E86BB5467F7C053419CB426F3BB445BEBA4C772C5B734D1BCE8677AF3C",
     "Arguments":  "\"--exitsick -o $($Pools.Lyra2RE2.Protocol)://$($Pools.Lyra2RE2.Host):$($Pools.Lyra2RE2.Port) -u $($Pools.Lyra2RE2.User) -p $($Pools.Lyra2RE2.Pass) --intensity 23\"",
     "HashRates":  {
                       "Lyra2RE2":  "\"$($Stats.MkxminerAmd_Lyra2re2_HashRate.Week)\""
