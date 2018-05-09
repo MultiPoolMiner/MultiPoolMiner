@@ -1,12 +1,12 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-SuprMiner\ccminer.exe"
-$HashSHA256 = "6DE5DC4F109951AE1591D083F5C2A6494C9B59470C15EF6FBE5D38C50625304B"
-$Uri = "https://github.com/ocminer/suprminer/releases/download/1.5/suprminer-1.5.7z"
+$Path = ".\Bin\NVIDIA-Nevermore\ccminer.exe"
+$HashSHA256 = "62489722C44CDAD3DF4C22E46A2A16A3E8A81E273D562C7C25398F77684A1C11"
+$Uri = "https://github.com/nemosminer/ccminernevermorex16r/releases/download/nevermorex16rv0.3/ccminernevermorex16rx64v0.3.zip"
 
 $Commands = [PSCustomObject]@{
-    "x16r"  = "" #X16R RavenCoin
-    "x16s"  = "" #X16S PigeonCoin
+    "X16r" = "" #X16r RavenCoin
+    "X16s" = "" #X16s PigeonCoin
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -21,5 +21,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         API = "Ccminer"
         Port = 4068
         URI = $Uri
+        PrerequisitePath = "$env:SystemRoot\System32\msvcr120.dll"
+        PrerequisiteURI = "http://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe"
     }
 }

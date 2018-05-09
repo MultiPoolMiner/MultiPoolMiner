@@ -1,12 +1,24 @@
-﻿using module ..\Include.psm1
+ using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-SuprMiner\ccminer.exe"
-$HashSHA256 = "6DE5DC4F109951AE1591D083F5C2A6494C9B59470C15EF6FBE5D38C50625304B"
-$Uri = "https://github.com/ocminer/suprminer/releases/download/1.5/suprminer-1.5.7z"
+$Path = ".\Bin\NVIDIA-Zealot\z-enemy.exe"
+$HashSHA256 = "59e413741711e2984a1911db003fee807941f9a9f838cb96ff050194bc74bfce"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/zenemy108/z-enemy-1.08-release.zip"
+#$ManualUri = "https://mega.nz/#!5WACFRTT!tV1vUsFdBIDqCzBrcMoXVR2G9YHD6xqct5QB2nBiuzM"
 
 $Commands = [PSCustomObject]@{
-    "x16r"  = "" #X16R RavenCoin
-    "x16s"  = "" #X16S PigeonCoin
+    "bitcore" = "" #Bitcore
+    "jha" = "" #JHA - NOT TESTED
+    "phi" = "" #PHI
+    "poly" = "" #Polytmos - NOT TESTED
+    "veltor" = "" #Veltor - NOT TESTED
+    "x12" = "" #X12 - NOT TESTED
+    "x14" = "" #X14 - NOT TESTED
+    "x16r" = "" #Rave
+    "x16s" = "" #Pigeon
+    # ASIC - never profitable 20/04/2018
+    #"cryptonight" = "" #CryptoNight - NOT TESTED
+    #"decred" = "" #Decred - NOT TESTED
+    #"vanilla" = "" #BlakeVanilla - NOT TESTED
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -22,4 +34,4 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         Port = 4068
         URI = $Uri
     }
-}
+} 
