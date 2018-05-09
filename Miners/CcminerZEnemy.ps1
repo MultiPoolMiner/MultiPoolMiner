@@ -2,6 +2,7 @@
 
 $Path = ".\Bin\NVIDIA-ZEnemy\z-enemy.exe"
 $Uri = "https://github.com/iwtym/iwtym-zenemy/archive/master.zip"
+$HashSHA256 = "59E413741711E2984A1911DB003FEE807941F9A9F838CB96FF050194BC74BFCE"
 
 $Commands = [PSCustomObject]@{
     "bitcore" = "" #Bitcore BTX
@@ -16,6 +17,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     [PSCustomObject]@{
         Type = "NVIDIA"
         Path = $Path
+        HashSHA256 = $HashSHA256
         Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_)"
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Ccminer"
