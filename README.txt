@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 08/05/2018 (dd/mm/yyyy) - v1.23.01 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 09/05/2018 (dd/mm/yyyy) - v1.23.02 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -383,6 +383,18 @@ A new install of MultiPoolMiner has no historical information on which to build 
 ====================================================================
 
 
+MULTIPOOLMINER API:
+
+
+MultiPoolMiner allows basic monitoring through its built in API.
+API data is available at http://localhost:3999/<resource>
+
+For a list of supported API commands open APIDocs.html with your web browser.
+
+
+====================================================================
+
+
 KNOWN ISSUES:
 
 There are known issues with the following miners not submitting shares or show higher hashrate than what they actually do:
@@ -436,7 +448,7 @@ Q13. MultiPoolMiner does not close miners properly (2 or more instances of the s
 A13. This is due to miner failure most likely caused by too much OVERCLOCKING. When miner fails it tries to recover which usually means restarting itself in the same window. This causes issues with the API connection to the miner and MultiPoolMiner thinks miner quit and launches another instance as a result. Due to default API port still being used by the first launched but failed miner, MPM can launch many instances of the same miner over time. This behaviour will be improved upon in the future but can only be completely solved by the user by lowering overclock to keep miners and the system stable.  
 
 Q14. Is it possible to change the payout currency from BTC to something else when mining on yiimp-based pools such as Zpool, Hash Refinery, etc?
-A14. Yes, advanced users can edit the currency settings in each pool file by amending the password field (c=BTC), however, this is not recommended as your payout will become uncertain as all other payout currencies are internally exchanged therefore you may end up losing your earnings due to pool never having enough coins to pay you!
+A14. Yes, see 'Advanced Configuration / To change payout currency of a pool'. However, this is not recommended as your payout will become uncertain as all other payout currencies are internally exchanged therefore you may end up losing your earnings due to pool never having enough coins to pay you!
 
 Q15. How do I customise miners to better work with my cards?
 A15. Some cards may require special parameters to be used in order to make them (more) stable, such as setting intensity for specific miners/algos/GPUs. This can be done by heading to the /Miners folder and editing the relevant miner files. For example, for CcminerTpruvot.ps1 you can replace
@@ -497,4 +509,5 @@ PID: process ID of the miner application being used
 BTC/day: Estimated Bitcoin earnings per day
 
 The monitoring service can change, evolve, be unavailable any time without prior notice. The contents of the database will NOT be shared with any third-parties but we reserve the right to create metrics out of it and use its contents to improve or promote our services and MultiPoolMiner. Credits to @grantemsley for the codebase.
+
 
