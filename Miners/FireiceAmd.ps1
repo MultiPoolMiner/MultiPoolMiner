@@ -1,13 +1,14 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\CryptoNight-FireIce\xmr-stak.exe"
-$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.4.2/xmr-stak-win64.zip"
+$HashSHA256 = "BF7EBD6EBECF9AA84FAAF657B80BA7848ED07CD5E1F74AED2E2317B347718FF0"
+$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.4.3/xmr-stak-win64.zip"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 3336
 
 $Commands = [PSCustomObject]@{
-    "cryptonight" = "" #CryptoNight
+    # "cryptonight" = "" #CryptoNight is ASIC territory
     "cryptonight_lite" = "" # CryptoNight-Lite
     "cryptonightV7" = "" #CryptoNightV7
 }
@@ -51,6 +52,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     [PSCustomObject]@{
         Type      = "AMD"
         Path      = $Path
+        HashSHA256 = $HashSHA256
         Arguments = "-C $($Pools.$Algorithm_Norm.Name)_$($Algorithm_Norm)_$($Pools.$Algorithm_Norm.User)_Amd.txt --noUAC --noCPU --noNVIDIA -i $($Port)"
         HashRates = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week}
         API       = "XMRig"

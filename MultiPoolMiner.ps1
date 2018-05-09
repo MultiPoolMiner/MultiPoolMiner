@@ -25,7 +25,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Array]$Type = @(), #AMD/NVIDIA/CPU
     [Parameter(Mandatory = $false)]
-    [Array]$Algorithm = @(), #i.e. Ethash,Equihash,CryptoNight etc.
+    [Array]$Algorithm = @(), #i.e. Ethash,Equihash,CryptoNightV7 etc.
     [Parameter(Mandatory = $false)]
     [Alias("Miner")]
     [Array]$MinerName = @(), 
@@ -33,7 +33,7 @@ param(
     [Alias("Pool")]
     [Array]$PoolName = @(), 
     [Parameter(Mandatory = $false)]
-    [Array]$ExcludeAlgorithm = @(), #i.e. Ethash,Equihash,CryptoNight etc.
+    [Array]$ExcludeAlgorithm = @(), #i.e. Ethash,Equihash,CryptoNightV7 etc.
     [Parameter(Mandatory = $false)]
     [Alias("ExcludeMiner")]
     [Array]$ExcludeMinerName = @(), 
@@ -51,6 +51,10 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$Watchdog = $false,
     [Parameter(Mandatory = $false)]
+    [Array]$ExcludeWatchdogAlgorithm = @("X16R"), #Do not use watchdog for these algorithms, e.g due to its nature X16R will always trigger watchdog
+    [Parameter(Mandatory = $false)]
+    [Array]$ExcludeWatchdogMinerName = @(), #Do not use watchdog for these miners
+    [Parameter(Mandatory = $false)]
     [Alias("Uri", "Url")]
     [String]$MinerStatusUrl = "", #i.e https://multipoolminer.io/monitor/miner.php
     [Parameter(Mandatory = $false)]
@@ -58,12 +62,15 @@ param(
     [Parameter(Mandatory = $false)]
     [Double]$SwitchingPrevention = 1, #zero does not prevent miners switching
     [Parameter(Mandatory = $false)]
-    [Switch]$AutoUpdate = $true
+    [Switch]$DisableAutoUpdate = $false
 )
 
 $Version = "2.7.2.7"
 $Strikes = 3
 $SyncWindow = 5 #minutes
+
+#Get miner hw info
+$Devices = Get-Devices
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 Import-Module NetSecurity -ErrorAction Ignore
@@ -98,7 +105,7 @@ if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpC
 }
 
 #Check for software updates
-if ($AutoUpdate -and (Test-Path .\Updater.ps1)) {$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1}
+if (-not $DisableAutoUpdate -and (Test-Path .\Updater.ps1)) {$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1}
 
 #Set donation parameters
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
@@ -117,55 +124,62 @@ while ($true) {
     $ConfigBackup = $Config
     if (Test-Path "Config.txt") {
         $Config = Get-ChildItemContent "Config.txt" -Parameters @{
-            Wallet              = $Wallet
-            UserName            = $UserName
-            WorkerName          = $WorkerName
-            API_ID              = $API_ID
-            API_Key             = $API_Key
-            Interval            = $Interval
-            Region              = $Region
-            SSL                 = $SSL
-            Type                = $Type
-            Algorithm           = $Algorithm
-            MinerName           = $MinerName
-            PoolName            = $PoolName
-            ExcludeAlgorithm    = $ExcludeAlgorithm
-            ExcludeMinerName    = $ExcludeMinerName
-            ExcludePoolName     = $ExcludePoolName
-            Currency            = $Currency
-            Donate              = $Donate
-            Proxy               = $Proxy
-            Delay               = $Delay
-            Watchdog            = $Watchdog
-            MinerStatusURL      = $MinerStatusURL
-            MinerStatusKey      = $MinerStatusKey
-            SwitchingPrevention = $SwitchingPrevention
+            Wallet                   = $Wallet
+            UserName                 = $UserName
+            WorkerName               = $WorkerName
+            API_ID                   = $API_ID
+            API_Key                  = $API_Key
+            Interval                 = $Interval
+            Region                   = $Region
+            SSL                      = $SSL
+            Type                     = $Type
+            Algorithm                = $Algorithm
+            MinerName                = $MinerName
+            PoolName                 = $PoolName
+            ExcludeAlgorithm         = $ExcludeAlgorithm
+            ExcludeMinerName         = $ExcludeMinerName
+            ExcludePoolName          = $ExcludePoolName
+            Currency                 = $Currency
+            Donate                   = $Donate
+            Proxy                    = $Proxy
+            Delay                    = $Delay
+            Watchdog                 = $Watchdog
+            WatchdogExcludeAlgorithm = $WatchdogExcludeAlgorithm
+            WatchdogExcludeMinerName = $WatchdogExcludeMinerName
+            MinerStatusURL           = $MinerStatusURL
+            MinerStatusKey           = $MinerStatusKey
+            SwitchingPrevention      = $SwitchingPrevention
         } | Select-Object -ExpandProperty Content
     }
     else {
         $Config = [PSCustomObject]@{
-            Pools               = [PSCustomObject]@{}
-            Miners              = [PSCustomObject]@{}
-            Interval            = $Interval
-            Region              = $Region
-            SSL                 = $SSL
-            Type                = $Type
-            Algorithm           = $Algorithm
-            MinerName           = $MinerName
-            PoolName            = $PoolName
-            ExcludeAlgorithm    = $ExcludeAlgorithm
-            ExcludeMinerName    = $ExcludeMinerName
-            ExcludePoolName     = $ExcludePoolName
-            Currency            = $Currency
-            Donate              = $Donate
-            Proxy               = $Proxy
-            Delay               = $Delay
-            Watchdog            = $Watchdog
-            MinerStatusURL      = $MinerStatusURL
-            MinerStatusKey      = $MinerStatusKey
-            SwitchingPrevention = $SwitchingPrevention
+            Pools                    = [PSCustomObject]@{}
+            Miners                   = [PSCustomObject]@{}
+            Interval                 = $Interval
+            Region                   = $Region
+            SSL                      = $SSL
+            Type                     = $Type
+            Algorithm                = $Algorithm
+            MinerName                = $MinerName
+            PoolName                 = $PoolName
+            ExcludeAlgorithm         = $ExcludeAlgorithm
+            ExcludeMinerName         = $ExcludeMinerName
+            ExcludePoolName          = $ExcludePoolName
+            Currency                 = $Currency
+            Donate                   = $Donate
+            Proxy                    = $Proxy
+            Delay                    = $Delay
+            Watchdog                 = $Watchdog
+            WatchdogExcludeAlgorithm = $WatchdogExcludeAlgorithm
+            WatchdogExcludeMinerName = $WatchdogExcludeMinerName
+            MinerStatusURL           = $MinerStatusURL
+            MinerStatusKey           = $MinerStatusKey
+            SwitchingPrevention      = $SwitchingPrevention
         }
     }
+
+    #Only use configured types that are present in system
+    $Config.Type = $Config.Type | Where-Object {$Devices.$_}
 
     #Error in Config.txt
     if ($Config -isnot [PSCustomObject]) {
@@ -210,8 +224,8 @@ while ($true) {
     #Give API access to the current running configuration
     $API.Config = $Config
 
-    #Clear pool cache if the configuration has changed
-    if (($ConfigBackup | ConvertTo-Json -Compress) -ne ($Config | ConvertTo-Json -Compress)) {$AllPools = $null}
+    #Clear pool cache if the pool configuration has changed
+    if (($ConfigBackup.Pools | ConvertTo-Json -Compress) -ne ($Config.Pools | ConvertTo-Json -Compress)) {$AllPools = $null}
 
     if ($Config.Proxy) {$PSDefaultParameterValues["*:Proxy"] = $Config.Proxy}
     else {$PSDefaultParameterValues.Remove("*:Proxy")}
@@ -608,17 +622,19 @@ while ($true) {
                 $Miner_Name = $_.Name
                 $_.Algorithm | ForEach-Object {
                     $Miner_Algorithm = $_
-                    $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
-                    if (-not $WatchdogTimer) {
-                        $WatchdogTimers += [PSCustomObject]@{
-                            MinerName = $Miner_Name
-                            PoolName  = $Pools.$Miner_Algorithm.Name
-                            Algorithm = $Miner_Algorithm
-                            Kicked    = $Timer
+                    if ($Config.ExcludeWatchdogAlgorithm -inotcontains $Miner_Algorithm -and $Config.ExcludeWatchdogMinerName -inotcontains $Miner_Name) {
+                        $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
+                        if (-not $WatchdogTimer) {
+                            $WatchdogTimers += [PSCustomObject]@{
+                                MinerName = $Miner_Name
+                                PoolName  = $Pools.$Miner_Algorithm.Name
+                                Algorithm = $Miner_Algorithm
+                                Kicked    = $Timer
+                            }
                         }
-                    }
-                    elseif (-not ($WatchdogTimer.Kicked -GT $Timer.AddSeconds( - $WatchdogReset))) {
-                        $WatchdogTimer.Kicked = $Timer
+                        elseif (-not ($WatchdogTimer.Kicked -GT $Timer.AddSeconds( - $WatchdogReset))) {
+                            $WatchdogTimer.Kicked = $Timer
+                        }
                     }
                 }
             }
@@ -641,7 +657,7 @@ while ($true) {
     ) | Out-Host
 
     #Display active miners list
-    $ActiveMiners | Where-Object {$_.GetActivateCount() -GT 0} | Sort-Object -Descending {$_.GetActiveLast()} | Select-Object -First (1 + 6 + 6) | Format-Table -Wrap -GroupBy @{Label = "Status"; Expression = {$_.GetStatus()}} (
+    $ActiveMiners | Where-Object {$_.GetActivateCount() -GT 0} | Sort-Object -Property {$_.GetStatus()}, @{Expression = {$_.GetActiveLast()}; Ascending = $false} | Select-Object -First (1 + 6 + 6) | Format-Table -Wrap -GroupBy @{Label = "Status"; Expression = {$_.GetStatus()}} (
         @{Label = "Speed"; Expression = {$_.Speed_Live | ForEach-Object {"$($_ | ConvertTo-Hash)/s"}}; Align = 'right'}, 
         @{Label = "Active"; Expression = {"{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f $_.GetActiveTime()}}, 
         @{Label = "Launched"; Expression = {Switch ($_.GetActivateCount()) {0 {"Never"} 1 {"Once"} Default {"$_ Times"}}}}, 

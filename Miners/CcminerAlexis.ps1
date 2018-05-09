@@ -1,42 +1,43 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
-$HashSHA256 = "EBF91E27F54DE29F158A4F5EBECEDB7E7E03EB9010331B2E949335BF1144A886"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.21/ccminer-821-cuda91-x64.zip"
+$Path = ".\Bin\NVIDIA-Alexis78hsr\ccminer-alexis.exe"
+$HashSHA256 = "1075FE6CBD4227AEA85188E90FD4432B6D39966AF305A2A43247C03DA914260C"
+$Uri = "https://github.com/nemosminer/ccminer-hcash/releases/download/alexishsr/ccminer-hsr-alexis-x86-cuda8.7z"
 
 $Commands = [PSCustomObject]@{
     #GPU - profitable 20/04/2018
-    "c11" = "" #C11
-    "deep" = "" #deep
-    "dmd-gr" = "" #dmd-gr
-    "fresh" = "" #fresh
-    "fugue256" = "" #Fugue256
-    "groestl" = "" #Groestl
-    "jackpot" = "" #Jackpot
+    "c11" = "" #c11
+    "hsr" = "" #HSR, HShare
     "keccak" = "" #Keccak
-    "luffa" = "" #Luffa
-    "lyra2v2" = "" #Lyra2RE2
-    "neoscrypt" = "" #NeoScrypt
-    "penta" = "" #Pentablake
-    "skein" = "" #Skein
-    "s3" = "" #S3
-    "tribus" = "" #Tribus
+    "lyra2" = "" #Lyra2
+    "lyra2v2" = "" #lyra2v2
+    #"neoscrypt" = "" #NeoScrypt
+    #"skein" = "" #Skein
+    "skein2" = "" #skein2
     "veltor" = "" #Veltor
+    #"whirlcoin" = "" #WhirlCoin
     #"whirlpool" = "" #Whirlpool
     #"whirlpoolx" = "" #whirlpoolx
-    "X17" = "" #X17 Verge
+    "x11evo" = "" #X11evo
+    "x17" = "" #x17
 
     # ASIC - never profitable 20/04/2018
+    #"blake2s" = "" #Blake2s
     #"blake" = "" #blake
     #"blakecoin" = "" #Blakecoin
-    #"blake2s" = "" #Blake2s
+    #"cryptolight" = "" #cryptolight
+    #"cryptonight" = "" #CryptoNight
+    #"decred" = "" #Decred
+    #"lbry" = "" #Lbry
     #"myr-gr" = "" #MyriadGroestl
     #"nist5" = "" #Nist5
     #"quark" = "" #Quark
     #"qubit" = "" #Qubit
-    #"vanilla" = "" #BlakeVanilla
+    #"scrypt" = "" #Scrypt
+    #"scrypt:N" = "" #scrypt:N
     #"sha256d" = "" #sha256d
     #"sia" = "" #SiaCoin
+    #"sib" = "" #Sib
     #"x11" = "" #X11
     #"x13" = "" #x13
     #"x14" = "" #x14
@@ -50,7 +51,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         Type = "NVIDIA"
         Path = $Path
         HashSHA256 = $HashSHA256
-        Arguments = "-a $_ -b 4068 -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_)"
+        Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_)"
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Ccminer"
         Port = 4068

@@ -3,6 +3,7 @@
 $Threads = 1
 
 $Path = ".\Bin\Excavator\excavator.exe"
+$HashSHA256 = "4CC2FF8C07F17E940A1965B8D0F7DD8508096A4E4928704912FA96C442346642"
 $Uri = "https://github.com/nicehash/excavator/releases/download/v1.4.4a/excavator_v1.4.4a_NVIDIA_Win64.zip"
 
 $Commands = [PSCustomObject]@{
@@ -13,7 +14,7 @@ $Commands = [PSCustomObject]@{
     "lbry" = @() #Lbry
     "lyra2rev2" = @() #Lyra2RE2
     "neoscrypt" = @() #NeoScrypt
-    "nist5" = @() #nist5
+    #"nist5" = @() #nist5 is ASIC territory
     "pascal" = @() #Pascal
 }
 
@@ -30,6 +31,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
                 [PSCustomObject]@{
                     Type = "NVIDIA"
                     Path = $Path
+                    HashSHA256 = $HashSHA256
                     Arguments = @([PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$_", "$([Net.DNS]::Resolve($Pools.$(Get-Algorithm $_).Host).AddressList.IPAddressToString | Select-Object -First 1):$($Pools.$(Get-Algorithm $_).Port)", "$($Pools.$(Get-Algorithm $_).User):$($Pools.$(Get-Algorithm $_).Pass)")}) + @([PSCustomObject]@{id = 1; method = "workers.add"; params = @(@($DeviceIDs | ForEach-Object {@("alg-0", "$_")} | Select-Object) * $Threads) + $Commands.$_})
                     HashRates = [PSCustomObject]@{$(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
                     API = "Excavator"
@@ -45,6 +47,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
                 [PSCustomObject]@{
                     Type = "NVIDIA"
                     Path = $Path
+                    HashSHA256 = $HashSHA256
                     Arguments = @([PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$_", "$([Net.DNS]::Resolve($Pools."$(Get-Algorithm $_)NiceHash".Host).AddressList.IPAddressToString | Select-Object -First 1):$($Pools."$(Get-Algorithm $_)NiceHash".Port)", "$($Pools."$(Get-Algorithm $_)NiceHash".User):$($Pools."$(Get-Algorithm $_)NiceHash".Pass)")}) + @([PSCustomObject]@{id = 1; method = "workers.add"; params = @(@($DeviceIDs | ForEach-Object {@("alg-0", "$_")} | Select-Object) * $Threads) + $Commands.$_})
                     HashRates = [PSCustomObject]@{"$(Get-Algorithm $_)NiceHash" = $Stats."$($Name)_$(Get-Algorithm $_)NiceHash_HashRate".Week}
                     API = "Excavator"
