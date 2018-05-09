@@ -123,10 +123,10 @@ $API.Devices = $Devices #Give API access to the device information
 
 # Create config.txt if it is missing
 if (!Test-Path "Config.txt") {
-    if(Test-Path "Config.example.txt") {
-        Copy-Item -Path "Config.example.txt" -Destination "Config.txt"
+    if(Test-Path "Config.default.txt") {
+        Copy-Item -Path "Config.default.txt" -Destination "Config.txt"
     } else {
-        Write-Log -Level Error "Critical error: Config.txt and Config.example.txt are missing. MPM cannot continue. "
+        Write-Log -Level Error "Critical error: Config.txt and Config.default.txt are missing. MPM cannot continue. "
         Start-Sleep 10
         Exit
     }

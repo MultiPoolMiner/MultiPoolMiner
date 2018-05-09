@@ -229,7 +229,7 @@ pause
 
 Current versions support advanced configuration via 'Config.txt' in the MPM main directory.
 
-If Config.txt does not exist, copy Config.example.txt and rename to Config.txt
+If Config.txt does not exist, copy Config.default.txt and rename to Config.txt
 
 Config.txt is a JSON file and human readable / editable. A good primer for understanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
 
