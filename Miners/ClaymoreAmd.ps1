@@ -56,7 +56,7 @@ $Commands = [PSCustomObject]@{
 $CommonCommands = @(" -logsmaxsize 1", "") # array, first value for main algo, second value for secondary algo
 
 # Get array of IDs of all devices in device set, returned DeviceIDs are of base $DeviceIdBase representation starting from $DeviceIdOffset
-$DeviceSet = Get-DeviceIDs -Config $Config -Devices $Devices -Type $Type -DeviceTypeModel $($Devices.$Type) -DeviceIdBase 16 -DeviceIdOffset 0
+$DeviceIDsSet = Get-DeviceIDs -Config $Config -Devices $Devices -Type $Type -DeviceTypeModel $($Devices.$Type) -DeviceIdBase 16 -DeviceIdOffset 0
 
 $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
 
@@ -64,9 +64,9 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
     $MainAlgorithm_Norm = Get-Algorithm $MainAlgorithm
     
     Switch ($MainAlgorithm_Norm) { # default is all devices, ethash has a 4GB minimum memory limit
-        "Ethash"    {$DeviceIDs = $DeviceSet."4gb"}
-        "Ethash3gb" {$DeviceIDs = $DeviceSet."3gb"}
-        default     {$DeviceIDs = $DeviceSet."All"}
+        "Ethash"    {$DeviceIDs = $DeviceIDsSet."4gb"}
+        "Ethash3gb" {$DeviceIDs = $DeviceIDsSet."3gb"}
+        default     {$DeviceIDs = $DeviceIDsSet."All"}
     }
 
     if ($Pools.$MainAlgorithm_Norm -and $DeviceIDs) { # must have a valid pool to mine and available devices
