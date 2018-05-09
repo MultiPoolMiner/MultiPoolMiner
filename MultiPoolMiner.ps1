@@ -62,7 +62,9 @@ param(
     [Parameter(Mandatory = $false)]
     [Double]$SwitchingPrevention = 1, #zero does not prevent miners switching
     [Parameter(Mandatory = $false)]
-    [Switch]$DisableAutoUpdate = $false
+    [Switch]$DisableAutoUpdate = $false,
+    [Parameter(Mandatory = $false)]
+    [Switch]$ShowMinerWindow = $false #if true all miner windows will be visible (they can steal focus)
 )
 
 $Version = "2.7.2.7"
@@ -113,7 +115,6 @@ $WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHh
 $UserNameDonate = @("aaronsace", "fonyo")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
 $WorkerNameDonate = "multipoolminer"
 
-
 #Initialize the API
 Import-Module .\API.psm1
 Start-APIServer
@@ -150,6 +151,7 @@ while ($true) {
             MinerStatusURL           = $MinerStatusURL
             MinerStatusKey           = $MinerStatusKey
             SwitchingPrevention      = $SwitchingPrevention
+            ShowMinerWindow          = $ShowMinerWindow
         } | Select-Object -ExpandProperty Content
     }
     else {
@@ -176,6 +178,7 @@ while ($true) {
             MinerStatusURL           = $MinerStatusURL
             MinerStatusKey           = $MinerStatusKey
             SwitchingPrevention      = $SwitchingPrevention
+            ShowMinerWindow          = $ShowMinerWindow
         }
     }
 
@@ -506,6 +509,7 @@ while ($true) {
                 New                  = $false
                 Benchmarked          = 0
                 Pool                 = $Miner.Pools.PSObject.Properties.Value.Name
+                ShowMinerWindow      = $Config.ShowMinerWindow
             }
         }
     }

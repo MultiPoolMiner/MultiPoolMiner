@@ -193,6 +193,9 @@ Since version 2.6, the delta value (integer) that was used to determine how ofte
 **-disableautoupdate**
 By default MPM will perform an automatic update on startup if a newer version is found. Set to 'true' to disable automatic update to latest MPM version. 
 
+**-ShowMinerWindow
+By default MPM hides most miner windows as to not steal focus. All miners write their output to files in the Log folder. Set to 'true' to show miner windows (old MPM behaviour).
+
 
 ##SAMPLE USAGE
 #####(check "start.bat" file in root folder)
@@ -307,6 +310,24 @@ E.g. to change the payout currency for Zpool to LiteCoin replace the line for BT
         "Worker": "$WorkerName"
     }
     
+
+### Advanced general configuration
+
+Settings in this section affect the overall behaviour of MPM.
+
+#### To show miner windows
+
+By default MPM hides most miner windows as to not steal focus. All miners write their output to files in the Log folder.
+
+To show the miner windows add '"ShowMinerWindow":  true' to the general section in Config.txt:
+Note: Showing the miner windows disables writing the miner output to log files.
+
+{
+    ...
+    "SwitchingPrevention":  "$SwitchingPrevention",
+    "ShowMinerWindow":  true,
+    ...
+}
 
 
 ## MULTIPOOLMINER'S LOGIC
