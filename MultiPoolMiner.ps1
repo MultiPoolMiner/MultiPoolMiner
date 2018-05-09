@@ -121,6 +121,17 @@ Start-APIServer
 $API.Version = $Version
 $API.Devices = $Devices #Give API access to the device information  
 
+# Create config.txt if it is missing
+if (!Test-Path "Config.txt") {
+    if(Test-Path "Config.example.txt") {
+        Copy-Item -Path "Config.example.txt" -Destination "Config.txt"
+    } else {
+        Write-Log -Level Error "Critical error: Config.txt and Config.example.txt are missing. MPM cannot continue. "
+        Start-Sleep 10
+        Exit
+    }
+}
+
 while ($true) {
     #Load the config
     $ConfigBackup = $Config
@@ -153,33 +164,6 @@ while ($true) {
             SwitchingPrevention      = $SwitchingPrevention
             ShowMinerWindow          = $ShowMinerWindow
         } | Select-Object -ExpandProperty Content
-    }
-    else {
-        $Config = [PSCustomObject]@{
-            Pools                    = [PSCustomObject]@{}
-            Miners                   = [PSCustomObject]@{}
-            Interval                 = $Interval
-            Region                   = $Region
-            SSL                      = $SSL
-            Type                     = $Type
-            Algorithm                = $Algorithm
-            MinerName                = $MinerName
-            PoolName                 = $PoolName
-            ExcludeAlgorithm         = $ExcludeAlgorithm
-            ExcludeMinerName         = $ExcludeMinerName
-            ExcludePoolName          = $ExcludePoolName
-            Currency                 = $Currency
-            Donate                   = $Donate
-            Proxy                    = $Proxy
-            Delay                    = $Delay
-            Watchdog                 = $Watchdog
-            WatchdogExcludeAlgorithm = $WatchdogExcludeAlgorithm
-            WatchdogExcludeMinerName = $WatchdogExcludeMinerName
-            MinerStatusURL           = $MinerStatusURL
-            MinerStatusKey           = $MinerStatusKey
-            SwitchingPrevention      = $SwitchingPrevention
-            ShowMinerWindow          = $ShowMinerWindow
-        }
     }
 
     #Only use configured types that are present in system
