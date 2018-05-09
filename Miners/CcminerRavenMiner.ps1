@@ -1,6 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-RavenMiner\ccminer.exe"
+$HashSHA256 = "31AD588F593C438B74E18776F503580BC49733C970500EA5EE55A2466CC28FCF"
 $Uri = "https://github.com/Ravencoin-Miner/Ravencoin/releases/download/v2.6/Ravencoin.Miner.v2.6.COLOR.zip"
 
 $Commands = [PSCustomObject]@{
@@ -13,6 +14,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     [PSCustomObject]@{
         Type = "NVIDIA"
         Path = $Path
+        HashSHA256 = $HashSHA256
         Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_)"
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Ccminer"
