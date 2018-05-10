@@ -171,9 +171,7 @@ while ($true) {
 
     #Error in Config.txt
     if ($Config -isnot [PSCustomObject]) {
-        Write-Log -Level Error "*********************************************************** "
         Write-Log -Level Error "Config.txt is invalid. Cannot continue. "
-        Write-Log -Level Error "*********************************************************** "
         Start-Sleep 10
         Exit
     }
