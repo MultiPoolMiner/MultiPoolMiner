@@ -8,7 +8,7 @@
                       },
         "API":  "Claymore",
         "Port":  "23335",
-        "URI":  "https://github.com/iwtym/iwtym-phoenix/archive/master.zip"
+        "URI":  "hhttps://github.com/MultiPoolMiner/miner-binaries/releases/download/phoenixminer/PhoenixMiner_2.9e.zip"
     },
     {
         "Type":  "AMD",
@@ -19,6 +19,6 @@
                       },
         "API":  "Claymore",
         "Port":  "23335",
-        "URI":  "https://github.com/iwtym/iwtym-phoenix/archive/master.zip"
+        "URI":  "https://github.com/MultiPoolMiner/miner-binaries/releases/download/phoenixminer/PhoenixMiner_2.9e.zip"
     }
 ]
