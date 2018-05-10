@@ -13,6 +13,8 @@ Function Get-Version ($Version) {
     Return [System.Version]($Version -Split "-" -Replace "[^0-9.]")[0]
 }
 
+# Allow SSL connection
+[Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
 
 $Name = "MultiPoolMiner"
 try {
