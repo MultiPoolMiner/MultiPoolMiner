@@ -19,41 +19,40 @@ $Port = 13333
 $MinerFeeInPercentSingleMode = 1.0
 $MinerFeeInPercentDualMode = 1.5
 $Commands = [PSCustomObject]@{
-    "ethash" = ""
-    "ethash2gb" = ""
-    "ethash;blake2s:40" = ""
-    "ethash;blake2s:60" = ""
-    "ethash;blake2s:80" = ""
-    "ethash;decred:100" = ""
-    "ethash;decred:130" = ""
-    "ethash;decred:160" = ""
-    "ethash;keccak:70" = ""
-    "ethash;keccak:90" = ""
-    "ethash;keccak:110" = ""
-    "ethash;lbry:60" = ""
-    "ethash;lbry:75" = ""
-    "ethash;lbry:90" = ""
-    "ethash;pascal:40" = ""
-    "ethash;pascal:60" = ""
-    "ethash;pascal:80" = ""
-    "ethash;pascal:100" = ""
-    "ethash2gb;blake2s:75" = ""
-    "ethash2gb;blake2s:100" = ""
-    "ethash2gb;blake2s:125" =  ""
-    "ethash2gb;decred:100" = ""
-    "ethash2gb;decred:130" = ""
-    "ethash2gb;decred:160" = ""
-    "ethash2gb;keccak:70" = ""
-    "ethash2gb;keccak:90" = ""
-    "ethash2gb;keccak:110" = ""
-    "ethash2gb;lbry:60" = ""
-    "ethash2gb;lbry:75" = ""
-    "ethash2gb;lbry:90" = ""
-    "ethash2gb;pascal:40" = ""
-    "ethash2gb;pascal:60" = ""
-    "ethash2gb;pascal:80" = ""
+    "ethash"                = @("")
+    "ethash2gb"             = @("")
+    "ethash;blake2s:40"     = @("", "")
+    "ethash;blake2s:60"     = @("", "")
+    "ethash;blake2s:80"     = @("", "")
+    "ethash;decred:100"     = @("", "")
+    "ethash;decred:130"     = @("", "")
+    "ethash;decred:160"     = @("", "")
+    "ethash;keccak:70"      = @("", "")
+    "ethash;keccak:90"      = @("", "")
+    "ethash;keccak:110"     = @("", "")
+    "ethash;lbry:60"        = @("", "")
+    "ethash;lbry:75"        = @("", "")
+    "ethash;lbry:90"        = @("", "")
+    "ethash;pascal:40"      = @("", "")
+    "ethash;pascal:60"      = @("", "")
+    "ethash;pascal:80"      = @("", "")
+    "ethash2gb;blake2s:40"  = @("", "")
+    "ethash2gb;blake2s:60"  = @("", "")
+    "ethash2gb;blake2s:80"  = @("", "")
+    "ethash2gb;decred:100"  = @("", "")
+    "ethash2gb;decred:130"  = @("", "")
+    "ethash2gb;decred:160"  = @("", "")
+    "ethash2gb;keccak:70"   = @("", "")
+    "ethash2gb;keccak:90"   = @("", "")
+    "ethash2gb;keccak:110"  = @("", "")
+    "ethash2gb;lbry:60"     = @("", "")
+    "ethash2gb;lbry:75"     = @("", "")
+    "ethash2gb;lbry:90"     = @("", "")
+    "ethash2gb;pascal:40"   = @("", "")
+    "ethash2gb;pascal:60"   = @("", "")
+    "ethash2gb;pascal:80"   = @("", "")
 }
-$CommonCommands = @(" -logsmaxsize 1", "") # array, first value for main algo, second value for secondary algo
+$CommonCommands = @(" -logsmaxsize 1", "") # To be applied to all algorithms and intensities. Array: first value for main algo, second value for secondary algo
 
 # Get array of IDs of all devices in device set, returned DeviceIDs are of base $DeviceIdBase representation starting from $DeviceIdOffset
 $DeviceIDsSet = Get-DeviceIDs -Config $Config -Devices $Devices -Type $Type -DeviceTypeModel $($Devices.$Type) -DeviceIdBase 16 -DeviceIdOffset 0
@@ -72,8 +71,8 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
     if ($Pools.$MainAlgorithm_Norm -and $DeviceIDs) { # must have a valid pool to mine and available devices
 
         $Miner_Name = $Name
-        $MainAlgorithmCommands = $Commands.$_.Split(";") | Select -Index 0 # additional command line options for main algorithm
-        $SecondaryAlgorithmCommands = $Commands.$_.Split(";") | Select -Index 1 # additional command line options for secondary algorithm
+        $MainAlgorithmCommands = $Commands.$_ | Select -Index 0 # additional command line options for main algorithm
+        $SecondaryAlgorithmCommands = $Commands.$_ | Select -Index 1 # additional command line options for secondary algorithm
 
         if ($Pools.$MainAlgorithm_Norm.Name -eq 'NiceHash') {$EthereumStratumMode = "3"} else {$EthereumStratumMode = "2"} #Optimize stratum compatibility
 
@@ -122,7 +121,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
                     Type       = $Type
                     Path       = $Path
                     HashSHA256 = $HashSHA256
-                    Arguments  = ("-mode 0 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$MainAlgorithmCommands$($CommonCommands | Select -Index 1) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dcoin $SecondaryAlgorithm -dcri $SecondaryAlgorithmIntensity -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$SecondaryAlgorithmCommands$($CommonCommands | Select -Index 1) -platform 1 -di $($DeviceIDs -join '')" -replace "\s+", " ").trim()
+                    Arguments  = ("-mode 0 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$MainAlgorithmCommands$($CommonCommands | Select -Index 0) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dcoin $SecondaryAlgorithm -dcri $SecondaryAlgorithmIntensity -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$SecondaryAlgorithmCommands$($CommonCommands | Select -Index 1) -platform 1 -di $($DeviceIDs -join '')" -replace "\s+", " ").trim()
                     HashRates  = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm; "$SecondaryAlgorithm_Norm" = $HashRateSecondaryAlgorithm}
                     API        = $Api
                     Port       = $Port
