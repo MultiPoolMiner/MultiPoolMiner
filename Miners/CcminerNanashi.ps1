@@ -7,6 +7,7 @@ $Commands = [PSCustomObject]@{
     #GPU - profitable 20/04/2018
     "bastion" = "" #bastion
     "bitcore" = "" #Bitcore
+    "blake2s" = "" #Blake2s
     "bmw" = "" #bmw
     #"c11" = "" #C11
     "deep" = "" #deep
@@ -45,7 +46,6 @@ $Commands = [PSCustomObject]@{
     # ASIC - never profitable 27/03/2018
     #"blake" = "" #blake
     #"blakecoin" = "" #Blakecoin
-    #"blake2s" = "" #Blake2s
     #"cryptolight" = "" #cryptolight
     #"cryptonight" = "" #CryptoNight
     #"decred" = "" #Decred

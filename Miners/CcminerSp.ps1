@@ -6,6 +6,7 @@ $Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z
 $Commands = [PSCustomObject]@{
     #GPU - profitable 20/04/2018
     "bastion" = "" #bastion
+    "blake2s" = "" #Blake2s
     "c11" = "" #C11
     "credit" = "" #Credit
     "deep" = "" #deep
@@ -34,7 +35,6 @@ $Commands = [PSCustomObject]@{
     # ASIC - never profitable 27/03/2018
     #"blake" = "" #blake
     #"blakecoin" = "" #Blakecoin
-    #"blake2s" = "" #Blake2s
     #"decred" = "" #Decred
     #"lbry" = "" #Lbry
     #"myr-gr" = "" #MyriadGroestl
