@@ -52,7 +52,7 @@ $Commands = [PSCustomObject]@{
     "ethash2gb;pascal:60"   = @("", "")
     "ethash2gb;pascal:80"   = @("", "")
 }
-$CommonCommands = @(" -logsmaxsize 1", " -p3") # To be applied to all algorithms and intensities. Array: first value for main algo, second value for secondary algo
+$CommonCommands = @(" -logsmaxsize 1", "") # To be applied to all algorithms and intensities. Array: first value for main algo, second value for secondary algo
 
 # Get array of IDs of all devices in device set, returned DeviceIDs are of base $DeviceIdBase representation starting from $DeviceIdOffset
 $DeviceIDsSet = Get-DeviceIDs -Config $Config -Devices $Devices -Type $Type -DeviceTypeModel $($Devices.$Type) -DeviceIdBase 16 -DeviceIdOffset 0
