@@ -1,6 +1,6 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\AMD-KL-101\sgminer.exe"
+$Path = ".\Bin\AMD-KL\sgminer.exe"
 $Uri = "https://github.com/KL0nLutiy/sgminer-kl/releases/download/kl-1.0.1/sgminer-kl-1.0.1-windows.zip"
 
 $Commands = [PSCustomObject]@{
