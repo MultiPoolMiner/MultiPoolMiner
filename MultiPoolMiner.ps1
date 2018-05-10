@@ -126,7 +126,7 @@ if (!Test-Path "Config.txt") {
     if(Test-Path "Config.default.txt") {
         Copy-Item -Path "Config.default.txt" -Destination "Config.txt"
     } else {
-        Write-Log -Level Error "Critical error: Config.txt and Config.default.txt are missing. MPM cannot continue. "
+        Write-Log -Level Error "Config.txt and Config.default.txt are missing. Cannot continue. "
         Start-Sleep 10
         Exit
     }
