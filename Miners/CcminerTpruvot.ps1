@@ -7,7 +7,7 @@ $Commands = [PSCustomObject]@{
     #GPU - profitable 20/04/2018
     "bastion" = "" #bastion
     "bitcore" = "" #Bitcore
-    "blake2s" = "" #Blake2s
+    #"blake2s" = "" #Blake2s
     "bmw" = "" #bmw
     #"c11" = "" #C11
     "deep" = "" #deep
