@@ -2,6 +2,7 @@
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\CryptoNight-AMD\\xmrig-amd.exe",
+        "HashSHA256": "8D1867696FFD1D5EB628E88CC1293D39484F5536CB84E8441053E13F992E8515",
         "Arguments":  "\"--api-port 3336 -a cryptonight -o $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -u $($Pools.CryptoNightV7.User) -p $($Pools.CryptoNightV7.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
                           "CryptoNightV7":  "\"$(if ($Pools.CryptoNightV7.SSL) {0}else {$Stats.XmrigAmd_CryptoNightV7_HashRate.Week})\""
@@ -13,6 +14,7 @@
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\CryptoNight-AMD\\xmrig-amd.exe",
+        "HashSHA256": "8D1867696FFD1D5EB628E88CC1293D39484F5536CB84E8441053E13F992E8515",
         "Arguments":  "\"--api-port 3336 -a cryptonight-lite -o $($Pools.CryptoNightLite.Protocol)://$($Pools.CryptoNightLite.Host):$($Pools.CryptoNightLite.Port) -u $($Pools.CryptoNightLite.User) -p $($Pools.CryptoNightLite.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
                           "CryptoNightLite":  "\"$(if ($Pools.CryptoNightLite.SSL) {0}else {$Stats.XmrigAmd_CryptoNightLite_HashRate.Week})\""
@@ -24,6 +26,7 @@
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\CryptoNight-AMD\\xmrig-amd.exe",
+        "HashSHA256": "8D1867696FFD1D5EB628E88CC1293D39484F5536CB84E8441053E13F992E8515",
         "Arguments":  "\"--api-port 3336 -a cryptonight-heavy -o $($Pools.CryptoNightHeavy.Protocol)://$($Pools.CryptoNightHeavy.Host):$($Pools.CryptoNightHeavy.Port) -u $($Pools.CryptoNightHeavy.User) -p $($Pools.CryptoNightHeavy.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
                           "CryptoNightHeavy":  "\"$(if ($Pools.CryptoNightHeavy.SSL) {0}else {$Stats.XmrigAmd_CryptoNightHeavy_HashRate.Week})\""

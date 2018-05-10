@@ -1,6 +1,7 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-SP\ccminer.exe"
+$HashSHA256 = "82477387C860517C5FACE8758BCB7AAC890505280BF713ACA9F86D7B306AC711"
 $Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z"
 
 $Commands = [PSCustomObject]@{
@@ -30,7 +31,6 @@ $Commands = [PSCustomObject]@{
     #"whirlpool" = "" #Whirlpool
     #"whirlpoolx" = "" #whirlpoolx
     "x17" = "" #x17
-    "yescrypt" = "" #Yescrypt
 
     # ASIC - never profitable 27/03/2018
     #"blake" = "" #blake
@@ -58,6 +58,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     [PSCustomObject]@{
         Type = "NVIDIA"
         Path = $Path
+        HashSHA256 = $HashSHA256
         Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass) -b 4068$($Commands.$_)"
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Ccminer"
