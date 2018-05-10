@@ -13,7 +13,7 @@ Function Get-Version ($Version) {
     Return [System.Version]($Version -Split "-" -Replace "[^0-9.]")[0]
 }
 
-# Allow SSL connection
+# Support SSL connection
 [Net.ServicePointManager]::SecurityProtocol = "tls12, tls11, tls"
 
 $Name = "MultiPoolMiner"
@@ -42,7 +42,7 @@ try {
     $Request = Invoke-RestMethod -Uri "https://api.github.com/repos/powershell/$Name/releases" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 
     # Filter to only show the latest non-preview release
-    $LatestVersion = $Request.tag_name | Where-Object {$_ -notmatch '-preview' -and $_ -notmatch '-rc' -and $_ -notmatch '-beta' -and $_ -notmatch '-alpha'} | Select-Object -First 1
+    $LatestVersion = $Request.tag_name | Where-Object {$_ -notmatch '-preview|-rc|-beta|-alpha'} | Select-Object -First 1
     $Request = $Request | Where-Object {$_.tag_name -eq $LatestVersion}
 
     $Version = ($Request.tag_name -replace '^v')
