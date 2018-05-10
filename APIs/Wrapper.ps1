@@ -19,6 +19,8 @@ class Wrapper : Miner {
         }
 
         if (-not $this.Process) {
+            # Set current path used by .net methods to the same as the script's path
+            [Environment]::CurrentDirectory = (Get-Location).Path
             $this.Process = Start-SubProcess -FilePath (@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) -ArgumentList "-executionpolicy bypass -command `". '$(Convert-Path ".\Wrapper.ps1")' -ControllerProcessID $Global:PID -Id '$($this.Port)' -FilePath '$($this.Path)' -ArgumentList '$($this.Arguments)' -WorkingDirectory '$(Split-Path $this.Path)'`"" -LogPath ([System.IO.Path]::GetFullPath(".\Logs\$($this.Name)-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt")) -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Type | ForEach-Object {if ($this -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
 
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
