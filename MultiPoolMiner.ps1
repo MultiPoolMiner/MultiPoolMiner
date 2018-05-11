@@ -167,7 +167,8 @@ while ($true) {
     }
 
     #Only use configured types that are present in system
-    $Config.Type = $Config.Type | Where-Object {$Devices.$_}
+    #Explicitly include CPU, because it won't show up as a device if OpenGL drivers for CPU are not installed
+    $Config.Type = $Config.Type | Where-Object {$Devices.$_ -or $_ -eq 'CPU'}
 
     #Error in Config.txt
     if ($Config -isnot [PSCustomObject]) {
