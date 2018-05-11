@@ -6,20 +6,11 @@ $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/zenem
 
 $Commands = [PSCustomObject]@{
     "bitcore" = "" #Bitcore
-    "jha"     = "" #JHA - NOT TESTED
     "phi"     = "" #PHI
-    "poly"    = "" #Polytmos - NOT TESTED
-    "veltor"  = "" #Veltor - NOT TESTED
-    "x12"     = "" #X12 - NOT TESTED
-    "x14"     = "" #X14 - NOT TESTED
     "x16r"    = "" #Rave
     "x16s"    = "" #Pigeon
     "xevan"   = "" #Xevan, new in 1.09a
     "vit"     = "" #Vitality, new in 1.09a
-# ASIC - never profitable 20/04/2018
-    #"cryptonight" = "" #CryptoNight - NOT TESTED
-    #"decred" = "" #Decred - NOT TESTED
-    #"vanilla" = "" #BlakeVanilla - NOT TESTED
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
