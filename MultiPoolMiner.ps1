@@ -122,7 +122,7 @@ $API.Version = $Version
 $API.Devices = $Devices #Give API access to the device information  
 
 # Create config.txt if it is missing
-if (!Test-Path "Config.txt") {
+if (!(Test-Path "Config.txt")) {
     if(Test-Path "Config.default.txt") {
         Copy-Item -Path "Config.default.txt" -Destination "Config.txt"
     } else {
