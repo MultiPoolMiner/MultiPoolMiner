@@ -613,6 +613,14 @@ while ($true) {
     Start-Sleep $Config.Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         if ($_.GetStatus() -ne "Running") {
+		
+            # Launch custom miner variable
+            $MinerNameProfile = ".\Profile\"+$_.Name+".bat"
+            if (Test-Path $MinerNameProfile) {
+				Write-Host -F Yellow "Launching :" $MinerNameProfile
+				Sleep 2
+            }
+			
             Write-Log "Starting miner ($($_.Name)): '$($_.Path) $($_.Arguments)'"
             $DecayStart = $Timer
             $_.SetStatus("Running")
