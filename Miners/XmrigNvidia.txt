@@ -3,7 +3,7 @@
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\CryptoNight-NVIDIA\\xmrig-nvidia.exe",
         "HashSHA256": "5905924C61D96267C176BC9AF86C16DCC837B81378E47315231A9EE0C5CC48B7",
-        "Arguments":  "\"--api-port 3335 -a cryptonight -o $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -u $($Pools.CryptoNightV7.User) -p $($Pools.CryptoNightV7.Pass) --keepalive --nicehash --donate-level 1\"",
+        "Arguments":  "\"--api-port 3335 -a cryptonightV7 -o $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -u $($Pools.CryptoNightV7.User) -p $($Pools.CryptoNightV7.Pass) --keepalive --nicehash --donate-level 1 --cuda-bfactor=11\"",
         "HashRates":  {
                           "CryptoNightV7":  "\"$(if ($Pools.CryptoNightV7.SSL) {0}else {$Stats.XmrigNvidia_CryptoNightV7_HashRate.Week})\""
                       },
@@ -15,7 +15,7 @@
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\CryptoNight-NVIDIA\\xmrig-nvidia.exe",
         "HashSHA256": "5905924C61D96267C176BC9AF86C16DCC837B81378E47315231A9EE0C5CC48B7",
-        "Arguments":  "\"--api-port 3335 -a cryptonight-lite -o $($Pools.CryptoNightLite.Protocol)://$($Pools.CryptoNightLite.Host):$($Pools.CryptoNightLite.Port) -u $($Pools.CryptoNightLite.User) -p $($Pools.CryptoNightLite.Pass) --keepalive --nicehash --donate-level 1\"",
+        "Arguments":  "\"--api-port 3335 -a cryptonight-lite -o $($Pools.CryptoNightLite.Protocol)://$($Pools.CryptoNightLite.Host):$($Pools.CryptoNightLite.Port) -u $($Pools.CryptoNightLite.User) -p $($Pools.CryptoNightLite.Pass) --keepalive --nicehash --donate-level 1 --cuda-bfactor=11\"",
         "HashRates":  {
                           "CryptoNightLite":  "\"$(if ($Pools.CryptoNightLite.SSL) {0}else {$Stats.XmrigNvidia_CryptoNightLite_HashRate.Week})\""
                       },
@@ -27,7 +27,7 @@
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\CryptoNight-NVIDIA\\xmrig-nvidia.exe",
         "HashSHA256": "5905924C61D96267C176BC9AF86C16DCC837B81378E47315231A9EE0C5CC48B7",
-        "Arguments":  "\"--api-port 3335 -a cryptonight-heavy -o $($Pools.CryptoNightHeavy.Protocol)://$($Pools.CryptoNightHeavy.Host):$($Pools.CryptoNightHeavy.Port) -u $($Pools.CryptoNightHeavy.User) -p $($Pools.CryptoNightHeavy.Pass) --keepalive --nicehash --donate-level 1\"",
+        "Arguments":  "\"--api-port 3335 -a cryptonight-heavy -o $($Pools.CryptoNightHeavy.Protocol)://$($Pools.CryptoNightHeavy.Host):$($Pools.CryptoNightHeavy.Port) -u $($Pools.CryptoNightHeavy.User) -p $($Pools.CryptoNightHeavy.Pass) --keepalive --nicehash --donate-level 1 --cuda-bfactor=11\"",
         "HashRates":  {
                           "CryptoNightHeavy":  "\"$(if ($Pools.CryptoNightHeavy.SSL) {0}else {$Stats.XmrigNvidia_CryptoNightHeavy_HashRate.Week})\""
                       },
