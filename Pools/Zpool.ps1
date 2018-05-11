@@ -39,7 +39,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Selec
     $Divisor = 1000000
 
     switch ($Zpool_Algorithm_Norm) {
-        # values in mBTC/MH/day, per PH for sha256 & GH for scrypt, blake, decred, x11, quark, qubit, kS for equihash
+        # values in mBTC/MH/day, per PH for sha256 & GH for scrypt, blake, decred, x11, quark, qubit, sha256t, kS for equihash
         "blake2s"   {$Divisor *= 1000}
         "blakecoin" {$Divisor *= 1000}
         "decred"    {$Divisor *= 1000}
