@@ -18,6 +18,10 @@ param(
     [Parameter(Mandatory = $false)]
     [Int]$Interval = 60, #seconds before reading hash rate from miners
     [Parameter(Mandatory = $false)]
+    [Array]$ExtendIntervalAlgorithm = @("X16R", "X16S"), #Extend interval duration by a factor of 10x $Interval for these algorithms
+    [Parameter(Mandatory = $false)]
+    [Array]$ExtendIntervalMinerName = @("PalginNvidia"), #Extend interval duration by a factor of 10x $Interval for these miners
+    [Parameter(Mandatory = $false)]
     [Alias("Location")]
     [String]$Region = "europe", #europe/us/asia
     [Parameter(Mandatory = $false)]
@@ -51,10 +55,6 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$Watchdog = $false,
     [Parameter(Mandatory = $false)]
-    [Array]$ExcludeWatchdogAlgorithm = @("X16R"), #Do not use watchdog for these algorithms, e.g due to its nature X16R will always trigger watchdog
-    [Parameter(Mandatory = $false)]
-    [Array]$ExcludeWatchdogMinerName = @(), #Do not use watchdog for these miners
-    [Parameter(Mandatory = $false)]
     [Alias("Uri", "Url")]
     [String]$MinerStatusUrl = "", #i.e https://multipoolminer.io/monitor/miner.php
     [Parameter(Mandatory = $false)]
@@ -70,9 +70,6 @@ param(
 $Version = "2.7.2.7"
 $Strikes = 3
 $SyncWindow = 5 #minutes
-
-#Get miner hw info
-$Devices = Get-Devices
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 Import-Module NetSecurity -ErrorAction Ignore
@@ -97,6 +94,13 @@ $Rates = [PSCustomObject]@{BTC = [Double]1}
 
 #Start the log
 Start-Transcript ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
+
+Write-Log "********************************************************************"
+Write-Log "***      Starting MPM version $Version (c) MultiPoolMiner.io      ***"
+Write-Log "********************************************************************"
+
+#Get miner hw info
+$Devices = Get-Devices
 
 #Set process priority to BelowNormal to avoid hash rate drops on systems with weak CPUs
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
@@ -143,6 +147,8 @@ while ($true) {
             API_ID                   = $API_ID
             API_Key                  = $API_Key
             Interval                 = $Interval
+            ExtendIntervalAlgorithm  = $ExtendIntervalAlgorithm
+            ExtendIntervalMinerName  = $ExtendIntervalMinerName
             Region                   = $Region
             SSL                      = $SSL
             Type                     = $Type
@@ -157,8 +163,6 @@ while ($true) {
             Proxy                    = $Proxy
             Delay                    = $Delay
             Watchdog                 = $Watchdog
-            WatchdogExcludeAlgorithm = $WatchdogExcludeAlgorithm
-            WatchdogExcludeMinerName = $WatchdogExcludeMinerName
             MinerStatusURL           = $MinerStatusURL
             MinerStatusKey           = $MinerStatusKey
             SwitchingPrevention      = $SwitchingPrevention
@@ -610,19 +614,17 @@ while ($true) {
                 $Miner_Name = $_.Name
                 $_.Algorithm | ForEach-Object {
                     $Miner_Algorithm = $_
-                    if ($Config.ExcludeWatchdogAlgorithm -inotcontains $Miner_Algorithm -and $Config.ExcludeWatchdogMinerName -inotcontains $Miner_Name) {
-                        $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
-                        if (-not $WatchdogTimer) {
-                            $WatchdogTimers += [PSCustomObject]@{
-                                MinerName = $Miner_Name
-                                PoolName  = $Pools.$Miner_Algorithm.Name
-                                Algorithm = $Miner_Algorithm
-                                Kicked    = $Timer
-                            }
+                    $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
+                    if (-not $WatchdogTimer) {
+                        $WatchdogTimers += [PSCustomObject]@{
+                            MinerName = $Miner_Name
+                            PoolName  = $Pools.$Miner_Algorithm.Name
+                            Algorithm = $Miner_Algorithm
+                            Kicked    = $Timer
                         }
-                        elseif (-not ($WatchdogTimer.Kicked -GT $Timer.AddSeconds( - $WatchdogReset))) {
-                            $WatchdogTimer.Kicked = $Timer
-                        }
+                    }
+                    elseif (-not ($WatchdogTimer.Kicked -GT $Timer.AddSeconds( - $WatchdogReset))) {
+                        $WatchdogTimer.Kicked = $Timer
                     }
                 }
             }
@@ -690,12 +692,22 @@ while ($true) {
 
     #Update API miner information
     $API.ActiveMiners = $ActiveMiners
-    $API.RunningMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Running}
+    $API.RunningMiners = $RunningMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Running}
     $API.FailedMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Failed}
 
     #Reduce Memory
     Get-Job -State Completed | Remove-Job
     [GC]::Collect()
+
+    #When benchmarking miners/algorithm in ExtendInterval... add 10x $Config.Interval to $StatEnd, extend StatSpan, extend watchdog times
+    $BenchmarkingMiners = $RunningMiners | Where-Object {$_.Speed -eq $null}
+    if ($BenchmarkingMiners | Where-Object {$Config.ExtendIntervalMinerName -icontains $_.Name -or ($_.Algorithm | Where-Object {$Config.ExtendIntervalAlgorithm -icontains $_})}) {
+        $StatEnd = $StatEnd.AddSeconds($Config.Interval * 10)
+        $StatSpan = New-TimeSpan $StatStart $StatEnd
+        $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
+        $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
+        Write-Log "Benchmarking watchdog sensitive algorithm or miner. Increasing interval time temporarily to 10x interval ($($Config.Interval * 10) seconds). "
+    }
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
     Write-Log "Start waiting before next run. "
@@ -712,10 +724,10 @@ while ($true) {
     $ActiveMiners | ForEach-Object {
         $Miner = $_
         $Miner.Speed_Live = 0
-        $Miner_Data = [PSCustomObject]@{}
 
         if ($Miner.New) {$Miner.Benchmarked++}
 
+        $Miner_Data = [PSCustomObject]@{}
         $Miner_Data = $Miner.GetMinerData(($Miner.New -and $Miner.Benchmarked -lt $Strikes))
         $Miner_Data.Lines | ForEach-Object {Write-Log -Level Verbose "$($Miner.Name): $_"}
 
@@ -723,7 +735,8 @@ while ($true) {
             $Miner.Speed_Live = $Miner_Data.HashRate.PSObject.Properties.Value
 
             $Miner.Algorithm | Where-Object {$Miner_Data.HashRate.$_} | ForEach-Object {
-                $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Data.HashRate.$_ -Duration $StatSpan -FaultDetection $true
+                $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Data.HashRate.$_ -Duration $StatSpan -FaultDetection ($Config.ExtendIntervalAlgorithm -inotcontains $_ -and $Config.ExtendIntervalMinerName -inotcontains $Miner.Name)
+
 
                 #Update watchdog timer
                 $Miner_Name = $Miner.Name

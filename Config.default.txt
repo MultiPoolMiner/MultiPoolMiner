@@ -40,5 +40,12 @@
   "Watchdog": "$Watchdog",
   "MinerStatusURL": "$MinerStatusURL",
   "MinerStatusKey": "$MinerStatusKey",
-  "SwitchingPrevention": "$SwitchingPrevention"
+  "SwitchingPrevention": "$SwitchingPrevention",
+  "ExtendIntervalAlgorithm": [
+    "X16R",
+    "X16S"
+  ],
+  "ExtendIntervalMinerName": [
+    "PalginNvidia"
+  ]
 }
