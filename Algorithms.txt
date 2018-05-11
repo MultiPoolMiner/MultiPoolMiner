@@ -152,6 +152,7 @@
     "verge-lyra2v2":  "Lyra2RE2",
     "verge-x17":  "X17",
     "vertcoin":  "Lyra2RE2",
+    "vit":  "Vitalium",
     "whirlpool":  "whirlpool",
     "whirlpoolx":  "whirlpoolX",
     "x11":  "X11",

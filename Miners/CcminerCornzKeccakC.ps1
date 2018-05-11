@@ -1,25 +1,11 @@
- using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-Zealot\z-enemy.exe"
-$HashSHA256 = "15F401E8AF15884440C5A8940C9E91934A3A7AF484DA3ACAB9237087D010F42A"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/zenemy109/z-enemy.109a-release.zip"
+$Path = ".\Bin\KeccakC-NVIDIA\ccminer_CP.exe"
+$HashSHA256 = "A63C6AC68D814CEC3757B345FE608DD44B59EECED6A7B4B47F5B408D0BC84CD3"
+$URI = "https://github.com/cornz/ccminer/releases/download/keccakc/ccminer_CP.zip"
 
 $Commands = [PSCustomObject]@{
-    "bitcore" = "" #Bitcore
-    "jha"     = "" #JHA - NOT TESTED
-    "phi"     = "" #PHI
-    "poly"    = "" #Polytmos - NOT TESTED
-    "veltor"  = "" #Veltor - NOT TESTED
-    "x12"     = "" #X12 - NOT TESTED
-    "x14"     = "" #X14 - NOT TESTED
-    "x16r"    = "" #Rave
-    "x16s"    = "" #Pigeon
-    "xevan"   = "" #Xevan, new in 1.09a
-    "vit"     = "" #Vitality, new in 1.09a
-# ASIC - never profitable 20/04/2018
-    #"cryptonight" = "" #CryptoNight - NOT TESTED
-    #"decred" = "" #Decred - NOT TESTED
-    #"vanilla" = "" #BlakeVanilla - NOT TESTED
+    "keccakC" = "" #KeccakC
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -35,4 +21,4 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         Port = 4068
         URI = $Uri
     }
-} 
+}
