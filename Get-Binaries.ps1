@@ -23,8 +23,8 @@ $Devices = Get-Devices
 
 # Choose which types to download
 $Types = @()
-if(-not $SkipAMD -and $Devices.AMD) {$Types += "AMD"}
-if(-not $SkipNVIDIA -and $Devices.NVIDIA) {$Types += "NVIDIA"}
+if(-not $SkipAMD) {$Types += "AMD"}
+if(-not $SkipNVIDIA) {$Types += "NVIDIA"}
 if(-not $SkipCPU) {$Types += "CPU"}
 
 Write-Verbose "Downloading miners for types: $Types"
