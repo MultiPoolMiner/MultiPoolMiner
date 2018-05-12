@@ -5,8 +5,6 @@ $HashSHA256 = "B0517639B174E2A7776A5567F566E1C0905A7FE439049D33D44A7502DE581F7B"
 $URI = "https://github.com/scaras/ccminer-2.2-mod-r1/releases/download/2.2-r1/2.2-mod-r1.zip"
 
 $Commands = [PSCustomObject]@{
-    "skunk" = "" #Skunk
-    
     "blake2s"   = "" #Blake2s
     "blakecoin" = "" #Blakecoin
     "c11"       = "" #C11
@@ -16,6 +14,7 @@ $Commands = [PSCustomObject]@{
     "lyra2z"    = "" #Lyra2z
     "neoscrypt" = "" #NeoScrypt
     "skein"     = "" #Skein
+    "skunk"     = "" #Skunk
     "timetravel"= "" #Timetravel
     "tribus"    = "" #Tribus
     "x11evo"    = "" #X11evo
