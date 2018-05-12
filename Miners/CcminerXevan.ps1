@@ -5,7 +5,8 @@ $HashSHA256 = "E71488C61263C080964596B72880F04AC20E91A00CB6A217BCE7863685705243"
 $Uri = "https://github.com/nemosminer/ccminer-xevan/releases/download/ccminer-xevan/ccminer_x86.7z"
 
 $Commands = [PSCustomObject]@{
-    "xevan" = "" #Xevan
+    "xevan"     = "" #Xevan
+    "Lyra2re2"  = "" #Lyra2RE2
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
