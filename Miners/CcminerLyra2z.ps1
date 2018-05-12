@@ -5,31 +5,31 @@ $HashSHA256 = "F9A69BA3C00E80BBBE7054E8705FE07DC23B7C408FA5405B778441A24D1AD223"
 $Uri = "https://github.com/djm34/ccminer-msvc2015/releases/download/v0.3.0/ccminer.rar"
 
 $Commands = [PSCustomObject]@{
-    "blake2s" = "" #Blake2s
+    "blake2s"   = "" #Blake2s
     "blakecoin" = "" #Blakecoin
-    "c11" = "" #C11
-    "groestl" = "" #Groestl
-    "keccak" = "" #Keccak
-    "lyra2h" = "" #Lyra2h
-    "lyra2v2" = "" #Lyra2RE2
-    "lyra2z" = "" #Lyra2z
+    "c11"       = "" #C11
+    "groestl"   = "" #Groestl
+    "keccak"    = "" #Keccak
+    "lyra2h"    = "" #Lyra2h
+    "lyra2v2"   = "" #Lyra2RE2
+    "lyra2z"    = "" #Lyra2z
     "neoscrypt" = "" #NeoScrypt
-    "skein" = "" #Skein
-    "x11evo" = "" #X11evo
-    "x17" = "" #X17
+    "skein"     = "" #Skein
+    "x11evo"    = "" #X11evo
+    "x17"       = "" #X17
     
     # ASIC - never profitable 12/05/2018
-    #"decred" = "" #Decred
-    #"lbry" = "" #Lbry
-    #"myr-gr" = "" #MyriadGroestl
-    #"nist5" = "" #Nist5
-    #"qubit" = "" #Qubit
-    #"quark" = "" #Quark
-    #"sib" = "" #Sib
-    #"x11" = "" #X11
-    #"x12" = "" #X12
-    #"x13" = "" #X13
-    #"x14" = "" #X14
+    #"decred"   = "" #Decred
+    #"lbry"     = "" #Lbry
+    #"myr-gr"   = "" #MyriadGroestl
+    #"nist5"    = "" #Nist5
+    #"qubit"    = "" #Qubit
+    #"quark"    = "" #Quark
+    #"sib"      = "" #Sib
+    #"x11"      = "" #X11
+    #"x12"      = "" #X12
+    #"x13"      = "" #X13
+    #"x14"      = "" #X14
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
