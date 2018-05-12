@@ -18,11 +18,14 @@ Param(
 # Make sure we are in the script's directory
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
+# Get device information
+$Devices = Get-Devices
+
 # Choose which types to download
 $Types = @()
-if(-not $SkipAMD) { $Types += "AMD"}
-if(-not $SkipNVIDIA) { $Types += "NVIDIA"}
-if(-not $SkipCPU) { $Types += "CPU"}
+if(-not $SkipAMD -and $Devices.AMD) {$Types += "AMD"}
+if(-not $SkipNVIDIA -and $Devices.NVIDIA) {$Types += "NVIDIA"}
+if(-not $SkipCPU) {$Types += "CPU"}
 
 Write-Verbose "Downloading miners for types: $Types"
 
@@ -87,7 +90,7 @@ if (-not (Test-Path ".\Bin")) {
 $BinDirectory = (Resolve-Path ".\Bin").Path
 
 # Get all the miners using the fake configuration
-$Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} 
+$Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $Devices} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} 
 Write-Debug "$($Miners.Count) miners loaded (including duplicates)"
 
 # Filter duplicates (same miner, different algo) out of the list
@@ -202,4 +205,3 @@ $Miners | Foreach-Object {
         Write-Warning "$($Miner.Name) - failed to download"
     }
 }
-
