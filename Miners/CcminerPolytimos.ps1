@@ -5,7 +5,8 @@ $HashSHA256 = "3B9F6A607F0E66974FFB1880B1E89062AC7D0794BE6CC596493CC475EE36DA6F"
 $URI = "https://github.com/punxsutawneyphil/ccminer/releases/download/polytimosv2/ccminer-polytimos_v2.zip"
 
 $Commands = [PSCustomObject]@{
-    "poly" = "" #Polytimos
+    "poly"      = "" #Polytimos
+    "keccak"    = "" #Keccak
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
