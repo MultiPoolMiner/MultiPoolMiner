@@ -1,4 +1,4 @@
- using module ..\Include.psm1
+using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-Zealot\z-enemy.exe"
 $HashSHA256 = "15F401E8AF15884440C5A8940C9E91934A3A7AF484DA3ACAB9237087D010F42A"
