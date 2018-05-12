@@ -5,7 +5,7 @@ $HashSHA256 = "6DE5DC4F109951AE1591D083F5C2A6494C9B59470C15EF6FBE5D38C50625304B"
 $Uri = "https://github.com/ocminer/suprminer/releases/download/1.5/suprminer-1.5.7z"
 
 $Commands = [PSCustomObject]@{
-    #"x16r"  = "" #X16R RavenCoin
+    "x16r"  = "" #X16R RavenCoin
     "x16s"  = "" #X16S PigeonCoin
 }
 
