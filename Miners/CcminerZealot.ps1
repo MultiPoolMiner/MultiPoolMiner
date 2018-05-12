@@ -9,6 +9,7 @@ $Commands = [PSCustomObject]@{
     "phi"     = "" #PHI
     "x16r"    = "" #Raven
     "x16s"    = "" #Pigeon
+    "x17"     = "" #X17
     "xevan"   = "" #Xevan, new in 1.09a
     "vit"     = "" #Vitality, new in 1.09a
 }
