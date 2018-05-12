@@ -5,7 +5,23 @@ $HashSHA256 = "CD8602A080728894570C9D29FC1423FB62AF1FA9CAF3913E609BA21777284DEE"
 $Uri = "https://github.com/nicehash/ccminer-x11gost/releases/download/ccminer-x11gost_windows/ccminer_x11gost.7z"
 
 $Commands = [PSCustomObject]@{
-    "sib" = "" #Sib
+    "blake2s"   = "" #Blake2s
+    "blakecoin" = "" #Blakecoin
+    "c11"       = "" #C11
+    "keccak"    = "" #Keccak
+    "lyra2v2"   = "" #Lyra2RE2
+    "neoscrypt" = "" #NeoScrypt
+    "sib"       = "" #Sib
+    "skein"     = "" #Skein
+    "x11evo"    = "" #X11evo
+
+    # ASIC - never profitable 12/05/2018
+    #"decred" = "" #Decred
+    #"lbry" = "" #Lbry
+    #"myr-gr" = "" #MyriadGroestl
+    #"nist5" = "" #Nist5
+    #"sib" = "" #Sib
+    
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
