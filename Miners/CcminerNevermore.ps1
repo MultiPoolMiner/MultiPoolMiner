@@ -26,7 +26,7 @@ $Commands = [PSCustomObject]@{
     "veltor" = "" #Veltor - NOT TESTED
     "x11evo" = "" #X11evo
     "x12" = "" #X12 - NOT TESTED
-    "x16r" = "" #Rave
+    "x16r" = "" #Raven
     "x16s" = "" #Pigeon
     "x17" = "" #X17
    
