@@ -1,7 +1,7 @@
 using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-Nevermore\ccminer.exe"
-$HashSHA256 = "62489722C44CDAD3DF4C22E46A2A16A3E8A81E273D562C7C25398F77684A1C11"
+$HashSHA256 = "913DBACE37949F2BB718E3C57C9A080C3040454E5D4E27244E1CB2F785DFD9AF"
 $Uri = "https://github.com/nemosminer/ccminernevermorex16r/releases/download/nevermorex16rv0.3/ccminernevermorex16rx64v0.3.zip"
 
 $Commands = [PSCustomObject]@{
