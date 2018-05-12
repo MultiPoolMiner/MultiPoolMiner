@@ -7,6 +7,10 @@ $Uri = "https://github.com/nicehash/ccminer-x11gost/releases/download/ccminer-x1
 $Commands = [PSCustomObject]@{
     "sib" = "" #Sib
     "x11evo" = "" #X11evo
+    
+    # ASIC - never profitable 12/05/2018
+    #"blakecoin" = "" #Blakecoin
+    #"blake2s" = "" #Blake2s 
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
