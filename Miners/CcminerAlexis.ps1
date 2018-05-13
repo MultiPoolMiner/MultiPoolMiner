@@ -1,27 +1,28 @@
 using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-Alexis78hsr\ccminer-alexis.exe"
-$HashSHA256 = "1075FE6CBD4227AEA85188E90FD4432B6D39966AF305A2A43247C03DA914260C"
-$Uri = "https://github.com/nemosminer/ccminer-hcash/releases/download/alexishsr/ccminer-hsr-alexis-x86-cuda8.7z"
+$Path = ".\Bin\NVIDIA-Alexis78hsr\ccminer.exe"
+$HashSHA256 = "406E67B490F02F1FAAC8C4AA38B949832E8F93AC454B1BA6054ED04B83BAA31D"
+$Uri = "https://github.com/nemosminer/ccminerAlexis78/releases/download/3%2F3%2F2018/ccminer-Alexis78.zip"
 
 $Commands = [PSCustomObject]@{
-    #GPU - profitable 20/04/2018
-    "c11" = "" #c11
-    "hsr" = "" #HSR, HShare
-    "keccak" = "" #Keccak
-    "lyra2" = "" #Lyra2
-    "lyra2v2" = "" #lyra2v2
-    #"neoscrypt" = "" #NeoScrypt
-    #"skein" = "" #Skein
-    "skein2" = "" #skein2
-    "veltor" = "" #Veltor
-    #"whirlcoin" = "" #WhirlCoin
-    #"whirlpool" = "" #Whirlpool
-    #"whirlpoolx" = "" #whirlpoolx
-    "x11evo" = "" #X11evo
-    "x17" = "" #x17
+    #GPU - profitable 13/05/2018
+    #Intensities and parameters tested by nemosminer on 10603gb to 1080ti
+    "c11"        = " -i 21" #X11evo; fix for default intensity
+    "hsr"        = "" #HSR, HShare
+    "keccak"     = " -m 2 -i 29" #Keccak; fix for default intensity, difficulty x M
+    "lyra2"      = "" #Lyra2
+    "lyra2v2"    = "" #lyra2v2
+    "neoscrypt"  = "" #NeoScrypt
+    "skein"      = "" #Skein
+    "skein2"     = "" #skein2
+    "veltor"     = " -i 23" #Veltor; fix for default intensity
+    "whirlcoin"  = "" #WhirlCoin
+    "whirlpool"  = "" #Whirlpool
+    "whirlpoolx" = "" #whirlpoolx
+    "x11evo"     = " -N 1 -i 21" #X11evo; fix for default intensity, N samples for hashrate
+    "x17"        = " -i 20" #x17; fix for default intensity
 
-    # ASIC - never profitable 20/04/2018
+    # ASIC - never profitable 13/05/2018
     #"blake2s" = "" #Blake2s
     #"blake" = "" #blake
     #"blakecoin" = "" #Blakecoin
@@ -47,14 +48,17 @@ $Commands = [PSCustomObject]@{
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
+
+    $Algorithm_Norm = Get-Algorithm $_
+
     [PSCustomObject]@{
-        Type = "NVIDIA"
-        Path = $Path
+        Type       = "NVIDIA"
+        Path       = $Path
         HashSHA256 = $HashSHA256
-        Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_)"
-        HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
-        API = "Ccminer"
-        Port = 4068
-        URI = $Uri
+        Arguments  = "-a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)"
+        HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week}
+        API        = "Ccminer"
+        Port       = 4068
+        URI        = $Uri
     }
 }
