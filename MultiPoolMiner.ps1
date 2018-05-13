@@ -242,8 +242,7 @@ while ($true) {
 
     #Load the stats
     Write-Log "Loading saved statistics. "
-    $Stats = [PSCustomObject]@{}
-    if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
+    $Stats = Get-Stats
     #Give API access to the current stats
     $API.Stats = $Stats
 
