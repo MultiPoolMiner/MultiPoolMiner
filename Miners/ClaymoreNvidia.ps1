@@ -80,7 +80,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
         default     {$DeviceIDs = $DeviceIDsAll}
     }
 
-    if ($Pools.$MainAlgorithm_Norm -and $DeviceIDs) { # must have a valid pool to mine and available devices
+    if (($Pools.$MainAlgorithm_Norm -and $DeviceIDs) -or $Config.InfoOnly) { # must have a valid pool to mine and available devices
 
         $Miner_Name = $Name
         $MainAlgorithmCommands = $Commands.$_.Split(";") | Select -Index 0 # additional command line options for main algorithm
