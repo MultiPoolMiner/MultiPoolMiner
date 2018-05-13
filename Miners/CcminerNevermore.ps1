@@ -55,8 +55,8 @@ $Commands = [PSCustomObject]@{
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
-
-    Algorithm_Norm = Get-Algorithm $_
+    
+    $Algorithm_Norm = Get-Algorithm $_
 
     [PSCustomObject]@{
         Type = "NVIDIA"
