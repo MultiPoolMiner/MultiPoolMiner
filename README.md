@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 09/05/2018 - v1.23.03 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 13/05/2018 - v1.23.04 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -193,10 +193,13 @@ Since version 2.6, the delta value (integer) that was used to determine how ofte
 **-disableautoupdate**
 By default MPM will perform an automatic update on startup if a newer version is found. Set to 'true' to disable automatic update to latest MPM version. 
 
-**-ShowMinerWindow
-By default MPM hides most miner windows as to not steal focus. All miners write their output to files in the Log folder. Set to 'true' to show miner windows (old MPM behaviour).
+**-ShowMinerWindow**
+By default MPM hides most miner windows as to not steal focus (miners that use the 'Wrapper' API will remain invisible. Set to 'true' to show miner windows (old MPM behaviour). If set to 'false' the miners write their output to files in the Log folder
 
-
+**-IgnoreMinerFee**
+Newer versions of MPM take miner fees into account when calculating profitability. Set this flag to 'true' to ignore the fees (old MPM behaviour).
+This is also a per-miner configuration item which available through advanced configuration 
+    
 ##SAMPLE USAGE
 #####(check "start.bat" file in root folder)
 
@@ -233,60 +236,60 @@ If Config.txt does not exist, copy Config.default.txt and rename to Config.txt
 
 Config.txt is a JSON file and human readable / editable. A good primer for understanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
 
-Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like https://codebeautify.org/jsonviewer/ (copy/paste the complete file).
+Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like https://jsonblob.com (copy/paste the complete file).
 
 ### Default content of 'Config.txt'
 
 ```
 {
-    "Pools": {
-        "MiningPoolHub": {
-            "User": "$UserName",
-            "Worker": "$WorkerName",
-            "API_ID": "$API_ID",
-            "API_Key": "$API_Key"
-        },
-            "MiningPoolHubCoins": {
-            "User": "$UserName",
-            "Worker": "$WorkerName",
-            "API_ID": "$API_ID",
-            "API_Key": "$API_Key"
-        },
-            "NiceHash": {
-            "BTC": "$Wallet",
-            "Worker": "$WorkerName"
-        },
-            "Zpool": {
-            "BTC": "$Wallet",
-            "Worker": "$WorkerName"
-        }
+  "Pools": {
+    "MiningPoolHub": {
+      "User": "$UserName",
+      "Worker": "$WorkerName",
+      "API_ID": "$API_ID",
+      "API_Key": "$API_Key"
     },
-    "Miners": {
+    "MiningPoolHubCoins": {
+      "User": "$UserName",
+      "Worker": "$WorkerName",
+      "API_ID": "$API_ID",
+      "API_Key": "$API_Key"
     },
-    "Interval": "$Interval",
-    "Region": "$Region",
-    "SSL": "$SSL",
-    "Type": "$Type",
-    "Algorithm": "$Algorithm",
-    "MinerName": "$MinerName",
-    "PoolName": "$PoolName",
-    "ExcludeAlgorithm": "$ExcludeAlgorithm",
-    "ExcludeMinerName": "$ExcludeMinerName",
-    "ExcludePoolName": "$ExcludePoolName",
-    "Currency": "$Currency",
-    "Donate": "$Donate",
-    "Proxy": "$Proxy",
-    "Delay": "$Delay",
-    "Watchdog": "$Watchdog",
-    "MinerStatusURL": "$MinerStatusURL",
-    "MinerStatusKey": "$MinerStatusKey",
-    "SwitchingPrevention": "$SwitchingPrevention"
-}
-```
+    "NiceHash": {
+      "BTC": "$Wallet",
+      "Worker": "$WorkerName"
+    },
+    "Zpool": {
+      "BTC": "$Wallet",
+      "Worker": "$WorkerName"
+    }
+  },
+  "Miners": {
+  },
+  "Interval": "$Interval",
+  "Region": "$Region",
+  "SSL": "$SSL",
+  "Type": "$Type",
+  "Algorithm": "$Algorithm",
+  "MinerName": "$MinerName",
+  "PoolName": "$PoolName",
+  "ExcludeAlgorithm": "$ExcludeAlgorithm",
+  "ExcludeMinerName": "$ExcludeMinerName",
+  "ExcludePoolName": "$ExcludePoolName",
+  "Currency": "$Currency",
+  "Donate": "$Donate",
+  "Proxy": "$Proxy",
+  "Delay": "$Delay",
+  "Watchdog": "$Watchdog",
+  "MinerStatusURL": "$MinerStatusURL",
+  "MinerStatusKey": "$MinerStatusKey",
+  "SwitchingPrevention": "$SwitchingPrevention",
+  "IgnoreMinerFee":  "$IgnoreMinerFee"
+}```
 
 There is a section for Pools, Miners and a general section
 
-### Advanced config for Pools
+### Advanced configuration for Pools
 
 Settings for each configured pool are stored in its own subsection. Theses settings are only valid for the named pool.
 
@@ -311,7 +314,25 @@ E.g. to change the payout currency for Zpool to LiteCoin replace the line for BT
         "LTC": "<YOUR_LITECOIN_ADDRESS>",
         "Worker": "$WorkerName"
     }
+
     
+### Advanced configuration for Miners
+
+Settings for each configured miner are stored in its own subsection. Theses settings are only valid for the named miner.
+
+#### Ignore miner fee in profit calculations
+
+By default newer versions of MPM take miner fees into account when calculating profitability. You can turn this off on a per miner basis.
+
+Note: Not all pools contain a fee, for more information consult the miners web page
+
+E.g. to ignore miner fees (old MPM behaviour) for the CcminerZealot miner add '"IgnoreMinerFee":  true'  to the miners section in Config.txt:
+
+    "Miners":  {
+        "CcminerZealot":  {
+            "IgnoreMinerFee":  true'
+        }
+
 
 ### Advanced general configuration
 
@@ -328,6 +349,20 @@ Note: Showing the miner windows disables writing the miner output to log files.
     ...
     "SwitchingPrevention":  "$SwitchingPrevention",
     "ShowMinerWindow":  true,
+    ...
+}
+
+#### Ignore miner fee in profit calculations
+
+By default newer versions of MPM take miner fees into account when calculating profitability.
+
+To ignore miner fees (old MPM behaviour) for ALL miners add '"IgnoreMinerFee":  true' to the general section in Config.txt:.
+
+{
+    ...
+    "SwitchingPrevention":  "$SwitchingPrevention",
+    "ShowMinerWindow":  true,
+    "IgnoreMinerFee":  true,
     ...
 }
 

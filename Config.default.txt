@@ -40,5 +40,6 @@
   "Watchdog": "$Watchdog",
   "MinerStatusURL": "$MinerStatusURL",
   "MinerStatusKey": "$MinerStatusKey",
-  "SwitchingPrevention": "$SwitchingPrevention"
+  "SwitchingPrevention": "$SwitchingPrevention",
+  "IgnoreMinerFee":  "$IgnoreMinerFee"
 }
