@@ -415,6 +415,103 @@ function Get-ChildItemContent {
     }
 }
 
+function Get-ChildItemContentParallel {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]$Path,
+        [Parameter(Mandatory = $false)]
+        [Hashtable]$Parameters = @{}
+    )
+    $ScriptDir = (Get-Location).Path
+
+    # Determine how many threads to use based on how many cores the system has, but force it to be between 2 and 8.
+    $Threads = 2 # Default
+    $Threads = ((Get-CimInstance win32_processor).NumberOfLogicalProcessors | Measure-Object -Sum).Sum 
+    if ($Threads -lt 2) { $Threads = 2 }
+    if ($Threads -gt 8) { $Threads = 8 }
+
+    # Create a runspace pool with up to $Threads threads
+    $RunspaceCollection = @()
+    $RunspacePool = [runspacefactory]::CreateRunspacePool(1,$Threads)
+    $RunspacePool.Open()
+
+    # Setup code block to process each file - Include.psm1 has to be imported into each runspace
+    $ProcessItem = {
+        Param($ScriptDir, $File, $Parameters)
+        Set-Location $ScriptDir
+
+        function Invoke-ExpressionRecursive ($Expression) {
+            if ($Expression -is [String]) {
+                if ($Expression -match '(\$|")') {
+                    try {$Expression = Invoke-Expression $Expression}
+                    catch {$Expression = Invoke-Expression "`"$Expression`""}
+                }
+            }
+            elseif ($Expression -is [PSCustomObject]) {
+                $Expression | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
+                    $Expression.$_ = Invoke-ExpressionRecursive $Expression.$_
+                }
+            }
+            return $Expression
+        }
+
+        $Name = $File.BaseName
+        $Content = @()
+        if ($File.Extension -eq ".ps1") {
+            $Content = & {
+                $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters.$_}
+                & $File.FullName @Parameters
+            }
+        }
+        else {
+            $Content = & {
+                $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters.$_}
+                try {
+                    ($File | Get-Content | ConvertFrom-Json) | ForEach-Object {Invoke-ExpressionRecursive $_}
+                }
+                catch [ArgumentException] {
+                    $null
+                }
+            }
+            if ($Content -eq $null) {$Content = $File | Get-Content}
+        }
+        $Content | ForEach-Object {
+            if ($_.Name) {
+                [PSCustomObject]@{Name = $_.Name; Content = $_}
+            }
+            else {
+                [PSCustomObject]@{Name = $Name; Content = $_}
+            }
+        }
+    }
+
+    # Get each requested file and process it in a runspace
+    Get-ChildItem $Path -File -ErrorAction SilentlyContinue | Foreach-Object {
+        $Powershell = [powershell]::Create().AddScript($ProcessItem,$true).AddArgument($ScriptDir).AddArgument($_).AddArgument($Parameters)
+        $Powershell.RunspacePool = $RunSpacePool
+
+        # Add to the collection of runspaces
+        [Collections.ArrayList]$RunspaceCollection += New-Object -TypeName PSObject -Property @{
+            Runspace = $PowerShell.BeginInvoke()
+            Powershell = $Powershell
+        }
+    }
+
+    # Wait for all runspaces to finish running and get their data
+    While($RunspaceCollection) {
+        Foreach($Runspace in $RunspaceCollection.ToArray()) {
+            if ($Runspace.Runspace.IsCompleted) {
+                # End the runspace and get the returned objects
+                $Runspace.PowerShell.EndInvoke($Runspace.Runspace)
+                # Cleanup the runspace
+                $Runspace.PowerShell.Dispose()
+                $RunspaceCollection.Remove($Runspace)
+            }
+        }
+    }
+}
+
 filter ConvertTo-Hash { 
     [CmdletBinding()]
     $Hash = $_
