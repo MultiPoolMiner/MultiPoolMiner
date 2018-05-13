@@ -12,11 +12,13 @@ Param(
     [Switch]$SkipAMD = $false,
     [Parameter(Mandatory = $false)]
     [Switch]$SkipNVIDIA = $false
-
 )
 
 # Make sure we are in the script's directory
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+
+# Add info flag to $Config; required for proper miner enumeration
+$Config | Add-Member InfoOnly $true
 
 # Get device information
 $Devices = Get-Devices
