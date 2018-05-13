@@ -624,7 +624,7 @@ while ($true) {
         if ($_.GetStatus() -ne "Running") {
 		
             # Launch custom miner variable
-            $MinerProfile = ".\Profile\"+$_.Name+".bat"
+            $MinerProfile = ".\Profile\Start_"+$_.Name+".bat"
             if (Test-Path $MinerProfile) {
 				Write-Host -F Yellow "Launching :" $MinerProfile
 				Write-Log "Launching $($_.Name) : $MinerProfile"
