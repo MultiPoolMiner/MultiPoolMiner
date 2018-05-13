@@ -80,8 +80,8 @@ function Get-DeviceIDs {
     }
     else { # one miner instance per hw type
         $DeviceIDs."All" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | ForEach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
-        $DeviceIDs."3gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 3000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | Foreach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
-        $DeviceIDs."4gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 4000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | Foreach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
+        $DeviceIDs."3gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 3000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | ForEach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
+        $DeviceIDs."4gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 4000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | ForEach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
     }
     $DeviceIDs
 }
@@ -141,7 +141,7 @@ function ConvertTo-CommandPerDeviceSet {
                 if ($Values -match "(?:[,; ]{1})") { # supported separators are listed in brackets: [,; ]{1}
                     $ValueSeparator = $Matches[0]
                     $RelevantValues = @()
-                    $DeviceIDs | Foreach-Object {
+                    $DeviceIDs | ForEach-Object {
                         $DeviceID = [Convert]::ToInt32($_, $DeviceIdBase) - $DeviceIdOffset
                         if ($Values.Split($ValueSeparator) | Select-Object -Index $DeviceId) {$RelevantValues += ($Values.Split($ValueSeparator) | Select-Object -Index $DeviceId)}
                         else {$RelevantValues += ""}
@@ -428,8 +428,8 @@ function Get-ChildItemContentParallel {
     # Determine how many threads to use based on how many cores the system has, but force it to be between 2 and 8.
     $Threads = 2 # Default
     $Threads = ((Get-CimInstance win32_processor).NumberOfLogicalProcessors | Measure-Object -Sum).Sum 
-    if ($Threads -lt 2) { $Threads = 2 }
-    if ($Threads -gt 8) { $Threads = 8 }
+    if ($Threads -lt 2) {$Threads = 2}
+    if ($Threads -gt 8) {$Threads = 8}
 
     # Create a runspace pool with up to $Threads threads
     $RunspaceCollection = @()
@@ -487,8 +487,8 @@ function Get-ChildItemContentParallel {
     }
 
     # Get each requested file and process it in a runspace
-    Get-ChildItem $Path -File -ErrorAction SilentlyContinue | Foreach-Object {
-        $Powershell = [powershell]::Create().AddScript($ProcessItem,$true).AddArgument($ScriptDir).AddArgument($_).AddArgument($Parameters)
+    Get-ChildItem $Path -File -ErrorAction SilentlyContinue | ForEach-Object {
+        $Powershell = [powershell]::Create().AddScript($ProcessItem, $true).AddArgument($ScriptDir).AddArgument($_).AddArgument($Parameters)
         $Powershell.RunspacePool = $RunSpacePool
 
         # Add to the collection of runspaces
@@ -499,8 +499,8 @@ function Get-ChildItemContentParallel {
     }
 
     # Wait for all runspaces to finish running and get their data
-    While($RunspaceCollection) {
-        Foreach($Runspace in $RunspaceCollection.ToArray()) {
+    While ($RunspaceCollection) {
+        ForEach($Runspace in $RunspaceCollection.ToArray()) {
             if ($Runspace.Runspace.IsCompleted) {
                 # End the runspace and get the returned objects
                 $Runspace.PowerShell.EndInvoke($Runspace.Runspace)
