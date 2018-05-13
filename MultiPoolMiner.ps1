@@ -624,13 +624,13 @@ while ($true) {
         if ($_.GetStatus() -ne "Running") {
 		
             # Launch custom miner variable
-            $MinerNameProfile = ".\Profile\"+$_.Name+".bat"
-            if (Test-Path $MinerNameProfile) {
+            $MinerProfile = ".\Profile\"+$_.Name+".bat"
+            if (Test-Path $MinerProfile) {
 				Write-Host -F Yellow "Launching :" $MinerProfile
 				Write-Log "Launching $($_.Name) : $MinerProfile"
 				Start-Process -Wait $MinerProfile -WorkingDirectory ".\Profile"
 				Sleep 1
-            }		
+            }	
 			
             Write-Log "Starting miner ($($_.Name)): '$($_.Path) $($_.Arguments)'"
             $DecayStart = $Timer
