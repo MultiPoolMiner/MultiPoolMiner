@@ -600,12 +600,13 @@ function Get-Algorithm {
         [Parameter(Mandatory = $false)]
         [String]$Algorithm = ""
     )
-
-    $Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
+    if(-not (Test-Path Variable:Script:Algorithms)) {
+        $Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
+    }
 
     $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-", " " -replace "_", " ")) -replace " "
 
-    if ($Algorithms.$Algorithm) {$Algorithms.$Algorithm}
+    if ($Script:Algorithms.$Algorithm) {$Script:Algorithms.$Algorithm}
     else {$Algorithm}
 }
 
