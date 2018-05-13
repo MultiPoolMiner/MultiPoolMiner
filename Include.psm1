@@ -600,8 +600,9 @@ function Get-Algorithm {
         [Parameter(Mandatory = $false)]
         [String]$Algorithm = ""
     )
+
     if(-not (Test-Path Variable:Script:Algorithms)) {
-        $Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
+        $Script:Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
     }
 
     $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-", " " -replace "_", " ")) -replace " "
@@ -617,11 +618,13 @@ function Get-Region {
         [String]$Region = ""
     )
 
-    $Regions = Get-Content "Regions.txt" | ConvertFrom-Json
-
+    if(-not (Test-Path Variable:Script:Regions)) {
+        $Script:Regions = Get-Content "Regions.txt" | ConvertFrom-Json
+    }
+    
     $Region = (Get-Culture).TextInfo.ToTitleCase(($Region -replace "-", " " -replace "_", " ")) -replace " "
 
-    if ($Regions.$Region) {$Regions.$Region}
+    if ($Script:Regions.$Region) {$Script:Regions.$Region}
     else {$Region}
 }
 
