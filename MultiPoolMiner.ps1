@@ -592,6 +592,15 @@ while ($true) {
             Write-Log "Stopping miner ($($Miner.Name)). "
             $Miner.SetStatus("Idle")
 
+            #Revert custom miner variable
+            $MinerProfile = ".\Profile\Stop_"+$_.Name+".bat"
+            if (Test-Path $MinerProfile) {
+				Write-Host -F Yellow "Launching :" $MinerProfile
+				Write-Log "Launching $($_.Name) : $MinerProfile"
+				Start-Process -Wait $MinerProfile -WorkingDirectory ".\Profile"
+				Sleep 1
+            }
+			
             #Remove watchdog timer
             $Miner_Name = $Miner.Name
             $Miner.Algorithm | ForEach-Object {
@@ -617,9 +626,11 @@ while ($true) {
             # Launch custom miner variable
             $MinerNameProfile = ".\Profile\"+$_.Name+".bat"
             if (Test-Path $MinerNameProfile) {
-				Write-Host -F Yellow "Launching :" $MinerNameProfile
-				Sleep 2
-            }
+				Write-Host -F Yellow "Launching :" $MinerProfile
+				Write-Log "Launching $($_.Name) : $MinerProfile"
+				Start-Process -Wait $MinerProfile -WorkingDirectory ".\Profile"
+				Sleep 1
+            }		
 			
             Write-Log "Starting miner ($($_.Name)): '$($_.Path) $($_.Arguments)'"
             $DecayStart = $Timer
