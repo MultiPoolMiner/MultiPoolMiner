@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 09/05/2018 (dd/mm/yyyy) - v1.23.03 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 13/05/2018 (dd/mm/yyyy) - v1.23.05 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -206,7 +206,10 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 -ShowMinerWindow
 	By default MPM hides most miner windows as to not steal focus. All miners write their output to files in the Log folder. Set to 'true' to show miner windows (old MPM behaviour).
 
-	
+-UseFastestMinerPerAlgoOnly
+	Use only use fastest miner per algo and device index. E.g. if there are 2 or more miners available to mine the same algo, only the fastest will ever be used, the slower ones will also be hidden in the summary screen.
+
+
 ====================================================================
 
 
@@ -343,6 +346,7 @@ To show the miner windows add '"ShowMinerWindow":  true' to the general section 
     "ShowMinerWindow":  true,
     ...
 }
+
 
 ====================================================================
 

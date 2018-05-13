@@ -64,7 +64,9 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$DisableAutoUpdate = $false,
     [Parameter(Mandatory = $false)]
-    [Switch]$ShowMinerWindow = $false #if true all miner windows will be visible (they can steal focus)
+    [Switch]$ShowMinerWindow = $false, #if true most miner windows will be visible (they can steal focus) - miners that use the 'Wrapper' API will still remain hidden
+    [Parameter(Mandatory = $false)]
+    [Switch]$UseFastestMinerPerAlgoOnly = $false #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
 )
 
 $Version = "2.7.2.7"
@@ -424,6 +426,9 @@ while ($true) {
         $Miner_WatchdogTimers = $WatchdogTimers | Where-Object MinerName -EQ $Miner.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset)
         ($Miner_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>2 -and ($Miner_WatchdogTimers | Where-Object {$Miner.HashRates.PSObject.Properties.Name -contains $_.Algorithm} | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>1
     }
+
+    #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
+    if ($Config.UseFastestMinerPerAlgoOnly) {$Miners = ($Miners | Group-Object Index).Group | Sort-Object -Descending {$_.HashRates.PSObject.Properties.Name -join ""} ,{($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Bias -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Group-Object {$_.HashRates.PSObject.Properties.Name -join ""} | Foreach-Object {$_.Group[0]}}
 
     #Update the active miners
     if ($Miners.Count -eq 0) {
