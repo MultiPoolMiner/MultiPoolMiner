@@ -3,7 +3,7 @@
         "Type":  "AMD",
         "Path":  ".\\Bin\\CryptoNight-AMD\\xmrig-amd.exe",
         "HashSHA256": "8D1867696FFD1D5EB628E88CC1293D39484F5536CB84E8441053E13F992E8515",
-        "Arguments":  "\"--api-port 3336 -a cryptonight -o $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -u $($Pools.CryptoNightV7.User) -p $($Pools.CryptoNightV7.Pass) --keepalive --nicehash --donate-level 1\"",
+        "Arguments":  "\"--api-port 3336 -a cryptonightV7 -o $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -u $($Pools.CryptoNightV7.User) -p $($Pools.CryptoNightV7.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
                           "CryptoNightV7":  "\"$(if ($Pools.CryptoNightV7.SSL) {0}else {$Stats.XmrigAmd_CryptoNightV7_HashRate.Week})\""
                       },

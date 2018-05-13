@@ -3,7 +3,7 @@
         "Type":  "CPU",
         "Path":  ".\\Bin\\CryptoNight-CPU\\xmrig.exe",
         "HashSHA256":  "24661A8807F4B991C79E587E846AAEA589720ED84D79AFB41D14709A6FB908CE",
-        "Arguments":  "\"--api-port 3334 -a cryptonight -o $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -u $($Pools.CryptoNightV7.User) -p $($Pools.CryptoNightV7.Pass) --keepalive --nicehash --donate-level 1\"",
+        "Arguments":  "\"--api-port 3334 -a cryptonightV7 -o $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -u $($Pools.CryptoNightV7.User) -p $($Pools.CryptoNightV7.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
                           "CryptoNightV7":  "\"$(if ($Pools.CryptoNightV7.SSL) {0}else {$Stats.XmrigCpu_CryptoNightV7_HashRate.Week})\""
                       },
