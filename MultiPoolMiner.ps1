@@ -194,8 +194,9 @@ while ($true) {
 
     #Activate or deactivate donation
     if ($Config.Donate -lt 10) {$Config.Donate = 10}
-    if ($Timer.AddDays(-1) -ge $LastDonated) {$LastDonated = $Timer}
+    if ($Timer.AddDays(-1) -ge $LastDonated.AddSeconds(59)) {$LastDonated = $Timer}
     if ($Timer.AddDays(-1).AddMinutes($Config.Donate) -ge $LastDonated) {
+        Write-Log "Donation run, mining to donation address for the next $(($LastDonated - ($Timer.AddDays(-1))).Minutes +1) minutes. Note: MPM will use ALL available pools. "
         Get-ChildItem "Pools" -File | ForEach-Object {
             $Config.Pools | Add-Member $_.BaseName (
                 [PSCustomObject]@{
@@ -206,6 +207,9 @@ while ($true) {
             ) -Force
         }
         $Config | Add-Member ExcludePoolName @() -Force
+    }
+    else {
+        Write-Log ("Mining for you. Donation run will start in {0:hh} hour(s) {0:mm} minute(s). " -f $($LastDonated.AddDays(1) - ($Timer.AddMinutes($Config.Donate))))
     }
 
     #Give API access to the current running configuration
