@@ -1,6 +1,6 @@
 using module ..\Include.psm1
 
-$Path = ".\Bin\AMD-Avermore1.4\sgminer.exe"
+$Path = ".\Bin\AMD-Avermore\sgminer.exe"
 $HashSHA256 = "be23687e70996b21108b66de79a58852eecaaea19fced5d7f2828f412a78344a"
 $Uri = "https://github.com/brian112358/avermore-miner/releases/download/v1.4/avermore-v1.4-windows.zip"
 
