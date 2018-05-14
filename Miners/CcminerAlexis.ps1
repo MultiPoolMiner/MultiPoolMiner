@@ -1,8 +1,8 @@
 using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-Alexis78hsr\ccminer.exe"
-$HashSHA256 = "406E67B490F02F1FAAC8C4AA38B949832E8F93AC454B1BA6054ED04B83BAA31D"
-$Uri = "https://github.com/nemosminer/ccminerAlexis78/releases/download/3%2F3%2F2018/ccminer-Alexis78.zip"
+$HashSHA256 = "51D30565697B0865217AA43EE741B1D5636E04CAC4744D8F83540FBA847CE4E9"
+$Uri = "https://github.com/nemosminer/ccminerAlexis78/releases/download/Alexis78-v1.1/ccminerAlexis78-v1.1.7z"
 
 $Commands = [PSCustomObject]@{
     #GPU - profitable 13/05/2018
@@ -10,6 +10,7 @@ $Commands = [PSCustomObject]@{
     "c11"        = " -i 21" #X11evo; fix for default intensity
     "hsr"        = "" #HSR, HShare
     "keccak"     = " -m 2 -i 29" #Keccak; fix for default intensity, difficulty x M
+    "keccakc"    = " -i 29" #Keccakc; fix for default intensity
     "lyra2"      = "" #Lyra2
     "lyra2v2"    = "" #lyra2v2
     "neoscrypt"  = "" #NeoScrypt
