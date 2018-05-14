@@ -6,11 +6,7 @@ $Uri = "https://github.com/zawawawa/gatelessgate/releases/download/v0.1.3-pre6b/
 
 $Commands = [PSCustomObject]@{
     "equihash" = " --gpu-threads 2 --intensity 16" #Equihash
-	"zec" = " --gpu-threads 2 --intensity 16" #Equihash
     "neoscrypt" = " --intensity 14" #NeoScrypt
-	"phoenixcoin" = " --intensity 14" #NeoScrypt
-	"trezarcoin" = " --intensity 14" #NeoScrypt
-	"feathercoin" = " --intensity 14" #NeoScrypt
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
