@@ -1,6 +1,7 @@
 using module ..\Include.psm1
 
 $Path = ".\Bin\AMD-Phi-5613\sgminer.exe"
+$HashSHA256 = "a50c110ccf573e8994b6cbcc34734bc68a0954205b2cd97aa2fd947efe25812f"
 $Uri = "https://github.com/Quake4/MindMinerPrerequisites/raw/master/AMD/sgminer-phi/sgminer-phi-5.6.1-bitbandi-3.zip"
 
 $Commands = [PSCustomObject]@{
@@ -13,6 +14,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     [PSCustomObject]@{
         Type = "AMD"
         Path = $Path
+		HashSHA256 = $HashSHA256
         Arguments = "--api-listen -k $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_) --text-only --gpu-platform $([array]::IndexOf(([OpenCl.Platform]::GetPlatformIDs() | Select-Object -ExpandProperty Vendor), 'Advanced Micro Devices, Inc.'))"
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Xgminer"
