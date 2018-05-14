@@ -1,7 +1,7 @@
 using module ..\Include.psm1
 
-$Path = ".\Bin\AMD-Avermore\sgminer.exe"
-$HashSHA256 = ""
+$Path = ".\Bin\AMD-Avermore1.4\sgminer.exe"
+$HashSHA256 = "c28ead031f5e7a73c5706e3e1d8b9f65cdc7591f919548cb69d8bbfddae43cad"
 $Uri = "https://github.com/brian112358/avermore-miner/releases/download/v1.4/avermore-v1.4-windows.zip"
 
 $Commands = [PSCustomObject]@{
@@ -33,8 +33,8 @@ $Commands = [PSCustomObject]@{
     #"veltor" = "" #Veltor
     #"x11evo" = "" #X11evo
     #"x17" = "" #X17
-	"x16R" = "" #X16r
-	"x16S" = "" #X16s
+    "x16R" = "" #X16r   
+    "x16S" = "" #X16s
     "yescrypt" = " --worksize 4 --rawintensity 256" #Yescrypt
     #"xevan-mod" = " --intensity 15" #Xevan
 }
