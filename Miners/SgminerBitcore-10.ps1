@@ -1,6 +1,6 @@
 using module ..\Include.psm1
 
-$Path = ".\Bin\AMD-Bitcore-10\sgminer-x64.exe"
+$Path = ".\Bin\AMD-Bitcore\sgminer-x64.exe"
 $HashSHA256 = "c00de0d33bd20be3b5014fc019ed8a81d3aa5273c8af96b17d6b51c5d8fa3933"
 $Uri = "https://github.com/Quake4/MindMinerPrerequisites/raw/master/AMD/sgminer-bitcore/sgminer-bitcore-5.6.1.9.zip"
 
