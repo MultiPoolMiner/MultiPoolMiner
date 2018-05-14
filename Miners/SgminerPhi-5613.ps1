@@ -1,7 +1,7 @@
 using module ..\Include.psm1
 
 $Path = ".\Bin\AMD-Phi-5613\sgminer.exe"
-$HashSHA256 = "a50c110ccf573e8994b6cbcc34734bc68a0954205b2cd97aa2fd947efe25812f"
+$HashSHA256 = "3a84c2970b8a7f7adfc28b9ed849675302ae50f92fe9de18a48911f7dfe7d328"
 $Uri = "https://github.com/Quake4/MindMinerPrerequisites/raw/master/AMD/sgminer-phi/sgminer-phi-5.6.1-bitbandi-3.zip"
 
 $Commands = [PSCustomObject]@{
