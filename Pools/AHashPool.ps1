@@ -38,13 +38,18 @@ $AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
     $Divisor = 1000000
 
     switch ($AHashPool_Algorithm_Norm) {
+        # values in mBTC/Mh/day (mBTC/Gh/day for blake2s|blakecoin|quark|qubit|scrypt|x11, mBTC/Kh/day for yescrypt)
         "blake2s" {$Divisor *= 1000}
         "blakecoin" {$Divisor *= 1000}
         "decred" {$Divisor *= 1000}
         "equihash" {$Divisor /= 1000}
+        "keccak" {$Divisor *= 1000}
+        "lbry" {$Divisor *= 1000}
+        "myrgr" {$Divisor *= 1000}
         "quark" {$Divisor *= 1000}
         "qubit" {$Divisor *= 1000}
         "scrypt" {$Divisor *= 1000}
+        "skein" {$Divisor *= 1000}
         "x11" {$Divisor *= 1000}
     }
 
