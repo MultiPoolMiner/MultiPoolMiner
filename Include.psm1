@@ -755,8 +755,6 @@ class Miner {
     [Array]$Algorithm = @()
     $Type
     $Index
-    $Device
-    $Device_Auto
     $Profit
     $Profit_Comparison
     $Profit_MarginOfError
