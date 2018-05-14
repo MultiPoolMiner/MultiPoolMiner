@@ -1,7 +1,7 @@
 using module ..\Include.psm1
 
 $Path = ".\Bin\AMD-Aeris-02\sgminer.exe"
-$HashSHA256 = "bbaa1f22a237349c5b5b8e5da43fe45b99a6ba41ec43356c68a351438e6b9b9f"
+$HashSHA256 = "6da505b3459cfa86f9f241c6ea3219f9c386c149c8a84192a76d9b8797b8afd0"
 $Uri = "https://mega.nz/#F!v6JSXBqK!2jQLwNjgaIV3IoN8OHgfzw"
 
 $Commands = [PSCustomObject]@{
