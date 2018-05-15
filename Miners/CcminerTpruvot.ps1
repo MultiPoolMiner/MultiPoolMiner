@@ -1,4 +1,4 @@
-﻿sing module ..\Include.psm1
+using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-TPruvot\ccminer-x64.exe"
 $HashSHA256 = "9156D5FC42DAA9C8739D04C3456DA8FBF3E9DC91D4894D351334F69A7CEE58C5"
