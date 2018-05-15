@@ -1,0 +1,13 @@
+﻿    {
+        "Type":  "AMD",
+        "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/neoscryptminer/Claymore.s.NeoScrypt.AMD.GPU.Miner.v1.2.zip",
+        "ManualURI": "https://bitcointalk.org/index.php?topic=3012600.0",
+        "Path":  ".\\Bin\\NeoScrypt-Claymore\\NeoScryptMiner.exe",
+        "HashSHA256": "AF7E52C6F71B2B114299BB2AFAAF11B65800AC0390C037473E0CEBAE8E9D4BC5",
+        "Arguments":  "\"-r -1 -mport 13333 -pool $($Pools.NeoScrypt.Host):$($Pools.NeoScrypt.Port) -wal $($Pools.NeoScrypt.User) -psw $($Pools.NeoScrypt.Pass)\"",
+        "HashRates":  {
+                          "NeoScrypt":  "\"$($Stats.ClaymoreNeoScryptAmd_NeoScrypt_HashRate.Week)\""
+                      },
+        "API":  "Claymore",
+        "Port":  "13333"
+    }
