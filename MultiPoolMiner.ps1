@@ -638,7 +638,7 @@ while ($true) {
 
     #Display mining information
     $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object -Descending Type, Profit_Bias | Format-Table -GroupBy Type (
-        @{Label = "Miner$(if (-not $Config.IgnoreMinerFees) {' [-Fee]'})"; Expression = {if ($Config.IgnoreMinerFees -or -not $_.Fees) {$_.Name}else {"$($_.Name) [-$(($_.Fees | Foreach-Object {$_.ToString("N2")}) -join '%/-')%]"}}}, 
+        @{Label = "Miner$(if (-not $Config.IgnoreMinerFees) {' [Fee]'})"; Expression = {if ($Config.IgnoreMinerFees -or -not $_.Fees) {$_.Name}else {"$($_.Name) [$(($_.Fees | Foreach-Object {$_.ToString("N2")}) -join '%/')%]"}}}, 
         @{Label = "Algorithm"; Expression = {$_.HashRates.PSObject.Properties.Name}}, 
         @{Label = "Speed"; Expression = {$_.HashRates.PSObject.Properties.Value | ForEach-Object {if ($_ -ne $null) {"$($_ | ConvertTo-Hash)/s"}else {"Benchmarking"}}}; Align = 'right'}, 
         @{Label = "$($Config.Currency | Select-Object -Index 0)/Day"; Expression = {if ($_.Profit) {ConvertTo-LocalCurrency $($_.Profit) $($Rates.$($Config.Currency | Select-Object -Index 0)) -Offset 2} else {"Unknown"}}; Align = "right"},
