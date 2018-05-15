@@ -694,7 +694,7 @@ while ($true) {
     #Display benchmarking progress
     $BenchmarksNeeded = @($Miners | Where-Object {$_.HashRates.PSObject.Properties.Value -eq $null}).Count
     if ($BenchmarksNeeded -gt 0) {
-        Write-Log -Level Warn "Benchmarking in progress: $($BenchmarksNeeded) miners left to benchmark."
+        Write-Log -Level Warn "Benchmarking in progress: $($BenchmarksNeeded) miner$(if ($BenchmarksNeeded -gt 1){'s'}) left to benchmark."
     }
 
     #Give API access to WatchdogTimers information
