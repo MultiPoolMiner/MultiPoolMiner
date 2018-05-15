@@ -524,6 +524,11 @@ function Get-ChildItemContentParallel {
             }
         }
     }
+    # Cleanup runspaces
+    $RunspacePool.Close()
+    $RunspacePool.Dispose()
+    Remove-Variable RunspacePool
+    Remove-Variable RunspaceCollection
 }
 
 filter ConvertTo-Hash { 
