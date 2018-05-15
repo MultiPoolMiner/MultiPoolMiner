@@ -1,4 +1,4 @@
-﻿[
+[
     {
         "Type":  "AMD",
         "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/claymorecryptonoteamd/Claymore.CryptoNote.AMD.GPU.Miner.v11.3.-.POOL.-.Catalyst.15.12-18.x.zip",
@@ -38,4 +38,4 @@
         "API":  "Claymore",
         "Port":  "13333"
     }
-}
+]
