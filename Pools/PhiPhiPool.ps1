@@ -14,7 +14,7 @@ $PhiPhiPool_Request = [PSCustomObject]@{}
 
 try {
     $PhiPhiPool_Request = Invoke-RestMethod "http://www.phi-phi-pool.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-    $PhiPhiPool_Request = Invoke-RestMethod "http://www.phi-phi-pool.com/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $PhiPhiPoolCoins_Request = Invoke-RestMethod "http://www.phi-phi-pool.com/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
@@ -29,25 +29,28 @@ if (($PhiPhiPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Igno
 $PhiPhiPool_Regions = "us"
 $PhiPhiPool_Currencies = @("BTC") + ($PhiPhiPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
-$PhiPhiPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$PhiPhiPool_Request.$_.hashrate -gt 0} |ForEach-Object {
-    $PhiPhiPool_Host = "pool1.phi-phi-pool.com"
+$PhiPhiPool_Host = "pool.phi-phi-pool.com"
+$PhiPhiPool_Coin = ""
+
+$PhiPhiPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$PhiPhiPool_Request.$_.hashrate -gt 0} | ForEach-Object {
     $PhiPhiPool_Port = $PhiPhiPool_Request.$_.port
-    $PhiPhiPool_Algorithm = $PhiPhiPool_Request.$_.name
+    $PhiPhiPool_Algorithm = $_
     $PhiPhiPool_Algorithm_Norm = Get-Algorithm $PhiPhiPool_Algorithm
-    $PhiPhiPool_Coin = ""
 
     $Divisor = 1000000
 
     switch ($PhiPhiPool_Algorithm_Norm) {
-        "blake2s" {$Divisor *= 1000}
+        # values in mBTC/MH/day, per GH for sha & blake algos
+        "blake2s"   {$Divisor *= 1000}
         "blakecoin" {$Divisor *= 1000}
-        "decred" {$Divisor *= 1000}
-        "equihash" {$Divisor /= 1000}
-        "keccak" {$Divisor *= 1000}
-        "quark" {$Divisor *= 1000}
-        "qubit" {$Divisor *= 1000}
-        "scrypt" {$Divisor *= 1000}
-        "x11" {$Divisor *= 1000}
+        "decred"    {$Divisor *= 1000}
+        "equihash"  {$Divisor /= 1000}
+        "keccak"    {$Divisor *= 1000}
+        "keccakc"   {$Divisor *= 1000}
+        "quark"     {$Divisor *= 1000}
+        "qubit"     {$Divisor *= 1000}
+        "scrypt"    {$Divisor *= 1000}
+        "x11"       {$Divisor *= 1000}
     }
 
     if ((Get-Stat -Name "$($Name)_$($PhiPhiPool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($PhiPhiPool_Algorithm_Norm)_Profit" -Value ([Double]$PhiPhiPool_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
