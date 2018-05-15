@@ -9,5 +9,5 @@
                       "NeoScrypt":  "\"$($Stats.ClaymoreNeoScryptAmd_NeoScrypt_HashRate.Week)\""
                   },
     "API":  "Claymore",
-    "Port":  "13333
+    "Port":  "13333"
 }
