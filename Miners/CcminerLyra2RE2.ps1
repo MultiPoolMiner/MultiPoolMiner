@@ -5,7 +5,7 @@ $HashSHA256 = "998AEBAA80CD6D2B758A5B4798D6AC929745B88D81735587798F616D7E2F3B23"
 $Uri = "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip"
 
 $Commands = [PSCustomObject]@{
-    "blake2s"   = "" #Blake2s
+    #"blake2s"  = "" #Blake2s - Beaten by ccminerSib by 150%
     "blakecoin" = "" #Blakecoin
     "c11"       = "" #C11
     "groestl"   = "" #Groestl
@@ -15,7 +15,7 @@ $Commands = [PSCustomObject]@{
     "skein"     = "" #Skein
     "x17"       = "" #X17
     
-    # ASIC - never profitable 12/05/2018
+    # ASIC - never profitable 15/05/2018
     #"decred"   = "" #Decred
     #"myr-gr"   = "" #MyriadGroestl
     #"nist5"    = "" #Nist5
