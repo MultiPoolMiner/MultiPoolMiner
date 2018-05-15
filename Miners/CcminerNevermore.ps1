@@ -1,4 +1,3 @@
-
 using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-Nevermore\ccminer.exe"
