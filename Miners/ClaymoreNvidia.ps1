@@ -12,7 +12,7 @@ if (-not $Devices.$Type) {return} # No NVIDIA mining device present in system
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\Ethash-Claymore\EthDcrMiner64.exe"
-
+$HashSHA256 = "11743A7B0F8627CEB088745F950557E303C7350F8E4241814C39904278204580"
 $API = "Claymore"
 $URI = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethdcrminer64/ClaymoreDual_v11.7.zip"
 $Port = 23333
