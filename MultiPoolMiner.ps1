@@ -692,7 +692,7 @@ while ($true) {
     }
 
     #Display benchmarking progress
-    $BenchmarksNeeded = ($Miners | Where-Object {$_.HashRates.PSObject.Properties.Value -eq $null}).Count
+    $BenchmarksNeeded = @($Miners | Where-Object {$_.HashRates.PSObject.Properties.Value -eq $null}).Count
     if ($BenchmarksNeeded -gt 0) {
         Write-Log -Level Warn "Benchmarking in progress: $($BenchmarksNeeded) miners left to benchmark."
     }
