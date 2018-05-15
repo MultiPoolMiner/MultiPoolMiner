@@ -237,7 +237,6 @@
 
     internal static class Cl
     {
-
         internal static T GetInfo<T>(GetInfoDelegate method, IntPtr handle, uint name) where T : struct
         {
             IntPtr size;
