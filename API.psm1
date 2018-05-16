@@ -70,7 +70,7 @@
                     Break
                 }
                 "/algorithms" {
-                    $Data = $API.Algorithms | ConvertTo-Json
+                    $Data = ($API.AllPools.Algorithm | Sort-Object -Unique) | ConvertTo-Json
                     Break
                 }
                 "/miners" {

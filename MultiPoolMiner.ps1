@@ -274,7 +274,6 @@ while ($true) {
     
     #Give API access to the current running configuration
     $API.AllPools = $AllPools
-    $API.Algorithms = @($AllPools.Algorithm | Sort-Object -Unique)
 
     #Apply watchdog to pools
     $AllPools = $AllPools | Where-Object {
