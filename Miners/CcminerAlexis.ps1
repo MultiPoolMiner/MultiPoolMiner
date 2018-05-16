@@ -1,11 +1,11 @@
 using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-Alexis78hsr\ccminer.exe"
-$HashSHA256 = "51D30565697B0865217AA43EE741B1D5636E04CAC4744D8F83540FBA847CE4E9"
-$Uri = "https://github.com/nemosminer/ccminerAlexis78/releases/download/Alexis78-v1.1/ccminerAlexis78-v1.1.7z"
+$HashSHA256 = "B0222106230616A31A93811640E8488BDCDA0FBF9EE2C5AD7EB1B3F4E4421884"
+$Uri = "https://github.com/nemosminer/ccminerAlexis78/releases/download/Alexis78-v1.2/ccminerAlexis78v1.2x32.7z"
 
 $Commands = [PSCustomObject]@{
-    #GPU - profitable 13/05/2018
+    #GPU - profitable 16/05/2018
     #Intensities and parameters tested by nemosminer on 10603gb to 1080ti
     "c11"        = " -i 21" #X11evo; fix for default intensity
     "hsr"        = "" #HSR, HShare
@@ -14,6 +14,7 @@ $Commands = [PSCustomObject]@{
     "lyra2"      = "" #Lyra2
     "lyra2v2"    = "" #lyra2v2
     "neoscrypt"  = "" #NeoScrypt
+    "poly"       = "" #Poly
     "skein"      = "" #Skein
     "skein2"     = "" #skein2
     "veltor"     = " -i 23" #Veltor; fix for default intensity
@@ -23,7 +24,7 @@ $Commands = [PSCustomObject]@{
     "x11evo"     = " -N 1 -i 21" #X11evo; fix for default intensity, N samples for hashrate
     "x17"        = " -i 20" #x17; fix for default intensity
 
-    # ASIC - never profitable 13/05/2018
+    # ASIC - never profitable 16/05/2018
     #"blake2s" = "" #Blake2s
     #"blake" = "" #blake
     #"blakecoin" = "" #Blakecoin
