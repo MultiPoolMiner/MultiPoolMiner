@@ -43,7 +43,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             Type       = $Type
             Path       = $Path
             HashSHA256 = $HashSHA256
-            Arguments  = ("--api-port $Port -S $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -O $($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass) -SP 2 --cuda --cuda-devices $($DeviceIDs)")
+            Arguments  = ("--api-port $Port -P $($Pools.$Algorithm_Norm.Protocol)://$([System.Web.HttpUtility]::UrlEncode($Pools.$Algorithm_Norm.User)):$([System.Web.HttpUtility]::UrlEncode($Pools.$Algorithm_Norm.Pass))@$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)$($Commands.$_) --cuda --cuda-devices $($DeviceIDs)")
             HashRates  = [PSCustomObject]@{"$Algorithm_Norm" = $HashRate}
             API        = $Api
             Port       = $Port
