@@ -28,7 +28,7 @@ if (($MiningPoolHubCoins_Request.return | Measure-Object).Count -le 1) {
 $MiningPoolHubCoins_Regions = "europe", "us-east", "asia"
 
 $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} | ForEach-Object {
-    $MiningPoolHubCoins_Host = $_.host
+    $MiningPoolHubCoins_Host = "hub.miningpoolhub.com"
     $MiningPoolHubCoins_Hosts = $_.host_list.split(";")
     $MiningPoolHubCoins_Port = $_.port
     $MiningPoolHubCoins_Algorithm = $_.algo
