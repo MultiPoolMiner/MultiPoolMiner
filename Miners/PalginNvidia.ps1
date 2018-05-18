@@ -8,7 +8,7 @@ param(
 )
 
 $Type = "NVIDIA"
-if (-not $Devices.$Type) {return} # No NVIDIA mining device present in system
+if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No NVIDIA mining device present in system, InfoOnly is for Get-Binaries
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\HSR-Palgin\hsrminer_hsr.exe"
@@ -35,13 +35,13 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             Name       = $Name
             Type       = $Type
             Path       = $Path
-			HashSHA256 = $HashSHA256
+            HashSHA256 = $HashSHA256
             Arguments  = ("-o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)")
             HashRates  = [PSCustomObject]@{"$Algorithm_Norm" = $HashRate}
             API        = $Api
             Port       = $Port
             URI        = $Uri
-            Fees       = $Fees
+            Fees       = @($Fees)
         }
     }
 }
