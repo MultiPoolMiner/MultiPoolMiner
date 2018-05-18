@@ -29,6 +29,8 @@
     "chaincoin":  "C11",
     "creativecoin":  "KeccakC",
     "credits":  "Argon2d-CRDS",
+    "cn":  "CryptoNightV7",
+    "cn-heavy":  "CryptoNight-Heavy",
     "cryptolight":  "CryptoNightLite",
     "cryptonight_heavy":  "CryptoNightHeavy",
     "cryptonight_lite":  "CryptoNightLite",
