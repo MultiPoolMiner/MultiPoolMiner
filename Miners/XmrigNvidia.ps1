@@ -8,7 +8,7 @@ param(
 )
 
 $Type = "NVIDIA"
-if (-not $Devices.$Type) {return} # No NVIDIA mining device present in system
+if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No NVIDIA mining device present in system, InfoOnly is for Get-Binaries
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\CryptoNight-NVIDIA\xmrig-nvidia.exe"
@@ -16,9 +16,9 @@ $HashSHA256 = ""
 $API = "XMRig"
 $Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.6.1/xmrig-nvidia-2.6.1-cuda9-win64.zip"
 $Port = 3335
-$Fees = 1
+$Fees = @(1)
 $Commands = [PSCustomObject]@{
-    "cn" = "" #CryptoNightV7
+    "cn"       = "" #CryptoNightV7
     "cn-heavy" = "" #CryptoNight-Heavy
 }
 
