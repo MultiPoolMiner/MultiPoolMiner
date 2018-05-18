@@ -20,7 +20,6 @@ $Commands = [PSCustomObject]@{
     "veltor"     = " -i 23" #Veltor; fix for default intensity
     "whirlcoin"  = "" #WhirlCoin
     "whirlpool"  = "" #Whirlpool
-    "whirlpoolx" = "" #whirlpoolx
     "x11evo"     = " -N 1 -i 21" #X11evo; fix for default intensity, N samples for hashrate
     "x17"        = " -i 20" #x17; fix for default intensity
 
