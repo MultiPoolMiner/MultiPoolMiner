@@ -27,6 +27,8 @@
     "bmw256":  "BMW",
     "c11":  "C11",
     "chaincoin":  "C11",
+    "cn":  "CryptoNightV7",
+    "cn-heavy":  "CryptoNight-Heavy",
     "creativecoin":  "KeccakC",
     "credits":  "Argon2d-CRDS",
     "cryptolight":  "CryptoNightLite",
