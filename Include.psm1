@@ -479,7 +479,7 @@ class Miner {
     $Wrap
     $API
     $Port
-    [Array]$Algorithm = @()
+    [string[]]$Algorithm = @()
     $Type
     $Index
     $Device
@@ -501,6 +501,7 @@ class Miner {
     $Benchmarked
     $LogFile
     $Pool
+    hidden [Array]$Data = @()
 
     [String[]]GetProcessNames() {
         return @(([IO.FileInfo]($this.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName)
@@ -606,18 +607,112 @@ class Miner {
         }
     }
 
-    [PSCustomObject]GetMinerData ([Bool]$Safe = $false) {
+    [String[]]UpdateMinerData () {
         $Lines = @()
 
         if ($this.Process.HasMoreData) {
+            $Date = (Get-Date).ToUniversalTime()
+
             $this.Process | Receive-Job | ForEach-Object {
                 $Line = $_ -replace "`n|`r", ""
-                if ($Line -replace "\x1B\[[0-?]*[ -/]*[@-~]", "") {$Lines += $Line}
+                $Line_Simple = $Line -replace "\x1B\[[0-?]*[ -/]*[@-~]", ""
+
+                if ($Line_Simple) {
+                    $HashRates = @()
+                    $Devices = @()
+
+                    if ($Line_Simple -match "/s") {
+                        $Words = $Line_Simple -split " "
+
+                        $Words -match "/s$" | ForEach-Object {
+                            if (($Words | Select-Object -Index $Words.IndexOf($_)) -match "^((?:\d*\.)?\d+)(.*)$") {
+                                $HashRate = ($matches | Select-Object -Index 1) -as [Decimal]
+                                $HashRate_Unit = ($matches | Select-Object -Index 2)
+                            }
+                            else {
+                                $HashRate = ($Words | Select-Object -Index ($Words.IndexOf($_) - 1)) -as [Decimal]
+                                $HashRate_Unit = ($Words | Select-Object -Index $Words.IndexOf($_))
+                            }
+
+                            switch -wildcard ($HashRate_Unit) {
+                                "kh/s*" {$HashRate *= [Math]::Pow(1000, 1)}
+                                "mh/s*" {$HashRate *= [Math]::Pow(1000, 2)}
+                                "gh/s*" {$HashRate *= [Math]::Pow(1000, 3)}
+                                "th/s*" {$HashRate *= [Math]::Pow(1000, 4)}
+                                "ph/s*" {$HashRate *= [Math]::Pow(1000, 5)}
+                            }
+
+                            $HashRates += $HashRate
+                        }
+                    }
+
+                    if ($Line_Simple -match "gpu|cpu|device") {
+                        $Words = $Line_Simple -replace "#", "" -replace ":", "" -split " "
+
+                        $Words -match "^gpu|^cpu|^device" | ForEach-Object {
+                            if (($Words | Select-Object -Index $Words.IndexOf($_)) -match "^(.*)((?:\d*\.)?\d+)$") {
+                                $Device = ($matches | Select-Object -Index 2) -as [Int]
+                                $Device_Type = ($matches | Select-Object -Index 1)
+                            }
+                            else {
+                                $Device = ($Words | Select-Object -Index ($Words.IndexOf($_) + 1)) -as [Int]
+                                $Device_Type = ($Words | Select-Object -Index $Words.IndexOf($_))
+                            }
+
+                            $Devices += "{0}#{1:d2}" -f $Device_Type, $Device
+                        }
+                    }
+
+                    $Lines += $Line
+
+                    $this.Data += [PSCustomObject]@{
+                        Date = $Date
+                        Raw = $Line
+                        HashRate = [PSCustomObject]@{[String]$this.Algorithm = $HashRates}
+                        Device = $Devices
+                    }
+                }
             }
+
+            $this.Data = @($this.Data | Select-Object -Last 10000)
         }
 
-        return [PSCustomObject]@{
-            Lines = $Lines
+        return $Lines
+    }
+
+    [Int64]GetHashRate([String]$Algorithm = [String]$this.Algorithm, [Int]$Seconds = 60, [Boolean]$Safe = $this.New) {
+        $HashRates_Devices = @($this.Data | Where-Object Device | Select-Object -ExpandProperty Device -Unique)
+        if (-not $HashRates_Devices) {$HashRates_Devices = @("Device")}
+
+        $HashRates_Counts = @{}
+        $HashRates_Averages = @{}
+        $HashRates_Variances = @{}
+
+        $this.Data | Where-Object HashRate | Where-Object Date -GE (Get-Date).ToUniversalTime().AddSeconds( - $Seconds) | ForEach-Object {
+            $Data_Devices = $_.Device
+            if (-not $Data_Devices) {$Data_Devices = $HashRates_Devices}
+
+            $Data_HashRates = $_.HashRate.$Algorithm
+
+            $Data_Devices | ForEach-Object {$HashRates_Counts.$_++}
+            $Data_Devices | ForEach-Object {$HashRates_Averages.$_ += @(($Data_HashRates | Measure-Object -Sum | Select-Object -ExpandProperty Sum) / $Data_Devices.Count)}
+            $HashRates_Variances."$($Data_Devices | ConvertTo-Json)" += @($Data_HashRates | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
+        }
+
+        $HashRates_Count = $HashRates_Counts.Values | ForEach-Object {$_} | Measure-Object -Minimum | Select-Object -ExpandProperty Minimum
+        $HashRates_Average = ($HashRates_Averages.Values | ForEach-Object {$_} | Measure-Object -Average | Select-Object -ExpandProperty Average) * $HashRates_Averages.Keys.Count
+        $HashRates_Variance = $HashRates_Variances.Keys | ForEach-Object {$_} | ForEach-Object {$HashRates_Variances.$_ | Measure-Object -Average -Minimum -Maximum} | ForEach-Object {if ($_.Average) {($_.Maximum - $_.Minimum) / $_.Average}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
+
+        if ($Safe) {
+            if ($HashRates_Count -lt 3 -or $HashRates_Variance -gt 0.05) {
+                return 0
+            }
+            else {
+                return $HashRates_Average * (1 + ($HashRates_Variance / 2))
+            }
+        }
+        else {
+            return $HashRates_Average
         }
     }
 }
