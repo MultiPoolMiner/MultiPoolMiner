@@ -16,7 +16,7 @@ $HashSHA256 = ""
 $API = "XMRig"
 $Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.6.1/xmrig-nvidia-2.6.1-cuda9-win64.zip"
 $Port = 3335
-$Fees = @(1)
+$Fees = 1
 $Commands = [PSCustomObject]@{
     "cn"       = "" #CryptoNightV7
     "cn-heavy" = "" #CryptoNight-Heavy
@@ -42,7 +42,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             API        = $Api
             Port       = $Port
             URI        = $Uri
-            Fees       = $Fees
+            Fees       = @($Fees)
         }
     }
 }
