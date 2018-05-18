@@ -8,7 +8,7 @@ param(
 )
 
 $Type = "NVIDIA"
-if (-not $Devices.$Type) {return} # No NVIDIA mining device present in system
+if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No NVIDIA mining device present in system, InfoOnly is for Get-Binaries
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\PhoenixMiner-29e\PhoenixMiner.exe"
@@ -18,7 +18,7 @@ $Uri = ""
 $Port = 23334
 $Fees = 0.65
 $Commands = [PSCustomObject]@{
-    "ethash" = ""
+    "ethash"    = ""
     "ethash2gb" = ""
 }
 
@@ -51,7 +51,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             API        = $Api
             Port       = $Port
             URI        = $Uri
-            Fees       = $Fees
+            Fees       = @($Fees)
         }
     }
 }
