@@ -38,11 +38,19 @@ $BlazePool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
     $Divisor = 1000000
 
     switch ($BlazePool_Algorithm_Norm) {
-        "equihash"  {$Divisor /= 1000}
+        "blake"     {$Divisor *= 1000}
         "blake2s"   {$Divisor *= 1000}
         "blakecoin" {$Divisor *= 1000}
         "decred"    {$Divisor *= 1000}
+        "equihash"  {$Divisor /= 1000}
         "keccak"    {$Divisor *= 1000}
+        "keccakc"   {$Divisor *= 1000}
+        "quark"     {$Divisor *= 1000}
+        "qubit"     {$Divisor *= 1000}
+        "scrypt"    {$Divisor *= 1000}
+        "vanilla"   {$Divisor *= 1000}
+        "x11"       {$Divisor *= 1000}
+        "yescrypt"  {$Divisor /= 1000}
     }
     
     if ((Get-Stat -Name "$($Name)_$($BlazePool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($BlazePool_Algorithm_Norm)_Profit" -Value ([Double]$BlazePool_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}

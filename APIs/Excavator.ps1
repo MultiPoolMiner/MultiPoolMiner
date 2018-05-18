@@ -27,7 +27,7 @@ class Excavator : Miner {
         $this.BeginTime = Get-Date
 
         if ($this.Workers) {
-            if ([Excavator]::Service.Id = $this.Service_Id) {
+            if ([Excavator]::Service.Id -eq $this.Service_Id) {
                 $Request = @{id = 1; method = "workers.free"; params = $this.Workers} | ConvertTo-Json -Compress
 
                 try {
