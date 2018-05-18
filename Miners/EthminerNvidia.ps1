@@ -8,17 +8,16 @@ param(
 )
 
 $Type = "NVIDIA"
-if (-not $Devices.$Type) {return} # No NVIDIA mining device present in system
+if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No NVIDIA mining device present in system, InfoOnly is for Get-Binaries
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Path = ".\Bin\Ethash-Ethminer-0140\ethminer.exe"
-$HashSHA256 = ""
+$Path = ".\Bin\Ethash-Ethminer\ethminer.exe"
+$HashSHA256 = "95F1F0DFCDF8EFE151501009276B00AE77B29DE9B3EF04974BE07F1A07D59761"
 $API = "Claymore"
 $Uri = "https://github.com/ethereum-mining/ethminer/releases/download/v0.14.0/ethminer-0.14.0-Windows.zip"
 $Port = 23333
-$Fees = 0
 $Commands = [PSCustomObject]@{
-    "ethash" = ""
+    "ethash"    = ""
     "ethash2gb" = ""
 }
 
@@ -49,7 +48,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             API        = $Api
             Port       = $Port
             URI        = $Uri
-            Fees       = $Fees
+            Fees       = @($null)
         }
     }
 }
