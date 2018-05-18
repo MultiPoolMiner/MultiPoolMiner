@@ -1,11 +1,38 @@
-{
-    "Type":  "AMD",
-    "Path":  ".\\Bin\\CryptoNight-Cast\\cast_xmr-vega.exe",
-    "Arguments":  "\"--remoteaccess -S $($Pools.CryptoNight.Host):$($Pools.CryptoNight.Port) -u $($Pools.CryptoNight.User) -p $($Pools.CryptoNight.Pass) --forcecompute --fastjobswitch$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -match 'Advanced Micro Devices, Inc.'} | ForEach-Object {$DeviceIDs += $DeviceID; $DeviceID++});if($DeviceIDs){' -G';$($DeviceIDs -join ',')})\"",
-    "HashRates":  {
-                      "CryptoNight":  "\"$(if ($Pools.CryptoNight.SSL) {0}else {$Stats.Cast_CryptoNight_HashRate.Week})\""
-                  },
-    "API":  "Cast",
-    "Port":  "7777",
-    "URI":  "http://www.gandalph3000.com/download/cast_xmr-vega-win64_092.zip"
-}
+[
+    {
+        "Type":  "AMD",
+        "Path":  ".\\Bin\\CryptoNight-Cast\\cast_xmr-vega.exe",
+        "HashSHA256": "ABC7BF9EA259E0BB3EF71A30BB30E3D4CBA33D6EDCCEBE4F38375DA2F3776B59",
+        "Arguments":  "\"--remoteaccess -S $($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -u $($Pools.CryptoNightV7.User) -p $($Pools.CryptoNightV7.Pass) --forcecompute --fastjobswitch$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -match 'Advanced Micro Devices, Inc.'} | ForEach-Object {$DeviceIDs += $DeviceID; $DeviceID++});if($DeviceIDs){' -G';$($DeviceIDs -join ',')})\"",
+        "HashRates":  {
+                          "CryptoNightV7":  "\"$(if ($Pools.CryptoNightV7.SSL) {0}else {$Stats.Cast_CryptoNightV7_HashRate.Week})\""
+                      },
+        "API":  "Cast",
+        "Port":  "7777",
+        "URI":  "http://www.gandalph3000.com/download/cast_xmr-vega-win64_092.zip"
+    },
+    {
+        "Type":  "AMD",
+        "Path":  ".\\Bin\\CryptoNight-Cast\\cast_xmr-vega.exe",
+        "HashSHA256": "ABC7BF9EA259E0BB3EF71A30BB30E3D4CBA33D6EDCCEBE4F38375DA2F3776B59",
+        "Arguments":  "\"--remoteaccess -S $($Pools.CryptoNightLite.Host):$($Pools.CryptoNightLite.Port) -u $($Pools.CryptoNightLite.User) -p $($Pools.CryptoNightLite.Pass) --forcecompute --fastjobswitch$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -match 'Advanced Micro Devices, Inc.'} | ForEach-Object {$DeviceIDs += $DeviceID; $DeviceID++});if($DeviceIDs){' -G';$($DeviceIDs -join ',')})\"",
+        "HashRates":  {
+                          "CryptoNightLite":  "\"$(if ($Pools.CryptoNightLite.SSL) {0}else {$Stats.Cast_CryptoNightLite_HashRate.Week})\""
+                      },
+        "API":  "Cast",
+        "Port":  "7777",
+        "URI":  "http://www.gandalph3000.com/download/cast_xmr-vega-win64_092.zip"
+    },
+    {
+        "Type":  "AMD",
+        "Path":  ".\\Bin\\CryptoNight-Cast\\cast_xmr-vega.exe",
+        "HashSHA256": "ABC7BF9EA259E0BB3EF71A30BB30E3D4CBA33D6EDCCEBE4F38375DA2F3776B59",
+        "Arguments":  "\"--remoteaccess -S $($Pools.CryptoNightHeavy.Host):$($Pools.CryptoNightHeavy.Port) -u $($Pools.CryptoNightHeavy.User) -p $($Pools.CryptoNightHeavy.Pass) --forcecompute --fastjobswitch$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -match 'Advanced Micro Devices, Inc.'} | ForEach-Object {$DeviceIDs += $DeviceID; $DeviceID++});if($DeviceIDs){' -G';$($DeviceIDs -join ',')})\"",
+        "HashRates":  {
+                          "CryptoNightHeavy":  "\"$(if ($Pools.CryptoNightHeavy.SSL) {0}else {$Stats.Cast_CryptoNightHeavy_HashRate.Week})\""
+                      },
+        "API":  "Cast",
+        "Port":  "7777",
+        "URI":  "http://www.gandalph3000.com/download/cast_xmr-vega-win64_092.zip"
+    }
+]

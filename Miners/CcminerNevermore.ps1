@@ -34,7 +34,6 @@ $Commands = [PSCustomObject]@{
     #"blakecoin"  = "" #Blakecoin
     #"blake2s"    = "" #Blake2s
     #"decred"     = "" #Decred
-    #"decrednicehash" = "" #Decrednicehash 
     #"lbry"       = "" #Lbry
     #"myr-gr"     = "" #MyriadGroestl
     #"nist5"      = "" #Nist5
