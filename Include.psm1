@@ -854,7 +854,7 @@ class Miner {
 
                     $this.Data += [PSCustomObject]@{
                         Date = $Date
-                        Raw = $Line
+                        Raw = $Line_Simple
                         HashRate = [PSCustomObject]@{[String]$this.Algorithm = $HashRates}
                         Device = $Devices
                     }
