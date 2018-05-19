@@ -52,7 +52,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             Path       = $Path
             HashSHA256 = $HashSHA256
             Arguments  = ("--remoteaccess --algo=$algo -S $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) --forcecompute --fastjobswitch  -G $($DeviceIDs -join ',')")
-            HashRates  = [PSCustomObject]@{"$Algorithm_Norm" = $HashRate}
+            HashRates  = [PSCustomObject]@{$Algorithm_Norm = $HashRate}
             API        = $Api
             Port       = $Port
             URI        = $Uri
