@@ -58,6 +58,7 @@ function Get-DeviceIDs {
         [String]$Type,
         [Parameter(Mandatory = $true)]
         [PSCustomObject]$DeviceTypeModel,
+        [AllowNull()]
         [Parameter(Mandatory = $true)]
         [Int]$DeviceIdBase,
         [Parameter(Mandatory = $true)]
