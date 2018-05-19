@@ -45,7 +45,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             Name       = $Name
             Type       = $Type
             Path       = $Path
-			HashSHA256 = $HashSHA256
+            HashSHA256 = $HashSHA256
             Arguments  = ("-rmode 0 -cdmport $Port -cdm 1 -pool $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -wal $($Pools.$Algorithm_Norm.User) -pass $($Pools.$Algorithm_Norm.Pass) -proto 4 -coin auto -amd -gpus $($DeviceIDs -join ',')")
             HashRates  = [PSCustomObject]@{"$Algorithm_Norm" = $HashRate}
             API        = $Api
