@@ -11,10 +11,10 @@ $Type = "NVIDIA"
 if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No NVIDIA mining device present in system, InfoOnly is for Get-Binaries
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Path = ".\Bin\PhoenixMiner-29e\PhoenixMiner.exe"
+$Path = ".\Bin\PhoenixMiner\PhoenixMiner.exe"
 $API = "Claymore"
-$HashSHA256 = ""
-$Uri = ""
+$HashSHA256 = "A531B7B0BB925173D3EA2976B72F3D280F64751BDB094D5BB980553DFA85FB07"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/phoenixminer/PhoenixMiner_2.9e.zip"
 $Port = 23334
 $Fees = 0.65
 $Commands = [PSCustomObject]@{
