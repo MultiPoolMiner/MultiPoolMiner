@@ -18,11 +18,11 @@ $Uri = "http://www.gandalph3000.com/download/cast_xmr-vega-win64_100.zip"
 $Port = 7777
 $Fees = 1.5
 $Commands = [PSCustomObject]@{
-    "CryptoNight" = "" #CryptoNight
-    "CryptoNightV7" = "" #CryptoNightV7
-    "CryptoNight-Heavy" = "" #CryptoNight-Heavy
-    "CryptoNightLite" = "" #CryptoNightLite
-    "cryptonight-litev7" = "" #CryptoNightLitetV7
+    "CryptoNight"          = "" #CryptoNight
+    "CryptoNightV7"        = "" #CryptoNightV7
+    "CryptoNight-Heavy"    = "" #CryptoNight-Heavy
+    "CryptoNightLite"      = "" #CryptoNightLite
+    "cryptonight-litev7"   = "" #CryptoNightLitetV7
     "CryptoNightIPBC-Lite" = "" #CryptoNightIPBC-Lite
 }
 
@@ -56,7 +56,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             API        = $Api
             Port       = $Port
             URI        = $Uri
-            MinerFee   = @($Fees)
+            Fees   = @($Fees)
         }
     }
 }

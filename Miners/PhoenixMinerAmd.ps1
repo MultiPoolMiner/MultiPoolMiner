@@ -51,7 +51,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             API        = $Api
             Port       = $Port
             URI        = $Uri
-            MinerFee   = @($Fees)
+            Fees   = @($Fees)
         }
     }
 }
