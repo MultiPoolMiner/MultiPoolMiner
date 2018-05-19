@@ -13,7 +13,7 @@ if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No AMD mining device 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\CryptoNight-Cast\cast_xmr-vega.exe"
 $API = "XMRig"
-$HashSHA256 = ""
+$HashSHA256 = "5AF6A8F1EA7F5D512CA4E70F0436C33DD961BCDCDDDFFA52F9306404557379A9"
 $Uri = "http://www.gandalph3000.com/download/cast_xmr-vega-win64_100.zip"
 $Port = 7777
 $Fees = 1.5
@@ -38,12 +38,12 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
 
         #temp fix
         switch ($Algorithm_Norm) {
-            "CryptoNight"          {$algo=0}
-            "CryptoNightV7"        {$algo=1}
-            "CryptoNight-Heavy"    {$algo=2}
-            "CryptoNightLite"      {$algo=3}
-            "CryptoNightLitetV7"   {$algo=4}
-            "CryptoNightIPBC-Lite" {$algo=5}
+            "CryptoNight"         {$algo=0}
+            "CryptoNightV7"       {$algo=1}
+            "CryptoNightHeavy"    {$algo=2}
+            "CryptoNightLite"     {$algo=3}
+            "CryptoNightLitetV7"  {$algo=4}
+            "CryptoNightIPBCLite" {$algo=5}
         }
 		
         [PSCustomObject]@{
@@ -56,7 +56,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             API        = $Api
             Port       = $Port
             URI        = $Uri
-            Fees   = @($Fees)
+            Fees       = @($Fees)
         }
     }
 }

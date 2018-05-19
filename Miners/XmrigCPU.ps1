@@ -8,7 +8,7 @@ param(
 )
 
 $Type = "CPU"
-if (-not $Devices.$Type) {return} # No NVIDIA mining device present in system
+if (-not $Devices.$Type) {return} # No CPU mining device present in system
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\CryptoNight-CPU\xmrig.exe"

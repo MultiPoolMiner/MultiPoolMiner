@@ -12,7 +12,7 @@ if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No NVIDIA mining devi
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\HSR-Palgin\hsrminer_hsr.exe"
-$HashSHA256 = ""
+$HashSHA256 = "C8E13F0B872FBB2A6679EB95456CBCF6C0F0BE84C5173DB948A4FEF9840AC425"
 $API = "Ccminer"
 $Uri = "https://github.com/palginpav/hsrminer/raw/master/HSR%20algo/Windows/hsrminer_hsr.exe"
 $Port = 4001

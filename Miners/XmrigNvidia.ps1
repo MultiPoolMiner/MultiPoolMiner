@@ -12,7 +12,7 @@ if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No NVIDIA mining devi
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\CryptoNight-NVIDIA\xmrig-nvidia.exe"
-$HashSHA256 = ""
+$HashSHA256 = "5905924C61D96267C176BC9AF86C16DCC837B81378E47315231A9EE0C5CC48B7"
 $API = "XMRig"
 $Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.6.1/xmrig-nvidia-2.6.1-cuda9-win64.zip"
 $Port = 3335
