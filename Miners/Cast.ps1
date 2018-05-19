@@ -36,15 +36,15 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
 		
         $HashRate = $HashRate * (1 - $Fee / 100)
 
-		#temp fix
-		switch ($Algorithm_Norm) {
+        #temp fix
+        switch ($Algorithm_Norm) {
             "CryptoNight"          {$algo=0}
             "CryptoNightV7"        {$algo=1}
             "CryptoNight-Heavy"    {$algo=2}
             "CryptoNightLite"      {$algo=3}
             "CryptoNightLitetV7"   {$algo=4}
             "CryptoNightIPBC-Lite" {$algo=5}
-		}
+        }
 		
         [PSCustomObject]@{
             Name       = $Name
