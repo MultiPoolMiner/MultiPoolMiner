@@ -18,7 +18,7 @@ $Uri = "https://github.com/xmrig/xmrig-amd/releases/download/v2.6.1/xmrig-amd-2.
 $Port = 3335
 $Fees = 1
 $Commands = [PSCustomObject]@{
-    "cn" = "" #CryptoNightV7
+    "cn"       = "" #CryptoNightV7
     "cn-heavy" = "" #CryptoNight-Heavy
 }
 
