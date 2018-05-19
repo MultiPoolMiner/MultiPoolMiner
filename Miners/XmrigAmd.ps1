@@ -38,7 +38,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             Path       = $Path
             HashSHA256 = $HashSHA256
             Arguments  = ("--api-port $Port -a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) --keepalive --nicehash --donate-level 1")
-            HashRates  = [PSCustomObject]@{"$Algorithm_Norm" = $HashRate}
+            HashRates  = [PSCustomObject]@{$Algorithm_Norm = $HashRate}
             API        = $Api
             Port       = $Port
             URI        = $Uri
