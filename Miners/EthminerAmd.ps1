@@ -10,12 +10,12 @@ param(
 $Type = "AMD"
 if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No AMD mining device present in system, InfoOnly is for Get-Binaries
 
-$Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\Ethash-Ethminer\ethminer.exe"
 $HashSHA256 = "95F1F0DFCDF8EFE151501009276B00AE77B29DE9B3EF04974BE07F1A07D59761"
 $API = "Claymore"
 $Uri = "https://github.com/ethereum-mining/ethminer/releases/download/v0.14.0/ethminer-0.14.0-Windows.zip"
 $Port = 13333
+
 $Commands = [PSCustomObject]@{
     "ethash"    = ""
     "ethash2gb" = ""
@@ -23,6 +23,8 @@ $Commands = [PSCustomObject]@{
 
 # Get array of IDs of all devices in device set, returned DeviceIDs are of base $DeviceIdBase representation starting from $DeviceIdOffset
 $DeviceIDsSet = Get-DeviceIDs -Config $Config -Devices $Devices -Type $Type -DeviceTypeModel $($Devices.$Type) -DeviceIdBase 10 -DeviceIdOffset 0
+
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
 

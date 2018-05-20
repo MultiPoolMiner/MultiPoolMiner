@@ -10,16 +10,25 @@ param(
 $Type = "NVIDIA"
 if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No NVIDIA mining device present in system, InfoOnly is for Get-Binaries
 
-$Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\CryptoNight-NVIDIA\xmrig-nvidia.exe"
 $HashSHA256 = "5905924C61D96267C176BC9AF86C16DCC837B81378E47315231A9EE0C5CC48B7"
 $API = "XMRig"
 $Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.6.1/xmrig-nvidia-2.6.1-cuda9-win64.zip"
 $Port = 3335
-$Fees = 1
+$MinerFeeInPercent = 1
+
 $Commands = [PSCustomObject]@{
     "cn"       = "" #CryptoNightV7
     "cn-heavy" = "" #CryptoNight-Heavy
+}
+
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+
+if ($Config.IgnoreMinerFee -or $Config.Miners.$Name.IgnoreMinerFee) {
+    $Fees = @($null)
+}
+else {
+    $Fees = @($MinerFeeInPercent)
 }
 
 $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
@@ -30,7 +39,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
 
         $HashRate = ($Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week)
 		
-        $HashRate = $HashRate * (1 - $Fees / 100)
+        if ($Fees) {$HashRate = $HashRate * (1 - $MinerFeeInPercent / 100)}
 
         [PSCustomObject]@{
             Name       = $Name

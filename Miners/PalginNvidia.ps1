@@ -10,16 +10,18 @@ param(
 $Type = "NVIDIA"
 if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No NVIDIA mining device present in system, InfoOnly is for Get-Binaries
 
-$Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\HSR-Palgin\hsrminer_hsr.exe"
 $HashSHA256 = "C8E13F0B872FBB2A6679EB95456CBCF6C0F0BE84C5173DB948A4FEF9840AC425"
 $API = "Ccminer"
 $Uri = "https://github.com/palginpav/hsrminer/raw/master/HSR%20algo/Windows/hsrminer_hsr.exe"
 $Port = 4001
-$Fees = 1
+$MinerFeeInPercent = 1
+
 $Commands = [PSCustomObject]@{
     "Hsr" = "" #Hsr
 }
+
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
 
@@ -29,7 +31,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
 
         $HashRate = ($Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week)
 		
-        $HashRate = $HashRate * (1 - $Fees / 100)
+        if ($Fees) {$HashRate = $HashRate * (1 - $MinerFeeInPercent / 100)}
 
         [PSCustomObject]@{
             Name       = $Name

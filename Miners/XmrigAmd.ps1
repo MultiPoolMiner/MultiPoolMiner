@@ -10,16 +10,25 @@ param(
 $Type = "AMD"
 if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No AMD mining device present in system, InfoOnly is for Get-Binaries
 
-$Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\CryptoNight-AMD\xmrig-amd.exe"
 $HashSHA256 = "8D1867696FFD1D5EB628E88CC1293D39484F5536CB84E8441053E13F992E8515"
 $API = "XMRig"
 $Uri = "https://github.com/xmrig/xmrig-amd/releases/download/v2.6.1/xmrig-amd-2.6.1-win64.zip"
 $Port = 3335
-$Fees = 1
+$MinerFeeInPercent = 1
+
 $Commands = [PSCustomObject]@{
     "cn"       = "" #CryptoNightV7
     "cn-heavy" = "" #CryptoNight-Heavy
+}
+
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+
+if ($Config.IgnoreMinerFee -or $Config.Miners.$Name.IgnoreMinerFee) {
+    $Fees = @($null)
+}
+else {
+    $Fees = @($MinerFeeInPercent)
 }
 
 $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
@@ -30,7 +39,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
 
         $HashRate = ($Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week)
 		
-        $HashRate = $HashRate * (1 - $Fees / 100)
+        if ($Fees) {$HashRate = $HashRate * (1 - $MinerFeeInPercent / 100)}
 
         [PSCustomObject]@{
             Name       = $Name

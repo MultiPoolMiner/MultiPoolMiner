@@ -11,13 +11,13 @@ param(
 $Type = "AMD"
 if (-not ($Devices.$Type -or $Config.InfoOnly)) {return} # No AMD mining device present in system, InfoOnly is for Get-Binaries
 
-$Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\CryptoNight-Cast\cast_xmr-vega.exe"
 $API = "XMRig"
 $HashSHA256 = "5AF6A8F1EA7F5D512CA4E70F0436C33DD961BCDCDDDFFA52F9306404557379A9"
 $Uri = "http://www.gandalph3000.com/download/cast_xmr-vega-win64_100.zip"
 $Port = 7777
 $Fees = 1.5
+
 $Commands = [PSCustomObject]@{
     "CryptoNight"          = @("0","") #CryptoNight, first item is algo number, second for additional miner commands
     "CryptoNightV7"        = @("1","") #CryptoNightV7
@@ -25,6 +25,15 @@ $Commands = [PSCustomObject]@{
     "CryptoNightLite"      = @("3","") #CryptoNightLite
     "cryptonight-litev7"   = @("4","") #CryptoNightLitetV7
     "CryptoNightIPBC-Lite" = @("5","") #CryptoNightIPBC-Lite
+}
+
+$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+
+if ($Config.IgnoreMinerFee -or $Config.Miners.$Name.IgnoreMinerFee) {
+    $Fees = @($null)
+}
+else {
+    $Fees = @($MinerFeeInPercent)
 }
 
 # Get array of IDs of all devices in device set, returned DeviceIDs are of base $DeviceIdBase representation starting from $DeviceIdOffset
@@ -38,7 +47,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
 
         $HashRate = ($Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week)
 		
-        $HashRate = $HashRate * (1 - $Fee / 100)
+        if ($Fees) {$HashRate = $HashRate * (1 - $MinerFeeInPercent / 100)}
 		
         [PSCustomObject]@{
             Name       = $Name
