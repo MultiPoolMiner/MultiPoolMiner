@@ -67,6 +67,8 @@ param(
     [Switch]$ShowMinerWindow = $false #if true all miner windows will be visible (they can steal focus)
 )
 
+Clear-Host
+
 $Version = "2.7.2.7"
 $Strikes = 3
 $SyncWindow = 5 #minutes
