@@ -18,8 +18,8 @@ function Get-Devices {
             else {
                 Switch ($_.Vendor) {
                     "Advanced Micro Devices, Inc." {$Type = "AMD"}
-                    "Intel(R) Corporation"         {$Type = "INTEL"}
-                    "NVIDIA Corporation"           {$Type = "NVIDIA"}
+                    "Intel(R) Corporation" {$Type = "INTEL"}
+                    "NVIDIA Corporation" {$Type = "NVIDIA"}
                 }
             }
 
@@ -30,7 +30,8 @@ function Get-Devices {
 
             $Name_Norm = (Get-Culture).TextInfo.ToTitleCase(($_.Name)) -replace "[^A-Z0-9]"
 
-            if ($Devices.$Type.Name_Norm -inotcontains $Name_Norm) { # New card model
+            if ($Devices.$Type.Name_Norm -inotcontains $Name_Norm) {
+                # New card model
                 $Device = $_
                 $Device | Add-Member Name_Norm $Name_Norm
                 $Device | Add-Member DeviceIDs @()
@@ -56,6 +57,7 @@ function Get-DeviceIDs {
         [Parameter(Mandatory = $true)]
         [String]$Type,
         [Parameter(Mandatory = $true)]
+        [AllowNull()]
         [PSCustomObject]$DeviceTypeModel,
         [Parameter(Mandatory = $true)]
         [Int]$DeviceIdBase,
@@ -69,7 +71,8 @@ function Get-DeviceIDs {
     $DeviceIDs | Add-Member "4gb" @() # array of all devices with more than 4MiB VRAM, ids will be in hex format
 
     # Get DeviceIDs, filter out all disabled hw models and IDs
-    if ($Config.MinerInstancePerCardModel) { # separate miner instance per hardware model
+    if ($Config.MinerInstancePerCardModel) {
+        # separate miner instance per hardware model
         if ($Config.Devices.$Type.IgnoreHWModel -inotcontains $DeviceTypeModel.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $DeviceTypeModel.Name_Norm) {
             $DeviceTypeModel.DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | ForEach-Object {
                 $DeviceIDs."All" += [Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)
@@ -78,10 +81,11 @@ function Get-DeviceIDs {
             }
         }
     }
-    else { # one miner instance per hw type
+    else {
+        # one miner instance per hw type
         $DeviceIDs."All" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | ForEach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
-        $DeviceIDs."3gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 3000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | Foreach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
-        $DeviceIDs."4gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 4000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | Foreach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
+        $DeviceIDs."3gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 3000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | ForEach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
+        $DeviceIDs."4gb" = @($Devices.$Type | Where-Object {$Config.Devices.$Type.IgnoreHWModel -inotcontains $_.Name_Norm -and $Config.Miners.$Name.IgnoreHWModel -inotcontains $_.Name_Norm} | Where-Object {$_.GlobalMemsize -gt 4000000000}).DeviceIDs | Where-Object {$Config.Devices.$Type.IgnoreDeviceID -notcontains $_ -and $Config.Miners.$Name.IgnoreDeviceID -notcontains $_} | ForEach-Object {[Convert]::ToString(($_ + $DeviceIdOffset), $DeviceIdBase)}
     }
     $DeviceIDs
 }
@@ -128,20 +132,23 @@ function ConvertTo-CommandPerDeviceSet {
         $ValueSeparator = $null
         $Values = $null
 
-        if ($Token.TrimStart() -match "(?:^[-=]{1,})") { # supported prefix characters are listed in brackets: [-=]{1,}
+        if ($Token.TrimStart() -match "(?:^[-=]{1,})") {
+            # supported prefix characters are listed in brackets: [-=]{1,}
 
             $Prefix = "$($Token -split $Matches[0] | Select-Object -Index 0)$($Matches[0])"
             $Token = $Token -split $Matches[0] | Select-Object -Last 1
 
-            if ($Token -match "(?:[ =]{1,})") { # supported separators are listed in brackets: [ =]{1,}
+            if ($Token -match "(?:[ =]{1,})") {
+                # supported separators are listed in brackets: [ =]{1,}
                 $ParameterValueSeparator = $Matches[0]
                 $Parameter = $Token -split $ParameterValueSeparator | Select-Object -Index 0
                 $Values = $Token.Substring(("$($Parameter)$($ParameterValueSeparator)").length)
 
-                if ($Values -match "(?:[,; ]{1})") { # supported separators are listed in brackets: [,; ]{1}
+                if ($Values -match "(?:[,; ]{1})") {
+                    # supported separators are listed in brackets: [,; ]{1}
                     $ValueSeparator = $Matches[0]
                     $RelevantValues = @()
-                    $DeviceIDs | Foreach-Object {
+                    $DeviceIDs | ForEach-Object {
                         $DeviceID = [Convert]::ToInt32($_, $DeviceIdBase) - $DeviceIdOffset
                         if ($Values.Split($ValueSeparator) | Select-Object -Index $DeviceId) {$RelevantValues += ($Values.Split($ValueSeparator) | Select-Object -Index $DeviceId)}
                         else {$RelevantValues += ""}
@@ -351,12 +358,27 @@ function Set-Stat {
 function Get-Stat {
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [String]$Name
     )
 
     if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
-    Get-ChildItem "Stats" -File | Where-Object Extension -NE ".ps1" | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
+
+    if ($Name) {
+        # Return single requested stat
+        Get-ChildItem "Stats" -File | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
+    }
+    else {
+        # Return all stats
+        $Stats = [PSCustomObject]@{}
+        Get-ChildItem "Stats" | ForEach-Object {
+            $BaseName = $_.BaseName
+            $_ | Get-Content | ConvertFrom-Json | ForEach-Object {
+                $Stats | Add-Member $BaseName $_
+            }
+        }
+        Return $Stats
+    }
 }
 
 function Get-ChildItemContent {
@@ -601,7 +623,7 @@ function Get-Algorithm {
         [String]$Algorithm = ""
     )
 
-    if(-not (Test-Path Variable:Script:Algorithms)) {
+    if (-not (Test-Path Variable:Script:Algorithms)) {
         $Script:Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
     }
 
@@ -618,10 +640,10 @@ function Get-Region {
         [String]$Region = ""
     )
 
-    if(-not (Test-Path Variable:Script:Regions)) {
+    if (-not (Test-Path Variable:Script:Regions)) {
         $Script:Regions = Get-Content "Regions.txt" | ConvertFrom-Json
     }
-    
+
     $Region = (Get-Culture).TextInfo.ToTitleCase(($Region -replace "-", " " -replace "_", " ")) -replace " "
 
     if ($Script:Regions.$Region) {$Script:Regions.$Region}
@@ -641,11 +663,9 @@ class Miner {
     $Wrap
     $API
     $Port
-    [Array]$Algorithm = @()
+    [string[]]$Algorithm = @()
     $Type
     $Index
-    $Device
-    $Device_Auto
     $Profit
     $Profit_Comparison
     $Profit_MarginOfError
@@ -663,6 +683,7 @@ class Miner {
     $Benchmarked
     $LogFile
     $Pool
+    hidden [Array]$Data = @()
     $ShowMinerWindow
 
     [String[]]GetProcessNames() {
@@ -774,18 +795,112 @@ class Miner {
         }
     }
 
-    [PSCustomObject]GetMinerData ([Bool]$Safe = $false) {
+    [String[]]UpdateMinerData () {
         $Lines = @()
 
         if ($this.Process.HasMoreData) {
+            $Date = (Get-Date).ToUniversalTime()
+
             $this.Process | Receive-Job | ForEach-Object {
                 $Line = $_ -replace "`n|`r", ""
-                if ($Line -replace "\x1B\[[0-?]*[ -/]*[@-~]", "") {$Lines += $Line}
+                $Line_Simple = $Line -replace "\x1B\[[0-?]*[ -/]*[@-~]", ""
+
+                if ($Line_Simple) {
+                    $HashRates = @()
+                    $Devices = @()
+
+                    if ($Line_Simple -match "/s") {
+                        $Words = $Line_Simple -split " "
+
+                        $Words -match "/s$" | ForEach-Object {
+                            if (($Words | Select-Object -Index $Words.IndexOf($_)) -match "^((?:\d*\.)?\d+)(.*)$") {
+                                $HashRate = ($matches | Select-Object -Index 1) -as [Decimal]
+                                $HashRate_Unit = ($matches | Select-Object -Index 2)
+                            }
+                            else {
+                                $HashRate = ($Words | Select-Object -Index ($Words.IndexOf($_) - 1)) -as [Decimal]
+                                $HashRate_Unit = ($Words | Select-Object -Index $Words.IndexOf($_))
+                            }
+
+                            switch -wildcard ($HashRate_Unit) {
+                                "kh/s*" {$HashRate *= [Math]::Pow(1000, 1)}
+                                "mh/s*" {$HashRate *= [Math]::Pow(1000, 2)}
+                                "gh/s*" {$HashRate *= [Math]::Pow(1000, 3)}
+                                "th/s*" {$HashRate *= [Math]::Pow(1000, 4)}
+                                "ph/s*" {$HashRate *= [Math]::Pow(1000, 5)}
+                            }
+
+                            $HashRates += $HashRate
+                        }
+                    }
+
+                    if ($Line_Simple -match "gpu|cpu|device") {
+                        $Words = $Line_Simple -replace "#", "" -replace ":", "" -split " "
+
+                        $Words -match "^gpu|^cpu|^device" | ForEach-Object {
+                            if (($Words | Select-Object -Index $Words.IndexOf($_)) -match "^(.*)((?:\d*\.)?\d+)$") {
+                                $Device = ($matches | Select-Object -Index 2) -as [Int]
+                                $Device_Type = ($matches | Select-Object -Index 1)
+                            }
+                            else {
+                                $Device = ($Words | Select-Object -Index ($Words.IndexOf($_) + 1)) -as [Int]
+                                $Device_Type = ($Words | Select-Object -Index $Words.IndexOf($_))
+                            }
+
+                            $Devices += "{0}#{1:d2}" -f $Device_Type, $Device
+                        }
+                    }
+
+                    $Lines += $Line
+
+                    $this.Data += [PSCustomObject]@{
+                        Date = $Date
+                        Raw = $Line_Simple
+                        HashRate = [PSCustomObject]@{[String]$this.Algorithm = $HashRates}
+                        Device = $Devices
+                    }
+                }
             }
+
+            $this.Data = @($this.Data | Select-Object -Last 10000)
         }
 
-        return [PSCustomObject]@{
-            Lines = $Lines
+        return $Lines
+    }
+
+    [Int64]GetHashRate([String]$Algorithm = [String]$this.Algorithm, [Int]$Seconds = 60, [Boolean]$Safe = $this.New) {
+        $HashRates_Devices = @($this.Data | Where-Object Device | Select-Object -ExpandProperty Device -Unique)
+        if (-not $HashRates_Devices) {$HashRates_Devices = @("Device")}
+
+        $HashRates_Counts = @{}
+        $HashRates_Averages = @{}
+        $HashRates_Variances = @{}
+
+        $this.Data | Where-Object HashRate | Where-Object Date -GE (Get-Date).ToUniversalTime().AddSeconds( - $Seconds) | ForEach-Object {
+            $Data_Devices = $_.Device
+            if (-not $Data_Devices) {$Data_Devices = $HashRates_Devices}
+
+            $Data_HashRates = $_.HashRate.$Algorithm
+
+            $Data_Devices | ForEach-Object {$HashRates_Counts.$_++}
+            $Data_Devices | ForEach-Object {$HashRates_Averages.$_ += @(($Data_HashRates | Measure-Object -Sum | Select-Object -ExpandProperty Sum) / $Data_Devices.Count)}
+            $HashRates_Variances."$($Data_Devices | ConvertTo-Json)" += @($Data_HashRates | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
+        }
+
+        $HashRates_Count = $HashRates_Counts.Values | ForEach-Object {$_} | Measure-Object -Minimum | Select-Object -ExpandProperty Minimum
+        $HashRates_Average = ($HashRates_Averages.Values | ForEach-Object {$_} | Measure-Object -Average | Select-Object -ExpandProperty Average) * $HashRates_Averages.Keys.Count
+        $HashRates_Variance = $HashRates_Variances.Keys | ForEach-Object {$_} | ForEach-Object {$HashRates_Variances.$_ | Measure-Object -Average -Minimum -Maximum} | ForEach-Object {if ($_.Average) {($_.Maximum - $_.Minimum) / $_.Average}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
+
+        if ($Safe) {
+            if ($HashRates_Count -lt 3 -or $HashRates_Variance -gt 0.05) {
+                return 0
+            }
+            else {
+                return $HashRates_Average * (1 + ($HashRates_Variance / 2))
+            }
+        }
+        else {
+            return $HashRates_Average
         }
     }
 }

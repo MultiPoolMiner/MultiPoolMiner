@@ -69,8 +69,16 @@
                     $Data = $API.AllPools | ConvertTo-Json
                     Break
                 }
+                "/algorithms" {
+                    $Data = ($API.AllPools.Algorithm | Sort-Object -Unique) | ConvertTo-Json
+                    Break
+                }
                 "/miners" {
                     $Data = $API.Miners | ConvertTo-Json
+                    Break
+                }
+                "/fastestminers" {
+                    $Data = $API.FastestMiners | ConvertTo-Json
                     Break
                 }
                 "/config" {
