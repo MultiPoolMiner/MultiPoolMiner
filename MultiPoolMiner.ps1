@@ -165,6 +165,7 @@ while ($true) {
             MinerStatusKey           = $MinerStatusKey
             SwitchingPrevention      = $SwitchingPrevention
             ShowMinerWindow          = $ShowMinerWindow
+            UseFastestMinerPerAlgoOnly = $UseFastestMinerPerAlgoOnly
         } | Select-Object -ExpandProperty Content
     }
 
