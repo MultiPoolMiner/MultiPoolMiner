@@ -8,7 +8,7 @@ param(
 )
 
 $Type = "NVIDIA"
-if (-not $Devices.$Type) {return} # No NVIDIA mining device present in system
+if (-not $Devices.$Type -and -not $Config.InfoOnly) {return} # No NVIDIA mining device present in system
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\Ethash-Claymore\EthDcrMiner64.exe"
@@ -24,9 +24,9 @@ $Commands = [PSCustomObject]@{
     "ethash;blake2s:40"     = @("", "")
     "ethash;blake2s:60"     = @("", "")
     "ethash;blake2s:80"     = @("", "")
+    "ethash;decred:40"      = @("", "")
+    "ethash;decred:70"      = @("", "")
     "ethash;decred:100"     = @("", "")
-    "ethash;decred:130"     = @("", "")
-    "ethash;decred:160"     = @("", "")
     "ethash;keccak:20"      = @("", "")
     "ethash;keccak:30"      = @("", "")
     "ethash;keccak:40"      = @("", "")
@@ -36,12 +36,15 @@ $Commands = [PSCustomObject]@{
     "ethash;pascal:40"      = @("", "")
     "ethash;pascal:60"      = @("", "")
     "ethash;pascal:80"      = @("", "")
+    "ethash;sia:40"         = @("", "")
+    "ethash;sia:60"         = @("", "")
+    "ethash;sia:80"         = @("", "")
     "ethash2gb;blake2s:40"  = @("", "")
     "ethash2gb;blake2s:60"  = @("", "")
     "ethash2gb;blake2s:80"  = @("", "")
+    "ethash2gb;decred:40"   = @("", "")
+    "ethash2gb;decred:70"   = @("", "")
     "ethash2gb;decred:100"  = @("", "")
-    "ethash2gb;decred:130"  = @("", "")
-    "ethash2gb;decred:160"  = @("", "")
     "ethash2gb;keccak:20"   = @("", "")
     "ethash2gb;keccak:30"   = @("", "")
     "ethash2gb;keccak:40"   = @("", "")
@@ -51,8 +54,11 @@ $Commands = [PSCustomObject]@{
     "ethash2gb;pascal:40"   = @("", "")
     "ethash2gb;pascal:60"   = @("", "")
     "ethash2gb;pascal:80"   = @("", "")
+    "ethash2gb;sia:40"      = @("", "")
+    "ethash2gb;sia:60"      = @("", "")
+    "ethash2gb;sia:80"      = @("", "")
 }
-$CommonCommands = @(" -logsmaxsize 1", "") # To be applied to all algorithms and intensities. Array: first value for main algo, second value for secondary algo
+$CommonCommands = @(" -logsmaxsize 1 -wd 0", "") # To be applied to all algorithms and intensities. Array: first value for main algo, second value for secondary algo
 
 # Get array of IDs of all devices in device set, returned DeviceIDs are of base $DeviceIdBase representation starting from $DeviceIdOffset
 $DeviceIDsSet = Get-DeviceIDs -Config $Config -Devices $Devices -Type $Type -DeviceTypeModel $($Devices.$Type) -DeviceIdBase 16 -DeviceIdOffset 0
@@ -80,7 +86,13 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             $Miner_Name = "$($Miner_Name)$($MainAlgorithm_Norm -replace '^ethash', '')"
             $HashRateMainAlgorithm = ($Stats."$($Miner_Name)_$($MainAlgorithm_Norm)_HashRate".Week)
 
-            $HashRateMainAlgorithm = $HashRateMainAlgorithm * (1 - $MinerFeeInPercentSingleMode / 100)
+            if (($DeviceIDsSet."3gb").Count -eq 0) { # All GPUs are 2GB, miner is completely free in this case, developer fee will not be mined at all.
+                $MinerFeeInPercentSingleMode = 0
+            }
+            else {
+                $HashRateMainAlgorithm = $HashRateMainAlgorithm * (1 - $MinerFeeInPercentSingleMode / 100)
+            }
+
             $Fees = @($MinerFeeInPercentSingleMode)
 
             # Single mining mode
@@ -107,8 +119,14 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             $HashRateMainAlgorithm = ($Stats."$($Miner_Name)_$($MainAlgorithm_Norm)_HashRate".Week)
             $HashRateSecondaryAlgorithm = ($Stats."$($Miner_Name)_$($SecondaryAlgorithm_Norm)_HashRate".Week)
 
+            if (($DeviceIDsSet."3gb").Count -eq 0) { # All GPUs are 2GB, miner is completely free in this case, developer fee will not be mined at all.
+                $MinerFeeInPercentDualMode = 0
+            }
+            else {
+                $HashRateMainAlgorithm = $HashRateMainAlgorithm * (1 - $MinerFeeInPercentDualMode / 100)
+            }
+
             #Second coin (Decred/Siacoin/Lbry/Pascal/Blake2s/Keccak) is mined without developer fee
-            $HashRateMainAlgorithm = $HashRateMainAlgorithm * (1 - $MinerFeeInPercentDualMode / 100)
             $Fees = @($MinerFeeInPercentDualMode, 0)
 
             if ($Pools.$SecondaryAlgorithm_Norm -and $SecondaryAlgorithmIntensity -gt 0) { # must have a valid pool to mine and positive intensity
@@ -125,8 +143,8 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
                     Fees       = $Fees
                 }
             }
-            if ($SecondaryAlgorithm_Norm -eq "Sia" -or $SecondaryAlgorithm_Norm -eq "Decred") {
-                $SecondaryAlgorithm_Norm = "$($SecondaryAlgorithm_Norm)NiceHash"
+            if ($SecondaryAlgorithm_Norm -eq "Sia") {
+                $SecondaryAlgorithm_Norm = "SiaNiceHash"
                 $HashRateSecondaryAlgorithm = ($Stats."$($Miner_Name)_$($SecondaryAlgorithm_Norm)_HashRate".Week)
 
                 if ($Pools.$SecondaryAlgorithm_Norm -and $SecondaryAlgorithmIntensity -gt 0) { # must have a valid pool to mine and positive intensity
