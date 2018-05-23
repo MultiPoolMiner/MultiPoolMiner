@@ -202,6 +202,7 @@ Use only use fastest miner per algo and device index. E.g. if there are 2 or mor
 **-IgnoreMinerFee**
 Newer versions of MPM take miner fees into account when calculating profitability. Set this flag to 'true' to ignore the fees (old MPM behaviour).
 This is also a per-miner configuration item which available through advanced configuration 
+
     
 ##SAMPLE USAGE
 #####(check "start.bat" file in root folder)

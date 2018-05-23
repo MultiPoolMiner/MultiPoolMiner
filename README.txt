@@ -253,7 +253,7 @@ If Config.txt does not exist, copy Config.default.txt and rename to Config.txt
 
 Config.txt is a JSON file and human readable / editable. A good primer for understanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
 
-Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like https://codebeautify.org/jsonviewer/ (copy/paste the complete file).
+Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like https://jsonblob.com (copy/paste the complete file).
 
 Default content of 'Config.txt'
 
@@ -385,6 +385,7 @@ To ignore miner fees (old MPM behaviour) for ALL miners add '"IgnoreMinerFee":  
 }
 
 
+====================================================================
 
 MULTIPOOLMINER'S LOGIC:
 
