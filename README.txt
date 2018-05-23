@@ -336,7 +336,7 @@ E.g. to change the payout currency for Zpool to LiteCoin replace the line for BT
 
 Advanced configuration for Miners
 
-Settings for each configured miner are stored in its own subsection. Theses settings are only valid for the named miner.
+Settings for each configured miner are stored in its own subsection. These settings are only valid for the named miner.
 
 Ignore miner fee in profit calculations
 
