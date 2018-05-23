@@ -297,7 +297,7 @@ There is a section for Pools, Miners and a general section
 
 ### Advanced configuration for Pools
 
-Settings for each configured pool are stored in its own subsection. Theses settings are only valid for the named pool.
+Settings for each configured pool are stored in its own subsection. These settings are only valid for the named pool.
 
 #### To change payout currency of a pool
 
