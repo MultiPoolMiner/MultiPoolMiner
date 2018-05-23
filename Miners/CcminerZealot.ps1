@@ -1,13 +1,14 @@
 using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-Zealot\z-enemy.exe"
-$HashSHA256 = "15F401E8AF15884440C5A8940C9E91934A3A7AF484DA3ACAB9237087D010F42A"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/zenemy109/z-enemy.109a-release.zip"
+$HashSHA256 = "16E60514BF2D5F9DD67B543EF220499CEF74DA637067E1D019C5FBAE37EC8219"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/zenemy110/z-enemy.1.10.release.zip"
 $MinerFeeInPercent = 1
 
 $Commands = [PSCustomObject]@{
     "bitcore" = "" #Bitcore
     "phi"     = "" #PHI
+    "tribus"  = "" #Tribus, new in 1.10
     "x16r"    = "" #Raven
     "x16s"    = "" #Pigeon
     "x17"     = "" #X17
