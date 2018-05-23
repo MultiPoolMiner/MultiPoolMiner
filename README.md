@@ -336,7 +336,7 @@ E.g. to ignore miner fees (old MPM behaviour) for the CcminerZealot miner add '"
 
     "Miners":  {
         "CcminerZealot":  {
-            "IgnoreMinerFee":  true'
+            "IgnoreMinerFee":  true
         }
 
 
