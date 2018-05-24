@@ -86,13 +86,13 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             else {
                 if (($DeviceIDsSet."3gb").Count -eq 0) {
                     # All GPUs are 2GB, miner is completely free in this case, developer fee will not be mined at all.
-                    $MinerFeeInPercentSingleMode = 0
+                    $Fees = @($null)
                 }
                 else {
                     $HashRateMainAlgorithm = $HashRateMainAlgorithm * (1 - $MinerFeeInPercentSingleMode / 100)
+                    #Second coin (Decred/Siacoin/Lbry/Pascal/Blake2s/Keccak) is mined without developer fee
+                    $Fees = @($MinerFeeInPercentSingleMode)
                 }
-                #Second coin (Decred/Siacoin/Lbry/Pascal/Blake2s/Keccak) is mined without developer fee
-                $Fees = @($MinerFeeInPercentSingleMode)
             }
 
             # Single mining mode
@@ -123,14 +123,15 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
                 $Fees = @($null)
             }
             else {
-                if (($DeviceIDsSet."3gb").Count -eq 0) { # All GPUs are 2GB, miner is completely free in this case, developer fee will not be mined at all.
-                    $MinerFeeInPercentDualMode = 0
+                if (($DeviceIDsSet."3gb").Count -eq 0) {
+                    # All GPUs are 2GB, miner is completely free in this case, developer fee will not be mined at all.
+                    $Fees = @($null)
                 }
                 else {
                     $HashRateMainAlgorithm = $HashRateMainAlgorithm * (1 - $MinerFeeInPercentDualMode / 100)
+                    #Second coin (Decred/Siacoin/Lbry/Pascal/Blake2s/Keccak) is mined without developer fee
+                    $Fees = @($MinerFeeInPercentDualMode, 0)
                 }
-                #Second coin (Decred/Siacoin/Lbry/Pascal/Blake2s/Keccak) is mined without developer fee
-                $Fees = @($MinerFeeInPercentDualMode, 0)
             }
 
             if ($Pools.$SecondaryAlgorithm_Norm -and $SecondaryAlgorithmIntensity -gt 0) { # must have a valid pool to mine and positive intensity
