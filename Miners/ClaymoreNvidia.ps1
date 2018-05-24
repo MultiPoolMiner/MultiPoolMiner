@@ -86,13 +86,13 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             else {
                 if (($DeviceIDsSet."3gb").Count -eq 0) {
                     # All GPUs are 2GB, miner is completely free in this case, developer fee will not be mined at all.
-                    $MinerFeeInPercentDualMode = 0
+                    $MinerFeeInPercentSingleMode = 0
                 }
                 else {
-                    $HashRateMainAlgorithm = $HashRateMainAlgorithm * (1 - $MinerFeeInPercentDualMode / 100)
+                    $HashRateMainAlgorithm = $HashRateMainAlgorithm * (1 - $MinerFeeInPercentSingleMode / 100)
                 }
                 #Second coin (Decred/Siacoin/Lbry/Pascal/Blake2s/Keccak) is mined without developer fee
-                $Fees = @($MinerFeeInPercentDualMode, 0)
+                $Fees = @($MinerFeeInPercentSingleMode, 0)
             }
 
             # Single mining mode
