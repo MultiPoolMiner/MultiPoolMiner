@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 $Path = ".\Bin\AMD-Bitcore\sgminer-x64.exe"
 $HashSHA256 = "C00DE0D33BD20BE3B5014FC019ED8A81D3AA5273C8AF96B17D6B51C5D8FA3933"
