@@ -29,8 +29,8 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
         $HashRate = ($Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week)
 
         [PSCustomObject]@{
-            Name       = "CPU"
-            Type       = $Type
+            Name       = $Name
+            Type       = "CPU"
             Path       = $Path
             HashSHA256 = $HashSHA256
             Arguments  = ("-r -1 -mport -$Port -pow7 $($Commands.$_ | Select-Object -Index 0) -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_ | Select-Object -Index 1)\")
