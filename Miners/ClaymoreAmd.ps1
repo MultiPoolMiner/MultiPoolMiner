@@ -92,7 +92,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
                     $HashRateMainAlgorithm = $HashRateMainAlgorithm * (1 - $MinerFeeInPercentSingleMode / 100)
                 }
                 #Second coin (Decred/Siacoin/Lbry/Pascal/Blake2s/Keccak) is mined without developer fee
-                $Fees = @($MinerFeeInPercentSingleMode, 0)
+                $Fees = @($MinerFeeInPercentSingleMode)
             }
             
             # Single mining mode
