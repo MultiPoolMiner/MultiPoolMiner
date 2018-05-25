@@ -80,7 +80,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} | ForEach
                 }
             }
 
-            if ($MiningPoolHubCoins_Algorithm_Norm -eq "Equihash") {
+            if ($MiningPoolHubCoins_Algorithm_Norm -eq "CryptonightV7" -or $MiningPoolHubCoins_Algorithm_Norm -eq "Equihash") {
                 [PSCustomObject]@{
                     Algorithm     = $MiningPoolHubCoins_Algorithm_Norm
                     Info          = $MiningPoolHubCoins_Coin
