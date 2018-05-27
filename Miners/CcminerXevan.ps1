@@ -1,8 +1,8 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\Xevan-NVIDIA\ccminer_x86.exe"
-$HashSHA256 = "E71488C61263C080964596B72880F04AC20E91A00CB6A217BCE7863685705243"
-$Uri = "https://github.com/nemosminer/ccminer-xevan/releases/download/ccminer-xevan/ccminer_x86.7z"
+$Path = ".\Bin\Xevan-NVIDIA\ccminer.exe"
+$HashSHA256 = "D7AC5F4DA8AB657DE9C7C0056FBA7B5BD0AB4EB9BE4849A782401F8B8CAE81D7"
+$Uri = "https://github.com/nemosminer/ccminer-xevan/releases/download/Alexis78xevan/ccminerAlexis78Xevan.7z"
 
 $Commands = [PSCustomObject]@{
     "blake2s"   = "" #Blake2s
