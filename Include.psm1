@@ -2,6 +2,127 @@
 
 Add-Type -Path .\OpenCL\*.cs
 
+function Get-Balance {
+    [CmdletBinding()]
+    param($Config, $Rates)
+
+    Write-Log "Getting pool balances"
+
+    # If rates weren't specified, just use 1 BTC = 1 BTC
+    if($Rates -eq $Null) {
+        $Rates = [PSCustomObject]@{BTC = [Double]1}
+    }
+
+    $balances = Get-ChildItemContent Balances -Parameters @{Config = $Config} | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
+
+    # Add local currency values if available
+    $balances | Foreach-Object {
+        # Use balances in BTC as is.  Convert altcoins to BTC first.
+        if ($_.currency -eq 'BTC') {
+            $total = $_.total
+        } else {
+            $total = Get-BTCValue -altcoin $_.currency -amount $_.total
+        }
+
+        Foreach($Rate in ($Rates.PSObject.Properties)) {
+            # Round BTC to 8 decimals, everything else to 2
+            if($Rate.Name -eq "BTC") {
+                $_ | Add-Member "Total_BTC" ("{0:N8}" -f ([Double]$Rate.Value * $total))
+            } else {
+                $_ | Add-Member "Total_$($Rate.Name)" ("{0:N2}" -f ([Double]$Rate.Value * $total))
+            }
+        }
+    }
+
+    Return $balances
+}
+
+# Get-BTCValue gets the exchange rate from bittrex.com for various altcoins and returns an equivelent BTC value
+# Exchange rates are cached for 1 hour to avoid abusing their API
+function Get-BTCValue {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$true)][string]$altcoin,
+        [Parameter(Mandatory=$true)][double]$amount
+    )
+
+    if (-not (Test-Path "Cache")) {New-Item "Cache" -ItemType "directory" | Out-Null}
+    $filename = 'Cache\ExchangeRates.json'
+    $cachetime = New-TimeSpan -Hour 1
+    
+    $ExchangeRates = @{}
+    if(Test-Path $filename) {
+        $ExchangeRateData = Get-Content $filename | ConvertFrom-Json
+        # Turn the PSObject back into a hashtable
+        $ExchangeRateData.PSObject.Properties | Foreach {$ExchangeRates[$_.Name] = $_.Value}
+    }
+    
+    # Return a cached exchange rate if available
+    if($ExchangeRates[$altcoin].LastUpdated -and ((Get-Date) - $ExchangeRates[$altcoin].LastUpdated) -lt $cachetime -and $ExchangeRates[$altcoin].rate -ne $null) {
+        Write-Log -Level Debug "Using cached exchange rate for $altcoin"
+        Return $amount * $ExchangeRates[$altcoin].rate
+    }
+    
+    # If there is no cached exchange rate, find the market for the coin and get the exchange rate
+    $market = Get-BittrexMarketName -altcoin $altcoin
+    if($market -eq $NULL) {
+        Write-Log -Level Verbose "Unable to get market for $altcoin"
+    } else {
+        Write-Log -Level Debug "Updating exchange rate for $altcoin"
+        try {
+            $Request = Invoke-RestMethod "https://bittrex.com/api/v1.1/public/getticker?market=$($market)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        } catch {
+            Write-Log -Level Warn "Bittrex exchange API has failed."
+            Return 0
+        }
+    }
+
+    # Write the new exchange rate to the cache
+    $ExchangeRates[$altcoin] = @{'rate' = $Request.result.Last; 'lastupdated' = (Get-Date).ToUniversalTime()}
+    $Exchangerates | ConvertTo-Json | Set-Content $filename
+
+    Return $ExchangeRates[$altcoin].rate * $amount
+}
+
+# Get-BittrexMarketName returns the altcoin<->BTC market name for a particular coin. Used by Get-BTCValue
+# It caches the markets list for 1 day to avoid abusing their API
+function Get-BittrexMarketName {
+    [CmdletBinding()]
+    param (
+        [Parameter(Mandatory=$true)][string]$altcoin
+    )
+    
+    if (-not (Test-Path "Cache")) {New-Item "Cache" -ItemType "directory" | Out-Null}
+    $cachefile = 'Cache\BittrexMarkets.json'
+    
+    $markets = $NULL
+    
+    if(Test-Path $cachefile) {
+        $lastupdated = (Get-Item $cachefile).LastWriteTime
+        $timespan = New-TimeSpan -Days 1
+        if(((Get-Date) - $lastupdated) -lt $timespan) {
+            Write-Log -Level Verbose "Using cached market list"
+            $markets = Get-Content $cachefile | ConvertFrom-Json
+        }
+    }
+    
+    # Update market file if necessary
+    if ($markets -eq $NULL) {
+        Write-Log -Level Verbose "Updating Bittrex markets list"
+        try {
+            $Request = Invoke-RestMethod "https://bittrex.com/api/v1.1/public/getmarkets" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+            $markets = $Request.result | Where-Object {$_.BaseCurrency -eq 'BTC'}
+            $markets | ConvertTo-Json | Set-Content $cachefile
+        } catch {
+            Write-Log -Level Warn "Bittrex exchange API has failed."
+            Return $false
+        }
+    }
+
+    $altcoinmarket = $markets | Where-Object {$_.MarketCurrencyLong -eq $altcoin -or $_.MarketCurrency -eq $altcoin} | Select-Object -First 1
+    Return $altcoinmarket.MarketName
+}
+
 function Get-Devices {
     [CmdletBinding()]
 

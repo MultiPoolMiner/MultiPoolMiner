@@ -66,7 +66,9 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$ShowMinerWindow = $false, #if true most miner windows will be visible (they can steal focus) - miners that use the 'Wrapper' API will still remain hidden
     [Parameter(Mandatory = $false)]
-    [Switch]$UseFastestMinerPerAlgoOnly = $false #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
+    [Switch]$UseFastestMinerPerAlgoOnly = $false, #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
+    [Parameter(Mandatory = $false)]
+    [Switch]$ShowPoolBalances = $false
 )
 
 Clear-Host
@@ -169,6 +171,7 @@ while ($true) {
             SwitchingPrevention      = $SwitchingPrevention
             ShowMinerWindow          = $ShowMinerWindow
             UseFastestMinerPerAlgoOnly = $UseFastestMinerPerAlgoOnly
+            ShowPoolBalances         = $ShowPoolBalances
         } | Select-Object -ExpandProperty Content
     }
 
@@ -197,6 +200,10 @@ while ($true) {
             }
         )
     }
+
+    # Copy the user's config before changing anything for donation runs
+    # This is used when getting pool balances so it doesn't get pool balances of the donation address instead
+    $UserConfig = $Config
 
     #Activate or deactivate donation
     if ($Config.Donate -lt 10) {$Config.Donate = 10}
@@ -249,6 +256,10 @@ while ($true) {
     catch {
         Write-Log -Level Warn "Coinbase is down. "
     }
+
+    #Update the pool balances
+    $Balances = Get-Balance -Config $UserConfig -Rates $Rates
+    $API.Balances = $Balances
 
     #Load the stats
     Write-Log "Loading saved statistics. "
@@ -666,6 +677,12 @@ while ($true) {
         }
 
         $MinerComparisons | Out-Host
+    }
+
+    #Display pool balances, formatting it to show all the user specified currencies
+    if ($Config.ShowPoolBalances) {
+        Write-Host "Pool Balances: "
+        $balances | Format-Table Name, Total_*
     }
 
     #Display benchmarking progress

@@ -101,6 +101,10 @@
                     $Data = $API.WatchdogTimers | ConvertTo-Json
                     Break
                 }
+                "/balances" {
+                    $Data = $API.Balances | ConvertTo-Json
+                    Break
+                }
                 "/stop" {
                     $API.Stop = $true
                     $Data = "Stopping"

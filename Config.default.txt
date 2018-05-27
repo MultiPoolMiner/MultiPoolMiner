@@ -41,5 +41,6 @@
   "MinerStatusURL": "$MinerStatusURL",
   "MinerStatusKey": "$MinerStatusKey",
   "SwitchingPrevention": "$SwitchingPrevention",
-  "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly"
+  "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
+  "ShowPoolBalances": "$ShowPoolBalances"
 }
