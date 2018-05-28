@@ -477,7 +477,8 @@ function ConvertTo-LocalCurrency {
         6 {$Number.ToString("N6")}
         7 {$Number.ToString("N7")}
         8 {$Number.ToString("N8")}
-        Default {$Number.ToString("N9")}
+        9 {$Number.ToString("N9")}
+        Default {$Number.ToString("N0")}
     }
 }
 
