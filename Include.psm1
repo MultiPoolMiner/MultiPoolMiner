@@ -13,10 +13,10 @@ function Get-Balance {
         $Rates = [PSCustomObject]@{BTC = [Double]1}
     }
 
-    $balances = Get-ChildItemContent Balances -Parameters @{Config = $Config} | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
+    $Balances = Get-ChildItemContent Balances -Parameters @{Config = $Config} | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
 
     # Add local currency values
-    $balances | Foreach-Object {
+    $Balances | Foreach-Object {
         Foreach($Rate in ($Rates.PSObject.Properties)) {
             # Round BTC to 8 decimals, everything else to 2
             if($Rate.Name -eq "BTC") {
@@ -26,7 +26,7 @@ function Get-Balance {
             }
         }
     }
-    Return $balances
+    Return $Balances
 }
 
 function Get-Devices {
