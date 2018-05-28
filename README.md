@@ -271,6 +271,8 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
   "Miners": {
   },
   "Interval": "$Interval",
+  "ExtendIntervalAlgorithm": "ExtendIntervalAlgorithm",
+  "ExtendIntervalMinerName: "ExtendIntervalMinerName",
   "Region": "$Region",
   "SSL": "$SSL",
   "Type": "$Type",
