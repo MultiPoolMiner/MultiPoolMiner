@@ -193,13 +193,17 @@ Since version 2.6, the delta value (integer) that was used to determine how ofte
 **-disableautoupdate**
 By default MPM will perform an automatic update on startup if a newer version is found. Set to 'true' to disable automatic update to latest MPM version. 
 
-**-ShowMinerWindow
+**-ShowMinerWindow**
 By default MPM hides most miner windows as to not steal focus. All miners write their output to files in the Log folder. Set to 'true' to show miner windows (old MPM behaviour).
 
 **-UseFastestMinerPerAlgoOnly**
 Use only use fastest miner per algo and device index. E.g. if there are 2 or more miners available to mine the same algo, only the fastest will ever be used, the slower ones will also be hidden in the summary screen.
 
+**-IgnoreMinerFee**
+Newer versions of MPM take miner fees into account when calculating profitability. Set this flag to 'true' to ignore the fees (old MPM behaviour).
+This is also a per-miner configuration item which available through advanced configuration 
 
+    
 ##SAMPLE USAGE
 #####(check "start.bat" file in root folder)
 
@@ -236,62 +240,65 @@ If Config.txt does not exist, copy Config.default.txt and rename to Config.txt
 
 Config.txt is a JSON file and human readable / editable. A good primer for understanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
 
-Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like https://codebeautify.org/jsonviewer/ (copy/paste the complete file).
+Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like https://jsonblob.com (copy/paste the complete file).
 
 ### Default content of 'Config.txt'
 
 ```
 {
-    "Pools": {
-        "MiningPoolHub": {
-            "User": "$UserName",
-            "Worker": "$WorkerName",
-            "API_ID": "$API_ID",
-            "API_Key": "$API_Key"
-        },
-            "MiningPoolHubCoins": {
-            "User": "$UserName",
-            "Worker": "$WorkerName",
-            "API_ID": "$API_ID",
-            "API_Key": "$API_Key"
-        },
-            "NiceHash": {
-            "BTC": "$Wallet",
-            "Worker": "$WorkerName"
-        },
-            "Zpool": {
-            "BTC": "$Wallet",
-            "Worker": "$WorkerName"
-        }
+  "Pools": {
+    "MiningPoolHub": {
+      "User": "$UserName",
+      "Worker": "$WorkerName",
+      "API_ID": "$API_ID",
+      "API_Key": "$API_Key"
     },
-    "Miners": {
+    "MiningPoolHubCoins": {
+      "User": "$UserName",
+      "Worker": "$WorkerName",
+      "API_ID": "$API_ID",
+      "API_Key": "$API_Key"
     },
-    "Interval": "$Interval",
-    "Region": "$Region",
-    "SSL": "$SSL",
-    "Type": "$Type",
-    "Algorithm": "$Algorithm",
-    "MinerName": "$MinerName",
-    "PoolName": "$PoolName",
-    "ExcludeAlgorithm": "$ExcludeAlgorithm",
-    "ExcludeMinerName": "$ExcludeMinerName",
-    "ExcludePoolName": "$ExcludePoolName",
-    "Currency": "$Currency",
-    "Donate": "$Donate",
-    "Proxy": "$Proxy",
-    "Delay": "$Delay",
-    "Watchdog": "$Watchdog",
-    "MinerStatusURL": "$MinerStatusURL",
-    "MinerStatusKey": "$MinerStatusKey",
-    "SwitchingPrevention": "$SwitchingPrevention"
+    "NiceHash": {
+      "BTC": "$Wallet",
+      "Worker": "$WorkerName"
+    },
+    "Zpool": {
+      "BTC": "$Wallet",
+      "Worker": "$WorkerName"
+    }
+  },
+  "Miners": {
+  },
+  "Interval": "$Interval",
+  "Region": "$Region",
+  "SSL": "$SSL",
+  "Type": "$Type",
+  "Algorithm": "$Algorithm",
+  "MinerName": "$MinerName",
+  "PoolName": "$PoolName",
+  "ExcludeAlgorithm": "$ExcludeAlgorithm",
+  "ExcludeMinerName": "$ExcludeMinerName",
+  "ExcludePoolName": "$ExcludePoolName",
+  "Currency": "$Currency",
+  "Donate": "$Donate",
+  "Proxy": "$Proxy",
+  "Delay": "$Delay",
+  "Watchdog": "$Watchdog",
+  "MinerStatusURL": "$MinerStatusURL",
+  "MinerStatusKey": "$MinerStatusKey",
+  "SwitchingPrevention": "$SwitchingPrevention",
+  "ShowMinerWindow": "$ShowMinerWindow",
+  "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
+  "IgnoreMinerFee":  "$IgnoreMinerFee"
 }
 ```
 
 There is a section for Pools, Miners and a general section
 
-### Advanced config for Pools
+### Advanced configuration for Pools
 
-Settings for each configured pool are stored in its own subsection. Theses settings are only valid for the named pool.
+Settings for each configured pool are stored in its own subsection. These settings are only valid for the named pool.
 
 #### To change payout currency of a pool
 
@@ -314,7 +321,25 @@ E.g. to change the payout currency for Zpool to LiteCoin replace the line for BT
         "LTC": "<YOUR_LITECOIN_ADDRESS>",
         "Worker": "$WorkerName"
     }
+
     
+### Advanced configuration for Miners
+
+Settings for each configured miner are stored in its own subsection. Theses settings are only valid for the named miner.
+
+#### Ignore miner fee in profit calculations
+
+By default newer versions of MPM take miner fees into account when calculating profitability. You can turn this off on a per miner basis.
+
+Note: Not all pools contain a fee, for more information consult the miners web page
+
+E.g. to ignore miner fees (old MPM behaviour) for the CcminerZealot miner add '"IgnoreMinerFee":  true'  to the miners section in Config.txt:
+
+    "Miners":  {
+        "CcminerZealot":  {
+            "IgnoreMinerFee":  true
+        }
+
 
 ### Advanced general configuration
 
@@ -331,6 +356,20 @@ Note: Showing the miner windows disables writing the miner output to log files.
     ...
     "SwitchingPrevention":  "$SwitchingPrevention",
     "ShowMinerWindow":  true,
+    ...
+}
+
+#### Ignore miner fee in profit calculations
+
+By default newer versions of MPM take miner fees into account when calculating profitability.
+
+To ignore miner fees (old MPM behaviour) for ALL miners add '"IgnoreMinerFee":  true' to the general section in Config.txt:.
+
+{
+    ...
+    "SwitchingPrevention":  "$SwitchingPrevention",
+    "ShowMinerWindow":  true,
+    "IgnoreMinerFee":  true,
     ...
 }
 

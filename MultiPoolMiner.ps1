@@ -66,7 +66,9 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$ShowMinerWindow = $false, #if true most miner windows will be visible (they can steal focus) - miners that use the 'Wrapper' API will still remain hidden
     [Parameter(Mandatory = $false)]
-    [Switch]$UseFastestMinerPerAlgoOnly = $false #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
+    [Switch]$UseFastestMinerPerAlgoOnly = $false, #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
+    [Parameter(Mandatory = $false)]
+    [Switch]$IgnoreMinerFee = $false # If $true MPM will ignore miner fees for its calculations (as older versions did)
 )
 
 Clear-Host
@@ -142,33 +144,34 @@ while ($true) {
     $ConfigBackup = $Config
     if (Test-Path "Config.txt") {
         $Config = Get-ChildItemContent "Config.txt" -Parameters @{
-            Wallet                   = $Wallet
-            UserName                 = $UserName
-            WorkerName               = $WorkerName
-            API_ID                   = $API_ID
-            API_Key                  = $API_Key
-            Interval                 = $Interval
-            Region                   = $Region
-            SSL                      = $SSL
-            Type                     = $Type
-            Algorithm                = $Algorithm
-            MinerName                = $MinerName
-            PoolName                 = $PoolName
-            ExcludeAlgorithm         = $ExcludeAlgorithm
-            ExcludeMinerName         = $ExcludeMinerName
-            ExcludePoolName          = $ExcludePoolName
-            Currency                 = $Currency
-            Donate                   = $Donate
-            Proxy                    = $Proxy
-            Delay                    = $Delay
-            Watchdog                 = $Watchdog
-            WatchdogExcludeAlgorithm = $WatchdogExcludeAlgorithm
-            WatchdogExcludeMinerName = $WatchdogExcludeMinerName
-            MinerStatusURL           = $MinerStatusURL
-            MinerStatusKey           = $MinerStatusKey
-            SwitchingPrevention      = $SwitchingPrevention
-            ShowMinerWindow          = $ShowMinerWindow
+            Wallet                     = $Wallet
+            UserName                   = $UserName
+            WorkerName                 = $WorkerName
+            API_ID                     = $API_ID
+            API_Key                    = $API_Key
+            Interval                   = $Interval
+            Region                     = $Region
+            SSL                        = $SSL
+            Type                       = $Type
+            Algorithm                  = $Algorithm
+            MinerName                  = $MinerName
+            PoolName                   = $PoolName
+            ExcludeAlgorithm           = $ExcludeAlgorithm
+            ExcludeMinerName           = $ExcludeMinerName
+            ExcludePoolName            = $ExcludePoolName
+            Currency                   = $Currency
+            Donate                     = $Donate
+            Proxy                      = $Proxy
+            Delay                      = $Delay
+            Watchdog                   = $Watchdog
+            WatchdogExcludeAlgorithm   = $WatchdogExcludeAlgorithm
+            WatchdogExcludeMinerName   = $WatchdogExcludeMinerName
+            MinerStatusURL             = $MinerStatusURL
+            MinerStatusKey             = $MinerStatusKey
+            SwitchingPrevention        = $SwitchingPrevention
+            ShowMinerWindow            = $ShowMinerWindow
             UseFastestMinerPerAlgoOnly = $UseFastestMinerPerAlgoOnly
+            IgnoreMinerFee             = $IgnoreMinerFee
         } | Select-Object -ExpandProperty Content
     }
 
@@ -616,7 +619,7 @@ while ($true) {
 
     #Display mining information
     $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object -Descending Type, Profit_Bias | Format-Table -GroupBy Type (
-        @{Label = "Miner"; Expression = {$_.Name}}, 
+        @{Label = "Miner$(if (-not $Config.IgnoreMinerFees) {' [Fee]'})"; Expression = {if ($Config.IgnoreMinerFees -or -not $_.Fees) {$_.Name}else {"$($_.Name) [$(($_.Fees | Foreach-Object {$_.ToString("N2")}) -join '%/')%]"}}}, 
         @{Label = "Algorithm"; Expression = {$_.HashRates.PSObject.Properties.Name}}, 
         @{Label = "Speed"; Expression = {$_.HashRates.PSObject.Properties.Value | ForEach-Object {if ($_ -ne $null) {"$($_ | ConvertTo-Hash)/s"}else {"Benchmarking"}}}; Align = 'right'}, 
         @{Label = "$($Config.Currency | Select-Object -Index 0)/Day"; Expression = {if ($_.Profit) {ConvertTo-LocalCurrency $($_.Profit) $($Rates.$($Config.Currency | Select-Object -Index 0)) -Offset 2} else {"Unknown"}}; Align = "right"}, 
