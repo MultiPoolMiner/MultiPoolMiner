@@ -9,7 +9,7 @@ function Get-Balance {
     Write-Log "Getting pool balances"
 
     # If rates weren't specified, just use 1 BTC = 1 BTC
-    if($Rates -eq $Null) {
+    if ($Rates -eq $Null) {
         $Rates = [PSCustomObject]@{BTC = [Double]1}
     }
 
@@ -19,9 +19,10 @@ function Get-Balance {
     $Balances | Foreach-Object {
         Foreach($Rate in ($Rates.PSObject.Properties)) {
             # Round BTC to 8 decimals, everything else to 2
-            if($Rate.Name -eq "BTC") {
+            if ($Rate.Name -eq "BTC") {
                 $_ | Add-Member "Total_BTC" ("{0:N8}" -f ([Double]$Rate.Value * $_.total))
-            } else {
+            } 
+            else {
                 $_ | Add-Member "Total_$($Rate.Name)" ("{0:N2}" -f ([Double]$Rate.Value * $_.total))
             }
         }
