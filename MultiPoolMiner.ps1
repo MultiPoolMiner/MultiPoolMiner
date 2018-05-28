@@ -176,7 +176,7 @@ while ($true) {
             SwitchingPrevention        = $SwitchingPrevention
             ShowMinerWindow            = $ShowMinerWindow
             UseFastestMinerPerAlgoOnly = $UseFastestMinerPerAlgoOnly
-            ShowPoolBalances         = $ShowPoolBalances
+            ShowPoolBalances           = $ShowPoolBalances
             IgnoreMinerFee             = $IgnoreMinerFee
         } | Select-Object -ExpandProperty Content
     }
@@ -689,7 +689,7 @@ while ($true) {
     #Display pool balances, formatting it to show all the user specified currencies
     if ($Config.ShowPoolBalances) {
         Write-Host "Pool Balances: "
-        $balances | Format-Table Name, Total_*
+        $Balances | Format-Table Name, Total_*
     }
 
     #Display benchmarking progress
