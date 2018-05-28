@@ -18,6 +18,10 @@ param(
     [Parameter(Mandatory = $false)]
     [Int]$Interval = 60, #seconds before reading hash rate from miners
     [Parameter(Mandatory = $false)]
+    [Array]$ExtendIntervalAlgorithm = @("X16R", "X16S"), #Extend interval duration by a factor of 10x $Interval for these algorithms
+    [Parameter(Mandatory = $false)]
+    [Array]$ExtendIntervalMinerName = @("PalginNvidia"), #Extend interval duration by a factor of 10x $Interval for these miners
+    [Parameter(Mandatory = $false)]
     [Alias("Location")]
     [String]$Region = "europe", #europe/us/asia
     [Parameter(Mandatory = $false)]
@@ -51,10 +55,6 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$Watchdog = $false,
     [Parameter(Mandatory = $false)]
-    [Array]$ExcludeWatchdogAlgorithm = @("X16R"), #Do not use watchdog for these algorithms, e.g due to its nature X16R will always trigger watchdog
-    [Parameter(Mandatory = $false)]
-    [Array]$ExcludeWatchdogMinerName = @(), #Do not use watchdog for these miners
-    [Parameter(Mandatory = $false)]
     [Alias("Uri", "Url")]
     [String]$MinerStatusUrl = "", #i.e https://multipoolminer.io/monitor/miner.php
     [Parameter(Mandatory = $false)]
@@ -68,7 +68,8 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$UseFastestMinerPerAlgoOnly = $false, #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
     [Parameter(Mandatory = $false)]
-    [Switch]$ShowPoolBalances = $false
+    [Switch]$ShowPoolBalances = $false,
+    [Switch]$IgnoreMinerFee = $false # If $true MPM will ignore miner fees for its calculations (as older versions did)
 )
 
 Clear-Host
@@ -76,9 +77,6 @@ Clear-Host
 $Version = "2.7.2.7"
 $Strikes = 3
 $SyncWindow = 5 #minutes
-
-#Get miner hw info
-$Devices = Get-Devices
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 Import-Module NetSecurity -ErrorAction Ignore
@@ -103,6 +101,13 @@ $Rates = [PSCustomObject]@{BTC = [Double]1}
 
 #Start the log
 Start-Transcript ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
+
+Write-Log "********************************************************************"
+Write-Log "***      Starting MPM version $Version (c) MultiPoolMiner.io      ***"
+Write-Log "********************************************************************"
+
+#Get miner hw info
+$Devices = Get-Devices
 
 #Set process priority to BelowNormal to avoid hash rate drops on systems with weak CPUs
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
@@ -144,40 +149,37 @@ while ($true) {
     $ConfigBackup = $Config
     if (Test-Path "Config.txt") {
         $Config = Get-ChildItemContent "Config.txt" -Parameters @{
-            Wallet                   = $Wallet
-            UserName                 = $UserName
-            WorkerName               = $WorkerName
-            API_ID                   = $API_ID
-            API_Key                  = $API_Key
-            Interval                 = $Interval
-            Region                   = $Region
-            SSL                      = $SSL
-            Type                     = $Type
-            Algorithm                = $Algorithm
-            MinerName                = $MinerName
-            PoolName                 = $PoolName
-            ExcludeAlgorithm         = $ExcludeAlgorithm
-            ExcludeMinerName         = $ExcludeMinerName
-            ExcludePoolName          = $ExcludePoolName
-            Currency                 = $Currency
-            Donate                   = $Donate
-            Proxy                    = $Proxy
-            Delay                    = $Delay
-            Watchdog                 = $Watchdog
-            WatchdogExcludeAlgorithm = $WatchdogExcludeAlgorithm
-            WatchdogExcludeMinerName = $WatchdogExcludeMinerName
-            MinerStatusURL           = $MinerStatusURL
-            MinerStatusKey           = $MinerStatusKey
-            SwitchingPrevention      = $SwitchingPrevention
-            ShowMinerWindow          = $ShowMinerWindow
+            Wallet                     = $Wallet
+            UserName                   = $UserName
+            WorkerName                 = $WorkerName
+            API_ID                     = $API_ID
+            API_Key                    = $API_Key
+            Interval                   = $Interval
+            ExtendIntervalAlgorithm    = $ExtendIntervalAlgorithm
+            ExtendIntervalMinerName    = $ExtendIntervalMinerName
+            Region                     = $Region
+            SSL                        = $SSL
+            Type                       = $Type
+            Algorithm                  = $Algorithm
+            MinerName                  = $MinerName
+            PoolName                   = $PoolName
+            ExcludeAlgorithm           = $ExcludeAlgorithm
+            ExcludeMinerName           = $ExcludeMinerName
+            ExcludePoolName            = $ExcludePoolName
+            Currency                   = $Currency
+            Donate                     = $Donate
+            Proxy                      = $Proxy
+            Delay                      = $Delay
+            Watchdog                   = $Watchdog
+            MinerStatusURL             = $MinerStatusURL
+            MinerStatusKey             = $MinerStatusKey
+            SwitchingPrevention        = $SwitchingPrevention
+            ShowMinerWindow            = $ShowMinerWindow
             UseFastestMinerPerAlgoOnly = $UseFastestMinerPerAlgoOnly
             ShowPoolBalances         = $ShowPoolBalances
+            IgnoreMinerFee             = $IgnoreMinerFee
         } | Select-Object -ExpandProperty Content
     }
-
-    #Only use configured types that are present in system
-    #Explicitly include CPU, because it won't show up as a device if OpenGL drivers for CPU are not installed
-    $Config.Type = $Config.Type | Where-Object {$Devices.$_ -or $_ -eq 'CPU'}
 
     #Error in Config.txt
     if ($Config -isnot [PSCustomObject]) {
@@ -185,6 +187,10 @@ while ($true) {
         Start-Sleep 10
         Exit
     }
+
+    #Only use configured types that are present in system
+    #Explicitly include CPU, because it won't show up as a device if OpenGL drivers for CPU are not installed
+    $Config.Type = $Config.Type | Where-Object {$Devices.$_ -or $_ -eq 'CPU'}
 
     #For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
     if ($Wallet -and -not $Config.MinerStatusKey) {$Config.MinerStatusKey = $Wallet}
@@ -588,7 +594,7 @@ while ($true) {
             }
         }
     }
-    Get-Process -Name @($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best -EQ $true | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {$_.GetProcessNames()}) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}
+    if ($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) {Get-Process -Name @($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best -EQ $true | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {$_.GetProcessNames()}) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}}
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Config.Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
@@ -600,21 +606,21 @@ while ($true) {
             #Add watchdog timer
             if ($Config.Watchdog -and $_.Profit -ne $null) {
                 $Miner_Name = $_.Name
+                $Miner_Type = $_.Type
                 $_.Algorithm | ForEach-Object {
                     $Miner_Algorithm = $_
-                    if ($Config.ExcludeWatchdogAlgorithm -inotcontains $Miner_Algorithm -and $Config.ExcludeWatchdogMinerName -inotcontains $Miner_Name) {
-                        $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
-                        if (-not $WatchdogTimer) {
-                            $WatchdogTimers += [PSCustomObject]@{
-                                MinerName = $Miner_Name
-                                PoolName  = $Pools.$Miner_Algorithm.Name
-                                Algorithm = $Miner_Algorithm
-                                Kicked    = $Timer
-                            }
+                    $WatchdogTimer = $WatchdogTimers | Where-Object {$_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm}
+                    if (-not $WatchdogTimer) {
+                        $WatchdogTimers += [PSCustomObject]@{
+                            MinerName = $Miner_Name
+                            MinerType = $Miner_Type
+                            PoolName  = $Pools.$Miner_Algorithm.Name
+                            Algorithm = $Miner_Algorithm
+                            Kicked    = $Timer
                         }
-                        elseif (-not ($WatchdogTimer.Kicked -GT $Timer.AddSeconds( - $WatchdogReset))) {
-                            $WatchdogTimer.Kicked = $Timer
-                        }
+                    }
+                    elseif (-not ($WatchdogTimer.Kicked -GT $Timer.AddSeconds( - $WatchdogReset))) {
+                        $WatchdogTimer.Kicked = $Timer
                     }
                 }
             }
@@ -627,7 +633,7 @@ while ($true) {
 
     #Display mining information
     $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object -Descending Type, Profit_Bias | Format-Table -GroupBy Type (
-        @{Label = "Miner"; Expression = {$_.Name}}, 
+        @{Label = "Miner$(if (-not $Config.IgnoreMinerFees) {' [Fee]'})"; Expression = {if ($Config.IgnoreMinerFees -or -not $_.Fees) {$_.Name}else {"$($_.Name) [$(($_.Fees | Foreach-Object {$_.ToString("N2")}) -join '%/')%]"}}}, 
         @{Label = "Algorithm"; Expression = {$_.HashRates.PSObject.Properties.Name}}, 
         @{Label = "Speed"; Expression = {$_.HashRates.PSObject.Properties.Value | ForEach-Object {if ($_ -ne $null) {"$($_ | ConvertTo-Hash)/s"}else {"Benchmarking"}}}; Align = 'right'}, 
         @{Label = "$($Config.Currency | Select-Object -Index 0)/Day"; Expression = {if ($_.Profit) {ConvertTo-LocalCurrency $($_.Profit) $($Rates.$($Config.Currency | Select-Object -Index 0)) -Offset 2} else {"Unknown"}}; Align = "right"}, 
@@ -648,6 +654,7 @@ while ($true) {
     #Display watchdog timers
     $WatchdogTimers | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset) | Format-Table -Wrap (
         @{Label = "Miner"; Expression = {$_.MinerName}}, 
+        @{Label = "Type"; Expression = {$_.MinerType}}, 
         @{Label = "Pool"; Expression = {$_.PoolName}}, 
         @{Label = "Algorithm"; Expression = {$_.Algorithm}}, 
         @{Label = "Watchdog Timer"; Expression = {"{0:n0} Seconds" -f ($Timer - $_.Kicked | Select-Object -ExpandProperty TotalSeconds)}; Align = 'right'}
@@ -699,12 +706,22 @@ while ($true) {
 
     #Update API miner information
     $API.ActiveMiners = $ActiveMiners
-    $API.RunningMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Running}
+    $API.RunningMiners = $RunningMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Running}
     $API.FailedMiners = $ActiveMiners | Where-Object {$_.GetStatus() -eq [MinerStatus]::Failed}
 
     #Reduce Memory
     Get-Job -State Completed | Remove-Job
     [GC]::Collect()
+
+    #When benchmarking miners/algorithm in ExtendInterval... add 10x $Config.Interval to $StatEnd, extend StatSpan, extend watchdog times
+    $BenchmarkingMiners = $RunningMiners | Where-Object {$_.Speed -eq $null}
+    if ($BenchmarkingMiners | Where-Object {$Config.ExtendIntervalMinerName -icontains $_.Name -or ($_.Algorithm | Where-Object {$Config.ExtendIntervalAlgorithm -icontains $_})}) {
+        $StatEnd = $StatEnd.AddSeconds($Config.Interval * 10)
+        $StatSpan = New-TimeSpan $StatStart $StatEnd
+        $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
+        $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
+        Write-Log "Benchmarking watchdog sensitive algorithm or miner. Increasing interval time temporarily to 10x interval ($($Config.Interval * 10) seconds). "
+    }
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
     Write-Log "Start waiting before next run. "
@@ -738,7 +755,7 @@ while ($true) {
                 if ($Miner.New -and (-not $Miner_Speed)) {$Miner_Speed = $Miner.GetHashRate($_, ($Interval * $Miner.Benchmarked), ($Miner.Benchmarked -lt $Strikes))}
 
                 if ((-not $Miner.New) -or $Miner_Speed -or $Miner.Benchmarked -ge ($Strikes * $Strikes) -or $Miner.GetActivateCount() -ge $Strikes) {
-                    $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Speed -Duration $StatSpan -FaultDetection $true
+                    $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Speed -Duration $StatSpan -FaultDetection ($Config.ExtendIntervalAlgorithm -inotcontains $_ -and $Config.ExtendIntervalMinerName -inotcontains $Miner.Name)
                 }
 
                 #Update watchdog timer
