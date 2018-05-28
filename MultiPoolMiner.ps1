@@ -64,8 +64,14 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$DisableAutoUpdate = $false,
     [Parameter(Mandatory = $false)]
-    [Switch]$ShowMinerWindow = $false #if true all miner windows will be visible (they can steal focus)
+    [Switch]$ShowMinerWindow = $false, #if true most miner windows will be visible (they can steal focus) - miners that use the 'Wrapper' API will still remain hidden
+    [Parameter(Mandatory = $false)]
+    [Switch]$UseFastestMinerPerAlgoOnly = $false, #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
+    [Parameter(Mandatory = $false)]
+    [Switch]$IgnoreMinerFee = $false # If $true MPM will ignore miner fees for its calculations (as older versions did)
 )
+
+Clear-Host
 
 $Version = "2.7.2.7"
 $Strikes = 3
@@ -142,32 +148,34 @@ while ($true) {
     $ConfigBackup = $Config
     if (Test-Path "Config.txt") {
         $Config = Get-ChildItemContent "Config.txt" -Parameters @{
-            Wallet                   = $Wallet
-            UserName                 = $UserName
-            WorkerName               = $WorkerName
-            API_ID                   = $API_ID
-            API_Key                  = $API_Key
-            Interval                 = $Interval
-            ExtendIntervalAlgorithm  = $ExtendIntervalAlgorithm
-            ExtendIntervalMinerName  = $ExtendIntervalMinerName
-            Region                   = $Region
-            SSL                      = $SSL
-            Type                     = $Type
-            Algorithm                = $Algorithm
-            MinerName                = $MinerName
-            PoolName                 = $PoolName
-            ExcludeAlgorithm         = $ExcludeAlgorithm
-            ExcludeMinerName         = $ExcludeMinerName
-            ExcludePoolName          = $ExcludePoolName
-            Currency                 = $Currency
-            Donate                   = $Donate
-            Proxy                    = $Proxy
-            Delay                    = $Delay
-            Watchdog                 = $Watchdog
-            MinerStatusURL           = $MinerStatusURL
-            MinerStatusKey           = $MinerStatusKey
-            SwitchingPrevention      = $SwitchingPrevention
-            ShowMinerWindow          = $ShowMinerWindow
+            Wallet                     = $Wallet
+            UserName                   = $UserName
+            WorkerName                 = $WorkerName
+            API_ID                     = $API_ID
+            API_Key                    = $API_Key
+            Interval                   = $Interval
+            Region                     = $Region
+            SSL                        = $SSL
+            Type                       = $Type
+            Algorithm                  = $Algorithm
+            MinerName                  = $MinerName
+            PoolName                   = $PoolName
+            ExcludeAlgorithm           = $ExcludeAlgorithm
+            ExcludeMinerName           = $ExcludeMinerName
+            ExcludePoolName            = $ExcludePoolName
+            Currency                   = $Currency
+            Donate                     = $Donate
+            Proxy                      = $Proxy
+            Delay                      = $Delay
+            Watchdog                   = $Watchdog
+            WatchdogExcludeAlgorithm   = $WatchdogExcludeAlgorithm
+            WatchdogExcludeMinerName   = $WatchdogExcludeMinerName
+            MinerStatusURL             = $MinerStatusURL
+            MinerStatusKey             = $MinerStatusKey
+            SwitchingPrevention        = $SwitchingPrevention
+            ShowMinerWindow            = $ShowMinerWindow
+            UseFastestMinerPerAlgoOnly = $UseFastestMinerPerAlgoOnly
+            IgnoreMinerFee             = $IgnoreMinerFee
         } | Select-Object -ExpandProperty Content
     }
 
@@ -430,6 +438,15 @@ while ($true) {
         ($Miner_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>2 -and ($Miner_WatchdogTimers | Where-Object {$Miner.HashRates.PSObject.Properties.Name -contains $_.Algorithm} | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>1
     }
 
+    #Give API access to the miners information
+    $API.Miners = $Miners
+
+    #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
+    if ($Config.UseFastestMinerPerAlgoOnly) {$Miners = $Miners | Sort-Object -Descending {"$($_.Type -join '')$($_.Index -join '')$($_.HashRates.PSObject.Properties.Name -join '')$(if($_.HashRates.PSObject.Properties.Value -eq $null) {$_.Name})"}, {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Bias -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Group-Object {"$($_.Type -join '')$($_.Index -join '')$($_.HashRates.PSObject.Properties.Name -join '')$(if($_.HashRates.PSObject.Properties.Value -eq $null) {$_.Name})"} | Foreach-Object {$_.Group[0]}}
+
+    #Give API access to the fasted miners information
+    $API.FastestMiners = $Miners
+
     #Update the active miners
     if ($Miners.Count -eq 0) {
         Write-Log -Level Warn "No miners available. "
@@ -437,8 +454,6 @@ while ($true) {
         Start-Sleep $Config.Interval
         continue
     }
-    #Give API access to the miners information
-    $API.Miners = $Miners
 
     $ActiveMiners | ForEach-Object {
         $_.Profit = 0
@@ -569,7 +584,7 @@ while ($true) {
             }
         }
     }
-    Get-Process -Name @($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best -EQ $true | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {$_.GetProcessNames()}) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}
+    if ($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) {Get-Process -Name @($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best -EQ $true | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {$_.GetProcessNames()}) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}}
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Config.Delay #Wait to prevent BSOD
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
@@ -606,7 +621,7 @@ while ($true) {
 
     #Display mining information
     $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object -Descending Type, Profit_Bias | Format-Table -GroupBy Type (
-        @{Label = "Miner"; Expression = {$_.Name}}, 
+        @{Label = "Miner$(if (-not $Config.IgnoreMinerFees) {' [Fee]'})"; Expression = {if ($Config.IgnoreMinerFees -or -not $_.Fees) {$_.Name}else {"$($_.Name) [$(($_.Fees | Foreach-Object {$_.ToString("N2")}) -join '%/')%]"}}}, 
         @{Label = "Algorithm"; Expression = {$_.HashRates.PSObject.Properties.Name}}, 
         @{Label = "Speed"; Expression = {$_.HashRates.PSObject.Properties.Value | ForEach-Object {if ($_ -ne $null) {"$($_ | ConvertTo-Hash)/s"}else {"Benchmarking"}}}; Align = 'right'}, 
         @{Label = "$($Config.Currency | Select-Object -Index 0)/Day"; Expression = {if ($_.Profit) {ConvertTo-LocalCurrency $($_.Profit) $($Rates.$($Config.Currency | Select-Object -Index 0)) -Offset 2} else {"Unknown"}}; Align = "right"}, 
@@ -620,6 +635,7 @@ while ($true) {
         @{Label = "Speed"; Expression = {$_.Speed_Live | ForEach-Object {"$($_ | ConvertTo-Hash)/s"}}; Align = 'right'}, 
         @{Label = "Active"; Expression = {"{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f $_.GetActiveTime()}}, 
         @{Label = "Launched"; Expression = {Switch ($_.GetActivateCount()) {0 {"Never"} 1 {"Once"} Default {"$_ Times"}}}}, 
+        @{Label = "Type"; Expression = {$_.Type}},
         @{Label = "Command"; Expression = {"$($_.Path.TrimStart((Convert-Path ".\"))) $($_.Arguments)"}}
     ) | Out-Host
 
@@ -658,9 +674,9 @@ while ($true) {
     }
 
     #Display benchmarking progress
-    $BenchmarksNeeded = ($Miners | Where-Object {$_.HashRates.PSObject.Properties.Value -eq $null}).Count
+    $BenchmarksNeeded = @($Miners | Where-Object {$_.HashRates.PSObject.Properties.Value -eq $null}).Count
     if ($BenchmarksNeeded -gt 0) {
-        Write-Log -Level Warn "Benchmarking in progress: $($BenchmarksNeeded) miners left to benchmark."
+        Write-Log -Level Warn "Benchmarking in progress: $($BenchmarksNeeded) miner$(if ($BenchmarksNeeded -gt 1){'s'}) left to benchmark."
     }
 
     #Display exchange rates

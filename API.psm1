@@ -77,6 +77,10 @@
                     $Data = $API.Miners | ConvertTo-Json
                     Break
                 }
+                "/fastestminers" {
+                    $Data = $API.FastestMiners | ConvertTo-Json
+                    Break
+                }
                 "/config" {
                     $Data = $API.Config | ConvertTo-Json
                     Break

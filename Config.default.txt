@@ -48,4 +48,6 @@
   "ExtendIntervalMinerName": [
     "PalginNvidia"
   ]
+  "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
+  "IgnoreMinerFee":  "$IgnoreMinerFee"
 }
