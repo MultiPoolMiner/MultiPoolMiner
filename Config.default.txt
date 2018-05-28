@@ -41,6 +41,13 @@
   "MinerStatusURL": "$MinerStatusURL",
   "MinerStatusKey": "$MinerStatusKey",
   "SwitchingPrevention": "$SwitchingPrevention",
+  "ExtendIntervalAlgorithm": [
+    "X16R",
+    "X16S"
+  ],
+  "ExtendIntervalMinerName": [
+    "PalginNvidia"
+  ]
   "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
   "IgnoreMinerFee":  "$IgnoreMinerFee"
 }
