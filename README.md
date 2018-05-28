@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 26/05/2018 - v1.23.06 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 13/05/2018 - v1.23.05 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -156,13 +156,7 @@ Choose the default currency or currencies your profit stats will be shown in.
 
 **-interval**
 MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
-
-**-ExtendIntervalAlgorithm**
-	Extend interval timer duration by a factor of 10x $Interval for specified algorithms. Due to their nature some algorithms, e.g. 'X16R', will always trigger watchdog on normal interval duration. Default is @("X16R", "X16S").
 	
-**-ExtendIntervalMinerName**
-	Extend interval timer duration by a factor of 10x $Interval for specified miners. Due to their nature some miners, e.g. 'PalginNvidia', will always trigger watchdog on normal interval duration. Default is @("PalginNvidia").
-
 **-delay**
 Specify the number of seconds required to pass before opening each miner. It is useful when cards are more sensitive to switching and need some extra time to recover (eg. clear DAG files from memory)
 
@@ -180,6 +174,12 @@ It works on a unified interval that is defaulted to 60 seconds. Watchdog timers 
 - Stage 3: when 3 timers expire relating to one pool, the pool is kicked
 
 Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
+
+**-ExcludeWatchdogAlgorithm**
+Exclude certain algorithms you don't want to be monitored by watchdog. Some algorithms, e.g. X16R, trigger watchdog constantly due to their nature. (default 'X16R')
+	
+**-ExcludeWatchdogMinerName**
+Exclude certain miners you don't want to be monitored by watchdog.
 
 **-minerstatusurl** https://multipoolminer.io/monitor/miner.php
 Report and monitor your mining rig's status by including the command above. Wallet address must be set even if you are only using MiningPoolHub as a pool. You can access the reported information by entering your wallet address on the https://multipoolminer.io/monitor web address. By using this service you understand and accept the terms and conditions detailed in this document (further below). 
