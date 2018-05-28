@@ -154,6 +154,8 @@ while ($true) {
             API_ID                     = $API_ID
             API_Key                    = $API_Key
             Interval                   = $Interval
+            ExtendIntervalAlgorithm    = $ExtendIntervalAlgorithm
+            ExtendIntervalMinerName    = $ExtendIntervalMinerName
             Region                     = $Region
             SSL                        = $SSL
             Type                       = $Type
@@ -168,8 +170,6 @@ while ($true) {
             Proxy                      = $Proxy
             Delay                      = $Delay
             Watchdog                   = $Watchdog
-            WatchdogExcludeAlgorithm   = $WatchdogExcludeAlgorithm
-            WatchdogExcludeMinerName   = $WatchdogExcludeMinerName
             MinerStatusURL             = $MinerStatusURL
             MinerStatusKey             = $MinerStatusKey
             SwitchingPrevention        = $SwitchingPrevention
@@ -179,16 +179,16 @@ while ($true) {
         } | Select-Object -ExpandProperty Content
     }
 
-    #Only use configured types that are present in system
-    #Explicitly include CPU, because it won't show up as a device if OpenGL drivers for CPU are not installed
-    $Config.Type = $Config.Type | Where-Object {$Devices.$_ -or $_ -eq 'CPU'}
-
     #Error in Config.txt
     if ($Config -isnot [PSCustomObject]) {
         Write-Log -Level Error "Config.txt is invalid. Cannot continue. "
         Start-Sleep 10
         Exit
     }
+
+    #Only use configured types that are present in system
+    #Explicitly include CPU, because it won't show up as a device if OpenGL drivers for CPU are not installed
+    $Config.Type = $Config.Type | Where-Object {$Devices.$_ -or $_ -eq 'CPU'}
 
     #For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
     if ($Wallet -and -not $Config.MinerStatusKey) {$Config.MinerStatusKey = $Wallet}
@@ -732,6 +732,7 @@ while ($true) {
             $Miner.Algorithm | ForEach-Object {
                 $Miner_Speed = $Miner.GetHashRate($_, $Interval, $Miner.New)
                 $Miner.Speed_Live += [Double]$Miner_Speed
+                if ($Miner.New -and (-not $Miner_Speed)) {$Miner_Speed = $Miner.GetHashRate($_, ($Interval * $Miner.Benchmarked), ($Miner.Benchmarked -lt $Strikes))}
                 if ((-not $Miner.New) -or $Miner_Speed -or $Miner.Benchmarked -ge ($Strikes * $Strikes) -or $Miner.GetActivateCount() -ge $Strikes) {
                     $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Speed -Duration $StatSpan -FaultDetection ($Config.ExtendIntervalAlgorithm -inotcontains $_ -and $Config.ExtendIntervalMinerName -inotcontains $Miner.Name)
                 }
