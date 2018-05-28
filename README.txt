@@ -191,6 +191,7 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 	- Stage 2: when 2 timers expire relating to one miner file, the one miner file is kicked
 	- Stage 3: when 3 timers expire relating to one pool, the pool is kicked
 	Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
+
 -minerstatusurl https://multipoolminer.io/monitor/miner.php
 	Report and monitor your mining rig's status by including the command above. Wallet address must be set even if you are only using MiningPoolHub as a pool. You can access the reported information by entering your wallet address on the https://multipoolminer.io/monitor web address. By using this service you understand and accept the terms and conditions detailed in this document (further below). 
 
@@ -213,6 +214,8 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 	Newer versions of MPM take miner fees into account when calculating profitability. Set this flag to 'true' to ignore the fees (old MPM behaviour).
 	This is also a per-miner configuration item which available through advanced configuration 
 
+
+====================================================================
 
 
 SAMPLE USAGE (check "start.bat" file in root folder):
@@ -283,6 +286,8 @@ Default content of 'Config.txt'
   "Miners": {
   },
   "Interval": "$Interval",
+  "ExtendIntervalAlgorithm": "ExtendIntervalAlgorithm",
+  "ExtendIntervalMinerName: "ExtendIntervalMinerName",
   "Region": "$Region",
   "SSL": "$SSL",
   "Type": "$Type",
@@ -309,7 +314,7 @@ There is a section for Pools, Miners and a general section
 
 Advanced configuration for Pools
 
-Settings for each configured pool are stored in its own subsection. Theses settings are only valid for the named pool.
+Settings for each configured pool are stored in its own subsection. These settings are only valid for the named pool.
 
 To change payout currency of a pool
 
@@ -359,9 +364,9 @@ Settings in this section affect the overall behaviour of MPM.
 To show miner windows
 
 By default MPM hides most miner windows as to not steal focus. All miners write their output to files in the Log folder.
-Note: Showing the miner windows disables writing the miner output to log files.
 
 To show the miner windows add '"ShowMinerWindow":  true' to the general section in Config.txt:
+Note: Showing the miner windows disables writing the miner output to log files.
 
 {
     ...
@@ -386,6 +391,7 @@ To ignore miner fees (old MPM behaviour) for ALL miners add '"IgnoreMinerFee":  
 
 
 ====================================================================
+
 
 MULTIPOOLMINER'S LOGIC:
 
