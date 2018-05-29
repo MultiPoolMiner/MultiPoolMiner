@@ -17,6 +17,12 @@ function Get-Balance {
         Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
     } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
 
+    # Add total of totals
+    $Balances += [PSCustomObject]@{
+        total = ($Balances.total | Measure-Object -Sum).sum
+        Name  = "*Total*"
+    }
+
     # Add local currency values
     $Balances | Foreach-Object {
         Foreach($Rate in ($Rates.PSObject.Properties)) {
