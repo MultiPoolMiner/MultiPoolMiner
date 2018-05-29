@@ -68,8 +68,11 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$UseFastestMinerPerAlgoOnly = $false, #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
     [Parameter(Mandatory = $false)]
-    [Switch]$ShowPoolBalances = $false,
     [Switch]$IgnoreMinerFee = $false # If $true MPM will ignore miner fees for its calculations (as older versions did)
+    [Parameter(Mandatory = $false)]
+    [Switch]$ShowPoolBalances = $false,
+    [Parameter(Mandatory = $false)]
+    $ShowPoolBalancesForExcludedPools = $false    
 )
 
 Clear-Host
@@ -149,35 +152,36 @@ while ($true) {
     $ConfigBackup = $Config
     if (Test-Path "Config.txt") {
         $Config = Get-ChildItemContent "Config.txt" -Parameters @{
-            Wallet                     = $Wallet
-            UserName                   = $UserName
-            WorkerName                 = $WorkerName
-            API_ID                     = $API_ID
-            API_Key                    = $API_Key
-            Interval                   = $Interval
-            ExtendIntervalAlgorithm    = $ExtendIntervalAlgorithm
-            ExtendIntervalMinerName    = $ExtendIntervalMinerName
-            Region                     = $Region
-            SSL                        = $SSL
-            Type                       = $Type
-            Algorithm                  = $Algorithm
-            MinerName                  = $MinerName
-            PoolName                   = $PoolName
-            ExcludeAlgorithm           = $ExcludeAlgorithm
-            ExcludeMinerName           = $ExcludeMinerName
-            ExcludePoolName            = $ExcludePoolName
-            Currency                   = $Currency
-            Donate                     = $Donate
-            Proxy                      = $Proxy
-            Delay                      = $Delay
-            Watchdog                   = $Watchdog
-            MinerStatusURL             = $MinerStatusURL
-            MinerStatusKey             = $MinerStatusKey
-            SwitchingPrevention        = $SwitchingPrevention
-            ShowMinerWindow            = $ShowMinerWindow
-            UseFastestMinerPerAlgoOnly = $UseFastestMinerPerAlgoOnly
-            ShowPoolBalances           = $ShowPoolBalances
-            IgnoreMinerFee             = $IgnoreMinerFee
+            Wallet                        = $Wallet
+            UserName                      = $UserName
+            WorkerName                    = $WorkerName
+            API_ID                        = $API_ID
+            API_Key                       = $API_Key
+            Interval                      = $Interval
+            ExtendIntervalAlgorithm       = $ExtendIntervalAlgorithm
+            ExtendIntervalMinerName       = $ExtendIntervalMinerName
+            Region                        = $Region
+            SSL                           = $SSL
+            Type                          = $Type
+            Algorithm                     = $Algorithm
+            MinerName                     = $MinerName
+            PoolName                      = $PoolName
+            ExcludeAlgorithm              = $ExcludeAlgorithm
+            ExcludeMinerName              = $ExcludeMinerName
+            ExcludePoolName               = $ExcludePoolName
+            Currency                      = $Currency
+            Donate                        = $Donate
+            Proxy                         = $Proxy
+            Delay                         = $Delay
+            Watchdog                      = $Watchdog
+            MinerStatusURL                = $MinerStatusURL
+            MinerStatusKey                = $MinerStatusKey
+            SwitchingPrevention           = $SwitchingPrevention
+            ShowMinerWindow               = $ShowMinerWindow
+            UseFastestMinerPerAlgoOnly    = $UseFastestMinerPerAlgoOnly
+            IgnoreMinerFee                = $IgnoreMinerFee
+            ShowPoolBalances              = $ShowPoolBalances
+            ShowPoolBalancesExcludedPools = $ShowPoolBalancesForExcludedPools
         } | Select-Object -ExpandProperty Content
     }
 
@@ -264,8 +268,10 @@ while ($true) {
     }
 
     #Update the pool balances
-    $Balances = Get-Balance -Config $UserConfig -Rates $Rates
-    $API.Balances = $Balances
+    if ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) {
+        $Balances = Get-Balance -Config $UserConfig -Rates $Rates
+        $API.Balances = $Balances
+    }
 
     #Load the stats
     Write-Log "Loading saved statistics. "
@@ -687,7 +693,7 @@ while ($true) {
     }
 
     #Display pool balances, formatting it to show all the user specified currencies
-    if ($Config.ShowPoolBalances) {
+    if ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) {
         Write-Host "Pool Balances: "
         $Balances | Format-Table Name, Total_*
     }

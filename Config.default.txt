@@ -42,6 +42,7 @@
   "MinerStatusKey": "$MinerStatusKey",
   "SwitchingPrevention": "$SwitchingPrevention",
   "ShowPoolBalances": "$ShowPoolBalances",
+  "ShowPoolBalancesExcludedPools": "$ShowPoolBalancesExcludedPools",
   "ExtendIntervalAlgorithm": [
     "X16R",
     "X16S"
