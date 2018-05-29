@@ -173,7 +173,7 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 	When benchmarking extend interval timer duration by :IntervalMultiplier times (if IntervalMultiplier is omitted IntervalMultiplier will be set to 10) for specified algorithms. Due to their nature some algorithms, e.g. 'X16R', will always trigger watchdog on normal interval duration. Default is @("X16R:10", "X16S:10").
 	
 -ExtendIntervalMinerName:IntervalMultiplier
-	When benchmarking extend interval timer duration by :IntervalMultiplier times (if IntervalMultiplier is omitted IntervalMultiplier will be set to 10) for specified miners. Due to their nature some miners, e.g. 'PalginNvidia', will always trigger watchdog on normal interval duration. Default is @("PalginNvidia:3","Excavator:3","Bminer:3").
+	When benchmarking extend interval timer duration by :IntervalMultiplier times (if IntervalMultiplier is omitted IntervalMultiplier will be set to 10) for specified miners. Due to their nature some miners, e.g. 'PalginNvidia', will always trigger watchdog on normal interval duration. Default is @("PalginNvidia:3", "Excavator:3", "Bminer:3").
     
 -delay
 	Specify the number of seconds required to pass before opening each miner. It is useful if cards are sensitive to switching and need some extra time to recover (eg. clear DAG files from memory)
