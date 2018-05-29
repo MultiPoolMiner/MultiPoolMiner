@@ -44,11 +44,13 @@
   "ShowPoolBalances": "$ShowPoolBalances",
   "ShowPoolBalancesExcludedPools": "$ShowPoolBalancesExcludedPools",
   "ExtendIntervalAlgorithm": [
-    "X16R",
-    "X16S"
+    "X16R:10",
+    "X16S:10"
   ],
   "ExtendIntervalMinerName": [
-    "PalginNvidia"
+    "PalginNvidia:3",
+    "Excavator:3",
+    "Bminer:3"
   ],
   "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
   "IgnoreMinerFee":  "$IgnoreMinerFee"
