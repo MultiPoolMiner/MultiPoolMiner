@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 $Type = "NVIDIA"
 if (-not $Devices.$Type -or $Config.InfoOnly) {return} # No NVIDIA present in system
@@ -22,6 +22,8 @@ $Commands = [PSCustomObject]@{
     "pascal:2"          = @() #Pascal 2 threads
 }
 
+$CommonCommands = @("")
+
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 3456 + (2 * 10000)
 
@@ -40,7 +42,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
             Type             = "NVIDIA"
             Path             = $Path
             HashSHA256       = $HashSHA256
-            Arguments        = @([PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$Algorithm", "$([Net.DNS]::Resolve($Pools.$Algorithm_Norm.Host).AddressList.IPAddressToString | Select-Object -First 1):$($Pools.$Algorithm_Norm.Port)", "$($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass)")}) + @([PSCustomObject]@{id = 1; method = "workers.add"; params = @(@($DeviceIDs | ForEach-Object {@("alg-0", "$_")} | Select-Object) * $Threads) + $Commands.$_})
+            Arguments        = @([PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$Algorithm", "$([Net.DNS]::Resolve($Pools.$Algorithm_Norm.Host).AddressList.IPAddressToString | Select-Object -First 1):$($Pools.$Algorithm_Norm.Port)", "$($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass)$($Commands.$_)")}) + @([PSCustomObject]@{id = 1; method = "workers.add"; params = @(@($DeviceIDs | ForEach-Object {@("alg-0", "$_")} | Select-Object) * $Threads) + $CommonCommands.$_})
             HashRates        = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
             API              = "Excavator"
             Port             = $Port
