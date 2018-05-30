@@ -68,7 +68,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$UseFastestMinerPerAlgoOnly = $false, #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
     [Parameter(Mandatory = $false)]
-    [Switch]$IgnoreMinerFee = $false # If $true MPM will ignore miner fees for its calculations (as older versions did)
+    [Switch]$IgnoreMinerFee = $false, # If $true MPM will ignore miner fees for its calculations (as older versions did)
     [Parameter(Mandatory = $false)]
     [Switch]$ShowPoolBalances = $false,
     [Parameter(Mandatory = $false)]
