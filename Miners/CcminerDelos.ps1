@@ -27,6 +27,7 @@ $Commands = [PSCustomObject]@{
     "fugue256"    = "" # Fuguecoin, untested
     "groestl"     = "" # Groestlcoin
     "hmq1725"     = "" # Doubloons / Espers
+    "hsr"         = "" # HSR
     "jackpot"     = "" # JHA v8, untested
     "keccak"      = "" # Deprecated Keccak-256
     "keccakc"     = "" # Keccak-256 (CreativeCoin)
