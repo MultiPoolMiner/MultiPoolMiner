@@ -458,7 +458,7 @@ while ($true) {
     $API.Miners = $Miners
 
     #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
-    if ($Config.UseFastestMinerPerAlgoOnly) {$Miners = $Miners | Sort-Object -Descending {"$($_.Type -join '')$($_.Index -join '')$($_.HashRates.PSObject.Properties.Name -join '')$(if($_.HashRates.PSObject.Properties.Value -eq $null) {$_.Name})"}, {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Bias -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Group-Object {"$($_.Type -join '')$($_.Index -join '')$($_.HashRates.PSObject.Properties.Name -join '')$(if($_.HashRates.PSObject.Properties.Value -eq $null) {$_.Name})"} | Foreach-Object {$_.Group[0]}}
+    if ($Config.UseFastestMinerPerAlgoOnly) {$Miners = $Miners | Sort-Object -Descending {"$($_.Type -join '')$($_.Index -join '')$($_.HashRates.PSObject.Properties.Name -join '')$(if($_.HashRates.PSObject.Properties.Value -eq $null) {$_.Name})"}, {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {([Double]($_ | Measure-Object Profit_Bias -Sum).Sum)}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Group-Object {"$($_.Type -join '')$($_.Index -join '')$($_.HashRates.PSObject.Properties.Name -join '')$(if($_.HashRates.PSObject.Properties.Value -eq $null) {$_.Name})"} | Foreach-Object {$_.Group[0]}}
 
     #Give API access to the fasted miners information
     $API.FastestMiners = $Miners
@@ -636,24 +636,35 @@ while ($true) {
     if ($Config.MinerStatusURL -and $Config.MinerStatusKey) {& .\ReportStatus.ps1 -Key $Config.MinerStatusKey -WorkerName $WorkerName -ActiveMiners $ActiveMiners -MinerStatusURL $Config.MinerStatusURL}
 
     Clear-Host
+    #Get miners needing benchmarking
+    $MinersNeedingBenchmark = @($Miners | Where-Object {$_.HashRates.PSObject.Properties.Value -eq $null})
+    $API.MinersNeedingBenchmark = $MinersNeedingBenchmark
 
     #Display mining information
-    $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object -Descending Type, Profit_Bias | Format-Table -GroupBy Type (
-        @{Label = "Miner$(if (-not $Config.IgnoreMinerFees) {' [Fee]'})"; Expression = {if ($Config.IgnoreMinerFees -or -not $_.Fees) {$_.Name}else {"$($_.Name) [$(($_.Fees | Foreach-Object {$_.ToString("N2")}) -join '%/')%]"}}}, 
+    #When benchmarking: Sort by type, algo and profit
+    #When mining: Sort by type and profit_bias
+    $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object -Property Type, @{Expression = {if ($MinersNeedingBenchmark.count -gt 0) {$_.HashRates.PSObject.Properties.Name}}}, @{Expression = {if ($MinersNeedingBenchmark.count -gt 0) {$_.Profit}}; Descending = $true}, @{Expression = {if ($MinersNeedingBenchmark.count -lt 1) {[double]$_.Profit_Bias}}; Descending = $true} | Format-Table -GroupBy Type (
+        @{Label = "Miner$(if (-not $Config.IgnoreMinerFees) {' [Fees]'})"; Expression = {if ($Config.IgnoreMinerFees -or -not $_.Fees) {$_.Name}else {"$($_.Name) [$(($_.Fees | Foreach-Object {$_.ToString("N2")}) -join '%/')%]"}}}, 
         @{Label = "Algorithm"; Expression = {$_.HashRates.PSObject.Properties.Name}}, 
         @{Label = "Speed"; Expression = {$_.HashRates.PSObject.Properties.Value | ForEach-Object {if ($_ -ne $null) {"$($_ | ConvertTo-Hash)/s"}else {"Benchmarking"}}}; Align = 'right'}, 
         @{Label = "$($Config.Currency | Select-Object -Index 0)/Day"; Expression = {if ($_.Profit) {ConvertTo-LocalCurrency $($_.Profit) $($Rates.$($Config.Currency | Select-Object -Index 0)) -Offset 2} else {"Unknown"}}; Align = "right"}, 
         @{Label = "Accuracy"; Expression = {$_.Pools.PSObject.Properties.Value.MarginOfError | ForEach-Object {(1 - $_).ToString("P0")}}; Align = 'right'}, 
         @{Label = "$($Config.Currency | Select-Object -Index 0)/GH/Day"; Expression = {$_.Pools.PSObject.Properties.Value.Price | ForEach-Object {ConvertTo-LocalCurrency $($_ * 1000000000) $($Rates.$($Config.Currency | Select-Object -Index 0)) -Offset 2}}; Align = "right"}, 
-        @{Label = "Pool"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {if ($_.Info) {"$($_.Name)-$($_.Info)"}else {"$($_.Name)"}}}}
+        @{Label = "Pool$(if (-not $Config.IgnorePoolFees) {' [Fee]'})"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {if ($_.Info) {"$($_.Name)-$($_.Info)$(if ($_.Fee) {" [$('{0:N2}' -f $_.Fee)%]"})"}else {"$($_.Name)$(if ($_.Fee) {" [$('{0:N2}' -f $_.Fee)%]"})"}}}}
     ) | Out-Host
 
+    #Display benchmarking progres
+    if ($MinersNeedingBenchmark.count -gt 0) {
+        Write-Log -Level Warn "Benchmarking in progress: $($MinersNeedingBenchmark.count) miner$(if ($MinersNeedingBenchmark.count -gt 1){'s'}) left to benchmark."
+    }
+
     #Display active miners list
-    $ActiveMiners | Where-Object {$_.GetActivateCount() -GT 0} | Sort-Object -Property {$_.GetStatus()}, @{Expression = {$_.GetActiveLast()}; Ascending = $false} | Select-Object -First (1 + 6 + 6) | Format-Table -Wrap -GroupBy @{Label = "Status"; Expression = {$_.GetStatus()}} (
-        @{Label = "Speed"; Expression = {$_.Speed_Live | ForEach-Object {"$($_ | ConvertTo-Hash)/s"}}; Align = 'right'}, 
+    $ActiveMiners | Where-Object {$_.GetActivateCount() -GT 0} | Sort-Object -Property @{Expression = {$_.GetStatus()}; Descending = $False}, @{Expression = {$_.GetActiveLast()}; Descending = $True} | Select-Object -First (1 + 6 + 6) | Format-Table -GroupBy @{Label = "Status"; Expression = {$_.GetStatus()}} (
+        @{Label = "Last Speed"; Expression = {$_.Speed_Live | ForEach-Object {"$($_ | ConvertTo-Hash)/s"}}; Align = 'right'}, 
         @{Label = "Active"; Expression = {"{0:dd} Days {0:hh} Hours {0:mm} Minutes" -f $_.GetActiveTime()}}, 
         @{Label = "Launched"; Expression = {Switch ($_.GetActivateCount()) {0 {"Never"} 1 {"Once"} Default {"$_ Times"}}}}, 
         @{Label = "Type"; Expression = {$_.Type}},
+        @{Label = "Miner"; Expression = {$_.Name}},
         @{Label = "Command"; Expression = {"$($_.Path.TrimStart((Convert-Path ".\"))) $($_.Arguments)"}}
     ) | Out-Host
 
@@ -696,12 +707,6 @@ while ($true) {
     if ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) {
         Write-Host "Pool Balances: "
         $Balances | Format-Table Name, Total_*
-    }
-
-    #Display benchmarking progress
-    $BenchmarksNeeded = @($Miners | Where-Object {$_.HashRates.PSObject.Properties.Value -eq $null}).Count
-    if ($BenchmarksNeeded -gt 0) {
-        Write-Log -Level Warn "Benchmarking in progress: $($BenchmarksNeeded) miner$(if ($BenchmarksNeeded -gt 1){'s'}) left to benchmark."
     }
 
     #Display exchange rates
