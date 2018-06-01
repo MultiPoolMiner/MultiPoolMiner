@@ -6,8 +6,6 @@ function Get-Balance {
     [CmdletBinding()]
     param($Config, $Rates)
 
-    Write-Log "Getting pool balances"
-
     # If rates weren't specified, just use 1 BTC = 1 BTC
     if ($Rates -eq $Null) {
         $Rates = [PSCustomObject]@{BTC = [Double]1}
