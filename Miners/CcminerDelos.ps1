@@ -87,6 +87,14 @@ else {
     $Fees = @($MinerFeeInPercent)
 }
 
+# Delos miner requires CUDA 9.2
+$DriverVersion = (Get-Devices).NVIDIA.Platform.Version -replace ".*CUDA ",""
+$RequiredVersion = "9.2.00"
+if ($DriverVersion -lt $RequiredVersion) {
+    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers. "
+    return
+}
+
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
 
     $Algorithm_Norm = Get-Algorithm $_
