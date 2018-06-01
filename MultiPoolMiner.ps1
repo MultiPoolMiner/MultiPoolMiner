@@ -269,6 +269,7 @@ while ($true) {
 
     #Update the pool balances
     if ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) {
+        Write-Log "Getting pool balances. "
         $Balances = Get-Balance -Config $UserConfig -Rates $Rates
         $API.Balances = $Balances
     }
