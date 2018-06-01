@@ -57,6 +57,10 @@
                     $Data = $API.FailedMiners | ConvertTo-Json
                     Break
                 }
+                "/minersneedingbenchmark" {
+                    $Data = $API.MinersNeedingBenchmark | ConvertTo-Json
+                    Break
+                }
                 "/pools" {
                     $Data = $API.Pools | ConvertTo-Json
                     Break
