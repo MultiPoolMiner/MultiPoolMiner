@@ -407,7 +407,7 @@ function Get-Stat {
         $Stats = [PSCustomObject]@{}
         Get-ChildItem "Stats" | ForEach-Object {
             $BaseName = $_.BaseName
-            $_ | Get-Content | ConvertFrom-Json | ForEach-Object {
+            $_ | Get-Content | ConvertFrom-Json -ErrorAction SilentlyContinue | ForEach-Object {
                 $Stats | Add-Member $BaseName $_
             }
         }
