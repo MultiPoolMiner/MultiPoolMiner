@@ -14,9 +14,25 @@
 
     $apiserver = [PowerShell]::Create().AddScript({
 
+        # Set the starting directory
+        Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+        $BasePath = "$PWD\web"
+
+        # List of possible mime types for files
+        $MIMETypes = @{
+            ".js" = "application/x-javascript"
+            ".html" = "text/html"
+            ".htm" = "text/html"
+            ".json" = "application/json"
+            ".css" = "text/css"
+            ".txt" = "text/plain"
+            ".ico" = "image/x-icon"
+            ".ps1" = "text/html" # ps1 files get executed, assume their response is html
+        }
+
         # Setup the listener
         $Server = New-Object System.Net.HttpListener
-        # Listening on anything other than localhost requires admin priviledges
+        # Listening on anything other than localhost requires admin privileges
         $Server.Prefixes.Add("http://localhost:3999/")
         $Server.Start()
 
@@ -25,8 +41,20 @@
             $Request = $Context.Request
             $URL = $Request.Url.OriginalString
 
-            # Determine the requested resource - remove any query strings and trailing slashes
-            $RequestedResource = ($Request.RawUrl -Split '\?')[0].TrimEnd('/')
+            # Determine the requested resource and parse query strings
+            $Path = $Request.Url.LocalPath
+
+            # Parse any parameters in the URL - $Request.Url.Query looks like "+ ?a=b&c=d&message=Hello%20world"
+            $Parameters = [PSCustomObject]@{}
+            $Request.Url.Query -Replace "\?", "" -Split '&' | Foreach-Object {
+                $key, $value = $_ -Split '='
+                # Decode any url escaped characters in the key and value
+                $key = [URI]::UnescapeDataString($key)
+                $value = [URI]::UnescapeDataString($value)
+                if ($key -and $value) {
+                    $Parameters | Add-Member $key $value
+                }
+            }
 
             # Create a new response and the defaults for associated settings
             $Response = $Context.Response
@@ -35,10 +63,11 @@
             $Data = ""
 
             # Set the proper content type, status code and data for each resource
-            Switch($RequestedResource) {
-                "" {
+            Switch($Path) {
+                "/" {
+                    # Serve index page
                     $ContentType = "text/html"
-                    $Data = Get-Content('APIDocs.html')
+                    $Data = Get-Content($BasePath + '/APIDocs.html')
                     break
                 }
                 "/version" {
@@ -115,9 +144,31 @@
                     break
                 }
                 default {
-                    $StatusCode = 404
-                    $ContentType = "text/html"
-                    $Data = "URI '$RequestedResource' is not a valid resource."
+                    # Check if there is a file with the requested path
+                    $Filename = $BasePath + $Path
+                    if (Test-Path $Filename -PathType Leaf) {
+                        # If the file is a powershell script, execute it and return the output. A $Parameters parameter is sent built from the query string
+                        # Otherwise, just return the contents of the file
+                        $File = Get-ChildItem $Filename
+
+                        If ($File.Extension -eq ".ps1") {
+                            $Data = & $File.FullName -Parameters $Parameters
+                        } else {
+                            $Data = Get-Content $Filename -Raw
+                        }
+
+                        # Set content type based on file extension
+                        If ($MIMETypes.ContainsKey($File.Extension)) {
+                            $ContentType = $MIMETypes[$File.Extension]
+                        } else {
+                            # If it's an unrecognized file type, prompt for download
+                            $ContentType = "application/octet-stream"
+                        }
+                    } else {
+                        $StatusCode = 404
+                        $ContentType = "text/html"
+                        $Data = "URI '$Path' is not a valid resource."
+                    }
                 }
             }
 
@@ -138,6 +189,7 @@
         }
         # Only gets here if something is wrong and the server couldn't start or stops listening
         $Server.Stop()
+        $Server.Close()
     }) #end of $apiserver
 
     $apiserver.Runspace = $newRunspace

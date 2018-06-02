@@ -4,6 +4,13 @@
     
     API data is available at http://localhost:3999/&lt;resource&gt;
 
+    <h2>File and Scripts</h2>
+    <p>Anything other than the resources listed below will be looked for in the web directory and sent if it exists.</p>
+    
+    <p>Any .ps1 files in the web directory will be run and their output sent. They get passed a $Parameters object with keys and values from the URL string.
+    Test it with this demo:  <a href="/scripts/demo.ps1?message=Hello%20world!">/script/demo.ps1?message=Hello%20world!</a>
+    This feature can be used to gather data that the API doesn't expose directly.</p>
+
     <h2>Resources</h2>
     
     <h3>Version</h3>
