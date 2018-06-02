@@ -39,7 +39,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
 
     $Algorithm_Norm = Get-Algorithm $_
 
-    if ($Pools.$Algorithm_Norm.host -match ".*miningpoolhub\.com") { *only available for miningpoolhub
+    if ($Pools.$Algorithm_Norm.host -match ".*miningpoolhub\.com") { #only available for miningpoolhub
 	
         $HashRate = $Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week
         
