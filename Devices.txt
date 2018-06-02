@@ -1,0 +1,65 @@
+{
+    "amd":  {
+                "Index":  "*",
+                "PlatformId":  "*",
+                "PlatformId_Index":  "*",
+                "Type":  "*",
+                "Type_Index":  "*",
+                "Vendor":  "Advanced Micro Devices, Inc.",
+                "Vendor_Index":  "{1}"
+            },
+    "cpu":  {
+                "Index":  "*",
+                "PlatformId":  "*",
+                "PlatformId_Index":  "*",
+                "Type":  "CPU",
+                "Type_Index":  "{1}",
+                "Vendor":  "*",
+                "Vendor_Index":  "*"
+            },
+    "device":  {
+                   "Index":  "{1}",
+                   "PlatformId":  "*",
+                   "PlatformId_Index":  "*",
+                   "Type":  "*",
+                   "Type_Index":  "*",
+                   "Vendor":  "*",
+                   "Vendor_Index":  "*"
+               },
+    "gpu":  {
+                "Index":  "*",
+                "PlatformId":  "*",
+                "PlatformId_Index":  "*",
+                "Type":  "GPU",
+                "Type_Index":  "{1}",
+                "Vendor":  "*",
+                "Vendor_Index":  "*"
+            },
+    "intel":  {
+                  "Index":  "*",
+                  "PlatformId":  "*",
+                  "PlatformId_Index":  "*",
+                  "Type":  "*",
+                  "Type_Index":  "*",
+                  "Vendor":  "Intel(R) Corporation",
+                  "Vendor_Index":  "{1}"
+              },
+    "nvidia":  {
+                   "Index":  "*",
+                   "PlatformId":  "*",
+                   "PlatformId_Index":  "*",
+                   "Type":  "*",
+                   "Type_Index":  "*",
+                   "Vendor":  "NVIDIA Corporation",
+                   "Vendor_Index":  "{1}"
+               },
+    "opencl":  {
+                   "Index":  "*",
+                   "PlatformId":  "{1}",
+                   "PlatformId_Index":  "{2}",
+                   "Type":  "*",
+                   "Type_Index":  "*",
+                   "Vendor":  "*",
+                   "Vendor_Index":  "*"
+               }
+}

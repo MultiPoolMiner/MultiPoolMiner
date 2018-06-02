@@ -4,11 +4,8 @@ param(
     [PSCustomObject]$Pools,
     [PSCustomObject]$Stats,
     [PSCustomObject]$Config,
-    [PSCustomObject]$Devices
+    [PSCustomObject[]]$Devices
 )
-
-$Type = "NVIDIA"
-if (-not $Devices.$Type) {return} # No NVIDIA mining device present in system
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\Ethash-Claymore\EthDcrMiner64.exe"
@@ -55,7 +52,7 @@ $Commands = [PSCustomObject]@{
 $CommonCommands = @(" -logsmaxsize 1", "") # To be applied to all algorithms and intensities. Array: first value for main algo, second value for secondary algo
 
 # Get array of IDs of all devices in device set, returned DeviceIDs are of base $DeviceIdBase representation starting from $DeviceIdOffset
-$DeviceIDsSet = Get-DeviceIDs -Config $Config -Devices $Devices -Type $Type -DeviceTypeModel $($Devices.$Type) -DeviceIdBase 16 -DeviceIdOffset 0
+$Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation"
 
 $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
 
@@ -64,12 +61,12 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
 
     Switch ($MainAlgorithm_Norm) {
         # default is all devices, ethash has a 4GB minimum memory limit
-        "Ethash" {$DeviceIDs = $DeviceIDsSet."4gb"}
-        "Ethash3gb" {$DeviceIDs = $DeviceIDsSet."3gb"}
-        default {$DeviceIDs = $DeviceIDsSet."All"}
+        "Ethash" {$Device = $Devices | Where-Object GlobalMemsize -GE 4000000000}
+        "Ethash3gb" {$Device = $Devices | Where-Object GlobalMemsize -GE 3000000000}
+        default {$Device = $Devices}
     }
 
-    if (($Pools.$MainAlgorithm_Norm -and $DeviceIDs) -or $Config.InfoOnly) {
+    if (($Pools.$MainAlgorithm_Norm -and $Device) -or $Config.InfoOnly) {
         # must have a valid pool to mine and available devices
 
         $Miner_Name = $Name
@@ -89,10 +86,10 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             # Single mining mode
             [PSCustomObject]@{
                 Name       = $Miner_Name
-                Type       = $Type
+                Device     = $Device
                 Path       = $Path
                 HashSHA256 = $HashSHA256
-                Arguments  = ("-mode 1 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$MainAlgorithmCommands$($CommonCommands | Select-Object -Index 0) -esm $EthereumStratumMode -allpools 1 -allcoins 1 -platform 2 -di $($DeviceIDs -join '')" -replace "\s+", " ").trim()
+                Arguments  = ("-mode 1 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$MainAlgorithmCommands$($CommonCommands | Select-Object -Index 0) -esm $EthereumStratumMode -allpools 1 -allcoins 1 -platform 2 -di $(($Device | ForEach-Object {'{0:x}' -f $_.Type_Index}) -join '')" -replace "\s+", " ").trim()
                 HashRates  = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm}
                 API        = $Api
                 Port       = $Port
@@ -119,10 +116,10 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
                 # must have a valid pool to mine and positive intensity
                 [PSCustomObject]@{
                     Name       = $Miner_Name
-                    Type       = $Type
+                    Device     = $Device
                     Path       = $Path
                     HashSHA256 = $HashSHA256
-                    Arguments  = ("-mode 0 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$MainAlgorithmCommands$($CommonCommands | Select-Object -Index 0) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dcoin $SecondaryAlgorithm -dcri $SecondaryAlgorithmIntensity -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$SecondaryAlgorithmCommands$($CommonCommands | Select-Object -Index 1) -platform 2 -di $($DeviceIDs -join '')" -replace "\s+", " ").trim()
+                    Arguments  = ("-mode 0 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$MainAlgorithmCommands$($CommonCommands | Select-Object -Index 0) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dcoin $SecondaryAlgorithm -dcri $SecondaryAlgorithmIntensity -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$SecondaryAlgorithmCommands$($CommonCommands | Select-Object -Index 1) -platform 2 -di $(($Device | ForEach-Object {'{0:x}' -f $_.Type_Index}) -join '')" -replace "\s+", " ").trim()
                     HashRates  = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm; "$SecondaryAlgorithm_Norm" = $HashRateSecondaryAlgorithm}
                     API        = $Api
                     Port       = $Port
@@ -138,10 +135,10 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
                     # must have a valid pool to mine and positive intensity
                     [PSCustomObject]@{
                         Name       = $Miner_Name
-                        Type       = $Type
+                        Device     = $Device
                         Path       = $Path
                         HashSHA256 = $HashSHA256
-                        Arguments  = ("-mode 0 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$MainAlgorithmCommands$($CommonCommands | Select-Object -Index 0) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dcoin $SecondaryAlgorithm -dcri $SecondaryAlgorithmIntensity -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$SecondaryAlgorithmCommands$($CommonCommands | Select-Object -Index 1) -platform 2 -di $($DeviceIDs -join '')" -replace "\s+", " ").trim()
+                        Arguments  = ("-mode 0 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$MainAlgorithmCommands$($CommonCommands | Select-Object -Index 0) -esm $EthereumStratumMode -allpools 1 -allcoins exp -dcoin $SecondaryAlgorithm -dcri $SecondaryAlgorithmIntensity -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$SecondaryAlgorithmCommands$($CommonCommands | Select-Object -Index 1) -platform 2 -di $(($Device | ForEach-Object {'{0:x}' -f $_.Type_Index}) -join '')" -replace "\s+", " ").trim()
                         HashRates  = [PSCustomObject]@{"$MainAlgorithm_Norm" = $HashRateMainAlgorithm; "$SecondaryAlgorithm_Norm" = $HashRateSecondaryAlgorithm}
                         API        = $Api
                         Port       = $Port
