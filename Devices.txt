@@ -1,0 +1,65 @@
+{
+    "amd":  {
+                "Index":  "*",
+                "PlatformId":  "*",
+                "Type_PlatformId_Index":  "*",
+                "Vendor":  "Advanced Micro Devices, Inc.",
+                "Type_Vendor_Index":  "{1}",
+                "Type":  "GPU",
+                "Type_Index":  "*"
+            },
+    "cpu":  {
+                "Index":  "*",
+                "PlatformId":  "*",
+                "Type_PlatformId_Index":  "*",
+                "Vendor":  "*",
+                "Type_Vendor_Index":  "*",
+                "Type":  "CPU",
+                "Type_Index":  "{1}"
+            },
+    "device":  {
+                   "Index":  "{1}",
+                   "PlatformId":  "*",
+                   "Type_PlatformId_Index":  "*",
+                   "Vendor":  "*",
+                   "Type_Vendor_Index":  "*",
+                   "Type":  "*",
+                   "Type_Index":  "*"
+               },
+    "gpu":  {
+                "Index":  "*",
+                "PlatformId":  "*",
+                "Type_PlatformId_Index":  "*",
+                "Vendor":  "*",
+                "Type_Vendor_Index":  "*",
+                "Type":  "GPU",
+                "Type_Index":  "{1}"
+            },
+    "intel":  {
+                  "Index":  "*",
+                  "PlatformId":  "*",
+                  "Type_PlatformId_Index":  "*",
+                  "Vendor":  "Intel(R) Corporation",
+                  "Type_Vendor_Index":  "{1}",
+                  "Type":  "GPU",
+                  "Type_Index":  "*"
+              },
+    "nvidia":  {
+                   "Index":  "*",
+                   "PlatformId":  "*",
+                   "Type_PlatformId_Index":  "*",
+                   "Vendor":  "NVIDIA Corporation",
+                   "Type_Vendor_Index":  "{1}",
+                   "Type":  "GPU",
+                   "Type_Index":  "*"
+               },
+    "opencl":  {
+                   "Index":  "*",
+                   "PlatformId":  "{1}",
+                   "Type_PlatformId_Index":  "{2}",
+                   "Vendor":  "*",
+                   "Type_Vendor_Index":  "*",
+                   "Type":  "*",
+                   "Type_Index":  "*"
+               }
+}

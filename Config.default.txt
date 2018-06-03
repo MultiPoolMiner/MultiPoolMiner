@@ -26,7 +26,7 @@
   "Interval": "$Interval",
   "Region": "$Region",
   "SSL": "$SSL",
-  "Type": "$Type",
+  "DeviceName": "$DeviceName",
   "Algorithm": "$Algorithm",
   "MinerName": "$MinerName",
   "PoolName": "$PoolName",
