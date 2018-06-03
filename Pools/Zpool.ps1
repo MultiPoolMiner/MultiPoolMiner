@@ -35,24 +35,8 @@ $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Selec
     $Zpool_Algorithm = $Zpool_Request.$_.name
     $Zpool_Algorithm_Norm = Get-Algorithm $Zpool_Algorithm
     $Zpool_Coin = ""
-
-    $Divisor = 1000000
-
-    switch ($Zpool_Algorithm_Norm) {
-        # values in mBTC/MH/day, per PH for sha256 & GH for scrypt, blake, decred, x11, quark, qubit, sha256t, kS for equihash
-        "blake2s"   {$Divisor *= 1000}
-        "blakecoin" {$Divisor *= 1000}
-        "decred"    {$Divisor *= 1000}
-        "equihash"  {$Divisor /= 1000}
-        "keccak"    {$Divisor *= 1000}
-        "keccakc"   {$Divisor *= 1000}
-        "quark"     {$Divisor *= 1000}
-        "qubit"     {$Divisor *= 1000}
-        "scrypt"    {$Divisor *= 1000}
-        "sha"       {$Divisor *= 1000000}
-        "sha256t"   {$Divisor *= 1000}
-        "x11"       {$Divisor *= 1000}
-    }
+    
+    $Divisor = 1000000 * [Double]$Zpool_Request.$_.mbtc_mh_factor
 
     if ((Get-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit" -Value ([Double]$Zpool_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
     else {$Stat = Set-Stat -Name "$($Name)_$($Zpool_Algorithm_Norm)_Profit" -Value ([Double]$Zpool_Request.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}

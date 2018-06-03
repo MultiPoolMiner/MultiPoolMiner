@@ -10,7 +10,7 @@
     $newRunspace = [runspacefactory]::CreateRunspace()
     $newRunspace.Open()
     $newRunspace.SessionStateProxy.SetVariable("API", $API)
-    $newRunspace.SessionStateProxy.Path.SetLocation($(pwd))
+    $newRunspace.SessionStateProxy.Path.SetLocation($(pwd)) | Out-Null
 
     $apiserver = [PowerShell]::Create().AddScript({
 
@@ -57,6 +57,10 @@
                     $Data = $API.FailedMiners | ConvertTo-Json
                     Break
                 }
+                "/minersneedingbenchmark" {
+                    $Data = $API.MinersNeedingBenchmark | ConvertTo-Json
+                    Break
+                }
                 "/pools" {
                     $Data = $API.Pools | ConvertTo-Json
                     Break
@@ -77,6 +81,10 @@
                     $Data = $API.Miners | ConvertTo-Json
                     Break
                 }
+                "/fastestminers" {
+                    $Data = $API.FastestMiners | ConvertTo-Json
+                    Break
+                }
                 "/config" {
                     $Data = $API.Config | ConvertTo-Json
                     Break
@@ -95,6 +103,10 @@
                 }
                 "/watchdogtimers" {
                     $Data = $API.WatchdogTimers | ConvertTo-Json
+                    Break
+                }
+                "/balances" {
+                    $Data = $API.Balances | ConvertTo-Json
                     Break
                 }
                 "/stop" {

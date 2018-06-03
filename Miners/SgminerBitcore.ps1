@@ -1,11 +1,11 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\Xevan-AMD\sgminer.exe"
-$HashSHA256 = "F20223113CF9A2A65ED3C787006FD09CC750243682537C86BACB5BDC563B6DDF"
-$Uri = "https://github.com/LIMXTEC/Xevan-GPU-Miner/releases/download/1/sgminer-xevan-5.5.0-nicehash-1-windows-amd64.zip"
+$Path = ".\Bin\Bitcore-AMD\sgminer-x64.exe"
+$HashSHA256 = "C00DE0D33BD20BE3B5014FC019ED8A81D3AA5273C8AF96B17D6B51C5D8FA3933"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/sgminerbitcore/sgminer-bitcore-5.6.1.9.zip"
 
 $Commands = [PSCustomObject]@{
-    "xevan-mod" = " --intensity 15" #Xevan
+    "timetravel10" = " --intensity 19" #Bitcore
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName

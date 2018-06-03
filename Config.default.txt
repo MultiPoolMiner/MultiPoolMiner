@@ -40,5 +40,16 @@
   "Watchdog": "$Watchdog",
   "MinerStatusURL": "$MinerStatusURL",
   "MinerStatusKey": "$MinerStatusKey",
-  "SwitchingPrevention": "$SwitchingPrevention"
+  "SwitchingPrevention": "$SwitchingPrevention",
+  "ShowPoolBalances": "$ShowPoolBalances",
+  "ShowPoolBalancesExcludedPools": "$ShowPoolBalancesExcludedPools",
+  "ExtendIntervalAlgorithm": [
+    "X16R",
+    "X16S"
+  ],
+  "ExtendIntervalMinerName": [
+    "PalginNvidia"
+  ],
+  "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
+  "IgnoreMinerFee":  "$IgnoreMinerFee"
 }

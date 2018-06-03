@@ -9,7 +9,7 @@ while ($true) {
         Sort-Object {$_.InputObject -replace $Sort} | 
         Where-Object InputObject -match $Log | 
         Where-Object SideIndicator -EQ "=>" | 
-        ForEach-Object {$Active += @{Id = (Start-Job ([ScriptBlock]::Create("Get-Content '$(Convert-Path ".\Logs\$($_.InputObject)")' -Wait$(if($QuickStart){" -Tail 1000"})")) -Name $_.InputObject).Id; Time = (Get-Date).ToUniversalTime()}}
+        ForEach-Object {$Active += @{Id = (Start-Job ([ScriptBlock]::Create("Get-Content '$(Convert-Path ".\Logs\$($_.InputObject)")' -Wait$(if($QuickStart){" -Tail 1000"}) -Encoding UTF8")) -Name $_.InputObject).Id; Time = (Get-Date).ToUniversalTime()}}
 
     Start-Sleep 1
 

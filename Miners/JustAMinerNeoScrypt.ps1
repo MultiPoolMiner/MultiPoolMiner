@@ -1,19 +1,12 @@
 using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-Zealot\z-enemy.exe"
-$HashSHA256 = "16E60514BF2D5F9DD67B543EF220499CEF74DA637067E1D019C5FBAE37EC8219"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/zenemy110/z-enemy.1.10.release.zip"
+$Path = ".\Bin\NeoScrypt-JAM\hsrminer_neoscrypt_fork_hp.exe"
+$HashSHA256 = "571B1C7D7A0BB9934AAF3E4106C26B7735A004473E9ECD99D35C4E2664487EFF"
+$Uri = "https://github.com/justaminer/hsrm-fork/raw/master/hsrminer_neoscrypt_fork_hp.zip"
 $MinerFeeInPercent = 1
 
 $Commands = [PSCustomObject]@{
-    "bitcore" = "" #Bitcore
-    "phi"     = "" #PHI
-    "tribus"  = "" #Tribus, new in 1.10
-    "x16r"    = "" #Raven
-    "x16s"    = "" #Pigeon
-    "x17"     = "" #X17
-    "xevan"   = "" #Xevan, new in 1.09a
-    "vit"     = "" #Vitality, new in 1.09a
+    "neoscrypt" = "" #NeoScrypt
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
