@@ -1,60 +1,46 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-Nanashi\ccminer.exe"
-$HashSHA256 = "1974bab01a30826497a76b79e227f3eb1c9eb9ffa6756c801fcd630122bdb5c7"
-$URI = "https://github.com/Nanashi-Meiyo-Meijin/ccminer/releases/download/v2.2-mod-r2/2.2-mod-r2-CUDA9.binary.zip"
+$Path = ".\Bin\NVIDIA-PHI\ccminer.exe"
+$HashSHA256 = "6C3AFFABBD39566F4AE3B78CF55BFEA06BE98C1D48FDDB27DEE406DB87B7663F"
+$URI = "https://github.com/216k155/ccminer-phi-anxmod/releases/download/ccminer%2Fphi-1.0/ccminer-phi-1.0.zip"
 
 $Commands = [PSCustomObject]@{
     ### SUPPORTED ALGORITHMS - BEST PERFORMING MINER
-    "hmq1725" = "" #HMQ1725
-    "lyra2z" = "" #Lyra2z, ZCoin
-    "neoscrypt" = "" #NeoScrypt
-    "skunk" = "" #Skunk
+    "blake2s" = "" #Blake2s XVG
+    "c11" = " -i 20" #c11
+    "hsr" = "" #HSR, HShare
+    "phi" = "" #PHI
+    "x11evo" = " -i 19" #X11evo
+    "x17" = " -i 21" #x17
 
     ### SUPPORTED ALGORITHMS - BEAT MY ANOTHER MINER
-    #"blake2s" = "" #Blake2s XVG
-    #"c11" = "" #c11
-    #"equihash" = "" #Equihash
-    #"groestl" = "" #Groestl
     #"keccak" = "" #Keccak SHA3
     #"lyra2v2" = "" #lyra2v2
+    #"neoscrypt" = " -i 14" #NeoScrypt
     #"skein" = "" #Skein
-    #"timetravel" = "" #Timetravel
-    #"tribus" = "" #Tribus
-    #"x11evo" = "" #X11evo
-    #"x17" = "" #x17
-   
+    
     ### MAYBE SUPPORTED ALGORITHMS - NOT MINEABLE IN SUPPORTED POOLS AS OF 20/05/2018
     ### these algorithms were not benchmarked into the leaderboard and 
     ### should be benchmarked on a per miner basis if supported by pools
-    "bastion" = "" #bastion
-    "bmw" = "" #bmw
-    "deep" = "" #deep
-    "dmd-gr" = "" #dmd-gr
-    "fresh" = "" #fresh
-    "fugue256" = "" #Fugue256
-    "heavy" = "" #HeavyCoin
-    "jackpot" = "" #JackPot
-    "luffa" = "" #Luffa
-    #"lyra2" = "" #lyra2re
-    "mjollnir" = "" #Mjollnircoin
-    "penta" = "" #Pentablake
-    "polytimos" = "" #Polytimos
-    "scryptjane:nf" = "" #scryptjane:nf
     "skein2" = "" #skein2
     #"whirlpool" = "" #Whirlpool
     "veltor" = "" #Veltor
-    "wildkeccak" = "" #wildkeccak
-    "zr5" = "" #zr5
 
     ### UNSUPPORTED ALGORITHMS - AS OF 20/05/2018
     ### these algorithms were tested as unsupported by the miner but
     ### are usually profitable algorithms and should be rebenchmarked as 
     ### applicable if the miner is modified or updated
     #"bitcore" = "" #Bitcore
-    #"sha256t" = "" #Sha256t Sha256 triple
-    #"X16R" = "" #X16r
-    #"X16S" = "" #X16s
+    #"ethash" = "" #Ethash
+    #"equihash" = "" #Equihash
+    #"groestl" = "" #Groestl
+    #"hmq1725" = "" #HMQ1725
+    #"keccakc" = "" #keccakc
+    #"lyra2z" = "" #Lyra2z, ZCoin
+    #"polytimos" = "" #Polytimos
+    #"skunk" = "" #Skunk
+    #"timetravel" = "" #Timetravel
+    #"tribus" = "" #Tribus
 
     ### UNTESTED ALGORITHMS - AS OF 20/05/2018
     ### test and rank as appropriate

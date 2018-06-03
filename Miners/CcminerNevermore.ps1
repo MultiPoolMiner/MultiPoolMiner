@@ -5,49 +5,87 @@ $HashSHA256 = "940EB4C246019216C8F95FFB2F2E65FA147B13A65756A38D660146672E47844B"
 $Uri = "https://github.com/nemosminer/ccminerx16r-x16s/releases/download/v0.5/ccminerx16rx16s64-bit.7z"
 
 $Commands = [PSCustomObject]@{
-    "bitcore"     = "" #Bitcore
-    "c11"         = "" #C11
-    #"equihash"   = "" #Equihash - Beaten by Bminer by 30%
-    "groestl"     = "" #Groestl
-    "hmq1725"     = "" #HMQ1725
-    "hsr"         = "" #HSR
-    "jha"         = "" #JHA - NOT TESTED
-    "keccak"      = "" #Keccak
-    "keccakc"     = "" #Keccakc
-    "lyra2v2"     = "" #Lyra2RE2
-    "lyra2z"      = "" #Lyra2z
-    "neoscrypt"   = "" #NeoScrypt
-    "phi"         = "" #PHI
-    "poly"        = "" #Polytmos - NOT TESTED
-    "skein"       = "" #Skein
-    "skunk"       = "" #Skunk
-    "timetravel"  = "" #Timetravel
-    "tribus"      = "" #Tribus
-    "veltor"      = "" #Veltor - NOT TESTED
-    "x11evo"      = "" #X11evo
-    "x12"         = "" #X12 - NOT TESTED
-    "x16r"        = "" #Raven
-    "x17"         = "" #X17
+    ### SUPPORTED ALGORITHMS - BEST PERFORMING MINER
+    "bitcore" = "" #Bitcore
+    "hmq1725" = "" #HMQ1725
+    "skunk" = "" #Skunk
+    "timetravel" = "" #Timetravel
+    "tribus" = "" #Tribus
+
+    ### SUPPORTED ALGORITHMS - BEAT MY ANOTHER MINER
+    #"blake2s" = "" #Blake2s XVG
+    #"c11" = "" #c11
+    #"equihash" = "" #Equihash
+    #"groestl" = "" #Groestl
+    #"hsr" = "" #HSR, HShare
+    #"keccak" = "" #Keccak SHA3
+    #"keccakc" = "" #keccakc
+    #"lyra2z" = "" #Lyra2z, ZCoin
+    #"lyra2v2" = "" #lyra2v2
+    #"neoscrypt" = "" #NeoScrypt
+    #"phi" = "" #PHI
+    #"sha256t" = "" #Sha256t Sha256 triple
+    #"skein" = "" #Skein
+    #"x11evo" = "" #X11evo
+    #"X16R" = "" #X16r
+    #"X16S" = "" #X16s
+    #"x17" = "" #x17
    
-    # ASIC - never profitable 15/05/2018
-    #"blake"      = "" #blake
-    #"blakecoin"  = "" #Blakecoin
-    #"blake2s"    = "" #Blake2s
-    #"decred"     = "" #Decred
-    #"lbry"       = "" #Lbry
-    #"myr-gr"     = "" #MyriadGroestl
-    #"nist5"      = "" #Nist5
-    #"quark"      = "" #Quark
-    #"qubit"      = "" #Qubit
-    #"scrypt"     = "" #Scrypt
-    #"sha256d"    = "" #sha256d
-    #"sia"        = "" #SiaCoin
-    #"sib"        = "" #Sib
-    #"vanilla"    = "" #BlakeVanilla
-    #"x11"        = "" #X11
-    #"x13"        = "" #x13
-    #"x14"        = "" #x14
-    #"x15"        = "" #x15
+    ### MAYBE SUPPORTED ALGORITHMS - NOT MINEABLE IN SUPPORTED POOLS AS OF 20/05/2018
+    ### these algorithms were not benchmarked into the leaderboard and 
+    ### should be benchmarked on a per miner basis if supported by pools
+    "bastion" = "" #bastion
+    "bmw" = "" #bmw
+    "deep" = "" #deep
+    "dmd-gr" = "" #dmd-gr
+    "fresh" = "" #fresh
+    "fugue256" = "" #Fugue256
+    "jackpot" = "" #JackPot
+    "luffa" = "" #Luffa
+    #"lyra2" = "" #lyra2re
+    "penta" = "" #Pentablake
+    "polytimos" = "" #Polytimos
+    "scryptjane:nf" = "" #scryptjane:nf
+    "skein2" = "" #skein2
+    #"whirlpool" = "" #Whirlpool
+    "wildkeccak" = "" #wildkeccak
+    "zr5" = "" #zr5
+    "veltor" = "" #Veltor
+
+    ### UNSUPPORTED ALGORITHMS - AS OF 20/05/2018
+    ### these algorithms were tested as unsupported by the miner but
+    ### are usually profitable algorithms and should be rebenchmarked as 
+    ### applicable if the miner is modified or updated
+    #"ethash" = "" #Ethash
+
+    ### UNTESTED ALGORITHMS - AS OF 20/05/2018
+    ### test and rank as appropriate
+
+    ### UNPROFITABLE ALGORITHMS - AS OF 20/05/2018
+    ### these algorithms have been overtaken by ASIC
+    ### hardware and thus have been rendered unprofitable
+    ### these were omitted from all miners and may or may not
+    ### be mineable by this miner
+    #"blake256R14" = "" #Decred
+    #"blake256R8" = "" #VCash
+    #"blake2b" = "" #SIAcoin
+    #"cryptonight" = "" #Former monero algo
+    #"cryptonight-lite" = "" #AEON
+    #"equihash" = "" #Equihash
+    #"lbry" = "" #Lbry Credits
+    #"nist5" = "" #Bulwark
+    #"myr-gr" = "" #Myriad-Groestl
+    #"pascal" = "" #PascalCoin
+    #"quark" = "" #Quark
+    #"qubit" = "" #Qubit
+    #"sha256" = "" #Bitcoin also known as SHA256D (double)
+    #"scrypt" = "" #Litecoin
+    #"scrypt:n" = "" #ScryptN
+    #"x11" = "" #Dash
+    #"x11gost" = "" #Sibcoin Siberian Chervonets
+    #"x13" = "" #Stratis
+    #"x14" = "" #BERNcash
+    #"x15" = "" #Halcyon
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
