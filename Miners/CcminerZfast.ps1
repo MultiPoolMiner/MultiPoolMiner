@@ -8,7 +8,7 @@ param(
 )
 
 $Type = "NVIDIA"
-if (-not $Devices.$Type) {return} # No NVIDIA mining device present in system
+if ($Devices.$Type.count -lt 3) {return} # Not enough NVIDIA mining device present in system
 
 $DriverVersion = (Get-Devices).NVIDIA.Platform.Version -replace ".*CUDA ",""
 $RequiredVersion = "9.2.00"
