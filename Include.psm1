@@ -514,32 +514,64 @@ function Get-Device {
     $PlatformId = 0
     $Index = 0
     $PlatformId_Index = @{}
-    $Type_Index = @{}
+    $Type_PlatformId_Index = @{}
     $Vendor_Index = @{}
+    $Type_Vendor_Index = @{}
+    $Type_Index = @{}
 
-    [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {
-        [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object {
-            $Device = $_ | ConvertTo-Json | ConvertFrom-Json | Add-Member -Force -PassThru @{
-                Index = [Int]$Index
-                PlatformId = [Int]$PlatformId
-                PlatformId_Index = [Int]$PlatformId_Index.($PlatformId)
-                Type = [String]$_.Type
-                Type_Index = [Int]$Type_Index.($_.Type)
-                Vendor = [String]$_.Vendor
-                Vendor_Index = [Int]$Vendor_Index.($_.Vendor)
+    try {
+        [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {
+            [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object {
+                $Device = $_ | ConvertTo-Json | ConvertFrom-Json | Add-Member -Force -PassThru @{
+                    Index = [Int]$Index
+                    PlatformId = [Int]$PlatformId
+                    PlatformId_Index = [Int]$PlatformId_Index.($PlatformId)
+                    Type_PlatformId_Index = [Int]$PlatformId_Index.($_.Type).($PlatformId)
+                    Vendor = [String]$_.Vendor
+                    Vendor_Index = [Int]$Vendor_Index.($_.Vendor)
+                    Type_Vendor_Index = [Int]$Vendor_Index.($_.Type).($_.Vendor)
+                    Type = [String]$_.Type
+                    Type_Index = [Int]$Type_Index.($_.Type)
+                }
+
+                if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
+                    $Device
+                }
+
+                if (-not $Type_PlatformId_Index.($_.Type)) {
+                    $Type_PlatformId_Index.($_.Type) = @{}
+                }
+                if (-not $Type_Vendor_Index.($_.Type)) {
+                    $Type_Vendor_Index.($_.Type) = @{}
+                }
+
+                $Index++
+                $PlatformId_Index.($PlatformId)++
+                $Type_PlatformId_Index.($_.Type).($PlatformId)++
+                $Vendor_Index.($_.Vendor)++
+                $Type_Vendor_Index.($_.Type).($_.Vendor)++
+                $Type_Index.($_.Type)++
             }
 
-            if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like $_})) {
-                $Device
-            }
-
-            $Index++
-            $PlatformId_Index.($PlatformId)++
-            $Type_Index.($_.Type)++
-            $Vendor_Index.($_.Vendor)++
+            $PlatformId++
         }
+    }
+    catch {
+        Write-Log -Level Warn "OpenCL device detection has failed. "
+    }
 
-        $PlatformId++
+    if (-not $Index) {
+        [PSCustomObject]@{
+            Index = [Int]$null
+            PlatformId = [Int]$null
+            PlatformId_Index = [Int]$null
+            Type_PlatformId_Index = [Int]$null
+            Vendor = [String]$null
+            Vendor_Index = [Int]$null
+            Type_Vendor_Index = [Int]$null
+            Type = [String]"Cpu"
+            Type_Index = [Int]$null
+        }
     }
 }
 
