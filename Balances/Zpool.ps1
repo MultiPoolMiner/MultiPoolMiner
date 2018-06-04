@@ -7,7 +7,7 @@ $MyConfig = $Config.Pools.$Name
 $Request = [PSCustomObject]@{}
 
 if(!$MyConfig.BTC) {
-  Write-Log -Level Verbose "Pool API ($Name) has failed - no wallet address specified."
+  Write-Log -Level Verbose "Pool Balance API ($Name) has failed - no wallet address specified."
   return
 }
 
@@ -15,7 +15,7 @@ try {
     $Request = Invoke-RestMethod "http://zpool.ca/api/wallet?address=$($MyConfig.BTC)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
-    Write-Log -Level Warn "Pool API ($Name) has failed. "
+    Write-Log -Level Warn "Pool Balance API ($Name) has failed. "
 }
 
 if (($Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
