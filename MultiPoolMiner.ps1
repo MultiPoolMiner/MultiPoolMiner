@@ -344,8 +344,8 @@ while ($true) {
     # select only the miners that match $Config.MinerName, if specified, and don't match $Config.ExcludeMinerName
     $AllMiners = if (Test-Path "Miners") {
         Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $Devices} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | 
-            ForEach-Object {if (-not $_.Device) {$_ | Add-Member Device (Get-Device $_.Type) -Force}; $_} | #for backward compatibility
-            Where-Object {(Compare-Object @($Devices | Select-Object) @($_.Device | Select-Object) | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0} | 
+            ForEach-Object {if (-not $_.DeviceName) {$_ | Add-Member DeviceName (Get-Device $_.Type).Name -Force}; $_} | #for backward compatibility
+            Where-Object {(Compare-Object @($Devices.Name | Select-Object) @($_.DeviceName | Select-Object) | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0} | 
             Where-Object {($Config.Algorithm.Count -eq 0 -or (Compare-Object $Config.Algorithm $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0) -and ((Compare-Object $Pools.PSObject.Properties.Name $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0)} | 
             Where-Object {$Config.ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $Config.ExcludeAlgorithm $_.HashRates.PSObject.Properties.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0} | 
             Where-Object {$Config.MinerName.Count -eq 0 -or (Compare-Object $Config.MinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
@@ -413,8 +413,7 @@ while ($true) {
         $Miner | Add-Member Profit_Bias $Miner_Profit_Bias
         $Miner | Add-Member Profit_Unbias $Miner_Profit_Unbias
 
-        $Miner | Add-Member Device @($Miner.Device | Select-Object * -Unique | Sort-Object Index) -Force
-        $Miner | Add-Member Device_Name @($Miner.Device | ForEach-Object {"{0}#{1:d2}" -f $_.Type, $_.Type_Index} | Sort-Object) -Force
+        $Miner | Add-Member DeviceName @($Miner.DeviceName | Select-Object -Unique | Sort-Object) -Force
 
         $Miner.Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Miner.Path)
         if ($Miner.PrerequisitePath) {$Miner.PrerequisitePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Miner.PrerequisitePath)}
@@ -452,7 +451,7 @@ while ($true) {
     $API.Miners = $Miners
 
     #Use only use fastest miner per algo and device index. E.g. if there are 2 miners available to mine the same algo, only the faster of the two will ever be used, the slower ones will also be hidden in the summary screen
-    if ($Config.UseFastestMinerPerAlgoOnly) {$Miners = $Miners | Sort-Object -Descending {"$($_.Device_Name -join '')$($_.HashRates.PSObject.Properties.Name -join '')$(if($_.HashRates.PSObject.Properties.Value -eq $null) {$_.Name})"}, {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {([Double]($_ | Measure-Object Profit_Bias -Sum).Sum)}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Group-Object {"$($_.Device_Name -join '')$($_.HashRates.PSObject.Properties.Name -join '')$(if($_.HashRates.PSObject.Properties.Value -eq $null) {$_.Name})"} | Foreach-Object {$_.Group[0]}}
+    if ($Config.UseFastestMinerPerAlgoOnly) {$Miners = $Miners | Sort-Object -Descending {"$($_.DeviceName -join '')$($_.HashRates.PSObject.Properties.Name -join '')$(if($_.HashRates.PSObject.Properties.Value -eq $null) {$_.Name})"}, {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {([Double]($_ | Measure-Object Profit_Bias -Sum).Sum)}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Group-Object {"$($_.DeviceName -join '')$($_.HashRates.PSObject.Properties.Name -join '')$(if($_.HashRates.PSObject.Properties.Value -eq $null) {$_.Name})"} | Foreach-Object {$_.Group[0]}}
 
     #Give API access to the fastest miners information
     $API.FastestMiners = $Miners
@@ -486,7 +485,7 @@ while ($true) {
             (Compare-Object $_.Algorithm ($Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name) | Measure-Object).Count -eq 0
         }
         if ($ActiveMiner) {
-            $ActiveMiner.Device = $Miner.Device
+            $ActiveMiner.DeviceName = $Miner.DeviceName
             $ActiveMiner.Profit = $Miner.Profit
             $ActiveMiner.Profit_Comparison = $Miner.Profit_Comparison
             $ActiveMiner.Profit_MarginOfError = $Miner.Profit_MarginOfError
@@ -503,8 +502,7 @@ while ($true) {
                 API                  = $Miner.API
                 Port                 = $Miner.Port
                 Algorithm            = $Miner.HashRates.PSObject.Properties.Name #temp fix, must use 'PSObject.Properties' to preserve order
-                Device               = $Miner.Device
-                Device_Name          = $Miner.Device_Name
+                DeviceName           = $Miner.DeviceName
                 Profit               = $Miner.Profit
                 Profit_Comparison    = $Miner.Profit_Comparison
                 Profit_MarginOfError = $Miner.Profit_MarginOfError
@@ -526,16 +524,16 @@ while ($true) {
     $ActiveMiners | Where-Object {$_.GetStatus() -EQ "Running"} | ForEach-Object {$_.Profit_Bias = $_.Profit_Unbias}
 
     #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
-    $BestMiners = $ActiveMiners | Select-Object Device_Name -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.Device_Name $_.Device_Name | Measure-Object).Count -eq 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Bias -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1)}
-    $BestMiners_Comparison = $ActiveMiners | Select-Object Device_Name -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.Device_Name $_.Device_Name | Measure-Object).Count -eq 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Comparison -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1)}
-    $Miners_Device_Combos = (Get-Combination ($ActiveMiners | Select-Object Device_Name -Unique) | Where-Object {(Compare-Object ($_.Combination | Select-Object -ExpandProperty Device_Name -Unique) ($_.Combination | Select-Object -ExpandProperty Device_Name) | Measure-Object).Count -eq 0})
+    $BestMiners = $ActiveMiners | Select-Object DeviceName -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Bias -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1)}
+    $BestMiners_Comparison = $ActiveMiners | Select-Object DeviceName -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Comparison -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1)}
+    $Miners_Device_Combos = (Get-Combination ($ActiveMiners | Select-Object DeviceName -Unique) | Where-Object {(Compare-Object ($_.Combination | Select-Object -ExpandProperty DeviceName -Unique) ($_.Combination | Select-Object -ExpandProperty DeviceName) | Measure-Object).Count -eq 0})
     $BestMiners_Combos = $Miners_Device_Combos | ForEach-Object {
         $Miner_Device_Combo = $_.Combination
         [PSCustomObject]@{
             Combination = $Miner_Device_Combo | ForEach-Object {
-                $Miner_Device_Count = $_.Device_Name.Count
-                [Regex]$Miner_Device_Regex = "^(" + (($_.Device_Name | ForEach-Object {[Regex]::Escape($_)}) -join "|") + ")$"
-                $BestMiners | Where-Object {([Array]$_.Device_Name -notmatch $Miner_Device_Regex).Count -eq 0 -and ([Array]$_.Device_Name -match $Miner_Device_Regex).Count -eq $Miner_Device_Count}
+                $Miner_Device_Count = $_.DeviceName.Count
+                [Regex]$Miner_Device_Regex = "^(" + (($_.DeviceName | ForEach-Object {[Regex]::Escape($_)}) -join "|") + ")$"
+                $BestMiners | Where-Object {([Array]$_.DeviceName -notmatch $Miner_Device_Regex).Count -eq 0 -and ([Array]$_.DeviceName -match $Miner_Device_Regex).Count -eq $Miner_Device_Count}
             }
         }
     }
@@ -543,9 +541,9 @@ while ($true) {
         $Miner_Device_Combo = $_.Combination
         [PSCustomObject]@{
             Combination = $Miner_Device_Combo | ForEach-Object {
-                $Miner_Device_Count = $_.Device_Name.Count
-                [Regex]$Miner_Device_Regex = "^(" + (($_.Device_Name | ForEach-Object {[Regex]::Escape($_)}) -join "|") + ")$"
-                $BestMiners_Comparison | Where-Object {([Array]$_.Device_Name -notmatch $Miner_Device_Regex).Count -eq 0 -and ([Array]$_.Device_Name -match $Miner_Device_Regex).Count -eq $Miner_Device_Count}
+                $Miner_Device_Count = $_.DeviceName.Count
+                [Regex]$Miner_Device_Regex = "^(" + (($_.DeviceName | ForEach-Object {[Regex]::Escape($_)}) -join "|") + ")$"
+                $BestMiners_Comparison | Where-Object {([Array]$_.DeviceName -notmatch $Miner_Device_Regex).Count -eq 0 -and ([Array]$_.DeviceName -match $Miner_Device_Regex).Count -eq $Miner_Device_Count}
             }
         }
     }
@@ -617,7 +615,7 @@ while ($true) {
     $API.MinersNeedingBenchmark = $MinersNeedingBenchmark
 
     #Display mining information
-    $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object Device_Name, @{Expression = "Profit_Bias"; Descending = $True} | Format-Table -GroupBy @{Name = "Device"; Expression = "Device_Name"} (
+    $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object DeviceName, @{Expression = "Profit_Bias"; Descending = $True} | Format-Table -GroupBy @{Name = "Device"; Expression = "DeviceName"} (
         @{Label = "Miner$(if (-not $Config.IgnoreMinerFees) {' [Fees]'})"; Expression = {if ($Config.IgnoreMinerFees -or -not $_.Fees) {$_.Name}else {"$($_.Name) [$(($_.Fees | Foreach-Object {$_.ToString("N2")}) -join '%/')%]"}}}, 
         @{Label = "Algorithm"; Expression = {$_.HashRates.PSObject.Properties.Name}}, 
         @{Label = "Speed"; Expression = {$_.HashRates.PSObject.Properties.Value | ForEach-Object {if ($_ -ne $null) {"$($_ | ConvertTo-Hash)/s"}else {"Benchmarking"}}}; Align = 'right'}, 

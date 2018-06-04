@@ -522,35 +522,37 @@ function Get-Device {
     try {
         [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {
             [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object {
-                $Device = $_ | ConvertTo-Json | ConvertFrom-Json | Add-Member -Force -PassThru @{
+                $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
+                $Device = [PSCustomObject]@{
                     Index = [Int]$Index
                     PlatformId = [Int]$PlatformId
                     PlatformId_Index = [Int]$PlatformId_Index.($PlatformId)
-                    Type_PlatformId_Index = [Int]$PlatformId_Index.($_.Type).($PlatformId)
-                    Vendor = [String]$_.Vendor
-                    Vendor_Index = [Int]$Vendor_Index.($_.Vendor)
-                    Type_Vendor_Index = [Int]$Vendor_Index.($_.Type).($_.Vendor)
-                    Type = [String]$_.Type
-                    Type_Index = [Int]$Type_Index.($_.Type)
+                    Type_PlatformId_Index = [Int]$PlatformId_Index.($Device_OpenCL.Type).($PlatformId)
+                    Vendor = [String]$Device_OpenCL.Vendor
+                    Vendor_Index = [Int]$Vendor_Index.($Device_OpenCL.Vendor)
+                    Type_Vendor_Index = [Int]$Vendor_Index.($Device_OpenCL.Type).($Device_OpenCL.Vendor)
+                    Type = [String]$Device_OpenCL.Type
+                    Type_Index = [Int]$Type_Index.($Device_OpenCL.Type)
+                    OpenCL = $Device_OpenCL
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
-                    $Device
+                    $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
                 }
 
-                if (-not $Type_PlatformId_Index.($_.Type)) {
-                    $Type_PlatformId_Index.($_.Type) = @{}
+                if (-not $Type_PlatformId_Index.($Device_OpenCL.Type)) {
+                    $Type_PlatformId_Index.($Device_OpenCL.Type) = @{}
                 }
-                if (-not $Type_Vendor_Index.($_.Type)) {
-                    $Type_Vendor_Index.($_.Type) = @{}
+                if (-not $Type_Vendor_Index.($Device_OpenCL.Type)) {
+                    $Type_Vendor_Index.($Device_OpenCL.Type) = @{}
                 }
 
                 $Index++
                 $PlatformId_Index.($PlatformId)++
-                $Type_PlatformId_Index.($_.Type).($PlatformId)++
-                $Vendor_Index.($_.Vendor)++
-                $Type_Vendor_Index.($_.Type).($_.Vendor)++
-                $Type_Index.($_.Type)++
+                $Type_PlatformId_Index.($Device_OpenCL.Type).($PlatformId)++
+                $Vendor_Index.($Device_OpenCL.Vendor)++
+                $Type_Vendor_Index.($Device_OpenCL.Type).($Device_OpenCL.Vendor)++
+                $Type_Index.($Device_OpenCL.Type)++
             }
 
             $PlatformId++
@@ -561,7 +563,7 @@ function Get-Device {
     }
 
     if (-not $Index) {
-        [PSCustomObject]@{
+        $Device = [PSCustomObject]@{
             Index = [Int]$null
             PlatformId = [Int]$null
             PlatformId_Index = [Int]$null
@@ -571,7 +573,10 @@ function Get-Device {
             Type_Vendor_Index = [Int]$null
             Type = [String]"Cpu"
             Type_Index = [Int]$null
+            OpenCL = $null
         }
+
+        $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
     }
 }
 
@@ -623,8 +628,7 @@ class Miner {
     $API
     $Port
     [string[]]$Algorithm = @()
-    $Device
-    $Device_Name
+    $DeviceName
     $Profit
     $Profit_Comparison
     $Profit_MarginOfError

@@ -61,8 +61,8 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
 
     Switch ($MainAlgorithm_Norm) {
         # default is all devices, ethash has a 4GB minimum memory limit
-        "Ethash" {$Device = $Devices | Where-Object Vendor -EQ "Advanced Micro Devices, Inc." | Where-Object GlobalMemsize -GE 4000000000}
-        "Ethash3gb" {$Device = $Devices | Where-Object Vendor -EQ "Advanced Micro Devices, Inc." | Where-Object GlobalMemsize -GE 3000000000}
+        "Ethash" {$Device = $Devices | Where-Object Vendor -EQ "Advanced Micro Devices, Inc." | Where-Object {$_.OpenCL.GlobalMemsize -ge 4000000000}}
+        "Ethash3gb" {$Device = $Devices | Where-Object Vendor -EQ "Advanced Micro Devices, Inc." | Where-Object {$_.OpenCL.GlobalMemsize -ge 3000000000}}
         default {$Device = $Devices | Where-Object Vendor -EQ "Advanced Micro Devices, Inc."}
     }
 
@@ -76,14 +76,14 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
 
         if ($_ -notmatch ";") {
             # single algo mining
-            $Miner_Name = (@($Name) + @($Device | Sort-Object Type, Type_Index | ForEach-Object {"{0}#{1:d2}" -f $_.Type, $_.Type_Index}) | Select-Object) -join '-'
+            $Miner_Name = (@($Name) + @($Device.Name | Sort-Object) | Select-Object) -join '-'
             $HashRateMainAlgorithm = ($Stats."$($Miner_Name)_$($MainAlgorithm_Norm)_HashRate".Week)
 
             if ($Config.IgnoreMinerFee -or $Config.Miners.$Name.IgnoreMinerFee) {
                 $Fees = @($null)
             }
             else {
-                if (-not ($Devices | Where-Object GlobalMemsize -GT 2000000000)) {
+                if (-not ($Devices | Where-Object {$_.OpenCL.GlobalMemsize -gt 2000000000})) {
                     # All GPUs are 2GB, miner is completely free in this case, developer fee will not be mined at all.
                     $Fees = @($null) 
                 }
@@ -97,7 +97,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             # Single mining mode
             [PSCustomObject]@{
                 Name       = $Miner_Name
-                Device     = $Device
+                DeviceName = $Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
                 Arguments  = ("-mode 1 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$EthereumStratumMode$MainAlgorithmCommands$($CommonCommands | Select-Object -Index 0) -allpools 1 -allcoins 1 -di $(($Device | ForEach-Object {'{0:x}' -f $_.Type_Index}) -join '')" -replace "\s+", " ").trim()
@@ -115,7 +115,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             $SecondaryAlgorithm_Norm = Get-Algorithm $SecondaryAlgorithm
             $SecondaryAlgorithmIntensity = ($_.Split(";") | Select-Object -Index 1).Split(":") | Select-Object -Index 1
 
-            $Miner_Name = (@("$Name$SecondaryAlgorithm_Norm") + @($Device | Sort-Object Type, Type_Index | ForEach-Object {"{0}#{1:d2}" -f $_.Type, $_.Type_Index}) | Select-Object) -join '-'
+            $Miner_Name = (@("$Name$SecondaryAlgorithm_Norm") + @($Device.Name | Sort-Object) | Select-Object) -join '-'
             $HashRateMainAlgorithm = ($Stats."$($Miner_Name)_$($MainAlgorithm_Norm)_HashRate".Week)
             $HashRateSecondaryAlgorithm = ($Stats."$($Miner_Name)_$($SecondaryAlgorithm_Norm)_HashRate".Week)
 
@@ -123,7 +123,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
                 $Fees = @($null)
             }
             else {
-                if (-not ($Devices | Where-Object GlobalMemsize -GT 2000000000)) {
+                if (-not ($Devices | Where-Object {$_.OpenCL.GlobalMemsize -gt 2000000000})) {
                     # All GPUs are 2GB, miner is completely free in this case, developer fee will not be mined at all.
                     $Fees = @($null)
                 }
@@ -138,7 +138,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
                 # must have a valid pool to mine and positive intensity
                 [PSCustomObject]@{
                     Name       = $Miner_Name
-                    Device     = $Device
+                    DeviceName = $Device.Name
                     Path       = $Path
                     HashSHA256 = $HashSHA256
                     Arguments  = ("-mode 0 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$EthereumStratumMode$MainAlgorithmCommands$($CommonCommands | Select-Object -Index 0) -allpools 1 -allcoins exp -dcoin $SecondaryAlgorithm -dcri $SecondaryAlgorithmIntensity -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$SecondaryAlgorithmCommands$($CommonCommands | Select-Object -Index 1) -di $(($Device | ForEach-Object {'{0:x}' -f $_.Type_Index}) -join '')" -replace "\s+", " ").trim()
@@ -164,8 +164,8 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
 
     Switch ($MainAlgorithm_Norm) {
         # default is all devices, ethash has a 4GB minimum memory limit
-        "Ethash" {$Device = $Devices | Where-Object Vendor -EQ "NVIDIA Corporation" | Where-Object GlobalMemsize -GE 4000000000}
-        "Ethash3gb" {$Device = $Devices | Where-Object Vendor -EQ "NVIDIA Corporation" | Where-Object GlobalMemsize -GE 3000000000}
+        "Ethash" {$Device = $Devices | Where-Object Vendor -EQ "NVIDIA Corporation" | Where-Object {$_.OpenCL.GlobalMemsize -ge 4000000000}}
+        "Ethash3gb" {$Device = $Devices | Where-Object Vendor -EQ "NVIDIA Corporation" | Where-Object {$_.OpenCL.GlobalMemsize -ge 3000000000}}
         default {$Device = $Devices | Where-Object Vendor -EQ "NVIDIA Corporation"}
     }
 
@@ -179,14 +179,14 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
 
         if ($_ -notmatch ";") {
             # single algo mining
-            $Miner_Name = (@($Name) + @($Device | Sort-Object Type, Type_Index | ForEach-Object {"{0}#{1:d2}" -f $_.Type, $_.Type_Index}) | Select-Object) -join '-'
+            $Miner_Name = (@($Name) + @($Device.Name | Sort-Object) | Select-Object) -join '-'
             $HashRateMainAlgorithm = ($Stats."$($Miner_Name)_$($MainAlgorithm_Norm)_HashRate".Week)
 
             if ($Config.IgnoreMinerFee -or $Config.Miners.$Name.IgnoreMinerFee) {
                 $Fees = @($null)
             }
             else {
-                if (-not ($Devices | Where-Object GlobalMemsize -GT 2000000000)) {
+                if (-not ($Devices | Where-Object {$_.OpenCL.GlobalMemsize -gt 2000000000})) {
                     # All GPUs are 2GB, miner is completely free in this case, developer fee will not be mined at all.
                     $Fees = @($null)
                 }
@@ -200,7 +200,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             # Single mining mode
             [PSCustomObject]@{
                 Name       = $Miner_Name
-                Device     = $Device
+                DeviceName = $Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
                 Arguments  = ("-mode 1 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$EthereumStratumMode$MainAlgorithmCommands$($CommonCommands | Select-Object -Index 0) -allpools 1 -allcoins 1 -di $(($Device | ForEach-Object {'{0:x}' -f $_.Type_Index}) -join '')" -replace "\s+", " ").trim()
@@ -218,7 +218,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
             $SecondaryAlgorithm_Norm = Get-Algorithm $SecondaryAlgorithm
             $SecondaryAlgorithmIntensity = ($_.Split(";") | Select-Object -Index 1).Split(":") | Select-Object -Index 1
 
-            $Miner_Name = (@("$Name$SecondaryAlgorithm_Norm") + @($Device | Sort-Object Type, Type_Index | ForEach-Object {"{0}#{1:d2}" -f $_.Type, $_.Type_Index}) | Select-Object) -join '-'
+            $Miner_Name = (@("$Name$SecondaryAlgorithm_Norm") + @($Device.Name | Sort-Object) | Select-Object) -join '-'
             $HashRateMainAlgorithm = ($Stats."$($Miner_Name)_$($MainAlgorithm_Norm)_HashRate".Week)
             $HashRateSecondaryAlgorithm = ($Stats."$($Miner_Name)_$($SecondaryAlgorithm_Norm)_HashRate".Week)
 
@@ -226,7 +226,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
                 $Fees = @($null)
             }
             else {
-                if (-not ($Devices | Where-Object GlobalMemsize -GT 2000000000)) {
+                if (-not ($Devices | Where-Object {$_.OpenCL.GlobalMemsize -gt 2000000000})) {
                     # All GPUs are 2GB, miner is completely free in this case, developer fee will not be mined at all.
                     $Fees = @($null)
                 }
@@ -241,7 +241,7 @@ $Commands | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Obj
                 # must have a valid pool to mine and positive intensity
                 [PSCustomObject]@{
                     Name       = $Miner_Name
-                    Device     = $Device
+                    DeviceName = $Device.Name
                     Path       = $Path
                     HashSHA256 = $HashSHA256
                     Arguments  = ("-mode 0 -mport -$Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass)$EthereumStratumMode$MainAlgorithmCommands$($CommonCommands | Select-Object -Index 0) -allpools 1 -allcoins exp -dcoin $SecondaryAlgorithm -dcri $SecondaryAlgorithmIntensity -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$SecondaryAlgorithmCommands$($CommonCommands | Select-Object -Index 1) -di $(($Device | ForEach-Object {'{0:x}' -f $_.Type_Index}) -join '')" -replace "\s+", " ").trim()
