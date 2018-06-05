@@ -534,6 +534,7 @@ function Get-Device {
                     Type = [String]$Device_OpenCL.Type
                     Type_Index = [Int]$Type_Index.($Device_OpenCL.Type)
                     OpenCL = $Device_OpenCL
+                    Model = [String]$Device_OpenCL.Name
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
@@ -574,6 +575,7 @@ function Get-Device {
             Type = [String]"Cpu"
             Type_Index = [Int]$null
             OpenCL = $null
+            Model = [String]"CPU"
         }
 
         $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
