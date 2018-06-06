@@ -17,7 +17,8 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 13/05/2018 (dd/mm/yyyy) - v1.23.05 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 26/05/2018 (dd/mm/yyyy) - v1.23.06 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+
 
 ====================================================================
 
@@ -167,7 +168,13 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 
 -interval
 	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
+
+-ExtendIntervalAlgorithm
+	Extend interval timer duration by a factor of 10x $Interval for specified algorithms. Due to their nature some algorithms, e.g. 'X16R', will always trigger watchdog on normal interval duration. Default is @("X16R", "X16S").
 	
+-ExtendIntervalMinerName
+	Extend interval timer duration by a factor of 10x $Interval for specified miners. Due to their nature some miners, e.g. 'PalginNvidia', will always trigger watchdog on normal interval duration. Default is @("PalginNvidia").
+    
 -delay
 	Specify the number of seconds required to pass before opening each miner. It is useful if cards are sensitive to switching and need some extra time to recover (eg. clear DAG files from memory)
 
@@ -184,12 +191,6 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 	- Stage 2: when 2 timers expire relating to one miner file, the one miner file is kicked
 	- Stage 3: when 3 timers expire relating to one pool, the pool is kicked
 	Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
-
--ExcludeWatchdogAlgorithm
-	Exclude certain algorithms you don't want to be monitored by watchdog. Some algorithms, e.g. X16R, trigger watchdog constantly due to their nature. (default 'X16R')
-	
--ExcludeWatchdogMinerName
-	Exclude certain miners you don't want to be monitored by watchdog.
 
 -minerstatusurl https://multipoolminer.io/monitor/miner.php
 	Report and monitor your mining rig's status by including the command above. Wallet address must be set even if you are only using MiningPoolHub as a pool. You can access the reported information by entering your wallet address on the https://multipoolminer.io/monitor web address. By using this service you understand and accept the terms and conditions detailed in this document (further below). 
@@ -208,6 +209,10 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 
 -UseFastestMinerPerAlgoOnly
 	Use only use fastest miner per algo and device index. E.g. if there are 2 or more miners available to mine the same algo, only the fastest will ever be used, the slower ones will also be hidden in the summary screen.
+
+-IgnoreMinerFee
+	Newer versions of MPM take miner fees into account when calculating profitability. Set this flag to 'true' to ignore the fees (old MPM behaviour).
+	This is also a per-miner configuration item which available through advanced configuration 
 
 
 ====================================================================
@@ -251,60 +256,65 @@ If Config.txt does not exist, copy Config.default.txt and rename to Config.txt
 
 Config.txt is a JSON file and human readable / editable. A good primer for understanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
 
-Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like https://codebeautify.org/jsonviewer/ (copy/paste the complete file).
+Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like https://jsonblob.com (copy/paste the complete file).
 
 Default content of 'Config.txt'
 
 {
-    "Pools": {
-        "MiningPoolHub": {
-            "User": "$UserName",
-            "Worker": "$WorkerName",
-            "API_ID": "$API_ID",
-            "API_Key": "$API_Key"
-        },
-            "MiningPoolHubCoins": {
-            "User": "$UserName",
-            "Worker": "$WorkerName",
-            "API_ID": "$API_ID",
-            "API_Key": "$API_Key"
-        },
-            "NiceHash": {
-            "BTC": "$Wallet",
-            "Worker": "$WorkerName"
-        },
-            "Zpool": {
-            "BTC": "$Wallet",
-            "Worker": "$WorkerName"
-        }
+  "Pools": {
+    "MiningPoolHub": {
+      "User": "$UserName",
+      "Worker": "$WorkerName",
+      "API_ID": "$API_ID",
+      "API_Key": "$API_Key"
     },
-    "Miners": {
+    "MiningPoolHubCoins": {
+      "User": "$UserName",
+      "Worker": "$WorkerName",
+      "API_ID": "$API_ID",
+      "API_Key": "$API_Key"
     },
-    "Interval": "$Interval",
-    "Region": "$Region",
-    "SSL": "$SSL",
-    "Type": "$Type",
-    "Algorithm": "$Algorithm",
-    "MinerName": "$MinerName",
-    "PoolName": "$PoolName",
-    "ExcludeAlgorithm": "$ExcludeAlgorithm",
-    "ExcludeMinerName": "$ExcludeMinerName",
-    "ExcludePoolName": "$ExcludePoolName",
-    "Currency": "$Currency",
-    "Donate": "$Donate",
-    "Proxy": "$Proxy",
-    "Delay": "$Delay",
-    "Watchdog": "$Watchdog",
-    "MinerStatusURL": "$MinerStatusURL",
-    "MinerStatusKey": "$MinerStatusKey",
-    "SwitchingPrevention": "$SwitchingPrevention"
+    "NiceHash": {
+      "BTC": "$Wallet",
+      "Worker": "$WorkerName"
+    },
+    "Zpool": {
+      "BTC": "$Wallet",
+      "Worker": "$WorkerName"
+    }
+  },
+  "Miners": {
+  },
+  "Interval": "$Interval",
+  "ExtendIntervalAlgorithm": "ExtendIntervalAlgorithm",
+  "ExtendIntervalMinerName: "ExtendIntervalMinerName",
+  "Region": "$Region",
+  "SSL": "$SSL",
+  "Type": "$Type",
+  "Algorithm": "$Algorithm",
+  "MinerName": "$MinerName",
+  "PoolName": "$PoolName",
+  "ExcludeAlgorithm": "$ExcludeAlgorithm",
+  "ExcludeMinerName": "$ExcludeMinerName",
+  "ExcludePoolName": "$ExcludePoolName",
+  "Currency": "$Currency",
+  "Donate": "$Donate",
+  "Proxy": "$Proxy",
+  "Delay": "$Delay",
+  "Watchdog": "$Watchdog",
+  "MinerStatusURL": "$MinerStatusURL",
+  "MinerStatusKey": "$MinerStatusKey",
+  "SwitchingPrevention": "$SwitchingPrevention",
+  "ShowMinerWindow": "$ShowMinerWindow",
+  "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
+  "IgnoreMinerFee":  "$IgnoreMinerFee"
 }
 
 There is a section for Pools, Miners and a general section
 
-Advanced config for Pools
+Advanced configuration for Pools
 
-Settings for each configured pool are stored in its own subsection. Theses settings are only valid for the named pool.
+Settings for each configured pool are stored in its own subsection. These settings are only valid for the named pool.
 
 To change payout currency of a pool
 
@@ -329,6 +339,24 @@ E.g. to change the payout currency for Zpool to LiteCoin replace the line for BT
     }
 
 
+Advanced configuration for Miners
+
+Settings for each configured miner are stored in its own subsection. These settings are only valid for the named miner.
+
+Ignore miner fee in profit calculations
+
+By default newer versions of MPM take miner fees into account when calculating profitability. You can turn this off on a per miner basis.
+
+Note: Not all pools contain a fee, for more information consult the miners web page
+
+E.g. to ignore miner fees (old MPM behaviour) for the CcminerZealot miner add '"IgnoreMinerFee":  true'  to the miners section in Config.txt:
+
+    "Miners":  {
+        "CcminerZealot":  {
+            "IgnoreMinerFee":  true
+        }
+
+
 Advanced general configuration
 
 Settings in this section affect the overall behaviour of MPM.
@@ -336,14 +364,28 @@ Settings in this section affect the overall behaviour of MPM.
 To show miner windows
 
 By default MPM hides most miner windows as to not steal focus. All miners write their output to files in the Log folder.
-Note: Showing the miner windows disables writing the miner output to log files.
 
 To show the miner windows add '"ShowMinerWindow":  true' to the general section in Config.txt:
+Note: Showing the miner windows disables writing the miner output to log files.
 
 {
     ...
     "SwitchingPrevention":  "$SwitchingPrevention",
     "ShowMinerWindow":  true,
+    ...
+}
+
+Ignore miner fee in profit calculations
+
+By default newer versions of MPM take miner fees into account when calculating profitability.
+
+To ignore miner fees (old MPM behaviour) for ALL miners add '"IgnoreMinerFee":  true' to the general section in Config.txt:
+
+{
+    ...
+    "SwitchingPrevention":  "$SwitchingPrevention",
+    "ShowMinerWindow":  true,
+    "IgnoreMinerFee":  true,
     ...
 }
 

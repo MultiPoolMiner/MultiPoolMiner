@@ -18,7 +18,7 @@ Param(
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 # Get device information
-$Devices = Get-Devices
+$Devices = Get-Device
 
 # Choose which types to download
 $Types = @()

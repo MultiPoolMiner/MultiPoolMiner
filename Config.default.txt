@@ -26,7 +26,7 @@
   "Interval": "$Interval",
   "Region": "$Region",
   "SSL": "$SSL",
-  "Type": "$Type",
+  "DeviceName": "$DeviceName",
   "Algorithm": "$Algorithm",
   "MinerName": "$MinerName",
   "PoolName": "$PoolName",
@@ -41,5 +41,15 @@
   "MinerStatusURL": "$MinerStatusURL",
   "MinerStatusKey": "$MinerStatusKey",
   "SwitchingPrevention": "$SwitchingPrevention",
-  "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly"
+  "ShowPoolBalances": "$ShowPoolBalances",
+  "ShowPoolBalancesExcludedPools": "$ShowPoolBalancesExcludedPools",
+  "ExtendIntervalAlgorithm": [
+    "X16R",
+    "X16S"
+  ],
+  "ExtendIntervalMinerName": [
+    "PalginNvidia"
+  ],
+  "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
+  "IgnoreMinerFee":  "$IgnoreMinerFee"
 }
