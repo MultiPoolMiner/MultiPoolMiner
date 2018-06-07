@@ -1,16 +1,9 @@
 ﻿using module ..\Include.psm1
 
-param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
-    [PSCustomObject]$Devices
-)
-
 $Path = ".\Bin\NVIDIA-Delos\ccminer.exe"
-$HashSHA256 = "778E13734C2C46325A56314C5E594E141CCC637CFB26D9AC2CF53F819C22526F"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/DelosMiner/DelosMiner1.1.2.zip"
-$UriManual = "https://bitcointalk.org/index.php?topic=4344544.0"
+$HashSHA256 = "C56675263E302DB97B9C5BBC88545ACFCE7BD9CA0C05E64074613D1CC43AA635"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/DelosMiner/DelosMiner1.3.0-x86-cu91.zip"
+$UriManual = "https://bitcointalk.org/index.php?topic=4344544"
 $MinerFeeInPercent = 1
 
 $Commands = [PSCustomObject]@{
@@ -85,14 +78,6 @@ if ($Config.IgnoreMinerFee -or $Config.Miners.$Name.IgnoreMinerFee) {
 }
 else {
     $Fees = @($MinerFeeInPercent)
-}
-
-# Delos miner requires CUDA 9.2
-$DriverVersion = (Get-Devices).NVIDIA.Platform.Version -replace ".*CUDA ",""
-$RequiredVersion = "9.2.00"
-if ($DriverVersion -lt $RequiredVersion) {
-    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers. "
-    return
 }
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
