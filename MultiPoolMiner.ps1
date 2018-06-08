@@ -722,11 +722,11 @@ while ($true) {
     #When benchmarking miners/algorithm in ExtendInterval...
     $Multiplier = 0
     $RunningMiners | Where-Object {$_.Speed -eq $null} | ForEach-Object {
-        if ($Config.ExtendIntervalMinerName.($_.Name)) {
-            if ($Config.ExtendIntervalMinerName.($_.Name) -gt $Multiplier) {$Multiplier = $Config.ExtendIntervalMinerName.($_.Name)} else {$Multiplier = 10}
+        if ($MatchingMinerName = $Config.ExtendIntervalMinerName.psobject.properties.name -match "^$($_.Name -Split "-" | Select-Object -Index 0)") {
+            if ($Config.ExtendIntervalMinerName.$MatchingMinerName -ge $Multiplier) {$Multiplier = $Config.ExtendIntervalMinerName.$MatchingMinerName} else {$Multiplier = 10}
         }
-        $_.Algorithm | Where-Object {$Config.ExtendIntervalAlgorithm.psobject.properties.match("$_")} | ForEach-Object {
-            if ($Config.ExtendIntervalAlgorithm.$_ -gt $Multiplier) {$Multiplier = $Config.ExtendIntervalAlgorithm.$_} else {$Multiplier = 10}
+        $_.Algorithm | Where-Object {$Config.ExtendIntervalAlgorithm.psobject.properties.name -match $_} | ForEach-Object {
+            if ($Config.ExtendIntervalAlgorithm.$_ -ge $Multiplier) {$Multiplier = $Config.ExtendIntervalAlgorithm.$_} else {$Multiplier = 10}
         }
     }
     #Multiply $Config.Interval and add it to $StatEnd, extend StatSpan, extend watchdog times
@@ -771,7 +771,7 @@ while ($true) {
                 if ($Miner.New -and (-not $Miner_Speed)) {$Miner_Speed = $Miner.GetHashRate($_, ($Interval * $Miner.Benchmarked), ($Miner.Benchmarked -lt $Strikes))}
 
                 if ((-not $Miner.New) -or $Miner_Speed -or $Miner.Benchmarked -ge ($Strikes * $Strikes) -or $Miner.GetActivateCount() -ge $Strikes) {
-                    $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Speed -Duration $StatSpan -FaultDetection ($Config.ExtendIntervalMinerName -notmatch "^$($Miner.Name)" -and $Config.ExtendIntervalAlgorithm  -notmatch "^$($_)")
+                    $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Speed -Duration $StatSpan -FaultDetection (-not ($Config.ExtendIntervalMinerName.psobject.properties.Name -match "^$($Miner.Name -Split "-" | Select-Object -Index 0)" -or $Config.ExtendIntervalAlgorithm.psobject.properties.name -match "^$($_)"))
                 }
 
                 #Update watchdog timer
