@@ -722,15 +722,16 @@ while ($true) {
     #When benchmarking miners/algorithm in ExtendInterval...
     $Multiplier = 0
     $RunningMiners | Where-Object {$_.Speed -eq $null} | ForEach-Object {
-        if ($MinerNameMatch = ($Config.ExtendIntervalMinerName -match "^$($_)")) {
-            $Multiplier = if (($MinerNameMatch -split ":" | Select-Object -Index 1) -gt $Multiplier) {$MinerNameMatch -split ":" | Select-Object -Index 1} else {$Multiplier = 10}
+        if ($Config.ExtendIntervalMinerName.($_.Name)) {
+            if ($Config.ExtendIntervalMinerName.($_.Name) -gt $Multiplier) {$Multiplier = $Config.ExtendIntervalMinerName.($_.Name)} else {$Multiplier = 10}
         }
-        if ($AlgorithmMatch = ($_.Algorithm | Where-Object {$Config.ExtendIntervalAlgorithm -match "^$($_)"})) {
-            $Multiplier = if (($AlgorithmMatch -split ":" | Select-Object -Index 1) -gt $Multiplier) {$AlgorithmMatch -split ":" | Select-Object -Index 1} else {$Multiplier = 10}
+        $_.Algorithm | Where-Object {$Config.ExtendIntervalAlgorithm.psobject.properties.match("$_")} | ForEach-Object {
+            if ($Config.ExtendIntervalAlgorithm.$_ -gt $Multiplier) {$Multiplier = $Config.ExtendIntervalAlgorithm.$_} else {$Multiplier = 10}
         }
     }
     #Multiply $Config.Interval and add it to $StatEnd, extend StatSpan, extend watchdog times
     if ($Multiplier -gt 0) {
+        if ($Multiplier -gt 10) {$Multiplier = 10}
         $StatEnd = $StatEnd.AddSeconds($Config.Interval * $Multiplier)
         $StatSpan = New-TimeSpan $StatStart $StatEnd
         $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
