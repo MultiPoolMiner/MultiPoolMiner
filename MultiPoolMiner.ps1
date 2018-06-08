@@ -18,9 +18,9 @@ param(
     [Parameter(Mandatory = $false)]
     [Int]$Interval = 60, #seconds before reading hash rate from miners
     [Parameter(Mandatory = $false)]
-    [Array]$ExtendIntervalAlgorithm = @("X16R:10", "X16S:10"), #Extend interval duration by :n times $Interval for these algorithms
+    [Array]$ExtendIntervalAlgorithm = [PSCustomObject]@{"X16R" = 10; "X16S" = 10}, #Extend interval duration by n times $Interval for these algorithms
     [Parameter(Mandatory = $false)]
-    [Array]$ExtendIntervalMinerName = @("PalginNvidia:3", "Excavator:3", "Bminer:3"), #Extend interval duration by :n times $Interval for these miners
+    [Array]$ExtendIntervalMinerName = [PSCustomObject]@{"PalginNvidia" = 3; "Excavator" = 3; "Bminer" = 3}, #Extend interval duration by n times $Interval for these miners
     [Parameter(Mandatory = $false)]
     [Alias("Location")]
     [String]$Region = "europe", #europe/us/asia
