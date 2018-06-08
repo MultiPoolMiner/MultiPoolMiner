@@ -158,10 +158,10 @@ Choose the default currency or currencies your profit stats will be shown in.
 MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
 
 **-ExtendIntervalAlgorithm**
-	When benchmarking extend interval timer duration by :IntervalMultiplier times (if IntervalMultiplier is omitted IntervalMultiplier will be set to 10) for specified algorithms. Due to their nature some algorithms, e.g. 'X16R', will always trigger watchdog on normal interval duration. Default is @("X16R:10", "X16S:10").
+	When benchmarking extend interval timer duration by :IntervalMultiplier times (if IntervalMultiplier is $null IntervalMultiplier will be set to 10) for specified algorithms. Due to their nature some algorithms, e.g. 'X16R', will always trigger watchdog on normal interval duration. Default is [PSCustomObject{"X16R" = 10; "X16S" = 10}.
 	
 **-ExtendIntervalMinerName:IntervalMultiplier**
-	When benchmarking extend interval timer duration by :IntervalMultiplier times (if IntervalMultiplier is omitted IntervalMultiplier will be set to 10) for specified miners. Due to their nature some miners, e.g. 'PalginNvidia', will always trigger watchdog on normal interval duration. Default is @("PalginNvidia:3", "Excavator:3", "Bminer:3").
+	When benchmarking extend interval timer duration by :IntervalMultiplier times (if IntervalMultiplier is $null IntervalMultiplier will be set to 10) for specified miners. Due to their nature some miners, e.g. 'PalginNvidia', will always trigger watchdog on normal interval duration. Default is [PSCustomObject]@{"PalginNvidia": 3; "Excavator" = 3; "Bminer" = 3}.
 
 **-delay**
 Specify the number of seconds required to pass before opening each miner. It is useful when cards are more sensitive to switching and need some extra time to recover (eg. clear DAG files from memory)
@@ -297,15 +297,15 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
   "ShowMinerWindow": "$ShowMinerWindow",
   "ShowPoolBalances": "$ShowPoolBalances",
   "ShowPoolBalancesExcludedPools": "$ShowPoolBalancesExcludedPools",
-  "ExtendIntervalAlgorithm": [
-    "X16R:10",
-    "X16S:10"
-  ],
-  "ExtendIntervalMinerName": [
-    "PalginNvidia:3",
-    "Excavator:3",
-    "Bminer:3"
-  ],
+  "ExtendIntervalAlgorithm": {
+    "X16R": 5,
+    "X16S": 5
+  },
+  "ExtendIntervalMinerName": {
+    "PalginNvidia": 3,
+    "BMiner": 3,
+    "Excavator": 3
+  },
   "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
   "IgnoreMinerFee":  "$IgnoreMinerFee"
 }
