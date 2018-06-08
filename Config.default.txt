@@ -43,15 +43,15 @@
   "SwitchingPrevention": "$SwitchingPrevention",
   "ShowPoolBalances": "$ShowPoolBalances",
   "ShowPoolBalancesExcludedPools": "$ShowPoolBalancesExcludedPools",
-  "ExtendIntervalAlgorithm": [
-    "X16R:10",
-    "X16S:10"
-  ],
-  "ExtendIntervalMinerName": [
-    "PalginNvidia:3",
-    "Excavator:3",
-    "Bminer:3"
-  ],
+  "ExtendIntervalAlgorithm": {
+    "X16R": 5,
+    "X16S": 5
+  },
+  "ExtendIntervalMinerName": {
+    "PalginNvidia": 3,
+    "BMiner": 3,
+    "Excavator": 3
+  },
   "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
   "IgnoreMinerFee":  "$IgnoreMinerFee"
 }
