@@ -169,10 +169,10 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 -interval
 	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
 
--ExtendIntervalAlgorithm
+-ExtendIntervalAlgorithm([PSCustomObject]@{Algorithm1=Factor1;Algorithm2=Factor2;...})
 	When benchmarking extend interval timer duration by :IntervalMultiplier times (if IntervalMultiplier is $null IntervalMultiplier will be set to 10) for specified algorithms. Due to their nature some algorithms, e.g. 'X16R', will always trigger watchdog on normal interval duration. Default is [PSCustomObject{"X16R" = 10; "X16S" = 10}.
 	
--ExtendIntervalMinerName:IntervalMultiplier
+-ExtendIntervalMinerName([PSCustomObject]@{MinerName1=Factor1;MinerName2=Factor2;...})
 	When benchmarking extend interval timer duration by :IntervalMultiplier times (if IntervalMultiplier is $null IntervalMultiplier will be set to 10) for specified miners. Due to their nature some miners, e.g. 'PalginNvidia', will always trigger watchdog on normal interval duration. Default is [PSCustomObject]@{"PalginNvidia": 3; "Excavator" = 3; "Bminer" = 3}.
     
 -delay
