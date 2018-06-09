@@ -1,11 +1,12 @@
-{
+﻿{
     "Type":  "NVIDIA",
     "Path":  ".\\Bin\\NVIDIA-BMiner\\BMiner.exe",
-    "Arguments":  "\"-api 127.0.0.1:1880 -uri $(if ($Pools.Equihash.SSL) {'stratum+ssl'}else {'stratum'})://$($Pools.Equihash.User):$($Pools.Equihash.Pass)@$($Pools.Equihash.Host):$($Pools.Equihash.Port) -nofee -watchdog=false\"",
+    "HashSHA256": "22E6C2797D6024D5E8AF28EC9D2BDAA6AB5C076DF729B96CC0CC9B2C348CDA51",
+    "Arguments":  "\"-api 127.0.0.1:1880 -uri $(if ($Pools.Equihash.SSL) {'stratum+ssl'}else {'stratum'})://$([System.Web.HttpUtility]::UrlEncode($Pools.Equihash.User)):$([System.Web.HttpUtility]::UrlEncode($Pools.Equihash.Pass))@$($Pools.Equihash.Host):$($Pools.Equihash.Port) -nofee -watchdog=false\"",
     "HashRates":  {
                       "Equihash":  "\"$($Stats.Bminer_Equihash_HashRate.Week)\""
                   },
     "API":  "Bminer",
     "Port":  "1880",
-    "URI":  "https://www.bminercontent.com/releases/bminer-v5.5.0-aba7617-amd64.zip"
+    "URI":  "https://www.bminercontent.com/releases/bminer-v6.1.0-7ea8bbe-amd64.zip"
 }

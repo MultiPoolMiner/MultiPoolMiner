@@ -25,7 +25,7 @@ if (($MiningPoolHub_Request.return | Measure-Object).Count -le 1) {
     return
 }
 
-$MiningPoolHub_Regions = "europe", "us", "asia"
+$MiningPoolHub_Regions = "europe", "us-east", "asia"
 
 $MiningPoolHub_Request.return | ForEach-Object {
     $MiningPoolHub_Hosts = $_.all_host_list.split(";")
@@ -33,7 +33,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
     $MiningPoolHub_Algorithm = $_.algo
     $MiningPoolHub_Algorithm_Norm = Get-Algorithm $MiningPoolHub_Algorithm
     $MiningPoolHub_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.current_mining_coin -replace "-", " " -replace "_", " ")) -replace " "
-
+    
     if ($MiningPoolHub_Algorithm_Norm -eq "Sia") {$MiningPoolHub_Algorithm_Norm = "SiaClaymore"} #temp fix
 
     $Divisor = 1000000000
@@ -42,7 +42,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
 
     $MiningPoolHub_Regions | ForEach-Object {
         $MiningPoolHub_Region = $_
-        $MiningPoolHub_Region_Norm = Get-Region $MiningPoolHub_Region
+        $MiningPoolHub_Region_Norm = Get-Region ($MiningPoolHub_Region -replace "^us-east$", "us")
 
         if ($User) {
             [PSCustomObject]@{
@@ -61,7 +61,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 Updated       = $Stat.Updated
             }
 
-            if ($MiningPoolHub_Algorithm_Norm -eq "Cryptonight" -or $MiningPoolHub_Algorithm_Norm -eq "Equihash") {
+            if ($MiningPoolHub_Algorithm_Norm -eq "CryptonightV7" -or $MiningPoolHub_Algorithm_Norm -eq "Equihash") {
                 [PSCustomObject]@{
                     Algorithm     = $MiningPoolHub_Algorithm_Norm
                     Info          = $MiningPoolHub_Coin

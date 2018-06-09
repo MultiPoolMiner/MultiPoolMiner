@@ -28,7 +28,7 @@ if (($ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore
 
 $ZergPool_Regions = "us", "europe"
 $ZergPool_Currencies = @("BTC", "LTC") | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
-$ZergPool_MiningCurrencies = ($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique
+$ZergPool_MiningCurrencies = ($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Foreach-Object {if ($ZergPoolCoins_Request.$_.Symbol) {$ZergPoolCoins_Request.$_.Symbol} else {$_}} | Select-Object -Unique # filter ...-algo
 
 $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$ZergPool_Request.$_.hashrate -gt 0} |ForEach-Object {
     $ZergPool_Host = "mine.zergpool.com"
@@ -37,22 +37,7 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
     $ZergPool_Algorithm_Norm = Get-Algorithm $ZergPool_Algorithm
     $ZergPool_Coin = ""
 
-    $Divisor = 1000000
-
-    switch ($ZergPool_Algorithm_Norm) {
-        "blake2s" {$Divisor *= 1000}
-        "blakecoin" {$Divisor *= 1000}
-        "decred" {$Divisor *= 1000}
-        "equihash" {$Divisor /= 1000}
-        "keccak" {$Divisor *= 1000}
-        "keccakc" {$Divisor *= 1000}
-        "neoscrypt" {$Divisor *= 1000}
-        "phi" {$Divisor *= 1000}
-        "quark" {$Divisor *= 1000}
-        "qubit" {$Divisor *= 1000}
-        "scrypt" {$Divisor *= 1000}
-        "x11" {$Divisor *= 1000}
-    }
+    $Divisor = 1000000 * [Double]$ZergPool_Request.$_.mbtc_mh_factor
 
     if ((Get-Stat -Name "$($Name)_$($ZergPool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($ZergPool_Algorithm_Norm)_Profit" -Value ([Double]$ZergPool_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
     else {$Stat = Set-Stat -Name "$($Name)_$($ZergPool_Algorithm_Norm)_Profit" -Value ([Double]$ZergPool_Request.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
@@ -90,22 +75,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
     $ZergPool_Coin = $ZergPoolCoins_Request.$_.name
     $ZergPool_Currency = $_
 
-    $Divisor = 1000000000
-
-    switch ($ZergPool_Algorithm_Norm) {
-        "blake2s" {$Divisor *= 1000}
-        "blakecoin" {$Divisor *= 1000}
-        "decred" {$Divisor *= 1000}
-        "equihash" {$Divisor /= 1000}
-        "keccak" {$Divisor *= 1000}
-        "keccakc" {$Divisor *= 1000}
-        "neoscrypt" {$Divisor *= 1000}
-        "phi" {$Divisor *= 1000}
-        "quark" {$Divisor *= 1000}
-        "qubit" {$Divisor *= 1000}
-        "scrypt" {$Divisor *= 1000}
-        "x11" {$Divisor *= 1000}
-    }
+    $Divisor = 1000000000 * [Double]$ZergPool_Request.$ZergPool_Algorithm.mbtc_mh_factor
 
     $Stat = Set-Stat -Name "$($Name)_$($_)_Profit" -Value ([Double]$ZergPoolCoins_Request.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
@@ -146,7 +116,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                     Host          = if ($ZergPool_Region -eq "us") {$ZergPool_Host}else {"$ZergPool_Region.$ZergPool_Host"}
                     Port          = $ZergPool_Port
                     User          = Get-Variable $_ -ValueOnly
-                    Pass          = "$Worker, c=$_, mc=$ZergPool_Currency"
+                    Pass          = "$Worker,c=$_,mc=$ZergPool_Currency"
                     Region        = $ZergPool_Region_Norm
                     SSL           = $false
                     Updated       = $Stat.Updated
