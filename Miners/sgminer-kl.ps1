@@ -1,7 +1,7 @@
 using module ..\Include.psm1
 
 $Path = ".\Bin\sgminer-kl\sgminer.exe"
-$HashSHA256 = "7A29E1280898D049BEE35B1CE4A6F05A7B3A3219AC805EA51BEFD8B9AFDE7D85"
+$HashSHA256 = "A24024BEA8789B62D61CB3F41432EA1A62EE5AD97CD3DEAB1E2308F40B127A4D"
 $Uri = "https://github.com/KL0nLutiy/sgminer-kl/releases/download/kl-1.0.5fix/sgminer-kl-1.0.5_fix-windows_x64.zip"
 
 $Commands = [PSCustomObject]@{
