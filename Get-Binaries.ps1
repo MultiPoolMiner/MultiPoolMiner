@@ -91,7 +91,7 @@ if (-not (Test-Path ".\Bin")) {
 $BinDirectory = (Resolve-Path ".\Bin").Path
 
 # Get all the miners using the fake configuration
-$Miners = Get-ChildItemContent "Miners" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $Devices} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} 
+$Miners = Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $Devices} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} 
 Write-Debug "$($Miners.Count) miners loaded (including duplicates)"
 
 # Filter duplicates (same miner, different algo) out of the list
