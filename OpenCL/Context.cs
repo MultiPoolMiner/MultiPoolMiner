@@ -221,5 +221,4 @@ namespace OpenCl
             return new Context(ctx, pfn);
         }
     }
-
 }

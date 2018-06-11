@@ -1,0 +1,26 @@
+[
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\Ethash-Ethminer\\ethminer.exe",
+        "HashSHA256": "3D3392F0FE13E0C5ACEA55189DEDD07F7E31FA9114CFAAAAB029B162F1B596B8",
+        "Arguments":  "\"--api-port 23333 -S $($Pools.Ethash.Host):$($Pools.Ethash.Port) -O $($Pools.Ethash.User):$($Pools.Ethash.Pass) -SP 2 --cuda$($DeviceID = 0; $DeviceIDs = @();([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | ForEach-Object {if ($_.GlobalMemsize -ge 3221225472) {$DeviceIDs += $DeviceID}; $DeviceID++});if($DeviceIDs){' --cuda-devices';$($DeviceIDs)})\"",
+        "HashRates":  {
+                          "Ethash":  "\"$(if(([OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {[OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All)} | Where {$_.Type -eq 'GPU' -and $_.Vendor -eq 'NVIDIA Corporation'} | Where-Object {$_.GlobalMemsize -ge 3221225472}).Count -eq 0) {0} else {$Stats.EthminerNvidia_Ethash_HashRate.Week})\""
+                      },
+        "API":  "Claymore",
+        "Port":  "23333",
+        "URI":  "https://github.com/ethereum-mining/ethminer/releases/download/v0.13.0/ethminer-0.13.0-Windows.zip"
+    },
+    {
+        "Type":  "NVIDIA",
+        "Path":  ".\\Bin\\Ethash-Ethminer\\ethminer.exe",
+        "HashSHA256": "3D3392F0FE13E0C5ACEA55189DEDD07F7E31FA9114CFAAAAB029B162F1B596B8",
+        "Arguments":  "\"--api-port 23333 -S $($Pools.Ethash2gb.Host):$($Pools.Ethash2gb.Port) -O $($Pools.Ethash2gb.User):$($Pools.Ethash2gb.Pass) -SP 2 --cuda\"",
+        "HashRates":  {
+                          "Ethash2gb":  "\"$($Stats.EthminerNvidia_Ethash2gb_HashRate.Week)\""
+                      },
+        "API":  "Claymore",
+        "Port":  "23333",
+        "URI":  "https://github.com/ethereum-mining/ethminer/releases/download/v0.13.0/ethminer-0.13.0-Windows.zip"
+    }
+]

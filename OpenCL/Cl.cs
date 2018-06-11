@@ -23,7 +23,7 @@
 		Submit = 0x1281,
 		Start  = 0x1282,
 		End    = 0x1283,
-	};
+	}
 
 	public enum SamplerInfo : uint
 	{
@@ -32,13 +32,13 @@
 		NormalizedCoords = 0x1152,
 		AddressingMode = 0x1153,
 		FilterMode = 0x1154,
-	};
+	}
 
 	public enum FilterMode : uint
 	{
 		Nearest = 0x1140,
 		Linear = 0x1141,
-	};
+	}
 
 	public enum AddressingMode : uint
 	{
@@ -46,7 +46,7 @@
 		ClampToEdge = 0x1131,
 		Clamp = 0x1132,
 		Repeat = 0x1133,
-	};
+	}
 
 	public enum EventInfo: int
 	{
@@ -54,7 +54,7 @@
 		CommandType = 0x11D1,
 		ReferenceCount = 0x11D2,
 		CommandExecutionStatus = 0x11D3,
-	};
+	}
 
 	[Flags]
 	public enum MapFlags: int
@@ -68,7 +68,7 @@
 		WorkGroupSize = 0x11B0,
 		CompileWorkGroupSize = 0x11B1,
 		LocalMemSize = 0x11B2
-	};
+	}
 
 	public enum KernelInfo : int // cl_int
 	{
@@ -96,7 +96,7 @@
 		Width = 0x1114,
 		Height = 0x1115,
 		Depth = 0x1116,
-	};
+	}
 
 	public enum MemInfo : uint // cl_uint
 	{
@@ -107,14 +107,14 @@
 		MapCount = 0x1104,
 		ReferenceCount = 0x1105,
 		Context = 0x1106,
-	};
+	}
 
 	public enum ContextInfo : uint // cl_uint
 	{
 		ReferenceCount = 0x1080,
 		Devices = 0x1081,
 		Properties = 0x1082,
-	};
+	}
 
 	public enum ChannelType : uint
 	{
@@ -133,7 +133,7 @@
 		UnsignedInt32  = 0x10DC,
 		HalfFloat      = 0x10DD,
 		Float          = 0x10DE,
-	};
+	}
 
 	public enum ChannelOrder : uint
 	{
@@ -147,7 +147,7 @@
 		ARGB      = 0x10B7,
 		Intensity = 0x10B8,
 		Luminance = 0x10B9,
-	};
+	}
 
     [Flags]
     public enum DeviceExecCapabilities : ulong
@@ -229,7 +229,7 @@
 		InvalidGlObject = -60,
 		InvalidBufferSize = -61,
 		InvalidMipLevel = -62,
-	};
+	}
 
     internal delegate ErrorCode GetInfoDelegate(IntPtr handle, uint paramName, IntPtr paramValueSize, IntPtr paramValue, out IntPtr paramValueSizeRet);
 
@@ -237,7 +237,6 @@
 
     internal static class Cl
     {
-
         internal static T GetInfo<T>(GetInfoDelegate method, IntPtr handle, uint name) where T : struct
         {
             IntPtr size;

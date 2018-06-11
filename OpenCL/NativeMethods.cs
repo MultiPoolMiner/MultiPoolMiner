@@ -1,4 +1,3 @@
-﻿
 //  
 //  NativeMethods.cs
 //  opencl-sharp
@@ -414,6 +413,5 @@ namespace OpenCl
 
         [DllImport("OpenCL")]
         internal static extern IntPtr clGetExtensionFunctionAddressForPlatform(IntPtr platform, string name);
-
     }
 }
