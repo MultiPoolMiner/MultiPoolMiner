@@ -31,8 +31,12 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "daggerhashimoto_sia"; Threads = 2; Params = @()} #Dual mining 2 threads
 
     #ASIC mining only 2018/06/11
-    [PSCustomObject]@{Algorithm = "pascal"; Threads = 1; Params = @()} #Pascal
-    [PSCustomObject]@{Algorithm = "pascal"; Threads = 2; Params = @()} #Pascal
+    #[PSCustomObject]@{Algorithm = "decred"; Threads = 1; Params = @()} #Pascal
+    #[PSCustomObject]@{Algorithm = "decred"; Threads = 2; Params = @()} #Pascal
+    #[PSCustomObject]@{Algorithm = "pascal"; Threads = 1; Params = @()} #Pascal
+    #[PSCustomObject]@{Algorithm = "pascal"; Threads = 2; Params = @()} #Pascal
+    #[PSCustomObject]@{Algorithm = "sia"; Threads = 1; Params = @()} #Pascal
+    #[PSCustomObject]@{Algorithm = "sia"; Threads = 2; Params = @()} #Pascal
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
