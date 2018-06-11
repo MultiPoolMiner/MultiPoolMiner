@@ -1,11 +1,11 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\CryptoNight-FireIce\xmr-stak.exe"
-$HashSHA256 = "BF7EBD6EBECF9AA84FAAF657B80BA7848ED07CD5E1F74AED2E2317B347718FF0"
-$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.4.3/xmr-stak-win64.zip"
+$HashSHA256 = "F99E89588DA1A4A924ECB1BD3E7CBFDD8EA3EAD239C2506F2653481ED89433AF"
+$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.4.4/xmr-stak-win64.zip"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-$Port = 3336
+$Port = 3334
 
 $Commands = [PSCustomObject]@{
     "cryptonight_heavy" = "" # CryptoNight-Heavy
@@ -48,13 +48,13 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
             http_pass       = ""
             prefer_ipv4     = $true
         } | ConvertTo-Json -Depth 10
-    ) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path)\$($Pools.$Algorithm_Norm.Name)_$($Algorithm_Norm)_$($Pools.$Algorithm_Norm.User)_Amd.txt" -Force -ErrorAction SilentlyContinue
+    ) -replace "^{" -replace "}$" | Set-Content "$(Split-Path $Path)\$($Pools.$Algorithm_Norm.Name)_$($Algorithm_Norm)_$($Pools.$Algorithm_Norm.User)_Cpu.txt" -Force -ErrorAction SilentlyContinue
 
     [PSCustomObject]@{
-        Type      = "AMD"
+        Type      = "CPU"
         Path      = $Path
         HashSHA256 = $HashSHA256
-        Arguments = "-C $($Pools.$Algorithm_Norm.Name)_$($Algorithm_Norm)_$($Pools.$Algorithm_Norm.User)_Amd.txt --noUAC --noCPU --noNVIDIA -i $($Port)"
+        Arguments = "-C $($Pools.$Algorithm_Norm.Name)_$($Algorithm_Norm)_$($Pools.$Algorithm_Norm.User)_Cpu.txt --noUAC --noAMD --noNVIDIA -i $($Port)"
         HashRates = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week}
         API       = "XMRig"
         Port      = $Port

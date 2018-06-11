@@ -90,7 +90,6 @@ namespace OpenCl
         {
             return Cl.GetBuildInfoEnum<BinaryType>(NativeMethods.clGetProgramBuildInfo, this.owner.handle, device.handle, CL_PROGRAM_BINARY_TYPE);
         }
-
     }
 
     public sealed class Program : RefCountedObject

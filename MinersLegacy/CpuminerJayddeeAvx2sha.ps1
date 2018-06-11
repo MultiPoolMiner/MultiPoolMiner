@@ -1,52 +1,62 @@
 ﻿using module ..\Include.psm1
 
-$Path = ".\Bin\CPU-JayDDee\cpuminer-avx2.exe"
-$HashSHA256 = "43CA634331BA64DD2DFD2928D636B2F5EE49AE3B1E516CE4E5EB649CEE02C8F3"
-$Uri = "https://github.com/JayDDee/cpuminer-opt/files/1939225/cpuminer-opt-3.8.8-windows.zip"
+$Path = ".\Bin\CPU-JayDDee\cpuminer-avx2-sha.exe"
+$HashSHA256 = "188066A1767071CEF10D74DFA8A0F629FCACBDF28C98E1D2DAA89519F923D415"
+$Uri = "https://github.com/JayDDee/cpuminer-opt/files/1996977/cpuminer-opt-3.8.8.1-windows.zip"
 
 $Commands = [PSCustomObject]@{
-    # CPU Only algos 23/04/2018
+    ### CPU PROFITABLE ALGOS AS OF 06/03/2018
+    ### these algorithms are profitable algorithms on supported pools
+    "allium" = "" #Garlicoin
+    "cryptonightv7" = "" #CryptoNightV7XMR
+    "hmq1725" = "" #HMQ1725
+    "lyra2z" = "" #Lyra2z, ZCoin
+    "m7m" = "" #m7m
+    "x12" = "" #x12
+    "yescrypt" = "" #Yescrypt
+    "yescryptr16" = "" #yescryptr16, YENTEN
+
+    ### MAYBE PROFITABLE ALGORITHMS - NOT MINEABLE IN SUPPORTED POOLS AS OF 06/03/2018
+    ### these algorithms are not mineable on supported pools but may be profitable
+    ### once/if support begins. They should be classified accordingly when or if
+    ### an algo becomes supported by one of the pools.
     "anime" = "" #Anime 
     "argon2" = "" #Argon2
     "argon2d-crds" = "" #Argon2Credits
     "argon2d-dyn" = "" #Argon2Dynamic
     "argon2d-uis" = "" #Argon2Unitus
     #"axiom" = "" #axiom
+    "bastion" = "" #bastion
+    "bmw" = "" #bmw
+    "deep" = "" #deep
     "drop" = "" #drop    
+    "fresh" = "" #fresh
+    "heavy" = "" #heavy
+    "jha" = "" #JHA
     "lyra2z330" = "" #lyra2z330
-    "m7m" = "" #m7m
-
-    # CPU & GPU - still profitable 23/04/2018
-    "lyra2z" = "" #Lyra2z, ZCoin
-    "hmq1725" = "" #HMQ1725
+    "pentablake" = "" #pentablake
+    "pluck" = "" #pluck
+    "scryptjane:nf" = "" #scryptjane:nf
     "shavite3" = "" #shavite3
-    "x12" = "" #x12
-    "cryptonightv7" = "" #CryptoNightV7XMR
-    "yescrypt" = "" #Yescrypt
+    "skein2" = "" #skein2
+    "veltor" = "" #Veltor
     "yescryptr8" = "" #yescryptr8
-    "yescryptr16" = "" #yescryptr16, YENTEN
     "yescryptr32" = "" #yescryptr32, WAVI
+    "zr5" = "" #zr5
 
     #GPU or ASIC - never profitable 23/04/2018
-    #"allium" = "" #Allium
-    #"bastion" = "" #bastion
     #"bitcore" = "" #Bitcore
     #"blake" = "" #blake
     #"blakecoin" = "" #Blakecoin
     #"blake2s" = "" #Blake2s
-    #"bmw" = "" #bmw
     #"cryptolight" = "" #cryptolight
     #"cryptonight" = "" #CryptoNight
     #"c11" = "" #C11
     #"decred" = "" #Decred
-    #"deep" = "" #deep
     #"dmd-gr" = "" #dmd-gr
     #"equihash" = "" #Equihash
     #"ethash" = "" #Ethash
-    #"fresh" = "" #fresh
     #"groestl" = "" #Groestl
-    #"heavy" = "" #heavy
-    #"jha" = "" #JHA
     #"keccak" = "" #Keccak
     #"keccakc" = "" #keccakc
     #"lbry" = "" #Lbry
@@ -57,22 +67,16 @@ $Commands = [PSCustomObject]@{
     #"neoscrypt" = "" #NeoScrypt
     #"nist5" = "" #Nist5
     #"pascal" = "" #Pascal
-    #"pentablake" = "" #pentablake
     #"phi1612" = "" #phi1612
-    #"pluck" = "" #pluck
     #"scrypt:N" = "" #scrypt:N
-    #"scryptjane:nf" = "" #scryptjane:nf
     #"sha256d" = "" #sha256d
     #"sha256t" = "" #sha256t
     #"sib" = "" #Sib
     #"skunk" = "" #Skunk
     #"skein" = "" #Skein
-    #"skein2" = "" #skein2
     #"timetravel" = "" #Timetravel
-    #"timetravel10" = "" #timetravel10
     #"tribus" = "" #Tribus
     #"vanilla" = "" #BlakeVanilla
-    #"veltor" = "" #Veltor
     #"whirlpoolx" = "" #whirlpoolx
     #"x11evo" = "" #X11evo
     #"x13" = "" #x13
@@ -82,8 +86,9 @@ $Commands = [PSCustomObject]@{
     #"x16r" = "" #x16r
     #"x16s" = "" #X16s
     #"x17" = "" #X17
-    #"zr5" = "" #zr5
 }
+
+$CommonCommands = ""
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
@@ -92,7 +97,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         Type = "CPU"
         Path = $Path
         HashSHA256 = $HashSHA256
-        Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_)"
+        Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_)$($CommonCommands)"
         HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
         API = "Ccminer"
         Port = 4048
