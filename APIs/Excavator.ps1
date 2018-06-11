@@ -244,28 +244,6 @@ class Excavator : Miner {
                     $this.SetStatus("Failed")
                     return
                 }
-
-                $Request = @{id = 1; method = "algorithm.clear"; params = @()} | ConvertTo-Json -Compress
-
-                try {
-                    $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
-                    $Data = $Response | ConvertFrom-Json -ErrorAction Stop
-
-                    if ($Data.id -ne 1) {
-                        Write-Log -Level Error  "Invalid response returned by miner ($($this.Name)). "
-                        $this.SetStatus("Failed")
-                    }
-
-                    if ($Data.error) {
-                        Write-Log -Level Error  "Error returned by miner ($($this.Name)): $($Data.error)"
-                        $this.SetStatus("Failed")
-                    }
-                }
-                catch {
-                    Write-Log -Level Error  "Failed to connect to miner ($($this.Name)). "
-                    $this.SetStatus("Failed")
-                    return
-                }
             }
         }
     }
