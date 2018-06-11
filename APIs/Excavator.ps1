@@ -388,7 +388,6 @@ class Excavator : Miner {
                 $HashRate_Name = [String]($this.Algorithm -match (Get-Algorithm $Algorithm))
                 if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -match "$(Get-Algorithm $Algorithm)*")} #temp fix
                 $HashRate_Value = [Double](($Workers | Where-Object {$this.Workers -like $_.worker_id}).speed | Select-Object -Index @($Workers.worker_id | ForEach-Object {$_ * 2 + $Algorithms.IndexOf($Algorithm)}) | Measure-Object -Sum).Sum
-#                $HashRate_Value = [Double]((($Data.algorithms | Where-Object name -EQ ($Algorithms -join "_")).workers | Where-Object {$this.Workers -like $_.worker_id}).speed | Select-Object -Index @($Algorithms | ForEach-Object {($Algorithms.IndexOf($_) * $Algorithms.Count) + $Algorithms.IndexOf($_)}) | Measure-Object -Sum).Sum
                 if ($HashRate_Name -and $HashRate_Value -gt 0) {
                     $HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
                 }
