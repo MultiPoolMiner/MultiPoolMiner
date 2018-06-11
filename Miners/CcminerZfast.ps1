@@ -1,22 +1,5 @@
 using module ..\Include.psm1
 
-param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
-    [PSCustomObject]$Devices
-)
-
-$Type = "NVIDIA"
-if ($Devices.$Type.count -lt 3) {return} # Not enough NVIDIA mining device present in system
-
-$DriverVersion = (Get-Devices).NVIDIA.Platform.Version -replace ".*CUDA ",""
-$RequiredVersion = "9.2.00"
-if ($DriverVersion -lt $RequiredVersion) {
-    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers to 397.93 or newer. "
-    return
-}
-
 $Path = ".\Bin\zFast-NVIDIA\zFastminer-v233.exe"
 $HashSHA256 = "B213F9989FCE204A723E0762C2FB4A713C18D3C858EC6B0468CE3295C8F151D8"
 $ManaulURI = "https://file.fm/f/b7dwr5vw"
@@ -35,12 +18,6 @@ else {
     $Fees = @($MinerFeeInPercent)
 }
 
-#avaiable only for GTX 1060, 1070, 1070 TI, 1080, 1080 TI
-# Get array of IDs of all devices in device set, returned DeviceIDs are of base $DeviceIdBase representation starting from $DeviceIdOffset
-$DeviceIDs = (Get-DeviceIDs -Config $Config -Devices $Devices -Type $Type -DeviceTypeModel $($Devices.$Type) -DeviceIdBase 10 -DeviceIdOffset 0)."1060"
-$DeviceIDs += (Get-DeviceIDs -Config $Config -Devices $Devices -Type $Type -DeviceTypeModel $($Devices.$Type) -DeviceIdBase 10 -DeviceIdOffset 0)."1070"
-$DeviceIDs += (Get-DeviceIDs -Config $Config -Devices $Devices -Type $Type -DeviceTypeModel $($Devices.$Type) -DeviceIdBase 10 -DeviceIdOffset 0)."1080"
-
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
 
     $Algorithm_Norm = Get-Algorithm $_
@@ -55,7 +32,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
             Type       = $Type
             Path       = $Path
             HashSHA256 = $HashSHA256
-            Arguments  = "-a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_) -d $($DeviceIDs -join ',')"
+            Arguments  = "-a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)"
             HashRates  = [PSCustomObject]@{$Algorithm_Norm = $HashRate}
             API        = "Ccminer"
             Port       = 4068
