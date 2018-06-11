@@ -21,15 +21,17 @@ catch {
     return
 }
 
-if (($HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
+if ((($HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) -or (($HashRefineryCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1)) {
     Write-Log -Level Warn "Pool API ($Name) returned nothing. "
     return
 }
 
 $HashRefinery_Regions = "us"
-$HashRefinery_Currencies = @("BTC") + ($HashRefineryCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
-$HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Hashrefinery_Request.$_.hashrate -gt 0} | ForEach-Object {
+#Pool allows payout in BTC and LTC only
+$HashRefinery_Currencies = @("BTC", "LTC") + ($HashRefineryCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
+
+$HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$ExcludeAlgorithm -inotcontains (Get-Algorithm $HashRefinery_Request.$_.name) -and $Hashrefinery_Request.$_.hashrate -gt 0} | ForEach-Object {
     $HashRefinery_Host = "hashrefinery.com"
     $HashRefinery_Port = $HashRefinery_Request.$_.port
     $HashRefinery_Algorithm = $HashRefinery_Request.$_.name

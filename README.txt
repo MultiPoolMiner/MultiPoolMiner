@@ -17,8 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 26/05/2018 (dd/mm/yyyy) - v1.23.06 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
-
+README.txt - updated on 29/04/2018 (dd/mm/yyyy) - v1.24.03 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -117,13 +116,12 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
       Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
       Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
-    ## Zpool
+    ## Zpool / ZpoolCoins
       WebSite: http://www.zpool.ca/
       Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
       Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
       IMPORTANT: For the list of default configured pools consult 'start.bat.' This does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
-
 
 -ExcludePoolName
 	Same as the -poolname command but it is used to exclude unwanted mining pools (please see above).
@@ -237,7 +235,6 @@ start pwsh -noexit -executionpolicy bypass -command "& .\reader.ps1 -log 'MultiP
 pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
 powershell -version 5.0 -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
 msiexec -i https://github.com/PowerShell/PowerShell/releases/download/v6.0.2/PowerShell-6.0.2-win-x64.msi -qb!
-pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
 
 pause
 ############ END OF CONTENT OF START.BAT ############
@@ -337,6 +334,86 @@ E.g. to change the payout currency for Zpool to LiteCoin replace the line for BT
         "LTC": "<YOUR_LITECOIN_ADDRESS>",
         "Worker": "$WorkerName"
     }
+    
+To disable mining some algorithms on a pool
+
+It might be desirable to prevent a pool from using a specific algorithm or a set of algorithms, e.g. if there is a known problem with it at the pool (e.g. jumping prices on keccak @nicehash)
+
+The default pool config might look like this:
+
+    "NiceHash": {
+        "Worker": "$WorkerName",
+        "BTC": "$Wallet"
+    }
+
+To prevent the pool from using an algorithm / a set of algorithms add a line like "ExcludeAlgorithm": ["Excluded_Algo", "Another_Excluded_Algo"]
+
+E.g. if you do not want to use Keccac and Equihash on NiceHash change the pool config to:
+
+    "NiceHash": {
+        "Worker": "$WorkerName",
+        "BTC": "$Wallet",
+        "ExcludeAlgorithm": ["Keccak", "Equihash"]
+    }
+
+To allow mining all algorithms remove the line "ExcludeAlgorithm": [...]
+
+To disable mining some coins on a pool
+
+The pools ending in ...Coins and MiningPoolHub (non-Coins) allow mining selected coins only, e.g do not mine ZClassic on MPH Pool
+Note: Not all pools support this, for more information consult the pools web page
+
+The default pool config might look like this:
+    "ZpoolCoins": {
+        "Worker": "$WorkerName",
+        "BTC": "$Wallet"
+    }
+
+To limit mining to well defined coins add a line like "ExcludeCoin": ["Excluded_Coin", "Another_Excluded_Coin", "Yet_Another_Excluded_Coin", "..."]
+
+E.g. if you do not want to mine the coins 'Pizza' and 'Vivo' on ZpoolCoins change the pool config to:
+
+    "ZpoolCoins": {
+        "Worker": "$WorkerName",
+        "BTC": "$Wallet",
+        "ExcludeCoin": ["Pizza", "Vivo"]
+    }
+
+To allow mining all coins remove the line "ExcludeCoin": [...]
+
+To mine only selected coins on a pool
+
+Most pools ending in ...Coins allow mining selected coins only, e.g mine only 'Pizza' and 'Vivo' on ZpoolCoins pool
+Note: Not all pools support this, for more information consult the pools web page
+
+The default pool config might look like this:
+
+    "ZpoolCoins": {
+        "Worker": "$WorkerName",
+        "BTC": "$Wallet"
+    }
+
+To limit mining to well defined coins add a line like "Coin": ["Coin", "Another_Coin", "Yet_Another_Coin", "..."]
+
+E.g. to mine only the coins 'Pizza' and 'Vivo' on ZpoolCoins change the pool config to:
+
+    "ZpoolCoins": {
+        "Worker": "$WorkerName",
+        "BTC": "$Wallet",
+        "Coin": ["Pizza", "Vivo"]
+    }
+
+To allow mining all coins remove the line "Coin": [...]
+
+Advanced config for Miners
+
+This is currently not used. For now just leave it as it is.
+
+General section
+
+Most of these parameters are automatically filled with values that were passed to MPM via the start batch file.
+For now just leave them as they are.
+=======
 
 
 Advanced configuration for Miners
@@ -468,7 +545,7 @@ For a list of supported API commands open APIDocs.html with your web browser.
 KNOWN ISSUES:
 
 There are known issues with the following miners not submitting shares or show higher hashrate than what they actually do:
-- CCminerLyra2Z
+- CCminerLyra2z
 - CCminerLyra2RE2
 This is not a fault of MultiPoolMiner and nothing can be done on our end. Please raise an issue on their respective github pages. See FAQ#2 on how to exclude these if you wish to do so.
 
@@ -563,7 +640,7 @@ A23. Some miners binaries cannot be downloaded automatically by MPM (e.g. there 
 
 REPORTING AND MONITORING TERMS AND CONDITIONS & PRIVACY POLICY:
 
-By enabling the Monitoring Service by setting the -MinerStatusURL to point to https://multipoolminer.io/monitor/miner.php as described in the Command Line Options section, you agree that the https://multipoolminer.io website can store relevant information about your mining rig(s) in its database that is directly accessible by anyone accessing the https://multipoolminer.io/monitor webpage with the corresponding wallet address (your BTC address set with the -wallet command). The following data is stored for each mining machine (rig) and overwritten in the database in each script-cycle determined by the -interval command:
+By enabling the Monitoring Service by setting the -MinerStatusURL to point to https://multipoolminer.io/monitor/miner.php as described in the Command Line Options section, you agree that the https://multipoolminer.io website can store relevant information about your mining rig(s) in its database that is directly accessible by anyone accessing the https://multipoolminer.io/monitor webpage with the corresponding wallet address (your BTC address set with the -wallet parameter, alternatively you can use -minerstatuskey parameter). The following data is stored for each mining machine (rig) and overwritten in the database in each script-cycle determined by the *-interval* parameter:
 
 BTC address: all data is stored under and identified by the Bitcoin address set with the -wallet command
 WorkerName: the name of the worker you set using the -workername command, also used for sorting
