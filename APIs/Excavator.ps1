@@ -244,6 +244,28 @@ class Excavator : Miner {
                     $this.SetStatus("Failed")
                     return
                 }
+
+                $Request = @{id = 1; method = "algorithm.clear"; params = @()} | ConvertTo-Json -Compress
+
+                try {
+                    $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
+                    $Data = $Response | ConvertFrom-Json -ErrorAction Stop
+
+                    if ($Data.id -ne 1) {
+                        Write-Log -Level Error  "Invalid response returned by miner ($($this.Name)). "
+                        $this.SetStatus("Failed")
+                    }
+
+                    if ($Data.error) {
+                        Write-Log -Level Error  "Error returned by miner ($($this.Name)): $($Data.error)"
+                        $this.SetStatus("Failed")
+                    }
+                }
+                catch {
+                    Write-Log -Level Error  "Failed to connect to miner ($($this.Name)). "
+                    $this.SetStatus("Failed")
+                    return
+                }
             }
         }
     }
@@ -357,16 +379,19 @@ class Excavator : Miner {
             return @($Request, $Response)
         }
 
-        $Index = 0
         $Data.algorithms.name | Select-Object -Unique | ForEach-Object {
-            $Algorithm = $_
-            $Algorithm -split "_" | ForEach-Object {
-                
-                $HashRate_Name = [String]($this.Algorithm -like (Get-Algorithm $_))
-                if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -like "$(Get-Algorithm $_)*")} #temp fix
-                $HashRate_Value = [Double](((($Data.algorithms | Where-Object name -EQ $Algorithm).workers | Where-Object {$this.Workers -like $_.worker_id}).speed | Select-Object -Index $Index) | Measure-Object -Sum).Sum
-                $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
-                $Index++
+            $Workers = @(($Data.algorithms | Where-Object name -EQ $_).workers)
+            $Algorithms = $_ -split "_"
+            $Algorithms | ForEach-Object {
+                $Algorithm = $_
+
+                $HashRate_Name = [String]($this.Algorithm -match (Get-Algorithm $Algorithm))
+                if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -match "$(Get-Algorithm $Algorithm)*")} #temp fix
+                $HashRate_Value = [Double](($Workers | Where-Object {$this.Workers -like $_.worker_id}).speed | Select-Object -Index @($Workers.worker_id | ForEach-Object {$_ * 2 + $Algorithms.IndexOf($Algorithm)}) | Measure-Object -Sum).Sum
+#                $HashRate_Value = [Double]((($Data.algorithms | Where-Object name -EQ ($Algorithms -join "_")).workers | Where-Object {$this.Workers -like $_.worker_id}).speed | Select-Object -Index @($Algorithms | ForEach-Object {($Algorithms.IndexOf($_) * $Algorithms.Count) + $Algorithms.IndexOf($_)}) | Measure-Object -Sum).Sum
+                if ($HashRate_Name -and $HashRate_Value -gt 0) {
+                    $HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
+                }
             }
         }
 
