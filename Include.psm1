@@ -535,6 +535,7 @@ function Get-Device {
                     Type_Index = [Int]$Type_Index.($Device_OpenCL.Type)
                     OpenCL = $Device_OpenCL
                     Model = [String]$Device_OpenCL.Name
+                    Model_Norm = [String]$Device_OpenCL.Name -replace "[^A-Z0-9]" -replace "GeForce",""
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
