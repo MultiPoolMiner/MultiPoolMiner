@@ -81,7 +81,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 }
             }
             else {
-                $Miner_Name = ((@($Name) + @($Miner_Device.Model_Norm | Sort-Object) | Select-Object) -join '-') -replace "-.", "-"
+                $Miner_Name = ((@($Name) + @($Miner_Device.Model_Norm | Sort-Object) | Select-Object) -join '-') -replace "[-]{2,}", "-"
                 $Miner_HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $Stats."$($Miner_Name)_$($MainAlgorithm_Norm)_HashRate".Week}
                 $Arguments_Secondary = ""
 
