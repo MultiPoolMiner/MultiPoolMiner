@@ -69,7 +69,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $SecondaryAlgorithm = $_.SecondaryAlgorithm
                 $SecondaryAlgorithm_Norm = Get-Algorithm $SecondaryAlgorithm
 
-                $Miner_Name = (@("$Name$SecondaryAlgorithm_Norm") + @(if ($_.SecondaryIntensity -ge 0) {$_.SecondaryIntensity}) + @($Miner_Device.Model_Norm | Sort-Object) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @("$SecondaryAlgorithm_Norm") + @(if ($_.SecondaryIntensity -ge 0) {$_.SecondaryIntensity}) + @($Miner_Device.Model_Norm | Sort-Object) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $Stats."$($Miner_Name)_$($MainAlgorithm_Norm)_HashRate".Week; "$SecondaryAlgorithm_Norm" = $Stats."$($Miner_Name)_$($SecondaryAlgorithm_Norm)_HashRate".Week}
                 $Arguments_Secondary = " -dcoin $SecondaryAlgorithm -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$(if($_.SecondaryIntensity -ge 0){" -dcri = $($_.SecondaryIntensity)"})"
 
@@ -81,7 +81,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 }
             }
             else {
-                $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object) | Select-Object) -join '-'
+                $Miner_Name = ((@($Name) + @($Miner_Device.Model_Norm | Sort-Object) | Select-Object) -join '-') -replace "-.", "-"
                 $Miner_HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $Stats."$($Miner_Name)_$($MainAlgorithm_Norm)_HashRate".Week}
                 $Arguments_Secondary = ""
 

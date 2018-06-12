@@ -77,7 +77,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             else {
                 #Dual algo mining
                 if ($Pools.$Secondary_Algorithm_Norm.Host ) {
-                    $Miner_Name = (@("$Name$Secondary_Algorithm_Norm") + @($Threads) + @($Miner_Device.Model_Norm | Sort-Object) | Select-Object) -join '-'
+                    $Miner_Name = (@($Name) + @("$Secondary_Algorithm_Norm") + @($Threads) + @($Miner_Device.Model_Norm | Sort-Object) | Select-Object) -join '-'
 
                     [PSCustomObject]@{
                         Name             = $Miner_Name
