@@ -25,15 +25,7 @@ $Commands = [PSCustomObject]@{
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
-
     $Algorithm_Norm = Get-Algorithm $_
-
-    if ($Config.IgnoreCosts -or $Config.Miners.$Name.IgnoreCosts) {
-        $Miner_Fees = [PSCustomObject]@{"$Algorithm_Norm" = 0 / 100}
-    }
-    else {
-        $Miner_Fees = [PSCustomObject]@{"$Algorithm_Norm" = 1 / 100}
-    }
 
     [PSCustomObject]@{
         Type       = "AMD"
@@ -44,7 +36,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         API        = "Xgminer"
         Port       = 4028
         URI        = $Uri
-        Fees       = $Miner_Fees
+        Fees       = [PSCustomObject]@{"$Algorithm_Norm" = 1 / 100}
     }
 }
 
