@@ -6,73 +6,78 @@ $Uri = "https://github.com/tpruvot/cpuminer-multi/releases/download/v1.3.1-multi
 
 $Commands = [PSCustomObject]@{
     # CPU Only algos 3/27/2018
-    "yescrypt" = "" #Yescrypt
-    #"axiom" = "" #axiom
+    "yescrypt"       = "" #Yescrypt
+    "axiom"          = "" #axiom
     
     # CPU & GPU - still profitable 27/03/2018
-    "cryptonight" = "" #CryptoNight
-    "hmq1725" = "" #HMQ1725
-    "shavite3" = "" #shavite3
+    "cryptonight"    = "" #CryptoNight
+    "shavite3"       = "" #shavite3
 
     #GPU - never profitable 27/03/2018
-    #"bastion" = "" #bastion
-    #"bitcore" = "" #Bitcore
-    #"blake" = "" #blake
-    #"blake2s" = "" #Blake2s
-    #"blakecoin" = "" #Blakecoin
-    #"bmw" = "" #bmw
-    #"c11" = "" #C11
-    #"cryptolight" = "" #cryptolight
-    #"decred" = "" #Decred
-    #"dmd-gr" = "" #dmd-gr
-    #"equihash" = "" #Equihash
-    #"ethash" = "" #Ethash
-    #"groestl" = "" #Groestl
-    #"jha" = "" #JHA
-    #"keccak" = "" #Keccak
-    #"keccakc" = "" #keccakc
-    #"lbry" = "" #Lbry
-    #"lyra2re" = "" #lyra2re
-    #"lyra2v2" = "" #Lyra2RE2
-    #"myr-gr" = "" #MyriadGroestl
-    #"neoscrypt" = "" #NeoScrypt
-    #"nist5" = "" #Nist5
-    #"pascal" = "" #Pascal
-    #"pentablake" = "" #pentablake
-    #"pluck" = "" #pluck
-    #"scrypt:N" = "" #scrypt:N
+    #"bastion"       = "" #bastion
+    #"bitcore"       = "" #Bitcore
+    #"blake"         = "" #blake
+    #"blake2s"       = "" #Blake2s
+    #"blakecoin"     = "" #Blakecoin
+    #"bmw"           = "" #bmw
+    #"c11"           = "" #C11
+    #"cryptolight"   = "" #cryptolight
+    #"decred"        = "" #Decred
+    #"dmd-gr"        = "" #dmd-gr
+    #"equihash"      = "" #Equihash
+    #"ethash"        = "" #Ethash
+    #"groestl"       = "" #Groestl
+    #"jha"           = "" #JHA
+    #"keccak"        = "" #Keccak
+    #"keccakc"       = "" #keccakc
+    #"lbry"          = "" #Lbry
+    #"lyra2re"       = "" #lyra2re
+    #"lyra2v2"       = "" #Lyra2RE2
+    #"myr-gr"        = "" #MyriadGroestl
+    #"neoscrypt"     = "" #NeoScrypt
+    #"nist5"         = "" #Nist5
+    #"pascal"        = "" #Pascal
+    #"pentablake"    = "" #pentablake
+    #"pluck"         = "" #pluck
+    #"scrypt:N"      = "" #scrypt:N
     #"scryptjane:nf" = "" #scryptjane:nf
-    #"sha256d" = "" #sha256d
-    #"sib" = "" #Sib
-    #"skein" = "" #Skein
-    #"skein2" = "" #skein2
-    #"skunk" = "" #Skunk
-    #"timetravel" = "" #Timetravel
-    #"tribus" = "" #Tribus
-    #"vanilla" = "" #BlakeVanilla
-    #"veltor" = "" #Veltor
-    #"x11" = "" #X11
-    #"x11evo" = "" #X11evo
-    #"x13" = "" #x13
-    #"x14" = "" #x14
-    #"x15" = "" #x15
-    #"x16r" = "" #x16r
-    #"zr5" = "" #zr5
+    #"sha256d"       = "" #sha256d
+    #"sib"           = "" #Sib
+    #"skein"         = "" #Skein
+    #"skein2"        = "" #skein2
+    #"skunk"         = "" #Skunk
+    #"timetravel"    = "" #Timetravel
+    #"tribus"        = "" #Tribus
+    #"vanilla"       = "" #BlakeVanilla
+    #"veltor"        = "" #Veltor
+    #"x11"           = "" #X11
+    #"x11evo"        = "" #X11evo
+    #"x13"           = "" #x13
+    #"x14"           = "" #x14
+    #"x15"           = "" #x15
+    #"x16r"          = "" #x16r
+    #"zr5"           = "" #zr5
 }
 
 $CommonCommands = ""
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
-    [PSCustomObject]@{
-        Type = "CPU"
-        Path = $Path
-        HashSHA256 = $HashSHA256
-        Arguments = "-a $_ -o $($Pools.(Get-Algorithm $_).Protocol)://$($Pools.(Get-Algorithm $_).Host):$($Pools.(Get-Algorithm $_).Port) -u $($Pools.(Get-Algorithm $_).User) -p $($Pools.(Get-Algorithm $_).Pass)$($Commands.$_)$($CommonCommands)"
-        HashRates = [PSCustomObject]@{(Get-Algorithm $_) = $Stats."$($Name)_$(Get-Algorithm $_)_HashRate".Week}
-        API = "Ccminer"
-        Port = 4048
-        URI = $Uri
+if ($Devices = Get-Device | Where-Object {$_.Type -EQ "CPU" -and $_.DriverVersion -match "[(,]avx2[,)]"}) {
+
+    $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
+
+        $Algorithm_Norm = Get-Algorithm $_
+
+        [PSCustomObject]@{
+            Type       = "CPU"
+            Path       = $Path
+            HashSHA256 = $HashSHA256
+            Arguments  = "-a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$($CommonCommands)"
+            HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week}
+            API        = "Ccminer"
+            Port       = 4048
+            URI        = $Uri
+        }
     }
 }
