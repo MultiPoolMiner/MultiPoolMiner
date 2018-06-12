@@ -358,11 +358,18 @@ class Excavator : Miner {
         }
 
         $Data.algorithms.name | Select-Object -Unique | ForEach-Object {
-            $HashRate_Name = [String]($this.Algorithm -like (Get-Algorithm $_))
-            if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -like "$(Get-Algorithm $_)*")} #temp fix
-            $HashRate_Value = [Double]((($Data.algorithms | Where-Object name -EQ $_).workers | Where-Object {$this.Workers -like $_.worker_id}).speed | Measure-Object -Sum).Sum
+            $Workers = @(($Data.algorithms | Where-Object name -EQ $_).workers)
+            $Algorithms = $_ -split "_"
+            $Algorithms | ForEach-Object {
+                $Algorithm = $_
 
-            $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
+                $HashRate_Name = [String]($this.Algorithm -match (Get-Algorithm $Algorithm))
+                if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -match "$(Get-Algorithm $Algorithm)*")} #temp fix
+                $HashRate_Value = [Double](($Workers | Where-Object {$this.Workers -like $_.worker_id}).speed | Select-Object -Index @($Workers.worker_id | ForEach-Object {$_ * 2 + $Algorithms.IndexOf($Algorithm)}) | Measure-Object -Sum).Sum
+                if ($HashRate_Name -and $HashRate_Value -gt 0) {
+                    $HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
+                }
+            }
         }
 
         $Request = @{id = 1; method = "algorithm.print.speeds"; params = @()} | ConvertTo-Json -Compress
