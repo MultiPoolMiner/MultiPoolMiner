@@ -118,7 +118,7 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
 
 if (Test-Path $ConfigFile) {
-    Write-Log -Level Info "Using configuration file ($($ConfigFile)). "
+    Write-Log -Level Info "Using configuration file ($(Resolve-Path $ConfigFile)). "
 }
 else {
     #Create new config file: Read command line parameters except ConfigFile
@@ -138,7 +138,7 @@ else {
     $Config | Add-Member Miners ([PSCustomObject]@{})
     Try {
         $Config | ConvertTo-Json | Out-File $ConfigFile -Encoding utf8
-        Write-Log -Level Info -Message "No valid config file found. Creating new config file ($($ConfigFile)) using defaults. "
+        Write-Log -Level Info -Message "No valid config file found. Creating new config file ($(Resolve-Path $ConfigFile)) using defaults. "
     }
     Catch {
         Write-Log -Level Error "Error writing config file ($($ConfigFile)). Cannot continue. "
