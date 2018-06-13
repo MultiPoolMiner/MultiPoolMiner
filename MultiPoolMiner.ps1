@@ -86,7 +86,7 @@ $SyncWindow = 5 #minutes
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
-#Make sure it ends with ".cfg", so no fool will accidentially overwrite MPM files
+#Make sure config file ends with ".cfg", so no fool will accidentially overwrite MPM files
 $ConfigFile = [io.path]::ChangeExtension($ConfigFile,".cfg")
 
 Import-Module NetSecurity -ErrorAction Ignore
@@ -138,7 +138,7 @@ else {
     $Config | Add-Member Miners ([PSCustomObject]@{})
     Try {
         $Config | ConvertTo-Json | Out-File $ConfigFile -Encoding utf8
-        Write-Log -Level Info -Message "No valid config file found. Creating new config file $($ConfigFile) using defaults. "
+        Write-Log -Level Info -Message "No valid config file found. Creating new config file ($($ConfigFile)) using defaults. "
     }
     Catch {
         Write-Log -Level Error "Error writing config file ($($ConfigFile)). Cannot continue. "
