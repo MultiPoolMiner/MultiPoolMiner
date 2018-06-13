@@ -126,9 +126,6 @@ else {
     $Config = [PSCustomObject]@{}
     #Use resolved parameter values from command line
     $Config | Add-Member VersionCompatibility $Version
-    $PSBoundParameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
-        $Config | Add-Member $_ ((Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue) -as ($MyInvocation.MyCommand.Parameters.$_).ParameterType)
-    }
     $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
         if (Get-Variable $_ -ErrorAction SilentlyContinue) {
             $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
