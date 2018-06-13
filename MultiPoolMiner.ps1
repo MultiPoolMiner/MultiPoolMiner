@@ -4,10 +4,10 @@
 param(
     [Parameter(Mandatory = $false)]
     [Alias("BTC")]
-    [String]$Wallet, 
+    [String]$Wallet = "1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", 
     [Parameter(Mandatory = $false)]
     [Alias("User")]
-    [String]$UserName, 
+    [String]$UserName = "aaronsace", 
     [Parameter(Mandatory = $false)]
     [Alias("Worker")]
     [String]$WorkerName = "multipoolminer", 
@@ -59,7 +59,7 @@ param(
     [Alias("Uri", "Url")]
     [String]$MinerStatusUrl = "", #i.e https://multipoolminer.io/monitor/miner.php
     [Parameter(Mandatory = $false)]
-    [String]$MinerStatusKey = "",
+    [String]$MinerStatusKey = $Wallet, #For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
     [Parameter(Mandatory = $false)]
     [Double]$SwitchingPrevention = 1, #zero does not prevent miners switching
     [Parameter(Mandatory = $false)]
@@ -84,10 +84,11 @@ $Version = "3"
 $Strikes = 3
 $SyncWindow = 5 #minutes
 
-#Make sure config file ends with ".cfg", so no fool will accidently overwrite MPM files
-$ConfigFile = "$(Split-Path $MyInvocation.MyCommand.Path)\$([io.path]::ChangeExtension($ConfigFile,".cfg"))"
-
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+
+#Make sure it ends with ".cfg", so no fool will accidentially overwrite MPM files
+$ConfigFile = [io.path]::ChangeExtension($ConfigFile,".cfg")
+
 Import-Module NetSecurity -ErrorAction Ignore
 Import-Module Defender -ErrorAction Ignore
 Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore
@@ -135,7 +136,15 @@ else {
     }
     $Config | Add-Member Pools ([PSCustomObject]@{})
     $Config | Add-Member Miners ([PSCustomObject]@{})
-    $Config | ConvertTo-Json | Out-File $ConfigFile -Encoding utf8
+    Try {
+        $Config | ConvertTo-Json | Out-File $ConfigFile -Encoding utf8
+        Write-Log -Level Info -Message "No valid config file found. Creating new config file $($ConfigFile) using defaults. "
+    }
+    Catch {
+        Write-Log -Level Error "Error writing config file ($($ConfigFile)). Cannot continue. "
+        Start-Sleep 10
+        Exit
+    }
 }
 
 if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -Recurse | Unblock-File}
@@ -172,9 +181,6 @@ while ($true) {
         Start-Sleep 10
         Exit
     }
-
-    #For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
-    if ($Wallet -and -not $Config.MinerStatusKey) {$Config.MinerStatusKey = $Wallet}
 
     Get-ChildItem "Pools" -File | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
         $Config.Pools | Add-Member $_.BaseName (
