@@ -4,10 +4,10 @@
 param(
     [Parameter(Mandatory = $false)]
     [Alias("BTC")]
-    [String]$Wallet = "1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", 
+    [String]$Wallet, 
     [Parameter(Mandatory = $false)]
     [Alias("User")]
-    [String]$UserName = "aaronsace", 
+    [String]$UserName, 
     [Parameter(Mandatory = $false)]
     [Alias("Worker")]
     [String]$WorkerName = "multipoolminer", 
