@@ -76,7 +76,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $SecondaryAlgorithm = $_.SecondaryAlgorithm
                 $SecondaryAlgorithm_Norm = Get-Algorithm $SecondaryAlgorithm
 
-                $Miner_Name = (@("$Name$($MainAlgorithm_Norm -replace '^ethash', '')$SecondaryAlgorithm_Norm") + @(if ($_.SecondaryIntensity -ge 0) {$_.SecondaryIntensity}) + @($Miner_Device.Model_Norm | Sort-Object) | Select-Object) -join '-'
+                $Miner_Name = (@("$Name$($MainAlgorithm_Norm -replace '^ethash', '')$SecondaryAlgorithm_Norm") + @(if ($_.SecondaryIntensity -ge 0) {$_.SecondaryIntensity}) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $Stats."$($Miner_Name)_$($MainAlgorithm_Norm)_HashRate".Week; "$SecondaryAlgorithm_Norm" = $Stats."$($Miner_Name)_$($SecondaryAlgorithm_Norm)_HashRate".Week}
                 $Arguments_Secondary = " -dcoin $SecondaryAlgorithm -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$(if($_.SecondaryIntensity -ge 0){" -dcri $($_.SecondaryIntensity)"})"
 
@@ -88,7 +88,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 }
             }
             else {
-                $Miner_Name = (@("$Name$($MainAlgorithm_Norm -replace '^ethash', '')") + @($Miner_Device.Model_Norm| Sort-Object) | Select-Object) -join '-'
+                $Miner_Name = (@("$Name$($MainAlgorithm_Norm -replace '^ethash', '')") + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $Stats."$($Miner_Name)_$($MainAlgorithm_Norm)_HashRate".Week}
                 $Arguments_Secondary = ""
 
@@ -105,7 +105,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
-                Arguments  = ("-mport -$Miner_Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -allpools 1 -allcoins exp -esm 3$Arguments_Secondary$($_.Params)$Arguments_Platform -di $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join '')" -replace "\s+", " ").trim()
+                Arguments  = ("-mport -$Miner_Port -epool $($Pools.$MainAlgorithm_Norm.Host):$($Pools.$MainAlgorithm_Norm.Port) -ewal $($Pools.$MainAlgorithm_Norm.User) -epsw $($Pools.$MainAlgorithm_Norm.Pass) -allpools 1 -allcoins exp -esm 3$Arguments_Secondary$($_.Params)$Arguments_Platform -di $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Vendor_Index}) -join '')" -replace "\s+", " ").trim()
                 HashRates  = $Miner_HashRates
                 API        = "Claymore"
                 Port       = $Miner_Port
