@@ -1,6 +1,6 @@
 ﻿using module ..\Include.psm1
 
-class ExcavatorNicehash : Miner {
+class ExcavatorNHMP : Miner {
     hidden static [System.Management.Automation.Job]$Service
     hidden [DateTime]$BeginTime = 0
     hidden [DateTime]$EndTime = 0
@@ -27,7 +27,7 @@ class ExcavatorNicehash : Miner {
         $this.BeginTime = Get-Date
 
         if ($this.Workers) {
-            if ([ExcavatorNicehash]::Service.Id -eq $this.Service_Id) {
+            if ([ExcavatorNHMP]::Service.Id -eq $this.Service_Id) {
                 $Request = @{id = 1; method = "workers.free"; params = $this.Workers} | ConvertTo-Json -Compress
 
                 try {
@@ -183,7 +183,7 @@ class ExcavatorNicehash : Miner {
         $this.Status = "Idle"
 
         if ($this.Workers) {
-            if ([ExcavatorNicehash]::Service.Id -eq $this.Service_Id) {
+            if ([ExcavatorNHMP]::Service.Id -eq $this.Service_Id) {
                 $Request = @{id = 1; method = "workers.free"; params = $this.Workers} | ConvertTo-Json -Compress
 
                 try {
@@ -301,16 +301,16 @@ class ExcavatorNicehash : Miner {
             $this.EndTime = 0
         }
 
-        if (-not [ExcavatorNicehash]::Service) {
+        if (-not [ExcavatorNHMP]::Service) {
             $LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\Excavator-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt")
-            [ExcavatorNicehash]::Service = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '-p $($this.Port) -f 0 -fn \```"$($LogFile)\```"' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+            [ExcavatorNHMP]::Service = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '-p $($this.Port) -f 0 -fn \```"$($LogFile)\```"' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
             Start-Sleep 5
         }
 
-        if ($this.Service_Id -ne [ExcavatorNicehash]::Service.Id) {
+        if ($this.Service_Id -ne [ExcavatorNHMP]::Service.Id) {
             $this.Status = "Idle"
             $this.Workers = @()
-            $this.Service_Id = [ExcavatorNicehash]::Service.Id
+            $this.Service_Id = [ExcavatorNHMP]::Service.Id
         }
 
         switch ($Status) {
@@ -321,12 +321,12 @@ class ExcavatorNicehash : Miner {
                 $this.StopMining()
             }
             Default {
-                if ([ExcavatorNicehash]::Service | Get-Job -ErrorAction SilentlyContinue) {
-                    [ExcavatorNicehash]::Service | Remove-Job -Force
+                if ([ExcavatorNHMP]::Service | Get-Job -ErrorAction SilentlyContinue) {
+                    [ExcavatorNHMP]::Service | Remove-Job -Force
                 }
 
-                if (-not ([ExcavatorNicehash]::Service | Get-Job -ErrorAction SilentlyContinue)) {
-                    [ExcavatorNicehash]::Service = $null
+                if (-not ([ExcavatorNHMP]::Service | Get-Job -ErrorAction SilentlyContinue)) {
+                    [ExcavatorNHMP]::Service = $null
                 }
 
                 $this.Status = $Status

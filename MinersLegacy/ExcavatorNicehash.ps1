@@ -7,7 +7,7 @@ param(
     [PSCustomObject[]]$Devices
 )
 
-$Path = ".\Bin\ExcavatorNicehash\excavator.exe"
+$Path = ".\Bin\ExcavatorNHMP\excavator.exe"
 $HashSHA256 = "4CC2FF8C07F17E940A1965B8D0F7DD8508096A4E4928704912FA96C442346642"
 $Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.4a/excavator_v1.5.4a_NVIDIA_Win64.zip"
 $UriManual = "https://github.com/nicehash/excavator/releases"
@@ -82,7 +82,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                         [PSCustomObject]@{time = 1; commands = @(@([PSCustomObject]@{id = 1; method = "worker.add"; params = @($Miner_Device.PlatformId_Index | ForEach-Object {@("$Algorithm", "$_")} | Select-Object)}) * $Threads) + $Params}`
                     )
                     HashRates        = [PSCustomObject]@{$Main_Algorithm_Norm = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week}
-                    API              = "ExcavatorNicehash"
+                    API              = "ExcavatorNHMP"
                     Port             = $Miner_Port
                     URI              = $Uri
                     PrerequisitePath = "$env:SystemRoot\System32\msvcr120.dll"
@@ -105,7 +105,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                             [PSCustomObject]@{time = 1; commands = @(@([PSCustomObject]@{id = 1; method = "worker.add"; params = @($Miner_Device.PlatformId_Index | ForEach-Object {@("$Algorithm", "$_")} | Select-Object)}) * $Threads) + $Params}`
                         )
                         HashRates        = [PSCustomObject]@{$Main_Algorithm_Norm = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week; $Secondary_Algorithm_Norm = $Stats."$($Miner_Name)_$($Secondary_Algorithm_Norm)_HashRate".Week}
-                        API              = "ExcavatorNicehash"
+                        API              = "ExcavatorNHMP"
                         Port             = $Miner_Port
                         URI              = $Uri
                         PrerequisitePath = "$env:SystemRoot\System32\msvcr120.dll"
