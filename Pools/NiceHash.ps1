@@ -62,7 +62,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
                 Updated       = $Stat.Updated
             }
             [PSCustomObject]@{
-                Algorithm     = $NiceHash_Algorithm_Norm
+                Algorithm     = "$($NiceHash_Algorithm_Norm)-NHMP"
                 Info          = $NiceHash_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
@@ -93,7 +93,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
                     Updated       = $Stat.Updated
                 }
                 [PSCustomObject]@{
-                    Algorithm     = $NiceHash_Algorithm_Norm
+                    Algorithm     = "$($NiceHash_Algorithm_Norm)-NHMP"
                     Info          = $NiceHash_Coin
                     Price         = $Stat.Live
                     StablePrice   = $Stat.Week
