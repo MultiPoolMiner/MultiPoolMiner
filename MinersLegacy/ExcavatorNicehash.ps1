@@ -7,9 +7,6 @@ param(
     [PSCustomObject[]]$Devices
 )
 
-$Devices = Get-Device
-
-
 $Path = ".\Bin\ExcavatorNicehash\excavator.exe"
 $HashSHA256 = "4CC2FF8C07F17E940A1965B8D0F7DD8508096A4E4928704912FA96C442346642"
 $Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.4a/excavator_v1.5.4a_NVIDIA_Win64.zip"
@@ -71,7 +68,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
             if (-not $Secondary_Algorithm) {
                 #Single algo mining
-                $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Model_Norm | Sort-Object) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
                 [PSCustomObject]@{
                     Name             = $Miner_Name
@@ -95,7 +92,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             else {
                 #Dual algo mining
                 if ($Pools.$Secondary_Algorithm_Norm.Host -and $Pools.$Secondary_Algorithm_Norm.Name -eq "Nicehash" ) {
-                    $Miner_Name = (@("$Name$Secondary_Algorithm_Norm") + @($Threads) + @($Miner_Device.Model_Norm | Sort-Object) | Select-Object) -join '-'
+                    $Miner_Name = (@($Name) + @("$Secondary_Algorithm_Norm") + @($Threads) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
                     [PSCustomObject]@{
                         Name             = $Miner_Name
