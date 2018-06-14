@@ -85,6 +85,6 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         API        = "Ccminer"
         Port       = 4068
         URI        = $Uri
-        Fees       = [PSCustomObject]@{"$Algorithm_Norm" = 1 / 100}
+        Fees       = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
     }
 } 
