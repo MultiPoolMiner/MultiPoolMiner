@@ -511,6 +511,7 @@ function Get-Device {
         }
     }
 
+    $Devices = @()
     $PlatformId = 0
     $Index = 0
     $PlatformId_Index = @{}
@@ -538,7 +539,7 @@ function Get-Device {
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
-                    $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+                    $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
                 }
 
                 if (-not $Type_PlatformId_Index.($Device_OpenCL.Type)) {
@@ -563,23 +564,36 @@ function Get-Device {
         Write-Log -Level Warn "OpenCL device detection has failed. "
     }
 
-    if (-not $Index) {
+    # CPU detection in OpenCL does not work well, sometimes not being included, sometimes being included twice for each processor - remove any CPUs from the OpenCL devices and generate more accurate ones
+    # Remove them instead of not generating them in the first place, because skipping them would affect the indexes
+    [array]$Devices = $Devices | Where-Object {$_.Type -ne "Cpu"}
+
+    $CPUIndex = 0
+    Get-CimInstance -ClassName Win32_Processor | Foreach-Object {
+        # Vendor, type and platform are all the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
+        $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
         $Device = [PSCustomObject]@{
-            Index = [Int]$null
-            PlatformId = [Int]$null
-            PlatformId_Index = [Int]$null
-            Type_PlatformId_Index = [Int]$null
-            Vendor = [String]$null
-            Vendor_Index = [Int]$null
-            Type_Vendor_Index = [Int]$null
-            Type = [String]"Cpu"
-            Type_Index = [Int]$null
-            OpenCL = $null
-            Model = [String]"CPU"
+            Index = [Int]$Index
+            PlatformId = [Int]$PlatformId
+            PlatformId_Index = $CPUIndex
+            Type_PlatformId_Index = $CPUIndex
+            Vendor = $CPUInfo.Manufacturer
+            Type_Vendor_Index = $CPUIndex
+            Type = "Cpu"
+            Type_Index = $CPUIndex
+            Info = $CPUInfo
+            Model = $CPUInfo.Name
         }
 
-        $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+        if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
+            $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+        }
+
+        $CPUIndex++
+        $Index++
     }
+
+    $Devices
 }
 
 function Get-Algorithm {
