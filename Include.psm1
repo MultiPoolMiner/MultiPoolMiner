@@ -493,22 +493,35 @@ function Get-Device {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = @()
+        [String[]]$Name = @(),
+        [Parameter(Mandatory = $false)]
+        [Switch]$Refresh = $false
     )
 
-    $Devices = Get-Content "Devices.txt" | ConvertFrom-Json
-
     if ($Name) {
+        $DeviceList = Get-Content "Devices.txt" | ConvertFrom-Json
         $Name_Devices = $Name | ForEach-Object {
             $Name_Split = $_ -split '#'
             $Name_Split = @($Name_Split | Select-Object -First 1) + @($Name_Split | Select-Object -Skip 1 | ForEach-Object {[Int]$_})
             $Name_Split += @("*") * (100 - $Name_Split.Count)
 
-            $Name_Device = $Devices.("{0}" -f $Name_Split) | Select-Object *
+            $Name_Device = $DeviceList.("{0}" -f $Name_Split) | Select-Object *
             $Name_Device | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Name_Device.$_ = $Name_Device.$_ -f $Name_Split}
 
             $Name_Device
         }
+    }
+
+    # Try to get cached devices first to improve performance
+    if ((Test-Path Variable:Script:CachedDevices) -and -not $Refresh) {
+        $Devices = $CachedDevices
+        $Devices | Foreach-Object {
+            $Device = $_
+            if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
+                $Device
+            }
+        }
+        return
     }
 
     $Devices = @()
@@ -592,7 +605,7 @@ function Get-Device {
         $CPUIndex++
         $Index++
     }
-
+    $Script:CachedDevices = $Devices
     $Devices
 }
 
