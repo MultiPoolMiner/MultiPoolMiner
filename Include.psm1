@@ -527,7 +527,7 @@ function Get-Device {
                     Index = [Int]$Index
                     PlatformId = [Int]$PlatformId
                     PlatformId_Index = [Int]$PlatformId_Index.($PlatformId)
-                    Type_PlatformId_Index = [Int]$Type_PlatformId_Index.($Device_OpenCL.Type).($PlatformId)
+                    Type_PlatformId_Index = [Int]$Type_PlatformId_Index.($Device_OpenCL.Type)."$($PlatformId)"
                     Vendor = [String]$Device_OpenCL.Vendor
                     Vendor_Index = [Int]$Vendor_Index.($Device_OpenCL.Vendor)
                     Type_Vendor_Index = [Int]$Type_Vendor_Index.($Device_OpenCL.Type).($Device_OpenCL.Vendor)
@@ -550,7 +550,7 @@ function Get-Device {
 
                 $Index++
                 $PlatformId_Index.($PlatformId)++
-                $Type_PlatformId_Index.($Device_OpenCL.Type).($PlatformId)++
+                $Type_PlatformId_Index.($Device_OpenCL.Type)."$($PlatformId)"++
                 $Vendor_Index.($Device_OpenCL.Vendor)++
                 $Type_Vendor_Index.($Device_OpenCL.Type).($Device_OpenCL.Vendor)++
                 $Type_Index.($Device_OpenCL.Type)++
