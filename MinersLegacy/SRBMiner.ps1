@@ -49,7 +49,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm "cryptonight-$($Algorithm)"
         $Threads = $_.Threads
         $Params = $_.Params
-        $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Model_Norm | Sort-Object -Unique) | Select-Object -Unique) -join '-'
+        $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object -Unique) | Select-Object -Unique) -join '-'
 
         $HashRate = $Stats."$Miner_Name".Week
 
@@ -61,11 +61,13 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 api_port         = [Int]$Miner_Port
                 api_rig_name     = "$($Config.Pools.$($Pools.$Algorithm_Norm.Name).Worker)"
                 cryptonight_type = $Algorithm
-                gpu_conf         = @([PSCustomObject]@{
-                    "id"        = [Int]$Miner_Device.PlatformId_Index  
-                    "intensity" = 0
-                    "threads"   = [Int]$Threads
-                    #"worksize"  = 8
+                gpu_conf         = @($Miner_Device.Type_PlatformId_Index | Foreach-Object {
+                    [PSCustomObject]@{
+                        "id"        = $_  
+                        "intensity" = 0
+                        "threads"   = [Int]$Threads
+                        #"worksize"  = 8
+                    }
                 })
             } | ConvertTo-Json -Depth 10
         ) | Set-Content "$(Split-Path $Path)\$($ConfigFile)" -ErrorAction Ignore
