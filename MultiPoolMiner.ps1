@@ -75,7 +75,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$ShowPoolBalancesForExcludedPools = $true,    
     [Parameter(Mandatory = $false)]
-    [String]$ConfigFile = "Default.cfg"
+    [String]$ConfigFile = "Default.txt"
 )
 
 Clear-Host
@@ -86,8 +86,8 @@ $SyncWindow = 5 #minutes
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
-#Make sure config file ends with ".cfg", so no fool will accidentially overwrite MPM files
-$ConfigFile = [io.path]::ChangeExtension($ConfigFile,".cfg")
+#Append .txt extension if no extension is given
+if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
 
 Import-Module NetSecurity -ErrorAction Ignore
 Import-Module Defender -ErrorAction Ignore
