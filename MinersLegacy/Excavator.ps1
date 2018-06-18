@@ -43,7 +43,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation"
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
-    $Miner_Device = $Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model
+    $Miner_Device = $Devices | Where-Object Model -EQ $_.Model
     $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)
 
     $Commands | ForEach-Object {
@@ -77,7 +77,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             else {
                 #Dual algo mining
                 if ($Pools.$Secondary_Algorithm_Norm.Host ) {
-                    $Miner_Name = (@("$Name$Secondary_Algorithm_Norm") + @($Threads) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
+                    $Miner_Name = (@($Name) + @("$Secondary_Algorithm_Norm") + @($Threads) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
                     [PSCustomObject]@{
                         Name             = $Miner_Name
