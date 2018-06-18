@@ -49,7 +49,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm "cryptonight-$($Algorithm)"
         $Threads = $_.Threads
         $Params = $_.Params
-        $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object) | Select-Object -Unique) -join '-'
+        $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
         $HashRate = $Stats."$Miner_Name".Week
 
