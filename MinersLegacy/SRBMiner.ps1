@@ -51,8 +51,6 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         $Params = $_.Params
         $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
-        $HashRate = $Stats."$Miner_Name".Week
-
         $ConfigFile = "$($Miner_Name)-$($Algorithm)-Port$($Miner_Port).json"
       
         (
