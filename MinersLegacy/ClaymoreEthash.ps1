@@ -88,7 +88,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 }
             }
             else {
-                $Miner_Name = ((@($Name) + @("$($MainAlgorithm_Norm -replace '^ethash', '')") + @($Miner_Device.Name | Sort-Object -Unique) | Select-Object) -join '-') -replace "[-]{2,}", "-"
+                $Miner_Name = ((@($Name) + @("$($MainAlgorithm_Norm -replace '^ethash', '')") + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-') -replace "[-]{2,}", "-"
                 $Miner_HashRates = [PSCustomObject]@{"$MainAlgorithm_Norm" = $Stats."$($Miner_Name)_$($MainAlgorithm_Norm)_HashRate".Week}
                 $Arguments_Secondary = ""
 
