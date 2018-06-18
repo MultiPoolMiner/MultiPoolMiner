@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 26/05/2018 - v1.23.06 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 08/06/2018 - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -157,11 +157,11 @@ Choose the default currency or currencies your profit stats will be shown in.
 **-interval**
 MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
 
-**-ExtendIntervalAlgorithm**
-	Extend interval timer duration by a factor of 10x $Interval for specified algorithms. Due to their nature some algorithms, e.g. 'X16R', will always trigger watchdog on normal interval duration. Default is @("X16R", "X16S").
+**-ExtendIntervalAlgorithm([PSCustomObject]@{Algorithm1=Factor1;Algorithm2=Factor2;...})**
+	When benchmarking extend interval timer duration by :IntervalMultiplier times (if IntervalMultiplier is $null IntervalMultiplier will be set to 10) for specified algorithms. Due to their nature some algorithms, e.g. 'X16R', will always trigger watchdog on normal interval duration. Default is [PSCustomObject{"X16R" = 10; "X16S" = 10}.
 	
-**-ExtendIntervalMinerName**
-	Extend interval timer duration by a factor of 10x $Interval for specified miners. Due to their nature some miners, e.g. 'PalginNvidia', will always trigger watchdog on normal interval duration. Default is @("PalginNvidia").
+**-ExtendIntervalMinerName([PSCustomObject]@{MinerName1=Factor1;MinerName2=Factor2;...})**
+	When benchmarking extend interval timer duration by :IntervalMultiplier times (if IntervalMultiplier is $null IntervalMultiplier will be set to 10) for specified miners. Due to their nature some miners, e.g. 'PalginNvidia', will always trigger watchdog on normal interval duration. Default is [PSCustomObject]@{"PalginNvidia": 3; "Excavator" = 3; "Bminer" = 3}.
 
 **-delay**
 Specify the number of seconds required to pass before opening each miner. It is useful when cards are more sensitive to switching and need some extra time to recover (eg. clear DAG files from memory)
@@ -202,6 +202,12 @@ Use only use fastest miner per algo and device index. E.g. if there are 2 or mor
 **-IgnoreMinerFee**
 Newer versions of MPM take miner fees into account when calculating profitability. Set this flag to 'true' to ignore the fees (old MPM behaviour).
 This is also a per-miner configuration item which available through advanced configuration 
+
+**ShowPoolBalances**
+Set to 'true' to have the balances of all active pools displayed on the summary screen.
+	
+**ShowPoolBalancesExcludedPools**
+Set to 'true' to have the balances of all pools (including those that are excluded with 'ExcludeMinerName') displayed on the summary screen.
 
     
 ##SAMPLE USAGE
@@ -271,8 +277,6 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
   "Miners": {
   },
   "Interval": "$Interval",
-  "ExtendIntervalAlgorithm": "ExtendIntervalAlgorithm",
-  "ExtendIntervalMinerName: "ExtendIntervalMinerName",
   "Region": "$Region",
   "SSL": "$SSL",
   "Type": "$Type",
@@ -291,6 +295,17 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
   "MinerStatusKey": "$MinerStatusKey",
   "SwitchingPrevention": "$SwitchingPrevention",
   "ShowMinerWindow": "$ShowMinerWindow",
+  "ShowPoolBalances": "$ShowPoolBalances",
+  "ShowPoolBalancesExcludedPools": "$ShowPoolBalancesExcludedPools",
+  "ExtendIntervalAlgorithm": {
+    "X16R": 5,
+    "X16S": 5
+  },
+  "ExtendIntervalMinerName": {
+    "PalginNvidia": 3,
+    "BMiner": 3,
+    "Excavator": 3
+  },
   "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
   "IgnoreMinerFee":  "$IgnoreMinerFee"
 }
