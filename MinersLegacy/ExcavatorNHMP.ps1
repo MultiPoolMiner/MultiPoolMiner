@@ -7,6 +7,8 @@ param(
     [PSCustomObject[]]$Devices
 )
 
+$Devices = Get-Device
+
 $Path = ".\Bin\ExcavatorNHMP\excavator.exe"
 $HashSHA256 = "AFE070E64EE06660218A8241B54A6A199FB1CE4F358A65CED3BFC38EF623EC4E"
 $Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.5a/excavator_v1.5.5a_NVIDIA_Win64.zip"
@@ -14,7 +16,7 @@ $UriManual = "https://github.com/nicehash/excavator/releases"
 $Port = "5400"
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{Algorithm = "blake2s"; Threads = 1; Params = @()} #Blake2s
+    [PSCustomObject]@{Algorithm = "blake2s"; Threads = 1; Params = @("BLA", "BLA2")} #Blake2s
     [PSCustomObject]@{Algorithm = "cryptonightV7"; Threads = 1; Params = @()} #CryptonightV7
     [PSCustomObject]@{Algorithm = "daggerhashimoto"; Threads = 1; Params = @()} #Ethash
     [PSCustomObject]@{Algorithm = "equihash"; Threads = 1; Params = @()} #Equihash
@@ -52,7 +54,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation"
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
-    $Miner_Device = $Devices | Where-Object Model -EQ $_.Model
+    $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)
 
     $Commands | ForEach-Object {
@@ -68,7 +70,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
             if (-not $Secondary_Algorithm) {
                 #Single algo mining
-                $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Threads) + @("$($Miner_Device.count)x$($Miner_Device.Name | Sort-Object)") | Select-Object) -join '-'
 
                 [PSCustomObject]@{
                     Name             = $Miner_Name
@@ -79,7 +81,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                     Arguments        = @(`
                         [PSCustomObject]@{time = 0; commands = @([PSCustomObject]@{id = 1; method = "subscribe"; params = @("$($Pools.$Main_Algorithm_Norm.Host):$($Pools.$Main_Algorithm_Norm.Port)"; "$($Pools.$Main_Algorithm_Norm.User)")})},`
                         [PSCustomObject]@{time = 1; commands = @([PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$Algorithm")})},`
-                        [PSCustomObject]@{time = 1; commands = @(@([PSCustomObject]@{id = 1; method = "worker.add"; params = @($Miner_Device.PlatformId_Index | ForEach-Object {@("$Algorithm", "$_")} | Select-Object)}) * $Threads) + $Params}`
+                        [PSCustomObject]@{time = 1; commands = @($Miner_Device.Type_PlatformId_Index | ForEach-Object {@(@([PSCustomObject]@{id = 1; method = "worker.add"; params = @("$Algorithm", "$_") + $Params} | Select-Object) * $Threads)})}`
                     )
                     HashRates        = [PSCustomObject]@{$Main_Algorithm_Norm = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week}
                     API              = "ExcavatorNHMP"
@@ -92,7 +94,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             else {
                 #Dual algo mining
                 if ($Pools.$Secondary_Algorithm_Norm.Host -and $Pools.$Secondary_Algorithm_Norm.Name -eq "Nicehash" ) {
-                    $Miner_Name = (@($Name) + @("$Secondary_Algorithm_Norm") + @($Threads) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
+                    $Miner_Name = (@($Name) + @("$Secondary_Algorithm_Norm") + @($Threads) + @("$($Miner_Device.count)x$($Miner_Device.Name | Sort-Object)") | Select-Object) -join '-'
 
                     [PSCustomObject]@{
                         Name             = $Miner_Name
@@ -102,7 +104,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                         Arguments        = @(`
                             [PSCustomObject]@{time = 0; commands = @([PSCustomObject]@{id = 1; method = "subscribe"; params = @("$($Pools.$Main_Algorithm_Norm.Host):$($Pools.$Main_Algorithm_Norm.Port)"; "$($Pools.$Main_Algorithm_Norm.User)")})},`
                             [PSCustomObject]@{time = 1; commands = @([PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$Main_Algorithm")};[PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$Secondary_Algorithm")})},`
-                            [PSCustomObject]@{time = 1; commands = @(@([PSCustomObject]@{id = 1; method = "worker.add"; params = @($Miner_Device.PlatformId_Index | ForEach-Object {@("$Algorithm", "$_")} | Select-Object)}) * $Threads) + $Params}`
+                            [PSCustomObject]@{time = 1; commands = @($Miner_Device.Type_PlatformId_Index | ForEach-Object {@(@([PSCustomObject]@{id = 1; method = "worker.add"; params = @("$Algorithm", "$_") + $Params} | Select-Object) * $Threads)})}`
                         )
                         HashRates        = [PSCustomObject]@{$Main_Algorithm_Norm = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week; $Secondary_Algorithm_Norm = $Stats."$($Miner_Name)_$($Secondary_Algorithm_Norm)_HashRate".Week}
                         API              = "ExcavatorNHMP"
