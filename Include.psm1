@@ -540,13 +540,13 @@ function Get-Device {
                 $Device = [PSCustomObject]@{
                     Index = [Int]$Index
                     PlatformId = [Int]$PlatformId
-                    PlatformId_Index = [Int]$PlatformId_Index.($PlatformId)
-                    Type_PlatformId_Index = [Int]$Type_PlatformId_Index.($Device_OpenCL.Type).($PlatformId)
+                    PlatformId_Index = [Int]$PlatformId_Index."$($PlatformId)"
+                    Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
                     Vendor = [String]$Device_OpenCL.Vendor
-                    Vendor_Index = [Int]$Vendor_Index.($Device_OpenCL.Vendor)
-                    Type_Vendor_Index = [Int]$Type_Vendor_Index.($Device_OpenCL.Type).($Device_OpenCL.Vendor)
+                    Vendor_Index = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
+                    Type_Vendor_Index = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
                     Type = [String]$Device_OpenCL.Type
-                    Type_Index = [Int]$Type_Index.($Device_OpenCL.Type)
+                    Type_Index = [Int]$Type_Index."$($Device_OpenCL.Type)"
                     OpenCL = $Device_OpenCL
                     Model = [String]$Device_OpenCL.Name
                 }
@@ -555,19 +555,19 @@ function Get-Device {
                     $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
                 }
 
-                if (-not $Type_PlatformId_Index.($Device_OpenCL.Type)) {
-                    $Type_PlatformId_Index.($Device_OpenCL.Type) = @{}
+                if (-not $Type_PlatformId_Index."$($Device_OpenCL.Type)") {
+                    $Type_PlatformId_Index."$($Device_OpenCL.Type)" = @{}
                 }
-                if (-not $Type_Vendor_Index.($Device_OpenCL.Type)) {
-                    $Type_Vendor_Index.($Device_OpenCL.Type) = @{}
+                if (-not $Type_Vendor_Index."$($Device_OpenCL.Type)") {
+                    $Type_Vendor_Index."$($Device_OpenCL.Type)" = @{}
                 }
 
                 $Index++
-                $PlatformId_Index.($PlatformId)++
-                $Type_PlatformId_Index.($Device_OpenCL.Type).($PlatformId)++
-                $Vendor_Index.($Device_OpenCL.Vendor)++
-                $Type_Vendor_Index.($Device_OpenCL.Type).($Device_OpenCL.Vendor)++
-                $Type_Index.($Device_OpenCL.Type)++
+                $PlatformId_Index."$($PlatformId)"++
+                $Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"++
+                $Vendor_Index."$($Device_OpenCL.Vendor)"++
+                $Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"++
+                $Type_Index."$($Device_OpenCL.Type)"++
             }
 
             $PlatformId++
