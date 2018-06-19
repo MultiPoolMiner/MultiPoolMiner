@@ -16,28 +16,28 @@ $UriManual = "https://github.com/nicehash/excavator/releases"
 $Port = "5400"
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{Algorithm = "blake2s"; Threads = 1; Params = @("BLA", "BLA2")} #Blake2s
-    [PSCustomObject]@{Algorithm = "cryptonightV7"; Threads = 1; Params = @()} #CryptonightV7
-    [PSCustomObject]@{Algorithm = "daggerhashimoto"; Threads = 1; Params = @()} #Ethash
-    [PSCustomObject]@{Algorithm = "equihash"; Threads = 1; Params = @()} #Equihash
-    [PSCustomObject]@{Algorithm = "lbry"; Threads = 1; Params = @()} #Lbry
-    [PSCustomObject]@{Algorithm = "lyra2rev2"; Threads = 1; Params = @()} #Lyra2RE2
-    [PSCustomObject]@{Algorithm = "lyra2z"; Threads = 1; Params = @()} #Lyra2z
-    [PSCustomObject]@{Algorithm = "neoscrypt"; Threads = 1; Params = @()} #NeoScrypt
-    [PSCustomObject]@{Algorithm = "blake2s"; Threads = 2; Params = @()} #Blake2s
-    [PSCustomObject]@{Algorithm = "cryptonightV7"; Threads = 2; Params = @()} #CryptonightV7
-    [PSCustomObject]@{Algorithm = "daggerhashimoto"; Threads = 2; Params = @()} #Ethash
-    [PSCustomObject]@{Algorithm = "equihash"; Threads = 2; Params = @()} #Equihash
-    [PSCustomObject]@{Algorithm = "lbry"; Threads = 2; Params = @()} #Lbry
-    [PSCustomObject]@{Algorithm = "lyra2rev2"; Threads = 2; Params = @()} #Lyra2RE2
-    [PSCustomObject]@{Algorithm = "lyra2z"; Threads = 2; Params = @()} #Lyra2z
-    [PSCustomObject]@{Algorithm = "neoscrypt"; Threads = 2; Params = @()} #NeoScrypt
-    [PSCustomObject]@{Algorithm = "daggerhashimoto_decred"; Threads = 1; Params = @()} #Dual mining 1 thread
-    [PSCustomObject]@{Algorithm = "daggerhashimoto_pascal"; Threads = 1; Params = @()} #Dual mining 1 thread
-    [PSCustomObject]@{Algorithm = "daggerhashimoto_sia"; Threads = 1; Params = @()} #Dual mining 1 thread
-    [PSCustomObject]@{Algorithm = "daggerhashimoto_decred"; Threads = 2; Params = @()} #Dual mining 2 threads
-    [PSCustomObject]@{Algorithm = "daggerhashimoto_pascal"; Threads = 2; Params = @()} #Dual mining 2 threads
-    [PSCustomObject]@{Algorithm = "daggerhashimoto_sia"; Threads = 2; Params = @()} #Dual mining 2 threads
+    [PSCustomObject]@{Algorithm = "blake2s"; Threads = 1; Params = @(); MinMem = 2000000000} #Blake2s
+    [PSCustomObject]@{Algorithm = "cryptonightV7"; Threads = 1; Params = @(); MinMem = 4000000000} #CryptonightV7
+    [PSCustomObject]@{Algorithm = "daggerhashimoto"; Threads = 1; Params = @(); MinMem = 4000000000} #Ethash
+    [PSCustomObject]@{Algorithm = "equihash"; Threads = 1; Params = @(); MinMem = 2000000000} #Equihash
+    [PSCustomObject]@{Algorithm = "lbry"; Threads = 1; Params = @(); MinMem = 2000000000} #Lbry
+    [PSCustomObject]@{Algorithm = "lyra2rev2"; Threads = 1; Params = @(); MinMem = 2000000000} #Lyra2RE2
+    [PSCustomObject]@{Algorithm = "lyra2z"; Threads = 1; Params = @(); MinMem = 2000000000} #Lyra2z
+    [PSCustomObject]@{Algorithm = "neoscrypt"; Threads = 1; Params = @(); MinMem = 2000000000} #NeoScrypt
+    [PSCustomObject]@{Algorithm = "daggerhashimoto_decred"; Threads = 1; Params = @(); MinMem = 4000000000} #Dual mining 1 thread
+    [PSCustomObject]@{Algorithm = "daggerhashimoto_pascal"; Threads = 1; Params = @(); MinMem = 4000000000} #Dual mining 1 thread
+    [PSCustomObject]@{Algorithm = "daggerhashimoto_sia"; Threads = 1; Params = @(); MinMem = 4000000000} #Dual mining 1 thread
+    [PSCustomObject]@{Algorithm = "blake2s"; Threads = 2; Params = @(); MinMem = 2000000000} #Blake2s
+    [PSCustomObject]@{Algorithm = "cryptonightV7"; Threads = 2; Params = @(); MinMem = 12000000000} #CryptonightV7
+    [PSCustomObject]@{Algorithm = "daggerhashimoto"; Threads = 2; Params = @(); MinMem = 4000000000} #Ethash
+    [PSCustomObject]@{Algorithm = "equihash"; Threads = 2; Params = @(); MinMem = 2000000000} #Equihash
+    [PSCustomObject]@{Algorithm = "lbry"; Threads = 2; Params = @(); MinMem = 2000000000} #Lbry
+    [PSCustomObject]@{Algorithm = "lyra2rev2"; Threads = 2; Params = @(); MinMem = 2000000000} #Lyra2RE2
+    [PSCustomObject]@{Algorithm = "lyra2z"; Threads = 2; Params = @(); MinMem = 2000000000} #Lyra2z
+    [PSCustomObject]@{Algorithm = "neoscrypt"; Threads = 2; Params = @(); MinMem = 12000000000} #NeoScrypt
+    [PSCustomObject]@{Algorithm = "daggerhashimoto_decred"; Threads = 2; Params = @(); MinMem = 4000000000} #Dual mining 2 threads
+    [PSCustomObject]@{Algorithm = "daggerhashimoto_pascal"; Threads = 2; Params = @(); MinMem = 4000000000} #Dual mining 2 threads
+    [PSCustomObject]@{Algorithm = "daggerhashimoto_sia"; Threads = 2; Params = @(); MinMem = 4000000000} #Dual mining 2 threads
 
     #ASIC mining only 2018/06/11
     #[PSCustomObject]@{Algorithm = "decred"; Threads = 1; Params = @()} #Pascal
@@ -54,11 +54,12 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation"
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
-    $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)
+    $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
+    $Miner_Port = $Port -f ($Device | Select-Object -First 1 -ExpandProperty Index)
 
     $Commands | ForEach-Object {
         $Algorithm = $_.Algorithm
+        $MinMem = $_.MinMem
         $Main_Algorithm = $Algorithm -Split "_" | Select-Object -Index 0
         $Main_Algorithm_Norm = "$(Get-Algorithm $Main_Algorithm)-NHMP"
         $Secondary_Algorithm = $Algorithm -Split "_" | Select-Object -Index 1
@@ -66,7 +67,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         $Threads = $_.Threads
         $Params = $_.Params
 
-        if ($Pools.$Main_Algorithm_Norm.Name -eq "Nicehash") {
+        $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMem} )
+
+        if ($Pools.$Main_Algorithm_Norm.Name -eq "Nicehash" -and $Miner_Device) {
 
             if (-not $Secondary_Algorithm) {
                 #Single algo mining
@@ -79,9 +82,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                     HashSHA256       = $HashSHA256
 
                     Arguments        = @(`
-                        [PSCustomObject]@{time = 0; commands = @([PSCustomObject]@{id = 1; method = "subscribe"; params = @("$($Pools.$Main_Algorithm_Norm.Host):$($Pools.$Main_Algorithm_Norm.Port)"; "$($Pools.$Main_Algorithm_Norm.User)")})},`
-                        [PSCustomObject]@{time = 1; commands = @([PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$Algorithm")})},`
-                        [PSCustomObject]@{time = 1; commands = @($Miner_Device.Type_PlatformId_Index | ForEach-Object {@(@([PSCustomObject]@{id = 1; method = "worker.add"; params = @("$Algorithm", "$_") + $Params} | Select-Object) * $Threads)})}`
+                        [PSCustomObject]@{id = 1; method = "subscribe"; params = @("$($Pools.$Main_Algorithm_Norm.Host):$($Pools.$Main_Algorithm_Norm.Port)"; "$($Pools.$Main_Algorithm_Norm.User)")},`
+                        [PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$Main_Algorithm")},`
+                        [PSCustomObject]@{id = 1; method = "workers.add"; params = @(@($Miner_Device.Type_PlatformId_Index | ForEach-Object {@("alg-$($Algorithm)", "$_") + $Params} | Select-Object) * $Threads)}
                     )
                     HashRates        = [PSCustomObject]@{$Main_Algorithm_Norm = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week}
                     API              = "ExcavatorNHMP"
@@ -102,9 +105,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                         Path             = $Path
                         HashSHA256       = $HashSHA256
                         Arguments        = @(`
-                            [PSCustomObject]@{time = 0; commands = @([PSCustomObject]@{id = 1; method = "subscribe"; params = @("$($Pools.$Main_Algorithm_Norm.Host):$($Pools.$Main_Algorithm_Norm.Port)"; "$($Pools.$Main_Algorithm_Norm.User)")})},`
-                            [PSCustomObject]@{time = 1; commands = @([PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$Main_Algorithm")};[PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$Secondary_Algorithm")})},`
-                            [PSCustomObject]@{time = 1; commands = @($Miner_Device.Type_PlatformId_Index | ForEach-Object {@(@([PSCustomObject]@{id = 1; method = "worker.add"; params = @("$Algorithm", "$_") + $Params} | Select-Object) * $Threads)})}`
+                            [PSCustomObject]@{id = 1; method = "subscribe"; params = @("$($Pools.$Main_Algorithm_Norm.Host):$($Pools.$Main_Algorithm_Norm.Port)"; "$($Pools.$Main_Algorithm_Norm.User)")},`
+                            [PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$Main_Algorithm")};[PSCustomObject]@{id = 1; method = "algorithm.add"; params = @("$Secondary_Algorithm")},`
+                            [PSCustomObject]@{id = 1; method = "workers.add"; params = @(@($Miner_Device.Type_PlatformId_Index | ForEach-Object {@("alg-$($Algorithm)", "$_") + $Params} | Select-Object) * $Threads)}
                         )
                         HashRates        = [PSCustomObject]@{$Main_Algorithm_Norm = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week; $Secondary_Algorithm_Norm = $Stats."$($Miner_Name)_$($Secondary_Algorithm_Norm)_HashRate".Week}
                         API              = "ExcavatorNHMP"

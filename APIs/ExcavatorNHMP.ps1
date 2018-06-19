@@ -53,7 +53,7 @@ class ExcavatorNHMP : Miner {
         }
 
         # Subscribe to Nicehash        
-        $Request = ($this.Arguments | ConvertFrom-Json).Commands | Where-Object Method -Like "subscribe" | Select-Object -Index 0 | ConvertTo-Json -Depth 10 -Compress
+        $Request = ($this.Arguments | ConvertFrom-Json) | Where-Object Method -Like "subscribe" | Select-Object -Index 0 | ConvertTo-Json -Depth 10 -Compress
         try {
             $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
             $Data = $Response | ConvertFrom-Json -ErrorAction Stop
@@ -96,19 +96,15 @@ class ExcavatorNHMP : Miner {
             return
         }
 
-        $Data_Algorithms = @($Data.algorithms | Select-Object @{"Name" = "ID"; "Expression" = {$_.algorithm_id}}, @{"Name" = "Name"; "Expression" = {$_.name}})
-        $Arguments_Algorithms = @()
+        $Algorithms = @($Data.algorithms.Name)
 
-        ($this.Arguments | ConvertFrom-Json).Commands | Where-Object Method -Like "*.add" | ForEach-Object {
+        ($this.Arguments | ConvertFrom-Json) | Where-Object Method -Like "*.add" | ForEach-Object {
             $Argument = $_
 
             switch ($Argument.method) {
 
                 "algorithm.add" {
-                    $Argument_Algorithm = $Argument | Select-Object @{"Name" = "ID"; "Expression" = {""}}, @{"Name" = "Name"; "Expression" = {$_.params[0]}}
-                    $Algorithm_ID = $Data_Algorithms | Where-Object Name -EQ $Argument_Algorithm.Name
-
-                    if (-not "$Algorithm_ID") {
+                    if ($Algorithms -notcontains $Argument.params) {
                         $Request = $Argument | ConvertTo-Json -Compress
 
                         try {
@@ -130,14 +126,6 @@ class ExcavatorNHMP : Miner {
                             $this.SetStatus("Failed")
                             return
                         }
-
-                        $Algorithm_ID = $Data.algorithm_id
-                    }
-
-                    if ("$Algorithm_ID") {
-                        $Argument_Algorithm.ID = "$Algorithm_ID"
-                        $Data_Algorithms += $Argument_Algorithm
-                        $Arguments_Algorithms += $Argument_Algorithm
                     }
                 }
 
@@ -166,6 +154,58 @@ class ExcavatorNHMP : Miner {
 
                     if ("$($Data.worker_id)") {
                         $this.Workers += "$($Data.worker_id)"
+                    }
+                }
+                "workers.add" {
+                    $Request = $Argument | ConvertTo-Json -Compress
+
+                    try {
+                        $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
+                        $Data = $Response | ConvertFrom-Json -ErrorAction Stop
+
+                        if ($Data.id -ne 1) {
+                            Write-Log -Level Error  "Invalid response returned by miner ($($this.Name)). "
+                            $this.SetStatus("Failed")
+                        }
+
+                        $Data.Status | ForEach-Object {
+                            if ($_.error) {
+                                Write-Log -Level Error  "Error returned by miner ($($this.Name)): $($_.error)"
+                                $this.SetStatus("Failed")
+                            }
+                        }
+                    }
+                    catch {
+                        Write-Log -Level Error  "Failed to connect to miner ($($this.Name)). "
+                        $this.SetStatus("Failed")
+                        return
+                    }
+
+                    $Data.Status | Where-Object {"$($_.worker_id)"} | ForEach-Object {
+                        $this.Workers += "$($_.worker_id)"
+                    }
+                }
+                Default {
+                    $Request = $Argument | ConvertTo-Json -Compress
+
+                    try {
+                        $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
+                        $Data = $Response | ConvertFrom-Json -ErrorAction Stop
+
+                        if ($Data.id -ne 1) {
+                            Write-Log -Level Error  "Invalid response returned by miner ($($this.Name)). "
+                            $this.SetStatus("Failed")
+                        }
+
+                        if ($Data.error) {
+                            Write-Log -Level Error  "Error returned by miner ($($this.Name)): $($Data.error)"
+                            $this.SetStatus("Failed")
+                        }
+                    }
+                    catch {
+                        Write-Log -Level Error  "Failed to connect to miner ($($this.Name)). "
+                        $this.SetStatus("Failed")
+                        return
                     }
                 }
             }
@@ -205,53 +245,83 @@ class ExcavatorNHMP : Miner {
                     $this.SetStatus("Failed")
                     return
                 }
-            }
 
-            $Request = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
+                $Request = @{id = 1; method = "worker.list"; params = @()} | ConvertTo-Json -Compress
+                $Response = ""
 
-            try {
-                $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
-                $Data = $Response | ConvertFrom-Json -ErrorAction Stop
+                $HashRate = [PSCustomObject]@{}
 
-                if ($Data.id -ne 1) {
-                    Write-Log -Level Error  "Invalid response returned by miner ($($this.Name)). "
-                    $this.SetStatus("Failed")
+                try {
+                    $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
+                    $Data = $Response | ConvertFrom-Json -ErrorAction Stop
+
+                    if ($Data.id -ne 1) {
+                        Write-Log -Level Error  "Invalid response returned by miner ($($this.Name)). "
+                        $this.SetStatus("Failed")
+                    }
+
+                    if ($Data.error) {
+                        Write-Log -Level Error  "Error returned by miner ($($this.Name)): $($Data.error)"
+                        $this.SetStatus("Failed")
+                    }
                 }
-
-                if ($Data.error) {
-                    Write-Log -Level Error  "Error returned by miner ($($this.Name)): $($Data.error)"
+                catch {
+                    Write-Log -Level Error  "Failed to connect to miner ($($this.Name)). "
                     $this.SetStatus("Failed")
+                    return
                 }
-            }
-            catch {
-                Write-Log -Level Error  "Failed to connect to miner ($($this.Name)). "
-                $this.SetStatus("Failed")
-                return
-            }
+                
+                if (-not "$($Data.worker_id)") {
+                    $Request = @{id = 1; method = "algorithm.clear"; params = @()} | ConvertTo-Json -Compress
+                    $Response = ""
 
-            $Data_Algorithms = @($Data.algorithms | Select-Object @{"Name" = "ID"; "Expression" = {$_.algorithm_id}}, @{"Name" = "Name"; "Expression" = {$_.name}}, @{"Name" = "Address1"; "Expression" = {$_.pools[0].address}}, @{"Name" = "Login1"; "Expression" = {$_.pools[0].login}}, @{"Name" = "Address2"; "Expression" = {$_.pools[1].address}}, @{"Name" = "Login2"; "Expression" = {$_.pools[1].login}})
-            $Arguments_Algorithms = @()
+                    $HashRate = [PSCustomObject]@{}
 
-            $Request = @{id = 1; method = "algorithm.clear"; params = @()} | ConvertTo-Json -Compress
+                    try {
+                        $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
+                        $Data = $Response | ConvertFrom-Json -ErrorAction Stop
 
-            try {
-                $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
-                $Data = $Response | ConvertFrom-Json -ErrorAction Stop
+                        if ($Data.id -ne 1) {
+                            Write-Log -Level Error  "Invalid response returned by miner ($($this.Name)). "
+                            $this.SetStatus("Failed")
+                        }
 
-                if ($Data.id -ne 1) {
-                    Write-Log -Level Error  "Invalid response returned by miner ($($this.Name)). "
-                    $this.SetStatus("Failed")
+                        if ($Data.error) {
+                            Write-Log -Level Error  "Error returned by miner ($($this.Name)): $($Data.error)"
+                            $this.SetStatus("Failed")
+                        }
+                    }
+                    catch {
+                        Write-Log -Level Error  "Failed to connect to miner ($($this.Name)). "
+                        $this.SetStatus("Failed")
+                        return
+                    }
+
+                    $Request = @{id = 1; method = "unsubscribe"; params = @()} | ConvertTo-Json -Compress
+                    $Response = ""
+
+                    $HashRate = [PSCustomObject]@{}
+
+                    try {
+                        $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
+                        $Data = $Response | ConvertFrom-Json -ErrorAction Stop
+
+                        if ($Data.id -ne 1) {
+                            Write-Log -Level Error  "Invalid response returned by miner ($($this.Name)). "
+                            $this.SetStatus("Failed")
+                        }
+
+                        if ($Data.error) {
+                            Write-Log -Level Error  "Error returned by miner ($($this.Name)): $($Data.error)"
+                            $this.SetStatus("Failed")
+                        }
+                    }
+                    catch {
+                        Write-Log -Level Error  "Failed to connect to miner ($($this.Name)). "
+                        $this.SetStatus("Failed")
+                        return
+                    }      
                 }
-
-                if ($Data.error) {
-                    Write-Log -Level Error  "Error returned by miner ($($this.Name)): $($Data.error)"
-                    $this.SetStatus("Failed")
-                }
-            }
-            catch {
-                Write-Log -Level Error  "Failed to connect to miner ($($this.Name)). "
-                $this.SetStatus("Failed")
-                return
             }
         }
     }
@@ -303,7 +373,7 @@ class ExcavatorNHMP : Miner {
 
         if (-not [ExcavatorNHMP]::Service) {
             $LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\Excavator-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt")
-            [ExcavatorNHMP]::Service = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '-p $($this.Port) -f 0 -fn \```"$($LogFile)\```"' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+            [ExcavatorNHMP]::Service = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '-p $($this.Port) -wp $([Int]($this.Port) + 1) -f 0 -fn \```"$($LogFile)\```"' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
             Start-Sleep 5
         }
 
@@ -340,7 +410,7 @@ class ExcavatorNHMP : Miner {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
-        $Request = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
+        $Request = @{id = 1; method = "worker.list"; params = @()} | ConvertTo-Json -Compress
         $Response = ""
 
         $HashRate = [PSCustomObject]@{}
@@ -365,17 +435,15 @@ class ExcavatorNHMP : Miner {
             return @($Request, $Response)
         }
 
-        $Data.algorithms.name | Select-Object -Unique | ForEach-Object {
-            $Algorithms = $_ -split "_"
-            $Algorithms | ForEach-Object {
-                $Algorithm = $_
+        $Data.workers.algorithms.name | Select-Object -Unique | ForEach-Object {
+            $Workers = $Data.workers | Where-Object {$this.workers -match $_.Worker_id}
+            $Algorithm = $_
 
-                $HashRate_Name = [String]($this.Algorithm -match (Get-Algorithm $Algorithm))
-                if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -match "$(Get-Algorithm $Algorithm)*")} #temp fix
-                $HashRate_Value = [Double](($Data.algorithms | Where-Object {$_.name -eq $Algorithm}).speed | Measure-Object -Sum).Sum
-                if ($HashRate_Name -and $HashRate_Value -gt 0) {
-                    $HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
-                }
+            $HashRate_Name = [String](($this.Algorithm -replace "-NHMP") -match (Get-Algorithm $Algorithm))
+            if (-not $HashRate_Name) {$HashRate_Name = [String](($this.Algorithm -replace "-NHMP") -match "$(Get-Algorithm $Algorithm)*")} #temp fix
+            $HashRate_Value = [Double](($Workers.algorithms | Where-Object {$_.name -eq $Algorithm}).speed | Measure-Object -Sum).Sum
+            if ($HashRate_Name -and $HashRate_Value -gt 0) {
+                $HashRate | Add-Member @{"$($HashRate_Name)-NHMP" = [Int64]$HashRate_Value}
             }
         }
 
