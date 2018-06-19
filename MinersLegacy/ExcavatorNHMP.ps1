@@ -7,8 +7,6 @@ param(
     [PSCustomObject[]]$Devices
 )
 
-$Devices = Get-Device
-
 $Path = ".\Bin\ExcavatorNHMP\excavator.exe"
 $HashSHA256 = "AFE070E64EE06660218A8241B54A6A199FB1CE4F358A65CED3BFC38EF623EC4E"
 $Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.5a/excavator_v1.5.5a_NVIDIA_Win64.zip"
@@ -51,7 +49,7 @@ $Commands = [PSCustomObject[]]@(
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-$Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation"
+$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
