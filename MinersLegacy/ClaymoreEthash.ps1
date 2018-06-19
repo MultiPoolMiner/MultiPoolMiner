@@ -48,7 +48,7 @@ $Commands = [PSCustomObject[]]@(
 )
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Devices = $Devices | Where-Object Type -EQ "GPU"
+$Devices = @($Devices | Where-Object Type -EQ "GPU")
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
