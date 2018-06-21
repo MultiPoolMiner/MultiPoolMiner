@@ -34,9 +34,6 @@ $NiceHash_Request.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# alg
     $NiceHash_Algorithm_Norm = Get-Algorithm $NiceHash_Algorithm
     $NiceHash_Coin = ""
 
-    if ($NiceHash_Algorithm_Norm -eq "Sia") {$NiceHash_Algorithm_Norm = "SiaNiceHash"} #temp fix
-    if ($NiceHash_Algorithm_Norm -eq "Decred") {$NiceHash_Algorithm_Norm = "DecredNiceHash"} #temp fix
-
     $Divisor = 1000000000
 
     $Stat = Set-Stat -Name "$($Name)_$($NiceHash_Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor) -Duration $StatSpan -ChangeDetection $true
@@ -61,7 +58,21 @@ $NiceHash_Request.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# alg
                 SSL           = $false
                 Updated       = $Stat.Updated
             }
-
+            [PSCustomObject]@{
+                Algorithm     = "$($NiceHash_Algorithm_Norm)-NHMP"
+                Info          = $NiceHash_Coin
+                Price         = $Stat.Live
+                StablePrice   = $Stat.Week
+                MarginOfError = $Stat.Week_Fluctuation
+                Protocol      = "stratum+tcp"
+                Host          = "nhmp.$($NiceHash_Region.ToLower()).nicehash.com"
+                Port          = 3200
+                User          = "$BTC.$Worker"
+                Pass          = "x"
+                Region        = $NiceHash_Region_Norm
+                SSL           = $false
+                Updated       = $Stat.Updated
+            }
             if ($NiceHash_Algorithm_Norm -eq "CryptonightV7" -or $NiceHash_Algorithm_Norm -eq "Equihash") {
                 [PSCustomObject]@{
                     Algorithm     = $NiceHash_Algorithm_Norm
@@ -72,6 +83,21 @@ $NiceHash_Request.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# alg
                     Protocol      = "stratum+ssl"
                     Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
                     Port          = $NiceHash_Port + 30000
+                    User          = "$BTC.$Worker"
+                    Pass          = "x"
+                    Region        = $NiceHash_Region_Norm
+                    SSL           = $true
+                    Updated       = $Stat.Updated
+                }
+                [PSCustomObject]@{
+                    Algorithm     = "$($NiceHash_Algorithm_Norm)-NHMP"
+                    Info          = $NiceHash_Coin
+                    Price         = $Stat.Live
+                    StablePrice   = $Stat.Week
+                    MarginOfError = $Stat.Week_Fluctuation
+                    Protocol      = "stratum+ssl"
+                    Host          = "nhmp.$($NiceHash_Region.ToLower()).nicehash.com"
+                    Port          = 3200
                     User          = "$BTC.$Worker"
                     Pass          = "x"
                     Region        = $NiceHash_Region_Norm
