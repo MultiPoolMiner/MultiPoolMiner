@@ -1,8 +1,8 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\CryptoNight-FireIce\xmr-stak.exe"
-$HashSHA256 = "F99E89588DA1A4A924ECB1BD3E7CBFDD8EA3EAD239C2506F2653481ED89433AF"
-$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.4.4/xmr-stak-win64.zip"
+$HashSHA256 = "1BFEAA00CCE185C889F82A2C87DCACABF2EE966B379384470E778E1DA72FB7E1"
+$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.4.5/xmr-stak-win64.zip"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 3334
