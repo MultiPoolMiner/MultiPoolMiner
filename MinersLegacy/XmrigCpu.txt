@@ -2,37 +2,49 @@
     {
         "Type":  "CPU",
         "Path":  ".\\Bin\\CryptoNight-CPU\\xmrig.exe",
-        "HashSHA256":  "24661A8807F4B991C79E587E846AAEA589720ED84D79AFB41D14709A6FB908CE",
+        "HashSHA256":  "2E7432D14546B510506CCC22DF62EF334D424D02FBC6BAAA7A0498A0102DE156",
         "Arguments":  "\"--api-port 3334 -a cryptonightV7 -o $($Pools.CryptoNightV7.Protocol)://$($Pools.CryptoNightV7.Host):$($Pools.CryptoNightV7.Port) -u $($Pools.CryptoNightV7.User) -p $($Pools.CryptoNightV7.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
                           "CryptoNightV7":  "\"$(if ($Pools.CryptoNightV7.SSL) {0}else {$Stats.XmrigCpu_CryptoNightV7_HashRate.Week})\""
                       },
         "API":  "XMRig",
         "Port":  "3334",
-        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.6.2/xmrig-2.6.2-msvc-win64.zip"
+        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.6.3/xmrig-2.6.3-msvc-win64.zip"
     },
     {
         "Type":  "CPU",
         "Path":  ".\\Bin\\CryptoNight-CPU\\xmrig.exe",
-        "HashSHA256":  "24661A8807F4B991C79E587E846AAEA589720ED84D79AFB41D14709A6FB908CE",
+        "HashSHA256":  "2E7432D14546B510506CCC22DF62EF334D424D02FBC6BAAA7A0498A0102DE156",
         "Arguments":  "\"--api-port 3334 -a cryptonight-lite -o $($Pools.CryptoNightLite.Protocol)://$($Pools.CryptoNightLite.Host):$($Pools.CryptoNightLite.Port) -u $($Pools.CryptoNightLite.User) -p $($Pools.CryptoNightLite.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
                           "CryptoNightLite":  "\"$(if ($Pools.CryptoNightLite.SSL) {0}else {$Stats.XmrigCpu_CryptoNightLite_HashRate.Week})\""
                       },
         "API":  "XMRig",
         "Port":  "3334",
-        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.6.2/xmrig-2.6.2-msvc-win64.zip"
+        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.6.3/xmrig-2.6.3-msvc-win64.zip"
     },
     {
         "Type":  "CPU",
         "Path":  ".\\Bin\\CryptoNight-CPU\\xmrig.exe",
-        "HashSHA256":  "24661A8807F4B991C79E587E846AAEA589720ED84D79AFB41D14709A6FB908CE",
+        "HashSHA256":  "2E7432D14546B510506CCC22DF62EF334D424D02FBC6BAAA7A0498A0102DE156",
         "Arguments":  "\"--api-port 3334 -a cryptonight-heavy -o $($Pools.CryptoNightHeavy.Protocol)://$($Pools.CryptoNightHeavy.Host):$($Pools.CryptoNightHeavy.Port) -u $($Pools.CryptoNightHeavy.User) -p $($Pools.CryptoNightHeavy.Pass) --keepalive --nicehash --donate-level 1\"",
         "HashRates":  {
                           "CryptoNightHeavy":  "\"$(if ($Pools.CryptoNightHeavy.SSL) {0}else {$Stats.XmrigCpu_CryptoNightHeavy_HashRate.Week})\""
                       },
         "API":  "XMRig",
         "Port":  "3334",
-        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.6.2/xmrig-2.6.2-msvc-win64.zip"
+        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.6.3/xmrig-2.6.3-msvc-win64.zip"
+    },
+    {
+        "Type":  "CPU",
+        "Path":  ".\\Bin\\CryptoNight-CPU\\xmrig.exe",
+        "HashSHA256":  "2E7432D14546B510506CCC22DF62EF334D424D02FBC6BAAA7A0498A0102DE156",
+        "Arguments":  "\"--api-port 3334 -a cryptonight-fast -o $($Pools.CryptoNightFast.Protocol)://$($Pools.CryptoNightFast.Host):$($Pools.CryptoNightFast.Port) -u $($Pools.CryptoNightFast.User) -p $($Pools.CryptoNightFast.Pass) --keepalive --nicehash --donate-level 1\"",
+        "HashRates":  {
+                          "CryptoNightFast":  "\"$(if ($Pools.CryptoNightFast.SSL) {0}else {$Stats.XmrigCpu_CryptoNightFast_HashRate.Week})\""
+                      },
+        "API":  "XMRig",
+        "Port":  "3334",
+        "URI":  "https://github.com/xmrig/xmrig/releases/download/v2.6.3/xmrig-2.6.3-msvc-win64.zip"
     }
 ]
