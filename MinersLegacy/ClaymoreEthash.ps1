@@ -48,10 +48,10 @@ $Commands = [PSCustomObject[]]@(
 )
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Devices = $Devices | Where-Object Type -EQ "GPU"
+$Devices = @($Devices | Where-Object Type -EQ "GPU")
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
-    $Device = $Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model
+    $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Port -f ($Device | Select-Object -First 1 -ExpandProperty Index)
 
     switch ($_.Vendor) {
@@ -66,9 +66,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
         Switch ($MainAlgorithm_Norm) {
             # default is all devices, ethash has a 4GB minimum memory limit
-            "Ethash" {$Miner_Device = $Device | Where-Object {$_.OpenCL.GlobalMemsize -ge 4000000000}}
-            "Ethash3gb" {$Miner_Device = $Device | Where-Object {$_.OpenCL.GlobalMemsize -ge 3000000000}}
-            default {$Miner_Device = $Device}
+            "Ethash" {$Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge 4000000000})}
+            "Ethash3gb" {$Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge 3000000000})}
+            default {$Miner_Device = @($Device)}
         }
 
         if ($Arguments_Platform -and $Miner_Device) {
