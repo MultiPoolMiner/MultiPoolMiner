@@ -16,6 +16,7 @@ $UriManual = "https://github.com/nicehash/excavator/releases"
 $Port = "5400"
 
 $Commands = [PSCustomObject[]]@(
+    #1 Thread
     [PSCustomObject]@{Algorithm = "blake2s"; Threads = 1; MinMemGb = 1; Params = @()} #Blake2s
     [PSCustomObject]@{Algorithm = "cryptonightV7"; Threads = 1; MinMemGb = 2; Params = @()} #CryptonightV7
     [PSCustomObject]@{Algorithm = "daggerhashimoto"; Threads = 1; MinMemGb = 4; Params = @()} #Ethash
@@ -27,6 +28,8 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "daggerhashimoto_decred"; Threads = 1; MinMemGb = 4; Params = @()} #Dual mining 1 thread
     [PSCustomObject]@{Algorithm = "daggerhashimoto_pascal"; Threads = 1; MinMemGb = 4; Params = @()} #Dual mining 1 thread
     [PSCustomObject]@{Algorithm = "daggerhashimoto_sia"; Threads = 1; MinMemGb = 4; Params = @()} #Dual mining 1 thread
+
+    #2 Threads
     [PSCustomObject]@{Algorithm = "blake2s"; Threads = 2; MinMemGb = 2*1; Params = @()} #Blake2s
     [PSCustomObject]@{Algorithm = "cryptonightV7"; Threads = 2; MinMemGb = 2*6; Params = @()} #CryptonightV7
     [PSCustomObject]@{Algorithm = "daggerhashimoto"; Threads = 2; MinMemGb = 2*4; Params = @()} #Ethash
