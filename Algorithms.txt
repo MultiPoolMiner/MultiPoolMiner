@@ -104,7 +104,7 @@
     "pascal":  "Pascal",
     "pentablake":  "PentaBlake",
     "phi":  "PHI",
-    "phi2":  "PHI",
+    "phi2":  "PHI2",
     "phi1612":  "PHI",
     "phoenixcoin":  "NeoScrypt",
     "pluck":  "Pluck",
