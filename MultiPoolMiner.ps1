@@ -516,6 +516,7 @@ while ($true) {
                 Benchmarked          = 0
                 Pool                 = $Miner.Pools.PSObject.Properties.Value.Name
                 ShowMinerWindow      = $Config.ShowMinerWindow
+                ExtendInterval       = $Miner.ExtendInterval
             }
         }
     }
