@@ -14,7 +14,7 @@ class SRBMiner : Miner {
         $ConfigFile = "$(Split-Path $this.Path)\$($this.Name)-$($this.Algorithm)-Port$($this.Port).json"
         $Parameters.Config | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -ErrorAction Ignore
 
-        $Arguments = " --config $ConfigFile $($Parameters.CommandLine)"
+        $Arguments = " --config $ConfigFile $($Parameters.Commands)"
 
         if ($this.Process) {
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
