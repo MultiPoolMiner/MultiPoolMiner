@@ -36,6 +36,8 @@ $Commands = [PSCustomObject[]]@(
     #[PSCustomObject]@{Algorithm = "normal"    ; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNight 1 thread, ASIC territory
 )
 
+$CommonCommands = ""
+
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Advanced Micro Devices, Inc."
 
@@ -73,7 +75,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                         }
                     })
                 }
-                CommandLine = " --cpool $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --cwallet $($Pools.$Algorithm_Norm.User) --cpassword $($Pools.$Algorithm_Norm.Pass) --ctls $($Pools.$Algorithm_Norm.SSL) --cnicehash $($Pools.$Algorithm_Norm.Name -eq 'NiceHash')$Params$CommonCommands"
+                Commands = " --cpool $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --cwallet $($Pools.$Algorithm_Norm.User) --cpassword $($Pools.$Algorithm_Norm.Pass) --ctls $($Pools.$Algorithm_Norm.SSL) --cnicehash $($Pools.$Algorithm_Norm.Name -eq 'NiceHash')$Params$CommonCommands"
             }
 
             [PSCustomObject]@{
