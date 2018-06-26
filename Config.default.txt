@@ -43,7 +43,7 @@
   "SwitchingPrevention": "$SwitchingPrevention",
   "ShowPoolBalances": "$ShowPoolBalances",
   "ShowPoolBalancesExcludedPools": "$ShowPoolBalancesExcludedPools",
-  "ShowMinerWindow": "$ShowMinerWindow"
+  "ShowMinerWindow": "$ShowMinerWindow",
   "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
   "IgnoreCosts":  "$IgnoreCosts"
 }
