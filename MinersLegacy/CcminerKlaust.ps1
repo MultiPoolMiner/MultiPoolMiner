@@ -1,29 +1,33 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-KlausT\ccminer.exe"
-$HashSHA256 = "EBF91E27F54DE29F158A4F5EBECEDB7E7E03EB9010331B2E949335BF1144A886"
-$Uri = "https://github.com/KlausT/ccminer/releases/download/8.21/ccminer-821-cuda91-x64.zip"
+$HashSHA256 = "0345D2D274404F166C0927FC64683A6C86C2D0940E1518C6808244D6EFBB7F22"
+$Uri = "https://github.com/nemosminer/ccminerKlausT-r11-fix/releases/download/r11-fix/ccminerKlausTr11.7z"
 
 $Commands = [PSCustomObject]@{
     #GPU - profitable 20/04/2018
-    "c11"         = "" #C11
-    "deep"        = "" #deep
-    "dmd-gr"      = "" #dmd-gr
-    "fresh"       = "" #fresh
-    "fugue256"    = "" #Fugue256
-    "groestl"     = "" #Groestl
-    "jackpot"     = "" #Jackpot
-    "keccak"      = "" #Keccak
-    "luffa"       = "" #Luffa
-    "lyra2v2"     = "" #Lyra2RE2
-    "neoscrypt"   = "" #NeoScrypt
-    "penta"       = "" #Pentablake
-    "skein"       = "" #Skein
-    "s3"          = "" #S3
-    "veltor"      = "" #Veltor
-    #"whirlpool"  = "" #Whirlpool
-    #"whirlpoolx" = "" #whirlpoolx
-    "X17"         = "" #X17 Verge
+    "c11"           = "" #C11
+    "deep"          = "" #deep
+    "dmd-gr"        = "" #dmd-gr
+    "fresh"         = "" #fresh
+    "fugue256"      = "" #Fugue256
+    "groestl"       = "" #Groestl
+    "jackpot"       = "" #Jackpot
+    "keccak"        = "" #Keccak
+    "luffa"         = "" #Luffa
+    "lyra2v2"       = "" #Lyra2RE2
+    "neoscrypt"     = "" #NeoScrypt
+    "penta"         = "" #Pentablake
+    "skein"         = "" #Skein
+    "s3"            = "" #S3
+    "veltor"        = "" #Veltor
+    "whirlpool"     = "" #Whirlpool
+    "whirlpoolx"    = "" #whirlpoolx
+    "x17"           = "" #X17 Verge
+    "yescrypt"      = "" #yescrypt
+    "yescryptR8"    = ""
+    "yescryptR16"   = "" #YescryptR16 #Yenten
+    "yescryptR16v2" = "" #PPN    
 
     # ASIC - never profitable 20/04/2018
     #"blake"      = "" #blake
@@ -43,6 +47,14 @@ $Commands = [PSCustomObject]@{
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+
+# Miner requires CUDA 9.2
+$DriverVersion = (Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version -replace ".*CUDA ",""
+$RequiredVersion = "9.2.00"
+if ($DriverVersion -lt $RequiredVersion) {
+    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers. "
+    return
+}
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
 
