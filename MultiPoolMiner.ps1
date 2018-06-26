@@ -55,7 +55,7 @@ param(
     [Alias("Uri", "Url")]
     [String]$MinerStatusUrl = "", #i.e https://multipoolminer.io/monitor/miner.php
     [Parameter(Mandatory = $false)]
-    [String]$MinerStatusKey = "",
+    [String]$MinerStatusKey = $Wallet, #For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
     [Parameter(Mandatory = $false)]
     [Double]$SwitchingPrevention = 1, #zero does not prevent miners switching
     [Parameter(Mandatory = $false)]
@@ -69,7 +69,9 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$ShowPoolBalances = $false,
     [Parameter(Mandatory = $false)]
-    $ShowPoolBalancesForExcludedPools = $false    
+    [Switch]$ShowPoolBalancesForExcludedPools = $true,    
+    [Parameter(Mandatory = $false)]
+    [String]$ConfigFile = "Default.txt"
 )
 
 Clear-Host
@@ -79,6 +81,10 @@ $Strikes = 3
 $SyncWindow = 5 #minutes
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+
+#Append .txt extension if no extension is given
+if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
+
 Import-Module NetSecurity -ErrorAction Ignore
 Import-Module Defender -ErrorAction Ignore
 Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore
@@ -107,6 +113,33 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 #Set process priority to BelowNormal to avoid hash rate drops on systems with weak CPUs
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
 
+if (Test-Path $ConfigFile) {
+    Write-Log -Level Info "Using configuration file ($(Resolve-Path $ConfigFile)). "
+}
+else {
+    #Create new config file: Read command line parameters except ConfigFile
+    Write-Log -Level Info -Message "No valid config file found. Creating new config file $($ConfigFile) using defaults. "        
+    $Config = [PSCustomObject]@{}
+    #Use resolved parameter values from command line
+    $Config | Add-Member VersionCompatibility $Version
+    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
+        if (Get-Variable $_ -ErrorAction SilentlyContinue) {
+            $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
+        }
+    }
+    $Config | Add-Member Pools ([PSCustomObject]@{})
+    $Config | Add-Member Miners ([PSCustomObject]@{})
+    Try {
+        $Config | ConvertTo-Json | Out-File $ConfigFile -Encoding utf8
+        Write-Log -Level Info -Message "No valid config file found. Creating new config file ($(Resolve-Path $ConfigFile)) using defaults. "
+    }
+    Catch {
+        Write-Log -Level Error "Error writing config file ($($ConfigFile)). Cannot continue. "
+        Start-Sleep 10
+        Exit
+    }
+}
+
 if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -Recurse | Unblock-File}
 if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue) -and (Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {
     Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) "-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1'; Add-MpPreference -ExclusionPath '$(Convert-Path .)'" -Verb runAs
@@ -126,65 +159,21 @@ Import-Module .\API.psm1
 Start-APIServer
 $API.Version = $Version
 
-# Create config.txt if it is missing
-if (!(Test-Path "Config.txt")) {
-    if (Test-Path "Config.default.txt") {
-        Copy-Item -Path "Config.default.txt" -Destination "Config.txt"
-    }
-    else {
-        Write-Log -Level Error "Config.txt and Config.default.txt are missing. Cannot continue. "
-        Start-Sleep 10
-        Exit
-    }
-}
-
 while ($true) {
-    #Load the config
     $ConfigBackup = $Config
-    if (Test-Path "Config.txt") {
-        $Config = Get-ChildItemContent "Config.txt" -Parameters @{
-            Wallet                        = $Wallet
-            UserName                      = $UserName
-            WorkerName                    = $WorkerName
-            API_ID                        = $API_ID
-            API_Key                       = $API_Key
-            Interval                      = $Interval
-            ExtendIntervalAlgorithm       = $ExtendIntervalAlgorithm
-            ExtendIntervalMinerName       = $ExtendIntervalMinerName
-            Region                        = $Region
-            SSL                           = $SSL
-            DeviceName                    = $DeviceName
-            Algorithm                     = $Algorithm
-            MinerName                     = $MinerName
-            PoolName                      = $PoolName
-            ExcludeAlgorithm              = $ExcludeAlgorithm
-            ExcludeMinerName              = $ExcludeMinerName
-            ExcludePoolName               = $ExcludePoolName
-            Currency                      = $Currency
-            Donate                        = $Donate
-            Proxy                         = $Proxy
-            Delay                         = $Delay
-            Watchdog                      = $Watchdog
-            MinerStatusURL                = $MinerStatusURL
-            MinerStatusKey                = $MinerStatusKey
-            SwitchingPrevention           = $SwitchingPrevention
-            ShowMinerWindow               = $ShowMinerWindow
-            UseFastestMinerPerAlgoOnly    = $UseFastestMinerPerAlgoOnly
-            IgnoreCosts                   = $IgnoreCosts
-            ShowPoolBalances              = $ShowPoolBalances
-            ShowPoolBalancesExcludedPools = $ShowPoolBalancesForExcludedPools
-        } | Select-Object -ExpandProperty Content
+    #Load the config, read command line parameters except ConfigFile, use default values for those that are not in command line
+    $Parameters = @{}
+    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
+        $Parameters.Add($_ , (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
     }
+    $Config = Get-ChildItemContent $ConfigFile -Parameters $Parameters | Select-Object -ExpandProperty Content
 
-    #Error in Config.txt
+    #Error in config file
     if ($Config -isnot [PSCustomObject]) {
-        Write-Log -Level Error "Config.txt is invalid. Cannot continue. "
+        Write-Log -Level Error "$($ConfigFile) is invalid. Cannot continue. "
         Start-Sleep 10
         Exit
     }
-
-    #For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
-    if ($Wallet -and -not $Config.MinerStatusKey) {$Config.MinerStatusKey = $Wallet}
 
     Get-ChildItem "Pools" -File | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
         $Config.Pools | Add-Member $_.BaseName (
