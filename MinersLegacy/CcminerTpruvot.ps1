@@ -1,11 +1,12 @@
 using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-TPruvot\ccminer-x64.exe"
-$HashSHA256 = "9156D5FC42DAA9C8739D04C3456DA8FBF3E9DC91D4894D351334F69A7CEE58C5"
-$Uri = "https://github.com/tpruvot/ccminer/releases/download/2.2.5-tpruvot/ccminer-x64-2.2.5-cuda9.7z"
+$HashSHA256 = "9DFE2C651CFFB399D8C9603A840C90707BD1E1D70CE6FB35DDC3BD3BD47A719C"
+$Uri = "https://github.com/tpruvot/ccminer/releases/download/2.2.6-tpruvot/ccminer-x64-2.2.6-phi2-cuda9.7z"
 
 $Commands = [PSCustomObject]@{
     #GPU - profitable 20/04/2018
+    "allium"        = "" #Garlic
     "bastion"       = "" #bastion
     "bitcore"       = "" #Bitcore
     "bmw"           = "" #bmw
@@ -26,7 +27,8 @@ $Commands = [PSCustomObject]@{
     "lyra2z"        = "" #Lyra2z, ZCoin
     "neoscrypt"     = "" #NeoScrypt
     "penta"         = "" #Pentablake
-    "phi"           = "" #PHI
+    #"phi"           = "" #old PHI
+    "phi2"          = "" #LUX
     "polytimos"     = "" #Polytimos
     "scryptjane:nf" = "" #scryptjane:nf
     "sha256t"       = "" #sha256t
@@ -75,14 +77,21 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
 
     $Algorithm_Norm = Get-Algorithm $_
 
+    Switch ($Algorithm_Norm) {
+        "PHI"   {$ExtendInterval = 3}
+        "X16R"  {$ExtendInterval = 10}
+        default {$ExtendInterval = 0}
+    }
+
     [PSCustomObject]@{
-        Type       = "NVIDIA"
-        Path       = $Path
-        HashSHA256 = $HashSHA256
-        Arguments  = "-a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_) --submit-stale"
-        HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week}
-        API        = "Ccminer"
-        Port       = 4068
-        URI        = $Uri
+        Type           = "NVIDIA"
+        Path           = $Path
+        HashSHA256     = $HashSHA256
+        Arguments      = "-a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_) --submit-stale"
+        HashRates      = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week}
+        API            = "Ccminer"
+        Port           = 4068
+        URI            = $Uri
+        ExtendInterval = $ExtendInterval
     }
 }
