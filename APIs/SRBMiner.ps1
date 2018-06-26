@@ -58,7 +58,6 @@ class SRBMiner : Miner {
         }
         catch {
             Write-Log -Level Error "Failed to connect to miner ($($this.Name)). "
-            $this.SetStatus("Failed")
             return @($Request, $Response)
         }
 
