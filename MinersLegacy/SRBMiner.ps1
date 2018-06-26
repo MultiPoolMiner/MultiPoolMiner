@@ -39,7 +39,7 @@ $Commands = [PSCustomObject[]]@(
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Advanced Micro Devices, Inc."
 
-$Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
+$Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)
 
