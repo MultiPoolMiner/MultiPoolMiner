@@ -11,7 +11,7 @@ class SRBMiner : Miner {
         $Parameters = $this.Arguments | ConvertFrom-Json
 
         #Write config files. Keep separate files and do not overwrite to preserve optional manual customization
-        $ConfigFile = "$(Split-Path $this.Path)\$($this.Name)-$($this.Algorithm)-Port$($this.Port).json"
+        $ConfigFile = "$(Split-Path $this.Path)\$($this.Pool)-$($this.Algorithm)-Port$($this.Port).json"
         $Parameters.Config | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -ErrorAction Ignore
 
         $Arguments = " --config $ConfigFile $($Parameters.Commands)"
