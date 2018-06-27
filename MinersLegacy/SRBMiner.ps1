@@ -10,33 +10,31 @@ $Port = "52{0:d2}"
                 
 # Commands are case sensitive!
 $Commands = [PSCustomObject[]]@(
-    # Note: For fine tuning directly edit [AlgorithmName]_config.txt in the miner binary 
-    [PSCustomObject]@{Algorithm = "alloy"     ; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNight-Alloy 1 thread
-    [PSCustomObject]@{Algorithm = "artocash"  ; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNight-ArtoCash 1 thread
-    [PSCustomObject]@{Algorithm = "b2n"       ; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNight-B2N 1 thread
-    [PSCustomObject]@{Algorithm = "fast"      ; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNight-Fast (Masari) 1 thread
-    [PSCustomObject]@{Algorithm = "lite"      ; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNight-Lite 1 thread
-    [PSCustomObject]@{Algorithm = "haven"     ; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNight-Haven 1 thread
-    [PSCustomObject]@{Algorithm = "heavy"     ; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNight-Heavy 1 thread
-    [PSCustomObject]@{Algorithm = "ipbc"      ; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNight-PPBC 1 thread
-    [PSCustomObject]@{Algorithm = "marketcash"; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNight-MarketCash 1 thread
-    [PSCustomObject]@{Algorithm = "normalv7"  ; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNightV7 1 thread
-    [PSCustomObject]@{Algorithm = "stellitev4"; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNight-Stellite 1 thread
-    [PSCustomObject]@{Algorithm = "alloy"     ; Threads = 2; MinMemGb = 2; Params = @()} # CryptoNight-Alloy 2 threads
-    [PSCustomObject]@{Algorithm = "artocash"  ; Threads = 2; MinMemGb = 2; Params = @()} # CryptoNight-ArtoCash 2 threads
-    [PSCustomObject]@{Algorithm = "b2n"       ; Threads = 2; MinMemGb = 2; Params = @()} # CryptoNight-B2N 2 threads
-    [PSCustomObject]@{Algorithm = "fast"      ; Threads = 2; MinMemGb = 2; Params = @()} # CryptoNight-Fast (Masari) 2 threads
-    [PSCustomObject]@{Algorithm = "lite"      ; Threads = 2; MinMemGb = 2; Params = @()} # CryptoNight-Lite 2 threads
-    [PSCustomObject]@{Algorithm = "heavy"     ; Threads = 2; MinMemGb = 2; Params = @()} # CryptoNight-Heavy 2 threads
-    [PSCustomObject]@{Algorithm = "haven"     ; Threads = 2; MinMemGb = 2; Params = @()} # CryptoNight-Haven 2 threads
-    [PSCustomObject]@{Algorithm = "ipbc"      ; Threads = 2; MinMemGb = 2; Params = @()} # CryptoNight-PPBC 2 threads
-    [PSCustomObject]@{Algorithm = "marketcash"; Threads = 2; MinMemGb = 2; Params = @()} # CryptoNight-MarketCash 2 threads
-    [PSCustomObject]@{Algorithm = "normalv7"  ; Threads = 2; MinMemGb = 2; Params = @()} # CryptoNightV7 2 thread
-    [PSCustomObject]@{Algorithm = "stellitev4"; Threads = 2; MinMemGb = 2; Params = @()} # CryptoNight-Stellite 2 threads
-    #[PSCustomObject]@{Algorithm = "normal"    ; Threads = 1; MinMemGb = 2; Params = @()} # CryptoNight 1 thread, ASIC territory
+    # Note: For fine tuning directly edit config file in the miner binary directory
+    [PSCustomObject]@{Algorithm = "alloy"     ; Threads = 1; MinMemGb = 2} # CryptoNight-Alloy 1 thread
+    [PSCustomObject]@{Algorithm = "artocash"  ; Threads = 1; MinMemGb = 2} # CryptoNight-ArtoCash 1 thread
+    [PSCustomObject]@{Algorithm = "b2n"       ; Threads = 1; MinMemGb = 2} # CryptoNight-B2N 1 thread
+    [PSCustomObject]@{Algorithm = "fast"      ; Threads = 1; MinMemGb = 2} # CryptoNight-Fast (Masari) 1 thread
+    [PSCustomObject]@{Algorithm = "lite"      ; Threads = 1; MinMemGb = 2} # CryptoNight-Lite 1 thread
+    [PSCustomObject]@{Algorithm = "haven"     ; Threads = 1; MinMemGb = 2} # CryptoNight-Haven 1 thread
+    [PSCustomObject]@{Algorithm = "heavy"     ; Threads = 1; MinMemGb = 2} # CryptoNight-Heavy 1 thread
+    [PSCustomObject]@{Algorithm = "ipbc"      ; Threads = 1; MinMemGb = 2} # CryptoNight-PPBC 1 thread
+    [PSCustomObject]@{Algorithm = "marketcash"; Threads = 1; MinMemGb = 2} # CryptoNight-MarketCash 1 thread
+    [PSCustomObject]@{Algorithm = "normalv7"  ; Threads = 1; MinMemGb = 2} # CryptoNightV7 1 thread
+    [PSCustomObject]@{Algorithm = "stellitev4"; Threads = 1; MinMemGb = 2} # CryptoNight-Stellite 1 thread
+    [PSCustomObject]@{Algorithm = "alloy"     ; Threads = 2; MinMemGb = 2} # CryptoNight-Alloy 2 threads
+    [PSCustomObject]@{Algorithm = "artocash"  ; Threads = 2; MinMemGb = 2} # CryptoNight-ArtoCash 2 threads
+    [PSCustomObject]@{Algorithm = "b2n"       ; Threads = 2; MinMemGb = 2} # CryptoNight-B2N 2 threads
+    [PSCustomObject]@{Algorithm = "fast"      ; Threads = 2; MinMemGb = 2} # CryptoNight-Fast (Masari) 2 threads
+    [PSCustomObject]@{Algorithm = "lite"      ; Threads = 2; MinMemGb = 2} # CryptoNight-Lite 2 threads
+    [PSCustomObject]@{Algorithm = "heavy"     ; Threads = 2; MinMemGb = 2} # CryptoNight-Heavy 2 threads
+    [PSCustomObject]@{Algorithm = "haven"     ; Threads = 2; MinMemGb = 2} # CryptoNight-Haven 2 threads
+    [PSCustomObject]@{Algorithm = "ipbc"      ; Threads = 2; MinMemGb = 2} # CryptoNight-PPBC 2 threads
+    [PSCustomObject]@{Algorithm = "marketcash"; Threads = 2; MinMemGb = 2} # CryptoNight-MarketCash 2 threads
+    [PSCustomObject]@{Algorithm = "normalv7"  ; Threads = 2; MinMemGb = 2} # CryptoNightV7 2 thread
+    [PSCustomObject]@{Algorithm = "stellitev4"; Threads = 2; MinMemGb = 2} # CryptoNight-Stellite 2 threads
+    #[PSCustomObject]@{Algorithm = "normal"    ; Threads = 1; MinMemGb = 2} # CryptoNight 1 thread, ASIC territory
 )
-
-$CommonCommands = ""
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Advanced Micro Devices, Inc."
@@ -54,7 +52,8 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         
         $Miner_Device = @($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMemGb * 1000000000)})
 
-        if ($Pools.$Algorithm_Norm.Host -and $Miner_Device) {        
+        if ($Pools.$Algorithm_Norm.Host -and $Miner_Device) {
+        
             $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object ) | Select-Object) -join '-'
             
             $Parameters = [PSCustomObject]@{
@@ -75,7 +74,15 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                         }
                     })
                 }
-                Commands = " --cpool $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --cwallet $($Pools.$Algorithm_Norm.User) --cpassword $($Pools.$Algorithm_Norm.Pass) --ctls $($Pools.$Algorithm_Norm.SSL) --cnicehash $($Pools.$Algorithm_Norm.Name -eq 'NiceHash')$Params$CommonCommands"
+                Pools = [PSCustomObject]@{
+                    pools = @([PSCustomObject]@{
+                        pool = "$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)"
+                        wallet = $($Pools.$Algorithm_Norm.User)
+                        password = $($Pools.$Algorithm_Norm.Pass)
+                        pool_use_tls = $($Pools.$Algorithm_Norm.SSL)
+                        nicehash = $($Pools.$Algorithm_Norm.Name -eq 'NiceHash')
+                    })
+                }
             }
 
             [PSCustomObject]@{
