@@ -10,7 +10,7 @@ $Port = "52{0:d2}"
                 
 # Commands are case sensitive!
 $Commands = [PSCustomObject[]]@(
-    # Note: For fine tuning directly edit config file in the miner binary directory
+    # Note: For fine tuning directly edit Config_[MinerName]-[Algorithm]-[Port].txt in the miner binary directory
     [PSCustomObject]@{Algorithm = "alloy"     ; Threads = 1; MinMemGb = 2} # CryptoNight-Alloy 1 thread
     [PSCustomObject]@{Algorithm = "artocash"  ; Threads = 1; MinMemGb = 2} # CryptoNight-ArtoCash 1 thread
     [PSCustomObject]@{Algorithm = "b2n"       ; Threads = 1; MinMemGb = 2} # CryptoNight-B2N 1 thread
@@ -56,41 +56,45 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         
             $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object ) | Select-Object) -join '-'
             
-            $Parameters = [PSCustomObject]@{
-                Config = [PSCustomObject]@{
-                    api_enabled      = $true
-                    api_port         = [Int]$Miner_Port
-                    api_rig_name     = "$($Config.Pools.$($Pools.$Algorithm_Norm.Name).Worker)"
-                    cryptonight_type = $Algorithm
-                    intensity        = 0
-                    double_threads   = $false
-                    gpu_conf         = @($Miner_Device.Type_PlatformId_Index | Foreach-Object {
-                        [PSCustomObject]@{
-                            "id"        = $_  
-                            "intensity" = 0
-                            "threads"   = [Int]$Threads
-                            "platform"  = "OpenCL"
-                            #"worksize"  = [Int]8
-                        }
-                    })
+            $Arguments = @(
+                [PSCustomObject]@{
+                    Config = [PSCustomObject]@{
+                        api_enabled      = $true
+                        api_port         = [Int]$Miner_Port
+                        api_rig_name     = "$($Config.Pools.$($Pools.$Algorithm_Norm.Name).Worker)"
+                        cryptonight_type = $Algorithm
+                        intensity        = 0
+                        double_threads   = $false
+                        gpu_conf         = @($Miner_Device.Type_PlatformId_Index | Foreach-Object {
+                            [PSCustomObject]@{
+                                "id"        = $_  
+                                "intensity" = 0
+                                "threads"   = [Int]$Threads
+                                "platform"  = "OpenCL"
+                                #"worksize"  = [Int]8
+                            }
+                        })
+                    }
                 }
-                Pools = [PSCustomObject]@{
-                    pools = @([PSCustomObject]@{
-                        pool = "$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)"
-                        wallet = $($Pools.$Algorithm_Norm.User)
-                        password = $($Pools.$Algorithm_Norm.Pass)
-                        pool_use_tls = $($Pools.$Algorithm_Norm.SSL)
-                        nicehash = $($Pools.$Algorithm_Norm.Name -eq 'NiceHash')
-                    })
+                [PSCustomObject]@{
+                    Pools = [PSCustomObject]@{
+                        pools = @([PSCustomObject]@{
+                            pool = "$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)"
+                            wallet = $($Pools.$Algorithm_Norm.User)
+                            password = $($Pools.$Algorithm_Norm.Pass)
+                            pool_use_tls = $($Pools.$Algorithm_Norm.SSL)
+                            nicehash = $($Pools.$Algorithm_Norm.Name -eq 'NiceHash')
+                        })
+                    }
                 }
-            }
+            )
 
             [PSCustomObject]@{
                 Name       = $Miner_Name
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
-                Arguments  = $Parameters
+                Arguments  = $Arguments
                 HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                 API        = "SRBMiner"
                 Port       = $Miner_Port
