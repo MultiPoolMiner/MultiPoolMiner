@@ -118,9 +118,7 @@ if (Test-Path $ConfigFile) {
 }
 else {
     #Create new config file: Read command line parameters except ConfigFile
-    Write-Log -Level Info -Message "No valid config file found. Creating new config file $($ConfigFile) using defaults. "        
     $Config = [PSCustomObject]@{}
-    #Use resolved parameter values from command line
     $Config | Add-Member VersionCompatibility $Version
     $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
         if (Get-Variable $_ -ErrorAction SilentlyContinue) {
