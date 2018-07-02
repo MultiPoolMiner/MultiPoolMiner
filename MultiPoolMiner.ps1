@@ -599,7 +599,7 @@ while ($true) {
 
     Clear-Host
     #Get miners needing benchmarking
-    $MinersNeedingBenchmark = @($Miners | Where-Object {$_.HashRates.PSObject.Properties.Value -eq $null})
+    $MinersNeedingBenchmark = @($Miners | Where-Object {$_.HashRates.PSObject.Properties.Value -contains $null} | Select-Object Name -Unique)
     $API.MinersNeedingBenchmark = $MinersNeedingBenchmark
 
     #Display mining information
