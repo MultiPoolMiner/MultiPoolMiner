@@ -1,0 +1,71 @@
+<!--#include file="/parts/head.html" -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 id="title" data-navbaractive="navdevices" class="h2">Devices</h1>
+</div>
+<p>These are the devices (GPUs and CPUs) detected by MultiPoolMiner.</p>
+<table id="devices" class="table"
+  data-toggle="table"
+  data-url="/devices"
+  data-response-handler="formatDevices"
+  data-cache="false"
+  data-show-columns="true"
+  data-show-toggle="true"
+  data-show-refresh="true"
+  data-icons-prefix="fa"
+  data-icons="icons"
+  data-detail-view="true"
+  data-detail-formatter="detailFormatter"
+>
+  <thead>
+    <tr>
+      <th data-field="Name" data-sortable="true">Name</th>
+      <th data-field="Vendor" data-sortable="true">Vendor</th>
+      <th data-field="Model" data-sortable="true">Model</th>
+      <th data-field="tMemory" data-sortable="true">Memory</th>
+      <th data-field="tCores" data-sortable="true">Cores/Stream Processors</th>
+      <th data-field="tClockSpeed" data-sortable="true">Clock Speed</th>
+      <th data-field="tDriverVersion">Driver Version</th>
+    </tr>
+  </thead>
+</table>
+
+<!-- End of page scripts -->
+<script type="text/javascript">
+  function formatDevices(data) {
+  // This function can alter the returned data before building the table, formatting it in a way
+  // that is easier to display and manipulate in a table
+  $.each(data, function(index, item) {
+    // Format the device(s)
+    if (item.OpenCL) {
+      item.tMemory = formatBytes(item.OpenCL.GlobalMemSize)
+    } else {
+      item.tMemory = "N/A"
+    }
+    
+    if (item.OpenCL) {
+      item.tClockSpeed = item.OpenCL.MaxClockFrequency
+    } else if (item.Info) {
+      item.tClockSpeed = item.Info.MaxClockSpeed
+    } else {
+      item.tClockSpeed = "N/A"
+    }
+    
+    if (item.OpenCL) {
+      item.tDriverVersion = item.OpenCL.DriverVersion
+    } else {
+      item.tDriverVersion = "N/A"
+    }
+    
+    if (item.OpenCL) {
+      item.tCores = item.OpenCL.MaxComputeUnits
+    } else if (item.Info) {
+      item.tCores = item.Info.NumberOfLogicalProcessors
+    } else {
+      item.tCores = "N/A"
+    }
+    
+  });
+  return data;
+}
+</script>
+<!--#include file="/parts/foot.html" -->
