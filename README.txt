@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 20/06/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 05/07/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 ====================================================================
@@ -71,10 +71,10 @@ IMPORTANT NOTES:
 
 COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Usage section below for an example):
 
--region [Europe/US/Asia]
+-Region [Europe/US/Asia]
 	Choose your region or the region closest to you.
 
--poolname [ahashpool, ahashpoolcoins, blazepool, blockmasters, blockmasterscoins, hashrefinery, miningpoolhub, miningpoolhubcoins, nicehash, yiimp, zergpool, zergpoolcoins, zpool]
+-Poolname [ahashpool, ahashpoolcoins, blazepool, blockmasters, blockmasterscoins, hashrefinery, miningpoolhub, miningpoolhubcoins, nicehash, yiimp, zergpool, zergpoolcoins, zpool]
 	The following pools are currently supported (in alphabetical order): 
 
     ## AHashPool / AHashPoolCoins
@@ -126,22 +126,22 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 -ExcludePoolName
 	Same as the -poolname command but it is used to exclude unwanted mining pools (please see above).
 
--username 
+-UserName 
 	Your username you use to login to MiningPoolHub.
 
--workername
+-WorkerName
 	To identify your mining rig.	
 
--wallet
+-Wallet
 	Your Bitcoin payout address. Required when mining on AhashPool, BlazePool, Hash Refinery, Nicehash and Zpool.
 	
 -SSL
 	Specifying the -ssl command (without a boolean value of true or false) will restrict the miner application list to include only the miners that support secure connection.
 
--devicename
+-DeviceName
 	Choose the relevant GPU(s) and/or CPU mining. [CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.]
 
--algorithm
+-Algorithm
 	Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
 	The following algorithms are currently supported: 
 	   Bitcore, Blakecoin, Blake2s, BlakeVanilla, C11, CryptoNightV7, Ethash, X11, Decred, Equihash, Groestl, HMQ1725, HSR, JHA, Keccak, Lbry, Lyra2RE2, Lyra2z, MyriadGroestl, NeoScrypt, Pascal, Phi, Phi2, Phi1612, Polytimos, Quark, Qubit, Scrypt, SHA256, Sib, Skunk, Skein, Timetravel, Tribus, Veltor, X11, X11evo, X16R, X16S, X17, Yescrypt
@@ -155,44 +155,46 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 -ExcludeAlgorithm
 	Same as the -algorithm command but it is used to exclude unwanted algorithms (please see above). Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
 	
--minername
+-MinerName
 	Specify to only include (restrict to) certain miner applications. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
 
 -ExcludeMinerName
-	Exclude certain miners you don't want to use. It is useful if a miner is causing issues with your machine. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
+	Exclude certain miners you don't want to use. This is useful if a miner is causing issues with your machine. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
+	Important: Newer miners, e.g. ClaymoreEthash create several child-miner names, e.g. ClaymoreEthash-GPU#01-Pascal-40. These can also be used with '-ExcludeMinerName'.
 	
--currency [BTC, USD, EUR, GBP, ETH ...]
+-Currency [BTC, USD, EUR, GBP, ETH ...]
 	Choose the default currency or currencies your profit stats will be shown in.
 
--interval
+-Interval
 	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
 
--delay
+-Delay
 	Specify the number of seconds required to pass before opening each miner. It is useful if cards are sensitive to switching and need some extra time to recover (eg. clear DAG files from memory)
 
--donate
+-Donate
 	Donation of mining time in minutes per day to aaronsace. Default is 24, minimum is 10 minutes per day (less than 0.7% fee). The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
 	
--proxy
+-Proxy
 	Specify your proxy address if applicable, i.e http://192.0.0.1:8080
 
--watchdog
+-Watchdog
 	Include this command to enable the watchdog feature which detects and handles miner and other related failures.
 	It works on a unified interval that is defaulted to 60 seconds. Watchdog timers expire if three of those intervals pass without being kicked. There are three stages as to what action is taken when watchdog timers expire and is determined by the number of related expired timers.
 	- Stage 1: when 1 timer expires relating to one miner/algorithm combination, the one miner/algorithm combination is kicked
 	- Stage 2: when 2 timers expire relating to one miner file, the one miner file is kicked
 	- Stage 3: when 3 timers expire relating to one pool, the pool is kicked
 	Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
--minerstatusurl https://multipoolminer.io/monitor/miner.php
+
+-MinerstatusURL https://multipoolminer.io/monitor/miner.php
 	Report and monitor your mining rig's status by including the command above. Wallet address must be set even if you are only using MiningPoolHub as a pool. You can access the reported information by entering your wallet address on the https://multipoolminer.io/monitor web address. By using this service you understand and accept the terms and conditions detailed in this document (further below). 
 
--minerstatuskey
+-MinerstatusKey
 	By default the MPM monitor uses the BTC address (-wallet) to identify your mining machine (rig). Use --minerstatuskey [your-miner-status-key] to anonymize your rig. To get your minerstatuskey goto to https://multipoolminer.io/monitor
 
--switchingprevention
+-SwitchingPrevention
 	Since version 2.6, the delta value (integer) that was used to determine how often MultiPoolMiner is allowed to switch, is now user-configurable on a scale of 1 to infinity on an intensity basis. Default is 1 (Start.bat default is 2). Recommended values are 1-10 where 1 means the most frequent switching and 10 means the least switching. Please note setting this value to zero (0) will not turn this function off! Please see further explanation in MULTIPOOLMINER'S LOGIC section below. 
 
--disableautoupdate
+-DisableAutoUpdate
 	By default MPM will perform an automatic update on startup if a newer version is found. Set to 'true' to disable automatic update to latest MPM version. 
 
 -ShowMinerWindow
@@ -202,10 +204,17 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 	Use only use fastest miner per algo and device index. E.g. if there are 2 or more miners available to mine the same algo, only the fastest will ever be used, the slower ones will also be hidden in the summary screen.
 
 -ShowPoolBalances
-	Set to 'true' to have the balances of all active pools displayed on the summary screen.
-	
+	Display the balances of all enabled pools (excluding those that are excluded with 'ExcludeMinerName') on the summary screen and in the web GUI.
+	Note: Only balances in BTC are listed, other currencies are currently not supported.
+
 -ShowPoolBalancesExcludedPools
-	Set to 'true' to have the balances of all pools (including those that are excluded with 'ExcludeMinerName') displayed on the summary screen.
+	Display the balances of all pools (including those that are excluded with 'ExcludeMinerName') on the summary screen and in the web GUI.
+	Note: Only balances in BTC are listed, other currencies are currently not supported.
+
+-ConfigFile [Path\ConfigFile.txt]
+	The default config file name is '.\default.txt'
+	If the config file does not exist MPM will create a config file with default values. If the file name does not have an extension MPM will add .txt file name extension.
+	By default MPM will use the values from the command line. If you hardcode config values directly in the config file, then these values will override the command line parameters (see Advanced Configuration).
 
 
 SAMPLE USAGE (check "start.bat" file in root folder):
@@ -239,66 +248,60 @@ pause
 
 ADVANCED CONFIGURATION
 
-Advanced config options are available via Config.txt
+Advanced config options are available via config file
 
-Current versions support advanced configuration via 'Config.txt' in the MPM main directory.
+MPM supports customized configuration via config files. The default config file name is '.\Default.txt'.
+If you do not include the command line parameter -ConfigFile [Path\FileName.txt] the MPM will use the default file name. 
 
-If Config.txt does not exist, copy Config.default.txt and rename to Config.txt
+If the config file does not exist MPM will create a config file with default values. If the file name does not have an extension MPM will add .txt file name extension.
+The default config file contains only the parameters which are also available per command line. 
+Note: More config items are added to the live configuration during runtime. For full list of available config items at runtime see the API at http://localhost:3999/config. All items could also be added manually to the config file (use with caution as this might lead to unpredictable results).
 
-Config.txt is a JSON file and human readable / editable. A good primer for understanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
+The config file is a JSON file and human readable / editable. A good primer for understanding the JSON structure can be found here: https://www.tutorialspoint.com/json/index.htm
 
 Warning: The JSON file structure is very fragile - every comma counts, so be careful when editing this file manually. To test the validity of the structure use a web service like https://jsonblob.com (copy/paste the complete file).
 
-Default content of 'Config.txt'
+Sample content of 'Default.txt'
 
 {
-  "Pools": {
-    "MiningPoolHub": {
-      "User": "$UserName",
-      "Worker": "$WorkerName",
-      "API_ID": "$API_ID",
-      "API_Key": "$API_Key"
-    },
-    "MiningPoolHubCoins": {
-      "User": "$UserName",
-      "Worker": "$WorkerName",
-      "API_ID": "$API_ID",
-      "API_Key": "$API_Key"
-    },
-    "NiceHash": {
-      "BTC": "$Wallet",
-      "Worker": "$WorkerName"
-    },
-    "Zpool": {
-      "BTC": "$Wallet",
-      "Worker": "$WorkerName"
-    }
-  },
-  "Miners": {
-  },
-  "Interval": "$Interval",
-  "Region": "$Region",
-  "SSL": "$SSL",
-  "DeviceName": "$DeviceName",
-  "Algorithm": "$Algorithm",
-  "MinerName": "$MinerName",
-  "PoolName": "$PoolName",
-  "ExcludeAlgorithm": "$ExcludeAlgorithm",
-  "ExcludeMinerName": "$ExcludeMinerName",
-  "ExcludePoolName": "$ExcludePoolName",
-  "Currency": "$Currency",
-  "Donate": "$Donate",
-  "Proxy": "$Proxy",
-  "Delay": "$Delay",
-  "Watchdog": "$Watchdog",
-  "MinerStatusURL": "$MinerStatusURL",
-  "MinerStatusKey": "$MinerStatusKey",
-  "SwitchingPrevention": "$SwitchingPrevention",
-  "ShowMinerWindow": "$ShowMinerWindow",
-  "UseFastestMinerPerAlgoOnly": "$UseFastestMinerPerAlgoOnly",
-  "ShowPoolBalances":  "$ShowPoolBalances",
-  "ShowPoolBalancesForExcludedPools":  "$ShowPoolBalancesForExcludedPools"  
+    "VersionCompatibility":  "3",
+    "Wallet":  "$Wallet",
+    "UserName":  "$UserName",
+    "WorkerName":  "$WorkerName",
+    "API_ID":  "$API_ID",
+    "API_Key":  "$API_Key",
+    "Interval":  "$Interval",
+    "Region":  "$Region",
+    "SSL":  "$SSL",
+    "DeviceName":  "$DeviceName",
+    "Algorithm":  "$Algorithm",
+    "MinerName":  "$MinerName",
+    "PoolName":  "$PoolName",
+    "ExcludeAlgorithm":  "$ExcludeAlgorithm",
+    "ExcludeMinerName":  "$ExcludeMinerName",
+    "ExcludePoolName":  "$ExcludePoolName",
+    "Currency":  "$Currency",
+    "Donate":  "$Donate",
+    "Proxy":  "$Proxy",
+    "Delay":  "$Delay",
+    "Watchdog":  "$Watchdog",
+    "MinerStatusUrl":  "$MinerStatusUrl",
+    "MinerStatusKey":  "$MinerStatusKey",
+    "SwitchingPrevention":  "$SwitchingPrevention",
+    "DisableAutoUpdate":  "$DisableAutoUpdate",
+    "ShowMinerWindow":  "$ShowMinerWindow",
+    "UseFastestMinerPerAlgoOnly":  "$UseFastestMinerPerAlgoOnly",
+    "IgnoreCosts":  "$IgnoreCosts",
+    "ShowPoolBalances":  "$ShowPoolBalances",
+    "ShowPoolBalancesExcludedPools":  "$ShowPoolBalancesExcludedPools",
+    "Pools":  {
+
+              },
+    "Miners":  {
+
+               }
 }
+
 
 There is a section for Pools, Miners and a general section
 
@@ -311,7 +314,7 @@ To change payout currency of a pool
 If a pool allows payout in another currency than BTC you can change this.
 Note: Not all pools support this, for more information consult the pools web page
 
-The default pool config might look like this:
+For each pool you can statically add a section similar to this (see http://localhost:3999/config):
 
     "Zpool": {
         "BTC": "$Wallet",
@@ -321,7 +324,7 @@ The default pool config might look like this:
 The payout currency is defined by this line:
 "BTC": "$Wallet", (MPM will use the the wallet address from the start.bat file)
 
-E.g. to change the payout currency for Zpool to LiteCoin replace the line for BTC with "LTC": "<YOUR_LITECOIN_ADDRESS>", (of course you  need to insert a real LTC address)
+E.g. to change the payout currency for Zpool to LiteCoin replace the line for BTC with "LTC": "<YOUR_LITECOIN_ADDRESS>", (of course you need to insert a real LTC address)
 
     "Zpool": {
         "LTC": "<YOUR_LITECOIN_ADDRESS>",
@@ -338,12 +341,12 @@ Advanced general configuration
 
 Settings in this section affect the overall behaviour of MPM.
 
+
 To show miner windows
 
 By default MPM hides most miner windows as to not steal focus . All miners write their output to files in the Log folder.
-Note: Showing the miner windows disables writing the miner output to log files. Miners of API type 'Wrapper' will remain hidden.
 
-To show the miner windows add '"ShowMinerWindow":  true' to the general section in Config.txt:
+To show the miner windows add '"ShowMinerWindow":  true' to the general section:
 
 {
     ...
@@ -351,7 +354,27 @@ To show the miner windows add '"ShowMinerWindow":  true' to the general section 
     "ShowMinerWindow":  true,
     ...
 }
+Note: Showing the miner windows disables writing the miner output to log files. Miners of API type 'Wrapper' will remain hidden.
 
+
+Pool Balances
+
+MPM can gather the pending balances at all configured pools.MPM can gather the pending BTC balances from all configured pools.
+
+To display the balances of all enabled pools (excluding those that are excluded with 'ExcludeMinerName') on the summary screen and in the web GUI add '"ShowPoolBalances":  true' to the general section:
+{
+    ...
+	"ShowPoolBalances":  true
+    ...
+}
+	
+To display the balances of all pools (including those that are excluded with 'ExcludeMinerName') on the summary screen and in the web GUI '"ShowPoolBalances":  true' to the general section:
+{
+    ...
+	"ShowPoolBalancesExcludedPools":  true
+    ...
+}
+Note: Only balances in BTC are listed, other currencies are currently not supported.
 
 
 ====================================================================
