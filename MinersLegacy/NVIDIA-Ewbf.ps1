@@ -1,27 +1,9 @@
 using module ..\Include.psm1
 
-param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
-    [PSCustomObject]$Devices
-)
-
-if (-not $Devices.NVIDIA) {return} # No NVIDIA mining device present in system
-
-
-$DriverVersion = (Get-Devices).NVIDIA.Platform.Version -replace ".*CUDA ",""
-$RequiredVersion = "9.1.00"
-if ($DriverVersion -lt $RequiredVersion) {
-    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers to 390.77 or newer. "
-    return
-}
-
 $Type = "NVIDIA"
-$Path = ".\Bin\NVIDIA-EWBF-Equihash-030\miner.exe"
-$Uri = "http://semitest.000webhostapp.com/binary/EWBF%20Equihash%20miner%20v0.3.zip"
+$Path = ".\Bin\NVIDIA-EWBF-Equihash\miner.exe"
+$ManualUri = "https://mega.nz/#F!fsAlmZQS!CwVgFfBDduQI-CbwVkUEpQ"
 $Port = 42000
-$Fee = 0
 
 $Commands = [PSCustomObject]@{
     "equihash-BTG"   = @("144_5","--pers BgoldPoW","") #EquihashBTG
@@ -37,8 +19,6 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
 
     $Algorithm_Norm = Get-Algorithm $_
 
-    $HashRate = $Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week * (1 - $Fee / 100)
-
     [PSCustomObject]@{
         Type           = $Type
         Path           = $Path
@@ -47,7 +27,5 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         API            = "DSTM"
         Port           = $Port
         URI            = $Uri
-        MinerFee       = @($Fee)
-        ExtendInterval = $ExtendInterval
     }
 }
