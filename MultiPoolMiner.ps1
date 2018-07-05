@@ -18,10 +18,6 @@ param(
     [Parameter(Mandatory = $false)]
     [Int]$Interval = 60, #seconds before reading hash rate from miners
     [Parameter(Mandatory = $false)]
-    [Array]$ExtendIntervalAlgorithm = @("X16R", "X16S"), #Extend interval duration by a factor of 10x $Interval for these algorithms
-    [Parameter(Mandatory = $false)]
-    [Array]$ExtendIntervalMinerName = @("PalginNvidia"), #Extend interval duration by a factor of 10x $Interval for these miners
-    [Parameter(Mandatory = $false)]
     [Alias("Location")]
     [String]$Region = "europe", #europe/us/asia
     [Parameter(Mandatory = $false)]
@@ -59,7 +55,7 @@ param(
     [Alias("Uri", "Url")]
     [String]$MinerStatusUrl = "", #i.e https://multipoolminer.io/monitor/miner.php
     [Parameter(Mandatory = $false)]
-    [String]$MinerStatusKey = "",
+    [String]$MinerStatusKey = $Wallet, #For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
     [Parameter(Mandatory = $false)]
     [Double]$SwitchingPrevention = 1, #zero does not prevent miners switching
     [Parameter(Mandatory = $false)]
@@ -73,7 +69,9 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$ShowPoolBalances = $false,
     [Parameter(Mandatory = $false)]
-    $ShowPoolBalancesForExcludedPools = $false    
+    [Switch]$ShowPoolBalancesExcludedPools = $true,    
+    [Parameter(Mandatory = $false)]
+    [String]$ConfigFile = "Default.txt"
 )
 
 Clear-Host
@@ -83,6 +81,10 @@ $Strikes = 3
 $SyncWindow = 5 #minutes
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+
+#Append .txt extension if no extension is given
+if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
+
 Import-Module NetSecurity -ErrorAction Ignore
 Import-Module Defender -ErrorAction Ignore
 Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore
@@ -111,6 +113,31 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 #Set process priority to BelowNormal to avoid hash rate drops on systems with weak CPUs
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
 
+if (Test-Path $ConfigFile) {
+    Write-Log -Level Info "Using configuration file ($(Resolve-Path $ConfigFile)). "
+}
+else {
+    #Create new config file: Read command line parameters except ConfigFile
+    $Config = [PSCustomObject]@{}
+    $Config | Add-Member VersionCompatibility $Version
+    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
+        if (Get-Variable $_ -ErrorAction SilentlyContinue) {
+            $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
+        }
+    }
+    $Config | Add-Member Pools ([PSCustomObject]@{})
+    $Config | Add-Member Miners ([PSCustomObject]@{})
+    Try {
+        $Config | ConvertTo-Json | Set-Content $ConfigFile -Encoding utf8
+        Write-Log -Level Info -Message "No valid config file found. Creating new config file ($(Resolve-Path $ConfigFile)) using defaults. "
+    }
+    Catch {
+        Write-Log -Level Error "Error writing config file ($($ConfigFile)). Cannot continue. "
+        Start-Sleep 10
+        Exit
+    }
+}
+
 if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -Recurse | Unblock-File}
 if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue) -and (Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {
     Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) "-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1'; Add-MpPreference -ExclusionPath '$(Convert-Path .)'" -Verb runAs
@@ -130,65 +157,21 @@ Import-Module .\API.psm1
 Start-APIServer
 $API.Version = $Version
 
-# Create config.txt if it is missing
-if (!(Test-Path "Config.txt")) {
-    if (Test-Path "Config.default.txt") {
-        Copy-Item -Path "Config.default.txt" -Destination "Config.txt"
-    }
-    else {
-        Write-Log -Level Error "Config.txt and Config.default.txt are missing. Cannot continue. "
-        Start-Sleep 10
-        Exit
-    }
-}
-
 while ($true) {
-    #Load the config
     $ConfigBackup = $Config
-    if (Test-Path "Config.txt") {
-        $Config = Get-ChildItemContent "Config.txt" -Parameters @{
-            Wallet                        = $Wallet
-            UserName                      = $UserName
-            WorkerName                    = $WorkerName
-            API_ID                        = $API_ID
-            API_Key                       = $API_Key
-            Interval                      = $Interval
-            ExtendIntervalAlgorithm       = $ExtendIntervalAlgorithm
-            ExtendIntervalMinerName       = $ExtendIntervalMinerName
-            Region                        = $Region
-            SSL                           = $SSL
-            DeviceName                    = $DeviceName
-            Algorithm                     = $Algorithm
-            MinerName                     = $MinerName
-            PoolName                      = $PoolName
-            ExcludeAlgorithm              = $ExcludeAlgorithm
-            ExcludeMinerName              = $ExcludeMinerName
-            ExcludePoolName               = $ExcludePoolName
-            Currency                      = $Currency
-            Donate                        = $Donate
-            Proxy                         = $Proxy
-            Delay                         = $Delay
-            Watchdog                      = $Watchdog
-            MinerStatusURL                = $MinerStatusURL
-            MinerStatusKey                = $MinerStatusKey
-            SwitchingPrevention           = $SwitchingPrevention
-            ShowMinerWindow               = $ShowMinerWindow
-            UseFastestMinerPerAlgoOnly    = $UseFastestMinerPerAlgoOnly
-            IgnoreCosts                   = $IgnoreCosts
-            ShowPoolBalances              = $ShowPoolBalances
-            ShowPoolBalancesExcludedPools = $ShowPoolBalancesForExcludedPools
-        } | Select-Object -ExpandProperty Content
+    #Load the config, read command line parameters except ConfigFile, use default values for those that are not in command line
+    $Parameters = @{}
+    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
+        $Parameters.Add($_ , (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
     }
+    $Config = Get-ChildItemContent $ConfigFile -Parameters $Parameters | Select-Object -ExpandProperty Content
 
-    #Error in Config.txt
+    #Error in config file
     if ($Config -isnot [PSCustomObject]) {
-        Write-Log -Level Error "Config.txt is invalid. Cannot continue. "
+        Write-Log -Level Error "$($ConfigFile) is invalid. Cannot continue. "
         Start-Sleep 10
         Exit
     }
-
-    #For backwards compatibility, set the MinerStatusKey to $Wallet if it's not specified
-    if ($Wallet -and -not $Config.MinerStatusKey) {$Config.MinerStatusKey = $Wallet}
 
     Get-ChildItem "Pools" -File | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
         $Config.Pools | Add-Member $_.BaseName (
@@ -349,8 +332,8 @@ while ($true) {
             Where-Object {(Compare-Object @($Devices.Name | Select-Object) @($_.DeviceName | Select-Object) | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0} | 
             Where-Object {($Config.Algorithm.Count -eq 0 -or (Compare-Object $Config.Algorithm $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0) -and ((Compare-Object $Pools.PSObject.Properties.Name $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0)} | 
             Where-Object {$Config.ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $Config.ExcludeAlgorithm $_.HashRates.PSObject.Properties.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0} | 
-            Where-Object {$Config.MinerName.Count -eq 0 -or (Compare-Object $Config.MinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
-            Where-Object {$Config.ExcludeMinerName.Count -eq 0 -or (Compare-Object $Config.ExcludeMinerName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
+            Where-Object {$Config.MinerName.Count -eq 0 -or (Compare-Object $Config.MinerName ($_.Name -split "-" | Select-Object -Index 0) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
+            Where-Object {$Config.ExcludeMinerName.Count -eq 0 -or (Compare-Object $Config.ExcludeMinerName ($_.Name -split "-" | Select-Object -Index 0) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
     }
     Write-Log "Calculating profit for each miner. "
     $AllMiners | ForEach-Object {
@@ -520,6 +503,7 @@ while ($true) {
                 Benchmarked          = 0
                 Pool                 = $Miner.Pools.PSObject.Properties.Value.Name
                 ShowMinerWindow      = $Config.ShowMinerWindow
+                ExtendInterval       = $Miner.ExtendInterval
             }
         }
     }
@@ -528,8 +512,8 @@ while ($true) {
     $ActiveMiners | Where-Object {$_.GetStatus() -EQ "Running"} | ForEach-Object {$_.Profit_Bias = $_.Profit_Unbias}
 
     #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
-    $BestMiners = $ActiveMiners | Select-Object DeviceName -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Bias -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1)}
-    $BestMiners_Comparison = $ActiveMiners | Select-Object DeviceName -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Comparison -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1)}
+    $BestMiners = $ActiveMiners | Select-Object DeviceName -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Bias -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count}, {$_.Benchmarked}, {$_.ExtendInterval} | Select-Object -First 1)}
+    $BestMiners_Comparison = $ActiveMiners | Select-Object DeviceName -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_ | Measure-Object Profit_Comparison -Sum).Sum}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count}, {$_.Benchmarked}, {$_.ExtendInterval} | Select-Object -First 1)}
     $Miners_Device_Combos = (Get-Combination ($ActiveMiners | Select-Object DeviceName -Unique) | Where-Object {(Compare-Object ($_.Combination | Select-Object -ExpandProperty DeviceName -Unique) ($_.Combination | Select-Object -ExpandProperty DeviceName) | Measure-Object).Count -eq 0})
     $BestMiners_Combos = $Miners_Device_Combos | ForEach-Object {
         $Miner_Device_Combo = $_.Combination
@@ -615,7 +599,7 @@ while ($true) {
 
     Clear-Host
     #Get miners needing benchmarking
-    $MinersNeedingBenchmark = @($Miners | Where-Object {$_.HashRates.PSObject.Properties.Value -eq $null})
+    $MinersNeedingBenchmark = @($Miners | Where-Object {$_.HashRates.PSObject.Properties.Value -contains $null})
     $API.MinersNeedingBenchmark = $MinersNeedingBenchmark
 
     #Display mining information
@@ -698,14 +682,20 @@ while ($true) {
     Get-Job -State Completed | Remove-Job
     [GC]::Collect()
 
-    #When benchmarking miners/algorithm in ExtendInterval... add 10x $Config.Interval to $StatEnd, extend StatSpan, extend watchdog times
-    $BenchmarkingMiners = $RunningMiners | Where-Object {$_.Speed -eq $null}
-    if ($BenchmarkingMiners | Where-Object {$Config.ExtendIntervalMinerName -icontains $_.Name -or ($_.Algorithm | Where-Object {$Config.ExtendIntervalAlgorithm -icontains $_})}) {
-        $StatEnd = $StatEnd.AddSeconds($Config.Interval * 10)
+    #Benchmarking miners/algorithm with ExtendInterval
+    $Multiplier = 0
+    $RunningMiners | Where-Object {$_.Speed -eq $null} | ForEach-Object {
+        if ($_.ExtendInterval -ge $Multiplier) {$Multiplier = $_.ExtendInterval}
+    }
+    
+    #Multiply $Config.Interval and add it to $StatEnd, extend StatSpan, extend watchdog times
+    if ($Multiplier -gt 0) {
+        if ($Multiplier -gt 10) {$Multiplier = 10}
+        $StatEnd = $StatEnd.AddSeconds($Config.Interval * $Multiplier)
         $StatSpan = New-TimeSpan $StatStart $StatEnd
         $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
         $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
-        Write-Log "Benchmarking watchdog sensitive algorithm or miner. Increasing interval time temporarily to 10x interval ($($Config.Interval * 10) seconds). "
+        Write-Log "Benchmarking watchdog sensitive algorithm or miner. Increasing interval time temporarily to $($Multiplier)x interval ($($Config.Interval * $($Multiplier)) seconds). "
     }
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
@@ -734,13 +724,13 @@ while ($true) {
 
         if ($Miner.GetStatus() -eq "Running" -or $Miner.New) {
             $Miner.Algorithm | ForEach-Object {
-                $Miner_Speed = $Miner.GetHashRate($_, $Interval, $Miner.New)
+                $Miner_Speed = $Miner.GetHashRate($_, $Config.Interval, $Miner.New)
                 $Miner.Speed_Live += [Double]$Miner_Speed
 
-                if ($Miner.New -and (-not $Miner_Speed)) {$Miner_Speed = $Miner.GetHashRate($_, ($Interval * $Miner.Benchmarked), ($Miner.Benchmarked -lt $Strikes))}
+                if ($Miner.New -and (-not $Miner_Speed)) {$Miner_Speed = $Miner.GetHashRate($_, ($Config.Interval * $Miner.Benchmarked), ($Miner.Benchmarked -lt $Strikes))}
 
                 if ((-not $Miner.New) -or $Miner_Speed -or $Miner.Benchmarked -ge ($Strikes * $Strikes) -or $Miner.GetActivateCount() -ge $Strikes) {
-                    $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Speed -Duration $StatSpan -FaultDetection ($Config.ExtendIntervalAlgorithm -inotcontains $_ -and $Config.ExtendIntervalMinerName -inotcontains $Miner.Name)
+                    $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Speed -Duration $StatSpan -FaultDetection (-not $Miner.ExtendInterval)
                 }
 
                 #Update watchdog timer

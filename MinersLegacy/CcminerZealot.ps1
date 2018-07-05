@@ -9,7 +9,7 @@ $Commands = [PSCustomObject]@{
     "aeriumx"    = "" #AeriumX, new in 1.11
     "bitcore"    = "" #Bitcore
     "c11"        = "" #C11, new in 1.11
-    "phi"        = "" #PHI
+    "phi"        = "" #Phi
     "phi2"       = "" #Phi2
     "polytimos"  = "" #Polytimos
     "skunk"      = "" #Skunk, new in 1.11
@@ -30,7 +30,8 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     $Algorithm_Norm = Get-Algorithm $_
 
     Switch ($Algorithm_Norm) {
-        "PHI2"   {$ExtendInterval = 3}
+        "PHI"   {$ExtendInterval = 3}
+        "PHI2"  {$ExtendInterval = 3}
         "X16R"  {$ExtendInterval = 10}
         "X16S"  {$ExtendInterval = 10}
         default {$ExtendInterval = 0}
