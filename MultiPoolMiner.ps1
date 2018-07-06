@@ -125,10 +125,8 @@ else {
             $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
         }
     }
-
     $Config | Add-Member Pools ([PSCustomObject]@{})
     $Config | Add-Member Miners ([PSCustomObject]@{})
-
     Try {
         $Config | ConvertTo-Json | Set-Content $ConfigFile -Encoding utf8
         Write-Log -Level Info -Message "No valid config file found. Creating new config file ($(Resolve-Path $ConfigFile)) using defaults. "
