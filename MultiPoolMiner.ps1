@@ -112,34 +112,33 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
 
 $Config = [PSCustomObject]@{}
-if ($PSBoundParameters.ConfigFile) {
-    #Append .txt extension if no extension is given
-    if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
-    if (Test-Path $ConfigFile) {
-        Write-Log -Level Info "Using configuration file ($(Resolve-Path $ConfigFile)). "
+
+#Append .txt extension if no extension is given
+if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
+if (Test-Path $ConfigFile) {
+    Write-Log -Level Info "Using configuration file ($(Resolve-Path $ConfigFile)). "
+}
+else {
+    #Create new config file: Read command line parameters except ConfigFile
+    $Config | Add-Member VersionCompatibility $Version
+
+    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
+        if (Get-Variable $_ -ErrorAction SilentlyContinue) {
+            $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
+        }
     }
-    else {
-        #Create new config file: Read command line parameters except ConfigFile
-        $Config | Add-Member VersionCompatibility $Version
 
-        $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
-            if (Get-Variable $_ -ErrorAction SilentlyContinue) {
-                $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
-            }
-        }
+    $Config | Add-Member Pools ([PSCustomObject]@{})
+    $Config | Add-Member Miners ([PSCustomObject]@{})
 
-        $Config | Add-Member Pools ([PSCustomObject]@{})
-        $Config | Add-Member Miners ([PSCustomObject]@{})
-
-        Try {
-            $Config | ConvertTo-Json | Set-Content $ConfigFile -Encoding utf8
-            Write-Log -Level Info -Message "No valid config file found. Creating new config file ($(Resolve-Path $ConfigFile)) using defaults. "
-        }
-        Catch {
-            Write-Log -Level Error "Error writing config file ($($ConfigFile)). Cannot continue. "
-            Start-Sleep 10
-            Exit
-        }
+    Try {
+        $Config | ConvertTo-Json | Set-Content $ConfigFile -Encoding utf8
+        Write-Log -Level Info -Message "No valid config file found. Creating new config file ($(Resolve-Path $ConfigFile)) using defaults. "
+    }
+    Catch {
+        Write-Log -Level Error "Error writing config file ($($ConfigFile)). Cannot continue. "
+        Start-Sleep 10
+        Exit
     }
 }
 
@@ -162,13 +161,11 @@ $API.Version = $Version
 while ($true) {
     $ConfigBackup = $Config
     #Load the config, read command line parameters except ConfigFile, use default values for those that are not in command line
-    if ($PSBoundParameters.ConfigFile) {
-        $Parameters = @{}
-        $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
-            $Parameters.Add($_ , (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
-        }
-        $Config = Get-ChildItemContent $ConfigFile -Parameters $Parameters | Select-Object -ExpandProperty Content
+    $Parameters = @{}
+    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
+        $Parameters.Add($_ , (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
     }
+    $Config = Get-ChildItemContent $ConfigFile -Parameters $Parameters | Select-Object -ExpandProperty Content
     #Add default values for parameters that are not yet in config
     $Config | Add-Member Pools ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
     $Config | Add-Member Miners ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
