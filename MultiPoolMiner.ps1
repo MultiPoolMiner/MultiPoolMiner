@@ -97,7 +97,6 @@ $StatEnd = $Timer
 $DecayStart = $Timer
 $DecayPeriod = 60 #seconds
 $DecayBase = 1 - 0.1 #decimal percentage
-$RunsCompleted = 0 #Number of runs
 
 $WatchdogTimers = @()
 $ActiveMiners = @()
@@ -112,7 +111,6 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
 
 $Config = [PSCustomObject]@{}
-
 #Append .txt extension if no extension is given
 if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
 if (Test-Path $ConfigFile) {
@@ -146,6 +144,9 @@ if (Get-Command "Unblock-File" -ErrorAction SilentlyContinue) {Get-ChildItem . -
 if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue) -and (Get-MpPreference).ExclusionPath -notcontains (Convert-Path .)) {
     Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) "-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1'; Add-MpPreference -ExclusionPath '$(Convert-Path .)'" -Verb runAs
 }
+
+#Check for software updates
+if (-not $DisableAutoUpdate -and (Test-Path .\Updater.ps1)) {$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1}
 
 #Set donation parameters
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
@@ -187,9 +188,6 @@ while ($true) {
         Start-Sleep 10
         Exit
     }
-
-    #Check for software updates, only check once
-    if ($RunsCompleted -eq 0 -and -not $Config.DisableAutoUpdate -and (Test-Path .\Updater.ps1)) {$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1}
 
     Get-ChildItem "Pools" -File | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
         $Config.Pools | Add-Member $_.BaseName (
@@ -775,7 +773,6 @@ while ($true) {
         }
     }
     Write-Log "Starting next run. "
-    $RunsCompleted++
 }
 
 #Stop the log
