@@ -11,6 +11,7 @@
     "argon2d4096":  "Argon2dUIS",
     "argon2d500":  "Argon2dDYN",
     "axiom":  "Axiom",
+    "balloon": "Balloon",
     "bastion":  "Bastion",
     "bitcore":  "Bitcore",
     "blake":  "Blakecoin",
