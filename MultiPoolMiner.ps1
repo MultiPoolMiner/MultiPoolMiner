@@ -100,6 +100,7 @@ $StatEnd = $Timer
 $DecayStart = $Timer
 $DecayPeriod = 60 #seconds
 $DecayBase = 1 - 0.1 #decimal percentage
+$RunsCompleted = 0 #number of completed runs
 
 $WatchdogTimers = @()
 $ActiveMiners = @()
@@ -143,9 +144,6 @@ if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpC
     Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) "-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1'; Add-MpPreference -ExclusionPath '$(Convert-Path .)'" -Verb runAs
 }
 
-#Check for software updates
-if (-not $DisableAutoUpdate -and (Test-Path .\Updater.ps1)) {$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1}
-
 #Set donation parameters
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
 $WalletDonate = @("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb", "1Fonyo1sgJQjEzqp1AxgbHhGkCuNrFt6v9")[[Math]::Floor((Get-Random -Minimum 1 -Maximum 11) / 10)]
@@ -156,6 +154,7 @@ $WorkerNameDonate = "multipoolminer"
 Import-Module .\API.psm1
 Start-APIServer
 $API.Version = $Version
+$API.RunsCompleted = $RunsCompleted
 
 while ($true) {
     $ConfigBackup = $Config
@@ -172,6 +171,9 @@ while ($true) {
         Start-Sleep 10
         Exit
     }
+
+    #Check for software updates, only check once
+    if ($RunsCompleted -eq 0 -and -not $Config.DisableAutoUpdate -and (Test-Path .\Updater.ps1)) {$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1}
 
     Get-ChildItem "Pools" -File | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
         $Config.Pools | Add-Member $_.BaseName (
@@ -744,6 +746,8 @@ while ($true) {
         }
     }
     Write-Log "Starting next run. "
+    $RunsCompleted++
+    $API.RunsCompleted = $RunsCompleted
 }
 
 #Stop the log
