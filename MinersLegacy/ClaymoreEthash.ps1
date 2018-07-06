@@ -8,8 +8,8 @@ param(
 )
 
 $Path = ".\Bin\Ethash-Claymore\EthDcrMiner64.exe"
-$HashSHA256 = "11743A7B0F8627CEB088745F950557E303C7350F8E4241814C39904278204580"
-$URI = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethdcrminer64/ClaymoreDual_v11.7.zip"
+$HashSHA256 = "41FDBE471F168CB82A2931DCB009CA236DC8280C808F29F415DDE3A86939D4B4"
+$URI = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethdcrminer64/ClaymoreDual_v11.8.zip"
 $Port = "50{0:d2}"
 
 $Commands = [PSCustomObject[]]@(
