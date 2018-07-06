@@ -119,7 +119,6 @@ if (Test-Path $ConfigFile) {
 else {
     #Create new config file: Read command line parameters except ConfigFile
     $Config | Add-Member VersionCompatibility $Version
-
     $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
         if (Get-Variable $_ -ErrorAction SilentlyContinue) {
             $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
