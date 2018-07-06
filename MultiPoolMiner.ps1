@@ -154,6 +154,7 @@ $WorkerNameDonate = "multipoolminer"
 Import-Module .\API.psm1
 Start-APIServer
 $API.Version = $Version
+$API.RunsCompleted = $RunsCompleted
 
 while ($true) {
     $ConfigBackup = $Config
@@ -746,6 +747,7 @@ while ($true) {
     }
     Write-Log "Starting next run. "
     $RunsCompleted++
+    $API.RunsCompleted = $RunsCompleted
 }
 
 #Stop the log
