@@ -110,7 +110,6 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 #Set process priority to BelowNormal to avoid hash rate drops on systems with weak CPUs
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
 
-$Config = [PSCustomObject]@{}
 #Append .txt extension if no extension is given
 if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
 if (Test-Path $ConfigFile) {
@@ -118,6 +117,7 @@ if (Test-Path $ConfigFile) {
 }
 else {
     #Create new config file: Read command line parameters except ConfigFile
+    $Config = [PSCustomObject]@{}
     $Config | Add-Member VersionCompatibility $Version
     $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
         if (Get-Variable $_ -ErrorAction SilentlyContinue) {
