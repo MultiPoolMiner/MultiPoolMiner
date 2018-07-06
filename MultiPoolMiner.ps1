@@ -170,6 +170,8 @@ while ($true) {
         $Config = Get-ChildItemContent $ConfigFile -Parameters $Parameters | Select-Object -ExpandProperty Content
     }
     #Add default values for parameters that are not yet in config
+    $Config | Add-Member Pools ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
+    $Config | Add-Member Miners ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
     $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
         if (Get-Variable $_ -ErrorAction SilentlyContinue) {
             $Config | Add-member $_ (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue) -ErrorAction SilentlyContinue
