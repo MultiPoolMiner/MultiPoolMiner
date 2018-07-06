@@ -100,6 +100,7 @@ $StatEnd = $Timer
 $DecayStart = $Timer
 $DecayPeriod = 60 #seconds
 $DecayBase = 1 - 0.1 #decimal percentage
+$RunsCompleted = 0 #number of completed runs
 
 $WatchdogTimers = @()
 $ActiveMiners = @()
@@ -170,8 +171,8 @@ while ($true) {
         Exit
     }
 
-    #Check for software updates, only check once ($API.Config is not present on first run)
-    if (-not $API.Config -and -not $Config.DisableAutoUpdate -and (Test-Path .\Updater.ps1)) {$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1}
+    #Check for software updates, only check once
+    if ($RunsCompleted -eq 0 -and -not $Config.DisableAutoUpdate -and (Test-Path .\Updater.ps1)) {$Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($Version, $PSVersionTable.PSVersion, "") -FilePath .\Updater.ps1}
 
     Get-ChildItem "Pools" -File | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
         $Config.Pools | Add-Member $_.BaseName (
@@ -744,6 +745,7 @@ while ($true) {
         }
     }
     Write-Log "Starting next run. "
+    $RunsCompleted++
 }
 
 #Stop the log
