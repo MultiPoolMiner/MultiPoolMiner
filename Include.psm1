@@ -582,19 +582,16 @@ function Get-Device {
     [array]$Devices = $Devices | Where-Object {$_.Type -ne "Cpu"}
 
     $CPUIndex = 0
-    Get-CimInstance -ClassName Win32_Processor | Foreach-Object {
-        # Vendor, type and platform are all the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
+    Get-CimInstance -ClassName CIM_Processor | Foreach-Object {
+        # Vendor and type the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
         $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
         $Device = [PSCustomObject]@{
             Index = [Int]$Index
-            PlatformId = [Int]$PlatformId
-            PlatformId_Index = $CPUIndex
-            Type_PlatformId_Index = $CPUIndex
             Vendor = $CPUInfo.Manufacturer
             Type_Vendor_Index = $CPUIndex
             Type = "Cpu"
             Type_Index = $CPUIndex
-            Info = $CPUInfo
+            CIM = $CPUInfo
             Model = $CPUInfo.Name
         }
 
