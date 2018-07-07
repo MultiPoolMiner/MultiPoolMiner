@@ -37,21 +37,7 @@ $PhiPhiPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
     $PhiPhiPool_Algorithm = $_
     $PhiPhiPool_Algorithm_Norm = Get-Algorithm $PhiPhiPool_Algorithm
 
-    $Divisor = 1000000
-
-    switch ($PhiPhiPool_Algorithm_Norm) {
-        # values in mBTC/MH/day, per GH for sha & blake algos
-        "blake2s"   {$Divisor *= 1000}
-        "blakecoin" {$Divisor *= 1000}
-        "decred"    {$Divisor *= 1000}
-        "equihash"  {$Divisor /= 1000}
-        "keccak"    {$Divisor *= 1000}
-        "keccakc"   {$Divisor *= 1000}
-        "quark"     {$Divisor *= 1000}
-        "qubit"     {$Divisor *= 1000}
-        "scrypt"    {$Divisor *= 1000}
-        "x11"       {$Divisor *= 1000}
-    }
+    $Divisor = 1000000 * [Double]$PhiPhiPool_Request.$_.mbtc_mh_factor
 
     if ((Get-Stat -Name "$($Name)_$($PhiPhiPool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($PhiPhiPool_Algorithm_Norm)_Profit" -Value ([Double]$PhiPhiPool_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
     else {$Stat = Set-Stat -Name "$($Name)_$($PhiPhiPool_Algorithm_Norm)_Profit" -Value ([Double]$PhiPhiPool_Request.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
