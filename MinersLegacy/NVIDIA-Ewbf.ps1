@@ -1,14 +1,15 @@
 using module ..\Include.psm1
 
-$Type = "NVIDIA"
-$Path = ".\Bin\NVIDIA-EWBF-Equihash\miner.exe"
+$Type      = "NVIDIA"
+$Path      = ".\Bin\NVIDIA-EWBF-Equihash\miner.exe"
+$API       = "DSTM"
 $ManualUri = "https://mega.nz/#F!fsAlmZQS!CwVgFfBDduQI-CbwVkUEpQ"
-$Port = 42000
+$Port      = 42000
 
 $Commands = [PSCustomObject]@{
-    "equihashBTG"   = @("144_5","--pers BgoldPoW","") #EquihashBTG
-    "equihash192"    = @("192_7","--pers ZERO_PoW","") #equihash192
-    "Minexcoin"      = @("96_5","","") #Minexcoin
+    "equihashBTG"    = @("144_5 --pers BgoldPoW","") #EquihashBTG
+    "equihash192"    = @("192_7 --pers ZERO_PoW","") #equihash192
+    "Minexcoin"      = @("96_5,"") #Minexcoin
 }
 
 $CommonCommands = "" #eg. " --cuda_devices 0 1 8 9"
@@ -22,9 +23,9 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     [PSCustomObject]@{
         Type           = $Type
         Path           = $Path
-        Arguments      = "--algo $($Commands.$_ | Select-Object -Index 0) --eexit 1 --api 0.0.0.0:$($Port) --server $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$($Commands.$_ | Select-Object -Index 2)$($CommonCommands) $($Commands.$_ | Select-Object -Index 1) --fee 0 --log 1 --color"
+        Arguments      = "--algo $($Commands.$_ | Select-Object -Index 0) --eexit 1 --api 0.0.0.0:$($Port) --server $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$($Commands.$_ | Select-Object -Index 1)$($CommonCommands) --fee 0 --log 1 --color"
         HashRates      = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week}
-        API            = "DSTM"
+        API            = $API
         Port           = $Port
         URI            = $Uri
     }
