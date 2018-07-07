@@ -71,7 +71,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$ShowPoolBalancesExcludedPools = $true,    
     [Parameter(Mandatory = $false)]
-    [String]$ConfigFile = "Default.txt"
+    [String]$ConfigFile = ".\Config.txt"
 )
 
 Clear-Host
@@ -81,9 +81,6 @@ $Strikes = 3
 $SyncWindow = 5 #minutes
 
 Set-Location (Split-Path $MyInvocation.MyCommand.Path)
-
-#Append .txt extension if no extension is given
-if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
 
 Import-Module NetSecurity -ErrorAction Ignore
 Import-Module Defender -ErrorAction Ignore
@@ -113,6 +110,8 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 #Set process priority to BelowNormal to avoid hash rate drops on systems with weak CPUs
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
 
+#Append .txt extension if no extension is given
+if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
 if (Test-Path $ConfigFile) {
     Write-Log -Level Info "Using configuration file ($(Resolve-Path $ConfigFile)). "
 }
@@ -165,10 +164,24 @@ while ($true) {
         $Parameters.Add($_ , (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
     }
     $Config = Get-ChildItemContent $ConfigFile -Parameters $Parameters | Select-Object -ExpandProperty Content
+    #Add default values for parameters that are not yet in config
+    $Config | Add-Member Pools ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
+    $Config | Add-Member Miners ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
+    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
+        if (Get-Variable $_ -ErrorAction SilentlyContinue) {
+            $Config | Add-member $_ (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue) -ErrorAction SilentlyContinue
+        }
+    }
 
     #Error in config file
     if ($Config -isnot [PSCustomObject]) {
         Write-Log -Level Error "$($ConfigFile) is invalid. Cannot continue. "
+        Start-Sleep 10
+        Exit
+    }
+
+    if (-not ($Config.Wallet -or $Config.UserName)) {
+        Write-Log -Level Error "No wallet or username specified. Cannot continue. "
         Start-Sleep 10
         Exit
     }
