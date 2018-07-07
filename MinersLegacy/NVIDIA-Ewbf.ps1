@@ -6,7 +6,7 @@ $ManualUri = "https://mega.nz/#F!fsAlmZQS!CwVgFfBDduQI-CbwVkUEpQ"
 $Port = 42000
 
 $Commands = [PSCustomObject]@{
-    "equihash-BTG"   = @("144_5","--pers BgoldPoW","") #EquihashBTG
+    "equihashBTG"   = @("144_5","--pers BgoldPoW","") #EquihashBTG
     "equihash192"    = @("192_7","--pers ZERO_PoW","") #equihash192
     "Minexcoin"      = @("96_5","","") #Minexcoin
 }
