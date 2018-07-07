@@ -60,6 +60,8 @@
     "dropcoin":  "Drop",
     "dynamic":  "Argon2dDYN",
     "equihash":  "Equihash",
+    "equihashBTG":  "EquihashBTG",
+    "equihash192":  "equihash192",
     "Espers":  "HMQ1725",
     "eth":  "Ethash",
     "ethash":  "Ethash",
