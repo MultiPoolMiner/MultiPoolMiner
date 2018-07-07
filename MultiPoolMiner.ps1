@@ -69,7 +69,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$ShowPoolBalances = $false,
     [Parameter(Mandatory = $false)]
-    [Switch]$ShowPoolBalancesExcludedPools = $true,    
+    [Switch]$ShowPoolBalancesExcludedPools = $false,    
     [Parameter(Mandatory = $false)]
     [String]$ConfigFile = ".\Config.txt"
 )
