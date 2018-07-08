@@ -63,21 +63,18 @@ $CommonCommands = ""
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-if ($Devices = Get-Device | Where-Object {$_.Type -EQ "CPU" -and $_.DriverVersion -match "[(,]avx2[,)]"}) {
+$Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
 
-    $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
+    $Algorithm_Norm = Get-Algorithm $_
 
-        $Algorithm_Norm = Get-Algorithm $_
-
-        [PSCustomObject]@{
-            Type       = "CPU"
-            Path       = $Path
-            HashSHA256 = $HashSHA256
-            Arguments  = "-a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$($CommonCommands)"
-            HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week}
-            API        = "Ccminer"
-            Port       = 4048
-            URI        = $Uri
-        }
+    [PSCustomObject]@{
+        Type       = "CPU"
+        Path       = $Path
+        HashSHA256 = $HashSHA256
+        Arguments  = "-a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$($CommonCommands)"
+        HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week}
+        API        = "Ccminer"
+        Port       = 4048
+        URI        = $Uri
     }
 }
