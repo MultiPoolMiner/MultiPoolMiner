@@ -547,7 +547,7 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 ###### **BTC address:** all data is stored under and identified by the Bitcoin address set with the -wallet command
 ###### **WorkerName:** the name of the worker you set using the -workername command, also used for sorting
 ###### **MinerName:** the current miner software the worker is running
-###### **Type:** device type set using the -type command, also used for sorting
+###### **Type:** device type set using the -devicename command, also used for sorting
 ###### **Pool:** current pool(s) the worker is mining on
 ###### **Path:** the miner application's path starting from /Bin as root. We will not store other user data!
 ###### **Active:** time the worker has been active for
