@@ -82,7 +82,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         $Main_Algorithm_Norm = Get-Algorithm $Main_Algorithm
         $MinMemGB = $_.MinMemGB
 
-        $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMemGB})
+        $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMemGB * 1000000000})
 
         if ($Arguments_Platform -and $Miner_Device) {
             if ($_.SecondaryAlgorithm) {
