@@ -11,7 +11,7 @@ $Path = ".\Bin\AMD_NVIDIA-PhoenixMiner\PhoenixMiner.exe"
 $HashSHA256 = "4E8540AA48C9D2245F22F68440494C6A39B16B107B600AFED69C5B7297DC7992"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/phoenixminer/PhoenixMiner_3.0c.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4129696.0"
-$Port = "67{0:d2}"
+$Port = "133{0:d2}"
 
 $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "ethash2gb"; MinMemGB = 2; Params = @()} #Ethash2GB
