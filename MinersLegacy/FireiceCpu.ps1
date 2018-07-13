@@ -8,10 +8,15 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 $Port = 3334
 
 $Commands = [PSCustomObject]@{
-    "cryptonight_heavy" = "" # CryptoNight-Heavy
-    "cryptonight_lite"  = "" # CryptoNight-Lite
-    "cryptonight_v7"    = "" # CryptoNightV7
-    # "cryptonight"     = "" # CryptoNight is ASIC territory
+    # "cryptonight"           = "" # CryptoNight is ASIC territory
+    "cryptonight_haven"       = "" # CryptoNightHaven
+    "cryptonight_heavy"       = "" # CryptoNightHeavy
+    "cryptonight_lite"        = "" # CryptoNightLite
+    "cryptonight_lite_v7"     = "" # CryptoNightLiteV7
+    "cryptonight_lite_v7_xor" = "" # CryptoNightLiteV7Xor
+    "cryptonight_masari"      = "" # CryptoNightMasari
+    "cryptonight_v7_stellite" = "" # CryptoNightV7Stellite
+    "cryptonight_v7"          = "" # CryptoNightV7
 }
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.$(Get-Algorithm $_)} | ForEach-Object {
