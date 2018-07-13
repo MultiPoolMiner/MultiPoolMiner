@@ -67,6 +67,7 @@
     "cryptonightstellitev4":  "CryptoNightXtl",
     "cryptonightv3":  "CryptoNightV3",
     "cryptonightv7":  "CryptoNightV7",
+    "cryptonightv7lite":  "CryptoNightLiteV7",
     "cryptonightv8":  "CryptoNightV8",
     "cryptonightv7stellitev4":  "CryptoNightXtl",
     "cryptonightxhvheavy":  "CryptoNightHeavyXhv",
