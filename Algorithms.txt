@@ -1,4 +1,5 @@
 {
+    "aeriumx":  "AeriumX",
     "allium":  "Allium",
     "anime":  "Anime",
     "animecoin":  "Anime",
@@ -49,6 +50,7 @@
     "cryptonightheavy":  "CryptoNightHeavy",
     "cryptonight/heavy":  "CryptoNightHeavy",
     "cryptonightheavy/tube":  "CryptoNightHeavyTube",
+    "cryptonightheavytube":  "CryptoNightHeavyTube",
     "cryptonightheavy/xhv":  "CryptoNightHeavyXhv",
     "cryptonightipbc":  "CryptoNightIpbc",
     "cryptonightitalo":  "CryptoNightItalo",
