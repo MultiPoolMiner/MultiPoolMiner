@@ -459,7 +459,7 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 ###### A2. Use the -excludeminername command to exclude certain miners you don't want to use. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
 
 ###### Q3. Miner says CL device is missing (or not found). How do I resolve this issue?
-###### A3. You most likely have NVIDIA cards in your rig. Open the start.bat in a text editor and look for '-type amd,nvidia,cpu' and change it to '-type nvidia,cpu'. This will disable the AMD exclusive miners and save you plenty of time when benchmarking. You can also exclude the cpu option if you don't want to mine with your processor.
+###### A3. You most likely have NVIDIA cards in your rig. Open the start.bat in a text editor and look for '-devicename amd,nvidia,cpu' and change it to '-devicename nvidia,cpu'. This will disable the AMD exclusive miners and save you plenty of time when benchmarking. You can also exclude the cpu option if you don't want to mine with your processor.
 
 ###### Q4. I only want to mine certain algorithms even if they are not the most profitable. I want to exclude algorithms. How do I do that?
 ###### A4. Open the start.bat in a text editor and look for '-algorithm cryptonightv7,ethash,equihash,groestl,lyra2z,neoscrypt,pascal'. Delete the algorithms you don't want to mine. This can save you some time when benchmarking. You can include any of these or even all of them if you please but bear in mind this can result your earnings to be spread across many pools! 
@@ -471,7 +471,7 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 ###### A6. Simply run 'ResetBenchmark.bat' This deletes all files in the /Stats folder. This will force MultiPoolMiner to run the benchmarks again. If you only want to re-run a single benchmark for a coin or algorithm, locate the appropriate stat file for that particular coin or algorithm and delete it. Please note some of the miners can do multiple algorithms therefore have multiple stat files for the same miner and some of them create multiple stat files for the different configuration files they use.
 
 ###### Q7. How long does benchmarking take to finish?
-###### A7. This is greatly dependant on the amount of selected algorithms and the number of device types chosen in the start.bat file. By default, each benchmark takes one minute. You can speed up benchmarking significantly by omitting unused device types. For example if you have a rig with AMD cards, you can tell MPM not to even launch the NVIDIA or CPU specific miner applications by removing these after the -type parameter in the start.bat file.
+###### A7. This is greatly dependant on the amount of selected algorithms and the number of device types chosen in the start.bat file. By default, each benchmark takes one minute. You can speed up benchmarking significantly by omitting unused device types. For example if you have a rig with AMD cards, you can tell MPM not to even launch the NVIDIA or CPU specific miner applications by removing these after the -devicename parameter in the start.bat file.
 
 ###### Q8. Is it possible to choose how many GPUs we want to allocate to mining or restrict mining on certain GPUs?
 ###### A8. This feature will possibly be implemented in the future (planned enhancement for MultiPoolMiner V3) but not yet supported by MultiPoolMiner.
@@ -547,7 +547,7 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 ###### **BTC address:** all data is stored under and identified by the Bitcoin address set with the -wallet command
 ###### **WorkerName:** the name of the worker you set using the -workername command, also used for sorting
 ###### **MinerName:** the current miner software the worker is running
-###### **Type:** device type set using the -type command, also used for sorting
+###### **Type:** device type set using the -devicename command, also used for sorting
 ###### **Pool:** current pool(s) the worker is mining on
 ###### **Path:** the miner application's path starting from /Bin as root. We will not store other user data!
 ###### **Active:** time the worker has been active for
