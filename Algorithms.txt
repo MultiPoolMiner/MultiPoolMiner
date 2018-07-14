@@ -173,6 +173,7 @@
     "skunk":  "Skunk",
     "skunkhash":  "Skunk",
     "skunkhashraptor":  "Skunk",
+    "sonoa":  "Sonoa",
     "supcoin":  "Pluck",
     "timetravel":  "Timetravel",
     "timetravel10":  "Bitcore",
