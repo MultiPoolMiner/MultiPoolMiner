@@ -189,11 +189,11 @@ while ($true) {
     Get-ChildItem "Pools" -File | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
         $Config.Pools | Add-Member $_.BaseName (
             [PSCustomObject]@{
-                BTC     = $Wallet
-                User    = $UserName
-                Worker  = $WorkerName
-                API_ID  = $API_ID
-                API_Key = $API_Key
+                BTC     = $Config.Wallet
+                User    = $Config.UserName
+                Worker  = $Config.WorkerName
+                API_ID  = $Config.API_ID
+                API_Key = $Config.API_Key
             }
         )
     }
