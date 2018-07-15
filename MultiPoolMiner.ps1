@@ -117,7 +117,8 @@ if (Test-Path $ConfigFile) {
     #Set API_ID, API_Key, UserName, Wallet and WorkerName if not passed as command line parameter, so they get properly inherited to the pool files
     @("API_ID", "API_Key", "UserName", "Wallet", "WorkerName") | ForEach-Object {
         if (-not ($PSBoundParameters.Keys.$_)) {
-            Set-variable $_ (Get-Content $ConfigFile | ConvertFrom-Json).$_
+            $Value = (Get-Content $ConfigFile | ConvertFrom-Json).$_
+            if ($Value -notlike "`$*") {Set-variable $_ $Value}
         }
     }
 }
