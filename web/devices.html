@@ -44,8 +44,8 @@
     
     if (item.OpenCL) {
       item.tClockSpeed = item.OpenCL.MaxClockFrequency
-    } else if (item.Info) {
-      item.tClockSpeed = item.Info.MaxClockSpeed
+    } else if (item.CIM) {
+      item.tClockSpeed = item.CIM.MaxClockSpeed
     } else {
       item.tClockSpeed = "N/A"
     }
@@ -58,8 +58,8 @@
     
     if (item.OpenCL) {
       item.tCores = item.OpenCL.MaxComputeUnits
-    } else if (item.Info) {
-      item.tCores = item.Info.NumberOfLogicalProcessors
+    } else if (item.CIM) {
+      item.tCores = item.CIM.NumberOfLogicalProcessors
     } else {
       item.tCores = "N/A"
     }
