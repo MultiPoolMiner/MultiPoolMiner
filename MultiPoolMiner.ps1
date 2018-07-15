@@ -114,6 +114,12 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
 if (Test-Path $ConfigFile) {
     Write-Log -Level Info "Using configuration file ($(Resolve-Path $ConfigFile)). "
+    #Set API_ID, API_Key, UserName, Wallet and WorkerName if not passed as command line parameter, so they get properly inherited to the pool files
+    @("API_ID", "API_Key", "UserName", "Wallet", "WorkerName") | ForEach-Object {
+        if (-not ($PSBoundParameters.Keys.$_)) {
+            Set-variable $_ (Get-Content $ConfigFile | ConvertFrom-Json).$_
+        }
+    }
 }
 else {
     #Create new config file: Read command line parameters except ConfigFile
