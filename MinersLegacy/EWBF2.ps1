@@ -9,7 +9,7 @@ param(
 
 $Path = ".\Bin\NVIDIA-EWBF2-Equihash\miner.exe"
 $HashSHA256 = "EF09B92F84CC1B2A4DEADF4C3937D9ADF651DAB51DA6DD77359CB0B187AC8DA6"
-$Uri = ""
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/EWBF2/EWBF.Equihash.miner.v0.3.zip"
 $ManualUri = "https://mega.nz/#F!fsAlmZQS!CwVgFfBDduQI-CbwVkUEpQ"
 $Port = "421{0:d2}"
 
