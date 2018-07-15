@@ -48,7 +48,7 @@ $BlockMasters_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore 
         $BlockMasters_Currencies | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $BlockMasters_Algorithm_Norm
-                Info          = $BlockMasters_Coin
+                CoinName      = $BlockMasters_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation

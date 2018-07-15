@@ -69,43 +69,43 @@
                     break
                 }
                 "/activeminers" {
-                    $Data = $API.ActiveMiners | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.ActiveMiners | Select-Object)
                     break
                 }
                 "/runningminers" {
-                    $Data = $API.RunningMiners | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.RunningMiners | Select-Object)
                     Break
                 }
                 "/failedminers" {
-                    $Data = $API.FailedMiners | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.FailedMiners | Select-Object)
                     Break
                 }
                 "/minersneedingbenchmark" {
-                    $Data = $API.MinersNeedingBenchmark | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.MinersNeedingBenchmark | Select-Object)
                     Break
                 }
                 "/pools" {
-                    $Data = $API.Pools | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.Pools | Select-Object)
                     Break
                 }
                 "/newpools" {
-                    $Data = $API.NewPools | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.NewPools | Select-Object)
                     Break
                 }
                 "/allpools" {
-                    $Data = $API.AllPools | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.AllPools | Select-Object)
                     Break
                 }
                 "/algorithms" {
-                    $Data = ($API.AllPools.Algorithm | Sort-Object -Unique) | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.AllPools.Algorithm | Sort-Object -Unique)
                     Break
                 }
                 "/miners" {
-                    $Data = $API.Miners | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.Miners | Select-Object)
                     Break
                 }
                 "/fastestminers" {
-                    $Data = $API.FastestMiners | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.FastestMiners | Select-Object)
                     Break
                 }
                 "/config" {
@@ -117,19 +117,23 @@
                     Break
                 }
                 "/devices" {
-                    $Data = $API.Devices | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.Devices | Select-Object)
                     Break
                 }
                 "/stats" {
-                    $Data = $API.Stats | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.Stats | Select-Object)
                     Break
                 }
                 "/watchdogtimers" {
-                    $Data = $API.WatchdogTimers | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.WatchdogTimers | Select-Object)
                     Break
                 }
                 "/balances" {
-                    $Data = $API.Balances | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.Balances | Select-Object)
+                    Break
+                }
+                "/currentprofit" {
+                    $Data = ($API.RunningMiners | Measure-Object -Sum -Property Profit).Sum | ConvertTo-Json
                     Break
                 }
                 "/stop" {

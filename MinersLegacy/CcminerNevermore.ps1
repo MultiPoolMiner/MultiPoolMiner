@@ -56,6 +56,12 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     
     $Algorithm_Norm = Get-Algorithm $_
 
+    Switch ($Algorithm_Norm) {
+        "PHI"   {$ExtendInterval = 3}
+        "X16R"  {$ExtendInterval = 10}
+        default {$ExtendInterval = 0}
+    }
+
     [PSCustomObject]@{
         Type             = "NVIDIA"
         Path             = $Path
@@ -65,6 +71,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         API              = "Ccminer"
         Port             = 4068
         URI              = $Uri
+        ExtendInterval   = $ExtendInterval
         PrerequisitePath = "$env:SystemRoot\System32\msvcr120.dll"
         PrerequisiteURI  = "http://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe"
     }

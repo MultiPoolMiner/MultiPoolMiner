@@ -48,7 +48,7 @@ $HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore 
         $HashRefinery_Currencies | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $HashRefinery_Algorithm_Norm
-                Info          = $HashRefinery_Coin
+                CoinName      = $HashRefinery_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation

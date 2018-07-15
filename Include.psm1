@@ -11,7 +11,7 @@ function Get-Balance {
         $Rates = [PSCustomObject]@{BTC = [Double]1}
     }
 
-    $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName) -or $Config.ShowPoolBalancesExcludedPools} | ForEach-Object {
+    $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
             Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
         } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru})
 
@@ -493,24 +493,38 @@ function Get-Device {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = @()
+        [String[]]$Name = @(),
+        [Parameter(Mandatory = $false)]
+        [Switch]$Refresh = $false
     )
 
-    $Devices = Get-Content "Devices.txt" | ConvertFrom-Json
-
     if ($Name) {
+        $DeviceList = Get-Content "Devices.txt" | ConvertFrom-Json
         $Name_Devices = $Name | ForEach-Object {
             $Name_Split = $_ -split '#'
             $Name_Split = @($Name_Split | Select-Object -First 1) + @($Name_Split | Select-Object -Skip 1 | ForEach-Object {[Int]$_})
             $Name_Split += @("*") * (100 - $Name_Split.Count)
 
-            $Name_Device = $Devices.("{0}" -f $Name_Split) | Select-Object *
+            $Name_Device = $DeviceList.("{0}" -f $Name_Split) | Select-Object *
             $Name_Device | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Name_Device.$_ = $Name_Device.$_ -f $Name_Split}
 
             $Name_Device
         }
     }
 
+    # Try to get cached devices first to improve performance
+    if ((Test-Path Variable:Script:CachedDevices) -and -not $Refresh) {
+        $Devices = $CachedDevices
+        $Devices | Foreach-Object {
+            $Device = $_
+            if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
+                $Device
+            }
+        }
+        return
+    }
+
+    $Devices = @()
     $PlatformId = 0
     $Index = 0
     $PlatformId_Index = @{}
@@ -538,7 +552,7 @@ function Get-Device {
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
-                    $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+                    $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
                 }
 
                 if (-not $Type_PlatformId_Index."$($Device_OpenCL.Type)") {
@@ -563,23 +577,33 @@ function Get-Device {
         Write-Log -Level Warn "OpenCL device detection has failed. "
     }
 
-    if (-not $Index) {
+    # CPU detection in OpenCL does not work well, sometimes not being included, sometimes being included twice for each processor - remove any CPUs from the OpenCL devices and generate more accurate ones
+    # Remove them instead of not generating them in the first place, because skipping them would affect the indexes
+    [array]$Devices = $Devices | Where-Object {$_.Type -ne "Cpu"}
+
+    $CPUIndex = 0
+    Get-CimInstance -ClassName CIM_Processor | Foreach-Object {
+        # Vendor and type the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
+        $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
         $Device = [PSCustomObject]@{
-            Index = [Int]$null
-            PlatformId = [Int]$null
-            PlatformId_Index = [Int]$null
-            Type_PlatformId_Index = [Int]$null
-            Vendor = [String]$null
-            Vendor_Index = [Int]$null
-            Type_Vendor_Index = [Int]$null
-            Type = [String]"Cpu"
-            Type_Index = [Int]$null
-            OpenCL = $null
-            Model = [String]"CPU"
+            Index = [Int]$Index
+            Vendor = $CPUInfo.Manufacturer
+            Type_Vendor_Index = $CPUIndex
+            Type = "Cpu"
+            Type_Index = $CPUIndex
+            CIM = $CPUInfo
+            Model = $CPUInfo.Name
         }
 
-        $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+        if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
+            $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+        }
+
+        $CPUIndex++
+        $Index++
     }
+    $Script:CachedDevices = $Devices
+    $Devices
 }
 
 function Get-Algorithm {

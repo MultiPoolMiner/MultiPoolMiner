@@ -1,11 +1,15 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
-$Path = ".\Bin\NVIDIA-PHI\ccminer.exe"
-$HashSHA256 = "6C3AFFABBD39566F4AE3B78CF55BFEA06BE98C1D48FDDB27DEE406DB87B7663F"
-$URI = "https://github.com/216k155/ccminer-phi-anxmod/releases/download/ccminer%2Fphi-1.0/ccminer-phi-1.0.zip"
+$Path = ".\Bin\NVIDIA-Dumax\ccminer.exe"
+$HashSHA256 = "715EE772A023218044B14C5C9D7D41AA936F5FA5791EF10E4924A5DDAAF9B781"
+$Uri = "https://github.com/DumaxFr/ccminer/releases/download/dumax-0.9.3/ccminer-dumax-0.9.3-win64.zip"
 
 $Commands = [PSCustomObject]@{
-    "Phi" = "" #Phi Phi1612 LUX
+    "phi"           = "" 
+    "phi2"          = "" #LUX
+    "x16r"          = "" #X16r
+    "x16s"         = "" #X16s
+    "x17"          = "" #x17
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -16,6 +20,9 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
 
     Switch ($Algorithm_Norm) {
         "PHI"   {$ExtendInterval = 3}
+        "PHI2"   {$ExtendInterval = 3}
+        "X16R"  {$ExtendInterval = 10}
+        "X16S"  {$ExtendInterval = 10}
         default {$ExtendInterval = 0}
     }
 
@@ -23,7 +30,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
         Type           = "NVIDIA"
         Path           = $Path
         HashSHA256     = $HashSHA256
-        Arguments      = "-a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)"
+        Arguments      = "-R 1 -q -a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_) --submit-stale"
         HashRates      = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Name)_$($Algorithm_Norm)_HashRate".Week}
         API            = "Ccminer"
         Port           = 4068
