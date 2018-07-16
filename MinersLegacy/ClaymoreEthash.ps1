@@ -8,8 +8,8 @@ param(
 )
 
 $Path = ".\Bin\AMD_NVIDIA-Claymore-Ethash\EthDcrMiner64.exe"
-$HashSHA256 = "41FDBE471F168CB82A2931DCB009CA236DC8280C808F29F415DDE3A86939D4B4"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethdcrminer64/ClaymoreDual_v11.8.zip"
+$HashSHA256 = "4A9AC40A4E8C2F59683294726616A1BE7DE6A78B4929AC490D6844C2CB69E347"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethdcrminer64/ClaymoreDual_v11.9.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=1433925.0"
 $Port = "50{0:d2}"
 
@@ -64,6 +64,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{MainAlgorithm = "ethash"; MinMemGB = 4; SecondaryAlgorithm = "pascal"; SecondaryIntensity = 80; Params = ""} #Ethash/Pascal80
 )
 
+$CommonCommands = " -dbg 1 -logfile debug.log"
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Devices = @($Devices | Where-Object Type -EQ "GPU")
 
@@ -90,6 +91,8 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $Secondary_Algorithm_Norm = Get-Algorithm $Secondary_Algorithm
 
                 $Miner_Name = (@($Name) + @("$($Main_Algorithm_Norm -replace '^ethash', '')$Secondary_Algorithm_Norm") + @(if ($_.SecondaryIntensity -ge 0) {$_.SecondaryIntensity}) + @("$($Miner_Device.count)x$($Miner_Device.Model_Norm | Sort-Object -unique)") | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Secondary_Algorithm_Norm) + @(if ($_.SecondaryIntensity -ge 0) {$_.SecondaryIntensity}) + @("$($Miner_Device.count)x$($Miner_Device.Model_Norm | Sort-Object -unique)") | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @("$($Miner_Device.count)x$($Miner_Device.Model_Norm | Sort-Object -unique)") | Select-Object) + @("$($Main_Algorithm_Norm -replace '^ethash', '')$Secondary_Algorithm_Norm") + @(if ($_.SecondaryIntensity -ge 0) {$_.SecondaryIntensity}) -join '-'
 
                 $Miner_HashRates = [PSCustomObject]@{"$Main_Algorithm_Norm" = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week; "$Secondary_Algorithm_Norm" = $Stats."$($Miner_Name)_$($Secondary_Algorithm_Norm)_HashRate".Week}
                 $Arguments_Secondary = " -dcoin $Secondary_Algorithm -dpool $($Pools.$Secondary_Algorithm_Norm.Host):$($Pools.$Secondary_Algorithm_Norm.Port) -dwal $($Pools.$Secondary_Algorithm_Norm.User) -dpsw $($Pools.$Secondary_Algorithm_Norm.Pass)$(if($_.SecondaryIntensity -ge 0){" -dcri $($_.SecondaryIntensity)"})"
