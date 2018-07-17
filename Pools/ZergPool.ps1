@@ -37,6 +37,10 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
     $ZergPool_Algorithm_Norm = Get-Algorithm $ZergPool_Algorithm
     $ZergPool_Coin = ""
 
+    #Define CoinNames for new Equihash algorithms
+    if ($ZergPool_Algorithm -eq "Equihash192") {$ZergPool_Coin = "ZeroCoin"}
+    if ($ZergPool_Algorithm -eq "Equihash144") {$ZergPool_Coin = "SnowGem"}
+
     $Divisor = 1000000 * [Double]$ZergPool_Request.$_.mbtc_mh_factor
 
     if ((Get-Stat -Name "$($Name)_$($ZergPool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($ZergPool_Algorithm_Norm)_Profit" -Value ([Double]$ZergPool_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
