@@ -14,18 +14,17 @@ $ManualUri = "https://mega.nz/#F!fsAlmZQS!CwVgFfBDduQI-CbwVkUEpQ"
 $Port = "421{0:d2}"
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{Algorithm = "Equihash-96_5"; Pers = ""; MinMemGB = 2; Params = ""}
-    [PSCustomObject]@{Algorithm = "Equihash-144_5"; Pers = ""; MinMemGB = 2; Params = ""}
-    [PSCustomObject]@{Algorithm = "Equihash-192_7"; Pers = ""; MinMemGB = 3; Params = ""}
-    [PSCustomObject]@{Algorithm = "aion"; Pers = " --pers AION0PoW"; MinMemGB = 2; Params = ""} #https://bitcointalk.org/index.php?topic=4466962.msg42333802#msg42333802
-    #Removed, conflicts with Equihash-144_5[PSCustomObject]@{Algorithm = "zhash"; Pers = " --pers BitcoinZ"; MinMemGB = 2; Params = ""} # https://twitter.com/bitcoinzteam/status/1008283738999021568?lang=en
+    [PSCustomObject]@{Algorithm = "Equihash-96_5"; MinMemGB = 2; Params = ""}
+    [PSCustomObject]@{Algorithm = "Equihash-144_5"; MinMemGB = 2; Params = ""}
+    [PSCustomObject]@{Algorithm = "Equihash-192_7"; MinMemGB = 3; Params = ""}
+    [PSCustomObject]@{Algorithm = "aion"; MinMemGB = 2; Params = ""} #Aion uses Equihash 210_9. The miner adds pers 'AION0PoW'. Unfortunately --algo 210_9 is not (yet) supported
 )
 
-$CommonCommands = " --fee 0 --intensity 64"
+$CommonCommands = " --pec --fee 0 --intensity 64"
 
 $Coins = [PSCustomObject]@{
     "BitcoinGold" = " --pers BgoldPoW"
-    "BitcoinZ"    = " --pers BitcoinZ"
+    "BitcoinZ"    = " --pers BitcoinZ" #https://twitter.com/bitcoinzteam/status/1008283738999021568?lang=en
     "Minexcoin"   = ""
     "SnowGem"     = " --pers sngemPoW"
     "Zero"        = " --pers ZERO_PoW"
@@ -47,8 +46,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $MinMemGB = $_.MinMemGB
 
         #Pers parameter, can be different per coin
-        if ($_.Pers) {$Pers = $_.Pers}
-        else {$Pers = $($Coins."$($Pools.$Algorithm_Norm.CoinName)")}
+        $Pers = $Coins."$($Pools.$Algorithm_Norm.CoinName)"
         
         if ($Miner_Device = @($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMemGB * 1000000000)})) {
             [PSCustomObject]@{
