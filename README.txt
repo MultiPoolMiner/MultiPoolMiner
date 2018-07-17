@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 08/07/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 17/07/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 ====================================================================
@@ -69,7 +69,7 @@ IMPORTANT NOTES:
 ====================================================================
 
 
-COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Usage section below for an example):
+COMMAND LINE OPTIONS (case-insensitive - except for wallet addresses (e.g. BTC), see Sample Usage section below for an example):
 
 -Region [Europe/US/Asia]
 	Choose your region or the region closest to you.
@@ -230,7 +230,7 @@ SAMPLE USAGE (check "start.bat" file in root folder):
 @if not "%GPU_SINGLE_ALLOC_PERCENT%"=="100" (setx GPU_SINGLE_ALLOC_PERCENT 100) > nul
 @if not "%CUDA_DEVICE_ORDER%"=="PCI_BUS_ID" (setx CUDA_DEVICE_ORDER PCI_BUS_ID) > nul
 
-@set "command=& .\multipoolminer.ps1 -wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -username aaronsace -workername multipoolminer -region europe -currency btc,usd,eur -devicename amd,nvidia,cpu -poolname miningpoolhubcoins,zpool,nicehash -algorithm blake2s,cryptonightV7,cryptonightheavy,decrednicehash,ethash,ethash2gb,ethash3gb,equihash,groestl,keccak,lbry,lyra2re2,lyra2z,neoscrypt,pascal,sib,skunk -donate 24 -watchdog -minerstatusurl https://multipoolminer.io/monitor/miner.php -MinerStatusKey xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx -switchingprevention 2"
+@set "command=& .\multipoolminer.ps1 -Wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -UserName aaronsace -WorkerName multipoolminer -Region europe -Currency btc,usd,eur -DeviceName amd,nvidia,cpu -PoolName miningpoolhubcoins,zpool,nicehash -Algorithm blake2s,cryptonightV7,cryptonightheavy,decrednicehash,ethash,ethash2gb,ethash3gb,equihash,groestl,keccak,lbry,lyra2re2,lyra2z,neoscrypt,pascal,sib,skunk -Donate 24 -watchdog -MinerstatusURL https://multipoolminer.io/monitor/miner.php -MinerStatusKey xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx -SwitchingPrevention 2"
 
 start pwsh -noexit -executionpolicy bypass -command "& .\reader.ps1 -log 'MultiPoolMiner_\d\d\d\d-\d\d-\d\d\.txt' -sort '^[^_]*_' -quickstart"
 start pwsh -noexit -executionpolicy bypass -command "& .\reader.ps1 -log '^((?!MultiPoolMiner_\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d\.txt).)*$' -sort '^[^_]*_' -quickstart"
