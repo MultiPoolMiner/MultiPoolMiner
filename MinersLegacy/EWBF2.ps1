@@ -8,8 +8,8 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-EWBF2-Equihash\miner.exe"
-$HashSHA256 = "EF09B92F84CC1B2A4DEADF4C3937D9ADF651DAB51DA6DD77359CB0B187AC8DA6"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/EWBF2/EWBF.Equihash.miner.v0.3.zip"
+$HashSHA256 = "9CB05EF5863CD3EB7D0C2E0E8B7D8EC527373F75DD2C3A6B4CC736B401EB6400"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/EWBF2/EWBF.Equihash.miner.v0.4.zip"
 $ManualUri = "https://mega.nz/#F!fsAlmZQS!CwVgFfBDduQI-CbwVkUEpQ"
 $Port = "421{0:d2}"
 
@@ -17,6 +17,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Equihash-96_5";  MinMemGB = 2; Params = ""}
     [PSCustomObject]@{Algorithm = "Equihash-144_5"; MinMemGB = 2; Params = ""}
     [PSCustomObject]@{Algorithm = "Equihash-192_7"; MinMemGB = 3; Params = ""}
+    [PSCustomObject]@{Algorithm = "Equihash-210_9"; MinMemGB = 2; Params = ""}
 )
 
 $CommonCommands = " --fee 0 --intensity 64"
