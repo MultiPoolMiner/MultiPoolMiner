@@ -18,7 +18,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Equihash-144_5"; Pers = ""; MinMemGB = 2; Params = ""}
     [PSCustomObject]@{Algorithm = "Equihash-192_7"; Pers = ""; MinMemGB = 3; Params = ""}
     [PSCustomObject]@{Algorithm = "aion"; Pers = " --pers AION0PoW"; MinMemGB = 2; Params = ""} #https://bitcointalk.org/index.php?topic=4466962.msg42333802#msg42333802
-    [PSCustomObject]@{Algorithm = "zhash"; Pers = " --pers BitcoinZ"; MinMemGB = 2; Params = ""} # https://twitter.com/bitcoinzteam/status/1008283738999021568?lang=en
+    #Removed, conflicts with Equihash-144_5[PSCustomObject]@{Algorithm = "zhash"; Pers = " --pers BitcoinZ"; MinMemGB = 2; Params = ""} # https://twitter.com/bitcoinzteam/status/1008283738999021568?lang=en
 )
 
 $CommonCommands = " --fee 0 --intensity 64"
