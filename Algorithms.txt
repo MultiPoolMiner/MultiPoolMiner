@@ -223,6 +223,7 @@
     "yescryptr8":  "YescryptR8",
     "zcoin":  "Lyra2z",
     "zec":  "Equihash",
+    "zhash":  "Equihash1445",
     "ziftr":  "zr5",
     "zoin":  "Lyra2z330",
     "zr5":  "zr5",
