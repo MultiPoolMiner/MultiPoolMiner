@@ -70,76 +70,7 @@ IMPORTANT NOTES:
 
 
 COMMAND LINE OPTIONS (case-insensitive - except for wallet addresses (e.g. BTC), see Sample Usage section below for an example):
-
--Region [Europe/US/Asia]
-	Choose your region or the region closest to you.
-
--Poolname [ahashpool, ahashpoolcoins, blazepool, blockmasters, blockmasterscoins, hashrefinery, miningpoolhub, miningpoolhubcoins, nicehash, yiimp, zergpool, zergpoolcoins, zpool]
-	The following pools are currently supported (in alphabetical order): 
-
-    ## AHashPool / AHashPoolCoins
-      WebSite: https://www.ahashpool.com/ 
-      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
-
-    ## BlazePool
-      WebSite: http://www.blazepool.com/ 
-      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
-
-    ## BlockMasters / BlockMastersCoins
-      WebSite: http://www.blockmasters.co/
-      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
-      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
-
-    ## HashRefinery
-      WebSite: http://pool.hashrefinery.com
-      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
-
-    ## MiningPoolHub / MiningPooHubCoins
-      WebSite: https://miningpoolhub.com/ 
-      - 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm
-      - 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). 
-      Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
-      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
-      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
-
-    ## Nicehash 
-      WebSite: https://www.nicehash.com/
-      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below)
-
-    ## YiiMP
-      WebSite: http://yiimp.eu/
-      Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config.txt (see below)
-
-    ## ZergPool / ZergPoolCoins
-      WebSite: http://zergpool.eu
-      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
-      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
-
-    ## Zpool
-      WebSite: http://www.zpool.ca/
-      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via Config.txt required, see below)
-      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
-
-      IMPORTANT: For the list of default configured pools consult 'start.bat.' This does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
-
-
--ExcludePoolName
-	Same as the -poolname command but it is used to exclude unwanted mining pools (please see above).
-
--UserName 
-	Your username you use to login to MiningPoolHub.
-
--WorkerName
-	To identify your mining rig.	
-
--Wallet
-	Your Bitcoin payout address. Required when mining on AhashPool, BlazePool, Hash Refinery, Nicehash and Zpool.
-	
--SSL
-	Specifying the -ssl command (without a boolean value of true or false) will restrict the miner application list to include only the miners that support secure connection.
-
--DeviceName
-	Choose the relevant GPU(s) and/or CPU mining. [CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.]
+Listed in alphabetical order. Note: For basic operation not all parameters must be defined through start.bat.
 
 -Algorithm
 	Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
@@ -153,56 +84,101 @@ COMMAND LINE OPTIONS (case-insensitive - except for wallet addresses (e.g. BTC),
 	   decrednicehash - if you want to include non-dual, non-Claymore Decred mining on Nicehash. NH created their own implementation of Decred mining protocol.
 	Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). WARNING! If you add all algorithms listed above, you may find your earnings spread across multiple pools regardless what pool(s) you specified with the -poolname command.
 	
--ExcludeAlgorithm
-	Same as the -algorithm command but it is used to exclude unwanted algorithms (please see above). Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
-	
--MinerName
-	Specify to only include (restrict to) certain miner applications. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
+-ConfigFile [Path\ConfigFile.txt]
+	The default config file name is '.\Config.txt'
+	If the config file does not exist MPM will create a config file with default values. If the file name does not have an extension MPM will add .txt file name extension.
+	By default MPM will use the values from the command line. If you hardcode config values directly in the config file, then these values will override the command line parameters (see Advanced Configuration).
 
--ExcludeMinerName
-	Exclude certain miners you don't want to use. This is useful if a miner is causing issues with your machine. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
-	Important: Newer miners, e.g. ClaymoreEthash create several child-miner names, e.g. ClaymoreEthash-GPU#01-Pascal-40. These can also be used with '-ExcludeMinerName'.
-	
 -Currency [BTC, USD, EUR, GBP, ETH ...]
 	Choose the default currency or currencies your profit stats will be shown in.
 
--Interval
-	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
+    -ExcludeAlgorithm
+	Same as the -algorithm command but it is used to exclude unwanted algorithms (please see above). Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
 
 -Delay
 	Specify the number of seconds required to pass before opening each miner. It is useful if cards are sensitive to switching and need some extra time to recover (eg. clear DAG files from memory)
 
+-DeviceName
+	Choose the relevant GPU(s) and/or CPU mining. [CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.]
+
 -Donate
 	Donation of mining time in minutes per day to aaronsace. Default is 24, minimum is 10 minutes per day (less than 0.7% fee). The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
 	
--Proxy
-	Specify your proxy address if applicable, i.e http://192.0.0.1:8080
+-ExcludeMinerName
+	Exclude certain miners you don't want to use. This is useful if a miner is causing issues with your machine. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
+	Important: Newer miners, e.g. ClaymoreEthash create several child-miner names, e.g. ClaymoreEthash-GPU#01-Pascal-40. These can also be used with '-ExcludeMinerName'.
+	
+-ExcludePoolName
+	Same as the -poolname command but it is used to exclude unwanted mining pools (please see above).
 
--Watchdog
-	Include this command to enable the watchdog feature which detects and handles miner and other related failures.
-	It works on a unified interval that is defaulted to 60 seconds. Watchdog timers expire if three of those intervals pass without being kicked. There are three stages as to what action is taken when watchdog timers expire and is determined by the number of related expired timers.
-	- Stage 1: when 1 timer expires relating to one miner/algorithm combination, the one miner/algorithm combination is kicked
-	- Stage 2: when 2 timers expire relating to one miner file, the one miner file is kicked
-	- Stage 3: when 3 timers expire relating to one pool, the pool is kicked
-	Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
+-Interval
+	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
+
+-MinerName
+	Specify to only include (restrict to) certain miner applications. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
+
+-MinerstatusKey
+	By default the MPM monitor uses the BTC address (-Wallet) to identify your mining machine (rig). Use --minerstatuskey [your-miner-status-key] to anonymize your rig. To get your minerstatuskey goto to https://multipoolminer.io/monitor
 
 -MinerstatusURL https://multipoolminer.io/monitor/miner.php
 	Report and monitor your mining rig's status by including the command above. Wallet address must be set even if you are only using MiningPoolHub as a pool. You can access the reported information by entering your wallet address on the https://multipoolminer.io/monitor web address. By using this service you understand and accept the terms and conditions detailed in this document (further below). 
 
--MinerstatusKey
-	By default the MPM monitor uses the BTC address (-wallet) to identify your mining machine (rig). Use --minerstatuskey [your-miner-status-key] to anonymize your rig. To get your minerstatuskey goto to https://multipoolminer.io/monitor
+-PoolName [ahashpool, ahashpoolcoins, blazepool, blockmasters, blockmasterscoins, hashrefinery, miningpoolhub, miningpoolhubcoins, nicehash, yiimp, zergpool, zergpoolcoins, zpool]
+	The following pools are currently supported (in alphabetical order): 
 
--SwitchingPrevention
-	Since version 2.6, the delta value (integer) that was used to determine how often MultiPoolMiner is allowed to switch, is now user-configurable on a scale of 1 to infinity on an intensity basis. Default is 1 (Start.bat default is 2). Recommended values are 1-10 where 1 means the most frequent switching and 10 means the least switching. Please note setting this value to zero (0) will not turn this function off! Please see further explanation in MULTIPOOLMINER'S LOGIC section below. 
+    ## AHashPool / AHashPoolCoins
+      WebSite: https://www.ahashpool.com/ 
+      Payout in BTC (Bitcoin address must be provided using the -Wallet command, see below)
 
--DisableAutoUpdate
-	By default MPM will perform an automatic update on startup if a newer version is found. Set to 'true' to disable automatic update to latest MPM version. 
+    ## BlazePool
+      WebSite: http://www.blazepool.com/ 
+      Payout in BTC (Bitcoin address must be provided using the -Wallet command, see below)
+
+    ## BlockMasters / BlockMastersCoins
+      WebSite: http://www.blockmasters.co/
+      Payout in BTC (Bitcoin address must be provided using the -Wallet command, see below), or any currency available in API (Advanced configuration via config file required, see below)
+      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below)
+
+    ## HashRefinery
+      WebSite: http://pool.hashrefinery.com
+      Payout in BTC (Bitcoin address must be provided using the -Wallet command, see below)
+
+    ## MiningPoolHub / MiningPooHubCoins
+      WebSite: https://miningpoolhub.com/ 
+      - 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm
+      - 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). 
+      Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
+      Payout in BTC (Bitcoin address must be provided using the -Wallet command, see below), or any currency available in API (Advanced configuration via config file required, see below)
+      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below)
+
+    ## Nicehash 
+      WebSite: https://www.nicehash.com/
+      Payout in BTC (Bitcoin address must be provided using the -Wallet command, see below)
+
+    ## YiiMP
+      WebSite: http://yiimp.eu/
+      Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config file (see below)
+
+    ## ZergPool / ZergPoolCoins
+      WebSite: http://zergpool.eu
+      Payout in BTC (Bitcoin address must be provided using the -Wallet command, see below), or any currency available in API (Advanced configuration via config file required, see below)
+      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below)
+
+    ## Zpool
+      WebSite: http://www.zpool.ca/
+      Payout in BTC (Bitcoin address must be provided using the -Wallet command, see below), or any currency available in API (Advanced configuration via config file required, see below)
+      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below)
+
+      IMPORTANT: For the list of default configured pools consult 'start.bat.' This does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the -algorithm command below for further details and example.*
+
+-Proxy
+	Specify your proxy address if applicable, i.e http://192.0.0.1:8080
+
+-Region [Europe/US/Asia]
+	Choose your region or the region closest to you.
 
 -ShowMinerWindow
 	By default MPM hides most miner windows as to not steal focus (Miners of API type 'Wrapper' will remain hidden). All miners write their output to files in the Log folder. Set to 'true' to show miner windows.
-
--UseFastestMinerPerAlgoOnly
-	Use only use fastest miner per algo and device index. E.g. if there are 2 or more miners available to mine the same algo, only the fastest will ever be used, the slower ones will also be hidden in the summary screen.
 
 -ShowPoolBalances
 	Display the balances of all enabled pools (excluding those that are excluded with 'ExcludeMinerName') on the summary screen and in the web GUI.
@@ -212,10 +188,32 @@ COMMAND LINE OPTIONS (case-insensitive - except for wallet addresses (e.g. BTC),
 	Display the balances of all pools (including those that are excluded with 'ExcludeMinerName') on the summary screen and in the web GUI.
 	Note: Only balances in BTC are listed, other currencies are currently not supported.
 
--ConfigFile [Path\ConfigFile.txt]
-	The default config file name is '.\default.txt'
-	If the config file does not exist MPM will create a config file with default values. If the file name does not have an extension MPM will add .txt file name extension.
-	By default MPM will use the values from the command line. If you hardcode config values directly in the config file, then these values will override the command line parameters (see Advanced Configuration).
+-SSL
+	Specifying the -ssl command (without a boolean value of true or false) will restrict the miner application list to include only the miners that support secure connection.
+
+-SwitchingPrevention
+	Since version 2.6, the delta value (integer) that was used to determine how often MultiPoolMiner is allowed to switch, is now user-configurable on a scale of 1 to infinity on an intensity basis. Default is 1 (Start.bat default is 2). Recommended values are 1-10 where 1 means the most frequent switching and 10 means the least switching. Please note setting this value to zero (0) will not turn this function off! Please see further explanation in MULTIPOOLMINER'S LOGIC section below. 
+
+-UseFastestMinerPerAlgoOnly
+	Use only use fastest miner per algo and device index. E.g. if there are 2 or more miners available to mine the same algo, only the fastest will ever be used, the slower ones will also be hidden in the summary screen.
+
+-UserName 
+	Your username you use to login to MiningPoolHub.
+
+-Wallet
+	Your Bitcoin payout address. Required when mining on AhashPool, BlazePool, Hash Refinery, Nicehash and Zpool.
+	
+-Watchdog
+	Include this command to enable the watchdog feature which detects and handles miner and other related failures.
+	It works on a unified interval that is defaulted to 60 seconds. Watchdog timers expire if three of those intervals pass without being kicked. There are three stages as to what action is taken when watchdog timers expire and is determined by the number of related expired timers.
+	- Stage 1: when 1 timer expires relating to one miner/algorithm combination, the one miner/algorithm combination is kicked
+	- Stage 2: when 2 timers expire relating to one miner file, the one miner file is kicked
+	- Stage 3: when 3 timers expire relating to one pool, the pool is kicked
+	Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
+
+    -WorkerName
+	To identify your mining rig.	
+
 
 
 SAMPLE USAGE (check "start.bat" file in root folder):
@@ -251,7 +249,7 @@ ADVANCED CONFIGURATION
 
 Advanced config options are available via config file
 
-MPM supports customized configuration via config files. The default config file name is '.\Default.txt'.
+MPM supports customized configuration via config files. The default config file name is '.\Config.txt'.
 If you do not include the command line parameter -ConfigFile [Path\FileName.txt] the MPM will use the default file name. 
 
 If the config file does not exist MPM will create a config file with default values. If the file name does not have an extension MPM will add .txt file name extension.
@@ -550,9 +548,9 @@ A23. Some miners binaries cannot be downloaded automatically by MPM (e.g. there 
 
 REPORTING AND MONITORING TERMS AND CONDITIONS & PRIVACY POLICY:
 
-By enabling the Monitoring Service by setting the -MinerStatusURL to point to https://multipoolminer.io/monitor/miner.php as described in the Command Line Options section, you agree that the https://multipoolminer.io website can store relevant information about your mining rig(s) in its database that is directly accessible by anyone accessing the https://multipoolminer.io/monitor webpage with the corresponding wallet address (your BTC address set with the -wallet command). The following data is stored for each mining machine (rig) and overwritten in the database in each script-cycle determined by the -interval command:
+By enabling the Monitoring Service by setting the -MinerStatusURL to point to https://multipoolminer.io/monitor/miner.php as described in the Command Line Options section, you agree that the https://multipoolminer.io website can store relevant information about your mining rig(s) in its database that is directly accessible by anyone accessing the https://multipoolminer.io/monitor webpage with the corresponding wallet address (your BTC address set with the -Wallet command). The following data is stored for each mining machine (rig) and overwritten in the database in each script-cycle determined by the -interval command:
 
-BTC address: all data is stored under and identified by the Bitcoin address set with the -wallet command
+BTC address: all data is stored under and identified by the Bitcoin address set with the -Wallet command
 WorkerName: the name of the worker you set using the -workername command, also used for sorting
 MinerName: the current miner software the worker is running
 Type: device type set using the -devicename command, also used for sorting
