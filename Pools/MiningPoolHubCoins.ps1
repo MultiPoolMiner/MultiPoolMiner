@@ -44,7 +44,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} | ForEach
     $MiningPoolHubCoins_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.coin_name -replace "-", " " -replace "_", " ")) -replace " "
 
     #Electroneum hardforked. ETN algo changed to previous Cryptonight which is also compatible with ASIC
-    if ($MiningPoolHubCoins_Coin = -eq "Electroneum") {$MiningPoolHubCoins_Algorithm_Norm = "CryptoNight"}
+    if ($MiningPoolHubCoins_Coin -eq "Electroneum") {$MiningPoolHubCoins_Algorithm_Norm = "CryptoNight"}
 
     if ($MiningPoolHubCoins_Algorithm -eq "Equihash-BTG") {$MiningPoolHubCoins_Hosts = ($_.host_list -replace ".hub.miningpoolhub", ".equihash-hub.miningpoolhub").split(";")}
     if ($MiningPoolHubCoins_Algorithm_Norm -eq "Sia") {$MiningPoolHubCoins_Algorithm_Norm = "SiaClaymore"} #temp fix
