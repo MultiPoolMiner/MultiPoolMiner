@@ -70,7 +70,7 @@ The following algorithms are currently supported:
 *Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). **WARNING!** If you add all algorithms listed above, you may find your earnings spread across multiple pools regardless what pool(s) you specified with the -poolname command.*
 
 **-ConfigFile [Path\ConfigFile.txt]**
-The default config file name is '.\default.txt'
+The default config file name is '.\Config.txt'
 If the config file does not exist MPM will create a config file with default values. If the file name does not have an extension MPM will add .txt file name extension.
 By default MPM will use the values from the command line. If you hardcode config values directly in the config file, then these values will override the command line parameters (see Advanced Configuration).
 
