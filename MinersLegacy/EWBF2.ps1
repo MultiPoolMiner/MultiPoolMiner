@@ -25,6 +25,7 @@ $Coins = [PSCustomObject]@{
     "BitcoinGold" = " --pers BgoldPoW"
     "BitcoinZ"    = " --pers BitcoinZ"
     "Minexcoin"   = ""
+    "SnowGem"     = " --pers sngemPoW"
     "Zero"        = " --pers ZERO_PoW"
     "ZeroCoin"    = " --pers ZERO_PoW"
 }
