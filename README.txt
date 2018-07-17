@@ -211,7 +211,7 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 	- Stage 3: when 3 timers expire relating to one pool, the pool is kicked
 	Watchdog timers reset after three times the number of seconds it takes to get to stage 3.
 
-    -WorkerName
+-WorkerName
 	To identify your mining rig.	
 
 
