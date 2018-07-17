@@ -91,6 +91,8 @@
     "equihash1445":  "Equihash1445",
     "equihash192":  "Equihash1927",
     "equihash1927":  "Equihash1927",
+    "equihash210":  "Equihash2109",
+    "equihash2109":  "Equihash2109",
     "equihash965":  "Equihash965",
     "equihashbtg":  "Equihash1445",
     "Espers":  "HMQ1725",
