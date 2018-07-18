@@ -8,7 +8,7 @@ param(
 )
 
 $Path = ".\Bin\CPU-XmRig-Cryptonight\xmrig.exe"
-$HashSHA256 = "73C345AB59538A0B4332BA0FB3659F111AAC4291F169D24DA6D5186FEC0B2712"
+$HashSHA256 = "EA2E92BB10D0482880F8D389B7915948E11F672CA8559B0901D8A8FA8E9D733E"
 $Uri = "https://github.com/xmrig/xmrig/releases/download/v2.6.4/xmrig-2.6.4-msvc-win64.zip"
 $ManualUri = "https://github.com/xmrig/xmrig-cpu"
 $Port = "339{0:d1}"
