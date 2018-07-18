@@ -41,7 +41,7 @@
     "cryptonight/rto":  "CryptoNightArto",
     "cryptonight/xao":  "CryptoNightXao",
     "cryptonight/xtl":  "CryptoNightXtl",
-    "cryptonightalloy":  "CryptoNightAlloy",
+    "cryptonightalloy":  "CryptoNightXao",
     "cryptonightarto":  "CryptoNightArto",
     "cryptonightartocash":  "CryptoNightArto",
     "cryptonightb2n":  "CryptoNightB2N",
