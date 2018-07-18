@@ -62,7 +62,7 @@
     "cryptonightipbclite":  "CryptoNightLiteIpbc",
     "cryptonightmarketcash":  "CryptoNightMarketCash",
     "cryptonightmasari":  "CryptoNightMsr",
-    "cryptonightmonero":  "CryptoNight",
+    "cryptonightmonero":  "CryptoNightV7",
     "cryptonightmonerov7":  "CryptoNightV7",
     "cryptonightnormalv7":  "CryptoNightV7",
     "cryptonightstellite":  "CryptoNightXtl",
