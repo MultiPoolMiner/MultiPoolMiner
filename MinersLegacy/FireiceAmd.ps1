@@ -9,7 +9,7 @@ $Port = 3336
 
 $Commands = [PSCustomObject]@{
     # "cryptonight"              = "" # CryptoNight is ASIC territory
-	"cryptonight_bittube2"       = "" # CryptoNightHeavyTube
+    "cryptonight_bittube2"       = "" # CryptoNightHeavyTube
     "cryptonight_haven"          = "" # CryptoNightHaven
     "cryptonight_heavy"          = "" # CryptoNightHeavy
     "cryptonight_lite"           = "" # CryptoNightLite
