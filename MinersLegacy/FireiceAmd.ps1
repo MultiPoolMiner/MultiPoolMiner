@@ -1,22 +1,23 @@
 ﻿using module ..\Include.psm1
 
 $Path = ".\Bin\CryptoNight-FireIce\xmr-stak.exe"
-$HashSHA256 = "1BFEAA00CCE185C889F82A2C87DCACABF2EE966B379384470E778E1DA72FB7E1"
-$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.4.5/xmr-stak-win64.zip"
+$HashSHA256 = "2B864D4ED3D3D2678E829E7E270B1BF41898ADCFA1010DDEECE6F863DA27222F"
+$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.4.7/xmr-stak-win64.zip"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Port = 3336
 
 $Commands = [PSCustomObject]@{
-    # "cryptonight"           = "" # CryptoNight is ASIC territory
-    "cryptonight_haven"       = "" # CryptoNightHaven
-    "cryptonight_heavy"       = "" # CryptoNightHeavy
-    "cryptonight_lite"        = "" # CryptoNightLite
-    "cryptonight_lite_v7"     = "" # CryptoNightLiteV7
-    "cryptonight_lite_v7_xor" = "" # CryptoNightLiteV7Xor
-    "cryptonight_masari"      = "" # CryptoNightMasari
-    "cryptonight_v7_stellite" = "" # CryptoNightV7Stellite
-    "cryptonight_v7"          = "" # CryptoNightV7
+    # "cryptonight"              = "" # CryptoNight is ASIC territory
+	"cryptonight_bittube2"       = "" # CryptoNightHeavyTube
+    "cryptonight_haven"          = "" # CryptoNightHaven
+    "cryptonight_heavy"          = "" # CryptoNightHeavy
+    "cryptonight_lite"           = "" # CryptoNightLite
+    "cryptonight_lite_v7"        = "" # CryptoNightLiteV7
+    "cryptonight_lite_v7_xor"    = "" # CryptoNightLiteV7Xor
+    "cryptonight_masari"         = "" # CryptoNightMasari
+    "cryptonight_v7_stellite"    = "" # CryptoNightV7Stellite
+    "cryptonight_v7"             = "" # CryptoNightV7
 }
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.$(Get-Algorithm $_)} | ForEach-Object {
