@@ -44,6 +44,7 @@
     "cryptonightartocash":  "CryptoNightRto",
     "cryptonightb2n":  "CryptoNightB2N",
     "cryptonightbittubev2":  "CryptoNightHeavyTube",
+    "cryptonightbittube2":  "CryptoNightHeavyTube",
     "cryptonightfast":  "CryptoNightFast",
     "cryptonighthaven":  "CryptoNightHeavyHaven",
     "cryptonightheavy":  "CryptoNightHeavy",
