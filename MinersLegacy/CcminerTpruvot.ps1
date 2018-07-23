@@ -47,6 +47,7 @@ $Commands = [PSCustomObject]@{
     "wildkeccak"    = "" #Boolberry
     #"whirlcoin"     = "" #Old Whirlcoin (Whirlpool algo) - whirlcoin not in algorithms.txt
     #"whirlpool"    = "" #WhirlPool
+    #"whirlpoolx"   = "" #whirlpoolx
     "x11evo"        = "" #X11evo
     "x12"           = "" #X12
     "x16r"          = "" #X16R
