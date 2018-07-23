@@ -44,6 +44,7 @@ $Commands = [PSCustomObject]@{
     "timetravel"    = "" #Timetravel
     "tribus"        = "" #Tribus
     "veltor"        = "" #Veltor
+    "wildkeccak"    = "" #Boolberry
     #"whirlcoin"     = "" #Old Whirlcoin (Whirlpool algo) - whirlcoin not in algorithms.txt
     #"whirlpool"    = "" #WhirlPool
     "x11evo"        = "" #X11evo
@@ -51,7 +52,6 @@ $Commands = [PSCustomObject]@{
     "x16r"          = "" #X16R
     #"X16s"         = "" #X16S
     #"x17"          = "" #x17
-    "wildkeccak"    = "" #Boolberry
     "zr5"           = "" #zr5
 
     # ASIC - never profitable 20/04/2018
