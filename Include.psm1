@@ -245,8 +245,16 @@ function Get-Stat {
         $Stats = [PSCustomObject]@{}
         Get-ChildItem "Stats" | ForEach-Object {
             $BaseName = $_.BaseName
-            $_ | Get-Content | ConvertFrom-Json -ErrorAction SilentlyContinue | ForEach-Object {
-                $Stats | Add-Member $BaseName $_
+            $FullName = $_.FullName
+            try {
+                $_ | Get-Content | ConvertFrom-Json -ErrorAction SilentlyContinue | ForEach-Object {
+                    $Stats | Add-Member $BaseName $_
+                }
+            }
+            catch {
+                #Remove broken stat file
+                Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be removed. "
+                Remove-Item -Path  $FullName -Force -Confirm:$false
             }
         }
         Return $Stats
