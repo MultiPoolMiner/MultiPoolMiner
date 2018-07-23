@@ -51,7 +51,7 @@ $Commands = [PSCustomObject]@{
     "x16r"          = "" #X16R
     #"X16s"         = "" #X16S
     #"x17"          = "" #x17
-    #"wildkeccak"    = "" #Boolberry - wildkeccak not in algorithms.txt
+    "wildkeccak"    = "" #Boolberry
     "zr5"           = "" #zr5
 
     # ASIC - never profitable 20/04/2018
