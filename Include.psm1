@@ -247,7 +247,7 @@ function Get-Stat {
             $BaseName = $_.BaseName
             $FullName = $_.FullName
             try {
-                $_ | Get-Content | ConvertFrom-Json -ErrorAction SilentlyContinue | ForEach-Object {
+                $_ | Get-Content -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop | ForEach-Object {
                     $Stats | Add-Member $BaseName $_
                 }
             }
