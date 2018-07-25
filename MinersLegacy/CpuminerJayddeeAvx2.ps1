@@ -15,6 +15,7 @@ $Commands = [PSCustomObject]@{
     "x12" = "" #x12
     "yescrypt" = "" #Yescrypt
     "yescryptr16" = "" #yescryptr16, YENTEN
+    "hodl" = "" # hodlcoin
 
     ### MAYBE PROFITABLE ALGORITHMS - NOT MINEABLE IN SUPPORTED POOLS AS OF 06/03/2018
     ### these algorithms are not mineable on supported pools but may be profitable
