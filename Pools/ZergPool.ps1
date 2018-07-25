@@ -37,10 +37,10 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
     $ZergPool_Algorithm = $ZergPool_Request.$_.name
 
     #Define CoinNames for new Equihash algorithms
-    if ($ZergPool_Algorithm -eq "Equihash144")     {$ZergPool_Coin = "SnowGem"}
-    if ($ZergPool_Algorithm -eq "Equihash144BtcZ") {$ZergPool_Algorithm = "Equihash144"; $ZergPool_Coin = "BitcoinZ"}
-    if ($ZergPool_Algorithm -eq "Equihash144Zel")  {$ZergPool_Algorithm = "Equihash144"; $ZergPool_Coin = "ZelCash"}
-    if ($ZergPool_Algorithm -eq "Equihash192")     {$ZergPool_Coin = "ZeroCoin"}
+    if ($ZergPool_Algorithm -eq "Equihash144")     {$ZergPool_Coin = "Snowgem"}
+    if ($ZergPool_Algorithm -eq "Equihash144BtcZ") {$ZergPool_Algorithm = "Equihash144"; $ZergPool_Coin = "Bitcoinz"}
+    if ($ZergPool_Algorithm -eq "Equihash144Zel")  {$ZergPool_Algorithm = "Equihash144"; $ZergPool_Coin = "Zelcash"}
+    if ($ZergPool_Algorithm -eq "Equihash192")     {$ZergPool_Coin = "Zerocoin"}
 
     $ZergPool_Algorithm_Norm = Get-Algorithm $ZergPool_Algorithm
 
