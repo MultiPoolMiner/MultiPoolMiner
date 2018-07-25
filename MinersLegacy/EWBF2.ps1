@@ -27,6 +27,7 @@ $Coins = [PSCustomObject]@{
     "BitcoinZ"    = " --pers BitcoinZ" #https://twitter.com/bitcoinzteam/status/1008283738999021568?lang=en
     "Minexcoin"   = ""
     "SnowGem"     = " --pers sngemPoW"
+    "ZelCash"     = " --pers ZelProof"
     "Zero"        = " --pers ZERO_PoW"
     "ZeroCoin"    = " --pers ZERO_PoW"
 }
