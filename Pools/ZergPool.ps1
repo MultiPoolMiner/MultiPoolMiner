@@ -40,8 +40,8 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
     #Define CoinNames for new Equihash algorithms
     if ($ZergPool_Algorithm -eq "Equihash192") {$ZergPool_Coin = "ZeroCoin"}
     if ($ZergPool_Algorithm -eq "Equihash144") {$ZergPool_Coin = "SnowGem"}
-	if ($ZergPool_Algorithm -eq "Equihash144Zel") {$ZergPool_Coin = "ZelCash"}
-	if ($ZergPool_Algorithm -eq "Equihash144BtcZ") {$ZergPool_Coin = "BitcoinZ"}
+    if ($ZergPool_Algorithm -eq "Equihash144Zel") {$ZergPool_Coin = "ZelCash"}
+    if ($ZergPool_Algorithm -eq "Equihash144BtcZ") {$ZergPool_Coin = "BitcoinZ"}
 
     $Divisor = 1000000 * [Double]$ZergPool_Request.$_.mbtc_mh_factor
 
