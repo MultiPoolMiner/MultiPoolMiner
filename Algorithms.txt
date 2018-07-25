@@ -63,7 +63,11 @@
     "dynamic":  "Argon2dDYN",
     "equihash":  "Equihash",
     "equihash144":  "Equihash1445",
+    "equihash144btcz":  "Equihash1445BtcZ",
+    "equihash144zel":  "Equihash1445Zel"
     "equihash1445":  "Equihash1445",
+    "equihash1445btcz":  "Equihash1445BtcZ",
+    "equihash1445zel":  "Equihash1445Zel",
     "equihash192":  "Equihash1927",
     "equihash1927":  "Equihash1927",
     "equihash200":  "Equihash",
