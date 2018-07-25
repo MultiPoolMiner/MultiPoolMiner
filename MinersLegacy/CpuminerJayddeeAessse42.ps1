@@ -10,12 +10,12 @@ $Commands = [PSCustomObject]@{
     "allium" = "" #Garlicoin
     "cryptonightv7" = "" #CryptoNightV7XMR
     "hmq1725" = "" #HMQ1725
+    "hodl" = "" # hodlcoin
     "lyra2z" = "" #Lyra2z, ZCoin
     "m7m" = "" #m7m
     "x12" = "" #x12
     "yescrypt" = "" #Yescrypt
     "yescryptr16" = "" #yescryptr16, YENTEN
-    "hodl" = "" # hodlcoin
 
     ### MAYBE PROFITABLE ALGORITHMS - NOT MINEABLE IN SUPPORTED POOLS AS OF 06/03/2018
     ### these algorithms are not mineable on supported pools but may be profitable
