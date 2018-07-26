@@ -28,7 +28,7 @@ if (-not $Pools.Equihash.SSL) {
             DeviceName       = $Miner_Device.Name
             Path             = $Path
             HashSHA256       = $HashSHA256
-            Arguments        = "--eexit 1 --api 127.0.0.1:$Miner_Port --server $($Pools.Equihash.Host) --port $($Pools.Equihash.Port) --user $($Pools.Equihash.User) --pass $($Pools.Equihash.Pass) --fee 0 --intensity 64 --cuda_devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_PlatformId_Index)}) -join ' ')"
+            Arguments        = "--eexit 1 --api 127.0.0.1:$Miner_Port --server $($Pools.Equihash.Host) --port $($Pools.Equihash.Port) --user $($Pools.Equihash.User) --pass $($Pools.Equihash.Pass) --fee 0 --intensity 64 --cuda_devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')"
             HashRates        = [PSCustomObject]@{"Equihash" = $Stats."$($Miner_Name)_Equihash_HashRate".Week}
             API              = "DSTM"
             Port             = $Miner_Port
