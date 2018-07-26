@@ -26,7 +26,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         DeviceName = $Miner_Device.Name
         Path       = $Path
         HashSHA256 = $HashSHA256
-        Arguments  = "--telemetry=127.0.0.1:$($Miner_Port) --server $(if ($Pools.Equihash.SSL) {'ssl://'})$($Pools.Equihash.Host) --port $($Pools.Equihash.Port) --user $($Pools.Equihash.User) --pass $($Pools.Equihash.Pass) --color --dev $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_PlatformId_Index)}) -join ' ')"
+        Arguments  = "--telemetry=127.0.0.1:$($Miner_Port) --server $(if ($Pools.Equihash.SSL) {'ssl://'})$($Pools.Equihash.Host) --port $($Pools.Equihash.Port) --user $($Pools.Equihash.User) --pass $($Pools.Equihash.Pass) --color --dev $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')"
         HashRates  = [PSCustomObject]@{"Equihash" = $Stats."$($Miner_Name)_Equihash_HashRate".Week}
         API        = "DSTM"
         Port       = $Miner_Port
