@@ -21,7 +21,7 @@ if (-not $Pools.Equihash.SSL) {
         $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
         $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)
 
-        $Miner_Name = ((@($Name) + @("Equihash") + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-') -replace "[-]{2,}", "-"
+        $Miner_Name = ((@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-') -replace "[-]{2,}", "-"
 
         [PSCustomObject]@{
             Name             = $Miner_Name
