@@ -1,0 +1,21 @@
+        </main>
+      </div>
+    </div>
+  </body>
+<script type="text/javascript">
+  // Set the active sidebar item
+  $(function() {
+    $('#'+$('#title').data('navbaractive')).addClass('active');
+  });
+  
+  // set the values in the header
+  $(function() {
+    $.ajax({url: '/currentprofit', success: function(result) {
+        $("#profit").empty();
+        $("#profit").append("<h6>Current profit: " + formatBTC(result) + " BTC/Day</h6>");
+      }});
+  
+  });
+  
+</script>
+</html>

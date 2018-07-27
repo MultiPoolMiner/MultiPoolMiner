@@ -27,7 +27,7 @@ if (($NiceHash_Request.result.simplemultialgo | Measure-Object).Count -le 1) {
 
 $NiceHash_Regions = "eu", "usa", "hk", "jp", "in", "br"
 
-$NiceHash_Request.result.simplemultialgo | ForEach-Object {
+$NiceHash_Request.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos paying 0 fail stratum #> | ForEach-Object {
     $NiceHash_Host = "nicehash.com"
     $NiceHash_Port = $_.port
     $NiceHash_Algorithm = $_.name
@@ -48,7 +48,7 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
         if ($BTC) {
             [PSCustomObject]@{
                 Algorithm     = $NiceHash_Algorithm_Norm
-                Info          = $NiceHash_Coin
+                CoinName      = $NiceHash_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
@@ -62,10 +62,10 @@ $NiceHash_Request.result.simplemultialgo | ForEach-Object {
                 Updated       = $Stat.Updated
             }
 
-            if ($NiceHash_Algorithm_Norm -eq "Cryptonight" -or $NiceHash_Algorithm_Norm -eq "Equihash") {
+            if ($NiceHash_Algorithm_Norm -eq "CryptonightV7" -or $NiceHash_Algorithm_Norm -eq "Equihash") {
                 [PSCustomObject]@{
                     Algorithm     = $NiceHash_Algorithm_Norm
-                    Info          = $NiceHash_Coin
+                    CoinName      = $NiceHash_Coin
                     Price         = $Stat.Live
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation

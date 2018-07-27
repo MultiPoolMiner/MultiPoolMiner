@@ -1,0 +1,59 @@
+<!--#include file="/parts/head.html" -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 id="title" class="h2" data-navbaractive="navactiveminers">Active Miners</h1>
+</div>
+<table id="miners" class="table"
+  data-toggle="table"
+  data-url="/activeminers"
+  data-response-handler="formatActiveMiners"
+  data-filter-control="true"
+  data-filter-show-clear="true"
+  data-sort-order="desc"
+  data-sort-name="Profit"
+  data-cache="false"
+  data-show-columns="true"
+  data-show-toggle="true"
+  data-show-refresh="true"
+  data-icons-prefix="fa"
+  data-icons="icons"
+  data-detail-view="true"
+  data-detail-formatter="detailFormatter"
+>
+  <thead>
+    <tr>
+      <th data-field="Name" data-sortable="true" data-filter-control="select">Name</th>
+      <th data-field="tDevices" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Devices</th>
+      <th data-field="Profit" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit</th>
+      <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select">Algorithm</th>
+      <th data-field="tPrimarySpeed" data-align="right" data-sortable="true" data-formatter="formatHashRateValue">Speed</th>
+      <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select">Secondary Algorithm</th>
+      <th data-field="tSecondarySpeed" data-align="right" data-sortable="true" data-formatter="formatHashRateValue">Secondary Speed</th>
+    </tr>
+  </thead>
+</table>
+
+<!-- End of page scripts -->
+<script type="text/javascript">
+  function formatActiveMiners(data) {
+    // This function can alter the returned data before building the table, formatting it in a way
+    // that is easier to display and manipulate in a table
+    $.each(data, function(index, item) {
+      // Format the algorithm(s)
+      item.tPrimaryAlgorithm = item.Algorithm[0];
+      item.tSecondaryAlgorithm = item.Algorithm[1];
+
+      // Format the speed(s)
+      if (Array.isArray(item.Speed)) {
+        item.tPrimarySpeed = item.Speed[0];
+        item.tSecondarySpeed = item.Speed[1];
+      } else {
+        item.tPrimarySpeed = item.Speed;
+      }
+
+      // Format the device(s)
+      item.tDevices = item.DeviceName.toString();
+    });
+    return data;
+  }
+</script>
+<!--#include file="/parts/foot.html" -->

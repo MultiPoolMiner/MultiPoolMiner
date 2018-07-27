@@ -10,13 +10,29 @@
     $newRunspace = [runspacefactory]::CreateRunspace()
     $newRunspace.Open()
     $newRunspace.SessionStateProxy.SetVariable("API", $API)
-    $newRunspace.SessionStateProxy.Path.SetLocation($(pwd))
+    $newRunspace.SessionStateProxy.Path.SetLocation($(pwd)) | Out-Null
 
     $apiserver = [PowerShell]::Create().AddScript({
 
+        # Set the starting directory
+        Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+        $BasePath = "$PWD\web"
+
+        # List of possible mime types for files
+        $MIMETypes = @{
+            ".js" = "application/x-javascript"
+            ".html" = "text/html"
+            ".htm" = "text/html"
+            ".json" = "application/json"
+            ".css" = "text/css"
+            ".txt" = "text/plain"
+            ".ico" = "image/x-icon"
+            ".ps1" = "text/html" # ps1 files get executed, assume their response is html
+        }
+
         # Setup the listener
         $Server = New-Object System.Net.HttpListener
-        # Listening on anything other than localhost requires admin priviledges
+        # Listening on anything other than localhost requires admin privileges
         $Server.Prefixes.Add("http://localhost:3999/")
         $Server.Start()
 
@@ -25,8 +41,20 @@
             $Request = $Context.Request
             $URL = $Request.Url.OriginalString
 
-            # Determine the requested resource - remove any query strings and trailing slashes
-            $RequestedResource = ($Request.RawUrl -Split '\?')[0].TrimEnd('/')
+            # Determine the requested resource and parse query strings
+            $Path = $Request.Url.LocalPath
+
+            # Parse any parameters in the URL - $Request.Url.Query looks like "+ ?a=b&c=d&message=Hello%20world"
+            $Parameters = [PSCustomObject]@{}
+            $Request.Url.Query -Replace "\?", "" -Split '&' | Foreach-Object {
+                $key, $value = $_ -Split '='
+                # Decode any url escaped characters in the key and value
+                $key = [URI]::UnescapeDataString($key)
+                $value = [URI]::UnescapeDataString($value)
+                if ($key -and $value) {
+                    $Parameters | Add-Member $key $value
+                }
+            }
 
             # Create a new response and the defaults for associated settings
             $Response = $Context.Response
@@ -35,42 +63,49 @@
             $Data = ""
 
             # Set the proper content type, status code and data for each resource
-            Switch($RequestedResource) {
-                "" {
-                    $ContentType = "text/html"
-                    $Data = Get-Content('APIDocs.html')
-                    break
-                }
+            Switch($Path) {
                 "/version" {
                     $Data = $API.Version | ConvertTo-Json
                     break
                 }
                 "/activeminers" {
-                    $Data = $API.ActiveMiners | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.ActiveMiners | Select-Object)
                     break
                 }
                 "/runningminers" {
-                    $Data = $API.RunningMiners | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.RunningMiners | Select-Object)
                     Break
                 }
                 "/failedminers" {
-                    $Data = $API.FailedMiners | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.FailedMiners | Select-Object)
+                    Break
+                }
+                "/minersneedingbenchmark" {
+                    $Data = ConvertTo-Json @($API.MinersNeedingBenchmark | Select-Object)
                     Break
                 }
                 "/pools" {
-                    $Data = $API.Pools | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.Pools | Select-Object)
                     Break
                 }
                 "/newpools" {
-                    $Data = $API.NewPools | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.NewPools | Select-Object)
                     Break
                 }
                 "/allpools" {
-                    $Data = $API.AllPools | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.AllPools | Select-Object)
+                    Break
+                }
+                "/algorithms" {
+                    $Data = ConvertTo-Json @($API.AllPools.Algorithm | Sort-Object -Unique)
                     Break
                 }
                 "/miners" {
-                    $Data = $API.Miners | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.Miners | Select-Object)
+                    Break
+                }
+                "/fastestminers" {
+                    $Data = ConvertTo-Json @($API.FastestMiners | Select-Object)
                     Break
                 }
                 "/config" {
@@ -82,15 +117,23 @@
                     Break
                 }
                 "/devices" {
-                    $Data = $API.Devices | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.Devices | Select-Object)
                     Break
                 }
                 "/stats" {
-                    $Data = $API.Stats | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.Stats | Select-Object)
                     Break
                 }
                 "/watchdogtimers" {
-                    $Data = $API.WatchdogTimers | ConvertTo-Json
+                    $Data = ConvertTo-Json @($API.WatchdogTimers | Select-Object)
+                    Break
+                }
+                "/balances" {
+                    $Data = ConvertTo-Json @($API.Balances | Select-Object)
+                    Break
+                }
+                "/currentprofit" {
+                    $Data = ($API.RunningMiners | Measure-Object -Sum -Property Profit).Sum | ConvertTo-Json
                     Break
                 }
                 "/stop" {
@@ -99,9 +142,49 @@
                     break
                 }
                 default {
-                    $StatusCode = 404
-                    $ContentType = "text/html"
-                    $Data = "URI '$RequestedResource' is not a valid resource."
+                    # Set index page
+                    if ($Path -eq "/") {
+                        $Path = "/index.html"
+                    }
+
+                    # Check if there is a file with the requested path
+                    $Filename = $BasePath + $Path
+                    if (Test-Path $Filename -PathType Leaf) {
+                        # If the file is a powershell script, execute it and return the output. A $Parameters parameter is sent built from the query string
+                        # Otherwise, just return the contents of the file
+                        $File = Get-ChildItem $Filename
+
+                        If ($File.Extension -eq ".ps1") {
+                            $Data = & $File.FullName -Parameters $Parameters
+                        } else {
+                            $Data = Get-Content $Filename -Raw
+
+                            # Process server side includes for html files
+                            # Includes are in the traditional '<!-- #include file="/path/filename.html" -->' format used by many web servers
+                            if($File.Extension -eq ".html") {
+                                $IncludeRegex = [regex]'<!-- *#include *file="(.*)" *-->'
+                                $IncludeRegex.Matches($Data) | Foreach-Object {
+                                    $IncludeFile = $BasePath +'/' + $_.Groups[1].Value
+                                    If (Test-Path $IncludeFile -PathType Leaf) {
+                                        $IncludeData = Get-Content $IncludeFile -Raw
+                                        $Data = $Data -Replace $_.Value, $IncludeData
+                                    }
+                                }
+                            }
+                        }
+
+                        # Set content type based on file extension
+                        If ($MIMETypes.ContainsKey($File.Extension)) {
+                            $ContentType = $MIMETypes[$File.Extension]
+                        } else {
+                            # If it's an unrecognized file type, prompt for download
+                            $ContentType = "application/octet-stream"
+                        }
+                    } else {
+                        $StatusCode = 404
+                        $ContentType = "text/html"
+                        $Data = "URI '$Path' is not a valid resource."
+                    }
                 }
             }
 
@@ -122,6 +205,7 @@
         }
         # Only gets here if something is wrong and the server couldn't start or stops listening
         $Server.Stop()
+        $Server.Close()
     }) #end of $apiserver
 
     $apiserver.Runspace = $newRunspace

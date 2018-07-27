@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 param(
     [alias("Wallet")]
@@ -30,27 +30,21 @@ $ZergPool_Regions = "us", "europe"
 $ZergPool_Currencies = @("BTC", "LTC") | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 $ZergPool_MiningCurrencies = ($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Foreach-Object {if ($ZergPoolCoins_Request.$_.Symbol) {$ZergPoolCoins_Request.$_.Symbol} else {$_}} | Select-Object -Unique # filter ...-algo
 
-$ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$ZergPool_Request.$_.hashrate -gt 0} |ForEach-Object {
+$ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$ZergPool_Request.$_.hashrate -gt 0} | ForEach-Object {
     $ZergPool_Host = "mine.zergpool.com"
     $ZergPool_Port = $ZergPool_Request.$_.port
-    $ZergPool_Algorithm = $ZergPool_Request.$_.name
-    $ZergPool_Algorithm_Norm = Get-Algorithm $ZergPool_Algorithm
     $ZergPool_Coin = ""
+    $ZergPool_Algorithm = $ZergPool_Request.$_.name
 
-    $Divisor = 1000000
+    #Define CoinNames for new Equihash algorithms
+    if ($ZergPool_Algorithm -eq "Equihash144")     {$ZergPool_Coin = "Snowgem"}
+    if ($ZergPool_Algorithm -eq "Equihash144BtcZ") {$ZergPool_Algorithm = "Equihash144"; $ZergPool_Coin = "Bitcoinz"}
+    if ($ZergPool_Algorithm -eq "Equihash144Zel")  {$ZergPool_Algorithm = "Equihash144"; $ZergPool_Coin = "Zelcash"}
+    if ($ZergPool_Algorithm -eq "Equihash192")     {$ZergPool_Coin = "Zerocoin"}
 
-    switch ($ZergPool_Algorithm_Norm) {
-        "blake2s" {$Divisor *= 1000}
-        "blakecoin" {$Divisor *= 1000}
-        "decred" {$Divisor *= 1000}
-        "equihash" {$Divisor /= 1000}
-        "keccak" {$Divisor *= 1000}
-        "keccakc" {$Divisor *= 1000}
-        "quark" {$Divisor *= 1000}
-        "qubit" {$Divisor *= 1000}
-        "scrypt" {$Divisor *= 1000}
-        "x11" {$Divisor *= 1000}
-    }
+    $ZergPool_Algorithm_Norm = Get-Algorithm $ZergPool_Algorithm
+
+    $Divisor = 1000000 * [Double]$ZergPool_Request.$_.mbtc_mh_factor
 
     if ((Get-Stat -Name "$($Name)_$($ZergPool_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($ZergPool_Algorithm_Norm)_Profit" -Value ([Double]$ZergPool_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
     else {$Stat = Set-Stat -Name "$($Name)_$($ZergPool_Algorithm_Norm)_Profit" -Value ([Double]$ZergPool_Request.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
@@ -63,7 +57,7 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
             #Option 1
             [PSCustomObject]@{
                 Algorithm     = $ZergPool_Algorithm_Norm
-                Info          = $ZergPool_Coin
+                CoinName      = $ZergPool_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
@@ -88,21 +82,10 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
     $ZergPool_Coin = $ZergPoolCoins_Request.$_.name
     $ZergPool_Currency = $_
 
-    $Divisor = 1000000000
-
-    switch ($ZergPool_Algorithm_Norm) {
-        "blake2s" {$Divisor *= 1000}
-        "blakecoin" {$Divisor *= 1000}
-        "decred" {$Divisor *= 1000}
-        "equihash" {$Divisor /= 1000}
-        "keccak" {$Divisor *= 1000}
-        "keccakc" {$Divisor *= 1000}
-        "neoscrypt" {$Divisor *= 1000}
-        "phi" {$Divisor *= 1000}
-        "quark" {$Divisor *= 1000}
-        "qubit" {$Divisor *= 1000}
-        "scrypt" {$Divisor *= 1000}
-        "x11" {$Divisor *= 1000}
+    $Divisor = 1000000000 * [Double]$ZergPool_Request.$ZergPool_Algorithm.mbtc_mh_factor
+    if ($Divisor -eq 0) {
+        Write-Log -Level Info "Unable to determine divisor for $ZergPool_Coin using $ZergPool_Algorithm_Norm algorithm"
+        return
     }
 
     $Stat = Set-Stat -Name "$($Name)_$($_)_Profit" -Value ([Double]$ZergPoolCoins_Request.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
@@ -116,7 +99,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                 #Option 2
                 [PSCustomObject]@{
                     Algorithm     = $ZergPool_Algorithm_Norm
-                    Info          = $ZergPool_Coin
+                    CoinName      = $ZergPool_Coin
                     Price         = $Stat.Live
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
@@ -136,7 +119,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                 #Option 3
                 [PSCustomObject]@{
                     Algorithm     = $ZergPool_Algorithm_Norm
-                    Info          = $ZergPool_Coin
+                    CoinName      = $ZergPool_Coin
                     Price         = $Stat.Live
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation

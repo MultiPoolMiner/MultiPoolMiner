@@ -1,0 +1,12 @@
+﻿{
+    "Type":  "NVIDIA",
+    "Path":  ".\\Bin\\NVIDIA-BMiner\\BMiner.exe",
+    "HashSHA256": "94F40A763FC4182663A5F3E1885EE4E3EDF1E1DBB69F8CFC170109DB7320081B",
+    "Arguments":  "\"-api 127.0.0.1:1880 -uri $(if ($Pools.Equihash.SSL) {'stratum+ssl'}else {'stratum'})://$([System.Web.HttpUtility]::UrlEncode($Pools.Equihash.User)):$([System.Web.HttpUtility]::UrlEncode($Pools.Equihash.Pass))@$($Pools.Equihash.Host):$($Pools.Equihash.Port) -nofee -watchdog=false\"",
+    "HashRates":  {
+                      "Equihash":  "\"$($Stats.Bminer_Equihash_HashRate.Week)\""
+                  },
+    "API":  "Bminer",
+    "Port":  "1880",
+    "URI":  "https://www.bminercontent.com/releases/bminer-lite-v9.0.0-199ca8c-amd64.zip"
+}
