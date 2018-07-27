@@ -33,7 +33,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm $Algorithm
         $MinMemGB = $_.MinMemGB
 
-        if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMemGB})) {
+        if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMemGB * 1000000000})) {
 
             $Miner_Name = ((@($Name) + @("$($Algorithm_Norm -replace '^ethash', '')") + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-') -replace "[-]{2,}", "-"
 

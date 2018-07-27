@@ -48,7 +48,7 @@ $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Selec
         $Zpool_Currencies | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $Zpool_Algorithm_Norm
-                Info          = $Zpool_Coin
+                CoinName      = $Zpool_Coin
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation

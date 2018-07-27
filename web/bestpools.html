@@ -8,7 +8,7 @@
   data-url="/pools"
   data-filter-control="true"
   data-filter-show-clear="true"
-  data-sort-order="desc"
+  data-sort-order="asc"
   data-sort-name="Algorithm"
   data-cache="false"
   data-show-columns="true"
@@ -18,12 +18,13 @@
   data-icons="icons"
   data-detail-view="true"
   data-detail-formatter="detailFormatter"
+  data-response-handler="formatPools"
 >
   <thead>
     <tr>
       <th data-field="Algorithm" data-sortable="true" data-filter-control="select">Algorithm</th>
       <th data-field="Name" data-sortable="true" data-filter-control="select">Name</th>
-      <th data-field="Info" data-sortable="true" data-filter-control="select">Info</th>
+      <th data-field="Coin" data-sortable="true" data-filter-control="select">CoinName</th>
       <th data-field="Price" data-align="right" data-sortable="true" data-formatter="formatPrices">BTC/GH/Day</th>
       <th data-field="Host" data-sortable="true" data-filter-control="select">Host</th>
       <th data-field="Updated" data-sortable="true" data-formatter="formatDate">Last Updated</th>
@@ -33,6 +34,16 @@
 
 <!-- End of page scripts -->
 <script type="text/javascript">
+
+  function formatPools(data) {
+    data = data[0];
+    var items = new Array();
+    $.each(Object.keys(data), function (index, item) {
+      items.push(data[item]);
+    });
+    return items;
+  }
+
   function formatPrices(data) {
     return (data * 1000000000).toFixed(10);
   }

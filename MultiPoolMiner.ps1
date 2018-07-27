@@ -352,8 +352,8 @@ while ($true) {
             Where-Object {(Compare-Object @($Devices.Name | Select-Object) @($_.DeviceName | Select-Object) | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0} | 
             Where-Object {($Config.Algorithm.Count -eq 0 -or (Compare-Object $Config.Algorithm $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0) -and ((Compare-Object $Pools.PSObject.Properties.Name $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0)} | 
             Where-Object {$Config.ExcludeAlgorithm.Count -eq 0 -or (Compare-Object $Config.ExcludeAlgorithm $_.HashRates.PSObject.Properties.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0} | 
-            Where-Object {$Config.MinerName.Count -eq 0 -or (Compare-Object $Config.MinerName ($_.Name -split "-" | Select-Object -Index 0) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
-            Where-Object {$Config.ExcludeMinerName.Count -eq 0 -or (Compare-Object $Config.ExcludeMinerName ($_.Name -split "-" | Select-Object -Index 0) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
+            Where-Object {$Config.MinerName.Count -eq 0 -or (Compare-Object @($Config.MinerName | Select-Object) @($_.Name, ($_.Name -split "-" | Select-Object -Index 0) | Select-Object -Unique) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
+            Where-Object {$Config.ExcludeMinerName.Count -eq 0 -or (Compare-Object @($Config.ExcludeMinerName| Select-Object) @($_.Name, ($_.Name -split "-" | Select-Object -Index 0) | Select-Object -Unique) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
     }
     Write-Log "Calculating profit for each miner. "
     $AllMiners | ForEach-Object {
@@ -630,7 +630,7 @@ while ($true) {
         @{Label = "$($Config.Currency | Select-Object -Index 0)/Day"; Expression = {if ($_.Profit) {ConvertTo-LocalCurrency $($_.Profit) $($Rates.$($Config.Currency | Select-Object -Index 0)) -Offset 2} else {"Unknown"}}; Align = "right"}, 
         @{Label = "Accuracy"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {"{0:P0}" -f [Double](1 - $_.MarginOfError)}}; Align = 'right'}, 
         @{Label = "$($Config.Currency | Select-Object -Index 0)/GH/Day"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {"$(ConvertTo-LocalCurrency $($_.Price * 1000000000) $($Rates.$($Config.Currency | Select-Object -Index 0)) -Offset 2)"}}; Align = "right"}, 
-        @{Label = "Pool[Fee]"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {if ($_.Info) {"$($_.Name)-$($_.Info)$("[{0:P2}]" -f [Double]$_.Fee)"}else {"$($_.Name)$("[{0:P2}]" -f [Double]$_.Fee)"}}}}
+        @{Label = "Pool[Fee]"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {if ($_.CoinName) {"$($_.Name)-$($_.CoinName)$("[{0:P2}]" -f [Double]$_.Fee)"}else {"$($_.Name)$("[{0:P2}]" -f [Double]$_.Fee)"}}}}
     ) | Out-Host
 
     #Display benchmarking progres
