@@ -17,19 +17,21 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Equihash-96_5"; MinMemGB = 2; Params = ""}
     [PSCustomObject]@{Algorithm = "Equihash-144_5"; MinMemGB = 2; Params = ""}
     [PSCustomObject]@{Algorithm = "Equihash-192_7"; MinMemGB = 3; Params = ""}
-    [PSCustomObject]@{Algorithm = "aion"; MinMemGB = 2; Params = ""} #Aion uses Equihash 210_9. The miner adds pers 'AION0PoW'. Unfortunately --algo 210_9 is not (yet) supported
+    [PSCustomObject]@{Algorithm = "aion"; MinMemGB = 2; Params = ""} #Aion uses Equihash 210_9. The miner automatically adds pers 'AION0PoW'. 
+    # --algo 210_9 ad algo name is not (yet) supported
 )
 
 $CommonCommands = " --pec --fee 0 --intensity 64"
 
 $Coins = [PSCustomObject]@{
-    "BitcoinGold" = " --pers BgoldPoW"
-    "BitcoinZ"    = " --pers BitcoinZ" #https://twitter.com/bitcoinzteam/status/1008283738999021568?lang=en
+    "Bitcoingold" = " --pers BgoldPoW"
+    "Bitcoinz"    = " --pers BitcoinZ" #https://twitter.com/bitcoinzteam/status/1008283738999021568?lang=en
     "Minexcoin"   = ""
-    "SnowGem"     = " --pers sngemPoW"
-    "ZelCash"     = " --pers ZelProof"
+    "Safecoin"    = " --pers Safecoin"
+    "Snowgem"     = " --pers sngemPoW"
+    "Zelcash"     = " --pers ZelProof"
     "Zero"        = " --pers ZERO_PoW"
-    "ZeroCoin"    = " --pers ZERO_PoW"
+    "Zerocoin"    = " --pers ZERO_PoW"
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
