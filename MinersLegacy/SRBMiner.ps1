@@ -59,8 +59,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm "cryptonight$($Algorithm)"
         $Threads = $_.Threads
         $MinMemGb = $_.MinMemGb
-        $Params = $_.Params
-        
+
         $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMemGb * 1000000000)})
 
         if ($Pools.$Algorithm_Norm.Host -and $Miner_Device) {
