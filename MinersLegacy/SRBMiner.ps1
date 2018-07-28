@@ -44,7 +44,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "stellitev4"; Threads = 2; MinMemGb = 2} # CryptoNightXtl 2 threads
 
     # Asic only (2018/07/12)
-    #[PSCustomObject]@{Algorithm = "normal"    ; Threads = 1; MinMemGb = 2} # CryptoNight 1 thread
+    #[PSCustomObject]@{Algorithm = "normal";     Threads = 1; MinMemGb = 2} # CryptoNight 1 thread
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
