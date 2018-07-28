@@ -24,7 +24,7 @@ $Commands = [PSCustomObject]@{
     "skunkhash" = "" #Skunk
     "tribus"    = "" #Tribus, new with 0.8
 }
-$CommonCommands = " --no-color"
+$CommonCommands = " --no-watchdog --no-color"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
