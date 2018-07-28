@@ -8,8 +8,8 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-CryptoDredge\CryptoDredge.exe"
-$HashSHA256 = "DFB28D9F17D89F694E564FA161747DB9A95B85A8CFF010BFFFCC8B53259328CC"
-$Uri = "https://github.com/technobyl/CryptoDredge/releases/download/v0.7.0/CryptoDredge_0.7.0_windows.zip"
+$HashSHA256 = "A921645B0C07225CCEF21D833B3E9EB765FEDD48F48A1D0BB7E22C7B4FE30ACA"
+$Uri = "https://github.com/technobyl/CryptoDredge/releases/download/v0.8.0/CryptoDredge_0.8.0_cuda_9.2_windows.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4129696.0"
 $Port = "60{0:d2}"
 
@@ -19,13 +19,23 @@ $Commands = [PSCustomObject]@{
     "lyra2z"    = "" #Lyra2z
     "neoscrypt" = "" #NeoScrypt
     "phi2"      = "" #PHI2
-    "phi1612"   = "" #PHI1612
+    "phi"       = "" #PHI1612
     "skein"     = "" #Skein
     "skunkhash" = "" #Skunk
+    "tribus"    = "" #Tribus, new with 0.8
 }
 $CommonCommands = " --no-color"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+
+# Miner requires CUDA 9.2
+$DriverVersion = (Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version -replace ".*CUDA ",""
+$RequiredVersion = "9.2.00"
+if ($DriverVersion -and $DriverVersion -lt $RequiredVersion) {
+    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers. "
+    return
+}
+
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
 
 $Devices | Select-Object -ExpandProperty Model | ForEach-Object {
@@ -37,8 +47,8 @@ $Devices | Select-Object -ExpandProperty Model | ForEach-Object {
         $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
         Switch ($Algorithm_Norm) {
+            "PHI"     {$ExtendInterval = 3}
             "PHI2"    {$ExtendInterval = 3}
-            "PHI1612" {$ExtendInterval = 3}
             default   {$ExtendInterval = 0}
         }
 
