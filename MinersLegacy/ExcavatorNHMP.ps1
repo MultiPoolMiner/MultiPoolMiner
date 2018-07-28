@@ -8,8 +8,8 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-ExcavatorNHMP\excavator.exe"
-$HashSHA256 = "6800F4B6122BB7F39A01F101B12A9E8B8AC050793EC0D10511CA2AD8354D792A"
-$Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.9a/excavator_v1.5.9a_Win64.zip"
+$HashSHA256 = "1AE0C316E2D4A71C9AB21545DF41F50E685913794FDCAC016E0B91691B3410E7"
+$Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.10a/excavator_v1.5.10a_Win64.zip"
 $ManualUri = "https://github.com/nicehash/excavator/releases"
 $Port = "5400"
 
