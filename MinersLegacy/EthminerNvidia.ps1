@@ -8,8 +8,8 @@ param(
 )
 
 $Path = ".\Bin\AMD_NVIDIA-Ethminer-Ethash\ethminer.exe"
-$HashSHA256 = "95F1F0DFCDF8EFE151501009276B00AE77B29DE9B3EF04974BE07F1A07D59761"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethminer/ethminer-0.14.0-Windows.zip"
+$HashSHA256 = "909FC9A440CD7872DB543D8A056E87BB9CF4C368736BD9C3AB743A578D30C34A"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethminer/ethminer-0.15.0-Windows.zip"
 $ManualUri = "https://github.com/ethereum-mining/ethminer"
 $Port = "233{0:d2}"
 
@@ -18,7 +18,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; Params = @()} #Ethash3GB
     [PSCustomObject]@{Algorithm = "ethash"   ; MinMemGB = 4; Params = @()} #Ethash
 )
-$CommonCommands = " --cuda-noeval"
+$CommonCommands = ""
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
