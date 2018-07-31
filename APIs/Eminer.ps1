@@ -22,7 +22,6 @@ class Eminer : Miner {
         }
 
         $HashRate_Name = [String]$this.Algorithm[0]
-#        $HashRate_Value = [Double]($Data.devices.hashrate_1m | Measure-Object -Sum).Sum
         $HashRate_Value = [Double]($Data.total_hashrate_mean | Measure-Object -Sum).Sum
 
         if ($HashRate_Name -and $HashRate_Value -gt 0) {
