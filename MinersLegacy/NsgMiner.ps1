@@ -24,8 +24,14 @@ $Devices = @($Devices | Where-Object Type -EQ "GPU")
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)    
-    
+    $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)
+
+    switch ($_.Vendor) {
+        "Advanced Micro Devices, Inc." {$Arguments_Platform = " --gpu-platform $($Miner_Device | Select-Object -First 1 -ExpandProperty PlatformID)"}
+        "NVIDIA Corporation" {$Arguments_Platform = ""}
+        Default {$Arguments_Platform = ""}
+    }
+
     $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
@@ -37,7 +43,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             DeviceName       = $Miner_Device.Name
             Path             = $Path
             HashSHA256       = $HashSHA256
-            Arguments        = ("--$_ --api-listen --api-port $Miner_Port -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$CommonCommands --gpu-platform $($Miner_Device.PlatformId) --device $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_PlatformId_Index)}) -join '--device ')" -replace "\s+", " ").trim()
+            Arguments        = ("--$_ --api-listen --api-port $Miner_Port -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$CommonCommands$Arguments_Platform --device $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_PlatformId_Index)}) -join '--device ')" -replace "\s+", " ").trim()
             HashRates        = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
             API              = "Xgminer"
             Port             = $Miner_Port
