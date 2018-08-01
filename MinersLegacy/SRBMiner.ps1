@@ -8,8 +8,8 @@ param(
 )
 
 $Path = ".\Bin\AMD-SRBMiner-CryptoNight\SRBMiner-CN.exe"
-$HashSHA256 = "265B3A473D2F2BEA96567A148146E88F77EA1EFF256DF20BC4D21CB43A02EB63"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/SRBMiner/SRBMiner-CN-V1-6-4.zip"
+$HashSHA256 = "5754439C2AE8331F75BDA10F14DBAEAF4F5948F391E2CF35AAFD585CAA4E0973"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/SRBMiner/SRBMiner-CN-V1-6-5.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3167363.0"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
