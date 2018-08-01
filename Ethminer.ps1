@@ -28,7 +28,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Miner_Port = $Port -f ($Device | Select-Object -First 1 -ExpandProperty Index)
 
     switch ($_.Vendor) {
-        "Advanced Micro Devices, Inc." {$Arguments_Platform = " --opencl --opencl-platform  $($Miner_Device | Select-Object -First 1 -ExpandProperty PlatformID) --opencl-devices "}
+        "Advanced Micro Devices, Inc." {$Arguments_Platform = " --opencl --opencl-platform  $($Device | Select-Object -First 1 -ExpandProperty PlatformID) --opencl-devices "}
         "NVIDIA Corporation" {$Arguments_Platform = " --cuda --cuda-devices "}
         Default {$Arguments_Platform = ""}
     }
