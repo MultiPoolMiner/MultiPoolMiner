@@ -21,11 +21,17 @@ $Commands = [PSCustomObject[]]@(
 $CommonCommands = " -log 0"
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
+$Devices = @($Devices | Where-Object Type -EQ "GPU")
 
-$Devices | Select-Object Model -Unique | ForEach-Object {
-    $Device = @($Devices | Where-Object Model -EQ $_.Model)
+$Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
+    $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Port -f ($Device | Select-Object -First 1 -ExpandProperty Index)
+
+    switch ($_.Vendor) {
+        "Advanced Micro Devices, Inc." {$Vendor = " -amd"}
+        "NVIDIA Corporation" {$Vendor = " -nvidia"}
+        Default {$Vendor = ""}
+    }
 
     $Commands | ForEach-Object {
         $Algorithm = $_.Algorithm
@@ -41,7 +47,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 DeviceName     = $Miner_Device.Name
                 Path           = $Path
                 HashSHA256     = $HashSHA256
-                Arguments      = ("-rmode 0 -cdmport $Miner_Port -cdm 1 -pool $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -wal $($Pools.$Algorithm_Norm.User) -pass $($Pools.$Algorithm_Norm.Pass)$CommonCommands -proto 4 -coin auto -nvidia -gpus $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index + 1)}) -join '')" -replace "\s+", " ").trim()
+                Arguments      = ("-rmode 0 -cdmport $Miner_Port -cdm 1 -pool $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -wal $($Pools.$Algorithm_Norm.User) -pass $($Pools.$Algorithm_Norm.Pass)$($_.Params)$CommonCommands -proto 4 -coin auto$Vendor -gpus $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index + 1)}) -join '')" -replace "\s+", " ").trim()
                 HashRates      = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                 API            = "Claymore"
                 Port           = $Miner_Port
