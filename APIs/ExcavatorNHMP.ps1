@@ -5,7 +5,7 @@ class ExcavatorNHMP : Miner {
     hidden [DateTime]$BeginTime = 0
     hidden [DateTime]$EndTime = 0
     hidden [Array]$Workers = @()
-    hidden [Int32]$Service_Id = 1
+    hidden [Int32]$Service_Id = 0
 
     [String[]]GetProcessNames() {
         return @()
