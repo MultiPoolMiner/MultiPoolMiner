@@ -8,22 +8,22 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-EWBF2-Equihash\miner.exe"
-$HashSHA256 = "9CB05EF5863CD3EB7D0C2E0E8B7D8EC527373F75DD2C3A6B4CC736B401EB6400"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/EWBF2/EWBF.Equihash.miner.v0.4.zip"
+$HashSHA256 = "BB17BA6C699F6BC7A4465E641E15E1A7AABF1D884BF908A603DBAA1A705EDCD9"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/EWBF2/EWBF.Equihash.miner.v0.5.zip"
 $ManualUri = "https://mega.nz/#F!fsAlmZQS!CwVgFfBDduQI-CbwVkUEpQ"
-$Port = "421{0:d2}"
+$Port = "40{0:d2}"
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{Algorithm = "Equihash-96_5"; MinMemGB = 2; Params = ""}
-    [PSCustomObject]@{Algorithm = "Equihash-144_5"; MinMemGB = 2; Params = ""}
-    [PSCustomObject]@{Algorithm = "Equihash-192_7"; MinMemGB = 3; Params = ""}
-    [PSCustomObject]@{Algorithm = "aion"; MinMemGB = 2; Params = ""} #Aion uses Equihash 210_9. The miner automatically adds pers 'AION0PoW'. 
-    # --algo 210_9 ad algo name is not (yet) supported
+    [PSCustomObject]@{Algorithm = "Equihash-96_5";  MinMemGB = 1.8; Params = ""}
+    [PSCustomObject]@{Algorithm = "Equihash-144_5"; MinMemGB = 2;   Params = ""}
+    [PSCustomObject]@{Algorithm = "Equihash-192_7"; MinMemGB = 2.7; Params = ""}
+    [PSCustomObject]@{Algorithm = "Equihash-210_9"; MinMemGB = 1.3; Params = ""}
 )
 
 $CommonCommands = " --pec --fee 0 --intensity 64"
 
 $Coins = [PSCustomObject]@{
+    "Aion"        = " --pers AION0PoW"
     "Bitcoingold" = " --pers BgoldPoW"
     "Bitcoinz"    = " --pers BitcoinZ" #https://twitter.com/bitcoinzteam/status/1008283738999021568?lang=en
     "Minexcoin"   = ""
@@ -49,8 +49,14 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $MinMemGB = $_.MinMemGB
 
         #Pers parameter, can be different per coin
-        $Pers = $Coins."$($Pools.$Algorithm_Norm.CoinName)"
-        
+        if ($Coins."$($Pools.$Algorithm_Norm.CoinName)") {
+            $Pers = $Coins."$($Pools.$Algorithm_Norm.CoinName)"
+        }
+        #ZergPool allows pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
+        if ($Pools.$Algorithm_Norm.Name -like "ZergPool*") {
+            $Pers = " --pers auto"
+        }
+
         if ($Miner_Device = @($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMemGB * 1000000000)})) {
             [PSCustomObject]@{
                 Name             = $Miner_Name
@@ -63,7 +69,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 Port             = $Miner_Port
                 URI              = $Uri
                 Fees             = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
-                ExtendInterval   = 2
+                BenchmarkSamples = 10
                 PrerequisitePath = "$env:SystemRoot\System32\msvcr120.dll"
                 PrerequisiteURI  = "http://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe"
             }
