@@ -11,6 +11,7 @@ param(
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $ZergPool_Request = [PSCustomObject]@{}
+$ZergPoolCoins_Request = [PSCustomObject]@{}
 
 try {
     $ZergPool_Request = Invoke-RestMethod "http://api.zergpool.com:8080/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
