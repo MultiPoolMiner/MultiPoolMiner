@@ -56,10 +56,11 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm $_
 
         Switch ($Algorithm_Norm) {
-            "PHI2"  {$BenchmarkSamples = 20}
-            "X16R"  {$BenchmarkSamples = 50}
-            "X16S"  {$BenchmarkSamples = 50}
-            default {$BenchmarkSamples = 10}
+        	"PHI"   {$ExtendInterval = 3}
+        	"PHI2"  {$ExtendInterval = 3}
+        	"X16R"  {$ExtendInterval = 10}
+        	"X16S"  {$ExtendInterval = 10}
+        	default {$ExtendInterval = 0}
         }
 
         [PSCustomObject]@{
@@ -73,7 +74,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             Port             = $Miner_Port
             URI              = $Uri
             Fees             = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
-            BenchmarkSamples = $BenchmarkSamples
+            ExtendInterval   = $ExtendInterval
         }
     } 
 }
