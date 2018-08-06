@@ -27,7 +27,7 @@ if (($ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore
     return
 }
 
-$ZergPool_Regions = "us", "europe"
+$ZergPool_Regions = "europe"
 $ZergPool_Currencies = @("BTC", "DASH", "LTC") | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 $ZergPool_MiningCurrencies = ($ZergPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Foreach-Object {if ($ZergPoolCoins_Request.$_.Symbol) {$ZergPoolCoins_Request.$_.Symbol} else {$_}} | Select-Object -Unique # filter ...-algo
 
@@ -68,7 +68,7 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = if ($ZergPool_Region -eq "us") {$ZergPool_Host}else {"$ZergPool_Region.$ZergPool_Host"}
+                Host          = $ZergPool_Region.$ZergPool_Host
                 Port          = $ZergPool_Port
                 User          = Get-Variable $_ -ValueOnly
                 Pass          = "$Worker,c=$_"
@@ -110,7 +110,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+tcp"
-                    Host          = if ($ZergPool_Region -eq "us") {$ZergPool_Host}else {"$ZergPool_Region.$ZergPool_Host"}
+                    Host          = $ZergPool_Region.$ZergPool_Host
                     Port          = $ZergPool_Port
                     User          = Get-Variable $_ -ValueOnly
                     Pass          = "$Worker, c=$_, mc=$ZergPool_Currency"
@@ -130,7 +130,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+tcp"
-                    Host          = if ($ZergPool_Region -eq "us") {$ZergPool_Host}else {"$ZergPool_Region.$ZergPool_Host"}
+                    Host          = $ZergPool_Region.$ZergPool_Host
                     Port          = $ZergPool_Port
                     User          = Get-Variable $_ -ValueOnly
                     Pass          = "$Worker,c=$_,mc=$ZergPool_Currency"
