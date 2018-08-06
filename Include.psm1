@@ -119,7 +119,7 @@ function Set-Stat {
     $Stat = Get-Content $Path -ErrorAction SilentlyContinue
     
     try {
-        $Stat | ConvertFrom-Json -ErrorAction Stop
+        $Stat = $Stat | ConvertFrom-Json -ErrorAction Stop
         $Stat = [PSCustomObject]@{
             Live = [Double]$Stat.Live
             Minute = [Double]$Stat.Minute
