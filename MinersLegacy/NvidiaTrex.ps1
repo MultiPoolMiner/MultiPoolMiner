@@ -30,16 +30,7 @@ $CommonCommands = ""
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-# Miner requires CUDA 9.2
-$DriverVersion = (Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version -replace ".*CUDA ",""
-$RequiredVersion = "9.2.00"
-if ($DriverVersion -and $DriverVersion -lt $RequiredVersion) {
-    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers. "
-    return
-}
-
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
-
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)
