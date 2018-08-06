@@ -38,8 +38,8 @@ if ($DriverVersion -and $DriverVersion -lt $RequiredVersion) {
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
 
-$Devices | Select-Object -ExpandProperty Model -Unique | ForEach-Object {
-    $Miner_Device = @($Devices | Where-Object Model -EQ $_)
+$Devices | Select-Object Model -Unique | ForEach-Object {
+    $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)
 
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
