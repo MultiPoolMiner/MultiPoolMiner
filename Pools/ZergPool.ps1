@@ -68,7 +68,7 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+tcp"
-                    Host          = $ZergPool_Host
+                    Host          = "$ZergPool_Algorithm.$ZergPool_Host"
                     Port          = $ZergPool_Port
                     User          = Get-Variable $_ -ValueOnly
                     Pass          = "$Worker,c=$_"
@@ -111,7 +111,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                         StablePrice   = $Stat.Week
                         MarginOfError = $Stat.Week_Fluctuation
                         Protocol      = "stratum+tcp"
-                        Host          = $ZergPool_Host
+                        Host          = "$ZergPool_Algorithm.$ZergPool_Host"
                         Port          = $ZergPool_Port
                         User          = Get-Variable $_ -ValueOnly
                         Pass          = "$Worker, c=$_, mc=$ZergPool_Currency"
@@ -131,7 +131,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                         StablePrice   = $Stat.Week
                         MarginOfError = $Stat.Week_Fluctuation
                         Protocol      = "stratum+tcp"
-                        Host          = $ZergPool_Host
+                        Host          = "$ZergPool_Algorithm.$ZergPool_Host"
                         Port          = $ZergPool_Port
                         User          = Get-Variable $_ -ValueOnly
                         Pass          = "$Worker,c=$_,mc=$ZergPool_Currency"
