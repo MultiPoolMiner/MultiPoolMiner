@@ -14,7 +14,7 @@ $ManualUri = "https://bitcointalk.org/index.php?topic=3378390.0"
 $Port = "40{0:d2}"
 
 $Commands = [PSCustomObject]@{
-    "aergo"      = "" #AeriumX, new in 1.11
+    "aeriumx"    = "" #AeriumX, new in 1.11
     "bitcore"    = "" #Bitcore
     "c11"        = "" #C11, new in 1.11
     "hsr"        = "" #Hsr
