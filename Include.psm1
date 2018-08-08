@@ -243,7 +243,7 @@ function Get-Stat {
     else {
         # Return all stats
         $Stats = [PSCustomObject]@{}
-        Get-ChildItem "Stats" | ForEach-Object {
+        Get-ChildItem "Stats" -File | ForEach-Object {
             $BaseName = $_.BaseName
             $FullName = $_.FullName
             try {
@@ -253,7 +253,7 @@ function Get-Stat {
             }
             catch {
                 #Remove broken stat file
-                Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be removed. "
+                Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
                 Remove-Item -Path  $FullName -Force -Confirm:$false
             }
         }
