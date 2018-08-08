@@ -367,7 +367,7 @@ To display the balances of all enabled pools (excluding those that are excluded 
     ...
 }
 	
-To display the balances of all pools (including those that are excluded with 'ExcludeMinerName') on the summary screen and in the web GUI '"ShowPoolBalances":  true' to the general section:
+To display the balances of all pools (including those that are excluded with 'ExcludeMinerName') on the summary screen and in the web GUI add '"ShowPoolBalances":  true' to the general section:
 {
     ...
 	"ShowPoolBalancesExcludedPools":  true
