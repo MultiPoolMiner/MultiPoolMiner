@@ -46,7 +46,7 @@
         "API":  "Cast",
         "Port":  "7777",
         "URI":  "http://www.gandalph3000.com/download/cast_xmr-vega-win64_130.zip"
-    }
+    },
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\CryptoNight-Cast\\cast_xmr-vega.exe",
@@ -58,7 +58,7 @@
         "API":  "Cast",
         "Port":  "7777",
         "URI":  "http://www.gandalph3000.com/download/cast_xmr-vega-win64_130.zip"
-    }
+    },
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\CryptoNight-Cast\\cast_xmr-vega.exe",
@@ -70,7 +70,7 @@
         "API":  "Cast",
         "Port":  "7777",
         "URI":  "http://www.gandalph3000.com/download/cast_xmr-vega-win64_130.zip"
-    }
+    },
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\CryptoNight-Cast\\cast_xmr-vega.exe",
@@ -82,7 +82,7 @@
         "API":  "Cast",
         "Port":  "7777",
         "URI":  "http://www.gandalph3000.com/download/cast_xmr-vega-win64_130.zip"
-    }
+    },
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\CryptoNight-Cast\\cast_xmr-vega.exe",
