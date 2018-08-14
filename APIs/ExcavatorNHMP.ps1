@@ -152,7 +152,7 @@ class ExcavatorNHMP : Miner {
                     $Data = [ExcavatorNHMP]::InvokeRequest($this, $Request)
 
                     #Algorithm cleared message
-                    [ExcavatorNHMP]::WriteMessage($this, "Unused algorithm [$($Unused_Algorithms -join " ;")] cleared. ")
+                    [ExcavatorNHMP]::WriteMessage($this, "Unused algorithm [$($Unused_Algorithms -join "; ")] cleared. ")
                 }
 
                 if (-not $Active_Algorithms) {
