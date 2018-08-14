@@ -8,10 +8,10 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-ExcavatorNHMP\excavator.exe"
-$HashSHA256 = "1AE0C316E2D4A71C9AB21545DF41F50E685913794FDCAC016E0B91691B3410E7"
-$Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.10a/excavator_v1.5.10a_Win64.zip"
+$HashSHA256 = "C666B70EF763A99D1163A94074A9D93D20FA10B88214C90F719AECA44D5201202"
+$Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.11a/excavator_v1.5.11a_Win64.zip"
 $ManualUri = "https://github.com/nicehash/excavator/releases"
-$Port = "5400"
+$Port = "5401"
 
 $Commands = [PSCustomObject[]]@(
     #1 Thread
@@ -56,6 +56,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Main_Algorithm = $Algorithm -Split "_" | Select-Object -Index 0
         $Main_Algorithm_Norm = "$(Get-Algorithm $Main_Algorithm)-NHMP"
         $Secondary_Algorithm = $Algorithm -Split "_" | Select-Object -Index 1
+        if ($Secondary_Algorithm -eq "decred") {$Secondary_Algorithm = "DecredNicehash"} #temp fix
         $Secondary_Algorithm_Norm = "$(Get-Algorithm $Secondary_Algorithm)-NHMP"
         $Threads = $_.Threads
         $Params = $_.Params
