@@ -13,7 +13,7 @@ $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/SRBMi
 $ManualUri = "https://bitcointalk.org/index.php?topic=3167363.0"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-$Port = "52{0:d2}"
+$Port = "40{0:d2}"
                 
 # Algorithm names are case sensitive!
 $Commands = [PSCustomObject[]]@(
@@ -53,6 +53,7 @@ $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Adv
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Port -f ($Device | Select-Object -First 1 -ExpandProperty Index)
+    $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object ) | Select-Object) -join '-'
 
     $Commands | ForEach-Object {
         $Algorithm = $_.Algorithm
@@ -64,8 +65,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         if ($Pools.$Algorithm_Norm.Host -and $Miner_Device) {
         
-            $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object ) | Select-Object) -join '-'
-            
             $Arguments = @(
                 [PSCustomObject]@{
                     Config = [PSCustomObject]@{
