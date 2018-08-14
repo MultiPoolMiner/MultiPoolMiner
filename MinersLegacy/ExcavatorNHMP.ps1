@@ -56,8 +56,8 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Main_Algorithm = $Algorithm -Split "_" | Select-Object -Index 0
         $Main_Algorithm_Norm = "$(Get-Algorithm $Main_Algorithm)-NHMP"
         $Secondary_Algorithm = $Algorithm -Split "_" | Select-Object -Index 1
-        if ($Secondary_Algorithm -eq "decred") {$Secondary_Algorithm = "DecredNicehash"} #temp fix
         $Secondary_Algorithm_Norm = "$(Get-Algorithm $Secondary_Algorithm)-NHMP"
+        if ($Secondary_Algorithm -eq "decred") {$Secondary_Algorithm_Norm = "DecredNicehash-NHMP"} #temp fix
         $Threads = $_.Threads
         $Params = $_.Params
         $ExtendInterval = $_.ExtendInterval
