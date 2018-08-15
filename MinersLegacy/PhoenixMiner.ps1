@@ -26,8 +26,9 @@ $Devices = @($Devices | Where-Object Type -EQ "GPU")
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Port -f ($Device | Select-Object -First 1 -ExpandProperty Index)
+    $Miner_Name = (@($Name) + @($Device.Name | Sort-Object) | Select-Object) -join '-'
 
-    switch ($_.Vendor) {
+switch ($_.Vendor) {
         "Advanced Micro Devices, Inc." {$Vendor = " -amd"}
         "NVIDIA Corporation" {$Vendor = " -nvidia"}
         Default {$Vendor = ""}
@@ -39,8 +40,6 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         $MinMemGB = $_.MinMemGB
 
         if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMemGB * 1000000000})) {
-
-            $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
             [PSCustomObject]@{
                 Name           = $Miner_Name
