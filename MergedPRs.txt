@@ -12,6 +12,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2032 (Add favicon to web i
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2037 (Delete corrupt stat files in Get-Stat)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2040 (Set-Stat: Do not write errors to transcript on missing stat file)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2066 (Update PWSH core to 6.0.4)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2083 (Faster ConvertTo-LocalCurrency)
 
 Documentation updates:
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2013 (Update readme)
