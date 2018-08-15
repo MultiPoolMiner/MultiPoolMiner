@@ -166,9 +166,6 @@ Specify your proxy address if applicable, i.e http://192.0.0.1:8080
 **-Region [Europe/US/Asia]**
 Choose your region or the region closest to you.
 
-**-SSL**
-Specifying the -ssl command (without a boolean value of true or false) will restrict the miner application list to include only the miners that support secure connection.
-
 **-ShowMinerWindow**
 By default MPM hides most miner windows as to not steal focus (Miners of API type 'Wrapper' will remain hidden). All miners write their output to files in the Log folder. Set to 'true' to show miner windows.
 
@@ -179,6 +176,9 @@ Note: Only balances in BTC are listed, other currencies are currently not suppor
 **-ShowPoolBalancesExcludedPools**
 Display the balances of all pools (including those that are excluded with 'ExcludeMinerName') on the summary screen and in the web GUI.
 Note: Only balances in BTC are listed, other currencies are currently not supported.
+
+**-SSL**
+Specifying the -ssl command (without a boolean value of true or false) will restrict the miner application list to include only the miners that support secure connection.
 
 **-SwitchingPrevention**
 Since version 2.6, the delta value (integer) that was used to determine how often MultiPoolMiner is allowed to switch, is now user-configurable on a scale of 1 to infinity on an intensity basis. Default is 1 (Start.bat default is 2). Recommended values are 1-10 where 1 means the most frequent switching and 10 means the least switching. Please note setting this value to zero (0) will not turn this function off! Please see further explanation in MULTIPOOLMINER'S LOGIC section below. 
