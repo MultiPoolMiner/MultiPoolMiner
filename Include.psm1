@@ -339,28 +339,18 @@ function ConvertTo-LocalCurrency {
 
     param(
         [Parameter(Mandatory = $true)]
-        [Double]$Number, 
+        [Double]$Value, 
         [Parameter(Mandatory = $true)]
         [Double]$BTCRate,
         [Parameter(Mandatory = $false)]
         [Int]$Offset        
     )
 
-    $Number = $Number * $BTCRate
-
-    switch ([math]::truncate(10 - $Offset - [math]::log($BTCRate, 10))) {
-        0 {$Number.ToString("N0")}
-        1 {$Number.ToString("N1")}
-        2 {$Number.ToString("N2")}
-        3 {$Number.ToString("N3")}
-        4 {$Number.ToString("N4")}
-        5 {$Number.ToString("N5")}
-        6 {$Number.ToString("N6")}
-        7 {$Number.ToString("N7")}
-        8 {$Number.ToString("N8")}
-        9 {$Number.ToString("N9")}
-        Default {$Number.ToString("N0")}
-    }
+    $Digits = ([math]::truncate(10 - $Offset - [math]::log($BTCRate, 10)))
+    if ($Digits -lt 0) {$Digits = 0}
+    if ($Digits -gt 10) {$Digits = 10}
+    
+    ($Value * $BTCRate).ToString("N$($Digits)")
 }
 
 function Get-Combination {
