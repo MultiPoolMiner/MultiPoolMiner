@@ -1,0 +1,40 @@
+Important fixes (needed for MPM to work properly):
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2019 (Algorithms.txt: Add CryptoNight and Equihash algorithm variants)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/1903 (Fix parameter -Algorithm & -ExcludeAlgorithm)
+
+Other fixes:
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/1953 (Add -DisableDualMining switch)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/1994 (Fix for https://github.com/MultiPoolMiner/MultiPoolMiner/issues/1992)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2012 (remove AutoUpdate)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2014 (Start batch files: parameter names to uppercase/lowercase)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2020 (Still report every minute, even during extended interval)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2032 (Add favicon to web interface)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2037 (Delete corrupt stat files in Get-Stat)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2040 (Set-Stat: Do not write errors to transcript on missing stat file)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2066 (Update PWSH core to 6.0.4)
+
+Documentation updates:
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2013 (Update readme)
+
+Miner changes:
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2052 (Remove CcminerAnxmodPhi (Nvidia only)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2031 (CPU-CpuminerTpruvotCorei7.ps1: Add missing CommonCommands line)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2044 (Enable HODL for Jayddee CPU miner)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2007 (Update XmRig CPU to version 2.6.4)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/1915 (SRB Miner version 1.6.5 (AMD only); NEW!
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2002 (EWBF2 Miner version 0.5 (Nvidia only); NEW!
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2006 (CryptoDredge Miner version 0.8.3 (Nvidia only); NEW!
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2038 (Excavator NHMP version 1.5.11a (Nvidia / Nicehash Only); NEW!
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2046 (DSTM & EWBF miner: Enable per device mining)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2047 (Eminer: Enable per device mining, unified miner)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2059 (EthMiner: Update to version 0.15, unified miner)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2060 (PhoenixMiner version 3.0c: Unified miner)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2061 (NsgMiner: Enable per device mining, unified miner)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2071 (CcminerZealot: Update to version 1.15, enable per device mining)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2075 (CcminerDumax: Update version 0.9.4, enable per device mining)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2078 (Bminer: Update version 10.1.0, enable per device mining and dual algo support)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2081 (Fix missing commas in cast.txt)
+
+Pool changes:
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2001 (MiningPoolHubCoins: Add Ethash3Gb)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2049 (ZergPool: Add new Equihash algos, europe only)
