@@ -53,7 +53,7 @@ $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Adv
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Port -f ($Device | Select-Object -First 1 -ExpandProperty Index)
-    $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object ) | Select-Object) -join '-'
+    $Miner_Name = (@($Name) + @($Threads) + @($Device.Name | Sort-Object ) | Select-Object) -join '-'
 
     $Commands | ForEach-Object {
         $Algorithm = $_.Algorithm
