@@ -35,6 +35,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2071 (CcminerZealot: Updat
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2075 (CcminerDumax: Update version 0.9.4, enable per device mining)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2078 (Bminer: Update version 10.1.0, enable per device mining and dual algo support)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2081 (Fix missing commas in cast.txt)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2086 (Fix parameter '-PoolName')
 
 Pool changes:
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2001 (MiningPoolHubCoins: Add Ethash3Gb)
