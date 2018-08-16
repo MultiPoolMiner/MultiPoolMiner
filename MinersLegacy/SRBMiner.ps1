@@ -61,7 +61,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $MinMemGb = $_.MinMemGb
 
         $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMemGb * 1000000000)})
-        $Miner_Name = (@($Miner_Device) + @($Threads) + @($Device.Name | Sort-Object ) | Select-Object) -join '-'
+        $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object ) | Select-Object) -join '-'
 
         if ($Pools.$Algorithm_Norm.Host -and $Miner_Device) {
         
