@@ -53,7 +53,6 @@ $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Adv
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Port -f ($Device | Select-Object -First 1 -ExpandProperty Index)
-    $Miner_Name = (@($Name) + @($Threads) + @($Device.Name | Sort-Object ) | Select-Object) -join '-'
 
     $Commands | ForEach-Object {
         $Algorithm = $_.Algorithm
@@ -62,6 +61,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $MinMemGb = $_.MinMemGb
 
         $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMemGb * 1000000000)})
+        $Miner_Name = (@($Miner_Device) + @($Threads) + @($Device.Name | Sort-Object ) | Select-Object) -join '-'
 
         if ($Pools.$Algorithm_Norm.Host -and $Miner_Device) {
         
