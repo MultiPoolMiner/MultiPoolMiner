@@ -13,6 +13,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2037 (Delete corrupt stat 
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2040 (Set-Stat: Do not write errors to transcript on missing stat file)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2066 (Update PWSH core to 6.0.4)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2083 (Faster ConvertTo-LocalCurrency)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2086 (Fix parameter '-PoolName')
 
 Documentation updates:
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2013 (Update readme)
@@ -35,7 +36,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2071 (CcminerZealot: Updat
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2075 (CcminerDumax: Update version 0.9.4, enable per device mining)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2078 (Bminer: Update version 10.1.0, enable per device mining and dual algo support)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2081 (Fix missing commas in cast.txt)
-https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2086 (Fix parameter '-PoolName')
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2087 (ClaymoreEthash.ps1: Fix miner name)
 
 Pool changes:
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2001 (MiningPoolHubCoins: Add Ethash3Gb)
