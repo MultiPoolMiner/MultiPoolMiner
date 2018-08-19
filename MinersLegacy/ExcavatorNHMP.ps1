@@ -15,32 +15,32 @@ $Port = "5401"
 
 $Commands = [PSCustomObject[]]@(
     #1 Thread
-    [PSCustomObject]@{Algorithm = "cryptonightV7";          Threads = 1; MinMemGB = 2; BenchmarkSamples = 10;  Params = @()} #CryptonightV7
-    [PSCustomObject]@{Algorithm = "daggerhashimoto";        Threads = 1; MinMemGB = 4; BenchmarkSamples = 10; Params = @()} #Ethash
-    [PSCustomObject]@{Algorithm = "equihash";               Threads = 1; MinMemGB = 2; BenchmarkSamples = 10; Params = @()} #Equihash
-    [PSCustomObject]@{Algorithm = "lyra2rev2";              Threads = 1; MinMemGB = 1; BenchmarkSamples = 10; Params = @()} #Lyra2RE2
-    [PSCustomObject]@{Algorithm = "lyra2z";                 Threads = 1; MinMemGB = 1; BenchmarkSamples = 10; Params = @()} #Lyra2z
-    [PSCustomObject]@{Algorithm = "neoscrypt";              Threads = 1; MinMemGB = 2; BenchmarkSamples = 10; Params = @()} #NeoScrypt
-    [PSCustomObject]@{Algorithm = "x16r";                   Threads = 1; MinMemGB = 2; BenchmarkSamples = 50; Params = @()} #X16R
-    [PSCustomObject]@{Algorithm = "daggerhashimoto_decred"; Threads = 1; MinMemGB = 4; BenchmarkSamples = 20; Params = @()} #Dual mining
-    [PSCustomObject]@{Algorithm = "daggerhashimoto_pascal"; Threads = 1; MinMemGB = 4; BenchmarkSamples = 20; Params = @()} #Dual mining
+    [PSCustomObject]@{Algorithm = "cryptonightV7";          Threads = 1; MinMemGB = 2; ExtendInterval = 1;  Params = @()} #CryptonightV7
+    [PSCustomObject]@{Algorithm = "daggerhashimoto";        Threads = 1; MinMemGB = 4; ExtendInterval = 1; Params = @()} #Ethash
+    [PSCustomObject]@{Algorithm = "equihash";               Threads = 1; MinMemGB = 2; ExtendInterval = 1; Params = @()} #Equihash
+    [PSCustomObject]@{Algorithm = "lyra2rev2";              Threads = 1; MinMemGB = 1; ExtendInterval = 1; Params = @()} #Lyra2RE2
+    [PSCustomObject]@{Algorithm = "lyra2z";                 Threads = 1; MinMemGB = 1; ExtendInterval = 1; Params = @()} #Lyra2z
+    [PSCustomObject]@{Algorithm = "neoscrypt";              Threads = 1; MinMemGB = 2; ExtendInterval = 1; Params = @()} #NeoScrypt
+    [PSCustomObject]@{Algorithm = "x16r";                   Threads = 1; MinMemGB = 2; ExtendInterval = 5; Params = @()} #X16R
+    [PSCustomObject]@{Algorithm = "daggerhashimoto_decred"; Threads = 1; MinMemGB = 4; ExtendInterval = 2; Params = @()} #Dual mining
+    [PSCustomObject]@{Algorithm = "daggerhashimoto_pascal"; Threads = 1; MinMemGB = 4; ExtendInterval = 2; Params = @()} #Dual mining
 
     #2 Threads
-    [PSCustomObject]@{Algorithm = "cryptonightV7";          Threads = 2; MinMemGB = 2*6; BenchmarkSamples = 10; Params = @()} #CryptonightV7
-    [PSCustomObject]@{Algorithm = "daggerhashimoto";        Threads = 2; MinMemGB = 2*4; BenchmarkSamples = 10; Params = @()} #Ethash
-    [PSCustomObject]@{Algorithm = "equihash";               Threads = 2; MinMemGB = 2*2; BenchmarkSamples = 10; Params = @()} #Equihash
-    [PSCustomObject]@{Algorithm = "lyra2rev2";              Threads = 2; MinMemGB = 2*1; BenchmarkSamples = 10; Params = @()} #Lyra2RE2
-    [PSCustomObject]@{Algorithm = "lyra2z";                 Threads = 2; MinMemGB = 2*1; BenchmarkSamples = 10; Params = @()} #Lyra2z
-    #[PSCustomObject]@{Algorithm = "neoscrypt";              Threads = 2; MinMemGB = 2*2; BenchmarkSamples = 10; Params = @()} #NeoScrypt 2 threads crashes
-    #[PSCustomObject]@{Algorithm = "x16r";                   Threads = 2; MinMemGB = 2*2; BenchmarkSamples = 50; Params = @()} #X16R 2 threads out-of memory
-    [PSCustomObject]@{Algorithm = "daggerhashimoto_decred"; Threads = 2; MinMemGB = 2*4; BenchmarkSamples = 20; Params = @()} #Dual mining
-    [PSCustomObject]@{Algorithm = "daggerhashimoto_pascal"; Threads = 2; MinMemGB = 2*4; BenchmarkSamples = 20; Params = @()} #Dual mining
+    [PSCustomObject]@{Algorithm = "cryptonightV7";          Threads = 2; MinMemGB = 2*6; ExtendInterval = 1; Params = @()} #CryptonightV7
+    [PSCustomObject]@{Algorithm = "daggerhashimoto";        Threads = 2; MinMemGB = 2*4; ExtendInterval = 1; Params = @()} #Ethash
+    [PSCustomObject]@{Algorithm = "equihash";               Threads = 2; MinMemGB = 2*2; ExtendInterval = 1; Params = @()} #Equihash
+    [PSCustomObject]@{Algorithm = "lyra2rev2";              Threads = 2; MinMemGB = 2*1; ExtendInterval = 1; Params = @()} #Lyra2RE2
+    [PSCustomObject]@{Algorithm = "lyra2z";                 Threads = 2; MinMemGB = 2*1; ExtendInterval = 1; Params = @()} #Lyra2z
+    #[PSCustomObject]@{Algorithm = "neoscrypt";              Threads = 2; MinMemGB = 2*2; ExtendInterval = 1; Params = @()} #NeoScrypt 2 threads crashes
+    #[PSCustomObject]@{Algorithm = "x16r";                   Threads = 2; MinMemGB = 2*2; ExtendInterval = 5; Params = @()} #X16R 2 threads out-of memory
+    [PSCustomObject]@{Algorithm = "daggerhashimoto_decred"; Threads = 2; MinMemGB = 2*4; ExtendInterval = 2; Params = @()} #Dual mining
+    [PSCustomObject]@{Algorithm = "daggerhashimoto_pascal"; Threads = 2; MinMemGB = 2*4; ExtendInterval = 2; Params = @()} #Dual mining
 
     #ASIC mining only 2018/06/11
-    #[PSCustomObject]@{Algorithm = "blake2s";                Threads = 1; MinMemGB = 1; BenchmarkSamples = 10; Params = @()} #Blake2s
-    #[PSCustomObject]@{Algorithm = "decred";                 Threads = 1; MinMemGB = 1; BenchmarkSamples = 10; Params = @()} #DecredNicehash
-    #[PSCustomObject]@{Algorithm = "keccak";                 Threads = 1; MinMemGB = 1; BenchmarkSamples = 10; Params = @()} #Keccak
-    #[PSCustomObject]@{Algorithm = "pascal";                 Threads = 1; MinMemGB = 1; BenchmarkSamples = 10; Params = @()} #Pascal
+    #[PSCustomObject]@{Algorithm = "blake2s";                Threads = 1; MinMemGB = 1; ExtendInterval = 1; Params = @()} #Blake2s
+    #[PSCustomObject]@{Algorithm = "decred";                 Threads = 1; MinMemGB = 1; ExtendInterval = 1; Params = @()} #DecredNicehash
+    #[PSCustomObject]@{Algorithm = "keccak";                 Threads = 1; MinMemGB = 1; ExtendInterval = 1; Params = @()} #Keccak
+    #[PSCustomObject]@{Algorithm = "pascal";                 Threads = 1; MinMemGB = 1; ExtendInterval = 1; Params = @()} #Pascal
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
