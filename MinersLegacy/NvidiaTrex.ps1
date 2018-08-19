@@ -8,18 +8,19 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-CcminerTrex\t-rex.exe"
-$HashSHA256 = "4DE665A6B81676F2D56B0F5B25497FB19D69341AC3338F8CC9E6F04B802379E3"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/T-rex/t-rex-0.5.7-win-cuda9.1.zip"
+$HashSHA256 = "A63A7DDC6F16FC3FC2CB1459A77D397F5ECA9878AD38E5EE46723D642E132B3D"
+$Uri = "https://github.com/paulpoco/MinerFiles/raw/master/t-rex-0.6.1-win-cuda9.1.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4432704.0"
 $Port = "40{0:d2}"
 
 $Commands = [PSCustomObject]@{
-    "c11"           = "" #C11
+    "bitcore"       = "" #Bitcore
+	"c11"           = "" #C11
     "hsr"           = "" #HSR
     "lyra2z"        = "" #Lyra2z
-    "phi"           = "" 
-    "phi2"          = "" #LUX
+	"phi"           = "" #Phi
     "renesis"       = "" #Renesis
+	"sonoa"         = "" #Sonoa
     "tribus"        = "" #Tribus
     "x16r"          = "" #X16r
     "x16s"          = "" #X16s
@@ -42,7 +43,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         Switch ($Algorithm_Norm) {
         	"PHI"   {$ExtendInterval = 3}
-        	"PHI2"  {$ExtendInterval = 3}
         	"X16R"  {$ExtendInterval = 10}
         	"X16S"  {$ExtendInterval = 10}
         	default {$ExtendInterval = 0}
