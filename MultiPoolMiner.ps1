@@ -116,6 +116,13 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
 if (Test-Path $ConfigFile) {
     Write-Log -Level Info "Using configuration file ($(Resolve-Path $ConfigFile)). "
+    #Set API_ID, API_Key, UserName, Wallet and WorkerName if not passed as command line parameter, so they get properly inherited to the pool files
+    @("API_ID", "API_Key", "UserName", "Wallet", "WorkerName") | ForEach-Object {
+        if (-not ($PSBoundParameters.Keys.$_)) {
+            $Value = (Get-Content $ConfigFile | ConvertFrom-Json).$_
+            if ($Value -notlike "`$*") {Set-variable $_ $Value}
+        }
+    }
 }
 else {
     #Create new config file: Read command line parameters except ConfigFile
@@ -191,11 +198,11 @@ while ($true) {
     Get-ChildItem "Pools" -File | Where-Object {-not $Config.Pools.($_.BaseName)} | ForEach-Object {
         $Config.Pools | Add-Member $_.BaseName (
             [PSCustomObject]@{
-                BTC     = $Wallet
-                User    = $UserName
-                Worker  = $WorkerName
-                API_ID  = $API_ID
-                API_Key = $API_Key
+                BTC     = $Config.Wallet
+                User    = $Config.UserName
+                Worker  = $Config.WorkerName
+                API_ID  = $Config.API_ID
+                API_Key = $Config.API_Key
             }
         )
     }
@@ -610,7 +617,7 @@ while ($true) {
         }
     }
 
-    if ($Config.MinerStatusURL -and $Config.MinerStatusKey) {& .\ReportStatus.ps1 -Key $Config.MinerStatusKey -WorkerName $WorkerName -ActiveMiners $ActiveMiners -MinerStatusURL $Config.MinerStatusURL}
+    if ($Config.MinerStatusURL -and $Config.MinerStatusKey) {& .\ReportStatus.ps1 -Key $Config.MinerStatusKey -WorkerName $Config.WorkerName -ActiveMiners $ActiveMiners -MinerStatusURL $Config.MinerStatusURL}
 
     Clear-Host
     #Get miners needing benchmarking
