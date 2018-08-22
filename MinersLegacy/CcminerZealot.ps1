@@ -8,8 +8,8 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-CcminerZealot\z-enemy.exe"
-$HashSHA256 = "8463736FAAADB6831121E0ABC173F5A037B397CD6F0CA5C613CB261DADF4C949"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-16-cuda9.2_x64.zip"
+$HashSHA256 = "0C8F5123092A346FB8A23E7719476853FB4C65B0CB5DA843246303836CDCDB06"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-17-cuda9.2_x64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3378390.0"
 $Port = "40{0:d2}"
 
@@ -57,10 +57,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm $_
 
         Switch ($Algorithm_Norm) {
-        	"PHI"   {$ExtendInterval = 3}
-        	"PHI2"  {$ExtendInterval = 3}
         	"X16R"  {$ExtendInterval = 10}
-        	"X16S"  {$ExtendInterval = 10}
         	default {$ExtendInterval = 0}
         }
 
