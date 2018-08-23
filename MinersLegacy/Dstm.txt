@@ -1,6 +1,6 @@
 {
     "Type":  "NVIDIA",
-    "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/dstm0.6/zm_0.6_win.zip",
+    "URI": "https://github.com/MultiPoolMiner/miner-binaries/releases/download/dstm61/zm_0.6.1_win.zip",
     "ManualURI": "https://bitcointalk.org/index.php?topic=2021765.0",
     "Path":  ".\\Bin\\Equihash-DSTM\\zm.exe",
     "HashSHA256": "39209C0077E1FC42A5F511AC9E81817073A8D4623EBFC57FBEC3308F96457316",
