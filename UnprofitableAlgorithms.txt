@@ -6,6 +6,7 @@
     "CryptoLight",
     "CryptoNight",
     "Groestl",
+    "Keccak",
     "Lbry",
     "Lyra2RE",
     "Decred",
