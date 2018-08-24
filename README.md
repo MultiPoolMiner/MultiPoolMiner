@@ -368,7 +368,7 @@ Note: Only balances in BTC are listed, other currencies are currently not suppor
 
 ## UNPROFITABLE ALGORITHMS
 
-More algorithms can be mined with ASICs, therefor mining them with GPUs becomes unprofitable.
+As more and more algorithms can be mined with ASICs mining them with GPUs becomes unprofitable.
 To add algorithms to the list edit 'UnprofitableAlgorithms.txt' in the MPM directory.
 
 [
