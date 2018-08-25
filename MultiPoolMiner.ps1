@@ -115,13 +115,6 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
 if (Test-Path $ConfigFile) {
     Write-Log -Level Info "Using configuration file ($(Resolve-Path $ConfigFile)). "
-    #Set API_ID, API_Key, UserName, Wallet and WorkerName if not passed as command line parameter, so they get properly inherited to the pool files
-    @("API_ID", "API_Key", "UserName", "Wallet", "WorkerName") | ForEach-Object {
-        if (-not ($PSBoundParameters.Keys.$_)) {
-            $Value = (Get-Content $ConfigFile | ConvertFrom-Json).$_
-            if ($Value -notlike "`$*") {Set-variable $_ $Value}
-        }
-    }
 }
 else {
     #Create new config file: Read command line parameters except ConfigFile
@@ -165,15 +158,13 @@ while ($true) {
     $ConfigBackup = $Config
     #Load the config, read command line parameters except ConfigFile, use default values for those that are not in command line
     $Parameters = @{}
-    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
-        $Parameters.Add($_ , (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
-    }
     $Config = Get-ChildItemContent $ConfigFile -Parameters $Parameters | Select-Object -ExpandProperty Content
-    #Add default values for parameters that are not yet in config
+
+    #Config file may not contain an entry for all supported parameters, use value from command line, or if empty use default
     $Config | Add-Member Pools ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
     $Config | Add-Member Miners ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
-    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
-        if (Get-Variable $_ -ErrorAction SilentlyContinue) {
+    $PSBoundParameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
+        if (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue) {
             $Config | Add-member $_ (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue) -ErrorAction SilentlyContinue
         }
     }
