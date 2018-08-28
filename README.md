@@ -380,6 +380,7 @@ To add algorithms to the list edit 'UnprofitableAlgorithms.txt' in the MPM direc
     "CryptoNight",
     "Groestl",
     "Keccak",
+    "KeccakC",
     "Lbry",
     "Lyra2RE",
     "Decred",
