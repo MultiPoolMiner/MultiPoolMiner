@@ -29,7 +29,7 @@ FEATURE SUMMARY:
 - Controls any miner that is available via command line
 - Supports benchmarking, multiple platforms (AMD, NVIDIA and CPU) and mining on A Hash Pool, BlazePool, BlockMasters, Hash Refinery, MiningPoolHub, Nicehash, YiiMP, ZergPool and Zpool pools
 - Includes Watchdog Timer to detect and handle miner failures
-- Web GUI with dashboard and balances overview.
+- Comprehensive web GUI with dashboard and balances overview
 
 Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH 
 
@@ -450,6 +450,7 @@ MultiPoolMiner has a built in Web GUI at http://localhost:3999
 
 
 ====================================================================
+
 
 MULTIPOOLMINER API:
 

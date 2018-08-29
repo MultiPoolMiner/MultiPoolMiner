@@ -17,6 +17,7 @@ README.md is based on README.txt - updated on 29/08/2018 (dd/mm/yyyy) - latest v
 - **Controls any miner that is available via command line**
 - **Supports benchmarking, multiple platforms (AMD, NVIDIA and CPU) and mining on A Hash Pool, BlazePool, BlockMasters, Hash Refinery, MiningPoolHub, Nicehash, YiiMP, ZergPool and Zpool pools**
 - **Includes Watchdog Timer to detect and handle miner failures**
+- **Comprehensive web GUI with dashboard and balances overview**
 
 *Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH*
 
