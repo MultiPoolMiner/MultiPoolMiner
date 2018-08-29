@@ -57,7 +57,7 @@ Done. You are all set to mine the most profitable coins and maximise your profit
 IMPORTANT NOTES:
 
 - It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
-- Having PowerShell 6 installed is now a requirement. Windows 64bit: https://github.com/PowerShell/PowerShell/releases/download/v6.0.2/PowerShell-6.0.2-win-x64.msi, ALL OTHER VERSIONS: https://github.com/PowerShell/PowerShell/releases
+- Having PowerShell 6 installed is now a requirement. Windows 64bit: https://github.com/PowerShell/PowerShell/releases/download/v6.0.4/PowerShell-6.0.4-win-x64.msi, ALL OTHER VERSIONS: https://github.com/PowerShell/PowerShell/releases
 - Microsoft .NET Framework 4.5.1 or later is required for MultiPoolMiner to function properly. Please update from here: https://www.microsoft.com/en-us/download/details.aspx?id=40773
 - CCMiner (NVIDIA cards only) may need 'MSVCR120.dll' if you don't already have it: https://www.microsoft.com/en-gb/download/details.aspx?id=40784. Make sure that you install both the x86 and the x64 versions. 
 - CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145. Make sure that you install both the x86 and the x64 versions. 
@@ -225,23 +225,24 @@ SAMPLE USAGE (check "start.bat" file in root folder):
 @cd /d %~dp0
 
 @if not "%GPU_FORCE_64BIT_PTR%"=="1" (setx GPU_FORCE_64BIT_PTR 1) > nul
-@if not "%GPU_MAX_HEAP_SIZE %"=="100" (setx GPU_MAX_HEAP_SIZE 100) > nul
+@if not "%GPU_MAX_HEAP_SIZE%"=="100" (setx GPU_MAX_HEAP_SIZE 100) > nul
 @if not "%GPU_USE_SYNC_OBJECTS%"=="1" (setx GPU_USE_SYNC_OBJECTS 1) > nul
 @if not "%GPU_MAX_ALLOC_PERCENT%"=="100" (setx GPU_MAX_ALLOC_PERCENT 100) > nul
 @if not "%GPU_SINGLE_ALLOC_PERCENT%"=="100" (setx GPU_SINGLE_ALLOC_PERCENT 100) > nul
 @if not "%CUDA_DEVICE_ORDER%"=="PCI_BUS_ID" (setx CUDA_DEVICE_ORDER PCI_BUS_ID) > nul
 
-@set "command=& .\multipoolminer.ps1 -wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -username aaronsace -workername multipoolminer -region europe -currency btc,usd,eur -devicename amd,nvidia,cpu -poolname miningpoolhubcoins,zpool,nicehash -algorithm blake2s,cryptonightV7,cryptonightheavy,decrednicehash,ethash,ethash2gb,ethash3gb,equihash,groestl,keccak,lbry,lyra2re2,lyra2z,neoscrypt,pascal,sib,skunk -donate 24 -watchdog -minerstatusurl https://multipoolminer.io/monitor/miner.php -MinerStatusKey xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx -switchingprevention 2"
+@set "command=& .\multipoolminer.ps1 -Wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -UserName aaronsace -WorkerName multipoolminer -Region europe -Currency btc,usd,eur -DeviceName amd,nvidia,cpu -PoolName miningpoolhubcoins,zpool,nicehash -Algorithm blake2s,cryptonightV7,cryptonightheavy,decrednicehash,ethash,ethash2gb,ethash3gb,equihash,keccak,lbry,lyra2re2,lyra2z,m7m,neoscrypt,pascal,sib,skein,skunk,x16r -Donate 24 -Watchdog -MinerStatusURL https://multipoolminer.io/monitor/miner.php -SwitchingPrevention 2"
 
 start pwsh -noexit -executionpolicy bypass -command "& .\reader.ps1 -log 'MultiPoolMiner_\d\d\d\d-\d\d-\d\d\.txt' -sort '^[^_]*_' -quickstart"
-start pwsh -noexit -executionpolicy bypass -command "& .\reader.ps1 -log '^((?!MultiPoolMiner_\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d\.txt).)*$' -sort '^[^_]*_' -quickstart"
+start pwsh -noexit -executionpolicy bypass -command "& .\reader.ps1 -log '^((?!MultiPoolMiner_.+\.txt).)*$' -sort '^[^_]*_' -quickstart"
 
 pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
 powershell -version 5.0 -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
-msiexec -i https://github.com/PowerShell/PowerShell/releases/download/v6.0.2/PowerShell-6.0.2-win-x64.msi -qb!
+msiexec -i https://github.com/PowerShell/PowerShell/releases/download/v6.0.4/PowerShell-6.0.4-win-x64.msi -qb!
 pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
 
 pause
+
 ############ END OF CONTENT OF START.BAT ############
 
 
