@@ -165,9 +165,9 @@ while ($true) {
     #Config file may not contain an entry for all supported parameters, use value from command line, or if empty use default
     $Config | Add-Member Pools ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
     $Config | Add-Member Miners ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
-    $PSBoundParameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
+    $PSBoundParameters.Keys | Where-Object {$_ -ne "ConfigFile" -and -not $Config.$_} | ForEach-Object {
         if (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue) {
-            $Config | Add-member $_ (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue) -ErrorAction SilentlyContinue
+            $Config | Add-Member $_ (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue) -Force
         }
     }
 
