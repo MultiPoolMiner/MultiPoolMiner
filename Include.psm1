@@ -507,7 +507,7 @@ function Get-Device {
             $Name_Split = @($Name_Split | Select-Object -First 1) + @($Name_Split | Select-Object -Skip 1 | ForEach-Object {[Int]$_})
             $Name_Split += @("*") * (100 - $Name_Split.Count)
 
-            $Name_Device = $DeviceList.("{0}" -f $Name_Split) | Select-Object *
+            $Name_Device = $DeviceList.Structure.("{0}" -f $Name_Split) | Select-Object *
             $Name_Device | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Name_Device.$_ = $Name_Device.$_ -f $Name_Split}
 
             $Name_Device
@@ -515,12 +515,13 @@ function Get-Device {
     }
 
     if ($ExcludeName) {
+        if (-not $DeviceList) {$DeviceList = Get-Content "Devices.txt" | ConvertFrom-Json}
         $ExcludeName_Devices = $ExcludeName | ForEach-Object {
             $ExcludeName_Split = $_ -split '#'
             $ExcludeName_Split = @($ExcludeName_Split | Select-Object -First 1) + @($ExcludeName_Split | Select-Object -Skip 1 | ForEach-Object {[Int]$_})
             $ExcludeName_Split += @("*") * (100 - $ExcludeName_Split.Count)
 
-            $ExcludeName_Device = $DeviceList.("{0}" -f $ExcludeName_Split) | Select-Object *
+            $ExcludeName_Device = $DeviceList.Structure.("{0}" -f $ExcludeName_Split) | Select-Object *
             $ExcludeName_Device | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$ExcludeName_Device.$_ = $ExcludeName_Device.$_ -f $ExcludeName_Split}
 
             $ExcludeName_Device
