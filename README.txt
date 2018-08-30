@@ -99,6 +99,9 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 -DeviceName
 	Choose the relevant GPU(s) and/or CPU mining.  [CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.]
 
+-DisableDualMining
+	To prevent dual algorithm mining, add '-DisableDualmining' to your start batch file.
+
 -Donate
 	Donation of mining time in minutes per day to aaronsace. Default is 24, minimum is 10 minutes per day (less than 0.7% fee). The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
 	
@@ -552,7 +555,7 @@ Q21. My antivirus says the .zip package contains a virus or MultiPoolMiner tries
 A21. MultiPoolMiner is open-source and used by many users/rigs. It also downloads miners from github releases that are open-sourced projects. That means the code is readable and you can see for yourself it does not contain any viruses. Your antivirus generates false positives as the miner software used by MultiPoolMiner are often included in malicious programs to create botnets for someone who wants to earn a quick buck. There are other closed-source miner program included in the package such as the Claymore miners. These come from legendary ranked or trusted/respected members of the bitcointalk community and used by a large number of users/rigs worldwide. You can exlude these miners if you wish by following the instructions in FAQ#2 and delete their software from your system. 
 
 Q22. How to disable dual-mining?
-A22. Make sure NOT to include any of the the following parameters in your start.bat after -algorithm or add them after the -ExludeAlgorithm command: blake2s, decred, keccak, pascal, lbry, decrednicehash
+A22. Add '-DisableDualmining' to your start batch file or to the config file.
     
 Q23. How to manually download miner binaries?
 A23. Some miners binaries cannot be downloaded automatically by MPM (e.g. there is no direct download). In these cases you need to download and install them manually. First find the download link "Uri" in the miner file (they are all in the folder 'Miners') and download the binaries. Next locate the destination path "$Path". You need to create the required subdirectory in the 'Miners' folder. Finally unpack the downloaded binary to the destination directory. If the packed file contains subdirectories you must also copy them.
