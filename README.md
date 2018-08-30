@@ -53,7 +53,8 @@ Done. You are all set to mine the most profitable coins and maximise your profit
 	
 
 ## COMMAND LINE OPTIONS
-###### (case-insensitive - except for BTC addresses, see *Sample Usage* section below for an example) in alphabetical order
+###### (case-insensitive - except for wallet addresses (e.g. BTC), see *Sample Usage* section below for an example)
+Listed in alphabetical order. Note: For basic operation not all parameters must be defined through start.bat.
 
 **-Algorithm**
 Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
@@ -72,7 +73,7 @@ Note that the list of supported algorithms can change depending on the capabilit
 *Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-PoolName) will be ignored when mining certain algorithms. The *-Algorithm* command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). **WARNING!** If you add all algorithms listed above, you may find your earnings spread across multiple pools regardless what pool(s) you specified with the *-PoolName* command.*
 
 **-ConfigFile [Path\ConfigFile.txt]**
-The default config file name is '.\default.txt'
+The default config file name is '.\Config.txt'
 If the config file does not exist MPM will create a config file with default values. If the file name does not have an extension MPM will add .txt file name extension.
 By default MPM will use the values from the command line. If you hardcode config values directly in the config file, then these values will override the command line parameters (see Advanced Configuration).
 
@@ -84,6 +85,9 @@ Specify the number of seconds required to pass before opening each miner. It is 
 
 **-DeviceName**
 Choose the relevant GPU(s) and/or CPU mining.  [CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.]
+
+**-DisableDualMining**
+To prevent dual algorithm mining, add *-DisableDualmining* to your start batch file.
 
 **-Donate**
 Donation of mining time in minutes per day to aaronsace. Default is 24, minimum is 10 minutes per day (less than 0.7% fee). The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
@@ -210,9 +214,10 @@ To identify your mining rig.
 
 
 
-## SAMPLE USAGE (check "start.bat" file in root folder)
+## SAMPLE USAGE
 
--------------------------------------------------
+---------- (check "start.bat" file in root folder) ----------
+
 @cd /d %~dp0
 
 @if not "%GPU_FORCE_64BIT_PTR%"=="1" (setx GPU_FORCE_64BIT_PTR 1) > nul
@@ -242,7 +247,7 @@ pause
 
 ### Advanced config options are available via config file
 
-MPM supports customized configuration via config files. The default config file name is '.\Default.txt'.
+MPM supports customized configuration via config files. The default config file name is '.\Config.txt'.
 If you do not include the command line parameter -ConfigFile [Path\FileName.txt] the MPM will use the default file name. 
 
 If the config file does not exist MPM will create a config file with default values. If the file name does not have an extension MPM will add .txt file name extension.
@@ -267,6 +272,7 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
     "Region":  "$Region",
     "SSL":  "$SSL",
     "DeviceName":  "$DeviceName",
+    "DisableDualMining":  "DisableDualMining",
     "Algorithm":  "$Algorithm",
     "MinerName":  "$MinerName",
     "PoolName":  "$PoolName",
@@ -281,7 +287,6 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
     "MinerStatusUrl":  "$MinerStatusUrl",
     "MinerStatusKey":  "$MinerStatusKey",
     "SwitchingPrevention":  "$SwitchingPrevention",
-    "DisableAutoUpdate":  "$DisableAutoUpdate",
     "ShowMinerWindow":  "$ShowMinerWindow",
     "UseFastestMinerPerAlgoOnly":  "$UseFastestMinerPerAlgoOnly",
     "IgnoreCosts":  "$IgnoreCosts",
@@ -360,7 +365,7 @@ To display the balances of all enabled pools (excluding those that are excluded 
     ...
 }
 	
-To display the balances of all pools (including those that are excluded with *-ExcludeMinerName*) on the summary screen and in the web GUI '"ShowPoolBalances":  true' to the general section:
+To display the balances of all pools (including those that are excluded with *-ExcludeMinerName*) on the summary screen and in the web GUI add '"ShowPoolBalances":  true' to the general section:
 {
     ...
 	"ShowPoolBalancesExcludedPools":  true
@@ -446,7 +451,7 @@ MultiPoolMiner allows basic monitoring through its built in API.
 
 API data is available at http://localhost:3999/<resource>
 
-For a list of supported API commands open APIDocs.html with your web browser.
+For a list of supported API commands open [MPM directory\]APIDocs.html with your web browser.
 
 
 
@@ -543,7 +548,7 @@ This is not a fault of MultiPoolMiner and nothing can be done on our end. Please
 ###### A21. MultiPoolMiner is open-source and used by many users/rigs. It also downloads miners from github releases that are open-sourced projects. That means the code is readable and you can see for yourself it does not contain any viruses. Your antivirus generates false positives as the miner software used by MultiPoolMiner are often included in malicious programs to create botnets for someone who wants to earn a quick buck. There are other closed-source miner program included in the package such as the Claymore miners. These come from legendary ranked or trusted/respected members of the bitcointalk community and used by a large number of users/rigs worldwide. You can exlude these miners if you wish by following the instructions in FAQ#2 and delete their software from your system. 
 
 ###### Q22. How to disable dual-mining?
-###### A22. Make sure NOT to include any of the the following parameters in your start.bat after *-algorithm* or add them after the *-ExludeAlgorithm* command: blake2s, decred, keccak, pascal, lbry, decrednicehash
+###### A22. Add '-DisableDualMining' to your start batch file or to the config file.
 
 ###### Q23. How to download and install missing miner binaries?
 ###### A23. Some miners binaries cannot be downloaded automatically by MPM (e.g. there is no direct download). In these cases you need to download and install them manually. First find the download link "Uri" in the miner file (they are all in the folder 'Miners') and download the binaries. Next locate the destination path "$Path". You need to create the required subdirectory in the 'Miners' folder.  Finally unpack the downloaded binary to the destination directory. If the packed file contains subdirectories you must also copy them.

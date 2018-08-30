@@ -70,7 +70,8 @@ IMPORTANT NOTES:
 ====================================================================
 
 
-COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Usage section below for an example) in alphabetical order:
+COMMAND LINE OPTIONS (case-insensitive - except for wallet addresses (e.g. BTC), see Sample Usage section below for an example):
+Listed in alphabetical order. Note: For basic operation not all parameters must be defined through start.bat.
 
 -Algorithm
 	Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
@@ -85,7 +86,7 @@ COMMAND LINE OPTIONS (case-insensitive - except for BTC addresses, see Sample Us
 	Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). WARNING! If you add all algorithms listed above, you may find your earnings spread across multiple pools regardless what pool(s) you specified with the -poolname command.
 	
 -ConfigFile [Path\ConfigFile.txt]
-	The default config file name is '.\default.txt'
+	The default config file name is '.\Config.txt'
 	If the config file does not exist MPM will create a config file with default values. If the file name does not have an extension MPM will add .txt file name extension.
 	By default MPM will use the values from the command line. If you hardcode config values directly in the config file, then these values will override the command line parameters (see Advanced Configuration).
 
@@ -254,7 +255,7 @@ ADVANCED CONFIGURATION
 
 Advanced config options are available via config file
 
-MPM supports customized configuration via config files. The default config file name is '.\Default.txt'.
+MPM supports customized configuration via config files. The default config file name is '.\Config.txt'.
 If you do not include the command line parameter -ConfigFile [Path\FileName.txt] the MPM will use the default file name. 
 
 If the config file does not exist MPM will create a config file with default values. If the file name does not have an extension MPM will add .txt file name extension.
@@ -278,6 +279,7 @@ Sample content of 'Config.txt'
     "Region":  "$Region",
     "SSL":  "$SSL",
     "DeviceName":  "$DeviceName",
+    "DisableDualMining":  "$DisableDualMining",
     "Algorithm":  "$Algorithm",
     "MinerName":  "$MinerName",
     "PoolName":  "$PoolName",
@@ -292,7 +294,6 @@ Sample content of 'Config.txt'
     "MinerStatusUrl":  "$MinerStatusUrl",
     "MinerStatusKey":  "$MinerStatusKey",
     "SwitchingPrevention":  "$SwitchingPrevention",
-    "DisableAutoUpdate":  "$DisableAutoUpdate",
     "ShowMinerWindow":  "$ShowMinerWindow",
     "UseFastestMinerPerAlgoOnly":  "$UseFastestMinerPerAlgoOnly",
     "IgnoreCosts":  "$IgnoreCosts",
@@ -372,7 +373,7 @@ To display the balances of all enabled pools (excluding those that are excluded 
     ...
 }
 	
-To display the balances of all pools (including those that are excluded with '-ExcludeMinerName') on the summary screen and in the web GUI '"ShowPoolBalances":  true' to the general section:
+To display the balances of all pools (including those that are excluded with '-ExcludeMinerName') on the summary screen and in the web GUI add '"ShowPoolBalances":  true' to the general section:
 {
     ...
 	"ShowPoolBalancesExcludedPools":  true
