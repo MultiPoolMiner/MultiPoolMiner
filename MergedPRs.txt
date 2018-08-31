@@ -24,6 +24,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2061 (NsgMiner: Enable per
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2071 (CcminerZealot: Update to version 1.15, enable per device mining)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2075 (CcminerDumax: Update version 0.9.4, enable per device mining)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2078 (Bminer: Update version 10.1.0, enable per device mining and dual algo support)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2117 (CcminerPigeonCoin: Fix driver version display)
 
 Pool changes:
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2049 (ZergPool: Add new Equihash algos, europe only)
