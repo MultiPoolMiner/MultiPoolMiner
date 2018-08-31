@@ -25,7 +25,9 @@ class Dstm : Miner {
         $HashRate_Value = [Double]($Data.result.sol_ps | Measure-Object -Sum).Sum
         if (-not $HashRate_Value) {$HashRate_Value = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum} #ewbf fix
 
-        $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
+        if ($HashRate_Name -and $HashRate_Value -gt 0) {
+            $HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
+        }
 
         $this.Data += [PSCustomObject]@{
             Date     = (Get-Date).ToUniversalTime()
