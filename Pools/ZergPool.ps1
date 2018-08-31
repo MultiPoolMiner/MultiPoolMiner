@@ -114,7 +114,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                         Host          = "$ZergPool_Algorithm.$ZergPool_Host"
                         Port          = $ZergPool_Port
                         User          = Get-Variable $_ -ValueOnly
-                        Pass          = "$Worker, c=$_, mc=$ZergPool_Currency"
+                        Pass          = "$Worker,c=$_,mc=$ZergPool_Currency"
                         Region        = $ZergPool_Region_Norm
                         SSL           = $false
                         Updated       = $Stat.Updated
