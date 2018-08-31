@@ -44,10 +44,10 @@ $ZergPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Se
     }
     else {
         #Define CoinNames for new Equihash algorithms
-        if ($ZergPool_Algorithm -eq "Equihash144btcz") {$ZergPool_Algorithm = "Equihash144"; $ZergPool_Coin = "Bitcoinz"}
-        if ($ZergPool_Algorithm -eq "Equihash144safe") {$ZergPool_Algorithm = "Equihash144"; $ZergPool_Coin = "Safecoin"}
-        if ($ZergPool_Algorithm -eq "Equihash144xsg")  {$ZergPool_Algorithm = "Equihash144"; $ZergPool_Coin = "Snowgem"}
-        if ($ZergPool_Algorithm -eq "Equihash144zel")  {$ZergPool_Algorithm = "Equihash144"; $ZergPool_Coin = "Zelcash"}
+        if ($ZergPool_Algorithm -eq "Equihash144btcz") {$ZergPool_Coin = "Bitcoinz"; $ZergPool_Algorithm = "Equihash144"}
+        if ($ZergPool_Algorithm -eq "Equihash144safe") {$ZergPool_Coin = "Safecoin"; $ZergPool_Algorithm = "Equihash144"}
+        if ($ZergPool_Algorithm -eq "Equihash144xsg")  {$ZergPool_Coin = "Snowgem";  $ZergPool_Algorithm = "Equihash144"}
+        if ($ZergPool_Algorithm -eq "Equihash144zel")  {$ZergPool_Coin = "Zelcash";  $ZergPool_Algorithm = "Equihash144"}
         if ($ZergPool_Algorithm -eq "Equihash192")     {$ZergPool_Coin = "Zerocoin"}
 
         $ZergPool_Algorithm_Norm = Get-Algorithm $ZergPool_Algorithm
@@ -85,16 +85,30 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
     $ZergPool_Host = "mine.zergpool.com"
     $ZergPool_Port = $ZergPoolCoins_Request.$_.port
     $ZergPool_Algorithm = $ZergPoolCoins_Request.$_.algo
-    $ZergPool_Algorithm_Norm = Get-Algorithm $ZergPool_Algorithm
     $ZergPool_Coin = $ZergPoolCoins_Request.$_.name
-    $ZergPool_Currency = $_
 
     $Divisor = 1000000000 * [Double]$ZergPool_Request.$ZergPool_Algorithm.mbtc_mh_factor
+
     if ($Divisor -eq 0) {
-        Write-Log -Level Info "$($Name): Unable to determine divisor for $ZergPool_Coin using $ZergPool_Algorithm algorithm. "
+        Write-Log -Level Info "$($Name): Unable to determine divisor for coin $ZergPool_Coin using $ZergPool_Algorithm algorithm. "
         return
     }
     else {
+        #Define CoinNames for new Equihash algorithms
+        if ($ZergPool_Algorithm -like "Equihash144*") {
+            $ZergPool_Currency = $null
+        }
+        else {
+            $ZergPool_Currency = $ZergPoolCoins_Request.$_.symbol
+        }
+
+        if ($ZergPool_Algorithm -eq "Equihash144btcz") {$ZergPool_Coin = "Bitcoinz"; $ZergPool_Algorithm = "Equihash144"}
+        if ($ZergPool_Algorithm -eq "Equihash144safe") {$ZergPool_Coin = "Safecoin"; $ZergPool_Algorithm = "Equihash144"}
+        if ($ZergPool_Algorithm -eq "Equihash144xsg")  {$ZergPool_Coin = "Snowgem";  $ZergPool_Algorithm = "Equihash144"}
+        if ($ZergPool_Algorithm -eq "Equihash144zel")  {$ZergPool_Coin = "Zelcash";  $ZergPool_Algorithm = "Equihash144"}
+    
+        $ZergPool_Algorithm_Norm = Get-Algorithm $ZergPool_Algorithm
+
         $Stat = Set-Stat -Name "$($Name)_$($_)_Profit" -Value ([Double]$ZergPoolCoins_Request.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
         $ZergPool_Regions | ForEach-Object {
@@ -114,7 +128,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                         Host          = "$ZergPool_Algorithm.$ZergPool_Host"
                         Port          = $ZergPool_Port
                         User          = Get-Variable $_ -ValueOnly
-                        Pass          = "$Worker, c=$_, mc=$ZergPool_Currency"
+                        Pass          = "$Worker,c=$ZergPool_Currency$(if ($ZergPool_Algorithm_Norm -ne 'Equihash1445') {",mc=$ZergPool_Currency"})"
                         Region        = $ZergPool_Region_Norm
                         SSL           = $false
                         Updated       = $Stat.Updated
@@ -134,7 +148,7 @@ $ZergPool_MiningCurrencies | Where-Object {$ZergPoolCoins_Request.$_.hashrate -g
                         Host          = "$ZergPool_Algorithm.$ZergPool_Host"
                         Port          = $ZergPool_Port
                         User          = Get-Variable $_ -ValueOnly
-                        Pass          = "$Worker,c=$_,mc=$ZergPool_Currency"
+                        Pass          = "$Worker,c=$_,mc=$ZergPool_Currency$(if ($ZergPool_Algorithm_Norm -ne 'Equihash1445') {",mc=$ZergPool_Currency"})"
                         Region        = $ZergPool_Region_Norm
                         SSL           = $false
                         Updated       = $Stat.Updated
