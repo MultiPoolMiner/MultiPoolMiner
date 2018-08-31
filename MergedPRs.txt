@@ -16,7 +16,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/pull/1915 (SRB Miner version 1.
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2002 (EWBF2 Miner version 0.5 (Nvidia only); NEW!
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2006 (CryptoDredge Miner version 0.8.3 (Nvidia only); NEW!
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2038 (Excavator NHMP version 1.5.11a (Nvidia / Nicehash Only); NEW!
-https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2046 (DSTM & EWBF miner: Enable per device mining)
+https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2119 (DSTM & EWBF miner: Enable per device mining)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2047 (Eminer: Enable per device mining, unified miner)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2059 (EthMiner: Update to version 0.15, unified miner)
 https://github.com/MultiPoolMiner/MultiPoolMiner/pull/2060 (PhoenixMiner version 3.0c: Unified miner)
