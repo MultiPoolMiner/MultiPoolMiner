@@ -10,7 +10,7 @@ param(
 $Path = ".\Bin\NVIDIA-DSTM-Equihash\zm.exe"
 $HashSHA256 = "3666C1870D83F9A0E813671ADFD920EA87E64A6174ECE357E5B4D1B65191B5D0"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/dstm/zm_0.6.1_win.zip"
-$Port = "22{0:d2}"
+$Port = "40{0:d2}"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
