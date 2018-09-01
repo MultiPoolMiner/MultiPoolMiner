@@ -11,7 +11,7 @@ $Path = ".\Bin\NVIDIA-CryptoDredge\CryptoDredge.exe"
 $HashSHA256 = "00886DCCD2CC806B2CD9566FC86AD8AA46F78229E031FB5F6D1B90882FC494C5"
 $Uri = "https://github.com/technobyl/CryptoDredge/releases/download/v0.8.3/CryptoDredge_0.8.3_cuda_9.2_windows.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4129696.0"
-$Port = "60{0:d2}"
+$Port = "40{0:d2}"
 
 $Commands = [PSCustomObject]@{
     "allium"    = "" #Allium
