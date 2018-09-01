@@ -9,7 +9,7 @@ param(
 
 $Path = ".\Bin\NVIDIA-CcminerTrex\t-rex.exe"
 $HashSHA256 = "2E51EE7F02A75DEED574483089A1EC3F7F876A15628A11208D49322F7C3A677E"
-$Uri = "https://github.com/paulpoco/MinerFiles/raw/master/t-rex-0.6.3-win-cuda9.1.zip"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/T-rex/t-rex-0.6.3-win-cuda9.1.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4432704.0"
 $Port = "40{0:d2}"
 
