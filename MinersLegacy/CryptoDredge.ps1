@@ -36,8 +36,8 @@ $CommonCommands = " --no-watchdog --no-color"
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 # Miner requires CUDA 9.2
-$DriverVersion = (Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation" | Select-Object -Unique).OpenCL.Platform.Version -replace ".*CUDA ",""
-$RequiredVersion = "9.2.00"
+$DriverVersion = ((Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+$RequiredVersion = "9.2.00"$RequiredVersion = "9.2.00"
 if ($DriverVersion -and $DriverVersion -lt $RequiredVersion) {
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers. "
     return
