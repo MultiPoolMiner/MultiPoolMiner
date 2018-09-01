@@ -37,9 +37,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
         Switch ($Algorithm_Norm) {
-            "PHI2"   {$ExtendInterval = 3}
             "X16R"  {$ExtendInterval = 10}
-            "X16S"  {$ExtendInterval = 10}
             default {$ExtendInterval = 0}
         }
 
