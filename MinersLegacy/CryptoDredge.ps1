@@ -8,22 +8,29 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-CryptoDredge\CryptoDredge.exe"
-$HashSHA256 = "00886DCCD2CC806B2CD9566FC86AD8AA46F78229E031FB5F6D1B90882FC494C5"
-$Uri = "https://github.com/technobyl/CryptoDredge/releases/download/v0.8.3/CryptoDredge_0.8.3_cuda_9.2_windows.zip"
+$HashSHA256 = "7E9F1A1A2BB181C341EA94D1FE830C87C6B03872B5361FDA98E00992D2BF8CA0"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/CryptDredge/CryptoDredge_0.9.0_win_x64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4129696.0"
 $Port = "40{0:d2}"
-
+                   
 $Commands = [PSCustomObject]@{
-    "allium"    = "" #Allium
-    "lyra2v2"   = "" #Lyra2REv2
-    "lyra2z"    = "" #Lyra2z
-    "neoscrypt" = "" #NeoScrypt
-    "phi"       = "" #PHI
-    "phi2"      = "" #PHI2
-    "skein"     = "" #Skein
-    "skunkhash" = "" #Skunk
-    "tribus"    = "" #Tribus, new with 0.8
+    "aeon"             = "" #Aeon, new in 0.9
+    "allium"           = "" #Allium
+    "blake2s"          = "" #Blake2s, new in 0.9
+    "cryptonightheavy" = "" #CyptoNightHeavy, new in 0.9
+    "cryptonightV7"    = "" #CyptoNightV7, new in 0.9
+    "masari"           = "" #CryptoNightMsr, new in 0.9
+    "lyra2v2"          = "" #Lyra2REv2
+    "lyra2z"           = "" #Lyra2z
+    "neoscrypt"        = "" #NeoScrypt
+    "phi"              = "" #PHI
+    "phi2"             = "" #PHI2
+    "skein"            = "" #Skein
+    "skunkhash"        = "" #Skunk
+    "stellite"         = "" #CryptoNightXtl, new in 0.9
+    "tribus"           = "" #Tribus, new with 0.8
 }
+
 $CommonCommands = " --no-watchdog --no-color"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -47,7 +54,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
         Switch ($Algorithm_Norm) {
-            "PHI"     {$ExtendInterval = 3}
             "PHI2"    {$ExtendInterval = 3}
             default   {$ExtendInterval = 0}
         }
