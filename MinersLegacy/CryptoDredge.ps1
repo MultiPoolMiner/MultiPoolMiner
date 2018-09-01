@@ -53,7 +53,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm $_
         $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
-        if ($Algorithm_Norm -notlike "CryptoNight*" -or ($Algorithm_Norm -like "CryptoNight*" -and $Pools.$Algorithm_Norm.Protocol -ne "Nicehash")) { #temp fix, cryptonight algos are not comparible with Nicehash, https://bitcointalk.org/index.php?topic=4807821.msg45036670#msg45036670
+        if (-not ($Algorithm_Norm -like "CryptoNight*" -and $Pools.$Algorithm_Norm.Name -eq "NiceHash")) { #temp fix, cryptonight algos are not compatible with NiceHash, https://bitcointalk.org/index.php?topic=4807821.msg45036670#msg45036670
             [PSCustomObject]@{
                 Name           = $Miner_Name
                 DeviceName     = $Miner_Device.Name
