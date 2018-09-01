@@ -11,7 +11,7 @@ $Path = ".\Bin\NVIDIA-EWBF-Equihash\miner.exe"
 $HashSHA256 = "84DD02DEBBF2B0C5ED7EEBF813305543265E34EC98635139787BF8B882E7C7B4"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ewbf/Zec.Miner.0.3.4b.zip"
 $ManualURI = "https://bitcointalk.org/index.php?topic=1707546.0"
-$Port = "420{0:d2}"
+$Port = "40{0:d2}"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
