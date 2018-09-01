@@ -116,9 +116,10 @@ function Set-Stat {
     $Path = "Stats\$Name.txt"
     $SmallestValue = 1E-20
 
+    $Stat = Get-Content $Path -ErrorAction SilentlyContinue
+    
     try {
-        $Stat = Get-Content $Path -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-
+        $Stat = $Stat | ConvertFrom-Json -ErrorAction Stop
         $Stat = [PSCustomObject]@{
             Live = [Double]$Stat.Live
             Minute = [Double]$Stat.Minute
