@@ -53,23 +53,19 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm $_
         $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
-        Switch ($Algorithm_Norm) {
-            "PHI2"    {$ExtendInterval = 3}
-            default   {$ExtendInterval = 0}
-        }
-
-        [PSCustomObject]@{
-            Name           = $Miner_Name
-            DeviceName     = $Miner_Device.Name
-            Path           = $Path
-            HashSHA256     = $HashSHA256
-            Arguments      = "--api-type ccminer-tcp --api-bind 127.0.0.1:$($Miner_Port) -a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$CommonCommands -d $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')"
-            HashRates      = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
-            API            = "Ccminer"
-            Port           = $Miner_Port
-            URI            = $Uri
-            Fees           = [PSCustomObject]@{"$Algorithm_Norm" = 1 / 100}
-            ExtendInterval = $ExtendInterval
+        if ($Algorithm_Norm -like "CryptoNight*" -and $Pools.$Algorithm_Norm.Protocol -ne "Nicehash") { #temp fix, cryptonight algos are not comparible with Nicehash, https://bitcointalk.org/index.php?topic=4807821.msg45036670#msg45036670
+            [PSCustomObject]@{
+                Name           = $Miner_Name
+                DeviceName     = $Miner_Device.Name
+                Path           = $Path
+                HashSHA256     = $HashSHA256
+                Arguments      = "--api-type ccminer-tcp --api-bind 127.0.0.1:$($Miner_Port) -a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$CommonCommands -d $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')"
+                HashRates      = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
+                API            = "Ccminer"
+                Port           = $Miner_Port
+                URI            = $Uri
+                Fees           = [PSCustomObject]@{"$Algorithm_Norm" = 1 / 100}
+            }
         }
     }
 }
