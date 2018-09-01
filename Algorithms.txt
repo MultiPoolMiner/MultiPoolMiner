@@ -1,4 +1,5 @@
 {
+    "aeon":  "Aeon",
     "aion":  "Equihash2109",
     "allium":  "Allium",
     "anime":  "Anime",
@@ -135,6 +136,7 @@
     "machine":  "Timetravel",
     "machinecoin":  "Timetravel",
     "magi":  "m7m",
+    "masari":  "CryptoNightMsr",
     "maxcoin":  "Keccak",
     "memohash":  "Axiom",
     "monero":  "CryptoNightV7",
@@ -184,6 +186,7 @@
     "skunkhash":  "Skunk",
     "skunkhashraptor":  "Skunk",
     "sonoa":  "Sonoa",
+    "stellite":  "CryptoNightXtl",
     "supcoin":  "Pluck",
     "timetravel":  "Timetravel",
     "timetravel10":  "Bitcore",
