@@ -59,6 +59,8 @@ $Commands = [PSCustomObject]@{
     #"zr5"           = "" #zr5
 }
 
+$CommonCommands = ""
+
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
