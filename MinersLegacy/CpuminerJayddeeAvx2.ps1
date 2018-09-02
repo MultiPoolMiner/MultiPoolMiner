@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 $Path = ".\Bin\CPU-JayDDee\cpuminer-avx2.exe"
 $HashSHA256 = "8F37B5BAD9D6A3AE1BA488C680B7DE2B244D1D012BCE105E6C2C7AB86DEEF6D0"
@@ -10,6 +10,7 @@ $Commands = [PSCustomObject]@{
     "allium" = "" #Garlicoin
     "cryptonightv7" = "" #CryptoNightV7XMR
     "hmq1725" = "" #HMQ1725
+    "hodl" = "" # hodlcoin
     "lyra2z" = "" #Lyra2z, ZCoin
     "m7m" = "" #m7m
     "x12" = "" #x12

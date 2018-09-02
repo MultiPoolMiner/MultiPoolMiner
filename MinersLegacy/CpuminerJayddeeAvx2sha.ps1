@@ -10,6 +10,7 @@ $Commands = [PSCustomObject]@{
     "allium" = "" #Garlicoin
     "cryptonightv7" = "" #CryptoNightV7XMR
     "hmq1725" = "" #HMQ1725
+    "hodl" = "" # hodlcoin
     "lyra2z" = "" #Lyra2z, ZCoin
     "m7m" = "" #m7m
     "x12" = "" #x12
