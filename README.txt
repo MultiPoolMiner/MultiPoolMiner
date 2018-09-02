@@ -19,7 +19,6 @@ Permissions of this strong copyleft license are conditioned on making available 
 
 README.txt - updated on 29/08/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
-
 ====================================================================
 
 
@@ -30,6 +29,7 @@ FEATURE SUMMARY:
 - Supports benchmarking, multiple platforms (AMD, NVIDIA and CPU) and mining on A Hash Pool, BlazePool, BlockMasters, Hash Refinery, MiningPoolHub, Nicehash, YiiMP, ZergPool and Zpool pools
 - Includes Watchdog Timer to detect and handle miner failures
 - Comprehensive web GUI with dashboard and balances overview
+
 
 Any bitcoin donations are greatly appreciated: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH 
 
@@ -64,7 +64,7 @@ IMPORTANT NOTES:
 - It is highly recommended to set Virtual Memory size in Windows to at least 16 GB in multi-GPU systems: Computer Properties -> Advanced System Settings -> Performance -> Advanced -> Virtual Memory
 - Please see the FAQ section on the bottom of this page before submitting bugs and feature requests on Github. https://github.com/MultiPoolMiner/MultiPoolMiner/issues 
 - Logs and Stats are produced in text format; use them when submitting issues.
-- Currently mining with upto 6 GPUs is fully supported. Where required advanced users can create additional or amend current miner files to support mining with more than 6 graphics cards.
+- Currently mining with up to 6 GPUs is fully supported. Where required advanced users can create additional or amend current miner files to support mining with more than 6 graphics cards.
 
 
 ====================================================================
@@ -287,6 +287,7 @@ Sample content of 'Config.txt'
     "MinerName":  "$MinerName",
     "PoolName":  "$PoolName",
     "ExcludeAlgorithm":  "$ExcludeAlgorithm",
+    "ExcludeDeviceName":  "$ExcludeDeviceName",
     "ExcludeMinerName":  "$ExcludeMinerName",
     "ExcludePoolName":  "$ExcludePoolName",
     "Currency":  "$Currency",
@@ -383,6 +384,45 @@ To display the balances of all pools (including those that are excluded with '-E
     ...
 }
 Note: Only balances in BTC are listed, other currencies are currently not supported.
+
+
+
+UNPROFITABLE ALGORITHMS
+
+As more and more algorithms can be mined with ASICs mining them with GPUs becomes unprofitable.
+To add algorithms to the list edit 'UnprofitableAlgorithms.txt' in the MPM directory.
+
+[
+    "Bitcore",
+    "Blake2s",
+    "Blakecoin",
+    "BlakeVanilla",
+    "CryptoLight",
+    "CryptoNight",
+    "Groestl",
+    "Keccak",
+    "KeccakC",
+    "Lbry",
+    "Lyra2RE",
+    "Decred",
+    "Quark",
+    "Qubit",
+    "MyriadGroestl",
+    "Nist5",
+    "Scrypt",
+    "ScryptN",
+    "SHA256d",
+    "SHA256t",
+    "Sia",
+    "Sib",
+    "X11",
+    "X13",
+    "X14",
+    "X15"
+]
+
+Note: MPM will no longer mine/benchmark these algorithms as main algorithms, but they will still be used as secondary algorithm for dual miners.
+
 
 
 ====================================================================
