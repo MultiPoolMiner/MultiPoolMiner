@@ -8,23 +8,26 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-CcminerTrex\t-rex.exe"
-$HashSHA256 = "A63A7DDC6F16FC3FC2CB1459A77D397F5ECA9878AD38E5EE46723D642E132B3D"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/T-rex/t-rex-0.6.1-win-cuda9.1.zip"
+$HashSHA256 = "2E51EE7F02A75DEED574483089A1EC3F7F876A15628A11208D49322F7C3A677E"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/T-rex/t-rex-0.6.3-win-cuda9.1.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4432704.0"
 $Port = "40{0:d2}"
 
 $Commands = [PSCustomObject]@{
-    "bitcore" = "" #Bitcore, New in 0.6.1
-    "c11"     = "" #C11
-    "hsr"     = "" #HSR
-    "lyra2z"  = "" #Lyra2z
-    "phi"     = "" #Phi
-    "renesis" = "" #Renesis
-    "sonoa"   = "" #Sonoa, New in 0.6.1
-    "tribus"  = "" #Tribus
-    "x16r"    = "" #X16r
-    "x16s"    = "" #X16s
-    "x17"     = "" #x17
+    "balloon"   = "" #Balloon, New in 0.6.2
+    "bitcore"   = "" #Bitcore, New in 0.6.1
+    "c11"       = "" #C11
+    "hsr"       = "" #HSR
+    "lyra2z"    = "" #Lyra2z
+    "phi"       = "" #Phi
+    "polytimos" = "" #Polytimos, New in 0.6.3
+    "renesis"   = "" #Renesis
+    "skunk"     = "" #Skunk, New in 0.6.3
+    "sonoa"     = "" #Sonoa, New in 0.6.1
+    "tribus"    = "" #Tribus
+    "x16r"      = "" #X16r
+    "x16s"      = "" #X16s
+    "x17"       = "" #x17
 }
 
 $CommonCommands = ""
