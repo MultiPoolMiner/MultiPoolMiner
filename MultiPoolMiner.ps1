@@ -113,23 +113,52 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 
 #Append .txt extension if no extension is given
 if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
+
+$Config = [PSCustomObject]@{}
 if (Test-Path $ConfigFile) {
-    Write-Log -Level Info "Using configuration file ($(Resolve-Path $ConfigFile)). "
+    $ConfigFile = Resolve-Path $ConfigFile
+    Write-Log -Level Info "Using configuration file ($ConfigFile). "
+    $Config = Get-Content $ConfigFile | ConvertFrom-Json
+    $ConfigOld = $Config.PSObject.Copy() #$Config = $ConfigOld does not work (https://stackoverflow.com/questions/9581568/how-to-create-new-clone-instance-of-psobject-object)
+
+    #Add variables that do not have an entry in config file
+    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile" -and (Get-Variable $_ -ErrorAction SilentlyContinue)} | ForEach-Object {
+        $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
+    }
+
+    $Config | Add-Member VersionCompatibility $Version -Force
+    $Config | Add-Member Pools ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
+    $Config | Add-Member Miners ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
+
+    if (($Config | ConvertTo-Json -Depth 10 -Compress) -ne ($ConfigOld | ConvertTo-Json -Depth 10 -Compress)) {
+        #Update existing config file
+        Try {
+            $Config | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -Encoding utf8 -Force
+            Write-Log -Level Info "Updating config file ($ConfigFile); adding missing defaults. "
+        }
+        Catch {
+            Write-Log -Level Error "Error updating config file ($ConfigFile). Cannot continue. "
+            Start-Sleep 10
+            Exit
+        }
+    }
 }
 else {
     #Create new config file: Read command line parameters except ConfigFile
-    $Config = [PSCustomObject]@{}
-    $Config | Add-Member VersionCompatibility $Version
-    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
+    $MyInvocation.MyCommand.Parameters.Keys | Sort-Object | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
         if (Get-Variable $_ -ErrorAction SilentlyContinue) {
             $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
         }
     }
+
+    $Config | Add-Member VersionCompatibility $Version
     $Config | Add-Member Pools ([PSCustomObject]@{})
     $Config | Add-Member Miners ([PSCustomObject]@{})
+
     Try {
-        $Config | ConvertTo-Json | Set-Content $ConfigFile -Encoding utf8
-        Write-Log -Level Info -Message "No valid config file found. Creating new config file ($(Resolve-Path $ConfigFile)) using defaults. "
+        $Config | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -Encoding utf8
+        $ConfigFile = Resolve-Path $ConfigFile
+        Write-Log -Level Info -Message "No valid config file found. Creating new config file ($ConfigFile) using defaults. "
     }
     Catch {
         Write-Log -Level Error "Error writing config file ($($ConfigFile)). Cannot continue. "
@@ -155,22 +184,24 @@ Start-APIServer
 $API.Version = $Version
 
 while ($true) {
-    $ConfigBackup = $Config
-    #Load the config, read command line parameters except ConfigFile, use default values for those that are not in command line
-    $Parameters = @{}
+    $ConfigBackup = $Config.PSObject.Copy()
+    #Add existing variables to $Parameters so they are available in psm1
+    $Config_Parameters = @{}
+    $Config = Get-Content $ConfigFile | ConvertFrom-Json
     $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
-        $Parameters.Add($_ , (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
+        if ($Config.$_ -like "`$*") {
+            $Config_Parameters.Add($_, (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
+        }
+        else {
+            $Config_Parameters.Add($_, $Config.$_)
+        }
     }
-    $Config = Get-ChildItemContent $ConfigFile -Parameters $Parameters | Select-Object -ExpandProperty Content
+    $Config = [PSCustomObject]@{}
+    $Config = Get-ChildItemContent $ConfigFile -Parameters $Config_Parameters | Select-Object -ExpandProperty Content
 
     #Config file may not contain an entry for all supported parameters, use value from command line, or if empty use default
     $Config | Add-Member Pools ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
     $Config | Add-Member Miners ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
-    $PSBoundParameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
-        if (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue) {
-            $Config | Add-member $_ (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue) -ErrorAction SilentlyContinue
-        }
-    }
 
     #Error in config file
     if ($Config -isnot [PSCustomObject]) {
@@ -199,7 +230,7 @@ while ($true) {
 
     # Copy the user's config before changing anything for donation runs
     # This is used when getting pool balances so it doesn't get pool balances of the donation address instead
-    $UserConfig = $Config
+    $UserConfig = $Config.PSObject.Copy()
 
     #Activate or deactivate donation
     if ($Config.Donate -lt 10) {$Config.Donate = 10}
@@ -225,7 +256,7 @@ while ($true) {
     $API.Config = $Config
 
     #Clear pool cache if the pool configuration has changed
-    if (($ConfigBackup.Pools | ConvertTo-Json -Compress) -ne ($Config.Pools | ConvertTo-Json -Compress)) {$AllPools = $null}
+    if ((($ConfigBackup.Pools | ConvertTo-Json -Compress -Depth 10) -ne ($Config.Pools | ConvertTo-Json -Compress -Depth 10)) -or ($ConfigBackup.PoolName -ne $Config.PoolName) -or ($ConfigBackup.ExcludePoolName -ne $Config.ExcludePoolName)) {$AllPools = $null}
 
     if ($Config.Proxy) {$PSDefaultParameterValues["*:Proxy"] = $Config.Proxy}
     else {$PSDefaultParameterValues.Remove("*:Proxy")}
