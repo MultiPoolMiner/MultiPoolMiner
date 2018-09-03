@@ -12,7 +12,7 @@ class SRBMiner : Miner {
 
         #Write config files. Keep separate files and do not overwrite to preserve optional manual customization
         $ConfigFile = "$(Split-Path $this.Path)\Config_$($this.Name)-$($this.Algorithm)-$($this.Port).txt"
-        $Parameters.Config | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -ErrorAction Ignore
+        $Parameters.ConfigFile | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -ErrorAction Ignore
 
         #Write pool file. Keep separate files
         $PoolFile = "$(Split-Path $this.Path)\Pools_$($this.Pool)-$($this.Algorithm).txt"
