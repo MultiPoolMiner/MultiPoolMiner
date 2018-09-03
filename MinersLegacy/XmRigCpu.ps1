@@ -87,18 +87,5 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 Fees       = [PSCustomObject]@{"$Algorithm_Norm" = 1 / 100}
             }
         }
-#
-#        [PSCustomObject]@{
-#            Name       = $Miner_Name
-#            DeviceName = $Miner_Device.Name
-#            Path       = $Path
-#            HashSHA256 = $HashSHA256
-#            Arguments  = "--api-port $($Miner_Port) -a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) --keepalive --nicehash --rig-id=$($Worker) --donate-level 1$($Commands.$_)$CommonCommands"
-#            HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
-#            API        = "XmRig"
-#            Port       = $Miner_Port
-#            URI        = $Uri
-#            Fees       = [PSCustomObject]@{"$Algorithm_Norm" = 1 / 100}
-#        }
     }
 }
