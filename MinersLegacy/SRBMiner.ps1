@@ -67,7 +67,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         
             $Arguments = @(
                 [PSCustomObject]@{
-                    Config = [PSCustomObject]@{
+                    ConfigFile = [PSCustomObject]@{
                         api_enabled      = $true
                         api_port         = [Int]$Miner_Port
                         api_rig_name     = "$($Config.Pools.$($Pools.$Algorithm_Norm.Name).Worker)"
