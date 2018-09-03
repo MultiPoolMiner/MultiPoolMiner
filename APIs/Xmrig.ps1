@@ -11,11 +11,10 @@ class XmRig : Miner {
         $Arguments = "$($Parameters.Commands)"
 
         #Write config files. Keep separate files and do not overwrite to preserve optional manual customization
-        if ($Parameters.ConfigFile) {
-            $ConfigFile = "$(Split-Path $this.Path)\$($this.Name)-$($this.Pool)-$($this.Algorithm).txt"
-            ($Parameters.ConfigFile | ConvertTo-Json -Depth 10) | Set-Content $ConfigFile -ErrorAction Ignore
-            $Arguments = "$Arguments --config=$ConfigFile"
-        }
+        $ConfigFile = "$($this.Name)-$($this.Pool)-$($this.Algorithm).txt" #Use unqualified file name in case MPM path contains spaces
+        $Parameters.ConfigFile | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -ErrorAction Ignore
+
+        $Arguments = "$Arguments --config=$ConfigFile"
 
         if ($this.Process) {
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
