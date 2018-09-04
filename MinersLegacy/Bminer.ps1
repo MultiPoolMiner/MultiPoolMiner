@@ -24,10 +24,10 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{MainAlgorithm = "tensority";    MinMemGB = 2; Params = ""} #Bytom
     [PSCustomObject]@{MainAlgorithm = "ethash3gb"; SecondaryAlgorithm = "blake14r"; MinMemGB = 3; Params = ""} #Ethash3Gb & Blake14r dual mining, auto dual solver and intensity
     [PSCustomObject]@{MainAlgorithm = "ethash2gb"; SecondaryAlgorithm = "blake14r"; MinMemGB = 2; Params = ""} #Ethash2Gb & Blake14r dual mining, auto dual solver and intensity
-    [PSCustomObject]@{MainAlgorithm = "ethash";    SecondaryAlgorithm = "blake14r"; MinMemGB = 2; Params = ""} #Ethash & Blake14r dual mining, auto dual solver and intensity
+    [PSCustomObject]@{MainAlgorithm = "ethash";    SecondaryAlgorithm = "blake14r"; MinMemGB = 4; Params = ""} #Ethash & Blake14r dual mining, auto dual solver and intensity
     [PSCustomObject]@{MainAlgorithm = "ethash3gb"; SecondaryAlgorithm = "blake2s";  MinMemGB = 3; Params = ""} #Ethash3Gb & Blake14r dual mining, auto dual solver and intensity
     [PSCustomObject]@{MainAlgorithm = "ethash2gb"; SecondaryAlgorithm = "blake2s";  MinMemGB = 2; Params = ""} #Ethash2Gb & Blake14r dual mining, auto dual solver and intensity
-    [PSCustomObject]@{MainAlgorithm = "ethash";    SecondaryAlgorithm = "blake2s";  MinMemGB = 2; Params = ""} #Ethash & Blake14r dual mining, auto dual solver and intensity
+    [PSCustomObject]@{MainAlgorithm = "ethash";    SecondaryAlgorithm = "blake2s";  MinMemGB = 4; Params = ""} #Ethash & Blake14r dual mining, auto dual solver and intensity
 
     #Custom config, manually set dual solver (Values: -1, 0, 1, 2, 3) and secondary intensity (Values: 0 - 300)
 #    [PSCustomObject]@{MainAlgorithm = "ethash2gb"; SecondaryAlgorithm = "blake14r"; DualSubsolver = 0; SecondaryIntensity = 00;  MinMemGB = 2; Params = ""} #Ethash2Gb & Blake14r dual mining
