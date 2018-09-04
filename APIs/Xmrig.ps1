@@ -18,11 +18,6 @@ class XmRig : Miner {
                 $this.Process | Remove-Job -Force
             }
 
-            if ($this.ProcessId) {
-                if (Get-Process -Id $this.ProcessId -ErrorAction SilentlyContinue) {Stop-Process -Id $this.ProcessId -Force -ErrorAction Ignore}
-                $this.ProcessId = $null
-            }
-
             if (-not ($this.Process | Get-Job -ErrorAction SilentlyContinue)) {
                 $this.Active += $this.Process.PSEndTime - $this.Process.PSBeginTime
                 $this.Process = $null
