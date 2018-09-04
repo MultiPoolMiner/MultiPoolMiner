@@ -13,8 +13,6 @@ class XmRig : Miner {
         #Write config files. Keep separate files and do not overwrite to preserve optional manual customization
         $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -ErrorAction Ignore
 
-        $Arguments = "$Arguments --config=$ConfigFile"
-
         if ($this.Process) {
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
                 $this.Process | Remove-Job -Force
