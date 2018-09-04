@@ -8,8 +8,8 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-CryptoDredge\CryptoDredge.exe"
-$HashSHA256 = "7E9F1A1A2BB181C341EA94D1FE830C87C6B03872B5361FDA98E00992D2BF8CA0"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/CryptDredge/CryptoDredge_0.9.0_win_x64.zip"
+$HashSHA256 = "92598B13F1B58CE0CC0352438BFF166C570BFCD96C278FB57C2A15E9CA1313EB"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/CryptoDredge/CryptoDredge_0.9.1_win_x64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4129696.0"
 $Port = "40{0:d2}"
                    
@@ -17,8 +17,9 @@ $Commands = [PSCustomObject]@{
     "aeon"             = "" #Aeon, new in 0.9
     "allium"           = "" #Allium
     "blake2s"          = "" #Blake2s, new in 0.9
-    "cryptonightheavy" = "" #CyptoNightHeavy, new in 0.9
-    "cryptonightV7"    = "" #CyptoNightV7, new in 0.9
+    "cryptonightheavy" = " -i 5" #CyptoNightHeavy, new in 0.9
+    "cryptonighthaven" = " -i 5" #CryptoNightHeavyHaven, new in 0.9.1
+    "cryptonightV7"    = " -i 5" #CyptoNightV7, new in 0.9
     "masari"           = "" #CryptoNightMsr, new in 0.9
     "lyra2v2"          = "" #Lyra2REv2
     "lyra2z"           = "" #Lyra2z
