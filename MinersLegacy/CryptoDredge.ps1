@@ -20,7 +20,7 @@ $Commands = [PSCustomObject]@{
     "cryptonightheavy" = " -i 5" #CyptoNightHeavy, new in 0.9
     "cryptonighthaven" = " -i 5" #CryptoNightHeavyHaven, new in 0.9.1
     "cryptonightV7"    = " -i 5" #CyptoNightV7, new in 0.9
-    "masari"           = "" #CryptoNightMsr, new in 0.9
+    "masari"           = " -i 5" #CryptoNightMsr, new in 0.9
     "lyra2v2"          = "" #Lyra2REv2
     "lyra2z"           = "" #Lyra2z
     "neoscrypt"        = "" #NeoScrypt
@@ -28,7 +28,7 @@ $Commands = [PSCustomObject]@{
     "phi2"             = "" #PHI2
     "skein"            = "" #Skein
     "skunkhash"        = "" #Skunk
-    "stellite"         = "" #CryptoNightXtl, new in 0.9
+    "stellite"         = " -i 5" #CryptoNightXtl, new in 0.9
     "tribus"           = "" #Tribus, new with 0.8
 }
 
