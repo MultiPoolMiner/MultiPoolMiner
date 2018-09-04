@@ -49,33 +49,37 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
         if ($Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" -and $Miner_Device) {
+            $ConfigFileName = "$Miner_Name-$($Pools.$Algorithm_Norm.Name)-$($Pools.$Algorithm_Norm.Algorithm).txt"
             $Arguments = [PSCustomObject]@{
                 ConfigFile = [PSCustomObject]@{
-                    "algo"         = $Algorithm
-                    "api" = [PSCustomObject]@{
-                        "port"         = $Miner_Port
-                        "access-token" = $null
-                        "worker-id"    = $null
+                    FileName = $ConfigFileName
+                    Content  = [PSCustomObject]@{
+                        "algo"         = $Algorithm
+                        "api" = [PSCustomObject]@{
+                            "port"         = $Miner_Port
+                            "access-token" = $null
+                            "worker-id"    = $null
+                        }
+                        "background"   = $false
+                        "cuda-bfactor" = 10
+                        "colors"       = $true
+                        "donate-level" = 1
+                        "log-file"     = $null
+                        "print-time"   = 5
+                        "retries"      = 5
+                        "retry-pause"  = 5
+                        "threads"      = @()
+                        "pools"        = @([PSCustomObject]@{
+                            "keepalive" = $true
+                            "nicehash"  = $(if ($Pools.$Algorithm_Norm.Name -eq "Nicehash") {$true} else {$false})
+                            "pass"      = "$($Pools.$Algorithm_Norm.Pass)"
+                            "url"       = "$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)"
+                            "user"      = "$($Pools.$Algorithm_Norm.User)"
+                            "rig-id"    = "$WorkerName"
+                        })
                     }
-                    "background"   = $false
-                    "cuda-bfactor" = 10
-                    "colors"       = $true
-                    "donate-level" = 1
-                    "log-file"     = $null
-                    "print-time"   = 5
-                    "retries"      = 5
-                    "retry-pause"  = 5
-                    "threads"      = @()
-                    "pools"        = @([PSCustomObject]@{
-                        "keepalive" = $true
-                        "nicehash"  = $(if ($Pools.$Algorithm_Norm.Name -eq "Nicehash") {$true} else {$false})
-                        "pass"      = "$($Pools.$Algorithm_Norm.Pass)"
-                        "url"       = "$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)"
-                        "user"      = "$($Pools.$Algorithm_Norm.User)"
-                        "rig-id"    = "$WorkerName"
-                    })
                 }
-                Commands = " --cuda-devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')$Params$CommonCommands"
+                Commands = " --config=$ConfigFileName --cuda-devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')$Params$CommonCommands"
             }
 
             [PSCustomObject]@{
