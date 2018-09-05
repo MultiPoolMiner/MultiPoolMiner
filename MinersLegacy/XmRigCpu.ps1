@@ -85,7 +85,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 HashSHA256 = $HashSHA256
                 Arguments  = $Arguments
                 HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
-                API        = "XmRig"
+                API        = "XmRigCfgFile"
                 Port       = $Miner_Port
                 URI        = $Uri
                 Fees       = [PSCustomObject]@{"$Algorithm_Norm" = 1 / 100}
