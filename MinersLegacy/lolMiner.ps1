@@ -80,7 +80,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $ConfigFileName = "$Miner_Name-$($Pools.$Algorithm_Norm.Name)-$($Pools.$Algorithm_Norm.Algorithm).txt"
                 $Arguments = [PSCustomObject]@{
                     ConfigFile = [PSCustomObject]@{
-                        FileName = $ConfigFilename
+                        FileName = $ConfigFileName
                         Content  = [PSCustomObject]@{
                             DEFAULT = [PSCustomObject]@{
                                 APIPORT    = $Miner_Port
