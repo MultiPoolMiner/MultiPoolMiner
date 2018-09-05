@@ -90,7 +90,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                         })
                     }
                 }
-                Commands = " --config=$ConfigFileName --opencl-devices$(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')$Params$CommonCommands"
+                Commands = " --config=$ConfigFileName --opencl-devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')$Params$CommonCommands"
             }
 
             [PSCustomObject]@{
