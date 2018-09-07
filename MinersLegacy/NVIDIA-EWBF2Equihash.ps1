@@ -7,7 +7,7 @@ param(
     [PSCustomObject[]]$Devices
 )
 
-$Path = ".\Bin\NVIDIA-EWBF2-Equihash\miner.exe"
+$Path = ".\Bin\NVIDIA-EWBF2Equihash\miner.exe"
 $HashSHA256 = "BB17BA6C699F6BC7A4465E641E15E1A7AABF1D884BF908A603DBAA1A705EDCD9"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/EWBF2/EWBF.Equihash.miner.v0.5.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4466962.0"
