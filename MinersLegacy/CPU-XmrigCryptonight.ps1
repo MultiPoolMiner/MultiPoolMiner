@@ -7,7 +7,7 @@ param(
     [PSCustomObject[]]$Devices
 )
 
-$Path = ".\Bin\CPU-XmRigCryptoNight\xmrig.exe"
+$Path = ".\Bin\CPU-XmrigCryptonight\xmrig.exe"
 $HashSHA256 = "73C345AB59538A0B4332BA0FB3659F111AAC4291F169D24DA6D5186FEC0B2712"
 $Uri = "https://github.com/xmrig/xmrig/releases/download/v2.6.4/xmrig-2.6.4-msvc-win64.zip"
 $ManualUri = "https://github.com/xmrig/xmrig"
