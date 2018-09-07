@@ -7,7 +7,7 @@ param(
     [PSCustomObject[]]$Devices
 )
 
-$Path = ".\Bin\NVIDIA-XmRig-Cryptonight\xmrig-nvidia.exe"
+$Path = ".\Bin\NVIDIA-XmRigCryptonight\xmrig-nvidia.exe"
 $HashSHA256 = "5905924C61D96267C176BC9AF86C16DCC837B81378E47315231A9EE0C5CC48B7"
 $Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.7.0-beta/xmrig-nvidia-2.7.0-beta-cuda9-win64.zip"
 $ManualUri = "https://github.com/xmrig/xmrig-nvidia"
