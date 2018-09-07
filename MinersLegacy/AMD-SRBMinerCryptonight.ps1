@@ -7,7 +7,7 @@ param(
     [PSCustomObject[]]$Devices
 )
 
-$Path = ".\Bin\AMD-SRBMinerCryptoNight\SRBMiner-CN.exe"
+$Path = ".\Bin\AMD-SRBMinerCryptonight\SRBMiner-CN.exe"
 $HashSHA256 = "5754439C2AE8331F75BDA10F14DBAEAF4F5948F391E2CF35AAFD585CAA4E0973"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/SRBMiner/SRBMiner-CN-V1-6-5.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3167363.0"
