@@ -188,7 +188,7 @@ while ($true) {
     #Add existing variables to $Parameters so they are available in psm1
     $Config_Parameters = @{}
     $Config = Get-Content $ConfigFile | ConvertFrom-Json
-    $ConfigBackup | ForEach-Object {
+    $ConfigBackup | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
         if ($ConfigBackup.$_ -like "`$*") {
             #First run read values from command line
             $Config_Parameters.Add($_, (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
