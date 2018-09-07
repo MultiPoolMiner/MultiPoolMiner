@@ -188,12 +188,13 @@ while ($true) {
     #Add existing variables to $Parameters so they are available in psm1
     $Config_Parameters = @{}
     $Config = Get-Content $ConfigFile | ConvertFrom-Json
-    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
-        if ($Config.$_ -like "`$*") {
+    $ConfigBackup | ForEach-Object {
+        if ($ConfigBackup.$_ -like "`$*") {
+            #First run read values from command line
             $Config_Parameters.Add($_, (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
         }
         else {
-            $Config_Parameters.Add($_, $Config.$_)
+            $Config_Parameters.Add($_, $ConfigBackup.$_)
         }
     }
     $Config = [PSCustomObject]@{}
