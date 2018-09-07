@@ -7,7 +7,7 @@ param(
     [PSCustomObject[]]$Devices
 )
 
-$Path = ".\Bin\AMD_NVIDIA-NsgminerNeoScrypt\nsgminer.exe"
+$Path = ".\Bin\AMD_NVIDIA-NsgminerNeoscrypt\nsgminer.exe"
 $HashSHA256 = "5FD5F65E360E93C7A520DA5E1945E58F8AD6B1CF9ECBDF2E4D5FB06DEDD2C6A8"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/NsgMiner/nsgminer-win64-0.9.4.zip"
 $ManualUri = "https://github.com/ghostlander/nsgminer"
