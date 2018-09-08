@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 29/08/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 09/09/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -192,6 +192,9 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 	Display the balances of all enabled pools (excluding those that are excluded with '-ExcludeMinerName') on the summary screen and in the web GUI.
 	Note: Only balances in BTC are listed, other currencies are currently not supported.
 
+-ShowPoolBalancesDetails
+	Display extra balances details (total of each currency) and the exchange rates for all currencies on the summary screen.
+
 -ShowPoolBalancesExcludedPools
 	Display the balances of all pools (including those that are excluded with '-ExcludeMinerName') on the summary screen and in the web GUI.
 	Note: Only balances in BTC are listed, other currencies are currently not supported.
@@ -302,6 +305,7 @@ Sample content of 'Config.txt'
     "UseFastestMinerPerAlgoOnly":  "$UseFastestMinerPerAlgoOnly",
     "IgnoreCosts":  "$IgnoreCosts",
     "ShowPoolBalances":  "$ShowPoolBalances",
+    "ShowPoolBalancesDetails":  "$ShowPoolBalancesDetails",
     "ShowPoolBalancesExcludedPools":  "$ShowPoolBalancesExcludedPools",
     "Pools":  {
 
@@ -376,7 +380,17 @@ To display the balances of all enabled pools (excluding those that are excluded 
 	"ShowPoolBalances":  true
     ...
 }
-	
+
+To display the sum of each currency in the balances (depending on 'ShowPoolBalancesExcludedPools' including those that are excluded with 'ExcludeMinerName') and the exchange rates for all currencies on the summary screen add
+'"ShowPoolBalancesDetails": true'
+to the general section:
+{
+    ...
+    "SwitchingPrevention":  "$SwitchingPrevention",
+    "ShowPoolBalancesDetails": true,
+    ...
+}	
+
 To display the balances of all pools (including those that are excluded with '-ExcludeMinerName') on the summary screen and in the web GUI add '"ShowPoolBalances":  true' to the general section:
 {
     ...
