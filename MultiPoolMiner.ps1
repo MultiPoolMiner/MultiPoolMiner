@@ -298,7 +298,7 @@ while ($true) {
     }
 
     #Load information about the devices
-    $Devices = @(Get-Device $Config.DeviceName | Select-Object)
+    $Devices = @(Get-Device $Config.DeviceName $Config.ExcludeDeviceName | Select-Object)
 
     #Give API access to the device information
     $API.Devices = $Devices
