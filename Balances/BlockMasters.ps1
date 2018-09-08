@@ -11,7 +11,7 @@ $APICurrenciesRequest = [PSCustomObject]@{}
 $APIWalletRequest = [PSCustomObject]@{}
 
 try {
-    $APICurrenciesRequest = Invoke-RestMethod "http://www.zpool.ca/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $APICurrenciesRequest = Invoke-RestMethod "http://blockmasters.co/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
     Write-Log -Level Warn "Pool Balance API ($Name) has failed. "
@@ -34,23 +34,23 @@ if (-not $Payout_Currencies) {
 
 $Payout_Currencies | Foreach-Object {
     try {
-        $APIWalletRequest = Invoke-RestMethod "http://zpool.ca/api/wallet?address=$($PoolConfig.$_)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-        if (($APIWalletRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
-            Write-Log -Level Warn "Pool Balance API ($Name) for $_ returned nothing. "
-        }
-        else {
-            [PSCustomObject]@{
-                Name        = "$($Name) ($($APIWalletRequest.currency))"
-                Pool        = $Name
-                Currency    = $APIWalletRequest.currency
-                Balance     = $APIWalletRequest.balance
-                Pending     = $APIWalletRequest.unsold
-                Total       = $APIWalletRequest.unpaid
-                LastUpdated = (Get-Date).ToUniversalTime()
-            }
+        $APIWalletRequest = Invoke-RestMethod "http://blockmasters.co/api/wallet?address=$($PoolConfig.BTC)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        [PSCustomObject]@{
+            Name        = "$($Name) ($($APIWalletRequest.currency))"
+            Pool        = $Name
+            Currency    = $APIWalletRequest.currency
+            Balance     = $APIWalletRequest.balance
+            Pending     = $APIWalletRequest.unsold
+            Total       = $APIWalletRequest.unpaid
+            LastUpdated = (Get-Date).ToUniversalTime()
         }
     }
     catch {
-        Write-Log -Level Warn "Pool Balance API ($Name) for $_ has failed. "
+        Write-Log -Level Warn "Pool Balance API ($Name) has failed. "
+    }
+
+    if (($APIWalletRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
+        Write-Log -Level Warn "Pool Balance API ($Name) for $_ returned nothing. "
+        return
     }
 }

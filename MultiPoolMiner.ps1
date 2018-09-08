@@ -73,6 +73,8 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$ShowPoolBalancesExcludedPools = $false,    
     [Parameter(Mandatory = $false)]
+    [Switch]$ShowPoolBalancesDetails = $false,
+    [Parameter(Mandatory = $false)]
     [String]$ConfigFile = ".\Config.txt"
 )
 
@@ -158,7 +160,7 @@ else {
     $Config | Add-Member Miners ([PSCustomObject]@{})
 
     Try {
-        $Config | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -Encoding utf8
+        $Config | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -Encoding utf8 -Force
         $ConfigFile = Resolve-Path $ConfigFile
         Write-Log -Level Info -Message "No valid config file found. Creating new config file ($ConfigFile) using defaults. "
     }
@@ -293,12 +295,11 @@ while ($true) {
     #Update the pool balances
     if ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) {
         Write-Log "Getting pool balances. "
-        $Balances = Get-Balance -Config $UserConfig -Rates $Rates
+        $BalancesData = Get-Balance -Config $UserConfig -NewRates $NewRates
 
         #Give API access to the pool balances
-        $API.Balances = $Balances
+        $API.Balances = $BalancesData.Balances
     }
-
     #Load information about the devices
     $Devices = @(Get-Device $Config.DeviceName $Config.ExcludeDeviceName | Select-Object)
 
@@ -662,7 +663,7 @@ while ($true) {
         @{Label = "Pool[Fee]"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {if ($_.CoinName) {"$($_.Name)-$($_.CoinName)$("[{0:P2}]" -f [Double]$_.Fee)"}else {"$($_.Name)$("[{0:P2}]" -f [Double]$_.Fee)"}}}}
     ) | Out-Host
 
-    #Display benchmarking progres
+    #Display benchmarking progress
     if ($MinersNeedingBenchmark.count -gt 0) {
         Write-Log -Level Warn "Benchmarking in progress: $($MinersNeedingBenchmark.count) miner$(if ($MinersNeedingBenchmark.count -gt 1){'s'}) left to benchmark."
     }
@@ -713,11 +714,30 @@ while ($true) {
     #Display pool balances, formatting it to show all the user specified currencies
     if ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) {
         Write-Host "Pool Balances: "
-        $Balances | Format-Table -Wrap Name, Total_*
+        $Columns = @()
+        $ColumnFormat = [Array]@{Name = "Name"; Expression = "Name"}
+        if ($Config.ShowPoolBalancesDetails) {
+            $Columns += $BalancesData.Balances | Foreach-Object {$_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name} | Where-Object {$_ -like "Balance (*"} | Sort-Object -Unique
+        }
+        else {
+            $ColumnFormat += @{Name = "Balance"; Expression = {$_.Total}}
+        }
+        $Columns += $BalancesData.Balances | Foreach-Object {$_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name} | Where-Object {$_ -like "Value in *"} | Sort-Object -Unique
+        $ColumnFormat += $Columns | Foreach-Object {@{Name = "$_"; Expression = "$_"; Align = "right"}}
+        $BalancesData.Balances | Format-Table -Wrap -Property $ColumnFormat
     }
 
-    #Display exchange rates
-    if ($Config.Currency | Where-Object {$_ -ne "BTC" -and $NewRates.$_}) {Write-Host "Exchange rates: 1 BTC = $(($Config.Currency | Where-Object {$_ -ne "BTC" -and $NewRates.$_} | ForEach-Object { "$($_) $($NewRates.$_)"})  -join ' = ')"}
+    #Display exchange rates, get decimal places from $NewRates
+    if (($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) -and $Config.ShowPoolBalancesDetails -and $BalancesData.Rates) {
+        Write-Host "Exchange rates:"
+        $BalancesData.Rates.PSObject.Properties.Name | ForEach-Object {
+            $BalanceCurrency = $_
+            Write-Host "1 $BalanceCurrency = $(($BalancesData.Rates.$_.PSObject.Properties.Name| Where-Object {$_ -ne $BalanceCurrency} | Sort-Object | ForEach-Object {$Digits = ($($NewRates.$_).ToString().Split(".")[1]).length; "$_ " + ("{0:N$($Digits)}" -f [Float]$BalancesData.Rates.$BalanceCurrency.$_)}) -join " = ")"
+        }
+    }
+    else {
+        if ($Config.Currency | Where-Object {$_ -ne "BTC" -and $NewRates.$_}) {Write-Host "Exchange rates: 1 BTC = $(($Config.Currency | Where-Object {$_ -ne "BTC" -and $NewRates.$_} | ForEach-Object {$Digits = ($($NewRates.$_).ToString().Split(".")[1]).length; "$_ " + ("{0:N$($Digits)}" -f [Float]$NewRates.$_)}) -join " = ")"}
+    }
 
     #Give API access to WatchdogTimers information
     $API.WatchdogTimers = $WatchdogTimers
