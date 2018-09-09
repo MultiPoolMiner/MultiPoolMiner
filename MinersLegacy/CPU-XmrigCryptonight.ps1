@@ -45,7 +45,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Params = $_.Params
 
         if ($Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" -and $Miner_Device) {
-            $ConfigFileName = "$Miner_Name-$($Pools.$Algorithm_Norm.Name)-$($Pools.$Algorithm_Norm.Algorithm).txt"
+            $ConfigFileName = "$($Pools.$Algorithm_Norm.Name)-$($Pools.$Algorithm_Norm.Algorithm)-$($Miner_Name -Split '-' | Select-Object -Last 1).txt"
             $Arguments = [PSCustomObject]@{
                 ConfigFile = [PSCustomObject]@{
                     FileName = $ConfigFileName
