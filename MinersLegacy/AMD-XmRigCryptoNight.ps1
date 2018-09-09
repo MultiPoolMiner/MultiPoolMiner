@@ -1,5 +1,11 @@
 using module ..\Include.psm1
 
+#XmRig AMD / Nvidia requires the explicit use of detailled thread information in the config file
+#these values are different for each card model nad algorithm
+#API will check for hw change and briefly start miner with an incomplete dummy config
+#The miner binary it will add the thread element for all installed cards to the config file on first start
+#Once this file is current we can retrieve the threads info
+
 param(
     [PSCustomObject]$Pools,
     [PSCustomObject]$Stats,
@@ -77,20 +83,10 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                             "user"      = "$($Pools.$Algorithm_Norm.User)"
                             "rig-id"    = "$WorkerName"
                         })
-                        "threads" = @($Miner_Device.Type_PlatformId_Index | Foreach-Object {
-                            [PSCustomObject]@{
-                                "affine_to_cpu" = $false
-                                "comp_mode"     = $true
-                                "index"         = $_
-                                "intensity"     = 768
-                                "mem_chunk"     = 2
-                                "strided_index" = 1
-                                "worksize"      = [Int]8
-                            }
-                        })
                     }
                 }
                 Commands = " --config=$ConfigFileName --opencl-devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')$Params$CommonCommands"
+                Devices  = @($Miner_Device.Type_Vendor_Index)
             }
 
             [PSCustomObject]@{
