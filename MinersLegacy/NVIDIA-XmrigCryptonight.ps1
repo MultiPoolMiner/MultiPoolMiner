@@ -1,5 +1,11 @@
 using module ..\Include.psm1
 
+#XmRig AMD / Nvidia requires the explicit use of detailled thread information in the config file
+#these values are different for each card model nad algorithm
+#API will check for hw change and briefly start miner with an incomplete dummy config
+#The miner binary it will add the thread element for all installed cards to the config file on first start
+#Once this file is current we can retrieve the threads info
+
 param(
     [PSCustomObject]$Pools,
     [PSCustomObject]$Stats,
@@ -49,6 +55,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
         if ($Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" -and $Miner_Device) {
+
             $ConfigFileName = "$Miner_Name-$($Pools.$Algorithm_Norm.Name)-$($Pools.$Algorithm_Norm.Algorithm).txt"
             $Arguments = [PSCustomObject]@{
                 ConfigFile = [PSCustomObject]@{
@@ -61,14 +68,13 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                             "worker-id"    = $null
                         }
                         "background"   = $false
-                        "cuda-bfactor" = 10
+                        "cuda-bfactor" = 11
                         "colors"       = $true
                         "donate-level" = 1
                         "log-file"     = $null
                         "print-time"   = 5
                         "retries"      = 5
                         "retry-pause"  = 5
-                        "threads"      = @()
                         "pools"        = @([PSCustomObject]@{
                             "keepalive" = $true
                             "nicehash"  = $(if ($Pools.$Algorithm_Norm.Name -eq "Nicehash") {$true} else {$false})
@@ -80,6 +86,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                     }
                 }
                 Commands = " --config=$ConfigFileName --cuda-devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')$Params$CommonCommands"
+                Devices  = @($Miner_Device.Type_Vendor_Index)
             }
 
             [PSCustomObject]@{
