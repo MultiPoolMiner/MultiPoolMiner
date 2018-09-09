@@ -26,6 +26,8 @@ param(
     [Alias("Device", "Type")]
     [Array]$DeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.
     [Parameter(Mandatory = $false)]
+    [Array]$ExcludeDeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc. will not be used for mining
+    [Parameter(Mandatory = $false)]
     [Array]$Algorithm = @(), #i.e. Ethash, Equihash, CryptoNightV7 etc.
     [Parameter(Mandatory = $false)]
     [Alias("Miner")]
@@ -71,6 +73,8 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$ShowPoolBalancesExcludedPools = $false,    
     [Parameter(Mandatory = $false)]
+    [Switch]$ShowPoolBalancesDetails = $false,
+    [Parameter(Mandatory = $false)]
     [String]$ConfigFile = ".\Config.txt"
 )
 
@@ -113,23 +117,52 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 
 #Append .txt extension if no extension is given
 if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
+
+$Config = [PSCustomObject]@{}
 if (Test-Path $ConfigFile) {
-    Write-Log -Level Info "Using configuration file ($(Resolve-Path $ConfigFile)). "
+    $ConfigFile = Resolve-Path $ConfigFile
+    Write-Log -Level Info "Using configuration file ($ConfigFile). "
+    $Config = Get-Content $ConfigFile | ConvertFrom-Json
+    $ConfigOld = $Config.PSObject.Copy() #$Config = $ConfigOld does not work (https://stackoverflow.com/questions/9581568/how-to-create-new-clone-instance-of-psobject-object)
+
+    #Add variables that do not have an entry in config file
+    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile" -and (Get-Variable $_ -ErrorAction SilentlyContinue)} | ForEach-Object {
+        $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
+    }
+
+    $Config | Add-Member VersionCompatibility $Version -Force
+    $Config | Add-Member Pools ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
+    $Config | Add-Member Miners ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
+
+    if (($Config | ConvertTo-Json -Depth 10 -Compress) -ne ($ConfigOld | ConvertTo-Json -Depth 10 -Compress)) {
+        #Update existing config file
+        Try {
+            $Config | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -Encoding utf8 -Force
+            Write-Log -Level Info "Updating config file ($ConfigFile); adding missing defaults. "
+        }
+        Catch {
+            Write-Log -Level Error "Error updating config file ($ConfigFile). Cannot continue. "
+            Start-Sleep 10
+            Exit
+        }
+    }
 }
 else {
     #Create new config file: Read command line parameters except ConfigFile
-    $Config = [PSCustomObject]@{}
-    $Config | Add-Member VersionCompatibility $Version
-    $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
+    $MyInvocation.MyCommand.Parameters.Keys | Sort-Object | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
         if (Get-Variable $_ -ErrorAction SilentlyContinue) {
             $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
         }
     }
+
+    $Config | Add-Member VersionCompatibility $Version
     $Config | Add-Member Pools ([PSCustomObject]@{})
     $Config | Add-Member Miners ([PSCustomObject]@{})
+
     Try {
-        $Config | ConvertTo-Json | Set-Content $ConfigFile -Encoding utf8
-        Write-Log -Level Info -Message "No valid config file found. Creating new config file ($(Resolve-Path $ConfigFile)) using defaults. "
+        $Config | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -Encoding utf8 -Force
+        $ConfigFile = Resolve-Path $ConfigFile
+        Write-Log -Level Info -Message "No valid config file found. Creating new config file ($ConfigFile) using defaults. "
     }
     Catch {
         Write-Log -Level Error "Error writing config file ($($ConfigFile)). Cannot continue. "
@@ -155,19 +188,25 @@ Start-APIServer
 $API.Version = $Version
 
 while ($true) {
-    $ConfigBackup = $Config
-    #Load the config, read command line parameters except ConfigFile, use default values for those that are not in command line
-    $Parameters = @{}
-    $Config = Get-ChildItemContent $ConfigFile -Parameters $Parameters | Select-Object -ExpandProperty Content
+    $ConfigBackup = $Config.PSObject.Copy()
+    #Add existing variables to $Parameters so they are available in psm1
+    $Config_Parameters = @{}
+    $Config = Get-Content $ConfigFile | ConvertFrom-Json
+    $ConfigBackup | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
+        if ($ConfigBackup.$_ -like "`$*") {
+            #First run read values from command line
+            $Config_Parameters.Add($_, (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
+        }
+        else {
+            $Config_Parameters.Add($_, $ConfigBackup.$_)
+        }
+    }
+    $Config = [PSCustomObject]@{}
+    $Config = Get-ChildItemContent $ConfigFile -Parameters $Config_Parameters | Select-Object -ExpandProperty Content
 
     #Config file may not contain an entry for all supported parameters, use value from command line, or if empty use default
     $Config | Add-Member Pools ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
     $Config | Add-Member Miners ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
-    $PSBoundParameters.Keys | Where-Object {$_ -ne "ConfigFile"} | ForEach-Object {
-        if (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue) {
-            $Config | Add-member $_ (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue) -ErrorAction SilentlyContinue
-        }
-    }
 
     #Error in config file
     if ($Config -isnot [PSCustomObject]) {
@@ -199,7 +238,7 @@ while ($true) {
 
     # Copy the user's config before changing anything for donation runs
     # This is used when getting pool balances so it doesn't get pool balances of the donation address instead
-    $UserConfig = $Config
+    $UserConfig = $Config.PSObject.Copy()
 
     #Activate or deactivate donation
     if ($Config.Donate -lt 10) {$Config.Donate = 10}
@@ -225,7 +264,7 @@ while ($true) {
     $API.Config = $Config
 
     #Clear pool cache if the pool configuration has changed
-    if (($ConfigBackup.Pools | ConvertTo-Json -Compress) -ne ($Config.Pools | ConvertTo-Json -Compress)) {$AllPools = $null}
+    if ((($ConfigBackup.Pools | ConvertTo-Json -Compress -Depth 10) -ne ($Config.Pools | ConvertTo-Json -Compress -Depth 10)) -or ($ConfigBackup.PoolName -ne $Config.PoolName) -or ($ConfigBackup.ExcludePoolName -ne $Config.ExcludePoolName)) {$AllPools = $null}
 
     if ($Config.Proxy) {$PSDefaultParameterValues["*:Proxy"] = $Config.Proxy}
     else {$PSDefaultParameterValues.Remove("*:Proxy")}
@@ -256,14 +295,13 @@ while ($true) {
     #Update the pool balances
     if ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) {
         Write-Log "Getting pool balances. "
-        $Balances = Get-Balance -Config $UserConfig -Rates $Rates
+        $BalancesData = Get-Balance -Config $UserConfig -NewRates $NewRates
 
         #Give API access to the pool balances
-        $API.Balances = $Balances
+        $API.Balances = $BalancesData.Balances
     }
-
     #Load information about the devices
-    $Devices = @(Get-Device $Config.DeviceName | Select-Object)
+    $Devices = @(Get-Device $Config.DeviceName $Config.ExcludeDeviceName | Select-Object)
 
     #Give API access to the device information
     $API.Devices = $Devices
@@ -625,7 +663,7 @@ while ($true) {
         @{Label = "Pool[Fee]"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {if ($_.CoinName) {"$($_.Name)-$($_.CoinName)$("[{0:P2}]" -f [Double]$_.Fee)"}else {"$($_.Name)$("[{0:P2}]" -f [Double]$_.Fee)"}}}}
     ) | Out-Host
 
-    #Display benchmarking progres
+    #Display benchmarking progress
     if ($MinersNeedingBenchmark.count -gt 0) {
         Write-Log -Level Warn "Benchmarking in progress: $($MinersNeedingBenchmark.count) miner$(if ($MinersNeedingBenchmark.count -gt 1){'s'}) left to benchmark."
     }
@@ -676,11 +714,30 @@ while ($true) {
     #Display pool balances, formatting it to show all the user specified currencies
     if ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) {
         Write-Host "Pool Balances: "
-        $Balances | Format-Table -Wrap Name, Total_*
+        $Columns = @()
+        $ColumnFormat = [Array]@{Name = "Name"; Expression = "Name"}
+        if ($Config.ShowPoolBalancesDetails) {
+            $Columns += $BalancesData.Balances | Foreach-Object {$_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name} | Where-Object {$_ -like "Balance (*"} | Sort-Object -Unique
+        }
+        else {
+            $ColumnFormat += @{Name = "Balance"; Expression = {$_.Total}}
+        }
+        $Columns += $BalancesData.Balances | Foreach-Object {$_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name} | Where-Object {$_ -like "Value in *"} | Sort-Object -Unique
+        $ColumnFormat += $Columns | Foreach-Object {@{Name = "$_"; Expression = "$_"; Align = "right"}}
+        $BalancesData.Balances | Format-Table -Wrap -Property $ColumnFormat
     }
 
-    #Display exchange rates
-    if ($Config.Currency | Where-Object {$_ -ne "BTC" -and $NewRates.$_}) {Write-Host "Exchange rates: 1 BTC = $(($Config.Currency | Where-Object {$_ -ne "BTC" -and $NewRates.$_} | ForEach-Object { "$($_) $($NewRates.$_)"})  -join ' = ')"}
+    #Display exchange rates, get decimal places from $NewRates
+    if (($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) -and $Config.ShowPoolBalancesDetails -and $BalancesData.Rates) {
+        Write-Host "Exchange rates:"
+        $BalancesData.Rates.PSObject.Properties.Name | ForEach-Object {
+            $BalanceCurrency = $_
+            Write-Host "1 $BalanceCurrency = $(($BalancesData.Rates.$_.PSObject.Properties.Name| Where-Object {$_ -ne $BalanceCurrency} | Sort-Object | ForEach-Object {$Digits = ($($NewRates.$_).ToString().Split(".")[1]).length; "$_ " + ("{0:N$($Digits)}" -f [Float]$BalancesData.Rates.$BalanceCurrency.$_)}) -join " = ")"
+        }
+    }
+    else {
+        if ($Config.Currency | Where-Object {$_ -ne "BTC" -and $NewRates.$_}) {Write-Host "Exchange rates: 1 BTC = $(($Config.Currency | Where-Object {$_ -ne "BTC" -and $NewRates.$_} | ForEach-Object {$Digits = ($($NewRates.$_).ToString().Split(".")[1]).length; "$_ " + ("{0:N$($Digits)}" -f [Float]$NewRates.$_)}) -join " = ")"}
+    }
 
     #Give API access to WatchdogTimers information
     $API.WatchdogTimers = $WatchdogTimers

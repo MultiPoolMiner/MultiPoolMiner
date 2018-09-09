@@ -4,36 +4,57 @@ Add-Type -Path .\OpenCL\*.cs
 
 function Get-Balance {
     [CmdletBinding()]
-    param($Config, $Rates)
+    param($Config, $NewRates)
 
-    # If rates weren't specified, just use 1 BTC = 1 BTC
-    if ($Rates -eq $Null) {
-        $Rates = [PSCustomObject]@{BTC = [Double]1}
-    }
-
+    $Data = [PSCustomObject]@{}
+    
     $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
-            Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
-        } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru})
+        Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
+    } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | Sort-Object Name)
 
-    # Add total of totals
-    $Balances += [PSCustomObject]@{
-        total = ($Balances.total | Measure-Object -Sum).sum
-        Name = "*Total*"
+    #Get exchgange rates for all payout currencies
+    $CurrenciesWithBalances = @($Balances.currency | Sort-Object -Unique)
+    try {
+        $Rates = Invoke-RestMethod "https://min-api.cryptocompare.com/data/pricemulti?fsyms=$($CurrenciesWithBalances -join ",")&tsyms=$($Config.Currency -join ",")&extraParams=http://multipoolminer.io" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    }
+    catch {
+        Write-Log -Level Warn "Pool API (CryptoCompare) has failed - cannot convert balances to other currencies. "
+        Return $Balances
     }
 
-    # Add local currency values
-    $Balances | Foreach-Object {
-        Foreach ($Rate in ($Rates.PSObject.Properties)) {
-            # Round BTC to 8 decimals, everything else is based on BTC value
-            if ($Rate.Name -eq "BTC") {
-                $_ | Add-Member "Total_BTC" ("{0:N8}" -f ([Double]$Rate.Value * $_.total))
-            }
-            else {
-                $_ | Add-Member "Total_$($Rate.Name)" (ConvertTo-LocalCurrency $($_.total) $Rate.Value -Offset 4)
+    #Add total of totals
+    $Totals = [PSCustomObject]@{
+        Name  = "*Total*"
+    }
+    #Add Balance (in currency)
+    $Rates.PSObject.Properties.Name | ForEach-Object {
+        $Currency = $_.ToUpper()
+        $Balances | Foreach-Object {
+            if ($NewRates.$Currency -ne $null) {$Digits = ($($NewRates.$Currency).ToString().Split(".")[1]).length}else {$Digits = 8}
+            $_.Total = ("{0:N$($Digits)}" -f ([Float]$($_.Total)))
+            if ($Currency -eq $_.Currency) {
+                $_ | Add-Member "Balance ($Currency)" $_.Total
             }
         }
+        if (($Balances."Balance ($Currency)" | Measure-Object -Sum).sum) {$Totals | Add-Member "Balance ($Currency)" ("{0:N$($Digits)}" -f ([Float]$($Balances."Balance ($Currency)" | Measure-Object -Sum).sum))}
     }
-    Return $Balances
+
+    #Add converted values
+    $Config.Currency | ForEach-Object {
+        $Currency = $_.ToUpper()
+        #Get number of digits from $NewRates
+        if ($NewRates.$Currency -ne $null) {$Digits = ($($NewRates.$Currency).ToString().Split(".")[1]).length}else {$Digits = 8}
+        $Balances | Foreach-Object {
+            $_ | Add-Member "Value in $Currency" $(if ($Rates.$($_.Currency).$Currency) {("{0:N$($Digits)}" -f ([Float]$_.Total * [Float]$Rates.$($_.Currency).$Currency))}else {"unknown"}) -Force
+        }
+        if (($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)  {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ([Float]$($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)) -Force}
+    }
+    $Balances += $Totals
+    
+    $Data | Add-Member Balances $Balances
+    $Data | Add-Member Rates $Rates
+
+    Return $Data
 }
 
 function Write-Log {
@@ -116,9 +137,10 @@ function Set-Stat {
     $Path = "Stats\$Name.txt"
     $SmallestValue = 1E-20
 
+    $Stat = Get-Content $Path -ErrorAction SilentlyContinue
+    
     try {
-        $Stat = Get-Content $Path -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-
+        $Stat = $Stat | ConvertFrom-Json -ErrorAction Stop
         $Stat = [PSCustomObject]@{
             Live = [Double]$Stat.Live
             Minute = [Double]$Stat.Minute
@@ -243,10 +265,18 @@ function Get-Stat {
     else {
         # Return all stats
         $Stats = [PSCustomObject]@{}
-        Get-ChildItem "Stats" | ForEach-Object {
+        Get-ChildItem "Stats" -File | ForEach-Object {
             $BaseName = $_.BaseName
-            $_ | Get-Content | ConvertFrom-Json -ErrorAction SilentlyContinue | ForEach-Object {
-                $Stats | Add-Member $BaseName $_
+            $FullName = $_.FullName
+            try {
+                $_ | Get-Content -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop | ForEach-Object {
+                    $Stats | Add-Member $BaseName $_
+                }
+            }
+            catch {
+                #Remove broken stat file
+                Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
+                Remove-Item -Path  $FullName -Force -Confirm:$false
             }
         }
         Return $Stats
@@ -444,6 +474,35 @@ function Expand-WebRequest {
     }
 }
 
+function Get-TCPResponse {
+    [cmdletbinding()]
+    Param (        
+        [Parameter(Mandatory = $true)]
+        $Server = "localhost", 
+        [Parameter(Mandatory = $true)]
+        $Port,
+        [Parameter(Mandatory = $true)]
+        $Timeout = 100
+    )
+
+    try {
+        $Response = ""
+        $Client = New-Object System.Net.Sockets.TCPClient $Server, $Port
+        Start-Sleep -Milliseconds $TimeOut
+        if ([int64]$Client.Available -gt 0) {
+            $Stream = $Client.GetStream()
+            $BindResponseBuffer = New-Object Byte[] -ArgumentList $Client.Available
+            $Read = $Stream.Read($BindResponseBuffer, 0, $BindResponseBuffer.count)  
+            $Response = ($BindResponseBuffer | ForEach {[char][int]$_}) -join ''
+        }
+    }
+    finally {
+        if ($Client) {$Client.Close()}
+    }
+
+    $Response
+}
+
 function Invoke-TcpRequest {
     [CmdletBinding()]
     param(
@@ -485,6 +544,8 @@ function Get-Device {
         [Parameter(Mandatory = $false)]
         [String[]]$Name = @(),
         [Parameter(Mandatory = $false)]
+        [String[]]$ExcludeName = @(),
+        [Parameter(Mandatory = $false)]
         [Switch]$Refresh = $false
     )
 
@@ -502,13 +563,29 @@ function Get-Device {
         }
     }
 
+    if ($ExcludeName) {
+        if (-not $DeviceList) {$DeviceList = Get-Content "Devices.txt" | ConvertFrom-Json}
+        $ExcludeName_Devices = $ExcludeName | ForEach-Object {
+            $ExcludeName_Split = $_ -split '#'
+            $ExcludeName_Split = @($ExcludeName_Split | Select-Object -First 1) + @($ExcludeName_Split | Select-Object -Skip 1 | ForEach-Object {[Int]$_})
+            $ExcludeName_Split += @("*") * (100 - $ExcludeName_Split.Count)
+
+            $ExcludeName_Device = $DeviceList.("{0}" -f $ExcludeName_Split) | Select-Object *
+            $ExcludeName_Device | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$ExcludeName_Device.$_ = $ExcludeName_Device.$_ -f $ExcludeName_Split}
+
+            $ExcludeName_Device
+        }
+    }
+
     # Try to get cached devices first to improve performance
     if ((Test-Path Variable:Script:CachedDevices) -and -not $Refresh) {
         $Devices = $CachedDevices
         $Devices | Foreach-Object {
             $Device = $_
             if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
-                $Device
+                if ((-not $ExcludeNameName) -or ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -notlike ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
+                    $Device
+                }
             }
         }
         return
@@ -542,7 +619,9 @@ function Get-Device {
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
-                    $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+                    if ((-not $ExcludeName) -or ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -notlike ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
+                        $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+                    }
                 }
 
                 if (-not $Type_PlatformId_Index."$($Device_OpenCL.Type)") {
@@ -586,7 +665,9 @@ function Get-Device {
         }
 
         if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
-            $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+            if ((-not $ExcludeName) -or ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -notlike ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
+                $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+            }
         }
 
         $CPUIndex++
