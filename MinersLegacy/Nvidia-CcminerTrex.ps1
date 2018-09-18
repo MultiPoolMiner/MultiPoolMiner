@@ -8,13 +8,14 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-CcminerTrex\t-rex.exe"
-$HashSHA256 = "CD742EED2E43058BD0443353831E79916EA091ABF110EB1383D75DC6CD873974"
-$Uri = "https://github.com/paulpoco/MinerFiles/raw/master/t-rex-0.6.4-win-cuda9.1.zip"
+$HashSHA256 = "499A25FAA5DF87C8353AEB707C1514E74F22A3BE2508075D08830013B5FECF6F"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/T-rex/t-rex-0.6.6-win-cuda9.1.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4432704.0"
 $Port = "40{0:d2}"
 
 $Commands = [PSCustomObject]@{
     "balloon"   = "" #Balloon, New in 0.6.2
+    "bcd"       = "" #BitcoinDiamond, New in 0.6.5
     "bitcore"   = "" #Bitcore, New in 0.6.1
     "c11"       = "" #C11
     "hsr"       = "" #HSR
