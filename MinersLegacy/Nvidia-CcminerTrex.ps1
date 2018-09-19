@@ -8,16 +8,18 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-CcminerTrex\t-rex.exe"
-$HashSHA256 = "2E51EE7F02A75DEED574483089A1EC3F7F876A15628A11208D49322F7C3A677E"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/T-rex/t-rex-0.6.3-win-cuda9.1.zip"
+$HashSHA256 = "499A25FAA5DF87C8353AEB707C1514E74F22A3BE2508075D08830013B5FECF6F"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/T-rex/t-rex-0.6.6-win-cuda9.1.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4432704.0"
 $Port = "40{0:d2}"
 
 $Commands = [PSCustomObject]@{
     "balloon"   = "" #Balloon, New in 0.6.2
+    "bcd"       = "" #BitcoinDiamond, New in 0.6.5
     "bitcore"   = "" #Bitcore, New in 0.6.1
     "c11"       = "" #C11
     "hsr"       = "" #HSR
+    "hmq1725"   = "" #Hmq1725, New in 0.6.4
     "lyra2z"    = "" #Lyra2z
     "phi"       = "" #Phi
     "polytimos" = "" #Polytimos, New in 0.6.3
