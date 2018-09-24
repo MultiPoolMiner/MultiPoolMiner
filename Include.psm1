@@ -468,7 +468,7 @@ function Expand-WebRequest {
             Rename-Item $Path_Old (Split-Path $Path -Leaf)
         }
         else {
-            Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $true | ForEach-Object {Move-Item (Join-Path $Path_Old $_) $Path_New}
+            Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $true | ForEach-Object {Move-Item $_.FullName $Path_New}
             Remove-Item $Path_Old
         }
     }
