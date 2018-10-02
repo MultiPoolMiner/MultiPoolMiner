@@ -8,14 +8,15 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-CcminerZealot\z-enemy.exe"
-$HashSHA256 = "79F34DBE730606F2D4DB051F3113A80997C575FBC8E67279715DCC683E3FEF04"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-18-cuda9.2_x64.zip"
+$HashSHA256 = "5406805A5AC93EFC5DF7ADAA5BC0985FEABBA51D4A4CA041E6902EBFF73C1C16"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-21-cuda9.2_x64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3378390.0"
 $Port = "40{0:d2}"
 
 $Commands = [PSCustomObject]@{
-    "aeriumx"    = "" #AeriumX, new in 1.11
+    "aergo"      = "" #Aergo, new in 1.11
     "bitcore"    = "" #Bitcore
+    "bcd"        = "" #Bitcoin Diamond, new in 1.20
     "c11"        = "" #C11, new in 1.11
     "hex"        = "" #Hex
     "hsr"        = "" #Hsr, new in 1.15
@@ -40,7 +41,7 @@ $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty
 # Miner requires CUDA 9.2
 $DriverVersion = ((Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
 $RequiredVersion = "9.2.00"
-if ($DriverVersion -and $DriverVersion -lt $RequiredVersion) {
+if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$RequiredVersion) {
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers. "
     return
 }
