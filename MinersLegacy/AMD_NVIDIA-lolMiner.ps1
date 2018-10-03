@@ -55,7 +55,6 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
             $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)    
             $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
-            $Miner_Name = (@($Name) + @("$($Miner_Device.count)x$($Miner_Device.Model_Norm | Sort-Object -unique)") | Select-Object) -join '-'
 
             switch ($Algorithm_Norm) {
                 "Equihash965" {
