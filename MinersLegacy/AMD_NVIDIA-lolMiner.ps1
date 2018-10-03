@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -7,33 +7,36 @@ param(
     [PSCustomObject[]]$Devices
 )
 
-$Path = ".\Bin\AMD_NVIDIA-lolMiner\lolminer.exe"
-$HashSHA256 = "1325784F9A9FF11BB077CC66937B66C28422D4E71DD46AE959CCAD87D7799065"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/lolMiner/lolMiner_v043_Win64.zip"
+$Path = ".\Bin\AMD_NVIDIA-lolMinerEquihash\lolminer.exe"
+$HashSHA256 = "232DCC48979879A20A5FA9A58089854A113C598326F27548F3FFF64C5BEF5D6E"
+$Uri = "https://www.dropbox.com/s/fw9zapm7l4cma1m/lolMiner_v05_Win64.zip?dl=1"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4724735.0"
 $Port = "40{0:d2}"
 
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{Algorithm = "Equihash965";  MinMemGB = 1.8; Fee = 1; Params = ""}
-    [PSCustomObject]@{Algorithm = "Equihash1445"; MinMemGB = 2.1; Fee = 2; Params = ""}
-    [PSCustomObject]@{Algorithm = "Equihash1927"; MinMemGB = 2.7; Fee = 2; Params = ""}
+    [PSCustomObject]@{Algorithm = "Equihash965";  MinMemGB = 0.5; Fee = 1; Params = ""}
+    [PSCustomObject]@{Algorithm = "Equihash1445"; MinMemGB = 3.0; Fee = 2; Params = ""}
+    [PSCustomObject]@{Algorithm = "Equihash1927"; MinMemGB = 4.0; Fee = 2; Params = ""}
+    [PSCustomObject]@{Algorithm = "Equihash2109"; MinMemGB = 1.0; Fee = 2; Params = ""}
 )
 
-$CommonCommands = ""
+$CommonCommands = " --workbatch VERYHIGH"
 
 $Coins = [PSCustomObject]@{
-    "Asofe"       = "ASF"
-    "BitcoinZ"    = "BTCZ"
-    "BitcoinGold" = "BTG"
-    "LitecoinZ"   = "LTZ"
-    "Heptacoin"   = "HEPTA"
-    "MinexCoin"   = "MNX"
-    "SafeCoin"    = "SAFE"
-    "SafeCash"    = "SCASH"
-    "Zelcash"     = "ZEL"
-    "Zero"        = "ZER"
-    "Zerocoin"    = "ZER"
+    "Asofe"        = "ASF"
+    "BitcoinZ"     = "BTCZ"
+    "BitcoinCandy" = "CDY" #new in 0.43b
+    "BitcoinGold"  = "BTG"
+    "BitcoinRM"    = "BCRM" #new in 0.43b
+    "Genesis"      = "GENX"
+    "LitecoinZ"    = "LTZ"
+    "Heptacoin"    = "HEPTA"
+    "MinexCoin"    = "MNX"
+    "SafeCoin"     = "SAFE"
+    "Zelcash"      = "ZEL"
+    "Zero"         = "ZER"
+    "Zerocoin"     = "ZER"
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -52,6 +55,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
             $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)    
             $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
+            $Miner_Name = (@($Name) + @("$($Miner_Device.count)x$($Miner_Device.Model_Norm | Sort-Object -unique)") | Select-Object) -join '-'
 
             switch ($Algorithm_Norm) {
                 "Equihash965" {
@@ -60,7 +64,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 "Equihash1445" {
                     #ZergPool allows pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
                     if ($Pools.$Algorithm_Norm.Name -like "ZergPool*") {
-                        $Coin = "AUTO144"
+                        $Coin = "AUTO144_5"
                     }
                     else {
                         #Coin parameter, different per coin
@@ -70,6 +74,16 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 "Equihash1927" {
                     $Coin = "ZER"
                 }
+                "Equihash2109" {
+                    #ZergPool allows pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
+                    if ($Pools.$Algorithm_Norm.Name -like "ZergPool*") {
+                        $Coin = "AUT210_9"
+                    }
+                    else {
+                        #Coin parameter, different per coin
+                        $Coin = $Coins."$($Pools.$Algorithm_Norm.CoinName)"
+                    }
+                }
             }
 
             if ($Coin) {
@@ -77,10 +91,10 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 #Disable_memcheck
                 if ($Miner_Device.Vendor -eq "NVIDIA Corporation" -and $Algorithm_Norm -ne "Equihash965") {$Params += " -disable_memcheck=1"}
 
-                $ConfigFileName = "$Miner_Name-$($Pools.$Algorithm_Norm.Name)-$($Pools.$Algorithm_Norm.Algorithm).txt"
+                $ConfigFileName = "$Miner_Name-$($Pools.$Algorithm_Norm.Name)-$($Pools.$Algorithm_Norm.Algorithm)-$Coin.txt"
                 $Arguments = [PSCustomObject]@{
                     ConfigFile = [PSCustomObject]@{
-                        FileName = $ConfigFileName
+                        FileName = $ConfigFilename
                         Content  = [PSCustomObject]@{
                             DEFAULT = [PSCustomObject]@{
                                 APIPORT    = $Miner_Port
@@ -96,7 +110,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                             }
                         }
                     }
-                    Commands = "-usercfg=$ConfigFileName -profile=DEFAULT$Params$CommonCommands"
+                    Commands = "--usercfg $ConfigFileName --profile DEFAULT$Params$CommonCommands"
                 }
 
                 [PSCustomObject]@{
