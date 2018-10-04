@@ -195,8 +195,13 @@ while ($true) {
     $ConfigBackup | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
         if ($ConfigBackup.$_ -like "`$*") {
             #First run read values from command line
-            $Config_Parameters.Add($_, (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
-        }
+            if ((Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue).IsPresent -match ".+") {
+                #Convert switch variables to proper $true/$false
+                $Config_Parameters.Add($_, (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue).IsPresent)
+            }
+            else {
+                $Config_Parameters.Add($_, (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
+            }        }
         else {
             $Config_Parameters.Add($_, $ConfigBackup.$_)
         }
