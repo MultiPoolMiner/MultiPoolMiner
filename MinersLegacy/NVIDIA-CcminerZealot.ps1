@@ -8,8 +8,8 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-CcminerZealot\z-enemy.exe"
-$HashSHA256 = "5406805A5AC93EFC5DF7ADAA5BC0985FEABBA51D4A4CA041E6902EBFF73C1C16"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-21-cuda9.2_x64.zip"
+$HashSHA256 = "F389264EF117265F81E30C6EB2BCDE0DF19426D84B9DA00E425D3447258224C0"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-21a-cuda9.2_x64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3378390.0"
 $Port = "40{0:d2}"
 
