@@ -9,8 +9,8 @@ param(
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Path = ".\Bin\NVIDIA-BMiner\BMiner.exe"
-$HashSHA256 = "DF8B41A454AC57A50037A2F333E17104BB901D0F0F66FDA2E2D73CB47160C62D"
-$Uri = "https://www.bminercontent.com/releases/bminer-lite-v10.3.0-c1b9204-amd64.zip"
+$HashSHA256 = "500E65843DF43CBDB9308A551406B4523B111955E8FA1D2A91E07DF680FBC354"
+$Uri = "https://www.bminercontent.com/releases/bminer-lite-v10.4.0-b73432a-amd64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=2519271.1320"
 $Port = "40{0:d2}"
 
@@ -22,11 +22,11 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{MainAlgorithm = "ethash3gb";    MinMemGB = 3; Params = ""} #Ethash3Gb
     [PSCustomObject]@{MainAlgorithm = "ethash";       MinMemGB = 4; Params = ""} #Ethash
     [PSCustomObject]@{MainAlgorithm = "tensority";    MinMemGB = 2; Params = ""} #Bytom
-    [PSCustomObject]@{MainAlgorithm = "ethash3gb"; SecondaryAlgorithm = "blake14r"; MinMemGB = 3; Params = ""} #Ethash3Gb & Blake14r dual mining, auto dual solver and intensity
     [PSCustomObject]@{MainAlgorithm = "ethash2gb"; SecondaryAlgorithm = "blake14r"; MinMemGB = 2; Params = ""} #Ethash2Gb & Blake14r dual mining, auto dual solver and intensity
+    [PSCustomObject]@{MainAlgorithm = "ethash3gb"; SecondaryAlgorithm = "blake14r"; MinMemGB = 3; Params = ""} #Ethash3Gb & Blake14r dual mining, auto dual solver and intensity
     [PSCustomObject]@{MainAlgorithm = "ethash";    SecondaryAlgorithm = "blake14r"; MinMemGB = 4; Params = ""} #Ethash & Blake14r dual mining, auto dual solver and intensity
-    [PSCustomObject]@{MainAlgorithm = "ethash3gb"; SecondaryAlgorithm = "blake2s";  MinMemGB = 3; Params = ""} #Ethash3Gb & Blake14r dual mining, auto dual solver and intensity
     [PSCustomObject]@{MainAlgorithm = "ethash2gb"; SecondaryAlgorithm = "blake2s";  MinMemGB = 2; Params = ""} #Ethash2Gb & Blake14r dual mining, auto dual solver and intensity
+    [PSCustomObject]@{MainAlgorithm = "ethash3gb"; SecondaryAlgorithm = "blake2s";  MinMemGB = 3; Params = ""} #Ethash3Gb & Blake14r dual mining, auto dual solver and intensity
     [PSCustomObject]@{MainAlgorithm = "ethash";    SecondaryAlgorithm = "blake2s";  MinMemGB = 4; Params = ""} #Ethash & Blake14r dual mining, auto dual solver and intensity
 
     #Custom config, manually set dual solver (Values: -1, 0, 1, 2, 3) and secondary intensity (Values: 0 - 300)
@@ -63,13 +63,16 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Arguments_Secondary = ""
         $Main_Algorithm = $_.MainAlgorithm
         $Main_Algorithm_Norm = Get-Algorithm $Main_Algorithm
-        $MinMemGB = $_.MinMemGB
+        $MinMem = $_.MinMemGB * 1GB
 
-        if ($Pools.$Main_Algorithm_Norm.Host -and ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMemGB * 1000000000}))) {
+        if ($Pools.$Main_Algorithm_Norm.Host -and ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMem}))) {
 
             #define --pers for equihash1445
-            $Pers = ""
-            if ($Main_Algorithm -eq "equihash1445") {
+            #ZergPool allows pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
+            if ($Pools.$Algorithm_Norm.Name -like "ZergPool*") {
+                $Pers = "auto"
+            }
+            else {
                 #Pers parameter, can be different per coin
                 $Pers = $Coins."$($Pools.$Main_Algorithm_Norm.CoinName)"
             }
