@@ -48,9 +48,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     $Algorithm_Norm = Get-Algorithm $_
 
     Switch ($Algorithm_Norm) {
-        "PHI"   {$ExtendInterval = 3}
-        "X16R"  {$ExtendInterval = 10}
-        "X16S"  {$ExtendInterval = 10}
+        "X16R"  {$ExtendInterval = 5}
         default {$ExtendInterval = 0}
     }
 

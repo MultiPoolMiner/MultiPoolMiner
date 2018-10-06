@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NVIDIA-Nevermore\ccminer.exe"
 $HashSHA256 = "940EB4C246019216C8F95FFB2F2E65FA147B13A65756A38D660146672E47844B"
@@ -57,8 +57,7 @@ $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty 
     $Algorithm_Norm = Get-Algorithm $_
 
     Switch ($Algorithm_Norm) {
-        "PHI"   {$ExtendInterval = 3}
-        "X16R"  {$ExtendInterval = 10}
+        "X16R"  {$ExtendInterval = 5}
         default {$ExtendInterval = 0}
     }
 

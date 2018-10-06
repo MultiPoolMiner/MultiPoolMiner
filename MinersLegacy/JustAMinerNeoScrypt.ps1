@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 $Path = ".\Bin\NeoScrypt-JAM\hsrminer_neoscrypt_fork_hp.exe"
 $HashSHA256 = "571B1C7D7A0BB9934AAF3E4106C26B7735A004473E9ECD99D35C4E2664487EFF"

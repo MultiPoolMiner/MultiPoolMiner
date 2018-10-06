@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 $Path = ".\Bin\Lyra2RE2-NVIDIA\ccminer.exe"
 $HashSHA256 = "998AEBAA80CD6D2B758A5B4798D6AC929745B88D81735587798F616D7E2F3B23"

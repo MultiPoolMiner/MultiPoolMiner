@@ -61,6 +61,21 @@ $NiceHash_Request.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# alg
                 SSL           = $false
                 Updated       = $Stat.Updated
             }
+            [PSCustomObject]@{
+                Algorithm     = "$($NiceHash_Algorithm_Norm)-NHMP"
+                CoinName      = $NiceHash_Coin
+                Price         = $Stat.Live
+                StablePrice   = $Stat.Week
+                MarginOfError = $Stat.Week_Fluctuation
+                Protocol      = "stratum+tcp"
+                Host          = "nhmp.$($NiceHash_Region.ToLower()).nicehash.com"
+                Port          = 3200
+                User          = "$BTC.$Worker"
+                Pass          = "x"
+                Region        = $NiceHash_Region_Norm
+                SSL           = $false
+                Updated       = $Stat.Updated
+            }
 
             if ($NiceHash_Algorithm_Norm -eq "CryptonightV7" -or $NiceHash_Algorithm_Norm -eq "Equihash") {
                 [PSCustomObject]@{
@@ -71,6 +86,21 @@ $NiceHash_Request.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# alg
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+ssl"
                     Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
+                    Port          = $NiceHash_Port + 30000
+                    User          = "$BTC.$Worker"
+                    Pass          = "x"
+                    Region        = $NiceHash_Region_Norm
+                    SSL           = $true
+                    Updated       = $Stat.Updated
+                }
+                [PSCustomObject]@{
+                    Algorithm     = "$($NiceHash_Algorithm_Norm)-NHMP"
+                    CoinName      = $NiceHash_Coin
+                    Price         = $Stat.Live
+                    StablePrice   = $Stat.Week
+                    MarginOfError = $Stat.Week_Fluctuation
+                    Protocol      = "stratum+ssl"
+                    Host          = "nhmp.$($NiceHash_Region.ToLower()).nicehash.com"
                     Port          = $NiceHash_Port + 30000
                     User          = "$BTC.$Worker"
                     Pass          = "x"

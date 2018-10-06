@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -8,14 +8,15 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-CcminerZealot\z-enemy.exe"
-$HashSHA256 = "0C8F5123092A346FB8A23E7719476853FB4C65B0CB5DA843246303836CDCDB06"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-17-cuda9.2_x64.zip"
+$HashSHA256 = "F389264EF117265F81E30C6EB2BCDE0DF19426D84B9DA00E425D3447258224C0"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-21a-cuda9.2_x64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3378390.0"
 $Port = "40{0:d2}"
 
 $Commands = [PSCustomObject]@{
-    "aeriumx"    = "" #AeriumX, new in 1.11
+    "aergo"      = "" #Aergo, new in 1.11
     "bitcore"    = "" #Bitcore
+    "bcd"        = "" #Bitcoin Diamond, new in 1.20
     "c11"        = "" #C11, new in 1.11
     "hex"        = "" #Hex
     "hsr"        = "" #Hsr, new in 1.15
@@ -40,7 +41,7 @@ $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty
 # Miner requires CUDA 9.2
 $DriverVersion = ((Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
 $RequiredVersion = "9.2.00"
-if ($DriverVersion -and $DriverVersion -lt $RequiredVersion) {
+if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$RequiredVersion) {
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers. "
     return
 }
@@ -57,22 +58,22 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm $_
 
         Switch ($Algorithm_Norm) {
-        	"X16R"  {$ExtendInterval = 10}
-        	default {$ExtendInterval = 0}
+            "X16R"  {$ExtendInterval = 5}
+            default {$ExtendInterval = 0}
         }
 
         [PSCustomObject]@{
-            Name             = $Miner_Name
-            DeviceName       = $Miner_Device.Name
-            Path             = $Path
-            HashSHA256       = $HashSHA256
-            Arguments        = ("-a $_ -b 127.0.0.1:$($Miner_Port) -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$CommonCommands -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ',')" -replace "\s+", " ").trim()
-            HashRates        = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
-            API              = "Ccminer"
-            Port             = $Miner_Port
-            URI              = $Uri
-            Fees             = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
-            ExtendInterval   = $ExtendInterval
+            Name           = $Miner_Name
+            DeviceName     = $Miner_Device.Name
+            Path           = $Path
+            HashSHA256     = $HashSHA256
+            Arguments      = ("-a $_ -b 127.0.0.1:$($Miner_Port) -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$CommonCommands -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ',')" -replace "\s+", " ").trim()
+            HashRates      = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
+            API            = "Ccminer"
+            Port           = $Miner_Port
+            URI            = $Uri
+            Fees           = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
+            ExtendInterval = $ExtendInterval
         }
     } 
 }

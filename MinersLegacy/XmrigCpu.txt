@@ -1,4 +1,4 @@
-[
+﻿[
     {
         "Type":  "CPU",
         "Path":  ".\\Bin\\CryptoNight-CPU\\xmrig.exe",

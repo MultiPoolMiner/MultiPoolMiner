@@ -1,6 +1,66 @@
-Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+﻿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
+
+function Get-CommandPerDevice {
+
+# rewrites the command parameters
+# if a parameter has multiple values, only the values for the available devices are returned
+# parameters with a single value are valid for all devices and remain untouched
+# supported parameter syntax:
+#$Command = ",c=BTC -9 1  -y  2 -a 00,11,22,33,44,55  -b=00,11,22,33,44,55 --c==00,11,22,33,44,55 --d --e=00,11,22,33,44,55 -f -g 00 11 22 33 44 55 ,c=LTC  -h 00 11 22 33 44 55 -i=,11,,33,,55 --j=00,11,,,44,55 --k==00,,,33,44,55 -l -zzz=0123,1234,2345,3456,4567,5678,6789 -u 0  --p all ,something=withcomma blah *blah *blah"
+#$Devices = @(0;1;4)
+# Result: ",c=BTC -9 1  -y  2 -a 00,11,44  -b=00,11,44 --c==00,11,44 --d --e=00,11,44 -f -g 00 11 44 ,c=LTC  -h 00 11 44 -i=,11 --j=00,11,44 --k==00,,44 -l -zzz=0123,1234,4567 -u 0  --p all ,something=withcomma blah *blah *blah"
+#$Devices = @(1)
+# Result: ",c=BTC -9 1  -y  2 -a 11  -b=11 --c==11 --d --e=11 -f -g 11 ,c=LTC  -h 11 -i=11 --j=11 --k== -l -zzz=1234 -u 0  --p all ,something=withcomma blah *blah *blah"
+#$Devices = @(0;2;9)
+# Result: ",c=BTC -9 1  -y  2 -a 00,22  -b=00,22 --c==00,22 --d --e=00,22 -f -g 00 22 ,c=LTC  -h 00 22 -i= --j=00 --k==00 -l -zzz=0123,2345 -u 0  --p all ,something=withcomma blah *blah *blah"
+
+[CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [String]$Command,
+        [Parameter(Mandatory = $false)]
+        [Int[]]$Devices
+    )
+
+    $CommandPerDevice = ""
+
+    $Command -split "(?=\s{1,}--|\s{1,}-| ,|^,)" | ForEach-Object {
+        $Token = $_
+        $Prefix = $null
+        $ParameterValueSeparator = $null
+        $ValueSeparator = $null
+        $Values = $null
+
+        if ($Token.TrimStart() -match "(?:^[-=]{1,})") { # supported prefix characters are listed in brackets: [-=]{1,}
+
+            $Prefix = "$($Token -split $Matches[0] | Select -Index 0)$($Matches[0])"
+            $Token = $Token -split $Matches[0] | Select -Last 1
+
+            if ($Token -match "(?:[ =]{1,})") { # supported separators are listed in brackets: [ =]{1,}
+                $ParameterValueSeparator = $Matches[0]
+                $Parameter = $Token -split $ParameterValueSeparator | Select -Index 0
+                $Values = $Token.Substring(("$($Parameter)$($ParameterValueSeparator)").length)
+
+                if ($Values -match "(?:[,; ]{1})") { # supported separators are listed in brackets: [,; ]{1}
+                    $ValueSeparator = $Matches[0]
+                    $RelevantValues = @()
+                    $Devices | Foreach-Object {
+                        if ($Values.Split($ValueSeparator) | Select -Index $_) {$RelevantValues += ($Values.Split($ValueSeparator) | Select -Index $_)}
+                        else {$RelevantValues += ""}
+                    }                    
+                    $CommandPerDevice += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$(($RelevantValues -join $ValueSeparator).TrimEnd($ValueSeparator))"
+                }
+                else {$CommandPerDevice += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$($Values)"}
+            }
+            else {$CommandPerDevice += "$($Prefix)$($Token)"}
+        }
+        else {$CommandPerDevice += $Token}
+    }
+    $CommandPerDevice
+}
 
 function Get-Balance {
     [CmdletBinding()]
@@ -78,7 +138,7 @@ function Write-Log {
         $filename = ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd").txt"
         $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
-        if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
+        if (-not (Test-Path "Stats" -PathType Container)) {New-Item "Stats" -ItemType "directory" | Out-Null}
 
         switch ($Level) {
             'Error' {
@@ -206,7 +266,7 @@ function Set-Stat {
         }
     }
     catch {
-        if (Test-Path $Path) {Write-Log -Level Warn "Stat file ($Name) is corrupt and will be reset. "}
+        if (Test-Path $Path -PathType Leaf) {Write-Log -Level Warn "Stat file ($Name) is corrupt and will be reset. "}
 
         $Stat = [PSCustomObject]@{
             Live = $Value
@@ -227,7 +287,7 @@ function Set-Stat {
         }
     }
 
-    if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
+    if (-not (Test-Path "Stats" -PathType Container)) {New-Item "Stats" -ItemType "directory" | Out-Null}
     [PSCustomObject]@{
         Live = [Decimal]$Stat.Live
         Minute = [Decimal]$Stat.Minute
@@ -256,7 +316,7 @@ function Get-Stat {
         [String]$Name
     )
 
-    if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
+    if (-not (Test-Path "Stats" -PathType Container)) {New-Item "Stats" -ItemType "directory" | Out-Null}
 
     if ($Name) {
         # Return single requested stat
@@ -446,10 +506,10 @@ function Expand-WebRequest {
     [Environment]::CurrentDirectory = $ExecutionContext.SessionState.Path.CurrentFileSystemLocation
 
     if (-not $Path) {$Path = Join-Path ".\Downloads" ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName}
-    if (-not (Test-Path ".\Downloads")) {New-Item "Downloads" -ItemType "directory" | Out-Null}
+    if (-not (Test-Path ".\Downloads" -PathType Container)) {New-Item "Downloads" -ItemType "directory" | Out-Null}
     $FileName = Join-Path ".\Downloads" (Split-Path $Uri -Leaf)
 
-    if (Test-Path $FileName) {Remove-Item $FileName}
+    if (Test-Path $FileName -PathType Leaf) {Remove-Item $FileName}
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
 
@@ -457,19 +517,24 @@ function Expand-WebRequest {
         Start-Process $FileName "-qb" -Wait
     }
     else {
-        $Path_Old = (Join-Path (Split-Path $Path) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
-        $Path_New = (Join-Path (Split-Path $Path) (Split-Path $Path -Leaf))
+        $Path_Old = (Join-Path (Split-Path (Split-Path $Path)) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
+        $Path_New = Split-Path $Path
 
-        if (Test-Path $Path_Old) {Remove-Item $Path_Old -Recurse -Force}
-        Start-Process "7z" "x `"$([IO.Path]::GetFullPath($FileName))`" -o`"$([IO.Path]::GetFullPath($Path_Old))`" -y -spe" -Wait
+        if (Test-Path $Path_Old -PathType Container) {Remove-Item $Path_Old -Recurse -Force}
+        Start-Process "7z" "x `"$([IO.Path]::GetFullPath($FileName))`" -o`"$([IO.Path]::GetFullPath($Path_Old))`" -y -spe" -Wait -WindowStyle Hidden
 
-        if (Test-Path $Path_New) {Remove-Item $Path_New -Recurse -Force}
-        if (Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $false) {
-            Rename-Item $Path_Old (Split-Path $Path -Leaf)
+        if (Test-Path $Path_New -PathType Container) {Remove-Item $Path_New -Recurse -Force}
+
+        While (Get-ChildItem $Path_Old | Where-Object {$_.PSIsContainer -EQ $true -and (-not (Test-Path (Join-Path $Path_Old (Split-Path $Path -Leaf)) -PathType Leaf))}) {
+            Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $true | ForEach-Object {$Path_Old = (Join-Path $Path_Old $_)}
+        }
+        if (Test-Path (Join-Path $Path_Old (Split-Path $Path -Leaf)) -PathType Leaf) {
+            Move-Item $Path_Old $Path_New -PassThru | ForEach-Object -Process {$_.LastWritetime = Get-Date}
+            $Path_Old = (Join-Path (Split-Path (Split-Path $Path)) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
+            if (Test-Path $Path_Old -PathType Container) {Remove-Item $Path_Old -Recurse -Force}
         }
         else {
-            Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $true | ForEach-Object {Move-Item $_.FullName $Path_New}
-            Remove-Item $Path_Old
+            Throw "Cannot find $($Path). "
         }
     }
 }
@@ -610,12 +675,21 @@ function Get-Device {
                     PlatformId_Index = [Int]$PlatformId_Index."$($PlatformId)"
                     Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
                     Vendor = [String]$Device_OpenCL.Vendor
+                    Vendor_ShortName = $(Switch ([String]$Device_OpenCL.Vendor)
+                        {
+                        "Advanced Micro Devices, Inc." {"AMD"}
+                        "Intel(R) Corporation" {"INTEL"}
+                        "NVIDIA Corporation" {"NVIDIA"}
+                        default {[String]$Device_OpenCL.Vendor}
+                        }
+                    )
                     Vendor_Index = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
                     Type_Vendor_Index = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
                     Type = [String]$Device_OpenCL.Type
                     Type_Index = [Int]$Type_Index."$($Device_OpenCL.Type)"
                     OpenCL = $Device_OpenCL
-                    Model = [String]$Device_OpenCL.Name
+                    Model = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
+                    Model_Norm = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
@@ -657,11 +731,13 @@ function Get-Device {
         $Device = [PSCustomObject]@{
             Index = [Int]$Index
             Vendor = $CPUInfo.Manufacturer
+            Vendor_ShortName = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") {"INTEL"} else {"AMD"})
             Type_Vendor_Index = $CPUIndex
             Type = "Cpu"
             Type_Index = $CPUIndex
             CIM = $CPUInfo
             Model = $CPUInfo.Name
+            Model_Norm = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
         }
 
         if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
