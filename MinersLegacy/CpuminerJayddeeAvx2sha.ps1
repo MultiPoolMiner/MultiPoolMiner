@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 $Path = ".\Bin\CPU-JayDDee\cpuminer-avx2-sha.exe"
 $HashSHA256 = "188066A1767071CEF10D74DFA8A0F629FCACBDF28C98E1D2DAA89519F923D415"
