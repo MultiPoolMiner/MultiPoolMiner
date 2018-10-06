@@ -41,15 +41,16 @@ $Commands = [PSCustomObject[]]@(
 $CommonCommands = " -watchdog=false -no-runtime-info -nofee -max-temperature 0"
 
 $Coins = [PSCustomObject]@{
-    "Aion"        = " --pers AION0PoW"
-    "Bitcoingold" = " --pers BgoldPoW"
-    "Bitcoinz"    = " --pers BitcoinZ" #https://twitter.com/bitcoinzteam/status/1008283738999021568?lang=en
-    "Minexcoin"   = ""
-    "Safecoin"    = " --pers Safecoin"
-    "Snowgem"     = " --pers sngemPoW"
-    "Zelcash"     = " --pers ZelProof"
-    "Zero"        = " --pers ZERO_PoW"
-    "Zerocoin"    = " --pers ZERO_PoW"
+    "ManagedByPool" = " -pers auto" #pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
+    "Aion"          = " -pers AION0PoW"
+    "Bitcoingold"   = " -pers BgoldPoW"
+    "Bitcoinz"      = " -pers BitcoinZ" #https://twitter.com/bitcoinzteam/status/1008283738999021568?lang=en
+    "Minexcoin"     = ""
+    "Safecoin"      = " -pers Safecoin"
+    "Snowgem"       = " -pers sngemPoW"
+    "Zelcash"       = " -pers ZelProof"
+    "Zero"          = " -pers ZERO_PoW"
+    "Zerocoin"      = " -pers ZERO_PoW"
 }
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
@@ -68,16 +69,17 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         if ($Pools.$Main_Algorithm_Norm.Host -and ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMem}))) {
 
             #define --pers for equihash1445
-            #ZergPool allows pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
-            if ($Pools.$Algorithm_Norm.Name -like "ZergPool*") {
-                $Pers = "auto"
+            if ($Main_Algorithm_Norm -like "Equihash1445") {
+                if ($Pools.$Main_Algorithm_Norm.Name -like "ZergPool*") {
+                    $Pers = " -pers auto" #pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
+                }
+                else {
+                    $Pers = $Coins."$($Pools.$Main_Algorithm_Norm.CoinName)"
+                }
             }
-            else {
-                #Pers parameter, can be different per coin
-                $Pers = $Coins."$($Pools.$Main_Algorithm_Norm.CoinName)"
-            }
+            else {$Pers = ""}
 
-            #define stratum & pers
+            #define stratum
             switch ($Main_Algorithm -replace "2gb" -replace "3gb") {
                 "equihash"     {$Stratum = "stratum$(if ($Pools.$Main_Algorithm_Norm.SSL) {'+ssl'})"}
                 "equihash1445" {$Stratum = "equihash1445$(if ($Pools.$Main_Algorithm_Norm.SSL) {'+ssl'})"}
@@ -103,7 +105,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 $Miner_Name = ((@($Name) + @($Main_Algorithm_Norm) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-') -replace "[-]{2,}", "-"
                 $Miner_HashRates = [PSCustomObject]@{"$Main_Algorithm_Norm" = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week}
 
-                if ($Main_Algorithm -like "Ethash*") {$MinerFeeInPercent = 0.65} # Ethash fee fixed at 0.65%
+                if ($Main_Algorithm_Norm -like "Ethash*") {$MinerFeeInPercent = 0.65} # Ethash fee fixed at 0.65%
                 else {$MinerFeeInPercent = 2} # Other algos fee fixed at 2%
 
                 $Miner_Fees = [PSCustomObject]@{"$Main_Algorithm_Norm" = $MinerFeeInPercent / 100}
@@ -111,8 +113,8 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 $ExtendInterval = 1
             }
 
-            if (($Main_Algorithm -ne "Equihash1445" -and $Pools.Decred.Name -ne "NiceHash") -or`  #temp fix. Bminer is not compatible with decred on Nicehash, https://bitcointalk.org/index.php?topic=2519271.msg44083414#msg44083414
-                ($Main_Algorithm -eq "Equihash1445" -and $Pers)) {` #Bminer needs --pers set for Equihash1445
+            if (($Main_Algorithm_Norm -ne "Equihash1445" -and $Pools.Decred.Name -ne "NiceHash") -or`  #temp fix. Bminer is not compatible with decred on Nicehash, https://bitcointalk.org/index.php?topic=2519271.msg44083414#msg44083414
+                ($Main_Algorithm_Norm -eq "Equihash1445" -and $Pers)) {` #Bminer needs --pers set for Equihash1445
 
                 [PSCustomObject]@{
                     Name           = $Miner_Name
