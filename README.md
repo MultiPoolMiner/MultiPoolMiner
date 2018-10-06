@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 09/09/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 06/10/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -41,7 +41,7 @@ Done. You are all set to mine the most profitable coins and maximise your profit
 ## IMPORTANT NOTES
 
 - It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
-- Having PowerShell 6 installed is now a requirement. [Windows 64bit](https://github.com/PowerShell/PowerShell/releases/download/v6.0.4/PowerShell-6.0.4-win-x64.msi), [All other versions](https://github.com/PowerShell/PowerShell/releases)
+- Having PowerShell 6 installed is now a requirement. [Windows 64bit](https://github.com/PowerShell/PowerShell/releases/download/v6.1.0/PowerShell-6.1.0-win-x64.msi), [All other versions](https://github.com/PowerShell/PowerShell/releases)
 - Microsoft .NET Framework 4.5.1 or later is required for MultiPoolMiner to function properly. [Web Installer](https://www.microsoft.com/en-us/download/details.aspx?id=40773)
 - CCMiner (NVIDIA cards only) may need 'MSVCR120.dll' if you don't already have it: https://www.microsoft.com/en-gb/download/details.aspx?id=40784. Make sure that you install both the x86 and the x64 versions. 
 - CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145. Make sure that you install both the x86 and the x64 versions. 
@@ -71,6 +71,11 @@ The following algorithms are currently supported:
 - **decrednicehash** - if you want to include non-dual, non-Claymore Decred mining on Nicehash. NiceHash created their own implementation of Decred mining protocol.
 
 *Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-PoolName) will be ignored when mining certain algorithms. The *-Algorithm* command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). **WARNING!** If you add all algorithms listed above, you may find your earnings spread across multiple pools regardless what pool(s) you specified with the *-PoolName* command.*
+
+**-CreateMinerInstancePerDeviceModel**
+Newer miner files can create separate instances for each card model. This increases profit. Not all miners currently support this feature (more coming). 
+By default this feature is turned off. To enable add '-CreateMinerInstancePerDeviceModel' to your start batch file.
+*Note that this will trigger some benchmarking.*
 
 **-ConfigFile [Path\ConfigFile.txt]**
 The default config file name is '.\Config.txt'
@@ -297,6 +302,7 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
     "ShowPoolBalances":  "$ShowPoolBalances",
     "ShowPoolBalancesDetails":  "$ShowPoolBalancesDetails",
     "ShowPoolBalancesExcludedPools":  "$ShowPoolBalancesExcludedPools",
+    "CreateMinerInstancePerDeviceModel":  "$CreateMinerInstancePerDeviceModel",
     "Pools":  {
 
               },

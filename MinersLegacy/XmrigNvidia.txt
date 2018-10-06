@@ -1,4 +1,4 @@
-[
+﻿[
     {
         "Type":  "NVIDIA",
         "Path":  ".\\Bin\\CryptoNight-NVIDIA\\xmrig-nvidia.exe",
