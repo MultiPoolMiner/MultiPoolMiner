@@ -51,7 +51,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         if ($Miner_Device = @($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMem)})) {
 
             #Get commands for active miner devices
-            $Commands.$_ = Get-CommandPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
+            $_.Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
 
             $Pers = ""
             #define --pers for equihash1445
