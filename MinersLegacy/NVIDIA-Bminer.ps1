@@ -68,16 +68,16 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         if ($Pools.$Main_Algorithm_Norm.Host -and ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMem}))) {
 
+            $Pers = ""
             #define --pers for equihash1445
             if ($Main_Algorithm_Norm -like "Equihash1445") {
                 if ($Pools.$Main_Algorithm_Norm.Name -like "ZergPool*") {
                     $Pers = " -pers auto" #pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
                 }
-                else {
-                    $Pers = $Coins."$($Pools.$Main_Algorithm_Norm.CoinName)"
+                elseif ($Coins.$($Pools.$Algorithm_Norm.CoinName) {
+                    $Pers = " --pers $Coins.$($Pools.$Algorithm_Norm.CoinName)"
                 }
             }
-            else {$Pers = ""}
 
             #define stratum
             switch ($Main_Algorithm -replace "2gb" -replace "3gb") {

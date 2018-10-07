@@ -20,7 +20,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Equihash-210_9"; MinMemGB = 1.3; Params = ""}
 )
 
-$CommonCommands = " --pec --fee 0 --intensity 64"
+$CommonCommands = " --pec --intensity 64"
 
 $Coins = [PSCustomObject]@{
     "Aion"        = " --pers AION0PoW"
@@ -50,18 +50,20 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         if ($Miner_Device = @($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMem)})) {
 
+            #Get commands for active miner devices
+            $Commands.$_ = Get-CommandPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
+
+            $Pers = ""
+            #define --pers for equihash1445
             if ($Algorithm_Norm -eq "Equihash1445") {
                 #ZergPool allows pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
                 if ($Pools.$Algorithm_Norm.Name -like "ZergPool*") {
                     $Pers = " --pers auto"
                 }
                 #Pers parameter, different per coin
-                else {
-                    $Pers = $Coins."$($Pools.$Algorithm_Norm.CoinName)"
+                elseif ($Coins.$($Pools.$Algorithm_Norm.CoinName) {
+                    $Pers = " --pers $Coins.$($Pools.$Algorithm_Norm.CoinName)"
                 }
-            }
-            else {
-                $Pers = ""
             }
 
             if ($Algorithm_Norm -ne "Equihash1445" -or $Pers) {
