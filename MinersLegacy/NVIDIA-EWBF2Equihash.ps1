@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -46,9 +46,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         $Algorithm_Norm = Get-Algorithm $_.Algorithm
         $Algorithm = ($_.Algorithm) -replace "Equihash-"
-        $MinMemGB = $_.MinMemGB
+        $MinMem = $_.MinMemGB * 1GB
 
-        if ($Miner_Device = @($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMemGB * 1000000000)})) {
+        if ($Miner_Device = @($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMem)})) {
 
             if ($Algorithm_Norm -eq "Equihash1445") {
                 #ZergPool allows pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268

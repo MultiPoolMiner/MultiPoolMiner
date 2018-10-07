@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -8,8 +8,8 @@ param(
 )
 
 $Path = ".\Bin\NVIDIA-CcminerTrex\t-rex.exe"
-$HashSHA256 = "499A25FAA5DF87C8353AEB707C1514E74F22A3BE2508075D08830013B5FECF6F"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/T-rex/t-rex-0.6.6-win-cuda9.1.zip"
+$HashSHA256 = "9BD2F772DA2C712A31D793E6F5550384462A10614AC6B56F139DFC657A8BE1D2"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/T-rex/t-rex-0.6.10-win-cuda9.1.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4432704.0"
 $Port = "40{0:d2}"
 
@@ -46,8 +46,11 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         $Algorithm_Norm = Get-Algorithm $_
 
+        #Get commands for active miner devices
+        $Commands.$_ = Get-CommandPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
+
         Switch ($Algorithm_Norm) {
-            "X16R"  {$ExtendInterval = 10}
+            "X16R"  {$ExtendInterval = 5}
             default {$ExtendInterval = 0}
         }
 
@@ -56,7 +59,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             DeviceName     = $Miner_Device.Name
             Path           = $Path
             HashSHA256     = $HashSHA256
-            Arguments      = ("-b 127.0.0.1:$($Miner_Port) -a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) $($_.Params)$CommonCommands -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ',')" -replace "\s+", " ").trim()
+            Arguments      = ("-b 127.0.0.1:$($Miner_Port) -a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) $($Commands.$_)$CommonCommands -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ',')" -replace "\s+", " ").trim()
             HashRates      = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
             API            = "Ccminer"
             Port           = $Miner_Port

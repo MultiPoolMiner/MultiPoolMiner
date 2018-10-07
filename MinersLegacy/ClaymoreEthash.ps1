@@ -81,9 +81,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Commands | ForEach-Object {
         $Main_Algorithm = $_.MainAlgorithm
         $Main_Algorithm_Norm = Get-Algorithm $Main_Algorithm
-        $MinMemGB = $_.MinMemGB
+        $MinMem = $_.MinMemGB * 1GB
 
-        $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMemGB * 1000000000})
+        $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMem})
 
         if ($Arguments_Platform -and $Miner_Device) {
             if ($_.SecondaryAlgorithm) {
@@ -96,7 +96,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $Arguments_Secondary = " -dcoin $Secondary_Algorithm -dpool $($Pools.$Secondary_Algorithm_Norm.Host):$($Pools.$Secondary_Algorithm_Norm.Port) -dwal $($Pools.$Secondary_Algorithm_Norm.User) -dpsw $($Pools.$Secondary_Algorithm_Norm.Pass)$(if($_.SecondaryIntensity -ge 0){" -dcri $($_.SecondaryIntensity)"})"
                 $ExtendInterval = 2
 
-                if ($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -gt 2000000000}) {
+                if ($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -gt 2GB}) {
                     $Miner_Fees = [PSCustomObject]@{"$Main_Algorithm_Norm" = 1.5 / 100; "$Secondary_Algorithm_Norm" = 0 / 100}
                 }
                 else {
@@ -110,7 +110,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $Arguments_Secondary = ""
                 $ExtendInterval = 1
 
-                if ($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -gt 2000000000}) {
+                if ($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -gt 2GB}) {
                     $Miner_Fees = [PSCustomObject]@{"$Main_Algorithm_Norm" = 1 / 100}
                 }
                 else {
