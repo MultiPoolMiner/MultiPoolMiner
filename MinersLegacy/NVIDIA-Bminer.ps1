@@ -38,7 +38,7 @@ $Commands = [PSCustomObject[]]@(
 #    [PSCustomObject]@{MainAlgorithm = "ethash";    SecondaryAlgorithm = "blake2s";  DualSubsolver = 0; SecondaryIntensity = 50;  MinMemGB = 4; Params = ""} #Ethash & Blake2S dual mining
 )
 
-$CommonCommands = " -watchdog=false -no-runtime-info -nofee -max-temperature 0"
+$CommonCommands = " -watchdog=false -no-runtime-info -max-temperature 0"
 
 $Coins = [PSCustomObject]@{
     "ManagedByPool" = " -pers auto" #pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
