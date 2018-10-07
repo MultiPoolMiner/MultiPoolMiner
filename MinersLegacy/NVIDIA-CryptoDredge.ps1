@@ -22,6 +22,7 @@ $Commands = [PSCustomObject]@{
     "cnv7"      = " -i 5" #CyptoNightV7, new in 0.9
     "cnfast"    = " -i 5" #CryptoNightFast, new in 0.9
     "cnsaber"   = " -i 5" #CryptonightHeavyTube (BitTube), new in 0.9.2
+    "lbk3"      = "" #used by Vertical VTL, new with 0.9.0
     "lyra2v2"   = "" #Lyra2REv2
     "lyra2z"    = "" #Lyra2z
     "neoscrypt" = "" #NeoScrypt
