@@ -74,6 +74,7 @@ class ExcavatorNHMP : Miner {
         #Build list of all algorithms
         $Request = @{id = 1; method = "algorithm.list"; params = @()}
         $Data = [ExcavatorNHMP]::InvokeRequest($this, $Request)
+        $Algorithms = @($Data.algorithms.name)
 
         ($this.Arguments | ConvertFrom-Json) | Where-Object Method -Like "*.add" | ForEach-Object {
             $Argument = $_
