@@ -132,7 +132,7 @@ if (Test-Path $ConfigFile) {
         $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
     }
 
-    $Config | Add-Member VersionCompatibility $Version -Force
+    $Config | Add-Member VersionCompatibility "3.0.0" -Force
     $Config | Add-Member Pools ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
     $Config | Add-Member Miners ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
 
@@ -157,7 +157,7 @@ else {
         }
     }
 
-    $Config | Add-Member VersionCompatibility $Version
+    $Config | Add-Member VersionCompatibility "3.0.0"
     $Config | Add-Member Pools ([PSCustomObject]@{})
     $Config | Add-Member Miners ([PSCustomObject]@{})
 
