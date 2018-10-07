@@ -74,7 +74,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 if ($Pools.$Main_Algorithm_Norm.Name -like "ZergPool*") {
                     $Pers = " -pers auto" #pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
                 }
-                elseif ($Coins.$($Pools.$Algorithm_Norm.CoinName) {
+                elseif ($Coins.$($Pools.$Algorithm_Norm.CoinName)) {
                     $Pers = " -pers $Coins.$($Pools.$Algorithm_Norm.CoinName)"
                 }
             }
