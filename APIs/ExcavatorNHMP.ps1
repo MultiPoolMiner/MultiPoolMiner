@@ -199,9 +199,9 @@ class ExcavatorNHMP : Miner {
         return $this.Activated
     }
 
-#    [MinerStatus]GetStatus() {
-#        return $this.Status
-#    }
+    [MinerStatus]GetStatus() {
+        return $this.Status
+    }
 
     SetStatus([MinerStatus]$Status) {
         if ($Status -eq $this.GetStatus()) {return}

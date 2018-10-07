@@ -68,7 +68,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             if (-not $Secondary_Algorithm) {
                 #Single algo mining
                 $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
-                $Miner_Name = (@($Name) + @("$($Miner_Device.count)x$($Miner_Device.Model_Norm | Sort-Object -unique)") | Select-Object) + @($Threads) -join '-'
 
                 [PSCustomObject]@{
                     Name              = $Miner_Name
@@ -93,7 +92,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 #Dual algo mining
                 if ($Pools.$Secondary_Algorithm_Norm.Host -and $Pools.$Secondary_Algorithm_Norm.Name -eq "Nicehash" ) {
                     $Miner_Name = (@($Name) + @($Threads) + @("$Secondary_Algorithm_Norm" -replace "-NHMP") + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
-                    $Miner_Name = (@($Name) + @("$($Miner_Device.count)x$($Miner_Device.Model_Norm | Sort-Object -unique)") | Select-Object) + @("$Main_Algorithm_Norm$Secondary_Algorithm_Norm" -replace "-NHMP") + @($Threads) -join '-'
 
                     [PSCustomObject]@{
                         Name              = $Miner_Name
