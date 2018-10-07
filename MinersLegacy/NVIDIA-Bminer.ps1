@@ -75,7 +75,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                     $Pers = " -pers auto" #pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
                 }
                 elseif ($Coins.$($Pools.$Algorithm_Norm.CoinName) {
-                    $Pers = " --pers $Coins.$($Pools.$Algorithm_Norm.CoinName)"
+                    $Pers = " -pers $Coins.$($Pools.$Algorithm_Norm.CoinName)"
                 }
             }
 
@@ -115,6 +115,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
             if (($Main_Algorithm_Norm -ne "Equihash1445" -and $Pools.Decred.Name -ne "NiceHash") -or`  #temp fix. Bminer is not compatible with decred on Nicehash, https://bitcointalk.org/index.php?topic=2519271.msg44083414#msg44083414
                 ($Main_Algorithm_Norm -eq "Equihash1445" -and $Pers)) {` #Bminer needs --pers set for Equihash1445
+
+                #Get commands for active miner devices
+                $_.Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
 
                 [PSCustomObject]@{
                     Name           = $Miner_Name

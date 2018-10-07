@@ -14,9 +14,9 @@ $ManualUri = "https://bitcointalk.org/index.php?topic=4129696.0"
 $Port = "40{0:d2}"
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{Algorithm = "ethash2gb"; MinMemGB = 2; Params = @()} #Ethash2GB
-    [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; Params = @()} #Ethash3GB
-    [PSCustomObject]@{Algorithm = "ethash"   ; MinMemGB = 4; Params = @()} #Ethash
+    [PSCustomObject]@{Algorithm = "ethash2gb"; MinMemGB = 2; Params = ""} #Ethash2GB
+    [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; Params = ""} #Ethash3GB
+    [PSCustomObject]@{Algorithm = "ethash"   ; MinMemGB = 4; Params = ""} #Ethash
 )
 $CommonCommandsAll    = " -log 0"
 $CommonCommandsNvidia = " -mi 14"
@@ -51,6 +51,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         $MinMem = $_.MinMemGB * 1GB
 
         if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMem})) {
+
+            #Get commands for active miner devices
+            $_.Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
 
             [PSCustomObject]@{
                 Name           = $Miner_Name
