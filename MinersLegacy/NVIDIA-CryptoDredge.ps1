@@ -22,9 +22,9 @@ $Commands = [PSCustomObject]@{
     "cnv7"      = " -i 5" #CyptoNightV7, new in 0.9
     "cnfast"    = " -i 5" #CryptoNightFast, new in 0.9
     "cnsaber"   = " -i 5" #CryptonightHeavyTube (BitTube), new in 0.9.2
-    "lbk3"      = "" #used by Vertical VTL, new with 0.9.0
     "lyra2v2"   = "" #Lyra2REv2
     "lyra2z"    = "" #Lyra2z
+    "lbk3"      = "" #used by Vertical VTL, new with 0.9.0
     "neoscrypt" = "" #NeoScrypt
     "phi"       = "" #PHI
     "phi2"      = "" #PHI2
@@ -55,6 +55,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm $_
         $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
+
+        #Get commands for active miner devices
+        $Commands.$_ = Get-CommandPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
 
         [PSCustomObject]@{
             Name           = $Miner_Name

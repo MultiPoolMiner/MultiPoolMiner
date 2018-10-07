@@ -57,6 +57,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         $Algorithm_Norm = Get-Algorithm $_
 
+        #Get commands for active miner devices
+        $Commands.$_ = Get-CommandPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
+
         Switch ($Algorithm_Norm) {
             "X16R"  {$ExtendInterval = 5}
             default {$ExtendInterval = 0}
