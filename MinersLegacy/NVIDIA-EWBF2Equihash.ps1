@@ -61,7 +61,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                     $Pers = " --pers auto"
                 }
                 #Pers parameter, different per coin
-                elseif ($Coins.$($Pools.$Algorithm_Norm.CoinName) {
+                elseif ($Coins.$($Pools.$Algorithm_Norm.CoinName)) {
                     $Pers = " --pers $Coins.$($Pools.$Algorithm_Norm.CoinName)"
                 }
             }
