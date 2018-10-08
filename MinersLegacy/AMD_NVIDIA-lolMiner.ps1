@@ -21,40 +21,45 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Equihash2109"; MinMemGB = 1.0; Fee = 2; Params = ""}
 )
 
-$CommonCommands = " --workbatch VERYHIGH"
+$CommonCommands = " --workbatch HIGH"
 
 $Coins = [PSCustomObject]@{
-    "Asofe"        = "ASF"
-    "BitcoinZ"     = "BTCZ"
-    "BitcoinCandy" = "CDY" #new in 0.43b
-    "BitcoinGold"  = "BTG"
-    "BitcoinRM"    = "BCRM" #new in 0.43b
-    "Genesis"      = "GENX"
-    "LitecoinZ"    = "LTZ"
-    "Heptacoin"    = "HEPTA"
-    "MinexCoin"    = "MNX"
-    "SafeCoin"     = "SAFE"
-    "Zelcash"      = "ZEL"
-    "Zero"         = "ZER"
-    "Zerocoin"     = "ZER"
+    "ManagedByPool" = " -pers auto" #pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
+    "Asofe"         = "ASF"
+    "BitcoinZ"      = "BTCZ"
+    "BitcoinCandy"  = "CDY" #new in 0.43b
+    "BitcoinGold"   = "BTG"
+    "BitcoinRM"     = "BCRM" #new in 0.43b
+    "Genesis"       = "GENX"
+    "LitecoinZ"     = "LTZ"
+    "Heptacoin"     = "HEPTA"
+    "MinexCoin"     = "MNX"
+    "SafeCoin"      = "SAFE"
+    "Zelcash"       = "ZEL"
+    "Zero"          = "ZER"
+    "Zerocoin"      = "ZER"
 }
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Devices = $Devices | Where-Object Type -EQ "GPU"
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
-    $Device = @($Devices | Where-Object Model -EQ $_.Model)
+    $Devices = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
 
     $Commands | Where-Object {$Pools.(Get-Algorithm $_.Algorithm).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
 
         $Algorithm_Norm = Get-Algorithm $_.Algorithm
-        $MinMemGB = $_.MinMemGB
+        $MinMem = $_.MinMemGB  * 1GB
         $Params = $_.Params
 
-        if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMemGB * 1GB)})) {
+        if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMem)})) {
 
-            $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)    
-            $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
+            if ($Config.UseDeviceModelBenchmarkFileNaming) {
+                $Miner_Name = (@($Name) + @("$($Miner_Device.count)x$($Miner_Device.Model_Norm | Sort-Object -unique)") | Select-Object) -join '-'
+            }
+            else {
+                $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
+            }
 
             switch ($Algorithm_Norm) {
                 "Equihash965" {
@@ -62,7 +67,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 }
                 "Equihash1445" {
                     #ZergPool allows pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
-                    if ($Pools.$Algorithm_Norm.Name -like "ZergPool*") {
+                    if ($Pools.$Algorithm_Norm.Name -like "ZergPool*" -or -not $Coins."$($Pools.$Algorithm_Norm.CoinName)") {
                         $Coin = "AUTO144_5"
                     }
                     else {
@@ -75,7 +80,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 }
                 "Equihash2109" {
                     #ZergPool allows pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
-                    if ($Pools.$Algorithm_Norm.Name -like "ZergPool*") {
+                    if ($Pools.$Algorithm_Norm.Name -like "ZergPool*" -or -not $Coins."$($Pools.$Algorithm_Norm.CoinName)") {
                         $Coin = "AUT210_9"
                     }
                     else {
@@ -86,7 +91,6 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             }
 
             if ($Coin) {
-            
                 #Disable_memcheck
                 if ($Miner_Device.Vendor -eq "NVIDIA Corporation" -and $Algorithm_Norm -ne "Equihash965") {$Params += " -disable_memcheck=1"}
 
@@ -123,7 +127,6 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                     Port             = $Miner_Port
                     URI              = $Uri
                     Fees             = [PSCustomObject]@{$Algorithm_Norm = $_.Fee / 100}
-                    BenchmarkSamples = 10
                 }
             }
         }
