@@ -1,4 +1,4 @@
-Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+﻿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
 
