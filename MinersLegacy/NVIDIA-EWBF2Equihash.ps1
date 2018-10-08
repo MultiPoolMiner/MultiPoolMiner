@@ -68,9 +68,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
             if ($Algorithm_Norm -ne "Equihash1445" -or $Pers) {
 
-                #Get commands for active miner devices
-                $_.Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
-
                 [PSCustomObject]@{
                     Name             = $Miner_Name
                     DeviceName       = $Miner_Device.Name
