@@ -525,16 +525,18 @@ function Expand-WebRequest {
 
         if (Test-Path $Path_New -PathType Container) {Remove-Item $Path_New -Recurse -Force}
 
-        While (Get-ChildItem $Path_Old | Where-Object {$_.PSIsContainer -EQ $true -and (-not (Test-Path (Join-Path $Path_Old (Split-Path $Path -Leaf)) -PathType Leaf))}) {
-            Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $true | ForEach-Object {$Path_Old = (Join-Path $Path_Old $_)}
-        }
-        if (Test-Path (Join-Path $Path_Old (Split-Path $Path -Leaf)) -PathType Leaf) {
+        $Path_Old = @(Get-ChildItem $Path_Old -File -Recurse | Where-Object {$_.Name -EQ $(Split-Path $Path -Leaf)}).Directory
+
+        if ($Path_Old.Count -eq 1) {
             Move-Item $Path_Old $Path_New -PassThru | ForEach-Object -Process {$_.LastWritetime = Get-Date}
             $Path_Old = (Join-Path (Split-Path (Split-Path $Path)) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
             if (Test-Path $Path_Old -PathType Container) {Remove-Item $Path_Old -Recurse -Force}
         }
+        elseif ($Path_Old.Count -gt 1) {
+            Throw "Warning: $($Path) contains multiple instances of $(Split-Path $Path -Leaf). You need to manually copy the desired version of $(Split-Path $Path -Leaf) to $Path_New. "
+        }
         else {
-            Throw "Cannot find $($Path). "
+            Throw "Error: Cannot find $($Path). "
         }
     }
 }
