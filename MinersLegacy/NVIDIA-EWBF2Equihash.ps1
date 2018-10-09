@@ -67,7 +67,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             }
 
             if ($Algorithm_Norm -ne "Equihash1445" -or $Pers) {
-
                 [PSCustomObject]@{
                     Name             = $Miner_Name
                     DeviceName       = $Miner_Device.Name
