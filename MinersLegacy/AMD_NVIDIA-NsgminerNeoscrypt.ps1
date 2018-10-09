@@ -32,6 +32,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
         $Algorithm_Norm = Get-Algorithm $_
 
+        #Get commands for active miner devices
+        $Commands.$_ = Get-CommandPerDevice $Commands.$_ $Miner_Device.Type_PlatformId_Index
+
         [PSCustomObject]@{
             Name             = $Miner_Name
             DeviceName       = $Miner_Device.Name
