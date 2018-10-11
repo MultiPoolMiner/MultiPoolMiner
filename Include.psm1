@@ -525,15 +525,13 @@ function Expand-WebRequest {
 
         if (Test-Path $Path_New -PathType Container) {Remove-Item $Path_New -Recurse -Force}
 
-        $Path_Old = @(Get-ChildItem $Path_Old -File -Recurse | Where-Object {$_.Name -EQ $(Split-Path $Path -Leaf)}).Directory
+        #use first (topmost) directory in case, e.g. ClaymoreDual_v11.9, contain multiple miner binaries for different driver versions in various sub dirs
+        $Path_Old = (Get-ChildItem $Path_Old -File -Recurse | Where-Object {$_.Name -EQ $(Split-Path $Path -Leaf)}).Directory | Select-Object -First 1
 
-        if ($Path_Old.Count -eq 1) {
+        if ($Path_Old) {
             Move-Item $Path_Old $Path_New -PassThru | ForEach-Object -Process {$_.LastWritetime = Get-Date}
             $Path_Old = (Join-Path (Split-Path (Split-Path $Path)) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
             if (Test-Path $Path_Old -PathType Container) {Remove-Item $Path_Old -Recurse -Force}
-        }
-        elseif ($Path_Old.Count -gt 1) {
-            Throw "Warning: $($Path) contains multiple instances of $(Split-Path $Path -Leaf). You need to manually copy the desired version of $(Split-Path $Path -Leaf) to $Path_New. "
         }
         else {
             Throw "Error: Cannot find $($Path). "
