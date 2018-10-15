@@ -11,7 +11,7 @@ $APICurrenciesRequest = [PSCustomObject]@{}
 $APIWalletRequest = [PSCustomObject]@{}
 
 try {
-    $APICurrenciesRequest = Invoke-RestMethod "http://api.zergpool.com:8080/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $APICurrenciesRequest = Invoke-RestMethod "http://www.nlpool.nl/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
     Write-Log -Level Warn "Pool Balance API ($Name) has failed. "
@@ -24,7 +24,7 @@ if (($APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ig
 }
 
 # Guaranteed payout currencies
-$Payout_Currencies = @("BTC", "LTC", "DASH")
+$Payout_Currencies = @("BTC", "LTC")
 $Payout_Currencies = $Payout_Currencies + @($APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Sort-Object | Where-Object {$PoolConfig.$_}
 
 if (-not $Payout_Currencies) {
@@ -34,7 +34,7 @@ if (-not $Payout_Currencies) {
 
 $Payout_Currencies | Foreach-Object {
     try {
-        $APIWalletRequest = Invoke-RestMethod "http://zerg.zergpool.com/api/wallet?address=$($PoolConfig.$_)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $APIWalletRequest = Invoke-RestMethod "https://www.nlpool.nl/api/wallet?address=$($PoolConfig.$_)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
         if (($APIWalletRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
             Write-Log -Level Warn "Pool Balance API ($Name) for $_ returned nothing. "
         }
