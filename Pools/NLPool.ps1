@@ -26,7 +26,7 @@ if (($NLPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore |
 }
 
 $NLPool_Regions = "europe"
-$NLPool_Currencies = @("BTC") | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
+$NLPool_Currencies = @("BTC", "LTC") | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 $NLPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$NLPool_Request.$_.hashrate -gt 0} | ForEach-Object {
     $NLPool_Host = "mine.nlpool.nl"
