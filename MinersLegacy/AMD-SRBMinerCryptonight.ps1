@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -58,9 +58,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Algorithm = $_.Algorithm
         $Algorithm_Norm = Get-Algorithm "cryptonight$($Algorithm)"
         $Threads = $_.Threads
-        $MinMemGb = $_.MinMemGb
+        $MinMem = $_.MinMemGb * 1GB
 
-        $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMemGb * 1000000000)})
+        $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMem)})
         $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object ) | Select-Object) -join '-'
 
         if ($Pools.$Algorithm_Norm.Host -and $Miner_Device) {

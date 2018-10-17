@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -7,7 +7,7 @@ param(
     [PSCustomObject[]]$Devices
 )
 
-$Path = ".\Bin\AMD_NVIDIA-Nsgminer-NeoScrypt\nsgminer.exe"
+$Path = ".\Bin\AMD_NVIDIA-NsgminerNeoscrypt\nsgminer.exe"
 $HashSHA256 = "5FD5F65E360E93C7A520DA5E1945E58F8AD6B1CF9ECBDF2E4D5FB06DEDD2C6A8"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/NsgMiner/nsgminer-win64-0.9.4.zip"
 $ManualUri = "https://github.com/ghostlander/nsgminer"
@@ -31,6 +31,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
 
         $Algorithm_Norm = Get-Algorithm $_
+
+        #Get commands for active miner devices
+        $Commands.$_ = Get-CommandPerDevice $Commands.$_ $Miner_Device.Type_PlatformId_Index
 
         [PSCustomObject]@{
             Name             = $Miner_Name

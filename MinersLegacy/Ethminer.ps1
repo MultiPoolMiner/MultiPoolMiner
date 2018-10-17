@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -37,9 +37,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
         $Algorithm = $_.Algorithm
         $Algorithm_Norm = Get-Algorithm $Algorithm
-        $MinMemGB = $_.MinMemGB
+        $MinMem = $_.MinMem * 1GB
 
-        if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMemGB * 1000000000})) {
+        if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMem})) {
 
             $Miner_Name = ((@($Name) + @("$($Algorithm_Norm -replace '^ethash', '')") + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-') -replace "[-]{2,}", "-"
 

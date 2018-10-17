@@ -35,7 +35,7 @@ $StatEnd = $Timer.AddSeconds(60)
 $StatSpan = New-TimeSpan $StatStart $StatEnd
 
 $Stats = [PSCustomObject]@{}
-if (Test-Path "Stats") {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
+if (Test-Path "Stats" -PathType Container) {Get-ChildItemContent "Stats" | ForEach-Object {$Stats | Add-Member $_.Name $_.Content}}
 
 # Add info flag to $Config; required for proper miner enumeration
 $Config = [PSCustomObject]@{
@@ -85,7 +85,7 @@ $Algorithms | Foreach-Object {
     $Pools | Add-Member $_ $FakePool
 }
 
-if (-not (Test-Path ".\Bin")) {
+if (-not (Test-Path ".\Bin" -PathType Container)) {
     New-Item ".\Bin" -ItemType "Directory" | Out-Null
 }
 $BinDirectory = (Resolve-Path ".\Bin").Path
@@ -107,7 +107,7 @@ $Miners | Foreach-Object {
         Return
     }
 
-    if(Test-Path $Miner.Path) {
+    if(Test-Path $Miner.Path -PathType Leaf) {
         #Miner file exists
         if($Miner.HashSHA256) {
             # A hash was provided in the miner file
@@ -172,7 +172,7 @@ $Miners | Foreach-Object {
                 Invoke-WebRequest $Miner.URI -OutFile $Miner.Path -UseBasicParsing -Erroraction Stop
             }
             else {
-                Expand-WebRequest $Miner.URI (Split-Path $Miner.Path) -ErrorAction Stop
+                Expand-WebRequest $Miner.URI $Miner.Path -ErrorAction Stop
             }
         }
         catch {
@@ -182,7 +182,7 @@ $Miners | Foreach-Object {
     }
 
     # Test again to verify that the freshly downloaded miner is the correct version
-    if(Test-Path $Miner.Path) {
+    if(Test-Path $Miner.Path -PathType Leaf) {
         #Miner file exists
         if($Miner.HashSHA256) {
             # A hash was provided in the miner file

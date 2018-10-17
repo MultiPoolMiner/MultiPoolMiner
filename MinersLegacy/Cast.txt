@@ -1,4 +1,4 @@
-[
+﻿[
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\CryptoNight-Cast\\cast_xmr-vega.exe",

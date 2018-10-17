@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -34,10 +34,13 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         $Algorithm_Norm = Get-Algorithm $_
 
+        #Get commands for active miner devices
+        $Commands.$_ = Get-CommandPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
+
         $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
 
         Switch ($Algorithm_Norm) {
-            "X16R"  {$ExtendInterval = 10}
+            "X16R"  {$ExtendInterval = 5}
             default {$ExtendInterval = 0}
         }
 

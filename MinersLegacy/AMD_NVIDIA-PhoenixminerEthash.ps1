@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -7,18 +7,20 @@ param(
     [PSCustomObject[]]$Devices
 )
 
-$Path = ".\Bin\AMD_NVIDIA-PhoenixMiner\PhoenixMiner.exe"
-$HashSHA256 = "4E8540AA48C9D2245F22F68440494C6A39B16B107B600AFED69C5B7297DC7992"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/phoenixminer/PhoenixMiner_3.0c.zip"
+$Path = ".\Bin\AMD_NVIDIA-PhoenixminerEthash\PhoenixMiner.exe"
+$HashSHA256 = "79D46481B679F96FCA9C8790ED94EBFC6453ED4AE45336AEB720A51CEA7341FB"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/phoenixminer/PhoenixMiner_3.5d_Windows.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4129696.0"
-$Port = "233{0:d2}"
+$Port = "40{0:d2}"
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{Algorithm = "ethash2gb"; MinMemGB = 2; Params = @()} #Ethash2GB
-    [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; Params = @()} #Ethash3GB
-    [PSCustomObject]@{Algorithm = "ethash"   ; MinMemGB = 4; Params = @()} #Ethash
+    [PSCustomObject]@{Algorithm = "ethash2gb"; MinMemGB = 2; Params = ""} #Ethash2GB
+    [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; Params = ""} #Ethash3GB
+    [PSCustomObject]@{Algorithm = "ethash"   ; MinMemGB = 4; Params = ""} #Ethash
 )
-$CommonCommands = " -log 0"
+$CommonCommandsAll    = " -log 0"
+$CommonCommandsNvidia = " -mi 14"
+$CommonCommandsAmd    = " -clgreen 1 -gt 15 -mi 14"
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Devices = @($Devices | Where-Object Type -EQ "GPU")
@@ -29,17 +31,29 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Miner_Name = (@($Name) + @($Device.Name | Sort-Object) | Select-Object) -join '-'
 
     switch ($_.Vendor) {
-        "Advanced Micro Devices, Inc." {$Vendor = " -amd"}
-        "NVIDIA Corporation" {$Vendor = " -nvidia"}
-        Default {$Vendor = ""}
+        "Advanced Micro Devices, Inc." {
+            $Vendor = " -amd"
+            $CommonCommands = $CommonCommandsAmd + $CommonCommandsAll
+        }
+        "NVIDIA Corporation" {
+            $Vendor = " -nvidia"
+            $CommonCommands = $CommonCommandsNvidia + $CommonCommandsAll
+        }
+        Default {
+            $Vendor = ""
+            $CommonCommands = $CommonCommandsAll
+        }
     }
 
     $Commands | ForEach-Object {
         $Algorithm = $_.Algorithm
         $Algorithm_Norm = Get-Algorithm $Algorithm
-        $MinMemGB = $_.MinMemGB
+        $MinMem = $_.MinMemGB * 1GB
 
-        if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMemGB * 1000000000})) {
+        if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMem})) {
+
+            #Get commands for active miner devices
+            $_.Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
 
             [PSCustomObject]@{
                 Name           = $Miner_Name

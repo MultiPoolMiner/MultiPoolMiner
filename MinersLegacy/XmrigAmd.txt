@@ -1,4 +1,4 @@
-[
+﻿[
     {
         "Type":  "AMD",
         "Path":  ".\\Bin\\CryptoNight-AMD\\xmrig-amd.exe",

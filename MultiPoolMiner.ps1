@@ -1,4 +1,4 @@
-using module .\Include.psm1
+﻿using module .\Include.psm1
 
 [CmdletBinding()]
 param(
@@ -75,12 +75,14 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$ShowPoolBalancesDetails = $false,
     [Parameter(Mandatory = $false)]
+    [Switch]$CreateMinerInstancePerDeviceModel = $false,
+    [Parameter(Mandatory = $false)]
     [String]$ConfigFile = ".\Config.txt"
 )
 
 Clear-Host
 
-$Version = "3"
+$Version = "3.0.1"
 $Strikes = 3
 $SyncWindow = 5 #minutes
 
@@ -123,14 +125,14 @@ if (Test-Path $ConfigFile) {
     $ConfigFile = Resolve-Path $ConfigFile
     Write-Log -Level Info "Using configuration file ($ConfigFile). "
     $Config = Get-Content $ConfigFile | ConvertFrom-Json
-    $ConfigOld = $Config.PSObject.Copy() #$Config = $ConfigOld does not work (https://stackoverflow.com/questions/9581568/how-to-create-new-clone-instance-of-psobject-object)
+    $ConfigOld = $Config | ConvertTo-Json -Depth 10 | ConvertFrom-Json #$Config = $ConfigOld does not work (https://kevinmarquette.github.io/2016-10-28-powershell-everything-you-wanted-to-know-about-pscustomobject/#objects-vs-value-types)
 
     #Add variables that do not have an entry in config file
     $MyInvocation.MyCommand.Parameters.Keys | Where-Object {$_ -ne "ConfigFile" -and (Get-Variable $_ -ErrorAction SilentlyContinue)} | ForEach-Object {
         $Config | Add-Member $_ "`$$($_)" -ErrorAction SilentlyContinue
     }
 
-    $Config | Add-Member VersionCompatibility $Version -Force
+    $Config | Add-Member VersionCompatibility "3.0.0" -Force
     $Config | Add-Member Pools ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
     $Config | Add-Member Miners ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
 
@@ -155,7 +157,7 @@ else {
         }
     }
 
-    $Config | Add-Member VersionCompatibility $Version
+    $Config | Add-Member VersionCompatibility "3.0.0"
     $Config | Add-Member Pools ([PSCustomObject]@{})
     $Config | Add-Member Miners ([PSCustomObject]@{})
 
@@ -178,24 +180,25 @@ if ((Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) -and (Get-MpC
 
 #Set donation parameters
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
-$WalletDonate = ((@("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb") * 3) + (@("16Qf1mEk5x2WjJ1HhfnvPnqQEi2fvCeity") * 2) + (@("14crZQtbDuYoNGnvCZhCmKYtgVdTdE6qDA") * 2))[(Get-Random -Minimum 0 -Maximum ((3 + 2 + 2) - 1))]
+$WalletDonate = ((@("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb") * 3) + (@("16Qf1mEk5x2WjJ1HhfnvPnqQEi2fvCeity") * 2) + (@("1GPSq8txFnyrYdXL8t6S94mYdF8cGqVQJF") * 2))[(Get-Random -Minimum 0 -Maximum ((3 + 2 + 2) - 1))]
 $UserNameDonate = ((@("aaronsace") * 3) + (@("grantemsley") * 2) + (@("uselessguru") * 2))[(Get-Random -Minimum 0 -Maximum ((3 + 2 + 2) - 1))]
 $WorkerNameDonate = "multipoolminer"
 
-#Initialize the API
-Import-Module .\API.psm1
-Start-APIServer
-$API.Version = $Version
-
 while ($true) {
-    $ConfigBackup = $Config.PSObject.Copy()
+    $ConfigBackup = $Config | ConvertTo-Json -Depth 10 | ConvertFrom-Json
     #Add existing variables to $Parameters so they are available in psm1
     $Config_Parameters = @{}
     $Config = Get-Content $ConfigFile | ConvertFrom-Json
     $ConfigBackup | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
         if ($ConfigBackup.$_ -like "`$*") {
             #First run read values from command line
-            $Config_Parameters.Add($_, (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
+            if ((Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue).IsPresent -match ".+") {
+                #Convert switch variables to proper $true/$false
+                $Config_Parameters.Add($_, (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue).IsPresent)
+            }
+            else {
+                $Config_Parameters.Add($_, (Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue))
+            }
         }
         else {
             $Config_Parameters.Add($_, $ConfigBackup.$_)
@@ -213,6 +216,14 @@ while ($true) {
         Write-Log -Level Error "$($ConfigFile) is invalid. Cannot continue. "
         Start-Sleep 10
         Exit
+    }
+
+    #Initialize the API only once
+    if(!(Test-Path Variable:API)) {
+        Import-Module .\API.psm1
+        Start-APIServer -RemoteAPI:$Config.RemoteAPI
+        $API.Version = $Version
+        $API.Devices = $Devices
     }
 
     if (-not ($Config.Wallet -or $Config.UserName)) {
@@ -238,7 +249,7 @@ while ($true) {
 
     # Copy the user's config before changing anything for donation runs
     # This is used when getting pool balances so it doesn't get pool balances of the donation address instead
-    $UserConfig = $Config.PSObject.Copy()
+    $UserConfig = $Config | ConvertTo-Json -Depth 10 | ConvertFrom-Json
 
     #Activate or deactivate donation
     if ($Config.Donate -lt 10) {$Config.Donate = 10}
@@ -282,6 +293,12 @@ while ($true) {
     $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
     $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
 
+    #Load information about the devices
+    $Devices = @(Get-Device $Config.DeviceName $Config.ExcludeDeviceName | Select-Object)
+
+    #Give API access to the device information
+    $API.Devices = $Devices
+
     #Update the exchange rates
     try {
         Write-Log "Updating exchange rates from Coinbase. "
@@ -300,11 +317,6 @@ while ($true) {
         #Give API access to the pool balances
         $API.Balances = $BalancesData.Balances
     }
-    #Load information about the devices
-    $Devices = @(Get-Device $Config.DeviceName $Config.ExcludeDeviceName | Select-Object)
-
-    #Give API access to the device information
-    $API.Devices = $Devices
 
     #Load the stats
     Write-Log "Loading saved statistics. "
@@ -377,6 +389,8 @@ while ($true) {
     # select only the ones that have a HashRate matching our algorithms, and that only include algorithms we have pools for
     # select only the miners that match $Config.MinerName, if specified, and don't match $Config.ExcludeMinerName
     $AllMiners = if (Test-Path "MinersLegacy") {
+        #Strip Model information from devices -> will create only one miner instance
+        if ($Config.CreateMinerInstancePerDeviceModel) {$DevicesTmp = $Devices} else {$DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object {$_.Model = ""}}
         Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $Devices} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | 
             ForEach-Object {if (-not $_.DeviceName) {$_ | Add-Member DeviceName (Get-Device $_.Type).Name -Force}; $_} | #for backward compatibility
             Where-Object {$_.DeviceName} | #filter miners for non-present hardware
@@ -402,7 +416,7 @@ while ($true) {
         $Miner_Profits_Unbias = [PSCustomObject]@{}
 
         $Miner.HashRates.PSObject.Properties.Name | ForEach-Object { #temp fix, must use 'PSObject.Properties' to preserve order
-            $Miner_HashRates | Add-Member $_ ([Double]$Miner.HashRates.$_)
+            $Miner_HashRates | Add-Member $_ ([Double]$Miner.HashRates.$_) 
             $Miner_Fees | Add-Member $_ ([Double]$Miner.Fees.$_)
             $Miner_Pools | Add-Member $_ ([PSCustomObject]$Pools.$_)
             $Miner_Pools_Comparison | Add-Member $_ ([PSCustomObject]$Pools.$_)
@@ -461,10 +475,10 @@ while ($true) {
 
         if (-not $Miner.API) {$Miner | Add-Member API "Miner" -Force}
     }
-    $Miners = $AllMiners | Where-Object {(Test-Path $_.Path) -and ((-not $_.PrerequisitePath) -or (Test-Path $_.PrerequisitePath))}
+    $Miners = $AllMiners | Where-Object {(Test-Path $_.Path -PathType Leaf) -and ((-not $_.PrerequisitePath) -or (Test-Path $_.PrerequisitePath))}
     if ($Miners.Count -ne $AllMiners.Count -and $Downloader.State -ne "Running") {
         Write-Log -Level Warn "Some miners binaries are missing, starting downloader. "
-        $Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList (@($AllMiners | Where-Object {$_.PrerequisitePath} | Select-Object @{name = "URI"; expression = {$_.PrerequisiteURI}}, @{name = "Path"; expression = {$_.PrerequisitePath}}, @{name = "Searchable"; expression = {$false}}) + @($AllMiners | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($AllMiners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}}) | Select-Object * -Unique) -FilePath .\Downloader.ps1
+        $Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList (@($AllMiners | Where-Object {$_.PrerequisitePath -and -not (Test-Path $_.PrerequisitePath -PathType Leaf)} | Select-Object @{name = "URI"; expression = {$_.PrerequisiteURI}}, @{name = "Path"; expression = {$_.PrerequisitePath}}, @{name = "Searchable"; expression = {$false}}) + @($AllMiners | Where-Object {-not (Test-Path $_.Path)} | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($AllMiners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}}) | Select-Object * -Unique) -FilePath .\Downloader.ps1
     }
     # Open firewall ports for all miners
     if (Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) {
@@ -655,7 +669,7 @@ while ($true) {
     #Display mining information
     $Miners | Where-Object {$_.Profit -ge 1E-5 -or $_.Profit -eq $null} | Sort-Object DeviceName, @{Expression = "Profit_Bias"; Descending = $True} | Format-Table -GroupBy @{Name = "Device"; Expression = "DeviceName"} (
         @{Label = "Miner[Fee]"; Expression = {"$($_.Name)$(($_.Fees.PSObject.Properties.Value | ForEach-Object {"[{0:P2}]" -f [Double]$_}) -join '')"}}, 
-        @{Label = "Algorithm"; Expression = {$_.HashRates.PSObject.Properties.Name}}, 
+        @{Label = "Algorithm"; Expression = {$_.HashRates.PSObject.Properties.Name -replace "-NHMP" -replace "NiceHash"}}, 
         @{Label = "Speed"; Expression = {$_.HashRates.PSObject.Properties.Value | ForEach-Object {if ($_ -ne $null) {"$($_ | ConvertTo-Hash)/s"}else {"Benchmarking"}}}; Align = 'right'}, 
         @{Label = "$($Config.Currency | Select-Object -Index 0)/Day"; Expression = {if ($_.Profit) {ConvertTo-LocalCurrency $($_.Profit) $($Rates.$($Config.Currency | Select-Object -Index 0)) -Offset 2} else {"Unknown"}}; Align = "right"}, 
         @{Label = "Accuracy"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {"{0:P0}" -f [Double](1 - $_.MarginOfError)}}; Align = 'right'}, 
@@ -775,7 +789,7 @@ while ($true) {
         
         if ($Config.MinerStatusURL -and $Config.MinerStatusKey) {
             if ($Timer -gt $LastReport.AddSeconds($Config.Interval)) {
-                & .\ReportStatus.ps1 -Key $Config.MinerStatusKey -WorkerName $WorkerName -ActiveMiners $ActiveMiners -MinerStatusURL $Config.MinerStatusURL
+                & .\ReportStatus.ps1 -Key $Config.MinerStatusKey -WorkerName $Config.WorkerName -ActiveMiners $ActiveMiners -MinerStatusURL $Config.MinerStatusURL
                 $LastReport = $Timer
             }
         }
