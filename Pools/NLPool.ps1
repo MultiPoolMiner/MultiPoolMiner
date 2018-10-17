@@ -14,6 +14,7 @@ $NLPool_Request = [PSCustomObject]@{}
 
 try {
     $NLPool_Request = Invoke-RestMethod "http://www.nlpool.nl/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $NLPoolCoins_Request = Invoke-RestMethod "http://www.nlpool.nl/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
@@ -26,7 +27,7 @@ if (($NLPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore |
 }
 
 $NLPool_Regions = "europe"
-$NLPool_Currencies = @("BTC", "LTC") | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
+$NLpool_Currencies = @("BTC", "LTC") + ($NLPoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
 
 $NLPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$NLPool_Request.$_.hashrate -gt 0} | ForEach-Object {
     $NLPool_Host = "mine.nlpool.nl"
