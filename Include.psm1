@@ -14,10 +14,10 @@ function Get-Balance {
     param($Config, $NewRates)
 
     $Data = [PSCustomObject]@{}
-    
+
     $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
-        Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
-    } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | Sort-Object Name)
+            Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
+        } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | Sort-Object Name)
 
     #Get exchgange rates for all payout currencies
     $CurrenciesWithBalances = @($Balances.currency | Sort-Object -Unique)
@@ -31,7 +31,7 @@ function Get-Balance {
 
     #Add total of totals
     $Totals = [PSCustomObject]@{
-        Name  = "*Total*"
+        Name = "*Total*"
     }
     #Add Balance (in currency)
     $Rates.PSObject.Properties.Name | ForEach-Object {
@@ -54,10 +54,10 @@ function Get-Balance {
         $Balances | Foreach-Object {
             $_ | Add-Member "Value in $Currency" $(if ($Rates.$($_.Currency).$Currency) {("{0:N$($Digits)}" -f ([Float]$_.Total * [Float]$Rates.$($_.Currency).$Currency))}else {"unknown"}) -Force
         }
-        if (($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)  {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ([Float]$($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)) -Force}
+        if (($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum) {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ([Float]$($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)) -Force}
     }
     $Balances += $Totals
-    
+
     $Data | Add-Member Balances $Balances
     $Data | Add-Member Rates $Rates
 
@@ -145,25 +145,25 @@ function Set-Stat {
     $SmallestValue = 1E-20
 
     $Stat = Get-Content $Path -ErrorAction SilentlyContinue
-    
+
     try {
         $Stat = $Stat | ConvertFrom-Json -ErrorAction Stop
         $Stat = [PSCustomObject]@{
-            Live = [Double]$Stat.Live
-            Minute = [Double]$Stat.Minute
-            Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
-            Minute_5 = [Double]$Stat.Minute_5
-            Minute_5_Fluctuation = [Double]$Stat.Minute_5_Fluctuation
-            Minute_10 = [Double]$Stat.Minute_10
+            Live                  = [Double]$Stat.Live
+            Minute                = [Double]$Stat.Minute
+            Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
+            Minute_5              = [Double]$Stat.Minute_5
+            Minute_5_Fluctuation  = [Double]$Stat.Minute_5_Fluctuation
+            Minute_10             = [Double]$Stat.Minute_10
             Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
-            Hour = [Double]$Stat.Hour
-            Hour_Fluctuation = [Double]$Stat.Hour_Fluctuation
-            Day = [Double]$Stat.Day
-            Day_Fluctuation = [Double]$Stat.Day_Fluctuation
-            Week = [Double]$Stat.Week
-            Week_Fluctuation = [Double]$Stat.Week_Fluctuation
-            Duration = [TimeSpan]$Stat.Duration
-            Updated = [DateTime]$Stat.Updated
+            Hour                  = [Double]$Stat.Hour
+            Hour_Fluctuation      = [Double]$Stat.Hour_Fluctuation
+            Day                   = [Double]$Stat.Day
+            Day_Fluctuation       = [Double]$Stat.Day_Fluctuation
+            Week                  = [Double]$Stat.Week
+            Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
+            Duration              = [TimeSpan]$Stat.Duration
+            Updated               = [DateTime]$Stat.Updated
         }
 
         $ToleranceMin = $Value
@@ -188,27 +188,27 @@ function Set-Stat {
             $Span_Week = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
 
             $Stat = [PSCustomObject]@{
-                Live = $Value
-                Minute = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
-                Minute_Fluctuation = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + 
+                Live                  = $Value
+                Minute                = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
+                Minute_Fluctuation    = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + 
                 ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
-                Minute_5 = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
-                Minute_5_Fluctuation = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + 
+                Minute_5              = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
+                Minute_5_Fluctuation  = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + 
                 ($Span_Minute_5 * ([Math]::Abs($Value - $Stat.Minute_5) / [Math]::Max([Math]::Abs($Stat.Minute_5), $SmallestValue)))
-                Minute_10 = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
+                Minute_10             = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
                 Minute_10_Fluctuation = ((1 - $Span_Minute_10) * $Stat.Minute_10_Fluctuation) + 
                 ($Span_Minute_10 * ([Math]::Abs($Value - $Stat.Minute_10) / [Math]::Max([Math]::Abs($Stat.Minute_10), $SmallestValue)))
-                Hour = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
-                Hour_Fluctuation = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + 
+                Hour                  = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
+                Hour_Fluctuation      = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + 
                 ($Span_Hour * ([Math]::Abs($Value - $Stat.Hour) / [Math]::Max([Math]::Abs($Stat.Hour), $SmallestValue)))
-                Day = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
-                Day_Fluctuation = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + 
+                Day                   = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
+                Day_Fluctuation       = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + 
                 ($Span_Day * ([Math]::Abs($Value - $Stat.Day) / [Math]::Max([Math]::Abs($Stat.Day), $SmallestValue)))
-                Week = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
-                Week_Fluctuation = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + 
+                Week                  = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
+                Week_Fluctuation      = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + 
                 ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
-                Duration = $Stat.Duration + $Duration
-                Updated = $Updated
+                Duration              = $Stat.Duration + $Duration
+                Updated               = $Updated
             }
         }
     }
@@ -216,41 +216,41 @@ function Set-Stat {
         if (Test-Path $Path) {Write-Log -Level Warn "Stat file ($Name) is corrupt and will be reset. "}
 
         $Stat = [PSCustomObject]@{
-            Live = $Value
-            Minute = $Value
-            Minute_Fluctuation = 0
-            Minute_5 = $Value
-            Minute_5_Fluctuation = 0
-            Minute_10 = $Value
+            Live                  = $Value
+            Minute                = $Value
+            Minute_Fluctuation    = 0
+            Minute_5              = $Value
+            Minute_5_Fluctuation  = 0
+            Minute_10             = $Value
             Minute_10_Fluctuation = 0
-            Hour = $Value
-            Hour_Fluctuation = 0
-            Day = $Value
-            Day_Fluctuation = 0
-            Week = $Value
-            Week_Fluctuation = 0
-            Duration = $Duration
-            Updated = $Updated
+            Hour                  = $Value
+            Hour_Fluctuation      = 0
+            Day                   = $Value
+            Day_Fluctuation       = 0
+            Week                  = $Value
+            Week_Fluctuation      = 0
+            Duration              = $Duration
+            Updated               = $Updated
         }
     }
 
     if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
     [PSCustomObject]@{
-        Live = [Decimal]$Stat.Live
-        Minute = [Decimal]$Stat.Minute
-        Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
-        Minute_5 = [Decimal]$Stat.Minute_5
-        Minute_5_Fluctuation = [Double]$Stat.Minute_5_Fluctuation
-        Minute_10 = [Decimal]$Stat.Minute_10
+        Live                  = [Decimal]$Stat.Live
+        Minute                = [Decimal]$Stat.Minute
+        Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
+        Minute_5              = [Decimal]$Stat.Minute_5
+        Minute_5_Fluctuation  = [Double]$Stat.Minute_5_Fluctuation
+        Minute_10             = [Decimal]$Stat.Minute_10
         Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
-        Hour = [Decimal]$Stat.Hour
-        Hour_Fluctuation = [Double]$Stat.Hour_Fluctuation
-        Day = [Decimal]$Stat.Day
-        Day_Fluctuation = [Double]$Stat.Day_Fluctuation
-        Week = [Decimal]$Stat.Week
-        Week_Fluctuation = [Double]$Stat.Week_Fluctuation
-        Duration = [String]$Stat.Duration
-        Updated = [DateTime]$Stat.Updated
+        Hour                  = [Decimal]$Stat.Hour
+        Hour_Fluctuation      = [Double]$Stat.Hour_Fluctuation
+        Day                   = [Decimal]$Stat.Day
+        Day_Fluctuation       = [Double]$Stat.Day_Fluctuation
+        Week                  = [Decimal]$Stat.Week
+        Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
+        Duration              = [String]$Stat.Duration
+        Updated               = [DateTime]$Stat.Updated
     } | ConvertTo-Json | Set-Content $Path
 
     $Stat
@@ -377,7 +377,7 @@ function ConvertTo-LocalCurrency {
     $Digits = ([math]::truncate(10 - $Offset - [math]::log($BTCRate, 10)))
     if ($Digits -lt 0) {$Digits = 0}
     if ($Digits -gt 10) {$Digits = 10}
-    
+
     ($Value * $BTCRate).ToString("N$($Digits)")
 }
 
@@ -612,17 +612,17 @@ function Get-Device {
             [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object {
                 $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
                 $Device = [PSCustomObject]@{
-                    Index = [Int]$Index
-                    PlatformId = [Int]$PlatformId
-                    PlatformId_Index = [Int]$PlatformId_Index."$($PlatformId)"
+                    Index                 = [Int]$Index
+                    PlatformId            = [Int]$PlatformId
+                    PlatformId_Index      = [Int]$PlatformId_Index."$($PlatformId)"
                     Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
-                    Vendor = [String]$Device_OpenCL.Vendor
-                    Vendor_Index = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
-                    Type_Vendor_Index = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
-                    Type = [String]$Device_OpenCL.Type
-                    Type_Index = [Int]$Type_Index."$($Device_OpenCL.Type)"
-                    OpenCL = $Device_OpenCL
-                    Model = [String]$Device_OpenCL.Name
+                    Vendor                = [String]$Device_OpenCL.Vendor
+                    Vendor_Index          = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
+                    Type_Vendor_Index     = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
+                    Type                  = [String]$Device_OpenCL.Type
+                    Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
+                    OpenCL                = $Device_OpenCL
+                    Model                 = [String]$Device_OpenCL.Name
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
@@ -662,13 +662,13 @@ function Get-Device {
         # Vendor and type the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
         $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
         $Device = [PSCustomObject]@{
-            Index = [Int]$Index
-            Vendor = $CPUInfo.Manufacturer
+            Index             = [Int]$Index
+            Vendor            = $CPUInfo.Manufacturer
             Type_Vendor_Index = $CPUIndex
-            Type = "Cpu"
-            Type_Index = $CPUIndex
-            CIM = $CPUInfo
-            Model = $CPUInfo.Name
+            Type              = "Cpu"
+            Type_Index        = $CPUIndex
+            CIM               = $CPUInfo
+            Model             = $CPUInfo.Name
         }
 
         if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
@@ -922,10 +922,10 @@ class Miner {
                     $Lines += $Line
 
                     $this.Data += [PSCustomObject]@{
-                        Date = $Date
-                        Raw = $Line_Simple
+                        Date     = $Date
+                        Raw      = $Line_Simple
                         HashRate = [PSCustomObject]@{[String]$this.Algorithm = $HashRates}
-                        Device = $Devices
+                        Device   = $Devices
                     }
                 }
             }
