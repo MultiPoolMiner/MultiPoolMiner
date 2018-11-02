@@ -3,10 +3,10 @@ Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 Add-Type -Path .\OpenCL\*.cs
 
 try {
-    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -ErrorAction Stop
+    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -ReferencedAssemblies "System.Xml" -ErrorAction Stop
 }
 catch {
-    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -ReferencedAssemblies "System.Xml"
+    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings
 }
 
 function Get-Balance {
