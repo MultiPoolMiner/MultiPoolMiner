@@ -130,7 +130,7 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 -MinerstatusURL https://multipoolminer.io/monitor/miner.php
 	Report and monitor your mining rig's status by including the command above. Wallet address must be set even if you are only using MiningPoolHub as a pool. You can access the reported information by entering your wallet address on the https://multipoolminer.io/monitor web address. By using this service you understand and accept the terms and conditions detailed in this document (further below). 
 
--Poolname [ahashpool, ahashpoolcoins, blazepool, blockmasters, blockmasterscoins, hashrefinery, miningpoolhub, miningpoolhubcoins, nicehash, yiimp, zergpool, zergpoolcoins, zpool]
+-Poolname [ahashpool, ahashpoolcoins, blazepool, blockmasters, blockmasterscoins, hashrefinery, miningpoolhub, miningpoolhubcoins, nicehash, ravenminer, ravenminereu, yiimp, zpool]
 	The following pools are currently supported (in alphabetical order): 
 
     ## AHashPool / AHashPoolCoins
@@ -161,15 +161,18 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
     ## Nicehash 
       WebSite: https://www.nicehash.com/
       Payout in BTC (Bitcoin address must be provided using the '-Wallet' command)
+      
+    ## Ravenminer 
+      WebSite: https://ravenminer.com
+      Payout in RVN (Ravencoin address must be provided using config.txt in Pools section use "Ravenminer" & RVN address)
+	  
+    ## RavenminerEu 
+      WebSite: https://eu.ravenminer.com
+      Payout in RVN (Ravencoin address must be provided using config.txt in Pools section use "RavenminerEu" & RVN address)
 
     ## YiiMP
       WebSite: http://yiimp.eu/
       Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config file (Advanced configuration via config file required, see below)
-
-    ## ZergPool / ZergPoolCoins
-      WebSite: http://zergpool.eu
-      Payout in BTC (Bitcoin address must be provided using the '-Wallet' command), or any currency available in API (Advanced configuration via config file required, see below)
-      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below)
 
     ## Zpool
       WebSite: http://www.zpool.ca/
