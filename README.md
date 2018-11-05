@@ -156,12 +156,6 @@ The following pools are currently supported (in alphabetical order):
 
 	  Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config file (Advanced configuration via config file required, see below)
 
-	- ZergPool http://zergpool.eu
-
-	  Payout in BTC (Bitcoin address must be provided using the *-Wallet* command), or any currency available in API (Advanced configuration via config file required, see below)
-	  
-	  Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below)
-
 	- Zpool http://www.zpool.ca/
 
 	  Payout in BTC (Bitcoin address must be provided using the *-Wallet* command), or any currency available in API (Advanced configuration via config file required, see below)
