@@ -51,6 +51,7 @@ $Ravenminer_Regions | ForEach-Object {
 
     if ($Request.balance -or $Request.unsold -or $Request.unpaid) {
         [PSCustomObject]@{
+            "name" = "$($Name) (RVN)"
             "region" = $_
             "currency" = $Request.currency
             "balance" = $Request.balance
