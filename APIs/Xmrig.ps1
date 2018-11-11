@@ -17,7 +17,7 @@ class Xmrig : Miner {
             $Data = $Response | ConvertFrom-Json -ErrorAction Stop
         }
         catch {
-            Write-Log -Level Error "Failed to connect to miner ($($this.Name)). "
+            if ((Get-Date) -gt ($this.Process.PSBeginTime.AddSeconds(30))) {Write-Log -Level Error "Failed to connect to miner ($($this.Name)) [ProcessId: $($this.ProcessId)]. "}
             return @($Request, $Response)
         }
 
@@ -28,13 +28,15 @@ class Xmrig : Miner {
         if (-not $HashRate_Value) {$HashRate_Value = [Double]$Data.hashrate.total[1]} #fix
         if (-not $HashRate_Value) {$HashRate_Value = [Double]$Data.hashrate.total[2]} #fix
 
-        $HashRate | Where-Object {$HashRate_Name} | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
+        if ($HashRate_Name -and $HashRate_Value -GT 0) {$HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}}
 
-        $this.Data += [PSCustomObject]@{
-            Date     = (Get-Date).ToUniversalTime()
-            Raw      = $Response
-            HashRate = $HashRate
-            Device   = @()
+        if ($HashRate | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) {
+            $this.Data += [PSCustomObject]@{
+                Date     = (Get-Date).ToUniversalTime()
+                Raw      = $Response
+                HashRate = $HashRate
+                Device   = @()
+            }
         }
 
         return @($Request, $Data | ConvertTo-Json -Compress)

@@ -8,13 +8,20 @@ param(
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$YiiMPCoins_Request = [PSCustomObject]@{}
-
-try {
-    $YiiMP_Request = Invoke-RestMethod "http://api.yiimp.eu/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-    $YiiMPCoins_Request = Invoke-RestMethod "http://api.yiimp.eu/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+$RetryCount = 3
+$RetryDelay = 2
+while (-not ($YiiMP_Request -and $YiiMPCoins_Request) -and $RetryCount -gt 0) {
+    try {
+        if (-not $YiiMP_Request) {$YiiMP_Request = Invoke-RestMethod "http://api.yiimp.eu/api/status" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $YiiMPCoins_Request) {$YiiMPCoins_Request = Invoke-RestMethod "http://api.yiimp.eu/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+    }
+    catch {
+        Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
+        $RetryCount--        
+    }
 }
-catch {
+
+if (-not $YiiMP_Request) {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
     return
 }
@@ -26,6 +33,11 @@ if (($YiiMPCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Igno
 
 $YiiMP_Regions = "us"
 $YiiMP_Currencies = ($YiiMPCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
+
+if (-not $YiiMP_Currencies) {
+    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+    return
+}
 
 $YiiMP_Currencies | Where-Object {$YiiMPCoins_Request.$_.hashrate -gt 0} | ForEach-Object {
     $YiiMP_Host = "yiimp.eu"
@@ -57,6 +69,7 @@ $YiiMP_Currencies | Where-Object {$YiiMPCoins_Request.$_.hashrate -gt 0} | ForEa
             Region        = $YiiMP_Region_Norm
             SSL           = $false
             Updated       = $Stat.Updated
+            PayoutScheme  = "PPLNS"
         }
     }
 }

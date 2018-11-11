@@ -10,12 +10,19 @@ param(
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$MiningPoolHub_Request = [PSCustomObject]@{}
-
-try {
-    $MiningPoolHub_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics&$(Get-Date -Format "yyyy-MM-dd_HH-mm")" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+$RetryCount = 3
+$RetryDelay = 2
+while (-not ($MiningPoolHub_Request) -and $RetryCount -gt 0) {
+    try {
+        if (-not $MiningPoolHub_Request) {$MiningPoolHub_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics&$(Get-Date -Format "yyyy-MM-dd_HH-mm")" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+    }
+    catch {
+        Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
+        $RetryCount--        
+    }
 }
-catch {
+
+if (-not $MiningPoolHub_Request) {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
     return
 }
@@ -59,6 +66,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                 Region        = $MiningPoolHub_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated
+                PayoutScheme  = "PPLNS"
             }
 
             if ($MiningPoolHub_Algorithm_Norm -eq "CryptonightV7" -or $MiningPoolHub_Algorithm_Norm -eq "Equihash") {
@@ -76,6 +84,7 @@ $MiningPoolHub_Request.return | ForEach-Object {
                     Region        = $MiningPoolHub_Region_Norm
                     SSL           = $true
                     Updated       = $Stat.Updated
+                    PayoutScheme  = "PPLNS"
                 }
             }
         }

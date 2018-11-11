@@ -63,7 +63,7 @@
         var template = Handlebars.compile($("#poolbalance_template").html());
         $.each(result, function(index, item) {
           var properties = Object.keys(item);
-          var currencies = properties.filter((properties) => properties.startsWith("Total_"));
+          var currencies = properties.filter((properties) => properties.startsWith("Value in "));
 
           if (item.Name == "*Total*") { 
             var data = {name: "Total Balance From All Pools", balances: {}, total: true};

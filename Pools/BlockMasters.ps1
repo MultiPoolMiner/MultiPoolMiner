@@ -10,13 +10,20 @@ param(
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$BlockMasters_Request = [PSCustomObject]@{}
-
-try {
-    $BlockMasters_Request = Invoke-RestMethod "http://blockmasters.co/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-    $BlockMastersCoins_Request = Invoke-RestMethod "http://blockmasters.co/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+$RetryCount = 3
+$RetryDelay = 2
+while (-not ($BlockMasters_Request -and $BlockMastersCoins_Request) -and $RetryCount -gt 0) {
+    try {
+        if (-not $BlockMasters_Request) {$BlockMasters_Request = Invoke-RestMethod "http://blockmasters.co/api/status" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $BlockMastersCoins_Request) {$BlockMastersCoins_Request  = Invoke-RestMethod "http://blockmasters.co/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+    }
+    catch {
+        Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
+        $RetryCount--        
+    }
 }
-catch {
+
+if (-not $BlockMasters_Request) {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
     return
 }
@@ -26,8 +33,13 @@ if (($BlockMasters_Request | Get-Member -MemberType NoteProperty -ErrorAction Ig
     return
 }
 
-$BlockMasters_Regions = "us"
+$BlockMasters_Regions = "eu", "us"
 $BlockMasters_Currencies = @("BTC") + ($BlockMastersCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
+
+if (-not $BlockMasters_Currencies) {
+    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+    return
+}
 
 $BlockMasters_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$BlockMasters_Request.$_.hashrate -gt 0} | ForEach-Object {
     $BlockMasters_Host = "blockmasters.co"
@@ -37,6 +49,10 @@ $BlockMasters_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore 
     $BlockMasters_Coin = ""
 
     $Divisor = 1000000 * [Double]$BlockMasters_Request.$_.mbtc_mh_factor
+
+    switch ($BlockMasters_Algorithm_Norm) {
+        "bcd" {$Divisor /= 10} #temp fix
+    }
 
     if ((Get-Stat -Name "$($Name)_$($BlockMasters_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($BlockMasters_Algorithm_Norm)_Profit" -Value ([Double]$BlockMasters_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
     else {$Stat = Set-Stat -Name "$($Name)_$($BlockMasters_Algorithm_Norm)_Profit" -Value ([Double]$BlockMasters_Request.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
@@ -53,15 +69,15 @@ $BlockMasters_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore 
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = $BlockMasters_Host
+                Host          = "$(if ($BlockMasters_Region -eq "eu") {"eu."})$BlockMasters_Host"
                 Port          = $BlockMasters_Port
                 User          = Get-Variable $_ -ValueOnly
                 Pass          = "$Worker,c=$_"
                 Region        = $BlockMasters_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated
+                PayoutScheme  = "PPLNS"
             }
         }
     }
 }
-Sleep 0

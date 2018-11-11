@@ -61,4 +61,4 @@ catch {
 
 $ProgressPreference = $ProgressPreferenceBackup
 
-Write-Progress -Activity "Updater" -Completed
+Write-Progress -Activity "Updater" -Status "Completed" -Completed
