@@ -38,12 +38,12 @@ function Get-Balance {
         $Currency = $_.ToUpper()
         $Balances | Foreach-Object {
             if ($NewRates.$Currency -ne $null) {$Digits = ($($NewRates.$Currency).ToString().Split(".")[1]).length}else {$Digits = 8}
-            $_.Total = ("{0:N$($Digits)}" -f ([Float]$($_.Total)))
+           # $_.Total = ("{0:N$($Digits)}" -f ([Float]$($_.Total)))
             if ($Currency -eq $_.Currency) {
-                $_ | Add-Member "Balance ($Currency)" $_.Total
+                $_ | Add-Member "Balance ($Currency)" ("{0:N$($Digits)}" -f ([Float]$($_.Total)))
             }
         }
-        if (($Balances."Balance ($Currency)" | Measure-Object -Sum).sum) {$Totals | Add-Member "Balance ($Currency)" ("{0:N$($Digits)}" -f ([Float]$($Balances."Balance ($Currency)" | Measure-Object -Sum).sum))}
+        if (($Balances.Total | Measure-Object -Sum).sum) {$Totals | Add-Member "Balance ($Currency)" ("{0:N$($Digits)}" -f ([Float]$($Balances.Total | Measure-Object -Sum).sum))}
     }
 
     #Add converted values
@@ -52,9 +52,10 @@ function Get-Balance {
         #Get number of digits from $NewRates
         if ($NewRates.$Currency -ne $null) {$Digits = ($($NewRates.$Currency).ToString().Split(".")[1]).length}else {$Digits = 8}
         $Balances | Foreach-Object {
+            $_ | Add-Member "Total1 in $Currency" $(if ($Rates.$($_.Currency).$Currency) {$_.Total * [Float]$Rates.$($_.Currency).$Currency}) -Force  
             $_ | Add-Member "Value in $Currency" $(if ($Rates.$($_.Currency).$Currency) {("{0:N$($Digits)}" -f ([Float]$_.Total * [Float]$Rates.$($_.Currency).$Currency))}else {"unknown"}) -Force
         }
-        if (($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum) {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ([Float]$($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)) -Force}
+        if (($Balances."Total1 in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)  {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ([Float]$($Balances."Total1 in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)) -Force}
     }
     $Balances += $Totals
 
