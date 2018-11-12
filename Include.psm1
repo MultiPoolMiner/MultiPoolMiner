@@ -2,6 +2,13 @@
 
 Add-Type -Path .\OpenCL\*.cs
 
+try {
+    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -ReferencedAssemblies "System.Xml" -ErrorAction Stop
+}
+catch {
+    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings
+}
+
 function Get-CommandPerDevice {
 
 # rewrites the command parameters
@@ -67,10 +74,10 @@ function Get-Balance {
     param($Config, $NewRates)
 
     $Data = [PSCustomObject]@{}
-    
+
     $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
-        Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
-    } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | Sort-Object Name)
+            Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
+        } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | Sort-Object Name)
 
     #Get exchgange rates for all payout currencies
     $CurrenciesWithBalances = @($Balances.currency | Sort-Object -Unique)
@@ -84,7 +91,7 @@ function Get-Balance {
 
     #Add total of totals
     $Totals = [PSCustomObject]@{
-        Name  = "*Total*"
+        Name = "*Total*"
     }
     #Add Balance (in currency)
     $Rates.PSObject.Properties.Name | ForEach-Object {
@@ -107,10 +114,10 @@ function Get-Balance {
         $Balances | Foreach-Object {
             $_ | Add-Member "Value in $Currency" $(if ($Rates.$($_.Currency).$Currency) {("{0:N$($Digits)}" -f ([Float]$_.Total * [Float]$Rates.$($_.Currency).$Currency))}else {"unknown"}) -Force
         }
-        if (($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)  {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ([Float]$($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)) -Force}
+        if (($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum) {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ([Float]$($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)) -Force}
     }
     $Balances += $Totals
-    
+
     $Data | Add-Member Balances $Balances
     $Data | Add-Member Rates $Rates
 
@@ -198,25 +205,25 @@ function Set-Stat {
     $SmallestValue = 1E-20
 
     $Stat = Get-Content $Path -ErrorAction SilentlyContinue
-    
+
     try {
         $Stat = $Stat | ConvertFrom-Json -ErrorAction Stop
         $Stat = [PSCustomObject]@{
-            Live = [Double]$Stat.Live
-            Minute = [Double]$Stat.Minute
-            Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
-            Minute_5 = [Double]$Stat.Minute_5
-            Minute_5_Fluctuation = [Double]$Stat.Minute_5_Fluctuation
-            Minute_10 = [Double]$Stat.Minute_10
+            Live                  = [Double]$Stat.Live
+            Minute                = [Double]$Stat.Minute
+            Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
+            Minute_5              = [Double]$Stat.Minute_5
+            Minute_5_Fluctuation  = [Double]$Stat.Minute_5_Fluctuation
+            Minute_10             = [Double]$Stat.Minute_10
             Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
-            Hour = [Double]$Stat.Hour
-            Hour_Fluctuation = [Double]$Stat.Hour_Fluctuation
-            Day = [Double]$Stat.Day
-            Day_Fluctuation = [Double]$Stat.Day_Fluctuation
-            Week = [Double]$Stat.Week
-            Week_Fluctuation = [Double]$Stat.Week_Fluctuation
-            Duration = [TimeSpan]$Stat.Duration
-            Updated = [DateTime]$Stat.Updated
+            Hour                  = [Double]$Stat.Hour
+            Hour_Fluctuation      = [Double]$Stat.Hour_Fluctuation
+            Day                   = [Double]$Stat.Day
+            Day_Fluctuation       = [Double]$Stat.Day_Fluctuation
+            Week                  = [Double]$Stat.Week
+            Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
+            Duration              = [TimeSpan]$Stat.Duration
+            Updated               = [DateTime]$Stat.Updated
         }
 
         $ToleranceMin = $Value
@@ -325,7 +332,6 @@ function Get-Stat {
     else {
         # Return all stats
         $Stats = [PSCustomObject]@{}
-#        Get-ChildItem "Stats" -File | Where-Object {($_.BaseName -like "*_profit" -and $UnprofitableAlgorithms -notcontains ($_.BaseName -split "_" | Select-Object -Index 1)) -or ($_.BaseName -like "*_hashrate")} |ForEach-Object {
         Get-ChildItem "Stats" -File | ForEach-Object {
             $BaseName = $_.BaseName
             $FullName = $_.FullName
@@ -431,7 +437,7 @@ function ConvertTo-LocalCurrency {
     $Digits = ([math]::truncate(10 - $Offset - [math]::log($BTCRate, 10)))
     if ($Digits -lt 0) {$Digits = 0}
     if ($Digits -gt 10) {$Digits = 10}
-    
+
     ($Value * $BTCRate).ToString("N$($Digits)")
 }
 
@@ -666,7 +672,7 @@ function Get-Device {
     $Type_Vendor_Index = @{}
     $Type_Index = @{}
 
-    try {
+        try {
         [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {
             [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object {
                 $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
