@@ -20,7 +20,7 @@ if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$Requ
     return
 }
 
-if ([System.Version]$DriverVersion -lt 10.0.0) {
+if ($DriverVersion -lt [System.Version]("10.0.0")) {
     $Uri = "https://github.com/technobyl/CryptoDredge/releases/download/v0.10.0/CryptoDredge_0.10.0_cuda_9.2_windows.zip"
     $HashSHA256 = "216EE4908E5BBEFC375090FEAC6EF0D3E028403F7FFCFB922818998A74CB81B0"
 }

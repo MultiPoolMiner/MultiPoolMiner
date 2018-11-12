@@ -14,8 +14,8 @@ $RetryCount = 3
 $RetryDelay = 2
 while (-not ($Zpool_Request -and $ZpoolCoins_Request) -and $RetryCount -gt 0) {
     try {
-        if (-not $Zpool_Request) {$Zpool_Request = Invoke-RestMethod "http://www.zpool.ca/api/status" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
-        if (-not $ZpoolCoins_Request) {$ZpoolCoins_Request = Invoke-RestMethod "http://www.zpool.ca/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $Zpool_Request) {$Zpool_Request = Invoke-RestMethod "https://www.zpool.ca/api/status" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $ZpoolCoins_Request) {$ZpoolCoins_Request = Invoke-RestMethod "https://www.zpool.ca/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
     }
     catch {
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests

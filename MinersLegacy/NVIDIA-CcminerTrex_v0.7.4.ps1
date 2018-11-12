@@ -20,7 +20,7 @@ if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$Requ
     return
 }
 
-if ([System.Version]$DriverVersion -lt 10.0.0) {
+if ($DriverVersion -lt [System.Version]("10.0.0")) {
     $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/T-rex/t-rex-0.7.4-win-cuda9.2.zip"
     $HashSHA256 = "D9FB5D711C5E26A24964A4245DA8573081C48037C8733BACF350E31EFDDA5435"
 }
@@ -30,23 +30,25 @@ else {
 }
 
 $Commands = [PSCustomObject]@{
-    "balloon"   = "" #Balloon, New in 0.6.2
-    "bcd"       = "" #BitcoinDiamond, New in 0.6.5
-    "bitcore"   = "" #Bitcore, New in 0.6.1
-    "c11"       = "" #C11
-    "hsr"       = "" #HSR
-    "hmq1725"   = "" #Hmq1725, New in 0.6.4
-    "lyra2z"    = "" #Lyra2z
-    "phi"       = "" #Phi
-    "polytimos" = "" #Polytimos, New in 0.6.3
-    "renesis"   = "" #Renesis
-    "skunk"     = "" #Skunk, New in 0.6.3
-    "sonoa"     = "" #Sonoa, New in 0.6.1
-    "tribus"    = "" #Tribus
-    "x16r"      = "" #X16r
-    "x16s"      = "" #X16s
-    "x17"       = "" #X17
-    "x22i"      = "" #X22i, new in 0.7.2
+    "balloon"    = "" #Balloon, New in 0.6.2
+    "bcd"        = "" #BitcoinDiamond, New in 0.6.5
+    "bitcore"    = "" #Bitcore, New in 0.6.1
+    "c11"        = "" #C11
+    "hmq1725"    = "" #Hmq1725, New in 0.6.4
+    "hsr"        = "" #HSR
+    "lyra2z"     = "" #Lyra2z
+    "phi"        = "" #Phi
+    "polytimos"  = "" #Polytimos, New in 0.6.3
+    "renesis"    = "" #Renesis
+    "sha256t"    = "" #Sha256t
+    "skunk"      = "" #Skunk, New in 0.6.3
+    "sonoa"      = "" #Sonoa, New in 0.6.1
+    "timetravel" = "" #Timetravel
+    "tribus"     = "" #Tribus
+    "x16r"       = "" #X16r
+    "x16s"       = "" #X16s
+    "x17"        = "" #X17
+    "x22i"       = "" #X22i, new in 0.7.2
 }
 $CommonCommands = ""
 

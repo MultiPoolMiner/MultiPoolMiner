@@ -20,7 +20,7 @@ if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$Requ
     return
 }
 
-if ([System.Version]$DriverVersion -lt 10.0.0) {
+if ($DriverVersion -lt [System.Version]("10.0.0")) {
 $HashSHA256 = "D224215D54039A45152948C1E3A87FC36934BAC61BD8181C81F2FC69EA08834A"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-23-cuda9.2_x64.zip"
 }
