@@ -692,7 +692,7 @@ while ($true) {
         $RunningMiners = $RunningMiners | Where-Object $_ -NE $Miner 
         $Miner_Name = $_.Name
         if ($Miner.GetStatus() -eq "Running") {
-            Write-Log "Stopping miner ($Miner_Name {$(($Miner.Algorithm | Foreach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}). "
+            Write-Log "Stopping miner ($Miner_Name). "
             $Miner.SetStatus("Idle")
             #Close Excavator if no longer used
             if ($Miner.ProcessId -and -not ($ActiveMiners | Where-Object {$_.Best -and $_.API -EQ $Miner.API})) {Stop-Process -Id $Miner.ProcessId -Force -ErrorAction Ignore}
