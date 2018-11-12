@@ -159,6 +159,7 @@ if (Test-Path $ConfigFile -PathType Leaf) {
     }
 
     $Config | Add-Member VersionCompatibility $VersionCompatibility -Force
+    $Config | Add-Member Region (Get-Region ($Config.Region)) -Force
     $Config | Add-Member Pools ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
     $Config | Add-Member Miners ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
 
