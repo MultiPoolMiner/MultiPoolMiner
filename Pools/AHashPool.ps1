@@ -10,12 +10,19 @@ param(
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$AHashPool_Request = [PSCustomObject]@{}
-
-try {
-    $AHashPool_Request = Invoke-RestMethod "http://www.ahashpool.com/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+$RetryCount = 3
+$RetryDelay = 2
+while (-not ($AHashPool_Request) -and $RetryCount -gt 0) {
+    try {
+        if (-not $AHashPool_Request) {$AHashPool_Request = Invoke-RestMethod "http://www.ahashpool.com/api/status" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+    }
+    catch {
+        Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
+        $RetryCount--        
+    }
 }
-catch {
+
+if (-not $AHashPool_Request) {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
     return
 }
@@ -27,6 +34,11 @@ if (($AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignor
 
 $AHashPool_Regions = "us"
 $AHashPool_Currencies = @("BTC") | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
+
+if (-not $AHashPool_Currencies) {
+    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+    return
+}
 
 $AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$AHashPool_Request.$_.hashrate -gt 0} | ForEach-Object {
     $AHashPool_Host = "mine.ahashpool.com"
@@ -59,6 +71,7 @@ $AHashPool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
                 Region        = $AHashPool_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated
+                PayoutScheme  = "PPLNS"
             }
         }
     }

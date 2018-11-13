@@ -10,13 +10,20 @@ param(
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$Zpool_Request = [PSCustomObject]@{}
-
-try {
-    $Zpool_Request = Invoke-RestMethod "http://www.zpool.ca/api/status" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-    $ZpoolCoins_Request = Invoke-RestMethod "http://www.zpool.ca/api/currencies" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+$RetryCount = 3
+$RetryDelay = 2
+while (-not ($Zpool_Request -and $ZpoolCoins_Request) -and $RetryCount -gt 0) {
+    try {
+        if (-not $Zpool_Request) {$Zpool_Request = Invoke-RestMethod "https://www.zpool.ca/api/status" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $ZpoolCoins_Request) {$ZpoolCoins_Request = Invoke-RestMethod "https://www.zpool.ca/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+    }
+    catch {
+        Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
+        $RetryCount--        
+    }
 }
-catch {
+
+if (-not $Zpool_Request) {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
     return
 }
@@ -26,8 +33,13 @@ if (($Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | 
     return
 }
 
-$Zpool_Regions = "us"
+$Zpool_Regions = "eu", "na", "sea" #STRATUM SERVERS - North America <na> - Europe <eu> - South East Asia <sea>
 $Zpool_Currencies = @("BTC") + ($ZpoolCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
+
+if (-not $Zpool_Currencies) {
+    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+    return
+}
 
 $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Zpool_Request.$_.hashrate -gt 0} |ForEach-Object {
     $Zpool_Host = "mine.zpool.ca"
@@ -53,13 +65,14 @@ $Zpool_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Selec
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = "$Zpool_Algorithm.$Zpool_Host"
+                Host          = "$($Zpool_Algorithm).$($Zpool_Region).$($Zpool_Host)"
                 Port          = $Zpool_Port
                 User          = Get-Variable $_ -ValueOnly
                 Pass          = "$Worker,c=$_"
                 Region        = $Zpool_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated
+                PayoutScheme  = "PPLNS"
             }
         }
     }

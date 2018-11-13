@@ -6,6 +6,8 @@
     "hk":  "Asia",
     "in":  "Asia",
     "jp":  "Asia",
+    "na":  "US",
+    "sea":  "Asia",
     "us":  "US",
     "usa":  "US"
 }

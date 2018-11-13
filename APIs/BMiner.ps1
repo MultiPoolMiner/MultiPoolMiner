@@ -10,6 +10,8 @@ class BMiner : Miner {
         $Request = ""
         $Response = ""
 
+        $HashRate_Name = ""
+        $HashRate_Value = 0
         $HashRate = [PSCustomObject]@{}
 
         try {
@@ -17,10 +19,7 @@ class BMiner : Miner {
             $Data = $Response | ConvertFrom-Json -ErrorAction Stop
         }
         catch {
-            if ($this.Process.PSBeginTime -lt (Get-Date).AddSeconds( - 30)) { #Allow some time for the miner to respond
-                Write-Log -Level Error "Failed to connect to miner ($($this.Name)[$($this.Pool)]). "
-                $this.SetStatus("Idle")
-            }
+            if ((Get-Date) -gt ($this.Process.PSBeginTime.AddSeconds(30))) {Write-Log -Level Error "Failed to connect to miner ($($this.Name)) [ProcessId: $($this.ProcessId)]. "}
             return @($Request, $Response)
         }
 
@@ -28,20 +27,16 @@ class BMiner : Miner {
             $HashRate_Name = [String]($this.Algorithm -like (Get-Algorithm $_))
             if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -like "$(Get-Algorithm $_)*")} #temp fix
 
-            $HashRate_Value = 0
-
             $Data.devices | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
                 $Data.devices.$_.solvers | Where-Object {$HashRate_Name -like "$(Get-Algorithm $_.Algorithm)*"} | ForEach-Object {
-                    if ($_.speed_info.hash_rate) {$HashRate_Value += $_.speed_info.hash_rate}
-                    else {$HashRate_Value += $_.speed_info.solution_rate}
+                    if ($_.speed_info.hash_rate) {$HashRate_Value += [Int64]$_.speed_info.hash_rate}
+                    else {$HashRate_Value += [Int64]$_.speed_info.solution_rate}
                 }
             }
-            if ($HashRate_Name -and $HashRate_Value -gt 0) {
-                $HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
-            }
+            if ($HashRate_Name -and $HashRate_Value -GT 0) {$HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}}
         }
 
-        if ($HashRate) {
+        if ($HashRate | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) {
             $this.Data += [PSCustomObject]@{
                 Date     = (Get-Date).ToUniversalTime()
                 Raw      = $Response

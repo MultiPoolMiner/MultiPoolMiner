@@ -1,31 +1,42 @@
 using module ..\Include.psm1
 
 param(
-    $Config
+    [Parameter(Mandatory = $true)]
+    [PSCustomObject]$Config
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $PoolConfig = $Config.Pools.$Name
 
-if (!$PoolConfig.BTC) {
+if (-not $PoolConfig.BTC) {
     Write-Log -Level Verbose "Cannot get balance on pool ($Name) - no wallet address specified. "
     return
 }
 
-$Request = [PSCustomObject]@{}
-
-try {
-    #NH API does not total all of your balances for each algo up, so you have to do it with another call then total them manually.
-    $UnpaidRequest = Invoke-RestMethod "https://api.nicehash.com/api?method=stats.provider&addr=$($PoolConfig.BTC)"  -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-
-    $Sum = 0
-    $UnpaidRequest.result.stats.balance | Foreach {$Sum += $_}
+$RetryCount = 3
+$RetryDelay = 2
+while (-not ($APIRequest) -and $RetryCount -gt 0) {
+    try {
+        #NH API does not total all of your balances for each algo up, so you have to do it with another call then total them manually.
+        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "https://api.nicehash.com/api?method=stats.provider&addr=$($PoolConfig.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        $Sum = 0
+        $APIRequest.result.stats.balance | Foreach {$Sum += $_}
+    }
+    catch {
+        Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
+        $RetryCount--        
+    }
 }
-catch {
+
+if (-not $APIRequest) {
     Write-Log -Level Warn "Pool Balance API ($Name) has failed. "
     return
 }
 
+if (($APIRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
+    Write-Log -Level Warn "Pool Balance API ($Name) returned nothing. "
+    return
+}
 [PSCustomObject]@{
     Name        = "$($Name) (BTC)"
     Pool        = $Name

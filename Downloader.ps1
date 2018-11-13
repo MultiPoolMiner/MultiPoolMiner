@@ -13,7 +13,7 @@ $DownloadList | ForEach-Object {
 
     $Progress += 100 / $DownloadList.Count
 
-    if (-not (Test-Path $Path)) {
+    if (-not (Test-Path $Path -PathType Leaf)) {
         $ProgressPreferenceBackup = $ProgressPreference
         try {
             $ProgressPreference = $ProgressPreferenceBackup
@@ -25,8 +25,9 @@ $DownloadList | ForEach-Object {
                 Invoke-WebRequest $URI -OutFile $Path -UseBasicParsing -ErrorAction Stop
             }
             else {
-                Expand-WebRequest $URI (Split-Path $Path) -ErrorAction Stop
+                Expand-WebRequest $URI $Path -ErrorAction Stop
             }
+            Write-Log -Level Verbose "Installed miner binary ($($Path)). "
         }
         catch {
             $ProgressPreference = $ProgressPreferenceBackup
@@ -44,8 +45,9 @@ $DownloadList | ForEach-Object {
             }
 
             if ($Path_Old) {
-                if (Test-Path (Split-Path $Path_New)) {(Split-Path $Path_New) | Remove-Item -Recurse -Force}
+                if (Test-Path (Split-Path $Path_New) -PathType Container) {(Split-Path $Path_New) | Remove-Item -Recurse -Force}
                 (Split-Path $Path_Old) | Copy-Item -Destination (Split-Path $Path_New) -Recurse -Force
+                Write-Log -Level Verbose "Installed $($Path). "
             }
             else {
                 if ($URI) {Write-Log -Level Warn "Cannot find $($Path) distributed at $($URI). "}
@@ -56,4 +58,6 @@ $DownloadList | ForEach-Object {
     }
 }
 
-Write-Progress -Activity "Downloader" -Completed
+Write-Progress -Activity "Downloader" -Status "Completed" -Completed
+
+return

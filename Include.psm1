@@ -1,12 +1,57 @@
-Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+﻿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 Add-Type -Path .\OpenCL\*.cs
 
-try {
-    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -ReferencedAssemblies "System.Xml" -ErrorAction Stop
-}
-catch {
-    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings
+function Get-CommandPerDevice {
+
+# rewrites the command parameters
+# if a parameter has multiple values, only the values for the available devices are returned
+# parameters with a single value are valid for all devices and remain untouched
+
+[CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [String]$Command,
+        [Parameter(Mandatory = $false)]
+        [Int[]]$Devices
+    )
+
+    $CommandPerDevice = ""
+
+    $Command -split "(?=\s{1,}--|\s{1,}-| ,|^,)" | ForEach-Object {
+        $Token = $_
+        $Prefix = $null
+        $ParameterValueSeparator = $null
+        $ValueSeparator = $null
+        $Values = $null
+
+        if ($Token.TrimStart() -match "(?:^[-=]{1,})") { # supported prefix characters are listed in brackets: [-=]{1,}
+
+            $Prefix = "$($Token -split $Matches[0] | Select -Index 0)$($Matches[0])"
+            $Token = $Token -split $Matches[0] | Select -Last 1
+
+            if ($Token -match "(?:[ =]{1,})") { # supported separators are listed in brackets: [ =]{1,}
+                $ParameterValueSeparator = $Matches[0]
+                $Parameter = $Token -split $ParameterValueSeparator | Select -Index 0
+                $Values = $Token.Substring(("$($Parameter)$($ParameterValueSeparator)").length)
+
+                if ($Values -match "(?:[,; ]{1})") { # supported separators are listed in brackets: [,; ]{1}
+                    $ValueSeparator = $Matches[0]
+                    $RelevantValues = @()
+                    $Devices | Foreach-Object {
+                        if ($Values.Split($ValueSeparator) | Select -Index $_) {$RelevantValues += ($Values.Split($ValueSeparator) | Select -Index $_)}
+                        else {$RelevantValues += ""}
+                    }                    
+                    $CommandPerDevice += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$(($RelevantValues -join $ValueSeparator).TrimEnd($ValueSeparator))"
+                }
+                else {$CommandPerDevice += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$($Values)"}
+            }
+            else {$CommandPerDevice += "$($Prefix)$($Token)"}
+        }
+        else {$CommandPerDevice += $Token}
+    }
+    $CommandPerDevice
 }
 
 function Get-Balance {
@@ -16,8 +61,8 @@ function Get-Balance {
     $Data = [PSCustomObject]@{}
 
     $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
-            Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
-        } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | Sort-Object Name)
+        Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
+    } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | Sort-Object Name)
 
     #Get exchgange rates for all payout currencies
     $CurrenciesWithBalances = @($Balances.currency | Sort-Object -Unique)
@@ -85,7 +130,7 @@ function Write-Log {
         $filename = ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd").txt"
         $date = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
-        if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
+        if (-not (Test-Path "Stats" -PathType Container)) {New-Item "Stats" -ItemType "directory" | Out-Null}
 
         switch ($Level) {
             'Error' {
@@ -213,7 +258,7 @@ function Set-Stat {
         }
     }
     catch {
-        if (Test-Path $Path) {Write-Log -Level Warn "Stat file ($Name) is corrupt and will be reset. "}
+        if (Test-Path $Path -PathType Leaf) {Write-Log -Level Warn "Stat file ($Name) is corrupt and will be reset. "}
 
         $Stat = [PSCustomObject]@{
             Live                  = $Value
@@ -234,7 +279,7 @@ function Set-Stat {
         }
     }
 
-    if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
+    if (-not (Test-Path "Stats" -PathType Container)) {New-Item "Stats" -ItemType "directory" | Out-Null}
     [PSCustomObject]@{
         Live                  = [Decimal]$Stat.Live
         Minute                = [Decimal]$Stat.Minute
@@ -263,7 +308,7 @@ function Get-Stat {
         [String]$Name
     )
 
-    if (-not (Test-Path "Stats")) {New-Item "Stats" -ItemType "directory" | Out-Null}
+    if (-not (Test-Path "Stats" -PathType Container)) {New-Item "Stats" -ItemType "directory" | Out-Null}
 
     if ($Name) {
         # Return single requested stat
@@ -453,10 +498,10 @@ function Expand-WebRequest {
     [Environment]::CurrentDirectory = $ExecutionContext.SessionState.Path.CurrentFileSystemLocation
 
     if (-not $Path) {$Path = Join-Path ".\Downloads" ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName}
-    if (-not (Test-Path ".\Downloads")) {New-Item "Downloads" -ItemType "directory" | Out-Null}
+    if (-not (Test-Path ".\Downloads" -PathType Container)) {New-Item "Downloads" -ItemType "directory" | Out-Null}
     $FileName = Join-Path ".\Downloads" (Split-Path $Uri -Leaf)
 
-    if (Test-Path $FileName) {Remove-Item $FileName}
+    if (Test-Path $FileName -PathType Leaf) {Remove-Item $FileName}
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
 
@@ -464,19 +509,24 @@ function Expand-WebRequest {
         Start-Process $FileName "-qb" -Wait
     }
     else {
-        $Path_Old = (Join-Path (Split-Path $Path) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
-        $Path_New = (Join-Path (Split-Path $Path) (Split-Path $Path -Leaf))
+        $Path_Old = (Join-Path (Split-Path (Split-Path $Path)) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
+        $Path_New = Split-Path $Path
 
-        if (Test-Path $Path_Old) {Remove-Item $Path_Old -Recurse -Force}
-        Start-Process "7z" "x `"$([IO.Path]::GetFullPath($FileName))`" -o`"$([IO.Path]::GetFullPath($Path_Old))`" -y -spe" -Wait
+        if (Test-Path $Path_Old -PathType Container) {Remove-Item $Path_Old -Recurse -Force}
+        Start-Process "7z" "x `"$([IO.Path]::GetFullPath($FileName))`" -o`"$([IO.Path]::GetFullPath($Path_Old))`" -y -spe" -Wait -WindowStyle Hidden
 
-        if (Test-Path $Path_New) {Remove-Item $Path_New -Recurse -Force}
-        if (Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $false) {
-            Rename-Item $Path_Old (Split-Path $Path -Leaf)
+        if (Test-Path $Path_New -PathType Container) {Remove-Item $Path_New -Recurse -Force}
+
+        #use first (topmost) directory in case, e.g. ClaymoreDual_v11.9, contain multiple miner binaries for different driver versions in various sub dirs
+        $Path_Old = (Get-ChildItem $Path_Old -File -Recurse | Where-Object {$_.Name -EQ $(Split-Path $Path -Leaf)}).Directory | Select-Object -First 1
+
+        if ($Path_Old) {
+            Move-Item $Path_Old $Path_New -PassThru | ForEach-Object -Process {$_.LastWritetime = Get-Date}
+            $Path_Old = (Join-Path (Split-Path (Split-Path $Path)) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
+            if (Test-Path $Path_Old -PathType Container) {Remove-Item $Path_Old -Recurse -Force}
         }
         else {
-            Get-ChildItem $Path_Old | Where-Object PSIsContainer -EQ $true | ForEach-Object {Move-Item $_.FullName $Path_New}
-            Remove-Item $Path_Old
+            Throw "Error: Cannot find $($Path). "
         }
     }
 }
@@ -612,17 +662,26 @@ function Get-Device {
             [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object {
                 $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
                 $Device = [PSCustomObject]@{
-                    Index                 = [Int]$Index
-                    PlatformId            = [Int]$PlatformId
-                    PlatformId_Index      = [Int]$PlatformId_Index."$($PlatformId)"
+                    Index = [Int]$Index
+                    PlatformId = [Int]$PlatformId
+                    PlatformId_Index = [Int]$PlatformId_Index."$($PlatformId)"
                     Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
-                    Vendor                = [String]$Device_OpenCL.Vendor
-                    Vendor_Index          = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
-                    Type_Vendor_Index     = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
-                    Type                  = [String]$Device_OpenCL.Type
-                    Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
-                    OpenCL                = $Device_OpenCL
-                    Model                 = [String]$Device_OpenCL.Name
+                    Vendor = [String]$Device_OpenCL.Vendor
+                    Vendor_ShortName = $(Switch ([String]$Device_OpenCL.Vendor)
+                        {
+                        "Advanced Micro Devices, Inc." {"AMD"}
+                        "Intel(R) Corporation" {"INTEL"}
+                        "NVIDIA Corporation" {"NVIDIA"}
+                        default {[String]$Device_OpenCL.Vendor}
+                        }
+                    )
+                    Vendor_Index = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
+                    Type_Vendor_Index = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
+                    Type = [String]$Device_OpenCL.Type
+                    Type_Index = [Int]$Type_Index."$($Device_OpenCL.Type)"
+                    OpenCL = $Device_OpenCL
+                    Model = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
+                    Model_Norm = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
@@ -662,13 +721,15 @@ function Get-Device {
         # Vendor and type the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
         $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
         $Device = [PSCustomObject]@{
-            Index             = [Int]$Index
-            Vendor            = $CPUInfo.Manufacturer
+            Index = [Int]$Index
+            Vendor = $CPUInfo.Manufacturer
+            Vendor_ShortName = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") {"INTEL"} else {"AMD"})
             Type_Vendor_Index = $CPUIndex
-            Type              = "Cpu"
-            Type_Index        = $CPUIndex
-            CIM               = $CPUInfo
-            Model             = $CPUInfo.Name
+            Type = "Cpu"
+            Type_Index = $CPUIndex
+            CIM = $CPUInfo
+            Model = $CPUInfo.Name
+            Model_Norm = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
         }
 
         if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
@@ -752,10 +813,19 @@ class Miner {
     $Pool
     hidden [Array]$Data = @()
     $ShowMinerWindow
-    $ExtendInterval
+    $BenchmarkIntervals
+    $ProcessId
 
     [String[]]GetProcessNames() {
         return @(([IO.FileInfo]($this.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName)
+    }
+
+    [String]GetCommandLineParameters() {
+        return $this.Arguments
+    }
+    
+    [String]GetCommandLine() {
+        return "$($this.Path) $($this.GetCommandLineParameters())"
     }
 
     hidden StartMining() {
@@ -785,13 +855,26 @@ class Miner {
             }
 
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
-                $this.Status = [MinerStatus]::Running
+                for ($WaitForPID = 0; $WaitForPID -le 20; $WaitForPID++) {
+                    if ($this.ProcessId = (Get-CIMInstance CIM_Process | Where-Object {$_.ExecutablePath -eq $this.Path -and $_.CommandLine -like "*$($this.Path)*$($this.GetCommandLineParameters())*"}).ProcessId) {
+                        $this.Status = [MinerStatus]::Running
+                        break
+                    }
+                    Start-Sleep -Milliseconds 100
+                }
             }
         }
     }
 
     hidden StopMining() {
         $this.Status = [MinerStatus]::Failed
+
+        if ($this.ProcessId) {
+            if (Get-Process -Id $this.ProcessId -ErrorAction SilentlyContinue) {
+                Stop-Process -Id $this.ProcessId -Force -ErrorAction Ignore
+            }
+            $this.ProcessId = $null
+        }
 
         if ($this.Process) {
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
@@ -835,10 +918,12 @@ class Miner {
     }
 
     [MinerStatus]GetStatus() {
-        if ($this.Process.State -eq "Running") {
+        if ($this.Process.State -eq "Running" -and $this.ProcessId -and (Get-Process -Id $this.ProcessId -ErrorAction SilentlyContinue)) {
             return [MinerStatus]::Running
         }
         elseif ($this.Status -eq "Running") {
+            $this.ProcessId = $null
+            $this.Status = [MinerStatus]::Failed
             return [MinerStatus]::Failed
         }
         else {
@@ -922,10 +1007,10 @@ class Miner {
                     $Lines += $Line
 
                     $this.Data += [PSCustomObject]@{
-                        Date     = $Date
-                        Raw      = $Line_Simple
-                        HashRate = [PSCustomObject]@{[String]$this.Algorithm = $HashRates}
-                        Device   = $Devices
+                        Date = $Date
+                        Raw = $Line_Simple
+                        HashRate = [PSCustomObject]@{[String]$this.Algorithm = [Int64]$HashRates}
+                        Device = $Devices
                     }
                 }
             }
@@ -943,8 +1028,12 @@ class Miner {
         $HashRates_Counts = @{}
         $HashRates_Averages = @{}
         $HashRates_Variances = @{}
+        $Hashrates_Samples = @{}
 
-        $this.Data | Where-Object HashRate | Where-Object Date -GE (Get-Date).ToUniversalTime().AddSeconds( - $Seconds) | ForEach-Object {
+        #strip lower 10% and upper 10% of all values for better hashrate stability
+        $Hashrates_Samples = @($this.Data | Where-Object {$_.HashRate.$Algorithm} | Where-Object {$_.Date -GE (Get-Date).ToUniversalTime().AddSeconds( - $Seconds)})
+        $Hashrates_Samples | Sort-Object {$_.HashRate.$Algorithm} | Select-Object -Skip ([Int]($HashRates_Samples.Count * 0.1)) | Select-Object -SkipLast ([Int]($HashRates_Samples.Count * 0.1)) | ForEach-Object {
+
             $Data_Devices = $_.Device
             if (-not $Data_Devices) {$Data_Devices = $HashRates_Devices}
 

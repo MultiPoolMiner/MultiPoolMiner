@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 param(
     [alias("UserName")]
@@ -10,8 +10,6 @@ param(
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$MiningPoolHubCoins_Request = [PSCustomObject]@{}
-
 #defines minimum memory required per coin, default is 4gb
 $MinMem = [PSCustomObject]@{
     "Expanse"  = "2gb"
@@ -20,10 +18,19 @@ $MinMem = [PSCustomObject]@{
     "Musicoin" = "3gb"
 }
 
-try {
-    $MiningPoolHubCoins_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getminingandprofitsstatistics&$(Get-Date -Format "yyyy-MM-dd_HH-mm")" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+$RetryCount = 3
+$RetryDelay = 2
+while (-not ($MiningPoolHubCoins_Request) -and $RetryCount -gt 0) {
+    try {
+        if (-not $MiningPoolHubCoins_Request) {$MiningPoolHubCoins_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getminingandprofitsstatistics&$(Get-Date -Format "yyyy-MM-dd_HH-mm")" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+    }
+    catch {
+        Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
+        $RetryCount--        
+    }
 }
-catch {
+
+if (-not $MiningPoolHubCoins_Request) {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
     return
 }
@@ -46,7 +53,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} | ForEach
     #Electroneum hardforked. ETN algo changed to previous Cryptonight which is also compatible with ASIC
     if ($MiningPoolHubCoins_Coin -eq "Electroneum") {$MiningPoolHubCoins_Algorithm_Norm = "CryptoNight"}
     
-    if ($MiningPoolHubCoins_Algorithm -eq "Equihash-BTG") {$MiningPoolHubCoins_Hosts = ($_.host_list -replace ".hub.miningpoolhub", ".equihash-hub.miningpoolhub").split(";")}
+    if ($MiningPoolHubCoins_Algorithm -eq "Equihash-BTG") {$MiningPoolHubCoins_Hosts = ($_.host_list -replace ".equihash.hub.miningpoolhub", ".equihash-hub.miningpoolhub").split(";")}
     if ($MiningPoolHubCoins_Algorithm_Norm -eq "Sia") {$MiningPoolHubCoins_Algorithm_Norm = "SiaClaymore"} #temp fix
 
     $Divisor = 1000000000
@@ -72,6 +79,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} | ForEach
                 Region        = $MiningPoolHubCoins_Region_Norm
                 SSL           = $false
                 Updated       = $Stat.Updated
+                PayoutScheme  = "PPLNS"
             }
 
             [PSCustomObject]@{
@@ -88,6 +96,7 @@ $MiningPoolHubCoins_Request.return | Where-Object {$_.pool_hash -gt 0} | ForEach
                 Region        = $MiningPoolHubCoins_Region_Norm
                 SSL           = $true
                 Updated       = $Stat.Updated
+                PayoutScheme  = "PPLNS"
             }
         }
     }
