@@ -179,10 +179,10 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
       WebSite: https://www.nicehash.com/
       Payout in BTC (Bitcoin address must be provided using the '-Wallet' command)
 
-	## NLPool
+    ## NLPool
       WebSite: https://www.nlpool.nl/
-	  Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via config file required, see below)
-	  Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
+      Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via config file required, see below)
+      Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
     ## YiiMP
       WebSite: http://yiimp.eu/
