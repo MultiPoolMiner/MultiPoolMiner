@@ -2,13 +2,6 @@
 
 Add-Type -Path .\OpenCL\*.cs
 
-try {
-    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -ReferencedAssemblies "System.Xml" -ErrorAction Stop
-}
-catch {
-    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings
-}
-
 function Get-CommandPerDevice {
 
 # rewrites the command parameters
