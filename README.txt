@@ -141,7 +141,7 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 
 -PoolBalancesUpdateInterval
 	MPM queries the pool balances every n minutes. Default is 15, minimum is 0 (=on every loop). MPM does this to minimize the requests sent to the pools. Pools usually do not update the balances in real time, so querying on each loop is unnecessary.
-    Note: The balance overview is still shown on each loop.
+	Note: The balance overview is still shown on each loop.
     
 -Poolname [ahashpool(coins), blazepool, blockmasters(coins), hashrefinery(coins), miningpoolhub(coins), nicehash, nlpool(coins), phiphipool(coins), ravenminer, ravenminereu, yiimp, zpool(coins)]
 	The following pools are currently supported (in alphabetical order): 
