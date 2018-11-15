@@ -47,7 +47,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
     $Commands | Where-Object {$Pools.(Get-Algorithm $_.Algorithm).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm $_.Algorithm
-        $MinMem = $_.MinMemGB  * 1GB
+        $MinMem = $_.MinMemGB * 1GB
         $Params = $_.Params
 
         if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMem)})) {
