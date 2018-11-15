@@ -83,6 +83,8 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$ShowPoolBalancesDetails = $false,
     [Parameter(Mandatory = $false)]
+    [Int]$PoolBalancesUpdateInterval = 15, #MPM will update balances every n minutes (to limit pool API requests)
+    [Parameter(Mandatory = $false)]
     [Switch]$CreateMinerInstancePerDeviceModel = $false, #if true MPM will create separate miner instances per device model. This will improve profitability.
     [Parameter(Mandatory = $false)]
     [Switch]$UseDeviceNameForStatsFileNaming = $false,#if true the benchmark files will be named like 'NVIDIA-CryptoDredge-2xGTX1080Ti_Lyra2RE2_HashRate'. This will keep benchmarks files valid even when the order of the cards are changed in your rig
@@ -357,13 +359,14 @@ while ($true) {
         Write-Log -Level Warn "Coinbase is down. "
     }
 
-    #Update the pool balances
-    if ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) {
+    #Update the pool balances every n minute to minimize web requests; pools usually do not update the balances in real time
+    if (((Get-Date).AddMinutes(- $Config.PoolBalancesUpdateInterval) -gt $BalancesUpdated) -and ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools)) {
         Write-Log "Getting pool balances. "
         $BalancesData = Get-Balance -Config $UserConfig -NewRates $NewRates
 
         #Give API access to the pool balances
         $API.Balances = $BalancesData.Balances
+        $BalancesUpdated = Get-Date
     }
 
     #Load the stats
@@ -837,11 +840,13 @@ while ($true) {
         $Columns += $BalancesData.Balances | Foreach-Object {$_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name} | Where-Object {$_ -like "Value in *"} | Sort-Object -Unique
         $ColumnFormat += $Columns | Foreach-Object {@{Name = "$_"; Expression = "$_"; Align = "right"}}
         #Insert footer separator
-        $BalancesData.Balances += ($BalancesData.Balances | Select-Object -Last 1).PsObject.Copy()
-        $BalancesData.Balances += ($BalancesData.Balances | Select-Object -Last 1).PsObject.Copy()
-        ($BalancesData.Balances | Select-Object -Last 1).PSObject.Properties.Name | ForEach-Object {
-            ($BalancesData.Balances | Select-Object -Last 1 -Skip 2) | Add-Member $_ "$('-' * ($BalancesData.Balances.$_ | Select-Object | Foreach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum))" -Force
-            ($BalancesData.Balances | Select-Object -Last 1 ) | Add-Member $_ "$('=' * ($BalancesData.Balances.$_ | Select-Object | Foreach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum))" -Force
+        if (($BalancesData.Balances | Select-Object -Last 1).Name -eq "*Total*") {
+            $BalancesData.Balances += ($BalancesData.Balances | Select-Object -Last 1).PsObject.Copy()
+            $BalancesData.Balances += ($BalancesData.Balances | Select-Object -Last 1).PsObject.Copy()
+            ($BalancesData.Balances | Select-Object -Last 1).PSObject.Properties.Name | ForEach-Object {
+                ($BalancesData.Balances | Select-Object -Last 1 -Skip 2) | Add-Member $_ "$('-' * ($BalancesData.Balances.$_ | Select-Object | Foreach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum))" -Force
+                ($BalancesData.Balances | Select-Object -Last 1 ) | Add-Member $_ "$('=' * ($BalancesData.Balances.$_ | Select-Object | Foreach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum))" -Force
+            }
         }
         $BalancesData.Balances | Format-Table -Wrap -Property $ColumnFormat
     }
