@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\cast_xmr-vega.exe"
-$HashSHA256 = "34967A705D5810A12797608138E69FB628CF1CB4503E779658F6901348A389A3"
-$Uri = "http://www.gandalph3000.com/download/cast_xmr-vega-win64_150.zip"
+$HashSHA256 = "6EA3D830E3CBAA7CE4DFD84CE10B90A517803132ED86B24D8591F17039688F86"
+$Uri = "http://www.gandalph3000.com/download/cast_xmr-vega-win64_160.zip"
 $ManualUri = "http://www.gandalph3000.com"
 $Port = "40{0:d2}"
 
@@ -42,7 +42,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $MinMem = $_.MinMemGb * 1GB
         $Params = $_.Params
 
-        $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMem) -and $_.OpenCL.Name -match "^Ellesmere.*|^Polaris.*|^Vega.*"})
+        $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMem) -and $_.OpenCL.Name -match "^Baffin.*|^Ellesmere.*|^Polaris.*|^Vega.*"})
 
         if ($Pools.$Algorithm_Norm.Host -and $Miner_Device) {
             if ($Config.UseDeviceNameForStatsFileNaming) {
