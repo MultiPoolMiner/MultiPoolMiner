@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\wildrig.exe"
-$HashSHA256 = "D17F354D9BFF7D8BE3EC52866DC095FCDBD79AF32FFDEAC6C611BE1207789EB4"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/WildRig/wildrig-multi-0.12.7-beta.7z"
+$HashSHA256 = "9DC9BF203AC48FBB99540DC919985203587F0728D93AF3EE6653E854030A90E0"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/WildRig/wildrig-multi-0.12.9-beta.7z"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5023676.0"
 $Port = "40{0:d2}"
 
