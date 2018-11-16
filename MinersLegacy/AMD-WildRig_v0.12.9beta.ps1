@@ -35,7 +35,7 @@ $Commands = [PSCustomObject]@{
     "x17"        = " --opencl-threads=3 --opencl-launch=20x0"
     "x22i"       = " --opencl-threads=3 --opencl-launch=17x128" # new with 12.5.1 beta
 }
-$CommonCommands = " --donate-level 1"
+$CommonCommands = " --donate-level 1 --multiple-instance"
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Advanced Micro Devices, Inc.")
 
