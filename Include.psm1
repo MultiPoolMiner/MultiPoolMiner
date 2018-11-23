@@ -82,7 +82,7 @@ function Get-Balance {
     $Rates.PSObject.Properties.Name | ForEach-Object {
         $Currency = $_.ToUpper()
         $Balances | Foreach-Object {
-            if ($NewRates.$Currency -ne $null) {$Digits = ($($NewRates.$Currency).ToString().Split(".")[1]).length}else {$Digits = 8}
+            if ($NewRates.$Currency -ne $null) {$Digits = ($NewRates.$Currency).length - ([Int]($NewRates.$Currency)).length - 1} else {$Digits = 8}
             $_.Total = ("{0:N$($Digits)}" -f ([Float]$($_.Total)))
             if ($Currency -eq $_.Currency) {
                 $_ | Add-Member "Balance ($Currency)" $_.Total
@@ -95,7 +95,7 @@ function Get-Balance {
     $Config.Currency | ForEach-Object {
         $Currency = $_.ToUpper()
         #Get number of digits from $NewRates
-        if ($NewRates.$Currency -ne $null) {$Digits = ($($NewRates.$Currency).ToString().Split(".")[1]).length}else {$Digits = 8}
+        if ($NewRates.$Currency -ne $null) {$Digits = ($NewRates.$Currency).length - ([Int]($NewRates.$Currency)).length - 1} else {$Digits = 8}
         $Balances | Foreach-Object {
             $_ | Add-Member "Value in $Currency" $(if ($Rates.$($_.Currency).$Currency) {("{0:N$($Digits)}" -f ([Float]$_.Total * [Float]$Rates.$($_.Currency).$Currency))}else {"unknown"}) -Force
         }
