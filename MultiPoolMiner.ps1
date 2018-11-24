@@ -362,11 +362,11 @@ while ($true) {
     #Update the pool balances every n minute to minimize web requests; pools usually do not update the balances in real time
     if (((Get-Date).AddMinutes(- $Config.PoolBalancesUpdateInterval) -gt $BalancesUpdated) -and ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools)) {
         Write-Log "Getting pool balances. "
+        $BalancesUpdated = Get-Date
         $BalancesData = Get-Balance -Config $UserConfig -NewRates $NewRates
 
         #Give API access to the pool balances
-        $API.Balances = $BalancesData.Balances
-        $BalancesUpdated = Get-Date
+        $API.BalancesData = $BalancesData
     }
 
     #Load the stats
@@ -813,7 +813,7 @@ while ($true) {
 
         $MinerComparisons_MarginOfError = $BestMiners_Combo_Stat.Week_Fluctuation, ($BestMiners_Combo_Comparison | ForEach-Object {$_.Profit_MarginOfError * (& {if ($MinerComparisons_Profit[1]) {$_.Profit_Comparison / $MinerComparisons_Profit[1]}else {1}})} | Measure-Object -Sum).Sum
 
-        $Config.Currency | ForEach-Object {
+        $Config.Currency | Where-Object {$Rates.$_} | ForEach-Object {
             $MinerComparisons[0] | Add-Member $_.ToUpper() ("{0:N5} $([Char]0x00B1){1:P0} ({2:N5}-{3:N5})" -f ($MinerComparisons_Profit[0] * $Rates.$_), $MinerComparisons_MarginOfError[0], (($MinerComparisons_Profit[0] * $Rates.$_) / (1 + $MinerComparisons_MarginOfError[0])), (($MinerComparisons_Profit[0] * $Rates.$_) * (1 + $MinerComparisons_MarginOfError[0])))
             $MinerComparisons[1] | Add-Member $_.ToUpper() ("{0:N5} $([Char]0x00B1){1:P0} ({2:N5}-{3:N5})" -f ($MinerComparisons_Profit[1] * $Rates.$_), $MinerComparisons_MarginOfError[1], (($MinerComparisons_Profit[1] * $Rates.$_) / (1 + $MinerComparisons_MarginOfError[1])), (($MinerComparisons_Profit[1] * $Rates.$_) * (1 + $MinerComparisons_MarginOfError[1])))
         }
