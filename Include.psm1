@@ -58,55 +58,62 @@ function Get-Balance {
     [CmdletBinding()]
     param($Config, $NewRates)
 
-    $Data = [PSCustomObject]@{}
+    $BalancesData = [PSCustomObject]@{}
 
     $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
         Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
-    } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | Sort-Object Name)
+    } | Select-Object -ExpandProperty Content | Sort-Object Name)
+    $BalancesData | Add-Member Balances $Balances
 
     #Get exchgange rates for all payout currencies
-    $CurrenciesWithBalances = @($Balances.currency | Sort-Object -Unique)
-    try {
-        $Rates = Invoke-RestMethod "https://min-api.cryptocompare.com/data/pricemulti?fsyms=$($CurrenciesWithBalances -join ",")&tsyms=$($Config.Currency -join ",")&extraParams=http://multipoolminer.io" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-    }
-    catch {
-        Write-Log -Level Warn "Pool API (CryptoCompare) has failed - cannot convert balances to other currencies. "
-        Return $Balances
-    }
-
-    #Add total of totals
-    $Totals = [PSCustomObject]@{
-        Name = "*Total*"
-    }
-    #Add Balance (in currency)
-    $Rates.PSObject.Properties.Name | ForEach-Object {
-        $Currency = $_.ToUpper()
-        $Balances | Foreach-Object {
-            if ($NewRates.$Currency -ne $null) {$Digits = ($NewRates.$Currency).length - ([Int]($NewRates.$Currency)).length - 1} else {$Digits = 8}
-            $_.Total = ("{0:N$($Digits)}" -f ([Float]$($_.Total)))
-            if ($Currency -eq $_.Currency) {
-                $_ | Add-Member "Balance ($Currency)" $_.Total
+    if ($CurrenciesWithBalances = @($Balances.currency | Sort-Object -Unique)) {
+        $BalancesData | Add-Member ApiRequest "https://min-api.cryptocompare.com/data/pricemulti?fsyms=$($CurrenciesWithBalances -join ",")&tsyms=$($Config.Currency -join ",")&extraParams=http://multipoolminer.io"
+        try {
+            $Rates = Invoke-RestMethod $BalancesData.ApiRequest -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        }
+        catch {
+            Write-Log -Level Warn "Pool API (CryptoCompare) has failed - cannot convert balances to other currencies. "
+            $BalancesData | Add-Member Rates $Rates
+            Return $BalancesData
+        }
+    
+        #Add total of totals
+        $Totals = [PSCustomObject]@{Name = "*Total*"}
+        
+        $NumberDecimalSeparator = (Get-Culture).NumberFormat.NumberDecimalSeparator
+        $NumberGroupSeparator = (Get-Culture).NumberFormat.NumberGroupSeparator
+        
+        #Add Balance (in currency)
+        $Rates.PSObject.Properties.Name | ForEach-Object {
+            $Currency = $_.ToUpper()
+            $Balances | Foreach-Object {
+                if ($NewRates.$Currency -ne $null) {$Digits = ($NewRates.$Currency).length - ([Int]($NewRates.$Currency)).length - 1} else {$Digits = 8}
+                #if ($Digits -lt 0 -or $Digits -gt 8) {$Digits = 8}
+                $_.Total = ("{0:N$($Digits)}" -f ([Float]$($_.Total)))
+                if ($Currency -eq $_.Currency) {
+                    $_ | Add-Member "Balance ($Currency)" $_.Total
+                }
             }
+            if (($Balances."Balance ($Currency)" | Measure-Object -Sum).sum) {$Totals | Add-Member "Balance ($Currency)" ("{0:N$($Digits)}" -f ([Float]$($Balances."Balance ($Currency)" | Measure-Object -Sum).sum))}
         }
-        if (($Balances."Balance ($Currency)" | Measure-Object -Sum).sum) {$Totals | Add-Member "Balance ($Currency)" ("{0:N$($Digits)}" -f ([Float]$($Balances."Balance ($Currency)" | Measure-Object -Sum).sum))}
+
+        #Add converted values
+        $Config.Currency | ForEach-Object {
+            $Currency = $_.ToUpper()
+            #Get number of digits from $NewRates
+            if ($NewRates.$Currency -ne $null) {$Digits = ($NewRates.$Currency).length - ([Int]($NewRates.$Currency)).length - 1} else {$Digits = 8}
+            #if ($Digits -lt 0 -or $Digits -gt 8) {$Digits = 8}
+            $Balances | Foreach-Object {
+                $_ | Add-Member "Value in $Currency" $(if ($Rates.$($_.Currency).$Currency) {("{0:N$($Digits)}" -f ([Float]$_.Total * [Float]$Rates.$($_.Currency).$Currency))}else {"unknown"}) -Force
+            }
+            if (($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)  {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ([Float]$($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)) -Force}
+        }
+        $Balances += $Totals
+        $BalancesData | Add-Member Balances $Balances -force
+        $BalancesData | Add-Member Rates $Rates
     }
 
-    #Add converted values
-    $Config.Currency | ForEach-Object {
-        $Currency = $_.ToUpper()
-        #Get number of digits from $NewRates
-        if ($NewRates.$Currency -ne $null) {$Digits = ($NewRates.$Currency).length - ([Int]($NewRates.$Currency)).length - 1} else {$Digits = 8}
-        $Balances | Foreach-Object {
-            $_ | Add-Member "Value in $Currency" $(if ($Rates.$($_.Currency).$Currency) {("{0:N$($Digits)}" -f ([Float]$_.Total * [Float]$Rates.$($_.Currency).$Currency))}else {"unknown"}) -Force
-        }
-        if (($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum) {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ([Float]$($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)) -Force}
-    }
-    $Balances += $Totals
-
-    $Data | Add-Member Balances $Balances
-    $Data | Add-Member Rates $Rates
-
-    Return $Data
+    Return $BalancesData
 }
 
 function Write-Log {
