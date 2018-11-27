@@ -124,9 +124,9 @@ class XmRig : Miner {
         $HashRate_Name = [String]($this.Algorithm -like (Get-Algorithm $Data.algo))
         if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
         if (-not $HashRate_Name) {$HashRate_Name = [String]$this.Algorithm[0]} #fireice fix
-        $HashRate_Value = [Int64]$Data.hashrate.total[0]
-        if (-not $HashRate_Value) {$HashRate_Value = [Int64]$Data.hashrate.total[1]} #fix
-        if (-not $HashRate_Value) {$HashRate_Value = [Int64]$Data.hashrate.total[2]} #fix
+        $HashRate_Value = [Double]$Data.hashrate.total[0]
+        if (-not $HashRate_Value) {$HashRate_Value = [Double]$Data.hashrate.total[1]} #fix
+        if (-not $HashRate_Value) {$HashRate_Value = [Double]$Data.hashrate.total[2]} #fix
 
         if ($HashRate_Name -and $HashRate_Value -GT 0) {$HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}}
 
