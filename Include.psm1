@@ -59,7 +59,7 @@ function Get-Balance {
     param($Config, $NewRates)
 
     $BalancesData = [PSCustomObject]@{}
-    
+
     $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
         Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
     } | Select-Object -ExpandProperty Content | Sort-Object Name)
@@ -76,13 +76,13 @@ function Get-Balance {
             $BalancesData | Add-Member Rates $Rates
             Return $BalancesData
         }
-    
+
         #Add total of totals
         $Totals = [PSCustomObject]@{Name = "*Total*"}
-        
+
         $NumberDecimalSeparator = (Get-Culture).NumberFormat.NumberDecimalSeparator
         $NumberGroupSeparator = (Get-Culture).NumberFormat.NumberGroupSeparator
-        
+
         #Add Balance (in currency)
         $Rates.PSObject.Properties.Name | ForEach-Object {
             $Currency = $_.ToUpper()
