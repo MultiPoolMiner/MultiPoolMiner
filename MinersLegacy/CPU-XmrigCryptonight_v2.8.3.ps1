@@ -16,19 +16,32 @@ $Port = "40{0:d2}"
 
 $Commands = [PSCustomObject[]]@(
     # Note: For fine tuning directly edit [Pool]_[Algorithm]-[Port]-[User]-[Pass].json in the miner binary directory 
-    [PSCustomObject]@{Algorithm = "cryptonight/0";           MinMemGB = 2; Params = ""} # CryptoNight    
-    [PSCustomObject]@{Algorithm = "cryptonight/1";           MinMemGB = 2; Params = ""} # CryptoNightV7
-    [PSCustomObject]@{Algorithm = "cryptonight/2";           MinMemGB = 2; Params = ""} # CryptoNightV8, new with 2.8.1
-    [PSCustomObject]@{Algorithm = "cryptonight/msr";         MinMemGB = 2; Params = ""} # CryptoNightMsr
-    [PSCustomObject]@{Algorithm = "cryptonight/rto";         MinMemGB = 2; Params = ""} # CryptoNightRto
-    [PSCustomObject]@{Algorithm = "cryptonight/xao";         MinMemGB = 2; Params = ""} # CryptoNightXao
-    [PSCustomObject]@{Algorithm = "cryptonight/xtl";         MinMemGB = 2; Params = ""} # CryptoNightXtl
-    [PSCustomObject]@{Algorithm = "cryptonight-lite/0";      MinMemGB = 1; Params = ""} # CryptoNightLite
-    [PSCustomObject]@{Algorithm = "cryptonight-lite/1";      MinMemGB = 1; Params = ""} # CryptoNightLiteV7
-    [PSCustomObject]@{Algorithm = "cryptonight-lite/2";      MinMemGB = 1; Params = ""} # CryptoNightLiteV8
-    [PSCustomObject]@{Algorithm = "cryptonight-heavy";       MinMemGB = 4; Params = ""} # CryptoNightHeavy
-    [PSCustomObject]@{Algorithm = "cryptonight-heavy/tube";  MinMemGB = 4; Params = ""} # CryptoNightHeavyTube
-    [PSCustomObject]@{Algorithm = "cryptonight-heavy/xhv";   MinMemGB = 4; Params = ""} # CryptoNightHeavyHaven
+    [PSCustomObject]@{Algorithm = "cryptonight/0";           MinMemGB = 2; Threads = 1; Params = ""} # CryptoNight    
+    [PSCustomObject]@{Algorithm = "cryptonight/1";           MinMemGB = 2; Threads = 1; Params = ""} # CryptoNightV7
+    [PSCustomObject]@{Algorithm = "cryptonight/2";           MinMemGB = 2; Threads = 1; Params = ""} # CryptoNightV8, new with 2.8.1
+    [PSCustomObject]@{Algorithm = "cryptonight/msr";         MinMemGB = 2; Threads = 1; Params = ""} # CryptoNightMsr
+    [PSCustomObject]@{Algorithm = "cryptonight/rto";         MinMemGB = 2; Threads = 1; Params = ""} # CryptoNightRto
+    [PSCustomObject]@{Algorithm = "cryptonight/xao";         MinMemGB = 2; Threads = 1; Params = ""} # CryptoNightXao
+    [PSCustomObject]@{Algorithm = "cryptonight/xtl";         MinMemGB = 2; Threads = 1; Params = ""} # CryptoNightXtl
+    [PSCustomObject]@{Algorithm = "cryptonight-lite/0";      MinMemGB = 1; Threads = 1; Params = ""} # CryptoNightLite
+    [PSCustomObject]@{Algorithm = "cryptonight-lite/1";      MinMemGB = 1; Threads = 1; Params = ""} # CryptoNightLiteV7
+    [PSCustomObject]@{Algorithm = "cryptonight-lite/2";      MinMemGB = 1; Threads = 1; Params = ""} # CryptoNightLiteV8
+    [PSCustomObject]@{Algorithm = "cryptonight-heavy";       MinMemGB = 4; Threads = 1; Params = ""} # CryptoNightHeavy
+    [PSCustomObject]@{Algorithm = "cryptonight-heavy/tube";  MinMemGB = 4; Threads = 1; Params = ""} # CryptoNightHeavyTube
+    [PSCustomObject]@{Algorithm = "cryptonight-heavy/xhv";   MinMemGB = 4; Threads = 1; Params = ""} # CryptoNightHeavyHaven
+    [PSCustomObject]@{Algorithm = "cryptonight/0";           MinMemGB = 2; Threads = 2; Params = ""} # CryptoNight    
+    [PSCustomObject]@{Algorithm = "cryptonight/1";           MinMemGB = 2; Threads = 2; Params = ""} # CryptoNightV7
+    [PSCustomObject]@{Algorithm = "cryptonight/2";           MinMemGB = 2; Threads = 2; Params = ""} # CryptoNightV8, new with 2.8.1
+    [PSCustomObject]@{Algorithm = "cryptonight/msr";         MinMemGB = 2; Threads = 2; Params = ""} # CryptoNightMsr
+    [PSCustomObject]@{Algorithm = "cryptonight/rto";         MinMemGB = 2; Threads = 2; Params = ""} # CryptoNightRto
+    [PSCustomObject]@{Algorithm = "cryptonight/xao";         MinMemGB = 2; Threads = 2; Params = ""} # CryptoNightXao
+    [PSCustomObject]@{Algorithm = "cryptonight/xtl";         MinMemGB = 2; Threads = 2; Params = ""} # CryptoNightXtl
+    [PSCustomObject]@{Algorithm = "cryptonight-lite/0";      MinMemGB = 1; Threads = 2; Params = ""} # CryptoNightLite
+    [PSCustomObject]@{Algorithm = "cryptonight-lite/1";      MinMemGB = 1; Threads = 2; Params = ""} # CryptoNightLiteV7
+    [PSCustomObject]@{Algorithm = "cryptonight-lite/2";      MinMemGB = 1; Threads = 2; Params = ""} # CryptoNightLiteV8
+    [PSCustomObject]@{Algorithm = "cryptonight-heavy";       MinMemGB = 4; Threads = 2; Params = ""} # CryptoNightHeavy
+    [PSCustomObject]@{Algorithm = "cryptonight-heavy/tube";  MinMemGB = 4; Threads = 2; Params = ""} # CryptoNightHeavyTube
+    [PSCustomObject]@{Algorithm = "cryptonight-heavy/xhv";   MinMemGB = 4; Threads = 2; Params = ""} # CryptoNightHeavyHaven
 )
 $CommonCommands = ""
 
@@ -43,19 +56,20 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Algorithm = $_.Algorithm
         $Algorithm_Norm = Get-Algorithm $Algorithm
         $Params = $_.Params
+        $Threads = $_.Threads
 
         if ($Miner_Device) {
             if ($Config.UseDeviceNameForStatsFileNaming) {
-                $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_;"$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') + @($Threads) | Select-Object) -join '-'
             }
             else {
-                $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object)  + @($Threads) | Select-Object) -join '-'
             }
 
             #Get commands for active miner devices
-            $Params = Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index
-            $ConfigFileName = "$((@($Pools.$Algorithm_Norm.Name) + @($Algorithm_Norm) + @($Miner_Device.Model_Norm -Join "_") + @($Miner_Port) + @($Pools.$Algorithm_Norm.User) + @($Pools.$Algorithm_Norm.Pass) | Select-Object) -join '-').json"
-            $ThreadsConfigFileName = "$((@("ThreadsConfig") + @($Algorithm_Norm) + @($Miner_Device.Model_Norm -Join "_") | Select-Object) -join '-').json"
+            $ConfigFileName = "$((@($Pools.$Algorithm_Norm.Name) + @($Pools.$Algorithm_Norm.Region) + @($Algorithm_Norm) + @($Miner_Device.Model_Norm -Join "_") + @($Miner_Port) +  @($Pools.$Algorithm_Norm.User) + @($Pools.$Algorithm_Norm.Pass) + @($Threads) | Select-Object) -join '-').json"
+            $ThreadsConfigFileName = "$((@("ThreadsConfig") + @($Algorithm_Norm) + @(($Devices.Model_Norm | Select-Object) -Join "_") | Select-Object) -join '-').json"
+            $PoolParameters = "--url=$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --userpass=$($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass) --rig-id=$WorkerName --keepalive$(if ($Pools.$Algorithm_Norm.Name -eq 'Nicehash') {" --nicehash"})$(if ($Pools.$Algorithm_Norm.SSL) {" --tls"})"
 
             $Arguments = [PSCustomObject]@{
                 ConfigFile = [PSCustomObject]@{
@@ -76,20 +90,12 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                         "retries"      = 5
                         "retry-pause"  = 5
                         "threads"      = @()
-                        "pools"        = @([PSCustomObject]@{
-                            "keepalive" = $true
-                            "nicehash"  = ($Pools.$Algorithm_Norm.Name -eq 'Nicehash')
-                            "pass"      = "$($Pools.$Algorithm_Norm.Pass)"
-                            "url"       = "$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)"
-                            "user"      = "$($Pools.$Algorithm_Norm.User)"
-                            "rig-id"    = "$WorkerName"
-                            "tls"       = ($Pools.$Algorithm_Norm.SSL)
-                        })
                     }
                 }
-                Commands = ("--config=$ConfigFileName$Params$CommonCommands" -replace "\s+", " ").trim()
+                Commands = ("$PoolParameters --config=$ConfigFileName$(Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index)$CommonCommands" -replace "\s+", " ").trim()
                 ThreadsConfigFileName = $ThreadsConfigFileName
-                HwDetectCommands = "--config=$ThreadsConfigFileName$Params$CommonCommands"
+                Threads = $Threads
+                HwDetectCommands = "$PoolParameters --config=$ThreadsConfigFileName$Params$CommonCommands"
             }
 
             [PSCustomObject]@{
@@ -99,7 +105,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 HashSHA256 = $HashSHA256
                 Arguments  = $Arguments
                 HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
-                API        = "XmRigCfgFile"
+                API        = "XmRig"
                 Port       = $Miner_Port
                 URI        = $Uri
                 Fees       = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}

@@ -54,7 +54,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
     $Commands | ForEach-Object {
         $Algorithm = $_.Algorithm
-        $MinMem = $_.MinMemGB * 1GB
         $Main_Algorithm = $Algorithm -Split "_" | Select-Object -Index 0
         $Main_Algorithm_Norm = "$(Get-Algorithm $Main_Algorithm)-NHMP"
         $Secondary_Algorithm = $Algorithm -Split "_" | Select-Object -Index 1
@@ -63,14 +62,15 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Threads = $_.Threads
         $Params = $_.Params
         $BenchmarkIntervals = $_.BenchmarkIntervals
-        
-        $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge ($MinMem)})
+        $MinMemGB = $_.MinMemGB
+
+        $Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})
 
         if ($Pools.$Main_Algorithm_Norm.Name -eq "Nicehash" -and $Miner_Device) {
             if (-not $Secondary_Algorithm) {
                 #Single algo mining
                 if ($Config.UseDeviceNameForStatsFileNaming) {
-                    $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_;"$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') + @($Threads) | Select-Object) -join '-'
+                    $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') + @($Threads) | Select-Object) -join '-'
                 }
                 else {
                     $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
@@ -99,7 +99,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 #Dual algo mining
                 if ($Pools.$Secondary_Algorithm_Norm.Host -and $Pools.$Secondary_Algorithm_Norm.Name -eq "Nicehash" ) {
                     if ($Config.UseDeviceNameForStatsFileNaming) {
-                        $Miner_Name = (@($Name) + @("$(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_;"$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_')$($Main_Algorithm_Norm -replace '-NHMP' -replace 'Nicehash')$($Secondary_Algorithm_Norm -replace '-NHMP' -replace 'Nicehash')") + @($Threads) | Select-Object) -join '-'
+                        $Miner_Name = (@($Name) + @("$(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_')$($Main_Algorithm_Norm -replace '-NHMP' -replace 'Nicehash')$($Secondary_Algorithm_Norm -replace '-NHMP' -replace 'Nicehash')") + @($Threads) | Select-Object) -join '-'
                     }
                     else {
                         $Miner_Name = (@($Name) + @($Threads) + @("$Secondary_Algorithm_Norm" -replace "-NHMP" -replace "Nicehash") + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'

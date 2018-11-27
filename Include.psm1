@@ -58,55 +58,62 @@ function Get-Balance {
     [CmdletBinding()]
     param($Config, $NewRates)
 
-    $Data = [PSCustomObject]@{}
-
+    $BalancesData = [PSCustomObject]@{}
+    
     $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
         Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
-    } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | Sort-Object Name)
+    } | Select-Object -ExpandProperty Content | Sort-Object Name)
+    $BalancesData | Add-Member Balances $Balances
 
     #Get exchgange rates for all payout currencies
-    $CurrenciesWithBalances = @($Balances.currency | Sort-Object -Unique)
-    try {
-        $Rates = Invoke-RestMethod "https://min-api.cryptocompare.com/data/pricemulti?fsyms=$($CurrenciesWithBalances -join ",")&tsyms=$($Config.Currency -join ",")&extraParams=http://multipoolminer.io" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-    }
-    catch {
-        Write-Log -Level Warn "Pool API (CryptoCompare) has failed - cannot convert balances to other currencies. "
-        Return $Balances
-    }
-
-    #Add total of totals
-    $Totals = [PSCustomObject]@{
-        Name = "*Total*"
-    }
-    #Add Balance (in currency)
-    $Rates.PSObject.Properties.Name | ForEach-Object {
-        $Currency = $_.ToUpper()
-        $Balances | Foreach-Object {
-            if ($NewRates.$Currency -ne $null) {$Digits = ($($NewRates.$Currency).ToString().Split(".")[1]).length}else {$Digits = 8}
-            $_.Total = ("{0:N$($Digits)}" -f ([Float]$($_.Total)))
-            if ($Currency -eq $_.Currency) {
-                $_ | Add-Member "Balance ($Currency)" $_.Total
+    if ($CurrenciesWithBalances = @($Balances.currency | Sort-Object -Unique)) {
+        $BalancesData | Add-Member ApiRequest "https://min-api.cryptocompare.com/data/pricemulti?fsyms=$(($CurrenciesWithBalances | ForEach-Object {$_.ToUpper()}) -join ",")&tsyms=$(($Config.Currency | ForEach-Object {$_.ToUpper()}) -join ",")&extraParams=http://multipoolminer.io"
+        try {
+            $Rates = Invoke-RestMethod $BalancesData.ApiRequest -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        }
+        catch {
+            Write-Log -Level Warn "Pool API (CryptoCompare) has failed - cannot convert balances to other currencies. "
+            $BalancesData | Add-Member Rates $Rates
+            Return $BalancesData
+        }
+    
+        #Add total of totals
+        $Totals = [PSCustomObject]@{Name = "*Total*"}
+        
+        $NumberDecimalSeparator = (Get-Culture).NumberFormat.NumberDecimalSeparator
+        $NumberGroupSeparator = (Get-Culture).NumberFormat.NumberGroupSeparator
+        
+        #Add Balance (in currency)
+        $Rates.PSObject.Properties.Name | ForEach-Object {
+            $Currency = $_.ToUpper()
+            $Balances | Foreach-Object {
+                if ($NewRates.$Currency -ne $null) {$Digits = ($NewRates.$Currency).length - ([Int]($NewRates.$Currency)).length - 1} else {$Digits = 8}
+                #if ($Digits -lt 0 -or $Digits -gt 8) {$Digits = 8}
+                $_.Total = ("{0:N$($Digits)}" -f ([Float]$($_.Total)))
+                if ($Currency -eq $_.Currency) {
+                    $_ | Add-Member "Balance ($Currency)" $_.Total
+                }
             }
+            if (($Balances."Balance ($Currency)" | Measure-Object -Sum).sum) {$Totals | Add-Member "Balance ($Currency)" ("{0:N$($Digits)}" -f ([Float]$($Balances."Balance ($Currency)" | Measure-Object -Sum).sum))}
         }
-        if (($Balances."Balance ($Currency)" | Measure-Object -Sum).sum) {$Totals | Add-Member "Balance ($Currency)" ("{0:N$($Digits)}" -f ([Float]$($Balances."Balance ($Currency)" | Measure-Object -Sum).sum))}
+
+        #Add converted values
+        $Config.Currency | ForEach-Object {
+            $Currency = $_.ToUpper()
+            #Get number of digits from $NewRates
+            if ($NewRates.$Currency -ne $null) {$Digits = ($NewRates.$Currency).length - ([Int]($NewRates.$Currency)).length - 1} else {$Digits = 8}
+            #if ($Digits -lt 0 -or $Digits -gt 8) {$Digits = 8}
+            $Balances | Foreach-Object {
+                $_ | Add-Member "Value in $Currency" $(if ($Rates.$($_.Currency).$Currency) {("{0:N$($Digits)}" -f ([Float]$_.Total * [Float]$Rates.$($_.Currency).$Currency))}else {"unknown"}) -Force
+            }
+            if (($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)  {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ([Float]$($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)) -Force}
+        }
+        $Balances += $Totals
+        $BalancesData | Add-Member Balances $Balances -force
+        $BalancesData | Add-Member Rates $Rates
     }
 
-    #Add converted values
-    $Config.Currency | ForEach-Object {
-        $Currency = $_.ToUpper()
-        #Get number of digits from $NewRates
-        if ($NewRates.$Currency -ne $null) {$Digits = ($($NewRates.$Currency).ToString().Split(".")[1]).length}else {$Digits = 8}
-        $Balances | Foreach-Object {
-            $_ | Add-Member "Value in $Currency" $(if ($Rates.$($_.Currency).$Currency) {("{0:N$($Digits)}" -f ([Float]$_.Total * [Float]$Rates.$($_.Currency).$Currency))}else {"unknown"}) -Force
-        }
-        if (($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum) {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ([Float]$($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)) -Force}
-    }
-    $Balances += $Totals
-
-    $Data | Add-Member Balances $Balances
-    $Data | Add-Member Rates $Rates
-
-    Return $Data
+    Return $BalancesData
 }
 
 function Write-Log {
@@ -190,25 +197,25 @@ function Set-Stat {
     $SmallestValue = 1E-20
 
     $Stat = Get-Content $Path -ErrorAction SilentlyContinue
-
+    
     try {
         $Stat = $Stat | ConvertFrom-Json -ErrorAction Stop
         $Stat = [PSCustomObject]@{
-            Live                  = [Double]$Stat.Live
-            Minute                = [Double]$Stat.Minute
-            Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
-            Minute_5              = [Double]$Stat.Minute_5
-            Minute_5_Fluctuation  = [Double]$Stat.Minute_5_Fluctuation
-            Minute_10             = [Double]$Stat.Minute_10
+            Live = [Double]$Stat.Live
+            Minute = [Double]$Stat.Minute
+            Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
+            Minute_5 = [Double]$Stat.Minute_5
+            Minute_5_Fluctuation = [Double]$Stat.Minute_5_Fluctuation
+            Minute_10 = [Double]$Stat.Minute_10
             Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
-            Hour                  = [Double]$Stat.Hour
-            Hour_Fluctuation      = [Double]$Stat.Hour_Fluctuation
-            Day                   = [Double]$Stat.Day
-            Day_Fluctuation       = [Double]$Stat.Day_Fluctuation
-            Week                  = [Double]$Stat.Week
-            Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
-            Duration              = [TimeSpan]$Stat.Duration
-            Updated               = [DateTime]$Stat.Updated
+            Hour = [Double]$Stat.Hour
+            Hour_Fluctuation = [Double]$Stat.Hour_Fluctuation
+            Day = [Double]$Stat.Day
+            Day_Fluctuation = [Double]$Stat.Day_Fluctuation
+            Week = [Double]$Stat.Week
+            Week_Fluctuation = [Double]$Stat.Week_Fluctuation
+            Duration = [TimeSpan]$Stat.Duration
+            Updated = [DateTime]$Stat.Updated
         }
 
         $ToleranceMin = $Value
@@ -422,7 +429,7 @@ function ConvertTo-LocalCurrency {
     $Digits = ([math]::truncate(10 - $Offset - [math]::log($BTCRate, 10)))
     if ($Digits -lt 0) {$Digits = 0}
     if ($Digits -gt 10) {$Digits = 10}
-
+    
     ($Value * $BTCRate).ToString("N$($Digits)")
 }
 
@@ -680,8 +687,8 @@ function Get-Device {
                     Type = [String]$Device_OpenCL.Type
                     Type_Index = [Int]$Type_Index."$($Device_OpenCL.Type)"
                     OpenCL = $Device_OpenCL
-                    Model = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
-                    Model_Norm = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
+                    Model = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
+                    Model_Norm = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {

@@ -8,11 +8,6 @@ param(
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $PoolConfig = $Config.Pools.$Name
 
-if (-not $PoolConfig.BTC) {
-    Write-Log -Level Verbose "Cannot get balance on pool ($Name) - no wallet address specified. "
-    return
-}
-
 $RetryCount = 3
 $RetryDelay = 2
 while (-not ($APIRequest) -and $RetryCount -gt 0) {
@@ -21,8 +16,8 @@ while (-not ($APIRequest) -and $RetryCount -gt 0) {
     }
     catch {
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
-        $RetryCount--        
     }
+    $RetryCount--
 }
 
 if (-not $APIRequest) {
@@ -36,7 +31,7 @@ if (($APIRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Mea
 }
 
 # Payout currencies
-$Payout_Currencies = @($APIRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Sort-Object | Where-Object {$PoolConfig.$_}
+$Payout_Currencies = @($APIRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Sort-Object | Where-Object {$PoolConfig.Wallets.$_}
 
 if (-not $Payout_Currencies) {
     Write-Log -Level Verbose "Cannot get balance on pool ($Name) - no wallet address specified. "
@@ -45,7 +40,7 @@ if (-not $Payout_Currencies) {
 
 $Payout_Currencies | Foreach-Object {
     try {
-        $APIRequest = Invoke-RestMethod "http://api.yiimp.eu/api/wallet?address=$($PoolConfig.$_)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $APIRequest = Invoke-RestMethod "http://api.yiimp.eu/api/wallet?address=$($PoolConfig.Wallets.$_)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 
         if (($APIRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
             Write-Log -Level Warn "Pool Balance API ($Name) for $_ returned nothing. "

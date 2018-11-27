@@ -10,7 +10,7 @@ param(
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ethminer.exe"
 $HashSHA256 = "B2947D6AF604B986810DEDC9EFC8263F509B59D9930D9180E2FEF48EAB14C7B2"
-$Uri = "https://github.com/ethereum-mining/ethminer/releases/download/v0.16.1/ethminer-0.16.1-windows-amd64.zip"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethminer/ethminer-0.16.1-windows-amd64.zip"
 $ManualUri = "https://github.com/ethereum-mining/ethminer"
 $Port = "40{0:d2}"
 
@@ -37,12 +37,12 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
         $Algorithm = $_.Algorithm
         $Algorithm_Norm = Get-Algorithm $Algorithm
-        $MinMem = $_.MinMemGB * 1GB
         $Params = $_.Params
+        $MinMemGB = $_.MinMemGB
 
-        if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMem})) {
+        if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
             if ($Config.UseDeviceNameForStatsFileNaming) {
-                $Miner_Name = (@($Name) + @("$($Algorithm_Norm -replace '^ethash', '')") + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_;"$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @("$($Algorithm_Norm -replace '^ethash', '')") + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
             }
             else {
                 $Miner_Name = (@($Name) + @("$($Algorithm_Norm -replace '^ethash', '')") + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'

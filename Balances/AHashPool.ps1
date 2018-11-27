@@ -8,7 +8,7 @@ param(
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $PoolConfig = $Config.Pools.$Name
 
-if (-not $PoolConfig.BTC) {
+if (-not $PoolConfig.Wallets.BTC) {
     Write-Log -Level Verbose "Cannot get balance on pool ($Name) - no wallet address specified. "
     return
 }
@@ -17,12 +17,12 @@ $RetryCount = 3
 $RetryDelay = 2
 while (-not ($APIRequest) -and $RetryCount -gt 0) {
     try {
-        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "http://www.ahashpool.com/api/wallet?address=$($PoolConfig.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "http://www.ahashpool.com/api/wallet?address=$($PoolConfig.Wallets.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
     }
     catch {
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
-        $RetryCount--        
     }
+    $RetryCount--
 }
 
 if (-not $APIRequest) {

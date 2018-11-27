@@ -8,7 +8,7 @@ param(
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $PoolConfig = $Config.Pools.$Name
 
-if (-not $PoolConfig.BTC) {
+if (-not $PoolConfig.Wallets.BTC) {
     Write-Log -Level Verbose "Cannot get balance on pool ($Name) - no wallet address specified. "
     return
 }
@@ -18,14 +18,14 @@ $RetryDelay = 2
 while (-not ($APIRequest) -and $RetryCount -gt 0) {
     try {
         #NH API does not total all of your balances for each algo up, so you have to do it with another call then total them manually.
-        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "https://api.nicehash.com/api?method=stats.provider&addr=$($PoolConfig.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "https://api.nicehash.com/api?method=stats.provider&addr=$($PoolConfig.Wallets.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
         $Sum = 0
         $APIRequest.result.stats.balance | Foreach {$Sum += $_}
     }
     catch {
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
-        $RetryCount--        
     }
+    $RetryCount--
 }
 
 if (-not $APIRequest) {

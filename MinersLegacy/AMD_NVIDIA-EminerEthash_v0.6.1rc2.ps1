@@ -19,7 +19,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; Params = ""} #Ethash3GB
     [PSCustomObject]@{Algorithm = "ethash"   ; MinMemGB = 4; Params = ""} #Ethash
 )
-$CommonCommands = " -no-devfee -intensity 64"
+$CommonCommands = " -intensity 64"
 
 # Set devfee default coin, it may reduce DAG changes
 $DevFeeCoin  = [PSCustomObject]@{
@@ -45,11 +45,11 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
         $Algorithm = $_.Algorithm
         $Algorithm_Norm = Get-Algorithm $Algorithm
-        $MinMem = $_.MinMemGB * 1GB
+        $MinMemGB = $_.MinMemGB
 
-        if ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMem})) {
+        if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
             if ($Config.UseDeviceNameForStatsFileNaming) {
-                $Miner_Name = (@($Name) + @("$($Algorithm_Norm -replace '^ethash', '')")+ @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_;"$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @("$($Algorithm_Norm -replace '^ethash', '')")+ @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
             }
             else {
                 $Miner_Name = (@($Name) + @("$($Algorithm_Norm -replace '^ethash', '')") + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'

@@ -21,8 +21,8 @@ while (-not ($APIRequest) -and $RetryCount -gt 0) {
     }
     catch {
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
-        $RetryCount--        
     }
+    $RetryCount--
 }
 
 if (-not $APIRequest) {

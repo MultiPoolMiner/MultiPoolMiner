@@ -26,7 +26,7 @@ $Commands = [PSCustomObject]@{
     #"equihash"     = "" #Equihash - Beaten by Bminer by 30%
     "fresh"         = "" #Fresh
     #"fugue256"      = "" #Fugue256 - fugue256 not in algorithms.txt
-    "graft"         = "" #CryptoNightV7
+    #"graft"         = "" #CryptoNightV7
     "hmq1725"       = "" #HMQ1725
     "jackpot"       = "" #JHA
     "keccak"        = "" #Keccak
@@ -35,7 +35,7 @@ $Commands = [PSCustomObject]@{
     "lyra2v2"       = "" #Lyra2RE2
     "lyra2z"        = "" #Lyra2z, ZCoin
     "neoscrypt"     = "" #NeoScrypt
-    "monero"        = "" #CryptoNightV7
+    #"monero"        = "" # -> CryptoNightV7
     #"penta"         = "" #Pentablake - penta not in algorithms.txt
     "phi1612"       = "" #PHI, e.g. Seraph
     "phi2"          = "" #PHI2 LUX
@@ -96,10 +96,10 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | Where-Object {$Pools.(Get-Algorithm $_).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm $_
-        if ($_ -eq "monero") {$Algorithm_Norm = "CryptonightV7"} #temp fix, monero is now CryptonightV8
+        if ($_ -eq "monero") {$Algorithm_Norm = "CryptonightV7"} #temp fix, monero is a coin, not an algo; should mine CryptonightV7; monero algo is now CryptonightV8
 
         if ($Config.UseDeviceNameForStatsFileNaming) {
-            $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_;"$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
+            $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
         }
         else {
             $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'

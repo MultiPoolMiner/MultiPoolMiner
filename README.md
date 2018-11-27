@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 08/11/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 15/11/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -138,12 +138,18 @@ By default the MPM monitor uses the BTC address (*-Wallet*) to identify your min
 **-MinerstatusURL** https://multipoolminer.io/monitor/miner.php
 Report and monitor your mining rig's status by including the command above. Wallet address must be set even if you are only using MiningPoolHub as a pool. You can access the reported information by entering your wallet address on the https://multipoolminer.io/monitor web address. By using this service you understand and accept the terms and conditions detailed in this document (further below). 
 
-**-PoolName [ahashpool, ahashpoolcoins, blazepool, blockmasters, blockmasterscoins, hashrefinery, miningpoolhub, miningpoolhubcoins, nicehash, yiimp, zergpool, zergpoolcoins, zpool, zpoolcoins]**
+**-PoolBalancesUpdateInterval**
+MPM queries the pool balances every n minutes. Default is 15, minimum is 0 (=on every loop). MPM does this to minimize the requests sent to the pools. Pools usually do not update the balances in real time, so querying on each loop is unnecessary.
+Note: The balance overview is still shown on each loop.
+    
+**-PoolName [ahashpool(coins), blazepool, blockmasters(coins), hashrefinery(coins), miningpoolhub(coins), nicehash, nlpool(coins), phiphipool(coins), ravenminer, ravenminereu, yiimp, zpool(coins)]**
 The following pools are currently supported (in alphabetical order):
 
 	- AHashPool / AHashPoolCoins https://www.ahashpool.com/
 
 	  Payout in BTC (Bitcoin address must be provided using the *-Wallet* command)
+
+	  AHashPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below)
 
 	- BlazePool http://www.blazepool.com/
 
@@ -153,11 +159,13 @@ The following pools are currently supported (in alphabetical order):
 
 	  Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via config file required, see below)
 	  
-	  Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
+	  BlockMastersCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
-	- HashRefinery http://pool.hashrefinery.com
+	- HashRefinery / HashRefineryCoins http://pool.hashrefinery.com
 
 	  Payout in BTC (Bitcoin address must be provided using the *-Wallet* command)
+
+	  HashRefineryCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below)
 
 	- MiningPoolHub / MiningPooHubCoins https://miningpoolhub.com/
 
@@ -173,20 +181,37 @@ The following pools are currently supported (in alphabetical order):
 
 	  Payout in BTC (Bitcoin address must be provided using the *-Wallet* command)
 
-	- NLPool https://www.nlpool.nl/
+	- NLPool / NLPoolCoins https://www.nlpool.nl/
 
 	  Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via config file required, see below)
 	  
-	  Pool allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
+	  NLPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
-	- YiiMP http://yiimp.eu/
+
+	- PhiPhiPool / PhiPhiPoolCoins http://pool.hashrefinery.com
+
+	  Payout in BTC (Bitcoin address must be provided using the '-Wallet' command) or any currency available in API (Advanced configuration via config file required, see below)
+ 
+	  PhiPhiPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below)
+
+
+	- Ravenminer https://ravenminer.com
+
+	  Payout in RVN (Ravencoin address must be provided using config.txt in Pools section use "Ravenminer" & RVN address)
+	  
+
+	- RavenminerEu https://eu.ravenminer.com
+
+	  Payout in RVN (Ravencoin address must be provided using config.txt in Pools section use "RavenminerEu" & RVN address)
 
 	  Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config file (Advanced configuration via config file required, see below)
 
 	- Zpool http://www.zpool.ca/
 
 	  Payout in BTC (Bitcoin address must be provided using the *-Wallet* command), or any currency available in API (Advanced configuration via config file required, see below)
-	  
+
+	  ZpoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below)
+
 	***IMPORTANT**: For the list of default configured pools consult 'start.bat.' This does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the *-Algorithm* command for further details and example.*
 
 **-PricePenaltyFactor**
@@ -293,8 +318,7 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
 
 ```
 {
-    "VersionCompatibility":  "3.1.0",
-    "Wallet":  "$Wallet",
+    "VersionCompatibility":  "3.2.0",
     "UserName":  "$UserName",
     "WorkerName":  "$WorkerName",
     "API_ID":  "$API_ID",
@@ -310,8 +334,8 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
     "ExcludeAlgorithm":  "$ExcludeAlgorithm",
     "PoolName":  "$PoolName",
     "ExcludePoolName":  "$ExcludePoolName",
-	"CoinName":  "$CoinName",
-	"ExcludeCoinName":  "$ExcludeCoinName",
+    "CoinName":  "$CoinName",
+    "ExcludeCoinName":  "$ExcludeCoinName",
     "Currency":  "$Currency",
     "Donate":  "$Donate",
     "Proxy":  "$Proxy",
@@ -327,15 +351,17 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
     "ShowPoolBalances":  "$ShowPoolBalances",
     "ShowPoolBalancesDetails":  "$ShowPoolBalancesDetails",
     "ShowPoolBalancesExcludedPools":  "$ShowPoolBalancesExcludedPools",
+    "PoolBalancesUpdateInterval":  "$PoolBalancesUpdateInterval",
     "CreateMinerInstancePerDeviceModel":  "$CreateMinerInstancePerDeviceModel",
     "UseDeviceNameForStatsFileNaming":  "$UseDeviceNameForStatsFileNaming",
     "PricePenaltyFactor":  "$PricePenaltyFactor",
     "Pools":  {
-
-              },
+    },
     "Miners":  {
-
-               }
+    },
+    "Wallets":  [
+        "BTC":  "$Wallet",
+    ]
 }
 ```
 

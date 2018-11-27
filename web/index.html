@@ -61,20 +61,23 @@
         console.log(result);
         $("#balanceboxes").empty();
         var template = Handlebars.compile($("#poolbalance_template").html());
+        var footer = new RegExp("-.+|=.+");
         $.each(result, function(index, item) {
-          var properties = Object.keys(item);
-          var currencies = properties.filter((properties) => properties.startsWith("Value in "));
+          if (!(footer.test(item.Name))) {
+            var properties = Object.keys(item);
+            var currencies = properties.filter((properties) => properties.startsWith("Value in "));
 
-          if (item.Name == "*Total*") { 
-            var data = {name: "Total Balance From All Pools", balances: {}, total: true};
-          } else {
-            var data = {name: item.Name, balances: {}};
+            if (item.Name == "*Total*") { 
+              var data = {name: "Total Balance From All Pools", balances: {}, total: true};
+            } else {
+              var data = {name: item.Name, balances: {}};
+            }
+            $.each(currencies, function(cindex, currency) {
+              var name = currency.replace("Total_","");
+                data["balances"][name] = item[currency];
+            });
+            $("#balanceboxes").append(template(data));
           }
-          $.each(currencies, function(cindex, currency) {
-            var name = currency.replace("Total_","");
-              data["balances"][name] = item[currency];
-          });
-          $("#balanceboxes").append(template(data));
         });
       }});
     }

@@ -76,7 +76,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{MainAlgorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "pascal";  SecondaryIntensity = 60;  Params = ""} #Ethash/Pascal60
     [PSCustomObject]@{MainAlgorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "pascal";  SecondaryIntensity = 80;  Params = ""} #Ethash/Pascal80
 )
-$CommonCommands = " -dbg 1 -logfile debug.log"
+$CommonCommands = " -dbg -1"
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU")
 
@@ -93,10 +93,10 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Commands | ForEach-Object {
         $Main_Algorithm = $_.MainAlgorithm
         $Main_Algorithm_Norm = Get-Algorithm $Main_Algorithm
-        $MinMem = $_.MinMemGB * 1GB
         $Params = $_.Params
+        $MinMemGB = $_.MinMemGB
 
-        $Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMem})
+        $Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})
 
         if ($Pools.$Main_Algorithm_Norm.Host -and $Arguments_Platform -and $Miner_Device) {
 
@@ -108,7 +108,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $Secondary_Algorithm_Norm = Get-Algorithm $Secondary_Algorithm
 
                 if ($Config.UseDeviceNameForStatsFileNaming) {
-                    $Miner_Name = (@($Name) + @("$(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_;"$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_')-$Main_Algorithm_Norm$Secondary_Algorithm_Norm-$(if ($_.SecondaryIntensity -ge 0) {$_.SecondaryIntensity})") | Select-Object) -join '-'
+                    $Miner_Name = (@($Name) + @("$(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_')-$Main_Algorithm_Norm$Secondary_Algorithm_Norm-$(if ($_.SecondaryIntensity -ge 0) {$_.SecondaryIntensity})") | Select-Object) -join '-'
                 }
                 else {
                     $Miner_Name = ((@($Name) + @("$($Main_Algorithm_Norm -replace '^ethash', '')$Secondary_Algorithm_Norm") + @(if ($_.SecondaryIntensity -ge 0) {$_.SecondaryIntensity}) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-') -replace "[-]{2,}", "-"
@@ -127,7 +127,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             }
             else {
                 if ($Config.UseDeviceNameForStatsFileNaming) {
-                    $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_;"$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') + @($Main_Algorithm_Norm) | Select-Object) -join '-'
+                    $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') + @($Main_Algorithm_Norm) | Select-Object) -join '-'
                 }
                 else {
                     $Miner_Name = ((@($Name) + @("$($Main_Algorithm_Norm -replace '^ethash', '')") + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-') -replace "[-]{2,}", "-"
