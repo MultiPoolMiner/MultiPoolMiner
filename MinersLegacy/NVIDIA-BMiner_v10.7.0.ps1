@@ -9,8 +9,17 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\BMiner.exe"
-$HashSHA256 = "762D2EE575FF5BE4D6BDC64A18D42F3FDC68FF61A0C8704EFA00FD6F06FF3AC5"
-$Uri = "https://www.bminercontent.com/releases/bminer-lite-v10.5.0-74955e3-amd64.zip"
+$HashSHA256 = "39926628F64CAE249023939CF730DAF8CE9CB5AD4897B26EBE7171098E850DD0"
+$Uri = "https://www.bminercontent.com/releases/bminer-lite-v10.7.0-31ee7bc-CUDA-9.2-amd64.zip"
+
+# Miner requires CUDA 9.2.00 or higher
+$DriverVersion = ((Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+$RequiredVersion = "9.2.00"
+if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$RequiredVersion) {
+    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers. "
+    return
+}
+
 $ManualUri = "https://bitcointalk.org/index.php?topic=2519271.1320"
 $Port = "40{0:d2}"
 
@@ -62,10 +71,10 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Arguments_Secondary = ""
         $Main_Algorithm = $_.MainAlgorithm
         $Main_Algorithm_Norm = Get-Algorithm $Main_Algorithm
-        $MinMem = $_.MinMemGB * 1GB
         $Params = $_.Params
+        $MinMemGB = $_.MinMemGB
 
-        if ($Pools.$Main_Algorithm_Norm.Host -and ($Miner_Device = @($Device | Where-Object {$_.OpenCL.GlobalMemsize -ge $MinMem}))) {
+        if ($Pools.$Main_Algorithm_Norm.Host -and ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB}))) {
 
             #define --pers for equihash1445
             if ($Main_Algorithm_Norm -like "Equihash1445") {
@@ -97,7 +106,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 $Secondary_Algorithm_Norm = Get-Algorithm $Secondary_Algorithm
 
                 if ($Config.UseDeviceNameForStatsFileNaming) {
-                    $Miner_Name = (@($Name) + @("$($Main_Algorithm_Norm)$($Secondary_Algorithm_Norm)$(if ($_.DualSubsolver -ge 0) {"-DS$($_.DualSubsolver)"})$(if ($_.SecondaryIntensity) {"-Intensity$($_.SecondaryIntensity)"})") + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_;"$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
+                    $Miner_Name = (@($Name) + @("$($Main_Algorithm_Norm)$($Secondary_Algorithm_Norm)$(if ($_.DualSubsolver -ge 0) {"-DS$($_.DualSubsolver)"})$(if ($_.SecondaryIntensity) {"-Intensity$($_.SecondaryIntensity)"})") + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
                 }
                 else {
                     $Miner_Name = (@($Name) + @("$($Main_Algorithm_Norm)$Secondary_Algorithm_Norm") + @(if ($_.DualSubsolver -ge 0) {"DS$($_.DualSubsolver)"}) + @(if ($_.SecondaryIntensity) {"Intensity$($_.SecondaryIntensity)"}) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
