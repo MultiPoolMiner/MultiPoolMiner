@@ -201,21 +201,21 @@ function Set-Stat {
     try {
         $Stat = $Stat | ConvertFrom-Json -ErrorAction Stop
         $Stat = [PSCustomObject]@{
-            Live = [Double]$Stat.Live
-            Minute = [Double]$Stat.Minute
-            Minute_Fluctuation = [Double]$Stat.Minute_Fluctuation
-            Minute_5 = [Double]$Stat.Minute_5
-            Minute_5_Fluctuation = [Double]$Stat.Minute_5_Fluctuation
-            Minute_10 = [Double]$Stat.Minute_10
+            Live                  = [Double]$Stat.Live
+            Minute                = [Double]$Stat.Minute
+            Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
+            Minute_5              = [Double]$Stat.Minute_5
+            Minute_5_Fluctuation  = [Double]$Stat.Minute_5_Fluctuation
+            Minute_10             = [Double]$Stat.Minute_10
             Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
-            Hour = [Double]$Stat.Hour
-            Hour_Fluctuation = [Double]$Stat.Hour_Fluctuation
-            Day = [Double]$Stat.Day
-            Day_Fluctuation = [Double]$Stat.Day_Fluctuation
-            Week = [Double]$Stat.Week
-            Week_Fluctuation = [Double]$Stat.Week_Fluctuation
-            Duration = [TimeSpan]$Stat.Duration
-            Updated = [DateTime]$Stat.Updated
+            Hour                  = [Double]$Stat.Hour
+            Hour_Fluctuation      = [Double]$Stat.Hour_Fluctuation
+            Day                   = [Double]$Stat.Day
+            Day_Fluctuation       = [Double]$Stat.Day_Fluctuation
+            Week                  = [Double]$Stat.Week
+            Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
+            Duration              = [TimeSpan]$Stat.Duration
+            Updated               = [DateTime]$Stat.Updated
         }
 
         $ToleranceMin = $Value
