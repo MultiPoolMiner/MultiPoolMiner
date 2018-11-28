@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\cast_xmr-vega.exe"
-$HashSHA256 = "6EA3D830E3CBAA7CE4DFD84CE10B90A517803132ED86B24D8591F17039688F86"
-$Uri = "http://www.gandalph3000.com/download/cast_xmr-vega-win64_160.zip"
+$HashSHA256 = "08C3E2A61412326F74E8CB0DBF0632F94DD670CC54322D9781A18E23E0ABF781"
+$Uri = "http://www.gandalph3000.com/download/cast_xmr-vega-win64_165.zip"
 $ManualUri = "http://www.gandalph3000.com"
 $Port = "40{0:d2}"
 
@@ -23,8 +23,9 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm_Norm = "CryptonightXtl";       AlgoNumber =  6; MinMemGB = 2; Params = ""} #CryptonightXtl
     [PSCustomObject]@{Algorithm_Norm = "CryptonightHeavyXhv";  AlgoNumber =  7; MinMemGB = 4; Params = ""} #CryptonightHeavyXhv
     [PSCustomObject]@{Algorithm_Norm = "CryptonightFast";      AlgoNumber =  8; MinMemGB = 2; Params = ""} #CryptonightFast
-    [PSCustomObject]@{Algorithm_Norm = "CryptonightRto";      AlgoNumber =  9; MinMemGB = 2; Params = ""} #CryptonightFest (not to be confused with CryptonightFast), new with 1.50
+    [PSCustomObject]@{Algorithm_Norm = "CryptonightRto";       AlgoNumber =  9; MinMemGB = 2; Params = ""} #CryptonightFest (not to be confused with CryptonightFast), new with 1.50
     [PSCustomObject]@{Algorithm_Norm = "CryptonightV8";        AlgoNumber = 10; MinMemGB = 2; Params = ""} #CryptonightV8, new with 1.50
+    [PSCustomObject]@{Algorithm_Norm = "CryptonightXfh";       AlgoNumber = 11; MinMemGB = 2; Params = ""} #CryptoNight-SuperFast, new with 1.65
 
     # ASIC only (09/07/2018)
     #[PSCustomObject]@{Algorithm_Norm = "Cryptonight";          AlgoNumber = 0; MinMemGB = 2; Commands = ""} #Cryptonight
