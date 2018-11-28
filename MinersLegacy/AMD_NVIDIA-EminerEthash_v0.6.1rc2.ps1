@@ -64,7 +64,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 DeviceName           = $Miner_Device.Name
                 Path                 = $Path
                 HashSHA256           = $HashSHA256
-                Arguments            = ("-http :$($Miner_Port) -S $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -U $($Pools.$Algorithm_Norm.User) -P $($Pools.$Algorithm_Norm.Pass)$(if($Config.WorkerName) {" -N $($Config.WorkerName)"})$(if($DevfeeCoin.($Pools.$Algorithm_Norm.CoinName)) {"$($DevfeeCoin.($Pools.$Algorithm_Norm.CoinName))"})$($_.Params)$CommonCommands -M $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Index)}) -join ',')" -replace "\s+", " ").trim()
+                Arguments            = ("-http :$($Miner_Port) -S $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -U $($Pools.$Algorithm_Norm.User) -P $($Pools.$Algorithm_Norm.Pass)$(if($DevfeeCoin.($Pools.$Algorithm_Norm.CoinName)) {"$($DevfeeCoin.($Pools.$Algorithm_Norm.CoinName))"})$($_.Params)$(if ($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker) {" -N $($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker)"})$CommonCommands -M $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Index)}) -join ',')" -replace "\s+", " ").trim()
                 HashRates            = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                 API                  = "Eminer"
                 Port                 = $Miner_Port
