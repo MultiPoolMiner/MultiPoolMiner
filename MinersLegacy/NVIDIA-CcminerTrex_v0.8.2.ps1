@@ -21,12 +21,12 @@ if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$Requ
 }
 
 if ($DriverVersion -lt [System.Version]("10.0.0")) {
-    $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/T-rex/t-rex-0.8.1-win-cuda9.2.zip"
-    $HashSHA256 = "464998AEA1FAC8E67337E354260FEAA766AF921E250464C6A1CF763EC495ABC9"
+    $Uri = "https://github.com/trexminer/T-Rex/releases/download/0.8.2/t-rex-0.8.2-win-cuda9.2.zip"
+    $HashSHA256 = "82DE85410B26DA70140C3B411C3FF8D1D868CC08A8FA6C8E9C56A0638C79B35B"
 }
 else {
-    $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/T-rex/t-rex-0.8.1-win-cuda10.0.zip"
-    $HashSHA256 = "9F1CE4EA6CA0E8545300473FC8D91F83BBFF71073CE2525E047D17F79728B9EF"
+    $Uri = "https://github.com/trexminer/T-Rex/releases/download/0.8.2/t-rex-0.8.2-win-cuda10.0.zip"
+    $HashSHA256 = "338BD5F320C00ADA92DC871C29F442CEC8083B2D6E61A5D17E00254244247EC2"
 }
 
 $Commands = [PSCustomObject]@{
@@ -34,9 +34,9 @@ $Commands = [PSCustomObject]@{
     "bcd"        = "" #BitcoinDiamond, New in 0.6.5
     "bitcore"    = "" #Bitcore, New in 0.6.1
     "c11"        = "" #C11
+    "dedal"      = "" #Dedal, new in 0.8.2
     "geek"       = "" #Geek, new in 0.8.0
     "hmq1725"    = "" #Hmq1725, New in 0.6.4
-    "hsr"        = "" #HSR
     "lyra2z"     = "" #Lyra2z
     "phi"        = "" #Phi
     "polytimos"  = "" #Polytimos, New in 0.6.3
