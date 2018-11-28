@@ -231,6 +231,7 @@ $UserNameDonate = ((@("aaronsace") * 3) + (@("grantemsley") * 2) + (@("uselessgu
 $WorkerNameDonate = "multipoolminer"
 
 while ($true) {
+    $Error.Clear() # Clear all errors from previous run, reduce memory
     $ConfigBackup = $Config | ConvertTo-Json -Depth 10 | ConvertFrom-Json
     #Add existing variables to $Parameters so they are available in psm1
     $Config_Parameters = @{}
