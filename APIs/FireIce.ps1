@@ -18,39 +18,45 @@ class Fireice : Miner {
         $PlatformThreadsConfigFile = "$(Split-Path $this.Path)\$($Parameters.PlatformThreadsConfigFile)"
         $ThreadsConfig = ""
 
-        #Write config files
-        ($Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10) -replace '^{' -replace '}$' | Set-Content $ConfigFile -ErrorAction SilentlyContinue -Force
-        ($Parameters.PoolsFile.Content | ConvertTo-Json -Depth 10) -replace '^{' -replace '}$', ',' | Set-Content $PoolsFile -ErrorAction SilentlyContinue -Force
+        try {
+            #Write config files
+            ($Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10) -replace '^{' -replace '}$' | Set-Content $ConfigFile -Force
+            ($Parameters.PoolsFile.Content | ConvertTo-Json -Depth 10) -replace '^{' -replace '}$', ',' | Set-Content $PoolsFile -Force
 
-        #Has hardware config changed? 
-        if (-not (Test-Path $PlatformThreadsConfigFile -PathType Leaf)) {
-            #Temporarily start miner with empty thread conf file. The miner will then create a hw config file with default threads info for all platform hardware
-            $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '$($Parameters.HwDetectCommands)' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
-            if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
-                for ($WaitForThreadsConfig = 0; $WaitForThreadsConfig -le 360; $WaitForThreadsConfig++) {
-                    if (Test-Path ($PlatformThreadsConfigFile)) {
-                        break
+            #Has hardware config changed? 
+            if (-not (Test-Path $PlatformThreadsConfigFile -PathType Leaf)) {
+                #Temporarily start miner with empty thread conf file. The miner will then create a hw config file with default threads info for all platform hardware
+                $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '$($Parameters.HwDetectCommands)' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+                if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
+                    for ($WaitForThreadsConfig = 0; $WaitForThreadsConfig -le 360; $WaitForThreadsConfig++) {
+                        if (Test-Path ($PlatformThreadsConfigFile)) {
+                            break
+                        }
+                        Start-Sleep -Milliseconds 100
                     }
-                    Start-Sleep -Milliseconds 100
+                    $this.Process | Remove-Job -Force
+                    $this.Process = $null
                 }
-                $this.Process | Remove-Job -Force
-                $this.Process = $null
+            }
+            if (-not (Test-Path $MinerThreadsConfigFile -PathType Leaf) -or (Get-Item $PlatformThreadsConfigFile).LastWriteTime -gt (Get-Item $MinerThreadsConfigFile).LastWriteTime) {
+                $ThreadsConfig = (Get-Content $PlatformThreadsConfigFile) -replace '^\s*//.*' | Out-String
+                $ThreadsConfig = $ThreadsConfig -replace '\/\*.*' -replace '\*\/' -replace '\*.+' -replace '\s' -replace ',\},]','}]' -replace ',\},\{','},{' -replace ',$',''
+                for ($DeviceID = 0; $DeviceID -le 32; $DeviceID++) {
+                    if ($Parameters.Devices.Count -ge 1 -and $Parameters.Devices -notcontains $DeviceId) {
+                        # Filter unwanted miner index
+                        $ThreadToRemovePattern = "({`"index`":$($DeviceID).+?},)"
+                        $ThreadsConfig = $ThreadsConfig -replace $ThreadToRemovePattern
+                    }
+                }
+                #Set Bfactor to 11 (default is 6 which makes PC unusable)
+                $ThreadsConfig = $ThreadsConfig -replace '"bfactor":\d,', '"bfactor":11,'
+                #Write HW config file with threads info for active device
+                $ThreadsConfig | Set-Content $MinerThreadsConfigFile -Force
             }
         }
-        if (-not (Test-Path $MinerThreadsConfigFile -PathType Leaf) -or (Get-Item $PlatformThreadsConfigFile).LastWriteTime -gt (Get-Item $MinerThreadsConfigFile).LastWriteTime) {
-            $ThreadsConfig = (Get-Content $PlatformThreadsConfigFile) -replace '^\s*//.*' | Out-String
-            $ThreadsConfig = $ThreadsConfig -replace '\/\*.*' -replace '\*\/' -replace '\*.+' -replace '\s' -replace ',\},]','}]' -replace ',\},\{','},{' -replace ',$',''
-            for ($DeviceID = 0; $DeviceID -le 32; $DeviceID++) {
-                if ($Parameters.Devices.Count -ge 1 -and $Parameters.Devices -notcontains $DeviceId) {
-                    # Filter unwanted miner index
-                    $ThreadToRemovePattern = "({`"index`":$($DeviceID).+?},)"
-                    $ThreadsConfig = $ThreadsConfig -replace $ThreadToRemovePattern
-                }
-            }
-            #Set Bfactor to 11 (default is 6 which makes PC unusable)
-            $ThreadsConfig = $ThreadsConfig -replace '"bfactor":\d,', '"bfactor":11,'
-            #Write HW config file with threads info for active device
-            $ThreadsConfig | Set-Content $MinerThreadsConfigFile -ErrorAction SilentlyContinue -Force
+        catch {
+            Write-Log -Level Error "Creating miner config files failed ($($this.Name) {$(($this.Algorithm | Foreach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}) [Error: '$($Error[0])']. "
+            return
         }
 
         if ($this.Process) {

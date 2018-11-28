@@ -28,22 +28,22 @@ class XmRig : Miner {
             if (-not $Parameters.ConfigFile.Content.threads) {
                 #Existing complete config file with threads info?
                 if (Test-Path $ConfigFile -PathType Leaf) {
-                    $ThreadsConfig = (Get-Content $ConfigFile | ConvertFrom-Json -ErrorAction SilentlyContinue).threads
+                    $ThreadsConfig = (Get-Content $ConfigFile | ConvertFrom-Json).threads
                 }
                 if (-not $ThreadsConfig.Count) {
                     #Check if we have a valid hw file for all installed hardware (hardware changed, deviceIDs changed?). Thread info depends on algo.
                     $ThreadsConfigFile = "$(Split-Path $this.Path)\$($Parameters.ThreadsConfigFileName)"
                     if (Test-Path $ThreadsConfigFile -PathType Leaf) {
-                        $ThreadsConfig = Get-Content $ThreadsConfigFile | ConvertFrom-Json -ErrorAction SilentlyContinue
+                        $ThreadsConfig = Get-Content $ThreadsConfigFile | ConvertFrom-Json
                     }
                     if (($ThreadsConfig.index).Count -le 1) {
                         #Temporarily start miner with pre-config file (without threads config). Miner will then update hw config file with threads info
-                        $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ThreadsConfigFile -ErrorAction SilentlyContinue -Force
+                        $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ThreadsConfigFile -Force
                         $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '$($Parameters.HwDetectCommands)' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
                         if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
                             for ($WaitForThreadsConfig = 0; $WaitForThreadsConfig -le 360; $WaitForThreadsConfig++) {
-                                if ($ThreadsConfig = (Get-Content $ThreadsConfigFile | ConvertFrom-Json -ErrorAction SilentlyContinue).threads) {
-                                    $ThreadsConfig | ConvertTo-Json -Depth 10 | Set-Content $ThreadsConfigFile -ErrorAction SilentlyContinue -Force
+                                if ($ThreadsConfig = (Get-Content $ThreadsConfigFile | ConvertFrom-Json).threads) {
+                                    $ThreadsConfig | ConvertTo-Json -Depth 10 | Set-Content $ThreadsConfigFile -Force
                                     break
                                 }
                                 Start-Sleep -Milliseconds 100
@@ -54,15 +54,18 @@ class XmRig : Miner {
                     }
                     #Write config files. Overwrite because we need to add thread info
                     $Parameters.ConfigFile.Content | Add-Member threads ([Array](($ThreadsConfig | Where-Object {$Parameters.Devices -contains $_.index}) | Select-Object -Unique) * $Parameters.Threads) -Force
-                    $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -ErrorAction SilentlyContinue -Force
+                    $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile-Force
                 }
             }
             else {    
                 #Write config files. Keep separate files and do not overwrite to preserve optional manual customization
-                $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -ErrorAction SilentlyContinue
+                $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile
             }
         }
-        catch {}
+        catch {
+            Write-Log -Level Error "Creating miner config files failed ($($this.Name) {$(($this.Algorithm | Foreach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}) [Error: '$($Error[0])']. "
+            return
+        }
 
         if ($this.Process) {
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
