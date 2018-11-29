@@ -96,9 +96,8 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                     FileName = $ConfigFileName
                     Content  = [PSCustomObject]@{
                         cryptonight_type = $Algorithm
-                        intensity        = 0
-                        double_threads   = $false
-                        gpu_conf         = @($Miner_Device.Type_PlatformId_Index | Foreach-Object {
+                        double_threads = $false
+                        gpu_conf = @($Miner_Device.Type_PlatformId_Index | Foreach-Object {
                             [PSCustomObject]@{
                                 "id"        = $_  
                                 "intensity" = $(if ($Intensity | Select-Object -Index $_ -ErrorAction SilentlyContinue) {$Intensity | Select-Object -Index $_} else {0})
@@ -107,6 +106,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                                 #"worksize"  = [Int]8
                             }
                         })
+                        intensity = 0
+                        min_rig_speed = $(if($Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week) {[Int]($Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week * 0.9)} else {0})
+                        min_rig_speed_duration = 60 
                     }
                 }
                 PoolFile = [PSCustomObject]@{
@@ -121,7 +123,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                         })
                     }
                 }
-                Commands = ("--config $ConfigFileName --pools $PoolFileName --apienable --apiport $Miner_Port --apirigname $($Config.Pools.$($Pools.$Algorithm_Norm.Name).Worker)$Params$CommonCommands" -replace "\s+", " ").trim()
+                Commands = ("--config $ConfigFileName --pools $PoolFileName --apienable --apiport $Miner_Port$(if($Config.Pools.$($Pools.$Algorithm_Norm.Name).Worker) {" --apirigname $($Config.Pools.$($Pools.$Algorithm_Norm.Name).Worker)"})$Params$CommonCommands" -replace "\s+", " ").trim()
             }
                         
             [PSCustomObject]@{
