@@ -127,6 +127,7 @@
     "ethash":  "Ethash",
     "exosis":  "Exosis",
     "feathercoin":  "Neoscrypt",
+    "trezarcoin" :  "Neoscrypt",
     "fresh":  "Fresh",
     "garlicoin":  "Allium",
     "graft":  "CryptonightV7",
