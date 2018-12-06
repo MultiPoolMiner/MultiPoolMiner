@@ -91,23 +91,23 @@ if (-not (Test-Path ".\Bin" -PathType Container)) {
 $BinDirectory = (Resolve-Path ".\Bin").Path
 
 # Get all the miners using the fake configuration
-$Miners = Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $Devices} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} 
+$Miners = Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $Devices} | ForEach-Object {$_.Content | Add-Member Name $(($_.Name -split "-" | Select-Object -First 2) -join "-") -PassThru -Force} 
 Write-Debug "$($Miners.Count) miners loaded (including duplicates)"
 
-# Filter duplicates (same miner, different algo) out of the list
-$Miners = $Miners | Sort-Object -Property Name, Path, HashSHA256 -Unique
+# Filter duplicates (same miner binary, different algo) out of the list
+$Miners = $Miners | Sort-Object -Property Path, HashSHA256 -Unique
 Write-Debug "$($Miners.Count) miners (excluding duplicates)"
 
 $Miners | Foreach-Object {
     $Miner = $_
-
+    if (-not $Miner.Type) {$Miner | Add-Member Type @(($Miner.Name -split "-" | Select-Object -Index 0) -split "_")}
     # Check if skipping this type of miner
-    If (($Miner.Type | Where-Object {$Types -contains $_}).Count -eq 0) {
+    if (($Miner.Type | Where-Object {$Types -contains $_}).Count -eq 0) {
         Write-Verbose "$($Miner.Name) - skipped, only supports $($Miner.Type)"
         Return
     }
 
-    if(Test-Path $Miner.Path -PathType Leaf) {
+    if (Test-Path $Miner.Path -PathType Leaf) {
         #Miner file exists
         if($Miner.HashSHA256) {
             # A hash was provided in the miner file
@@ -119,7 +119,7 @@ $Miners | Foreach-Object {
             }
             else {
                 # Wrong version of miner installed - if -Overwrite specified and miner can be automatically downloaded, delete it
-                if($Overwrite -and $Miner.URI) {
+                if ($Overwrite -and $Miner.URI) {
                     Write-Warning "$($Miner.Name) - incorrect version installed (got hash $($Hash), expected $($Miner.HashSHA256)), updating..."
                     # Delete the existing miner and stats files, and don't return so the miner gets redownloaded
                     Write-Host "    Deleting $(Split-Path $Miner.Path)"
@@ -129,8 +129,8 @@ $Miners | Foreach-Object {
                     If($MinerFolder.StartsWith($BinDirectory)) {
                         # Have to use -force because many of the download files are flagged as read-only
                         Remove-Item -Force -Recurse (Split-Path $Miner.Path)
-                        Write-Host "    Deleting .\Stats\$($Miner.Name)_*.txt"
-                        Remove-Item ".\Stats\$($Miner.Name)_*.txt"
+                        Write-Host "    Deleting .\Stats\$($Miner.Name)-*.txt"
+                        Remove-Item ".\Stats\$($Miner.Name)-*.txt"
                     } else {
                         Write-Warning "$($Miner.Name) - path $($Miner.Path) is not in the .\Bin directory, path is invalid, not deleting."
                         Return
@@ -148,12 +148,12 @@ $Miners | Foreach-Object {
     }
     
     # If the loop reaches here, the miner either didn't exist, or we removed it
-    If ($VerifyOnly) {
+    if ($VerifyOnly) {
         Write-Warning "$($Miner.Name) - $($Miner.Path) missing"
         Return
     }
     
-    If (-not $Miner.URI) {
+    if (-not $Miner.URI) {
         if ($Miner.ManualURI) {
             Write-Warning "$($Miner.Name) - must be downloaded manually from $($Miner.ManualURI) and extracted to $($Miner.Path)"
             Return
@@ -182,9 +182,9 @@ $Miners | Foreach-Object {
     }
 
     # Test again to verify that the freshly downloaded miner is the correct version
-    if(Test-Path $Miner.Path -PathType Leaf) {
+    if (Test-Path $Miner.Path -PathType Leaf) {
         #Miner file exists
-        if($Miner.HashSHA256) {
+        if ($Miner.HashSHA256) {
             # A hash was provided in the miner file
             $Hash = (Get-FileHash $Miner.Path).Hash
             if ($Hash -eq $Miner.HashSHA256) {
