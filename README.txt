@@ -242,11 +242,11 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 -SwitchingPrevention
 	Since version 2.6, the delta value (integer) that was used to determine how often MultiPoolMiner is allowed to switch, is now user-configurable on a scale of 1 to infinity on an intensity basis. Default is 1 (Start.bat default is 2). Recommended values are 1-10 where 1 means the most frequent switching and 10 means the least switching. Please note setting this value to zero (0) will not turn this function off! Please see further explanation in MULTIPOOLMINER'S LOGIC section below. 
 
--UseDeviceNameForStatsFileNaming (recommended)
+-UseDeviceNameForStatsFileNaming (recommended, enabled by default with MPM version 3.2 and later)
     Miner speed stat files will use the device model as part of the file name. This keeps benchmark results valid when new cards of a different model are added or when the the order of the cards are change. 
     E.g. CcminerNevermore-GPU#00-GPU#02_Lyra2z_HashRate.txt -> NVIDIA-CcminerNevermore-2xGtx1080ti_Lyra2z_HashRate.txt
 
--UseFastestMinerPerAlgoOnly (enabled by default with MPM version 3.2 and later)
+-UseFastestMinerPerAlgoOnly (recommended, enabled by default with MPM version 3.2 and later)
 	Use only use fastest miner per algo and device index. E.g. if there are 2 or more miners available to mine the same algo, only the fastest will ever be used, the slower ones will also be hidden in the summary screen.
 
 -UserName 

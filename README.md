@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 15/11/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 7/12/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -187,24 +187,27 @@ The following pools are currently supported (in alphabetical order):
 	  
 	  NLPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
-
 	- PhiPhiPool / PhiPhiPoolCoins http://pool.hashrefinery.com
 
 	  Payout in BTC (Bitcoin address must be provided using the '-Wallet' command) or any currency available in API (Advanced configuration via config file required, see below)
  
 	  PhiPhiPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below)
 
-
 	- Ravenminer https://ravenminer.com
 
 	  Payout in RVN (Ravencoin address must be provided using config.txt in Pools section use "Ravenminer" & RVN address)
 	  
-
 	- RavenminerEu https://eu.ravenminer.com
 
 	  Payout in RVN (Ravencoin address must be provided using config.txt in Pools section use "RavenminerEu" & RVN address)
 
 	  Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config file (Advanced configuration via config file required, see below)
+
+	- StarPool / StarPoolCoins https://www.starpool.biz/
+
+      Payout in BTC (Bitcoin address must be provided using the '-Wallet' command), or any currency available in API (Advanced configuration via config file required, see below)
+
+      StarCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below)
 
 	- Zpool http://www.zpool.ca/
 
@@ -245,11 +248,11 @@ Specifying the *-SSL* command (without a boolean value of true or false) will re
 **-SwitchingPrevention**
 Since version 2.6, the delta value (integer) that was used to determine how often MultiPoolMiner is allowed to switch, is now user-configurable on a scale of 1 to infinity on an intensity basis. Default is 1 (Start.bat default is 2). Recommended values are 1-10 where 1 means the most frequent switching and 10 means the least switching. Please note setting this value to zero (0) will not turn this function off! Please see further explanation in MULTIPOOLMINER'S LOGIC section below. 
 
-**-UseDeviceNameForStatsFileNaming**
+**-UseDeviceNameForStatsFileNaming** (recommended, enabled by default with MPM version 3.2 and later)
 Miner speed stat files will use the device model as part of the file name. This keeps benchmark results valid when new cards of a different model are added or when the the order of the cards are change. 
 E.g. CcminerNevermore-GPU#00-GPU#02_Lyra2z_HashRate.txt -> NVIDIA-CcminerNevermore-2xGtx1080ti_Lyra2z_HashRate.txt
 
-**-UseFastestMinerPerAlgoOnly**
+**-UseFastestMinerPerAlgoOnly** (recommended, enabled by default with MPM version 3.2 and later)
 Use only use fastest miner per algo and device index. E.g. if there are 2 or more miners available to mine the same algo, only the fastest will ever be used, the slower ones will also be hidden in the summary screen.
 
 **-UserName**
@@ -440,8 +443,22 @@ E.g. You feel that Zpool is exaggerating its estimations by 10% - Set PricePenal
         ...
     }
 
+#### NiceHash internal wallet
 
+If you have a NiceHash internal wallet you can configure MPM/NiceHash Pool to mine to the internal address. MPM will then use the lower pool fee of 1% for calculations.
+
+To use the NiceHash internal wallet modify the NiceHash pool section (you may have to create is first). Enter your "<YOUR_NICEHASH_INTERNAL_WALLET>" (of course you need to insert the real BTC address), and set the flag '"IsInternalWallet":  true':
+
+    "NiceHash":  {
+        "Wallets":  {
+            "BTC":  "<YOUR_NICEHASH_INTERNAL_WALLET>"
+        },
+        "IsInternalWallet":  true
+    }
+
+    
 ### Advanced configuration for Miners
+
 
 Settings for each configured miner are stored in its own subsection. These settings are only valid for the named miner.
 
