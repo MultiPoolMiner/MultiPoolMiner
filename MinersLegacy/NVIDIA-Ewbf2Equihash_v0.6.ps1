@@ -55,7 +55,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             }
 
             #Get commands for active miner devices
-            $_.Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
+            $Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
 
             if ($Algorithm_Norm -like "Equihash1445") {
                 #define --pers for equihash1445
@@ -76,7 +76,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                     DeviceName       = $Miner_Device.Name
                     Path             = $Path
                     HashSHA256       = $HashSHA256
-                    Arguments        = ("--algo $Algorithm$Pers --eexit 1 --api 127.0.0.1:$($Miner_Port) --server $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$($_.Params)$CommonCommands --cuda_devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')" -replace "\s+", " ").trim()
+                    Arguments        = ("--algo $Algorithm$Pers --eexit 1 --api 127.0.0.1:$($Miner_Port) --server $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$Params$CommonCommands --cuda_devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')" -replace "\s+", " ").trim()
                     HashRates        = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                     API              = "DSTM"
                     Port             = $Miner_Port
