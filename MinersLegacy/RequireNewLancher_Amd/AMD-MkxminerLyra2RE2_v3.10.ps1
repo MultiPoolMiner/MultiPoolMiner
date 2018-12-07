@@ -49,6 +49,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             API            = "Wrapper"
             Port           = $Miner_Port
             URI            = $Uri
+            Environment    = @{"GPU_FORCE_64BIT_PTR" = 0}
         }
     }
 }

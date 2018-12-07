@@ -8,8 +8,8 @@ param(
 )
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Path = ".\Bin\$($Name)\z-enemy.exe"
-$ManualUri = "https://bitcointalk.org/index.php?topic=3378390.0"
+$Path = ".\Bin\$($Name)\t-rex.exe"
+$ManualUri = "https://bitcointalk.org/index.php?topic=4432704.0"
 $Port = "40{0:d2}"
 
 # Miner requires CUDA 9.2.00 or higher
@@ -21,32 +21,36 @@ if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$Requ
 }
 
 if ($DriverVersion -lt [System.Version]("10.0.0")) {
-    $HashSHA256 = "CE01A93D426E1A6F55045B4E012F863D68A3D12C9CEEAA0955D331E951439276"
-    $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-25-cuda_9.2_ver1.zip"
+    $HashSHA256 = "1B30616CF34997496291E66244B718221142EE4CE4B2DD39F408616DA7613369"
+    $Uri = "https://github.com/trexminer/T-Rex/releases/download/0.8.5/t-rex-0.8.5-win-cuda9.1.zip"
 }
 else {
-    $HashSHA256 = "11217EFE543AA84A143280107C15AD13C4F058C4F72A0EEFD3736008D33FB1C8"
-    $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-25-cuda10.0_ver1.zip"
+    $HashSHA256 = "00AFD119A9DD7B8C48E482AC70E1F27FBEFF70A0D1A9204252602F7CD901CFCA"
+    $Uri = "https://github.com/trexminer/T-Rex/releases/download/0.8.5/t-rex-0.8.5-win-cuda10.0.zip"
 }
 
 $Commands = [PSCustomObject]@{
-    "aergo"      = "" #Aergo, new in 1.11
-    "bitcore"    = "" #Bitcore
-    "bcd"        = "" #Bitcoin Diamond, new in 1.20
-    "c11"        = "" #C11, new in 1.11
-    "hex"        = "" #Hex
-    "phi"        = "" #PHI
-    "phi2"       = "" #Phi2
-    "poly"       = "" #Polytimos
+    "balloon"    = "" #Balloon, New in 0.6.2
+    "bcd"        = "" #BitcoinDiamond, New in 0.6.5
+    "bitcore"    = "" #Bitcore, New in 0.6.1
+    "c11"        = "" #C11
+    "dedal"      = "" #Dedal, new in 0.8.2
+    "geek"       = "" #Geek, new in 0.8.0
+    "hmq1725"    = "" #Hmq1725, New in 0.6.4
+    "lyra2z"     = "" #Lyra2z
+    "phi"        = "" #Phi
+    "polytimos"  = "" #Polytimos, New in 0.6.3
     "renesis"    = "" #Renesis
-    "skunk"      = "" #Skunk, new in 1.11
-    "sonoa"      = "" #SONOA, new in 1.12
-    "timetravel" = "" #Timetravel8
-    "tribus"     = "" #Tribus, new in 1.10
-    "x16r"       = " -N 100" #Raven, number of samples used to compute hashrate (default: 30) 
-    "x16s"       = "" #Pigeon
+    "sha256t"    = "" #Sha256t
+    "skunk"      = "" #Skunk, New in 0.6.3
+    "sonoa"      = "" #Sonoa, New in 0.6.1
+    "timetravel" = "" #Timetravel
+    "tribus"     = "" #Tribus
+    "x16r"       = "" #X16r
+    "x16s"       = "" #X16s
     "x17"        = "" #X17
-    "xevan"      = "" #Xevan, new in 1.09a
+    "x21s"       = "" #X21s, new in 0.8.3
+    "x22i"       = "" #X22i, new in 0.7.2
 }
 $CommonCommands = ""
 
@@ -60,7 +64,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm $_
 
         if ($Config.UseDeviceNameForStatsFileNaming) {
-            $Miner_Name = "$Name-$($Miner_Device.count)x$($Miner_Device.Model_Norm | Sort-Object -unique)"
+            $Miner_Name = "$Name-$($Miner_Device.count)x$($Miner_Device.Model_Norm | Sort-Object -unique)"		
         }
         else {
             $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
@@ -71,7 +75,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         Switch ($Algorithm_Norm) {
             "X16R"  {$BenchmarkIntervals = 5}
-            default {$BenchmarkIntervals = 1}
+        	default {$BenchmarkIntervals = 1}
         }
 
         [PSCustomObject]@{
@@ -79,7 +83,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             DeviceName         = $Miner_Device.Name
             Path               = $Path
             HashSHA256         = $HashSHA256
-            Arguments          = ("-a $_ -b 127.0.0.1:$($Miner_Port) -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$CommonCommands -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ',')" -replace "\s+", " ").trim()
+            Arguments          = ("-b 127.0.0.1:$($Miner_Port) -a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) $($Commands.$_)$CommonCommands -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ',')" -replace "\s+", " ").trim()
             HashRates          = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
             API                = "Ccminer"
             Port               = $Miner_Port
@@ -87,5 +91,5 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             Fees               = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
             BenchmarkIntervals = $BenchmarkIntervals
         }
-    } 
+    }
 }

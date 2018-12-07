@@ -40,10 +40,6 @@ class ExcavatorNHMP : Miner {
         return @()
     }
 
-    [String]GetCommandLineParameters() {
-        return $this.Arguments
-    }
-
     hidden StartMining() {
         $Server = "localhost"
         $Timeout = 10 #seconds
@@ -211,7 +207,12 @@ class ExcavatorNHMP : Miner {
 
         if (-not ([ExcavatorNHMP]::Service.State -eq "Running")) {
             $LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\Excavator-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt")
-            [ExcavatorNHMP]::Service = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '-p $($this.Port) -f 0 -fn \```"$($LogFile)\```"' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+            if (Test-Path ".\CreateProcess.cs" -PathType Leaf) {
+                [ExcavatorNHMP]::Service = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList "-p $($this.Port) -f 0 -fn $($LogFile)" -WorkingDirectory $(Split-Path $this.Path) -Priority ($this.Device.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
+            }
+            else {
+                [ExcavatorNHMP]::Service = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '-p $($this.Port) -f 0 -fn \```"$($LogFile)\```"' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+            }
             #Wait until excavator is ready, max 10 seconds
             $Server = "localhost"
             $Timeout = 1
@@ -221,7 +222,7 @@ class ExcavatorNHMP : Miner {
                 try {
                     $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
                     $Data = $Response | ConvertFrom-Json -ErrorAction Stop
-                    [ExcavatorNHMP]::Service | Add-Member ProcessId (Get-CIMInstance CIM_Process | Where-Object {$_.ExecutablePath -eq $this.path -and $_.CommandLine -like "*$((Get-Job -Id ([ExcavatorNHMP]::Service.Id)).CommandLine)*"}).ProcessId
+                    [ExcavatorNHMP]::Service | Add-Member ProcessId (Get-CIMInstance CIM_Process | Where-Object {$_.ExecutablePath -eq $this.Path -and $_.CommandLine -like "*$($this.Path)*-p $($this.Port) -f 0 -fn $($LogFile)*"}).ProcessId
                     break
                 }
                 catch {
@@ -234,7 +235,6 @@ class ExcavatorNHMP : Miner {
             $this.Status = "Idle"
             $this.Workers = @()
             $this.ProcessId = [ExcavatorNHMP]::Service.ProcessId
-            $this.BeginTime = (Get-Date).ToUniversalTime()
         }
 
         switch ($Status) {
@@ -279,10 +279,7 @@ class ExcavatorNHMP : Miner {
             }
         }
         catch {
-            if ($this.GetActiveTime().TotalSeconds -gt 60) {
-                Write-Log -Level Error "Failed to connect to miner ($($this.Name)) [ProcessId: $($this.ProcessId)]. "
-                $this.SetStatus("Failed")
-            }
+            if ((Get-Date) -gt ($this.BeginTime.AddSeconds(30))) {$this.SetStatus("Failed")}
             return @($Request, $Response)
         }
 

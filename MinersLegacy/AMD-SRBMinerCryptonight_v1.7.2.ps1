@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\SRBMiner-CN.exe"
-$HashSHA256 = "D75E550D155FF7B1DDB660688DA15855D42C32E11DF203D7E31173FAE8C27ABE"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/SRBMiner/SRBMiner-CN-V1-7-1.zip"
+$HashSHA256 = "A4B21F3C2BDB64F00F402D335FA6DB13A2D6462C9678B58D840490F2878818FB"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/SRBMiner/SRBMiner-CN-V1-7-2.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3167363.0"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName

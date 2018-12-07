@@ -48,16 +48,17 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Commands.$_ = Get-CommandPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
 
         [PSCustomObject]@{
-            Name       = $Miner_Name
-            DeviceName = $Miner_Device.Name
-            Path       = $Path
-            HashSHA256 = $HashSHA256
-            Arguments  = ("--api-listen --api-port $Miner_Port --kernel $_ --url $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$CommonCommands --gpu-platform $($Miner_Device.PlatformId | Sort-Object -Unique) -d $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
-            HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
-            API        = "Xgminer"
-            Port       = $Miner_Port
-            URI        = $Uri
-            Fees       = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
+            Name        = $Miner_Name
+            DeviceName  = $Miner_Device.Name
+            Path        = $Path
+            HashSHA256  = $HashSHA256
+            Arguments   = ("--api-listen --api-port $Miner_Port --kernel $_ --url $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$CommonCommands --gpu-platform $($Miner_Device.PlatformId | Sort-Object -Unique) -d $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
+            HashRates   = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
+            API         = "Xgminer"
+            Port        = $Miner_Port
+            URI         = $Uri
+            Fees        = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
+            Environment = @{"GPU_FORCE_64BIT_PTR" = 0}
         }
     }
 }

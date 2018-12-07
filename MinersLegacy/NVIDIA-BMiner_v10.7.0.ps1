@@ -121,7 +121,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             }
             else {
                 if ($Config.UseDeviceNameForStatsFileNaming) {
-                    $Miner_Name = "$Name-$Main_Algorithm_Norm-$($Miner_Device.count)x$($Miner_Device.Model_Norm | Sort-Object -unique)"
+                    $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
                 }
                 else {
                     $Miner_Name = ((@($Name) + @($Main_Algorithm_Norm) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-') -replace "[-]{2,}", "-"

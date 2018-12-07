@@ -8,10 +8,18 @@ param(
 )
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Path = ".\Bin\$($Name)\ccminer-x64.exe"
-$HashSHA256 = "8051774049A412DBA64D9A699337797E7077AE45D564ECC7DEA36C0270E91F6A"
-$Uri = "https://github.com/tpruvot/ccminer/releases/download/2.3-tpruvot/ccminer-2.3-cuda9.7z"
+$Path = ".\Bin\$($Name)\ccminer.exe"
+$HashSHA256 = "C3CD207D9EE15FBCB4C9BEEB20872E0B34D6E8A11D70026C98FDDB915E6CE8D4"
+$Uri = "https://github.com/nemosminer/ccminerTpruvot/releases/download/v2.3-cuda10/ccminertpruvotx64.7z"
 $Port = "40{0:d2}"
+
+# Miner requires CUDA 10.0.00
+$DriverVersion = ((Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+$RequiredVersion = "10.0.00"
+if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$RequiredVersion) {
+    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers. "
+    return
+}
 
 $Commands = [PSCustomObject]@{
     #GPU - profitable 20/04/2018
@@ -24,6 +32,7 @@ $Commands = [PSCustomObject]@{
     "deep"          = "" #Deep
     "dmd-gr"        = "" #DMDGR
     #"equihash"     = "" #Equihash - Beaten by Bminer by 30%
+    "exosis"        = "" #Exosis, new with 2.3 from Dec 02, 2018
     "fresh"         = "" #Fresh
     #"fugue256"      = "" #Fugue256 - fugue256 not in algorithms.txt
     #"graft"         = "" #CryptoNightV7

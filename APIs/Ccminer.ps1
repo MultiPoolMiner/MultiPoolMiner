@@ -17,12 +17,11 @@ class Ccminer : Miner {
             $Data = $Response -split ";" | ConvertFrom-StringData -ErrorAction Stop
         }
         catch {
-            if ((Get-Date) -gt ($this.Process.PSBeginTime.AddSeconds(30))) {Write-Log -Level Error "Failed to connect to miner ($($this.Name)) [ProcessId: $($this.ProcessId)]. "}
+            if ((Get-Date) -gt ($this.Process.PSBeginTime.AddSeconds(30))) {$this.SetStatus("Failed")}
             return @($Request, $Response)
         }
 
-        $HashRate_Name = [String]($this.Algorithm -like (Get-Algorithm $Data.algo))
-        if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
+        $HashRate_Name = [String]$this.Algorithm[0]
         $HashRate_Value = [Double]$Data.KHS * 1000
 
         if ($HashRate_Name -and $HashRate_Value -GT 0) {$HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}}

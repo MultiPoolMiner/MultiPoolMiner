@@ -41,29 +41,4 @@ class JceMiner : Miner {
 
         return @($Request, $Data | ConvertTo-Json -Compress)
     }
-
-    hidden StopMining() {
-        $this.Status = [MinerStatus]::Failed
-
-        if ($this.ProcessId) {
-            if (Get-Process -Id $this.ProcessId -ErrorAction SilentlyContinue) {
-                Stop-Process -Id $this.ProcessId -Force -ErrorAction Ignore
-                # Kill spawned process 'Attrib'
-                Stop-Process -Id (Get-CIMInstance CIM_Process | Where-Object {($_.CommandLine -replace '"') -like ("*$($this.Path)*$($this.GetCommandLineParameters())*" -replace '"')}).ProcessId -Force -ErrorAction Ignore
-            }
-            $this.ProcessId = $null
-        }
-
-        if ($this.Process) {
-            if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
-                $this.Process | Remove-Job -Force
-            }
-
-            if (-not ($this.Process | Get-Job -ErrorAction SilentlyContinue)) {
-                $this.Active += $this.Process.PSEndTime - $this.Process.PSBeginTime
-                $this.Process = $null
-                $this.Status = [MinerStatus]::Idle
-            }
-        }
-    }
 }

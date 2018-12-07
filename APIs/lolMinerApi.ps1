@@ -23,11 +23,11 @@ class lolMinerApi : Miner {
             return @($Request, $Response)
         }
 
-        $HashRate_Name = Get-Algorithm($data.Mining.Algorithm -replace "/")
+        $HashRate_Name = [String]$this.Algorithm[0]
         $HashRate_Value = [Double]$data.Session.Performance_Summary
 
         if ($HashRate_Name -and $HashRate_Value -gt 0) {
-            $HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
+            $HashRate | Add-Member @{$HashRate_Name = [Double]$HashRate_Value}
         }
 
         if ($HashRate | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) {

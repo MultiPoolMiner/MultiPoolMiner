@@ -9,21 +9,21 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "8392E07FD220C74F4B7F210AB0E839CB80061F36DDCD07C43D3EAC6AE11021FC"
-$Uri = "https://github.com/nemosminer/ccminer-KlausT-8.23-mod-r1/releases/download/8.23-mod-r1/ccminer-KlausT-8.23-r1.7z"
-$ManualUri = "https://github.com/nemosminer/ccminer-KlausT-8.23-mod-r1"
+$HashSHA256 = "86FDABA0D48471475327DAAA5AFAB9CC76CABA8024385DA0ADFF650B4301F775"
+$Uri = "https://github.com/nemosminer/ccminerKlausTyescrypt/releases/download/v10/ccminerKlausTyescryptv10.7z"
+$ManualUri = "https://github.com/nemosminer/ccminerKlausTyescrypt/releases"
 $Port = "40{0:d2}"
 
-# Miner requires CUDA 9.2
+# Miner requires CUDA 10.0.00
 $DriverVersion = ((Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
-$RequiredVersion = "9.2.00"
+$RequiredVersion = "10.0.00"
 if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$RequiredVersion) {
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers. "
     return
 }
 
 $Commands = [PSCustomObject]@{
-    #GPU - profitable 20/04/2018
+    #GPU - profitable 25/11/2018
     "c11"           = "" #C11
     "deep"          = "" #deep
     "dmd-gr"        = "" #dmd-gr
@@ -33,24 +33,27 @@ $Commands = [PSCustomObject]@{
     "keccak"        = "" #Keccak
     "luffa"         = "" #Luffa
     "lyra2v2"       = "" #Lyra2RE2
-    #"neoscrypt"     = "" #NeoScrypt; broken in 8.23-mod-r1
+    "neoscrypt"     = "" #NeoScrypt
     "penta"         = "" #Pentablake
-    "skein"         = "" #Skein
     "s3"            = "" #S3
-    "veltor"        = "" #Veltor
-    "whirlpool"     = "" #Whirlpool
+    "skein"         = "" #Skein
+    "whirl"         = "" #Whirlpool
     "whirlpoolx"    = "" #whirlpoolx
     "x17"           = "" #X17 Verge
     "yescrypt"      = "" #yescrypt
-    "yescryptR8"    = ""
-    "yescryptR16"   = "" #YescryptR16 #Yenten
-    "yescryptR16v2" = "" #PPN    
+    "yescryptr8"    = "" #yescryptr8
+    "yescryptr16"   = " -i 12.5" #YescryptR16 #Yenten
+    "yescryptr16v2" = " -i 12.5" #PPTP
+    "yescryptr24"   = "" #JagariCoinR
+    "yescryptr32"   = " -i 12.5" #WAVI
 
-    # ASIC - never profitable 24/06/2018
-    #"blake"      = "" #blake
+    # ASIC - never profitable 25/11/2018
+    #"bitcoin"    = "" #Bitcoin
+    #"blake"      = "" #Blake
     #"blakecoin"  = "" #Blakecoin
     #"blake2s"    = "" #Blake2s
     #"groestl"    = "" #Groestl
+	#"keccak"     = "" #Keccak-256 (Maxcoin)
     #"myr-gr"     = "" #MyriadGroestl
     #"nist5"      = "" #Nist5
     #"quark"      = "" #Quark
@@ -63,6 +66,7 @@ $Commands = [PSCustomObject]@{
     #"x14"        = "" #x14
     #"x15"        = "" #x15
 }
+            
 $CommonCommmands = ""
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")

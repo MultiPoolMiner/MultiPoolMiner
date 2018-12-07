@@ -9,7 +9,7 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\CPU-Cryply_v3.8.8.3\cpuminer-sse42.exe"
-$HashSHA256 = "89384FB35DA4D6FE75449020FE7A4FEC2BD8EB8FD26CCFB5E1980B93BD29578E"
+$HashSHA256 = "D57F6B404C031136467FE54A6FAB78027C910E2A0ED9CC8876007E80FD5110A1"
 $Uri = "https://github.com/bubasik/cpuminer-opt-yespower/releases/download/v3.8.8.3/cpuminer-opt-cryply-yespower-ver2.zip"
 $ManualUri = "https://github.com/bubasik/cpuminer-opt-yespower/releases"
 $Port = "40{0:d2}"
@@ -18,7 +18,7 @@ $Commands = [PSCustomObject]@{
     ### CPU PROFITABLE ALGOS AS OF 25/07/2018
     ### these algorithms are profitable algorithms on supported pools
     "allium"        = "" #Garlicoin (GRLC)
-    "cryptonightv7" = "" #variant 7, Monero (XMR)
+    "cryptonightv7" = "" #variant 7
     "hmq1725"       = "" #Espers
     "hodl"          = "" #Hodlcoin
     "lyra2z"        = "" #Zcoin (XZC)

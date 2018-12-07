@@ -2,8 +2,8 @@
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\xmr-stak.exe"
-$HashSHA256 = "871A94EFEA6749251E5C686856F5AAA3B1B2BD91B58F5720FFFE3B92D7227858"
-$Uri = "https://github.com/nemosminer/xmr-stak/releases/download/v2.6/xmr-stak-win64-2.6.0.7z" #Use binary compiled by nemos, has 0% dev fee
+$HashSHA256 = "7980E668BC1B47B0895703839339A018DEFBF30DF049C367D7192777FACAC0B0"
+$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.7.0/xmr-stak-win64-2.7.0.zip"
 $ManualUri = "https://github.com/fireice-uk/xmr-stak"
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -18,24 +18,36 @@ if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$Requ
 }
 
 $Commands = [PSCustomObject[]]@(
+    # Note: For fine tuning directly edit the config files in the miner binary directory
+    #       'ThreadsConfig-[Algorithm_Norm]-[Hardware].json' & 'Config-[Algorithm_Norm]-[Hardware]-[Port]-[Threads].json'
     #                             Miner algo name            MinMem        Params       Algorithm_Norm (from Get-Algorithm)
-    [PSCustomObject]@{Algorithm = "cryptonight_bittube2";    MinMemGB = 4; Params = ""} #CryptoNightHeavyTube
-    [PSCustomObject]@{Algorithm = "cryptonight_lite";        MinMemGB = 1; Params = ""} #CryptoNightLite
-    [PSCustomObject]@{Algorithm = "cryptonight_lite_v7";     MinMemGB = 1; Params = ""} #CryptoNightLiteV7
-    [PSCustomObject]@{Algorithm = "cryptonight_lite_v7_xor"; MinMemGB = 1; Params = ""} #CryptoNightLiteIpbc
-    [PSCustomObject]@{Algorithm = "cryptonight_haven";       MinMemGB = 4; Params = ""} #CryptoNightHeavyHaven
-    [PSCustomObject]@{Algorithm = "cryptonight_heavy";       MinMemGB = 4; Params = ""} #CryptoNightHeavy
-    [PSCustomObject]@{Algorithm = "cryptonight_masari";      MinMemGB = 2; Params = ""} #CryptoNightMsr
-    [PSCustomObject]@{Algorithm = "cryptonight_v7";          MinMemGB = 2; Params = ""} #CryptoNightV7
-    [PSCustomObject]@{Algorithm = "cryptonight_v7_stellite"; MinMemGB = 2; Params = ""} #CryptoNightXtl
-    [PSCustomObject]@{Algorithm = "cryptonight_v8";          MinMemGB = 2; Params = ""} #CryptoNightV8
+    [PSCustomObject]@{Algorithm = "cryptonight_bittube2";    MinMemGB = 4; Threads = 1; Params = ""} #CryptoNightHeavyTube
+    [PSCustomObject]@{Algorithm = "cryptonight_lite";        MinMemGB = 1; Threads = 1; Params = ""} #CryptoNightLite
+    [PSCustomObject]@{Algorithm = "cryptonight_lite_v7";     MinMemGB = 1; Threads = 1; Params = ""} #CryptoNightLiteV7
+    [PSCustomObject]@{Algorithm = "cryptonight_lite_v7_xor"; MinMemGB = 1; Threads = 1; Params = ""} #CryptoNightLiteIpbc
+    [PSCustomObject]@{Algorithm = "cryptonight_haven";       MinMemGB = 4; Threads = 1; Params = ""} #CryptoNightHeavyHaven
+    [PSCustomObject]@{Algorithm = "cryptonight_heavy";       MinMemGB = 4; Threads = 1; Params = ""} #CryptoNightHeavy
+    [PSCustomObject]@{Algorithm = "cryptonight_masari";      MinMemGB = 2; Threads = 1; Params = ""} #CryptoNightMsr
+    [PSCustomObject]@{Algorithm = "cryptonight_v7";          MinMemGB = 2; Threads = 1; Params = ""} #CryptoNightV7
+    [PSCustomObject]@{Algorithm = "cryptonight_v7_stellite"; MinMemGB = 2; Threads = 1; Params = ""} #CryptoNightXtl
+    [PSCustomObject]@{Algorithm = "cryptonight_v8";          MinMemGB = 2; Threads = 1; Params = ""} #CryptoNightV8
+    [PSCustomObject]@{Algorithm = "cryptonight_bittube2";    MinMemGB = 4; Threads = 2; Params = ""} #CryptoNightHeavyTube
+    [PSCustomObject]@{Algorithm = "cryptonight_lite";        MinMemGB = 1; Threads = 2; Params = ""} #CryptoNightLite
+    [PSCustomObject]@{Algorithm = "cryptonight_lite_v7";     MinMemGB = 1; Threads = 2; Params = ""} #CryptoNightLiteV7
+    [PSCustomObject]@{Algorithm = "cryptonight_lite_v7_xor"; MinMemGB = 1; Threads = 2; Params = ""} #CryptoNightLiteIpbc
+    [PSCustomObject]@{Algorithm = "cryptonight_haven";       MinMemGB = 4; Threads = 2; Params = ""} #CryptoNightHeavyHaven
+    [PSCustomObject]@{Algorithm = "cryptonight_heavy";       MinMemGB = 4; Threads = 2; Params = ""} #CryptoNightHeavy
+    [PSCustomObject]@{Algorithm = "cryptonight_masari";      MinMemGB = 2; Threads = 2; Params = ""} #CryptoNightMsr
+    [PSCustomObject]@{Algorithm = "cryptonight_v7";          MinMemGB = 2; Threads = 2; Params = ""} #CryptoNightV7
+    [PSCustomObject]@{Algorithm = "cryptonight_v7_stellite"; MinMemGB = 2; Threads = 2; Params = ""} #CryptoNightXtl
+    [PSCustomObject]@{Algorithm = "cryptonight_v8";          MinMemGB = 2; Threads = 2; Params = ""} #CryptoNightV8
 
     # ASIC (09/07/2018)
-    #[PSCustomObject]@{Algorithm = "cryptonight";             MinMemGB = 2; Params = @()} #CryptoNight
+    #[PSCustomObject]@{Algorithm = "cryptonight";             MinMemGB = 2; Threads = 1; Params = @()} #CryptoNight
 )
 $CommonCommands = ""
 
-$Coins = @("aeon7", "bbscoin", "croat", "edollar", "electroneum", "graft", "haven", "intense", "ipbc", "karbo", "masari", "monero7", "stellite", "sumokoin", "turtlecoin")
+$Coins = @("aeon7", "bbscoin", "bittube", "freehaven", "graft", "haven", "intense", "masari", "monero" ,"qrl", "ryo", "stellite", "turtlecoin")
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
@@ -46,14 +58,15 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm $Algorithm
         $Params = $_.Params
         $MinMemGB = $_.MinMemGB
+        $Threads = $_.Threads
 
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
         
             if ($Config.UseDeviceNameForStatsFileNaming) {
-                $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') + @($Threads) | Select-Object) -join '-'
             }
             else {
-                $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) + @($Threads) | Select-Object) -join '-'
             }
 
             $Currency = if ($Coins -icontains $Pools.$Algorithm_Norm.CoinName) {$Pools.$Algorithm_Norm.CoinName} else {$Algorithm}
@@ -73,10 +86,10 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             
             #Get commands for active miner devices
             $Params = Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index
-            $ConfigFileName = "$((@("Config") + @($Pools.$Algorithm_Norm.Name) + @($Pools.$Algorithm_Norm.Algorithm) + @($Pools.$Algorithm_Norm.Region) | Select-Object) -join '-').txt"
-            $PoolsFileName = "$((@("Pools") + @($Pools.$Algorithm_Norm.Name) + @($Pools.$Algorithm_Norm.Algorithm) + @($Pools.$Algorithm_Norm.Region) | Select-Object) -join '-').txt"
-            $PlatformThreadsConfigFile = "$((@("HwConfig") + @($Platform) + @(($Devices | Where-Object Vendor -EQ $Miner_Device.Vendor | Select-Object -ExpandProperty Model_Norm) -Join "_") | Select-Object) -join '-').txt"
-            $MinerThreadsConfigFile = "$((@("ThreadsConfig") + @(($Miner_Device | Select-Object -ExpandProperty Model_Norm) -Join "_") + @($Algorithm_Norm) | Select-Object) -join '-').txt"
+            $ConfigFileName = "$((@("Config") + @($Platform) + @($Pools.$Algorithm_Norm.Algorithm) + @($Miner_Device.Model_Norm -Join "_") + @($Miner_Port) | Select-Object) -join '-').txt"
+            $PoolsFileName = "$((@("Pools") + @($Pools.$Algorithm_Norm.Name) + @($Pools.$Algorithm_Norm.Algorithm) | Select-Object) -join '-').txt"
+            $PlatformThreadsConfigFile = "$((@("HwConfig") + @($Platform) + @($Algorithm_Norm) + @(($Devices | Where-Object Vendor -EQ $Miner_Device.Vendor | Select-Object -ExpandProperty Model_Norm) -Join "_") | Select-Object) -join '-').json"
+            $MinerThreadsConfigFile = "$((@("ThreadsConfig") + @($Platform) + @($Algorithm_Norm) + @(($Miner_Device | Select-Object -ExpandProperty Model_Norm) -Join "_") + @($Threads) | Select-Object) -join '-').txt"
             $Parameters = [PSCustomObject]@{
                 PoolsFile = [PSCustomObject]@{
                     FileName = $PoolsFileName
@@ -119,9 +132,10 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 MinerThreadsConfigFile = $MinerThreadsConfigFile
                 PlatformThreadsConfigFile = $PlatformThreadsConfigFile
                 Commands = ("--poolconf $PoolsFileName --config $ConfigFileName$NoPlatform --$($Platform.ToLower()) $MinerThreadsConfigFile$(if ($Platform -eq 'NVIDIA') {' --openCLVendor NVIDIA'}) --noUAC --httpd $($Miner_Port)$($CommonCommands)").trim()
-                HwDetectCommands = ("--poolconf $PoolsFileName --config $ConfigFileName$NoPlatform --$($Platform.ToLower()) $PlatformThreadsConfigFile$(if ($Platform -eq 'NVIDIA') {' --openCLVendor NVIDIA'}) --noUAC --httpd $($Miner_Port)$($CommonCommands)").trim()
+                HwDetectCommands = ("--poolconf $PoolsFileName --config $ConfigFileName$NoPlatform --$($Platform.ToLower()) $PlatformThreadsConfigFile$(if ($Platform -eq 'NVIDIA') {' --openCLVendor NVIDIA'}) --httpd $($Miner_Port)$($CommonCommands)").trim()
                 Devices  = @($Miner_Device.Type_Vendor_Index)
                 Platform = $Platform
+                Threads = $Threads
             }
 
             if ($Miner_Device.PlatformId) {$Parameters.ConfigFile.Content | Add-Member "platform_index" (($Miner_Device | Select-Object PlatformId -Unique).PlatformId)}
@@ -136,7 +150,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 API        = "Fireice"
                 Port       = $Miner_Port
                 URI        = $Uri
-                Fees       = [PSCustomObject]@{$Algorithm_Norm = 0 / 100}
+                Fees       = [PSCustomObject]@{$Algorithm_Norm = 2 / 100}
             }
         }
     }

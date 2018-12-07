@@ -18,7 +18,7 @@ $Commands = [PSCustomObject]@{
     ### CPU PROFITABLE ALGOS AS OF 25/07/2018
     ### these algorithms are profitable algorithms on supported pools
     "allium"        = "" #Garlicoin (GRLC)
-    "cryptonightv7" = "" #variant 7, Monero (XMR)
+    "cryptonightv7" = "" #variant 7
     "hmq1725"       = "" #Espers
     "hodl"          = "" #Hodlcoin
     "lyra2z"        = "" #Zcoin (XZC)

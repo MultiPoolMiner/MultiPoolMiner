@@ -15,8 +15,8 @@ class lolMiner : Miner {
         $Parameters = $this.Arguments | ConvertFrom-Json
         $Arguments = "$($Parameters.Commands)"
 
-        #Write config files. Keep separate files and do not overwrite to preserve optional manual customization
-        $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -Encoding UTF8 -ErrorAction Ignore
+        #Write config files. Keep separate files, do not overwrite to preserve optional manual customization
+        if (-not (Test-Path "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -PathType Leaf)) {$Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -Encoding UTF8 -ErrorAction Ignore}
 
         if ($this.Process) {
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
@@ -73,7 +73,7 @@ class lolMiner : Miner {
             $Data = $Response | ConvertFrom-Json -ErrorAction Stop
         }
         catch {
-            if ((Get-Date) -gt ($this.Process.PSBeginTime.AddSeconds(30))) {Write-Log -Level Error "Failed to connect to miner ($($this.Name)) [ProcessId: $($this.ProcessId)]. "}
+            if ((Get-Date) -gt ($this.Process.PSBeginTime.AddSeconds(30))) {$this.SetStatus("Failed")}
             return @($Request, $Response)
         }
 
@@ -85,12 +85,11 @@ class lolMiner : Miner {
                 $HashRate_Value = [Double]$Data."TotalSpeed($($Interval)s)"
             }
             catch {
-                sleep 0            
             }
         }
 
         if ($HashRate_Name -and $HashRate_Value -gt 0) {
-            $HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}
+            $HashRate | Add-Member @{$HashRate_Name = [Double]$HashRate_Value}
         }
 
         if ($HashRate | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) {

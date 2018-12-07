@@ -100,7 +100,7 @@ param(
 
 Clear-Host
 
-$Version = "3.2.0"
+$Version = "3.2.0 Beta 9"
 $VersionCompatibility = "3.2.0"
 $Strikes = 3
 $SyncWindow = 5 #minutes
@@ -145,10 +145,11 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
 if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
 $Config = [PSCustomObject]@{}
 if (Test-Path $ConfigFile -PathType Leaf) {
+    $Error.Clear() #Clear all errors from previous run, reduce memory
     $ConfigFile = Resolve-Path $ConfigFile
-    $Config = Get-Content $ConfigFile | ConvertFrom-Json
-    if ($Config -isnot [PSCustomObject]) {
-        Write-Log -Level Error "Config file ($ConfigFile) is not a valid JSON file. Cannot continue. "
+    $Config = Get-Content $ConfigFile | ConvertFrom-Json -ErrorAction SilentlyContinue
+    if (-not $Config.VersionCompatibility) {
+        Write-Log -Level Error "Config file ($ConfigFile) is not a valid MPM configuration file. Cannot continue. "
         Start-Sleep 10
         Exit
     }
@@ -235,9 +236,10 @@ while ($true) {
     $ConfigBackup = $Config | ConvertTo-Json -Depth 10 | ConvertFrom-Json
     #Add existing variables to $Parameters so they are available in psm1
     $Config_Parameters = @{}
+    $Config = [PSCustomObject]@{}
     $Config = Get-Content $ConfigFile | ConvertFrom-Json
-    if ($Config -isnot [PSCustomObject]) {
-        Write-Log -Level Error "Config file ($ConfigFile) is not a valid JSON file. Cannot continue. "
+    if (-not $Config.VersionCompatibility) {
+        Write-Log -Level Error "Config file ($ConfigFile) is not a valid MPM configuration file. Cannot continue. "
         Start-Sleep 10
         Exit
     }
@@ -302,7 +304,6 @@ while ($true) {
         $Config.Pools.($_) | Add-Member API_Key            $Config.API_Key            -ErrorAction SilentlyContinue
         $Config.Pools.($_) | Add-Member PricePenaltyFactor $Config.PricePenaltyFactor -ErrorAction SilentlyContinue
     }
-
 
     # Copy the user's config before changing anything for donation runs
     # This is used when getting pool balances so it doesn't get pool balances of the donation address instead
@@ -395,15 +396,23 @@ while ($true) {
     $API.Stats = $Stats
 
     #Load information about the pools
-    Write-Log "Loading pool information. "
     $NewPools = @()
     if (Test-Path "Pools" -PathType Container) {
-        $NewPools = @(Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | ForEach-Object {
-            $Pool_Name = $_.BaseName
-            $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config}
-            $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
-            Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters
-        } | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru})
+        if (-not (Get-Job -Name GetPoolData -ErrorAction SilentlyContinue)) {
+            Write-Log "Loading pool information - this may take a minute or two. "
+            #First loop, gather pool data so we can start downloading miners
+            $GetPoolDataJob = Start-Job -Name GetPoolData -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($StatSpan, $Config) -FilePath .\Get-PoolData.ps1
+        }
+        elseif ($GetPoolDataJob.State -eq "Running") {Write-Log "Waiting for pool information. "}
+        $NewPools = Get-Job -Name GetPoolData | Wait-Job | Receive-Job
+        $GetPoolDataJobDuration = ($GetPoolDataJob.PSEndTime - $GetPoolDataJob.PSBeginTime)
+        Write-Log "Loading pool data ($($GetPoolDataJob.PSBeginTime) - $($GetPoolDataJob.PSEndTime)). "
+        Remove-Job -Name GetPoolData
+        #Get pool data just in time; required if $Config.Interval is high to have recent pool data
+        if ((Get-Date).ToUniversalTime().AddSeconds($GetPoolDataJobDuration.TotalSeconds) -ge $StatEnd) {
+            Write-Log "Triggered loading pool information. "
+            $GetPoolDataJob = Start-Job -Name GetPoolData -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($StatSpan, $Config) -FilePath .\Get-PoolData.ps1
+        }
     }
 
     #Apply PricePenaltyFactor to pools
@@ -489,6 +498,12 @@ while ($true) {
     #Give API access to the pools information
     $API.Pools = $Pools
 
+    #Get pool data just in time - required if $Config.Interval is high to have recent pool data
+    if (-not (Get-Job -Name GetPoolData -ErrorAction SilentlyContinue) -and (Get-Date).ToUniversalTime().AddSeconds($GetPoolDataJobDuration.TotalSeconds) -ge $StatEnd) {
+        Write-Log "Triggered loading pool information. "
+        $GetPoolDataJob = Start-Job -Name GetPoolData -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($StatSpan, $Config) -FilePath .\Get-PoolData.ps1
+    }
+
     #Load information about the miners
     #Messy...?
     Write-Log "Getting miner information. "
@@ -509,6 +524,13 @@ while ($true) {
             Where-Object {$Config.MinerName.Count -eq 0 -or (Compare-Object $Config.MinerName ($_.Name -split "-" | Select-Object -Index 0) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
             Where-Object {$Config.ExcludeMinerName.Count -eq 0 -or (Compare-Object $Config.ExcludeMinerName ($_.Name -split "-" | Select-Object -Index 0) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0}
     }
+
+    #Get pool data just in time - required if $Config.Interval is high to have recent pool data
+    if (-not (Get-Job -Name GetPoolData -ErrorAction SilentlyContinue) -and (Get-Date).ToUniversalTime().AddSeconds($GetPoolDataJobDuration.TotalSeconds) -ge $StatEnd) {
+        Write-Log "Triggered loading pool information. "
+        $GetPoolDataJob = Start-Job -Name GetPoolData -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($StatSpan, $Config) -FilePath .\Get-PoolData.ps1
+    }
+    
     Write-Log "Calculating profit for each miner. "
     $AllMiners | ForEach-Object {
         $Miner = $_
@@ -595,8 +617,15 @@ while ($true) {
     $Miners = $AllMiners | Where-Object {(Test-Path $_.Path -PathType Leaf) -and ((-not $_.PrerequisitePath) -or (Test-Path $_.PrerequisitePath))}
     if ($Miners.Count -ne $AllMiners.Count -and $Downloader.State -ne "Running") {
         Write-Log -Level Warn "Some miners binaries are missing, starting downloader. "
-        $Downloader = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList (@($AllMiners | Where-Object {$_.PrerequisitePath -and -not (Test-Path $_.PrerequisitePath -PathType Leaf)} | Select-Object @{name = "URI"; expression = {$_.PrerequisiteURI}}, @{name = "Path"; expression = {$_.PrerequisitePath}}, @{name = "Searchable"; expression = {$false}}) + @($AllMiners | Where-Object {-not (Test-Path $_.Path)} | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($AllMiners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}}) | Select-Object * -Unique) -FilePath .\Downloader.ps1
+        $Downloader = Start-Job -Name Downloader -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList (@($AllMiners | Where-Object {$_.PrerequisitePath -and -not (Test-Path $_.PrerequisitePath -PathType Leaf)} | Select-Object @{name = "URI"; expression = {$_.PrerequisiteURI}}, @{name = "Path"; expression = {$_.PrerequisitePath}}, @{name = "Searchable"; expression = {$false}}) + @($AllMiners | Where-Object {-not (Test-Path $_.Path)} | Select-Object URI, Path, @{name = "Searchable"; expression = {$Miner = $_; ($AllMiners | Where-Object {(Split-Path $_.Path -Leaf) -eq (Split-Path $Miner.Path -Leaf) -and $_.URI -ne $Miner.URI}).Count -eq 0}}) | Select-Object * -Unique) -FilePath .\Downloader.ps1
     }
+
+    #Get pool data just in time - required if $Config.Interval is high to have recent pool data
+    if (-not (Get-Job -Name GetPoolData -ErrorAction SilentlyContinue) -and (Get-Date).ToUniversalTime().AddSeconds($GetPoolDataJobDuration.TotalSeconds) -ge $StatEnd) {
+        Write-Log "Triggered loading pool information. "
+        $GetPoolDataJob = Start-Job -Name GetPoolData -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($StatSpan, $Config) -FilePath .\Get-PoolData.ps1
+    }
+
     # Open firewall ports for all miners
     if (Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) {
         if ((Get-Command "Get-MpComputerStatus" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue)) {
@@ -630,7 +659,7 @@ while ($true) {
     if ($Miners.Count -eq 0) {
         Write-Log -Level Warn "No miners available. "
         if ($Downloader) {$Downloader | Receive-Job}
-        Start-Sleep ([Int]($Config.Interval / 5))
+        Start-Sleep ([Int]($Config.Interval / 10))
         continue
     }
 
@@ -685,7 +714,7 @@ while ($true) {
                 Best_Comparison      = $false
                 New                  = $false
                 Benchmarked          = 0
-                Pool                 = $Miner.Pools.PSObject.Properties.Value.Name
+                Pool                 = [Array]$Miner.Pools.PSObject.Properties.Value.Name #temp fix, must use 'PSObject.Properties' to preserve order
                 ShowMinerWindow      = $Config.ShowMinerWindow
                 BenchmarkIntervals   = $Miner.BenchmarkIntervals
             }
@@ -725,6 +754,9 @@ while ($true) {
 
     $BestMiners_Combo = $BestMiners_Combos | Sort-Object -Descending {($_.Combination | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_.Combination | Measure-Object Profit_Bias -Sum).Sum}, {($_.Combination | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1 | Select-Object -ExpandProperty Combination
     $BestMiners_Combo_Comparison = $BestMiners_Combos_Comparison | Sort-Object -Descending {($_.Combination | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_.Combination | Measure-Object Profit_Comparison -Sum).Sum}, {($_.Combination | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1 | Select-Object -ExpandProperty Combination
+
+    #Kill stray miners
+    Get-CIMInstance CIM_Process | Where-Object ExecutablePath | Where-Object {$_.ExecutablePath -like "$(Get-Location)\Bin\*"} | Where-Object {$ActiveMiners.ProcessID -notcontains $_.ProcessID} | Select-Object -ExpandProperty ProcessID | Foreach-Object {Stop-Process -Id $_ -Force -ErrorAction Ignore}
 
     #Check for failed miner
     $RunningMiners | Where-Object {$_.GetStatus() -ne "Running"} | ForEach-Object {
@@ -768,8 +800,12 @@ while ($true) {
             }
         }
     }
-    #Kill stray miners
-    Get-CIMInstance CIM_Process | Where-Object ExecutablePath | Where-Object {$_.ExecutablePath -like "$(Get-Location)\Bin\*"} | Where-Object {$ActiveMiners.ProcessID -notcontains $_.ProcessID} | Select-Object -ExpandProperty ProcessID | Foreach-Object {Stop-Process -Id $_ -Force -ErrorAction Ignore}
+
+    #Get pool data just in time - required if $Config.Interval is high to have recent pool data
+    if (-not (Get-Job -Name GetPoolData -ErrorAction SilentlyContinue) -and (Get-Date).ToUniversalTime().AddSeconds($GetPoolDataJobDuration.TotalSeconds) -ge $StatEnd) {
+        Write-Log "Triggered loading pool information. "
+        $GetPoolDataJob = Start-Job -Name GetPoolData -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($StatSpan, $Config) -FilePath .\Get-PoolData.ps1
+    }
 
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Config.Delay #Wait to prevent BSOD
@@ -917,7 +953,7 @@ while ($true) {
     $API.WatchdogTimers = $WatchdogTimers
 
     #Reduce Memory
-    Get-Job -State Completed | Remove-Job
+    Get-Job | Where-Object {$_.Name -eq "Downloader" -and $_.State -eq "Completed"} | Remove-Job
     [GC]::Collect()
 
     #Ensure a full interval for benchmarking if no reported hashrate
@@ -931,7 +967,14 @@ while ($true) {
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
     Write-Log "Start waiting before next run. "
     #Get at least 10 hashrate samples when benchamrking
-    for ($i = 11; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
+    for ($i = 11; $i -gt 0 -and $Timer -lt $StatEnd; $i--) {
+
+        #Get pool data just in time - required if $Config.Interval is high to have recent pool data
+        if (-not (Get-Job -Name GetPoolData -ErrorAction SilentlyContinue) -and (Get-Date).ToUniversalTime().AddSeconds($GetPoolDataJobDuration.TotalSeconds) -ge $StatEnd) {
+            Write-Log "Triggered loading pool information. "
+            $GetPoolDataJob = Start-Job -Name GetPoolData -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($StatSpan, $Config) -FilePath .\Get-PoolData.ps1
+        }
+
         if ($Downloader) {$Downloader | Receive-Job}
         if ($API.Stop) {Exit}
         
@@ -1001,7 +1044,7 @@ while ($true) {
         if ($Miner.GetStatus() -eq "Running" -or $Miner.New) {
             $Miner.Algorithm | ForEach-Object {
                 $Algorithm = $_ -replace "-NHMP"
-                $Miner_Speed = $Miner.GetHashRate($Algorithm, $Config.Interval, ($Miner.New -and $Miner.Benchmarked -lt $Miner.BenchmarkIntervals))
+                $Miner_Speed = [Double]($Miner.GetHashRate($Algorithm, $Config.Interval, ($Miner.New -and $Miner.Benchmarked -lt $Miner.BenchmarkIntervals)))
                 $Miner.Speed_Live += [Double]$Miner_Speed
 
                 #Limit benchmarking loops

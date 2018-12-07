@@ -9,7 +9,7 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\lolminer.exe"
-$HashSHA256 = "232DCC48979879A20A5FA9A58089854A113C598326F27548F3FFF64C5BEF5D6E"
+$HashSHA256 = "A6688876C34AC91CAE6229D1A9B395F1D70316B442F171CD9ED762C78D6A3A03"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/lolMiner/lolMiner_v05_Win64_Bugfix.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4724735.0"
 $Port = "40{0:d2}"

@@ -15,13 +15,14 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\xmrig-amd.exe"
-$HashSHA256 = "926D04F9529C427C4F6730CBF507D427D781206609E414646FF7271AC9C9D84E"
+$HashSHA256 = "A4E7ED43E32BED11D5FEFFDC8642E97AF67E4A8310ED777B308108B6B3152CD7"
 $Uri = "https://github.com/xmrig/xmrig-amd/releases/download/v2.8.6/xmrig-amd-2.8.6-msvc-win64.zip"
 $ManualUri = "https://github.com/xmrig/xmrig-amd"
 $Port = "40{0:d2}"
 
 $Commands = [PSCustomObject[]]@(
-    # Note: For fine tuning directly edit [Pool]_[Algorithm]-[Port]-[User]-[Pass].json in the miner binary directory 
+    # Note: For fine tuning directly edit the config file in the miner binary directory
+    #       'Config-[Pool]_[Algorithm_Norm]-[Port]-[User]-[Pass].json'
     [PSCustomObject]@{Algorithm = "cryptonight/0";           MinMemGB = 2; Threads = 1; Params = " --opencl-strided-index=1"} # CryptoNight    
     [PSCustomObject]@{Algorithm = "cryptonight/1";           MinMemGB = 2; Threads = 1; Params = " --opencl-strided-index=1"} # CryptoNightV7
     [PSCustomObject]@{Algorithm = "cryptonight/2";           MinMemGB = 2; Threads = 1; Params = " --opencl-strided-index=2 --opencl-mem-chunk=1"} # CryptoNightV8, new with 2.8.1
@@ -87,7 +88,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             }
 
             #Get commands for active miner devices
-            $ConfigFileName = "$((@($Pools.$Algorithm_Norm.Name) + @($Pools.$Algorithm_Norm.Region) + @($Algorithm_Norm) + @($Miner_Device.Model_Norm -Join "_") + @($Miner_Port) +  @($Pools.$Algorithm_Norm.User) + @($Pools.$Algorithm_Norm.Pass) + @($Threads) | Select-Object) -join '-').json"
+            $ConfigFileName = "$((@("Config") + @($Algorithm_Norm) + @($Miner_Device.Model_Norm -Join "_") + @($Miner_Port) + @($Threads) | Select-Object) -join '-').json"
             $ThreadsConfigFileName = "$((@("ThreadsConfig") + @($Algorithm_Norm) + @(($Devices.Model_Norm | Select-Object) -Join "_") | Select-Object) -join '-').json"
             $PoolParameters = "--url=$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --userpass=$($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass) --keepalive$(if ($Pools.$Algorithm_Norm.Name -eq 'Nicehash') {" --nicehash"})$(if ($Pools.$Algorithm_Norm.SSL) {" --tls"})"
 
@@ -109,10 +110,10 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                         "print-time"      = 5
                         "retries"         = 5
                         "retry-pause"     = 5
-                        "opencl-platform" = $Miner_Device.PlatformId
+                        "opencl-platform" = ($Miner_Device.PlatformId | Select-Object -Unique)
                     }
                 }
-                Commands = ("$PoolParameters --config=$ConfigFileName --opencl-devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')$(Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index)$(if ($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker) {" --rig-id=$($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker)"})$CommonCommands" -replace "\s+", " ").trim()
+                Commands = ("$PoolParameters$(if ($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker) {" --rig-id=$($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker)"}) --config=$ConfigFileName --opencl-devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')$(Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index)$CommonCommands" -replace "\s+", " ").trim()
                 ThreadsConfigFileName = $ThreadsConfigFileName
                 HwDetectCommands = "$PoolParameters --config=$ThreadsConfigFileName$Params$CommonCommands"
                 Threads = $Threads

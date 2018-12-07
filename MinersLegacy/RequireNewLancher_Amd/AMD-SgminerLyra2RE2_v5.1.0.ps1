@@ -10,14 +10,11 @@ param(
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\sgminer.exe"
 $HashSHA256 = ""
-$Uri = "https://github.com/brian112358/avermore-miner/releases/download/v1.4.1/avermore-v1.4.1-windows.zip"
-$ManualUri = "https://github.com/brian112358/avermore-miner"
+$Uri = "https://cryptomining-blog.com/wp-content/download/sgminer-5-1-0-lyra2re-opt.zip"
 $Port = "40{0:d2}"
 
 $Commands = [PSCustomObject]@{
-    "X16r"  = " -k x16r -g 2 -w 64 -X 64"
-    "X16s"  = " -k x16s -g 2 -w 64 -X 64"
-    "Xevan" = " -k xevan -g 2 -w 64 -X 64"
+    "lyra2re2" = "" #Lyra2re2
 }
 $CommonCommands = " --text-only"
 
@@ -40,24 +37,17 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         #Get commands for active miner devices
         $Commands.$_ = Get-CommandPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
 
-        Switch ($Algorithm_Norm) {
-            "X16R"  {$BenchmarkIntervals = 5}
-            default {$BenchmarkIntervals = 1}
-        }
-
         [PSCustomObject]@{
-            Name               = $Miner_Name
-            DeviceName         = $Miner_Device.Name
-            Path               = $Path
-            HashSHA256         = $HashSHA256
-            Arguments          = ("--api-listen --api-port $Miner_Port --kernel $_ --url $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$CommonCommands --gpu-platform $($Miner_Device.PlatformId | Sort-Object -Unique) -d $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
-            HashRates          = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
-            API                = "Xgminer"
-            Port               = $Miner_Port
-            URI                = $Uri
-            Fees               = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
-            BenchmarkIntervals = $BenchmarkIntervals
+            Name        = $Miner_Name
+            DeviceName  = $Miner_Device.Name
+            Path        = $Path
+            HashSHA256  = $HashSHA256
+            Arguments   = ("--api-listen --api-port $Miner_Port --kernel $_ --url $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$($Commands.$_)$CommonCommands --gpu-platform $($Miner_Device.PlatformId | Sort-Object -Unique) -d $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
+            HashRates   = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
+            API         = "Xgminer"
+            Port        = $Miner_Port
+            URI         = $Uri
+            Environment = @{"GPU_FORCE_64BIT_PTR" = 0}
         }
     }
 }
-

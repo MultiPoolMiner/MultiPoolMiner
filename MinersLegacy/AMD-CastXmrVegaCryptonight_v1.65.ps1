@@ -43,7 +43,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Params = $_.Params
         $MinMemGB = $_.MinMemGB
 
-        $Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB -and $_.OpenCL.Name -match "^Ellesmere.*|^Polaris.*|^Vega.*|^gfx900.*"})
+        $Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB -and $_.OpenCL.Name -match "^Baffin.*|^Ellesmere.*|^Polaris.*|^Vega.*|^gfx900.*"})
 
         if ($Pools.$Algorithm_Norm.Host -and $Miner_Device) {
             if ($Config.UseDeviceNameForStatsFileNaming) {

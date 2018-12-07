@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\lolminer.exe"
-$HashSHA256 = "A2732B9D54A81A2BDD8D012A7E5601AC7152E6C97E6DD3A930AF2764B74B31F1"
-$Uri = "https://github.com/Lolliedieb/lolMiner-preview/releases/download/alpha3/lolMiner_v06_alpha3_Win64.zip"
+$HashSHA256 = "A90AE8714E373DCC895372F353C779EB3CA9E16BECC7442F63907BD1DF530880"
+$Uri = "https://github.com/Lolliedieb/lolMiner-preview/releases/download/alpha4/lolMiner_v06_alpha4_Win64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4724735.0"
 $Port = "40{0:d2}"
 
@@ -96,7 +96,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                     DeviceName       = $Miner_Device.Name
                     Path             = $Path
                     HashSHA256       = $HashSHA256
-                    Arguments        = ("--pool $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.pass) --apiport $Miner_Port --coin $coin$(Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index)$CommonCommands --devices $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')").trim()
+                    Arguments        = ("--pool $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.pass) --apiport $Miner_Port --coin $coin$(Get-CommandPerDevice $Params $Miner_Device.Type_Index)$CommonCommands --devices $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Index}) -join ',')").trim()
                     HashRates        = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                     API              = "lolMinerApi"
                     Port             = $Miner_Port

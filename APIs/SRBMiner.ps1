@@ -14,8 +14,8 @@ class SRBMiner : Miner {
 
         $Parameters = $this.Arguments | ConvertFrom-Json
 
-        #Write config files. Keep separate files and do not overwrite to preserve optional manual customization
-        $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -ErrorAction Ignore
+        #Write config files. Keep separate files, do not overwrite to preserve optional manual customization
+        if (-not (Test-Path "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -PathType Leaf)) {$Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -ErrorAction Ignore}
 
         #Write pool file. Keep separate files
         $Parameters.PoolFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.PoolFile.FileName)" -Force -ErrorAction SilentlyContinue
