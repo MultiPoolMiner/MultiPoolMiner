@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\teamredminer.exe"
-$HashSHA256 = "769AB0FC212A55687240DEB0E1EC70982315A09E405DB17C5AFB842CF83C32C9"
-$Uri = "https://github.com/todxx/teamredminer/releases/download/v0.3.7/teamredminer-v0.3.7-win.zip"
+$HashSHA256 = "5110414AC919431148F0DA75CAA4AE08EBB25278A0F18E781E046D3C0CF93539"
+$Uri = "https://github.com/todxx/teamredminer/releases/download/v0.3.8/teamredminer-v0.3.8-win.zip"
 $ManualUri = "https://github.com/todxx/teamredminer/blob/master/README.md"
 $Port = "40{0:d2}"
 
@@ -38,14 +38,14 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         }
 
         #Get commands for active miner devices
-        $Commands = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
+        $Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
 
         [PSCustomObject]@{
             Name       = $Miner_Name
             DeviceName = $Miner_Device.Name
             Path       = $Path
             HashSHA256 = $HashSHA256
-            Arguments  = ("--algo=$($_.Algorithm) --api_listen=127.0.0.1:$Miner_Port --url=$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user=$($Pools.$Algorithm_Norm.User) --pass=$($Pools.$Algorithm_Norm.Pass)$Commands$CommonCommands --platform=$($Miner_Device.PlatformId | Sort-Object -Unique) --devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
+            Arguments  = ("--algo=$($_.Algorithm) --api_listen=127.0.0.1:$Miner_Port --url=$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user=$($Pools.$Algorithm_Norm.User) --pass=$($Pools.$Algorithm_Norm.Pass)$Params$CommonCommands --platform=$($Miner_Device.PlatformId | Sort-Object -Unique) --devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
             HashRates  = [PSCustomObject]@{$Algorithm_Norm = $($Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week)}
             API        = "Xgminer"
             Port       = $Miner_Port
