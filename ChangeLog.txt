@@ -1,0 +1,120 @@
+﻿## Changelog Version 3.2.0
+
+#### New features
+- Added parameter '-PoolBalancesUpdateInterval'
+
+- Pool fee is now part of the profitability calculation
+
+- Separate section 'Wallets' in config file, BTC/Wallet gets automatically moved to 'Wallets' on start
+
+#### Core changes
+- Added 'Bitcoin' to the list of unprofitable algos
+- Added 'CryptonightDark', 'CryptonightFreeHaven', 'CryptonightRed', 'YescryptR24' and 'YescryptR32' to Algorithms.txt
+- Added 'poolbalancesdata' to web API
+
+- Changed APIs files; simplified algo name detection
+- Changed defaults parameter values for fresh installations; enabled 'CreateMinerInstancePerDeviceModel' and 'UseDeviceNameForStatsFileNaming' in config file
+- Changed exchange rate currency name to be displayed in upper case
+- Changed list of default algos in start batch files:
+  - Start-MiningPoolHub: removed lyra2re2
+  - Start_Zpool: aded hex,x16r,x16s,x17,x22i; removed lyra2re2
+
+- Enhancement: Better detection of failed miners (some crashed miners are dead, but may still be found by their processId)
+- Enhancement: Changed method to launch miner executables when '-ShowMinerWindows:true'; will no longer steal focus (requires [MPM-Dir]\CreateProcess.cs file)
+- Enhancement: Loading pool data converted to job; shortens loop time
+
+- Fixed 'No pools available' message when no wallet was explicitly configured in the config file
+- Fixed donation addresses
+- Fixed error displaying Pool balances, but no wallet address / username was configured
+- Fixed generated miner objects; pool element is of type [array]
+- Fixed MPM Error message when '-MinerName' was empty
+- Fixed MPM starts mining if only one miner is available
+- Fixed pool balances display formatting (works with any regional setting)
+- Fixed rescanning devices when reconfiguring 'DeviceName' or 'ExcludeDeviceName' while MPM is running
+
+- Miner overview: Sort algorithms requiring benchmarking alphabetically; print either 'Benchmark pending' or 'Benchmark in progress' depending on status
+
+- Start batch files, 'UseFastestMinerPerAlgoOnly' is now enabled by default
+
+- Updated README: NiceHash pool configuration details
+
+#### Miner changes
+
+- Added AMD-JCECryptonote_v0.33b6
+- Added CPU-JCECryptonote_v0.36g
+- Added NVIDIA-GminerEquihash_v1.10
+
+- Changed config file handling of *-XmrigCryptonight_* miners
+- Changed NVIDIA-CcminerTpruvot_v2.3; removed monero and graft algos
+
+- Disabled some AMD miners because they need special environment variable values (which is currently not supported by MPM, see https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2208#issuecomment-432696257)
+  They are all in the folder 'RequireNewLancher_Amd', feel free to move them to 'MinersLegacy'. If they work that's fine :-)
+  - AMD-MkxminerLyra2RE2_v3.10
+  - AMD-Sgminer_v5.6.1
+  - AMD-SgminerAvermore_v1.4.1
+  - AMD-SgminerKL_v1.0.9
+  - AMD-SgminerLyra2RE2_v5.1.0
+  - AMD-SgminerXevan_v5.5.0
+
+- Enabled AMD_NVIDIA-EminerEthash_v0.6.1rc2 dev fee mining
+
+- Fixed AMD_CPU_NVIDIA-FireiceCryptonight_v2.7.0; preserve existing config files
+- Fixed AMD_NVIDIA-ClaymoreEthash_v11.9; removed double algo in miner name (when '-UseDeviceNameForStatsFileNaming:true' and single mining)
+- Fixed AMD_NVIDIA-lolMinerEquihash_v0.5bugfix; preserve existing config files
+- Fixed NVIDIA-BMiner_v10.7.0; removed double algo in miner name (when '-UseDeviceNameForStatsFileNaming:true' and single mining), support for -pers auto'
+
+- Fixed AMD_NVIDIA-lolMinerEquihash_v0.5bugfix Sha256 hash
+- Fixed AMD-XmrigCryptonight_v2.8.6 algo filtering based on minimum memory (CryptonightHeavy requires 4GB)
+- Fixed CPU-ClaymoreCryptonight_v4.0; api port is now in the 4000 range as all other miners
+- Fixed CPU-CryplyAvx_v3.8.8.3 Sha256 hash
+- Fixed CPU-CryplyAvx2_v3.8.8.3 Sha256 hash
+- Fixed CPU-CryplyAvx2Sha_v3.8.8.3 Sha256 hash
+- Fixed CPU-CryplySse42_v3.8.8.3 Sha256 hash
+- Fixed CPU-CryplySse42Sha_v3.8.8.3 Sha256 hash
+
+- Merged API files for XmRig & XmRigCfgFile
+
+- Reported graphics memory is rounded to the nearest 1/4 GB (Include.psm1/Get-Device)
+
+- Updated AMD-CastXmrVegaCryptonight_v1.65; support for algo CryptonightXfh, added support for Baffin chipset
+- Updated AMD-SgminerKL_v1.0.9
+- Updated AMD-SRBMinerCryptonight_v1.7.2
+- Updated AMD-WildRig_v0.13.6.2beta; support for Dedal, Lyra2vc0ban & X21s algo
+- Updated AMD-XmrigCryptonight_v2.8.6
+- Updated AMD_NVIDIA-lolMinerEquihash_v0.6alpha4; support for Equihash 210/9 algo
+- Updated AMD_NVIDIA-PhoenixminerEthash_v4.0a; support for Blake2s dual mining with AMD cards
+- Updated NVIDIA-BMiner_v10.7.0; support for -pers auto'
+- Updated NVIDIA-CryptoDredge_v0.13.0; support for Dedal, Lyra2vc0banHash, Pipe & X21s algo
+- Updated NVIDIA-CcminerAlexis_v1.4; requires CUDA 10.0.0
+- Updated NVIDIA-CcminerTrex_v0.8.5; support for Dedal, Geek & X21s algo
+- Updated NVIDIA-CcminerZealot_v1.24ver3
+- Updated NVIDIA-CcminerKlausT_vYescryptR16R32.V7
+- Updated NVIDIA-CcminerTpruvot_v2.3; requires CUDA 10.0.0, support for Exosis algo
+- Updated NVIDIA-CcminerZealot_v1.26ver1; remove support for Renesis algo
+
+#### Pool changes
+- Added *Coins variants for pools that support it
+- Added Ravenminer & RavenminerEU
+- Added StarPool & StarPoolCoins
+- Added Zpool region NA (USA)
+
+- Fixed BlockMasters.ps1; returned empty data in some scenarios
+- Fixed MiningPoolHub(Coins); changed hosts for Equihash-BTG
+- Fixed NLPool; was using wrong host address (Zpool)
+- Fixed Yiimp balance (message 'no wallet specified')
+
+- Pool queries are less likely to fail (try 3 times before giving up)
+- Pool objects contain fee information, will be used for profit calculation
+
+#### New algorithms
+- Dedal
+- Equihash 210/9
+- Geek
+- Lyra2vc0banHash
+- Pipe
+- X18
+- X21s
+
+#### Other changes / Fixes
+- Get-Binaries: Fixed compatibility with miner filename change introduced in 3.1.0
+- Updated README: NiceHash pool configuration details
