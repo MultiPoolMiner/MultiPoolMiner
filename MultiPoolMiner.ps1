@@ -100,7 +100,7 @@ param(
 
 Clear-Host
 
-$Version = "3.2.0 Beta 9"
+$Version = "3.2.0"
 $VersionCompatibility = "3.2.0"
 $Strikes = 3
 $SyncWindow = 5 #minutes
