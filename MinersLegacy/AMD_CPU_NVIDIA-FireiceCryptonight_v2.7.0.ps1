@@ -56,7 +56,6 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Commands | Where-Object {$Pools.(Get-Algorithm $_.Algorithm)} | ForEach-Object {
         $Algorithm = $_.Algorithm
         $Algorithm_Norm = Get-Algorithm $Algorithm
-        $Params = $_.Params
         $MinMemGB = $_.MinMemGB
         $Threads = $_.Threads
 
@@ -85,7 +84,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             }
             
             #Get commands for active miner devices
-            $Params = Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index
+            $Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
             $ConfigFileName = "$((@("Config") + @($Platform) + @($Pools.$Algorithm_Norm.Algorithm) + @($Miner_Device.Model_Norm -Join "_") + @($Miner_Port) | Select-Object) -join '-').txt"
             $PoolsFileName = "$((@("Pools") + @($Pools.$Algorithm_Norm.Name) + @($Pools.$Algorithm_Norm.Algorithm) | Select-Object) -join '-').txt"
             $PlatformThreadsConfigFile = "$((@("HwConfig") + @($Platform) + @($Algorithm_Norm) + @(($Devices | Where-Object Vendor -EQ $Miner_Device.Vendor | Select-Object -ExpandProperty Model_Norm) -Join "_") | Select-Object) -join '-').json"

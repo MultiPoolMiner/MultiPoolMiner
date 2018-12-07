@@ -47,7 +47,6 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
     $Commands | Where-Object {$Pools.(Get-Algorithm $_.Algorithm).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Algorithm_Norm = Get-Algorithm $_.Algorithm
-        $Params = $_.Params
         $MinMemGB = $_.MinMemGB
 
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
@@ -58,6 +57,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             else {
                 $Miner_Name = (@($Name) + @($Miner_Device.Name | Sort-Object) | Select-Object) -join '-'
             }
+
+            #Get commands for active miner devices
+            $Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Index
 
             switch ($Algorithm_Norm) {
                 "Equihash965" {
@@ -96,7 +98,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                     DeviceName       = $Miner_Device.Name
                     Path             = $Path
                     HashSHA256       = $HashSHA256
-                    Arguments        = ("--pool $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.pass) --apiport $Miner_Port --coin $coin$(Get-CommandPerDevice $Params $Miner_Device.Type_Index)$CommonCommands --devices $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Index}) -join ',')").trim()
+                    Arguments        = ("--pool $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.pass) --apiport $Miner_Port --coin $coin$Params$CommonCommands --devices $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Index}) -join ',')").trim()
                     HashRates        = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                     API              = "lolMinerApi"
                     Port             = $Miner_Port
