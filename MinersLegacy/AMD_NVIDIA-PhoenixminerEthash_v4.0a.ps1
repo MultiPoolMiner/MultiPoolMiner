@@ -58,14 +58,13 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Commands | Where-Object {$Vendor -eq "AMD" -or -not $_.SecondaryAlgorithm} | ForEach-Object { #Dual mining is only supported for AMD
         $Main_Algorithm = $_.MainAlgorithm
         $Main_Algorithm_Norm = Get-Algorithm $Main_Algorithm
-        $Params = $_.Params
         $MinMemGB = $_.MinMemGB
 
         $Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})
 
         if ($Pools.$Main_Algorithm_Norm.Host -and $Miner_Device) {
             #Get commands for active miner devices
-            $Params = Get-CommandPerDevice $Params $Miner_Device.Type_Index
+            $Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Index
 
             if ($_.SecondaryAlgorithm) {
                 $Secondary_Algorithm = $_.SecondaryAlgorithm
