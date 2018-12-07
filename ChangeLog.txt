@@ -40,7 +40,7 @@
 
 #### Miner changes
 
-- Added AMD-JCECryptonote_v0.33b6
+- Added AMD-JCECryptonote_v0.33b9
 - Added CPU-JCECryptonote_v0.36g
 - Added NVIDIA-GminerEquihash_v1.10
 
@@ -79,6 +79,7 @@
 - Updated AMD-CastXmrVegaCryptonight_v1.65; support for algo CryptonightXfh, added support for Baffin chipset
 - Updated AMD-SgminerKL_v1.0.9
 - Updated AMD-SRBMinerCryptonight_v1.7.2
+- Updated AMD-TeamRed_v0.3.8
 - Updated AMD-WildRig_v0.13.6.2beta; support for Dedal, Lyra2vc0ban & X21s algo
 - Updated AMD-XmrigCryptonight_v2.8.6
 - Updated AMD_NVIDIA-lolMinerEquihash_v0.6alpha4; support for Equihash 210/9 algo
