@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\jce_cn_gpu_miner64.exe"
-$HashSHA256 = "9EC1A55DA073798690C9A3785489E8A01613A2839DE56D889F2267CCAF82DF9B"
-$Uri = "https://github.com/jceminer/cn_gpu_miner/raw/master/jce_cn_gpu_miner.033b6.zip"
+$HashSHA256 = "BF526F08D7D658A947AB249B5A5E3E824A010EE7E73095152588C2F3AFBC1AC9"
+$Uri = "https://github.com/jceminer/cn_gpu_miner/raw/master/jce_cn_gpu_miner.033b9.zip"
 $ManualURI = "https://bitcointalk.org/index.php?topic=3281187.0"
 $Port = "40{0:d2}"
 
