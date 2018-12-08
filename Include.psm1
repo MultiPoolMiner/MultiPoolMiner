@@ -1061,3 +1061,116 @@ class Miner {
         }
     }
 }
+
+enum DownloadStatus {
+    Idle
+    Downloading
+    Complete
+    Failed
+}
+
+class Download {
+    hidden [DownloadStatus]$Status = [DownloadStatus]::Idle
+
+    hidden static $TorrentEngine
+    hidden static $TorrentEngine_DHT
+    hidden static $TorrentEngine_DHT_Listener
+
+    hidden $TorrentEngine_Manager
+    hidden [System.Management.Automation.Job]$HttpJob
+
+    hidden [System.Uri]$Uri
+    hidden [System.Uri]$DownloadFilePath
+
+    Download($Uri, $DownloadFilePath) {
+        $this.Uri = $Uri
+        $this.DownloadFilePath = $DownloadFilePath
+    }
+
+    hidden Start_TorrentEngine() {
+        $Address = [System.Net.IPAddress]::Any
+        $Port = Get-Random -Minimum ([System.Net.IPEndPoint]::MinPort) -Maximum ([System.Net.IPEndPoint]::MaxPort)
+
+        if (-not [Download]::TorrentEngine_DHT) {
+            [Download]::TorrentEngine_DHT_Listener = New-Object "MonoTorrent.Dht.Listeners.DhtListener" ([System.Net.IPEndPoint]::new($Address, $Port))
+            [Download]::TorrentEngine_DHT = New-Object "MonoTorrent.Dht.DhtEngine" ([Download]::TorrentEngine_DHT_Listener)
+            [Download]::TorrentEngine_DHT.Start()
+
+            for ($i = 0; $i -lt 60 * 2 -and [Download]::TorrentEngine_DHT.State -ne "Ready"; $i += 10) {
+                Start-Sleep 10
+            }
+
+            if ([Download]::TorrentEngine_DHT.State -ne "Ready") {
+                [Download]::TorrentEngine_DHT.Dispose()
+                [Download]::TorrentEngine_DHT = $null
+                $this.Status = [DownloadStatus]::Failed
+                return
+            }
+        }
+
+        if (-not [Download]::TorrentEngine) {
+            $TorrentEngine_Settings = New-Object "MonoTorrent.Client.EngineSettings"
+            [Download]::TorrentEngine = New-Object "MonoTorrent.Client.ClientEngine" $TorrentEngine_Settings
+            [Download]::TorrentEngine.ChangeListenEndpoint([System.Net.IPEndPoint]::new($Address, $Port))
+            [Download]::TorrentEngine.RegisterDht([Download]::TorrentEngine_DHT)
+        }
+
+        if (-not $this.TorrentEngine_Manager) {
+            $Magnet = New-Object "MonoTorrent.Common.MagnetLink" $this.Uri
+            $TorrentEngine_Manager_Settings = New-Object "MonoTorrent.Client.TorrentSettings"
+            $this.TorrentEngine_Manager = New-Object "MonoTorrent.Client.TorrentManager" $Magnet, $this.DownloadFilePath.AbsolutePath, $TorrentEngine_Manager_Settings, (Join-Path $this.DownloadFilePath.AbsolutePath "$($Magnet.InfoHash).torrent")
+            [Download]::TorrentEngine.Register($this.TorrentEngine_Manager)
+        }
+
+        $this.TorrentEngine_Manager.Start()
+        $this.Status = [DownloadStatus]::Downloading
+    }
+
+    Start() {
+        if ($this.Uri.Scheme -eq "magnet") {
+            $this.Start_TorrentEngine()
+        }
+        elseif ($this.Uri.Scheme -eq "https" -and $this.Uri.Host -eq "mega.nz") {
+            #To-do: add support for 'https://mega.nz'
+        }
+        else {
+            #To-do: add support for 'http:' and 'https:'
+        }
+    }
+
+    Stop() {
+        $this.TorrentEngine_Manager.Stop()
+        $this.Status = [DownloadStatus]::Idle
+    }
+
+    [DownloadStatus]GetStatus() {
+        $TorrentEngine_Manager_State = $this.TorrentEngine_Manager.State
+
+        if ($TorrentEngine_Manager_State -eq "Error") {
+            $this.Status = [DownloadStatus]::Failed
+        }
+
+        switch ($this.Status) {
+            "Idle" {
+                if ($TorrentEngine_Manager_State -ne "Stopped" -and $TorrentEngine_Manager_State -ne "Paused" -and $TorrentEngine_Manager_State -ne "Stopping") {
+                    $this.Status = [DownloadStatus]::Failed
+                }
+            }
+            "Downloading" {
+                if ($TorrentEngine_Manager_State -eq "Seeding") {
+                    $this.Status = [DownloadStatus]::Complete
+                }
+                elseif ($TorrentEngine_Manager_State -ne "Downloading" -and $TorrentEngine_Manager_State -ne "Hashing" -and $TorrentEngine_Manager_State -ne "Metadata") {
+                    $this.Status = [DownloadStatus]::Failed
+                }
+            }
+            "Complete" {
+                if ($this.TorrentEngine_Manager.Complete -ne $true) {
+                    $this.Status = [DownloadStatus]::Failed
+                }
+            }
+        }
+
+        return $this.Status
+    }
+}
