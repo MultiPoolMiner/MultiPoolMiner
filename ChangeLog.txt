@@ -26,6 +26,7 @@
 - Fixed 'No pools available' message when no wallet was explicitly configured in the config file
 - Fixed donation addresses
 - Fixed error displaying Pool balances, but no wallet address / username was configured
+- Fixed 'ExcludeDeviceName; before it would not exclude more than one device
 - Fixed generated miner objects; pool element is of type [array]
 - Fixed MPM Error message when '-MinerName' was empty
 - Fixed MPM starts mining if only one miner is available
@@ -91,7 +92,8 @@
 - Updated NVIDIA-CcminerZealot_v1.24ver3
 - Updated NVIDIA-CcminerKlausT_vYescryptR16R32.V7
 - Updated NVIDIA-CcminerTpruvot_v2.3; requires CUDA 10.0.0, support for Exosis algo
-- Updated NVIDIA-CcminerZealot_v1.26ver1; remove support for Renesis algo
+- Updated NVIDIA-CcminerZealot_v1.27; remove support for Renesis algo
+- Updated NVIDIA-ExcavatorNHMP_v1.5.14a
 
 #### Pool changes
 - Added *Coins variants for pools that support it
