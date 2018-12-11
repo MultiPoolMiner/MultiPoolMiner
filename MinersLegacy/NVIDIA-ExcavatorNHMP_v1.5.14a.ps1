@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\excavator.exe"
-$HashSHA256 = "EC992234C85B76EAACE74E333C8C55341B2D32AC6D90214A5E656D5E23F83667"
-$Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.13a/excavator_v1.5.13a_Win64.zip"
+$HashSHA256 = "5AFFBBBD18676359904380ECF36E1A96C222E01B04F657147DC40B090AF1E058"
+$Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.14a/excavator_v1.5.14a_Win64.zip"
 $ManualUri = "https://github.com/nicehash/excavator/releases"
 $Port = "5401"
 
