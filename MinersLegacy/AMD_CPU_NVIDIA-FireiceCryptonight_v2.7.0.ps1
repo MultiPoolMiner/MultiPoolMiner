@@ -59,7 +59,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         $MinMemGB = $_.MinMemGB
         $Threads = $_.Threads
 
-        if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
+        if ($Miner_Device = @($Device | Where-Object {$_.Type -eq "CPU" -or ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
         
             if ($Config.UseDeviceNameForStatsFileNaming) {
                 $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') + @($Threads) | Select-Object) -join '-'
@@ -87,7 +87,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             $Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
             $ConfigFileName = "$((@("Config") + @($Platform) + @($Pools.$Algorithm_Norm.Algorithm) + @($Miner_Device.Model_Norm -Join "_") + @($Miner_Port) | Select-Object) -join '-').txt"
             $PoolsFileName = "$((@("Pools") + @($Pools.$Algorithm_Norm.Name) + @($Pools.$Algorithm_Norm.Algorithm) | Select-Object) -join '-').txt"
-            $PlatformThreadsConfigFile = "$((@("HwConfig") + @($Platform) + @($Algorithm_Norm) + @(($Devices | Where-Object Vendor -EQ $Miner_Device.Vendor | Select-Object -ExpandProperty Model_Norm) -Join "_") | Select-Object) -join '-').json"
+            $PlatformThreadsConfigFile = "$((@("HwConfig") + @($Platform) + @($Algorithm_Norm) + @((Get-Device | Where-Object {$_.Type -EQ ($Miner_Device.Type | Select-Object -First 1) -and $_.Vendor -EQ ($Miner_Device.Vendor | Select-Object -First 1)} | Select-Object -ExpandProperty Model_Norm) -Join "_") | Select-Object) -join '-').json"
             $MinerThreadsConfigFile = "$((@("ThreadsConfig") + @($Platform) + @($Algorithm_Norm) + @(($Miner_Device | Select-Object -ExpandProperty Model_Norm) -Join "_") + @($Threads) | Select-Object) -join '-').txt"
             $Parameters = [PSCustomObject]@{
                 PoolsFile = [PSCustomObject]@{
