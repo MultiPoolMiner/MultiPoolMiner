@@ -16,7 +16,7 @@ class Fireice : Miner {
             $ConfigFile = "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)"
             $PoolsFile = "$(Split-Path $this.Path)\$($Parameters.PoolsFile.FileName)"
             $MinerThreadsConfigFile = "$(Split-Path $this.Path)\$($Parameters.MinerThreadsConfigFile)"
-            $ThreadsConfigFile = "$(Split-Path $this.Path)\$($Parameters.PlatformThreadsConfigFile)"
+            $ThreadsConfigFile = "$(Split-Path $this.Path)\$($Parameters.ThreadsConfigFile)"
             $Platform = $Parameters.Platform
             $PlatformThreadsConfigFile = "$(Split-Path $this.Path)\$($Parameters.PlatformThreadsConfigFile)"
             $ThreadsConfig = ""
