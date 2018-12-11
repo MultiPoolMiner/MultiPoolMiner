@@ -44,7 +44,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             DeviceName = $Miner_Device.Name
             Path       = $Path
             HashSHA256 = $HashSHA256
-            Arguments  = ("-r -1 -mport -$($Miner_Port) -pow7 1 -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)-mport 127.0.0.1:$Miner_Port$($Commands.$_)$CommonCommands" -replace "\s+", " ").trim()
+            Arguments  = ("-r -1 -mport -$($Miner_Port) -pow7 1 -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)($Commands.$_)$CommonCommands" -replace "\s+", " ").trim()
             HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
             API        = "Claymore"
             Port       = $Miner_Port
