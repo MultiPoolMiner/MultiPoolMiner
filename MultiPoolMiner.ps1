@@ -100,7 +100,7 @@ param(
 
 Clear-Host
 
-$Version = "3.2.0"
+$Version = "3.2.0 Beta 9a"
 $VersionCompatibility = "3.2.0"
 $Strikes = 3
 $SyncWindow = 5 #minutes
@@ -406,7 +406,7 @@ while ($true) {
         elseif ($GetPoolDataJob.State -eq "Running") {Write-Log "Waiting for pool information. "}
         $NewPools = Get-Job -Name GetPoolData | Wait-Job | Receive-Job
         $GetPoolDataJobDuration = ($GetPoolDataJob.PSEndTime - $GetPoolDataJob.PSBeginTime)
-        Write-Log "Loading pool data ($($GetPoolDataJob.PSBeginTime) - $($GetPoolDataJob.PSEndTime)). "
+        Write-Log "Got pool information for $($GetPoolDataJob.PSBeginTime) - $($GetPoolDataJob.PSEndTime). "
         Remove-Job -Name GetPoolData
         #Get pool data just in time; required if $Config.Interval is high to have recent pool data
         if ((Get-Date).ToUniversalTime().AddSeconds($GetPoolDataJobDuration.TotalSeconds) -ge $StatEnd) {
@@ -755,9 +755,6 @@ while ($true) {
     $BestMiners_Combo = $BestMiners_Combos | Sort-Object -Descending {($_.Combination | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_.Combination | Measure-Object Profit_Bias -Sum).Sum}, {($_.Combination | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1 | Select-Object -ExpandProperty Combination
     $BestMiners_Combo_Comparison = $BestMiners_Combos_Comparison | Sort-Object -Descending {($_.Combination | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_.Combination | Measure-Object Profit_Comparison -Sum).Sum}, {($_.Combination | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1 | Select-Object -ExpandProperty Combination
 
-    #Kill stray miners
-    Get-CIMInstance CIM_Process | Where-Object ExecutablePath | Where-Object {$_.ExecutablePath -like "$(Get-Location)\Bin\*"} | Where-Object {$ActiveMiners.ProcessID -notcontains $_.ProcessID} | Select-Object -ExpandProperty ProcessID | Foreach-Object {Stop-Process -Id $_ -Force -ErrorAction Ignore}
-
     #Check for failed miner
     $RunningMiners | Where-Object {$_.GetStatus() -ne "Running"} | ForEach-Object {
         $_.SetStatus("Failed")
@@ -809,6 +806,9 @@ while ($true) {
 
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Config.Delay #Wait to prevent BSOD
+
+    #Kill stray miners
+    Get-CIMInstance CIM_Process | Where-Object ExecutablePath | Where-Object {$_.ExecutablePath -like "$(Get-Location)\Bin\*"} | Where-Object {$ActiveMiners.ProcessID -notcontains $_.ProcessID} | Select-Object -ExpandProperty ProcessID | Foreach-Object {Stop-Process -Id $_ -Force -ErrorAction Ignore}
 
     $RunningMiners = @()
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
