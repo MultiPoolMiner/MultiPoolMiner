@@ -21,12 +21,12 @@ if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$Requ
 }
 
 if ($DriverVersion -lt [System.Version]("10.0.0")) {
-    $HashSHA256 = "EC1BB6F500F5622F70A19C22D3ABB8550C732826A80DFE82CC8B7ECC66B3023F"
-    $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-26-cuda9.2.zip"
+    $HashSHA256 = "BBF97FF18A51309C64F207E43D42E98CAF50446C58B9853382AACE68AE35C849"
+    $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-27-cuda9.2.zip"
 }
 else {
-    $HashSHA256 = "9EBF58A64DD60AB7F83ECF8570856F6A1457DFB6C384D2B82B21592FAB113407"
-    $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-26-cuda10.0.zip"
+    $HashSHA256 = "390C757313D3DD88EDBA7528522A3D34F92BC4721E264D11D688E5216AEDA083"
+    $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.1-27-cuda10.0.zip"
 }
 
 $Commands = [PSCustomObject]@{
