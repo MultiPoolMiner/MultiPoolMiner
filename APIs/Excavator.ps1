@@ -40,8 +40,17 @@ class Excavator : Miner {
         return @()
     }
 
+    [String]GetLogFileParameters() {
+        if ($this.ShowMinerWindow) {
+            Return ""
+        }
+        else {
+            Return " -fn $($Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\Excavator-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"))"
+        }
+    }
+
     [String]GetCommandLineParameters() {
-        return $this.Arguments
+        return "-p $($this.Port) -f 0$($this.GetLogFileParameters())"
     }
 
     hidden StartMining() {
@@ -200,12 +209,11 @@ class Excavator : Miner {
         }
 
         if (-not ([Excavator]::Service.State -eq "Running")) {
-            $LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\Excavator-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt")
             if (Test-Path ".\CreateProcess.cs" -PathType Leaf) {
-                [Excavator]::Service = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList "-p $($this.Port) -f 0 -fn $($LogFile)" -WorkingDirectory $(Split-Path $this.Path) -Priority ($this.Device.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
+                [Excavator]::Service = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList $($this.GetCommandLineParameters()) -WorkingDirectory $(Split-Path $this.Path) -Priority ($this.Device.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
             }
             else {
-               [Excavator]::Service = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '-p $($this.Port) -f 0 -fn \```"$($LogFile)\```"' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+               [Excavator]::Service = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '$($this.GetCommandLineParameters())' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
             }
             #Wait until excavator is ready, max 10 seconds
             $Server = "localhost"
@@ -216,7 +224,7 @@ class Excavator : Miner {
                 try {
                     $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
                     $Data = $Response | ConvertFrom-Json -ErrorAction Stop
-                    [Excavator]::Service | Add-Member ProcessId (Get-CIMInstance CIM_Process | Where-Object {$_.ExecutablePath -eq $this.Path -and $_.CommandLine -like "*$($this.Path)*-p $($this.Port) -f 0 -fn $($LogFile)*"}).ProcessId
+                    [Excavator]::Service | Add-Member ProcessId (Get-CIMInstance CIM_Process | Where-Object {$_.ExecutablePath -eq $this.Path -and $_.CommandLine -like "*$($this.Path)*$($this.GetCommandLineParameters())*"}).ProcessId
                     break
                 }
                 catch {
