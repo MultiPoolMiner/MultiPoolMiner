@@ -4,11 +4,11 @@ Add-Type -Path .\OpenCL\*.cs
 
 function Get-CommandPerDevice {
 
-# rewrites the command parameters
-# if a parameter has multiple values, only the values for the available devices are returned
-# parameters with a single value are valid for all devices and remain untouched
+    # rewrites the command parameters
+    # if a parameter has multiple values, only the values for the available devices are returned
+    # parameters with a single value are valid for all devices and remain untouched
 
-[CmdletBinding()]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
@@ -26,17 +26,20 @@ function Get-CommandPerDevice {
         $ValueSeparator = $null
         $Values = $null
 
-        if ($Token.TrimStart() -match "(?:^[-=]{1,})") { # supported prefix characters are listed in brackets: [-=]{1,}
+        if ($Token.TrimStart() -match "(?:^[-=]{1,})") {
+            # supported prefix characters are listed in brackets: [-=]{1,}
 
             $Prefix = "$($Token -split $Matches[0] | Select -Index 0)$($Matches[0])"
             $Token = $Token -split $Matches[0] | Select -Last 1
 
-            if ($Token -match "(?:[ =]{1,})") { # supported separators are listed in brackets: [ =]{1,}
+            if ($Token -match "(?:[ =]{1,})") {
+                # supported separators are listed in brackets: [ =]{1,}
                 $ParameterValueSeparator = $Matches[0]
                 $Parameter = $Token -split $ParameterValueSeparator | Select -Index 0
                 $Values = $Token.Substring(("$($Parameter)$($ParameterValueSeparator)").length)
 
-                if ($Values -match "(?:[,; ]{1})") { # supported separators are listed in brackets: [,; ]{1}
+                if ($Values -match "(?:[,; ]{1})") {
+                    # supported separators are listed in brackets: [,; ]{1}
                     $ValueSeparator = $Matches[0]
                     $RelevantValues = @()
                     $Devices | Foreach-Object {
@@ -61,8 +64,8 @@ function Get-Balance {
     $Data = [PSCustomObject]@{}
 
     $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
-        Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
-    } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | Sort-Object Name)
+            Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
+        } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | Sort-Object Name)
 
     #Get exchgange rates for all payout currencies
     $CurrenciesWithBalances = @($Balances.currency | Sort-Object -Unique)
@@ -662,26 +665,25 @@ function Get-Device {
             [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object {
                 $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
                 $Device = [PSCustomObject]@{
-                    Index = [Int]$Index
-                    PlatformId = [Int]$PlatformId
-                    PlatformId_Index = [Int]$PlatformId_Index."$($PlatformId)"
+                    Index                 = [Int]$Index
+                    PlatformId            = [Int]$PlatformId
+                    PlatformId_Index      = [Int]$PlatformId_Index."$($PlatformId)"
                     Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
-                    Vendor = [String]$Device_OpenCL.Vendor
-                    Vendor_ShortName = $(Switch ([String]$Device_OpenCL.Vendor)
-                        {
-                        "Advanced Micro Devices, Inc." {"AMD"}
-                        "Intel(R) Corporation" {"INTEL"}
-                        "NVIDIA Corporation" {"NVIDIA"}
-                        default {[String]$Device_OpenCL.Vendor}
+                    Vendor                = [String]$Device_OpenCL.Vendor
+                    Vendor_ShortName      = $(Switch ([String]$Device_OpenCL.Vendor) {
+                            "Advanced Micro Devices, Inc." {"AMD"}
+                            "Intel(R) Corporation" {"INTEL"}
+                            "NVIDIA Corporation" {"NVIDIA"}
+                            default {[String]$Device_OpenCL.Vendor}
                         }
                     )
-                    Vendor_Index = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
-                    Type_Vendor_Index = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
-                    Type = [String]$Device_OpenCL.Type
-                    Type_Index = [Int]$Type_Index."$($Device_OpenCL.Type)"
-                    OpenCL = $Device_OpenCL
-                    Model = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
-                    Model_Norm = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
+                    Vendor_Index          = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
+                    Type_Vendor_Index     = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
+                    Type                  = [String]$Device_OpenCL.Type
+                    Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
+                    OpenCL                = $Device_OpenCL
+                    Model                 = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
+                    Model_Norm            = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
@@ -721,15 +723,15 @@ function Get-Device {
         # Vendor and type the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
         $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
         $Device = [PSCustomObject]@{
-            Index = [Int]$Index
-            Vendor = $CPUInfo.Manufacturer
-            Vendor_ShortName = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") {"INTEL"} else {"AMD"})
+            Index             = [Int]$Index
+            Vendor            = $CPUInfo.Manufacturer
+            Vendor_ShortName  = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") {"INTEL"} else {"AMD"})
             Type_Vendor_Index = $CPUIndex
-            Type = "Cpu"
-            Type_Index = $CPUIndex
-            CIM = $CPUInfo
-            Model = $CPUInfo.Name
-            Model_Norm = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
+            Type              = "Cpu"
+            Type_Index        = $CPUIndex
+            CIM               = $CPUInfo
+            Model             = $CPUInfo.Name
+            Model_Norm        = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
         }
 
         if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
@@ -823,7 +825,7 @@ class Miner {
     [String]GetCommandLineParameters() {
         return $this.Arguments
     }
-    
+
     [String]GetCommandLine() {
         return "$($this.Path) $($this.GetCommandLineParameters())"
     }
@@ -1007,10 +1009,10 @@ class Miner {
                     $Lines += $Line
 
                     $this.Data += [PSCustomObject]@{
-                        Date = $Date
-                        Raw = $Line_Simple
+                        Date     = $Date
+                        Raw      = $Line_Simple
                         HashRate = [PSCustomObject]@{[String]$this.Algorithm = [Int64]$HashRates}
-                        Device = $Devices
+                        Device   = $Devices
                     }
                 }
             }
