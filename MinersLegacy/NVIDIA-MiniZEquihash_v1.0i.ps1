@@ -26,7 +26,7 @@ $Port = "40{0:d2}"
 $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Equihash144,5"; MinMemGB = 2.0; Params = ""}
 )
-$CommonCommands = "--intensity 100 --latency --extra "
+$CommonCommands = " --intensity 100 --latency --extra"
 
 $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation"
 
@@ -52,10 +52,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
             if ($Algorithm_Norm -like "Equihash1445") {
                 #define --pers for equihash1445
-                if ($(Get-EquihashPers -CoinName $Pools.$Algorithm_Norm.CoinName)) {
-                    $Pers = " --pers $(Get-EquihashPers -CoinName $Pools.$Algorithm_Norm.CoinName -Default 'auto')"
-                }
-                else {$Pers = ""}
+                $Pers = " --pers $(Get-EquihashPers -CoinName $Pools.$Algorithm_Norm.CoinName -Default 'auto')"
             }
             else {$Pers = ""}
 
