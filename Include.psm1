@@ -779,6 +779,27 @@ function Get-Region {
     else {$Region}
 }
 
+function Get-EquihashPers {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [String]$CoinName = "",
+        [Parameter(Mandatory = $false)]
+        [AllowEmptyString()]
+        [String]$Default = ""
+    )
+
+    if (-not (Test-Path Variable:Script:EquihashPers)) {
+        $Script:EquihashPers = Get-Content "EquihashPers.txt" | ConvertFrom-Json
+    }
+
+    $CoinName = (Get-Culture).TextInfo.ToTitleCase(($CoinName -replace "-", " " -replace "_", " ")) -replace " "
+    
+    if ($Script:EquihashPers.$CoinName) {$Script:EquihashPers.$CoinName}
+    else {$Default}
+}
+
 enum MinerStatus {
     Running
     Idle
