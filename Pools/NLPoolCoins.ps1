@@ -13,7 +13,7 @@ $PoolAPIStatusUri = "http://www.nlpool.nl/api/status"
 $PoolAPICurrenciesUri = "http://www.nlpool.nl/api/currencies"
 
 # Guaranteed payout currencies
-$Payout_Currencies = @("BTC", "LTC", "DASH") | Where-Object {$Wallets.$_}
+$Payout_Currencies = @("BTC", "LTC") | Where-Object {$Wallets.$_}
 
 if ($Payout_Currencies) {
 
