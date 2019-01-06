@@ -17,7 +17,7 @@ $RetryCount = 3
 $RetryDelay = 2
 while (-not ($APIRequest) -and $RetryCount -gt 0) {
     try {
-        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "http://www.phi-phi-pool.com/api/wallet?address=$($PoolConfig.Wallets.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "http://phi-phi-pool.com/api/wallet?address=$($PoolConfig.Wallets.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
     }
     catch {
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
