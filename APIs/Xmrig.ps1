@@ -3,10 +3,10 @@
 class XmRig : Miner {
 
     [String]GetCommandLineParameters() {
-        try {
+        if ($this.Arguments -like "{*}") {
             return ($this.Arguments | ConvertFrom-Json -ErrorAction SilentlyContinue).Commands
         }
-        catch {
+        else {
             return $this.Arguments
         }    
         
@@ -18,7 +18,7 @@ class XmRig : Miner {
         $this.New = $true
         $this.Activated++
 
-        try {
+        if ($this.Arguments -like "{*}") {
             $Parameters = $this.Arguments | ConvertFrom-Json -ErrorAction SilentlyContinue
 
             try {
@@ -33,12 +33,12 @@ class XmRig : Miner {
                 }
                 else {
                     #Check if we have a valid hw file for all installed hardware. If hardware / device order has changed we need to re-create the config files.
-                    $ThreadsConfig = @(Get-Content $ThreadsConfigFile -ErrorAction SilentlyContinue | ConvertFrom-Json -ErrorAction SilentlyContinue).index
+                    $ThreadsConfig = Get-Content $ThreadsConfigFile -ErrorAction SilentlyContinue | ConvertFrom-Json -ErrorAction SilentlyContinue
                     if ($ThreadsConfig.Count -lt 1) {
                         if (Test-Path "$(Split-Path $this.Path)\$($this.Algorithm[0])-*.json" -PathType Leaf) {
                             #Remove old config files, thread info is no longer valid
                             Write-Log -Level Warn "Hardware change detected. Deleting existing configuration files for miner ($($this.Name) {$($this.Algorithm[0] -replace 'NiceHash')@$($this.Pool[0])}). "
-                            Remove-Item "$(Split-Path $this.Path)\$($this.Algorithm[0])-*.json" -Force -ErrorAction SilentlyContinue
+                            Remove-Item "$(Split-Path $this.Path)\ThreadsConfig-$($this.Algorithm[0])-*.json" -Force -ErrorAction SilentlyContinue
                         }
                         #Temporarily start miner with pre-config file (without threads config). Miner will then update hw config file with threads info
                         $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ThreadsConfigFile -Force
@@ -78,7 +78,7 @@ class XmRig : Miner {
 
                     if (-not ((Get-Content $ConfigFile -ErrorAction SilentlyContinue | ConvertFrom-Json -ErrorAction SilentlyContinue).threads)) {
                         #Threads config in config file is invalid, retrieve from threads config file
-                        $ThreadsConfig = Get-Content $ThreadsConfigFile | ConvertFrom-Json -ErrorAction SilentlyContinue
+                        $ThreadsConfig = Get-Content $ThreadsConfigFile | ConvertFrom-Json
                         if ($ThreadsConfig.Count -ge 1) {
                             #Write config files. Overwrite because we need to add thread info
                             if ($this.DeviceName -like "GPU*") {
@@ -103,7 +103,6 @@ class XmRig : Miner {
             }
             
         }
-        catch {}
 
         if ($this.Process) {
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
@@ -176,10 +175,10 @@ class XmRig : Miner {
 
         if ($HashRate | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) {
             $this.Data += [PSCustomObject]@{
-                Date     = (Get-Date).ToUniversalTime()
-                Raw      = $Response
-                HashRate = $HashRate
-                Device   = @()
+                Date       = (Get-Date).ToUniversalTime()
+                Raw        = $Response
+                HashRate   = $HashRate
+                Device     = @()
             }
         }
 
