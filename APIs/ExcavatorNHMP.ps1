@@ -309,15 +309,16 @@ class ExcavatorNHMP : Miner {
 
             if ($HashRate_Name -and $HashRate_Value -GT 0) {$HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}}
         }
+
         #Print algorithm speeds
         $Data = [ExcavatorNHMP]::InvokeRequest($this, @{id = 1; method = "algorithm.print.speeds"; params = @()})
 
         if ($HashRate | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) {
             $this.Data += [PSCustomObject]@{
-                Date     = (Get-Date).ToUniversalTime()
-                Raw      = $Response
-                HashRate = $HashRate
-                Device   = @()
+                Date       = (Get-Date).ToUniversalTime()
+                Raw        = $Response
+                HashRate   = $HashRate
+                Device     = @()
             }
         }
 

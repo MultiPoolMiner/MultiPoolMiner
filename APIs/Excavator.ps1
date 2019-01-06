@@ -266,6 +266,7 @@ class Excavator : Miner {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
+        #Get list of all algorithms
         $Request = @{id = 1; method = "algorithm.list"; params = @()} | ConvertTo-Json -Compress
         $Response = ""
 
@@ -312,10 +313,10 @@ class Excavator : Miner {
 
         if ($HashRate | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) {
             $this.Data += [PSCustomObject]@{
-                Date     = (Get-Date).ToUniversalTime()
-                Raw      = $Response
-                HashRate = $HashRate
-                Device   = @()
+                Date       = (Get-Date).ToUniversalTime()
+                Raw        = $Response
+                HashRate   = $HashRate
+                Device     = @()
             }
         }
 

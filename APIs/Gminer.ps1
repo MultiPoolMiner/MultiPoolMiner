@@ -7,7 +7,7 @@ class Gminer : Miner {
         $Server = "localhost"
         $Timeout = 10 #seconds
 
-        $Request = @{id = 1; method = "getstat"} | ConvertTo-Json -Compress
+        $Request = ""
         $Response = ""
 
         $HashRate = [PSCustomObject]@{}
@@ -28,10 +28,11 @@ class Gminer : Miner {
 
         if ($HashRate | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) {
             $this.Data += [PSCustomObject]@{
-                Date     = (Get-Date).ToUniversalTime()
-                Raw      = $Response
-                HashRate = $HashRate
-                Device   = @()
+                Date       = (Get-Date).ToUniversalTime()
+                Raw        = $Response
+                HashRate   = $HashRate
+                PowerUsage = (Get-PowerUsage $this)
+                Device     = @()
             }
         }
 
