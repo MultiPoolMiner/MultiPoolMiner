@@ -22,19 +22,6 @@ $Commands = [PSCustomObject[]]@(
 )
 $CommonCommands = " --pec --intensity 64"
 
-$Coins = [PSCustomObject]@{
-    "ManagedByPool" = " --pers auto" #pers auto switching; https://bitcointalk.org/index.php?topic=2759935.msg43324268#msg43324268
-    "Aion"          = " --pers AION0PoW"
-    "Bitcoingold"   = " --pers BgoldPoW"
-    "Bitcoinz"      = " --pers BitcoinZ" #https://twitter.com/bitcoinzteam/status/1008283738999021568?lang=en
-    "Minexcoin"     = ""
-    "Safecoin"      = " --pers Safecoin"
-    "Snowgem"       = " --pers sngemPoW"
-    "Zelcash"       = " --pers ZelProof"
-    "Zero"          = " --pers ZERO_PoW"
-    "Zerocoin"      = " --pers ZERO_PoW"
-}
-
 $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation"
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
@@ -59,14 +46,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
             if ($Algorithm_Norm -like "Equihash1445") {
                 #define --pers for equihash1445
-                if (($Coins | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) -contains $Pools.$Algorithm_Norm.CoinName) {
-                    #Coin parameter, different per coin
-                    $Pers = $Coins."$($Pools.$Algorithm_Norm.CoinName)"
-                }
-                else {
-                    #Try auto if no coinname is available
-                    $Pers = " -pers auto"
-                }
+                $Pers = " --pers $(Get-EquihashPers -CoinName $Pools.$Algorithm_Norm.CoinName -Default 'auto')"
             }
             else {$Pers = ""}
 
