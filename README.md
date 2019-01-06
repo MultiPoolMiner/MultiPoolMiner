@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 7/12/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 15/12/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -91,10 +91,6 @@ Choose the default currency or currencies your profit stats will be shown in.
 
 **-Delay**
 Specify the number of seconds required to pass before opening each miner. It is useful when cards are more sensitive to switching and need some extra time to recover (eg. clear DAG files from memory)
-
-**-ExcludeCoinName**
-Similar to the *-CoinName* command but it is used to exclude mining unwanted coins; this is also a per-pool setting (see Advanced Configuration)	
-Note: Only the pools ending in ...Coins expose the coin name in their API.
 
 **-DeviceName**
 Choose the relevant GPU(s) and/or CPU mining.  [CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.]
@@ -201,13 +197,16 @@ The following pools are currently supported (in alphabetical order):
 
 	  Payout in RVN (Ravencoin address must be provided using config.txt in Pools section use "RavenminerEu" & RVN address)
 
-	  Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config file (Advanced configuration via config file required, see below)
 
 	- StarPool / StarPoolCoins https://www.starpool.biz/
 
-      Payout in BTC (Bitcoin address must be provided using the '-Wallet' command), or any currency available in API (Advanced configuration via config file required, see below)
+	  Payout in BTC (Bitcoin address must be provided using the '-Wallet' command), or any currency available in API (Advanced configuration via config file required, see below)
 
-      StarCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below)
+	  StarCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below)
+
+	- YiiMP	http://yiimp.eu/
+
+	  Note: Yiimp is not an auto-exchange pool. Do NOT mine with a BTC address. A separate wallet address for each mined currency must be provided in config file (Advanced configuration via config file required, see below)
 
 	- Zpool http://www.zpool.ca/
 
@@ -378,11 +377,12 @@ Settings for each configured pool are stored in its own subsection. These settin
 Only mine the selected coins at the specified pool.
 
 E.g. you do not want to mine Zcash & ZeroCoin at Zpool:
+    
     "ZpoolCoins": {
-		"CoinName":  [
-			"Zcash",
-			"ZeroCoin"
-		]
+        "CoinName":  [
+            "Zcash",
+            "ZeroCoin"
+        ]
     }
 Note: Only the pools ending in ...Coins expose the coin name in their API.
 
@@ -401,6 +401,7 @@ E.g. you do not want to mine Equihash and Ethash2GB at Zpool:
 Exclude selected coins from being mined at the specified pool.
 
 E.g. you do not want to mine Zcash & ZeroCoin at Zpool:
+
     "ZpoolCoins": {
 		"ExcludeCoinName":  [
 			"Zcash",
@@ -518,7 +519,7 @@ To display the balances of all enabled pools (excluding those that are excluded 
     ...
 }
 	
-To display the sum of each currency in the balances (depending on 'ShowPoolBalancesExcludedPools' including those that are excluded with 'ExcludeMinerName') and the exchange rates for all currencies on the summary screen add _'"ShowPoolBalancesDetails": true'_ to the general section:
+To display the sum of each currency in the balances (depending on 'ShowPoolBalancesExcludedPools' including those that are excluded with 'ExcludeMinerName') and the exchange rates for all currencies on the summary screen add '"ShowPoolBalancesDetails": true' to the general section:
 ```
 {
     ...
@@ -646,7 +647,7 @@ This means that the longer the current miner is running, the less MPM takes the 
 
 In practice, this explains why when you first launch MPM it may pick a pool/algorithm combo that has a lower value in the "Currency/Day" column, as it is favoring a more accurate combo. Over time, assuming the more profitable pool/algorithm stays more profitable, the accuracy will have less and less weight in the miner selection calculation process until MPM eventually switches over to it.
 
-*Please note, a new install of MultiPoolMiner has no historical information on which to build accurate "margin-of-error" values. MPM will, therefore, sometimes make less desirable miner selections and switch more often until it can gather enough coin data to stabilize its decision-making process.*
+*Please note: that a new install of MultiPoolMiner has no historical information on which to build accurate "margin-of-error" values. MPM will, therefore, sometimes make less desirable miner selections and switch more often until it can gather enough coin data to stabilize its decision-making process.*
 
 
 

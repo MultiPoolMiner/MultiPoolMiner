@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 07/12/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 15/12/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -86,10 +86,14 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 	Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). WARNING! If you add all algorithms listed above, you may find your earnings spread across multiple pools regardless what pool(s) you specified with the -poolname command.
 
 -CreateMinerInstancePerDeviceModel
-    Newer miner files can create separate instances for each card model. This increases profit. Not all miners currently support this feature (more coming). 
-    By default this feature is turned off. To enable add '-CreateMinerInstancePerDeviceModel' to your start batch file.
-    Note that this will trigger some benchmarking.
-	
+	Newer miner files can create separate instances for each card model. This increases profit. Not all miners currently support this feature (more coming). 
+	By default this feature is turned off. To enable add '-CreateMinerInstancePerDeviceModel' to your start batch file.
+	Note that this will trigger some benchmarking.
+
+-CoinName [Zcash, ZeroCoin etc.]
+	Limit mining to the listed coins only; this is also a per-pool setting (see Advanced Configuration)
+	Note: Only the pools ending in ...Coins expose the coin name in their API.
+
 -ConfigFile [Path\ConfigFile.txt]
 	The default config file name is '.\Config.txt'
 	If the config file does not exist MPM will create a config file with default values. If the file name does not have an extension MPM will add .txt file name extension.
@@ -112,7 +116,11 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 	
 -ExcludeAlgorithm
 	Similar to the '-Algorithm' command but it is used to exclude unwanted algorithms. Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms
-	
+
+-ExcludeCoinName [Zcash, ZeroCoin etc.]
+	Similar to the '-CoinName' command but it is used to exclude selected coins from being mined; this is also a per-pool setting (see Advanced Configuration)	
+	Note: Only the pools ending in ...Coins expose the coin name in their API.
+
 -ExcludeDeviceName
 	Simlar to the '-DeviceName' command but it is used to exclude unwanted devices for mining.  [CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.]
 
@@ -216,7 +224,7 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
     E.g. If you feel that the general profit estimations as reported by MPM are too high, e.g. %20, then set '-PricePenaltyFactor' to 0.8. 
     This is also settable per pool - see advanced configuration below. The value set on the pool level will override this global setting.
 
-    -Proxy
+-Proxy
 	Specify your proxy address if applicable, i.e http://192.0.0.1:8080
 
 -Region [Europe/US/Asia]
@@ -314,7 +322,6 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
 Sample content of 'Config.txt'
 
 {
-
     "VersionCompatibility":  "3.2.0",
     "UserName":  "$UserName",
     "WorkerName":  "$WorkerName",
@@ -367,10 +374,47 @@ Advanced configuration for Pools
 
 Settings for each configured pool are stored in its own subsection. These settings are only valid for the named pool.
 
+CoinName [Zcash, ZeroCoin etc.]
+Only mine the selected coins at the specified pool.
+
+E.g. you do not want to mine Zcash & ZeroCoin at Zpool:
+
+    "ZpoolCoins": {
+		"CoinName":  [
+			"Zcash",
+			"ZeroCoin"
+		]
+    }
+Note: Only the pools ending in ...Coins expose the coin name in their API.
+
+ExcludeAlgorithm
+Do not use the configured algorithms for mining at the specified pool.
+
+E.g. you do not want to mine Equihash and Ethash2GB at Zpool:
+
+    "ZpoolCoins": {
+		"ExcludeAlgorithm":  [
+			"Equihash",
+			"Ethash2Gb"
+		]
+	}
+
+ExcludeCoinName [Zcash, ZeroCoin etc.]
+Exclude selected coins from being mined at the specified pool.
+
+E.g. you do not want to mine Zcash & ZeroCoin at Zpool:
+
+    "ZpoolCoins": {
+		"ExcludeCoinName":  [
+			"Zcash",
+			"ZeroCoin"
+		]
+    }
+Note: Only the pools ending in ...Coins expose the coin name in their API.
+
 To change payout currency of a pool
 
 If a pool allows payout in another currency than BTC you can change this.
-Note: Not all pools support this, for more information consult the pools web page
 
 For each pool you can statically add a section similar to this (see http://localhost:3999/config):
 
@@ -388,6 +432,7 @@ E.g. to change the payout currency for Zpool to LiteCoin replace the line for BT
         "LTC": "<YOUR_LITECOIN_ADDRESS>",
         "Worker": "$WorkerName"
     }
+Note: Not all pools support this, for more information consult the pools web page
 
 PricePenaltyFactor
 
@@ -399,7 +444,6 @@ E.g. You feel that Zpool is exaggerating its estimations by 10% - Set PricePenal
         "PricePenaltyFactor":  0.9,
         ...
     }
-
 
 NiceHash internal wallet
 
@@ -462,7 +506,6 @@ To show the miner windows add '"ShowMinerWindow":  true' to the general section:
 }
 Note: Showing the miner windows disables writing the miner output to log files. Miners of API type 'Wrapper' will remain hidden.
 
-
 Pool Balances
 
 MPM can gather the pending BTC balances from all configured pools.
@@ -475,9 +518,7 @@ To display the balances of all enabled pools (excluding those that are excluded 
     ...
 }
 
-To display the sum of each currency in the balances (depending on 'ShowPoolBalancesExcludedPools' including those that are excluded with 'ExcludeMinerName') and the exchange rates for all currencies on the summary screen add
-'"ShowPoolBalancesDetails": true'
-to the general section:
+To display the sum of each currency in the balances (depending on 'ShowPoolBalancesExcludedPools' including those that are excluded with 'ExcludeMinerName') and the exchange rates for all currencies on the summary screen add '"ShowPoolBalancesDetails": true' to the general section:
 {
     ...
     "SwitchingPrevention":  "$SwitchingPrevention",
@@ -602,7 +643,7 @@ This means that the longer the current miner is running, the less MPM takes the 
 
 In practice, this explains why when you first launch MPM it may pick a pool/algorithm combo that has a lower value in the "Currency/Day" column, as it is favoring a more accurate combo. Over time, assuming the more profitable pool/algorithm stays more profitable, the accuracy will have less and less weight in the miner selection calculation process until MPM eventually switches over to it.
 
-A new install of MultiPoolMiner has no historical information on which to build accurate "margin-of-error" values. MPM will, therefore, sometimes make less desirable miner selections and switch more often until it can gather enough coin data to stabilize its decision-making process.
+Please note that a new install of MultiPoolMiner has no historical information on which to build accurate "margin-of-error" values. MPM will, therefore, sometimes make less desirable miner selections and switch more often until it can gather enough coin data to stabilize its decision-making process.
 
 
 ====================================================================
@@ -623,7 +664,7 @@ MULTIPOOLMINER API:
 MultiPoolMiner allows basic monitoring through its built in API.
 API data is available at http://localhost:3999/<resource>
 
-For a list of supported API commands open APIDocs.html with your web browser.
+For a list of supported API commands open [MPM directory\]APIDocs.html with your web browser.
 
 
 ====================================================================
