@@ -16,8 +16,8 @@ $Port = "5401"
 
 $Commands = [PSCustomObject[]]@(
     #1 Thread
-    [PSCustomObject]@{Algorithm = "cryptonightV7";          Threads = 1; MinMemGB = 2; BenchmarkIntervals = 1;  Params = @()} #CryptonightV7
-    [PSCustomObject]@{Algorithm = "cryptonightV8";          Threads = 1; MinMemGB = 2; BenchmarkIntervals = 1;  Params = @()} #CryptonightV8
+    [PSCustomObject]@{Algorithm = "cryptonightV7";          Threads = 1; MinMemGB = 2; BenchmarkIntervals = 1; Params = @()} #CryptonightV7
+    [PSCustomObject]@{Algorithm = "cryptonightV8";          Threads = 1; MinMemGB = 2; BenchmarkIntervals = 1; Params = @()} #CryptonightV8
     [PSCustomObject]@{Algorithm = "daggerhashimoto";        Threads = 1; MinMemGB = 4; BenchmarkIntervals = 1; Params = @()} #Ethash
     [PSCustomObject]@{Algorithm = "equihash";               Threads = 1; MinMemGB = 2; BenchmarkIntervals = 1; Params = @()} #Equihash
     [PSCustomObject]@{Algorithm = "lyra2rev2";              Threads = 1; MinMemGB = 1; BenchmarkIntervals = 1; Params = @()} #Lyra2RE2
@@ -29,13 +29,13 @@ $Commands = [PSCustomObject[]]@(
 
     #2 Threads
     [PSCustomObject]@{Algorithm = "cryptonightV7";          Threads = 2; MinMemGB = 2*6; BenchmarkIntervals = 1; Params = @()} #CryptonightV7
-    [PSCustomObject]@{Algorithm = "cryptonightV8";          Threads = 1; MinMemGB = 2; BenchmarkIntervals = 1;  Params = @()} #CryptonightV8
+    [PSCustomObject]@{Algorithm = "cryptonightV8";          Threads = 1; MinMemGB = 2*2; BenchmarkIntervals = 1; Params = @()} #CryptonightV8
     [PSCustomObject]@{Algorithm = "daggerhashimoto";        Threads = 2; MinMemGB = 2*4; BenchmarkIntervals = 1; Params = @()} #Ethash
-    [PSCustomObject]@{Algorithm = "equihash";               Threads = 2; MinMemGB = 2*2; BenchmarkIntervals = 1; Params = @()} #Equihash
+    [PSCustomObject]@{Algorithm = "equihash";               Threads = 2; MinMemGB = 2*6; BenchmarkIntervals = 1; Params = @()} #Equihash
     [PSCustomObject]@{Algorithm = "lyra2rev2";              Threads = 2; MinMemGB = 2*1; BenchmarkIntervals = 1; Params = @()} #Lyra2RE2
     [PSCustomObject]@{Algorithm = "lyra2z";                 Threads = 2; MinMemGB = 2*1; BenchmarkIntervals = 1; Params = @()} #Lyra2z
     #[PSCustomObject]@{Algorithm = "neoscrypt";              Threads = 2; MinMemGB = 2*2; BenchmarkIntervals = 1; Params = @()} #NeoScrypt 2 threads crashes
-    #[PSCustomObject]@{Algorithm = "x16r";                   Threads = 2; MinMemGB = 2*2; BenchmarkIntervals = 5; Params = @()} #X16R 2 threads out-of memory
+    [PSCustomObject]@{Algorithm = "x16r";                   Threads = 2; MinMemGB = 2*2; BenchmarkIntervals = 5; Params = @()} #X16R
     [PSCustomObject]@{Algorithm = "daggerhashimoto_decred"; Threads = 2; MinMemGB = 2*4; BenchmarkIntervals = 2; Params = @()} #Dual mining
     [PSCustomObject]@{Algorithm = "daggerhashimoto_pascal"; Threads = 2; MinMemGB = 2*4; BenchmarkIntervals = 2; Params = @()} #Dual mining
 
