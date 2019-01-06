@@ -2,87 +2,6 @@
 
 Add-Type -Path .\OpenCL\*.cs
 
-function Start-SubProcessWithoutStealingFocus {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]
-        [String]$FilePath,
-        [Parameter(Mandatory = $false)]
-        [String]$ArgumentList = "",
-        [Parameter(Mandatory = $false)]
-        [String]$LogPath = "",
-        [Parameter(Mandatory = $false)]
-        [String]$WorkingDirectory = "", 
-        [ValidateRange(-2, 3)]
-        [Parameter(Mandatory = $false)]
-        [Int]$Priority = 0,
-        [Parameter(Mandatory = $false)]
-        [String]$EnvBlock
-    )
-
-    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
-
-    
-    $Job = Start-Job -ArgumentList $PID, (Resolve-Path ".\CreateProcess.cs"), $FilePath, $ArgumentList, $WorkingDirectory, $MinerVisibility {
-        param($ControllerProcessID, $CreateProcessPath, $FilePath, $ArgumentList, $WorkingDirectory, $MinerVisibility)
-
-        $ControllerProcess = Get-Process -Id $ControllerProcessID
-        if ($ControllerProcess -eq $null) {return}
-
-        #CreateProcess won't be usable inside this job if Add-Type is run outside the job
-        Add-Type -Path $CreateProcessPath
-
-        $lpApplicationName = $FilePath;
-
-        $lpCommandLine = '"' + $FilePath + '"' #Windows paths cannot contain ", so there is no need to escape
-        if ($ArgumentList -ne "") {$lpCommandLine += " " + $ArgumentList}
-
-        $lpProcessAttributes = New-Object SECURITY_ATTRIBUTES
-        $lpProcessAttributes.Length = [System.Runtime.InteropServices.Marshal]::SizeOf($lpProcessAttributes)
-
-        $lpThreadAttributes = New-Object SECURITY_ATTRIBUTES
-        $lpThreadAttributes.Length = [System.Runtime.InteropServices.Marshal]::SizeOf($lpThreadAttributes)
-
-        $bInheritHandles = $false
-
-        $dwCreationFlags = [CreationFlags]::CREATE_NEW_CONSOLE
-
-        $lpEnvironment = [IntPtr]::Zero
-
-        if ($WorkingDirectory -ne "") {$lpCurrentDirectory = $WorkingDirectory}
-        else {$lpCurrentDirectory = [IntPtr]::Zero}
-
-        $lpStartupInfo = New-Object STARTUPINFO
-        $lpStartupInfo.cb = [System.Runtime.InteropServices.Marshal]::SizeOf($lpStartupInfo)
-        $lpStartupInfo.wShowWindow = [ShowWindow]::SW_SHOWMINNOACTIVE
-        $lpStartupInfo.dwFlags = [STARTF]::STARTF_USESHOWWINDOW
-
-        $lpProcessInformation = New-Object PROCESS_INFORMATION
-
-        [Kernel32]::CreateProcess($lpApplicationName, $lpCommandLine, [ref] $lpProcessAttributes, [ref] $lpThreadAttributes, $bInheritHandles, $dwCreationFlags, $lpEnvironment, $lpCurrentDirectory, [ref] $lpStartupInfo, [ref] $lpProcessInformation)
-
-        $Process = Get-Process -Id $lpProcessInformation.dwProcessId
-        if ($Process -eq $null) {
-            [PSCustomObject]@{ProcessId = $null}
-            return
-        }
-
-        [PSCustomObject]@{ProcessId = $Process.Id; ProcessHandle = $Process.Handle}
-
-        $ControllerProcess.Handle | Out-Null
-        $Process.Handle | Out-Null
-
-        do {if ($ControllerProcess.WaitForExit(1000)) {$Process.CloseMainWindow() | Out-Null}}
-        while ($Process.HasExited -eq $false)
-    }
-
-    do {Start-Sleep 1; $JobOutput = Receive-Job $Job}
-    while ($JobOutput -eq $null)
-
-    $Process = Get-Process | Where-Object Id -EQ $JobOutput.ProcessId
-    if ($Process) {$Process.PriorityClass = $PriorityNames.$Priority}
-    Return $Job
-}
 
 function Get-CommandPerDevice {
 
@@ -141,7 +60,6 @@ function Get-Balance {
     param($Config, $NewRates)
 
     $BalancesData = [PSCustomObject]@{}
-    
     $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
         Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
     } | Select-Object -ExpandProperty Content | Sort-Object Name)
@@ -159,15 +77,16 @@ function Get-Balance {
             $BalancesData | Add-Member Rates $Rates
             Return $BalancesData
         }
-    
+
         #Add total of totals
         $Totals = [PSCustomObject]@{Name = "*Total*"}
-        
+
         #Add converted values
         $Config.Currency | ForEach-Object {
             $Currency = $_.ToUpper()
-            #Get number of digits from $NewRates
-            if ($NewRates.$Currency -ne $null) {$Digits = ($NewRates.$Currency).length - ([Int]($NewRates.$Currency)).length - 1} else {$Digits = 8}
+            $Digits = 8
+            if ($NewRates.$Currency -ne $null) {$Digits = ([math]::truncate(8 - [math]::log($NewRates.$Currency, 10)))}
+            if ($Digits -gt 8) {$Digits = 8}
             $Balances | Foreach-Object {
                 if ($Rates.$($_.Currency).$Currency) {
                     # Add separate element with numeric value. Measure-Object can not sum strings (-f)
@@ -176,7 +95,7 @@ function Get-Balance {
                     $_ | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ($_.Total * $Rates.$($_.Currency).$Currency)) -Force
                 }
                 else {
-                    $_ | Add-Member "Value in $Currency" {"unknown"} -Force
+                    $_ | Add-Member "Value in $Currency" "unknown" -Force
                 }
             }
             if (($Balances."_Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)  {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ($Balances."_Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum) -Force}
@@ -185,7 +104,9 @@ function Get-Balance {
         #Add Balance (in currency)
         $Rates.PSObject.Properties.Name | ForEach-Object {
             $Currency = $_.ToUpper()
-            if ($NewRates.$Currency -ne $null) {$Digits = ($NewRates.$Currency).length - ([Int]($NewRates.$Currency)).length - 1} else {$Digits = 8}
+            $Digits = 8
+            if ($NewRates.$Currency -ne $null) {$Digits = ([math]::truncate(8 - [math]::log($NewRates.$Currency, 10)))}
+            if ($Digits -gt 8) {$Digits = 8}
             $Balances | Foreach-Object {
                 if ($Currency -eq $_.Currency) {
                     # Add separate element with numeric value. Measure-Object can not sum strings (-f)
@@ -207,10 +128,11 @@ function Get-Balance {
         }
 
         $Balances += $Totals
-        $BalancesData | Add-Member Balances $Balances -force
+        $BalancesData | Add-Member Balances $Balances -Force
         $BalancesData | Add-Member Rates $Rates
     }
 
+    $BalancesData | Add-Member Updated (Get-Date) -Force
     Return $BalancesData
 }
 
@@ -295,7 +217,7 @@ function Set-Stat {
     $SmallestValue = 1E-20
 
     $Stat = Get-Content $Path -ErrorAction SilentlyContinue
-    
+
     try {
         $Stat = $Stat | ConvertFrom-Json -ErrorAction Stop
         $Stat = [PSCustomObject]@{
@@ -584,6 +506,89 @@ function Start-SubProcess {
     Start-Job ([ScriptBlock]::Create($ScriptBlock))
 }
 
+function Start-SubProcessWithoutStealingFocus {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]$FilePath,
+        [Parameter(Mandatory = $false)]
+        [String]$ArgumentList = "",
+        [Parameter(Mandatory = $false)]
+        [String]$LogPath = "",
+        [Parameter(Mandatory = $false)]
+        [String]$WorkingDirectory = "", 
+        [ValidateRange(-2, 3)]
+        [Parameter(Mandatory = $false)]
+        [Int]$Priority = 0,
+        [Parameter(Mandatory = $false)]
+        [String]$EnvBlock
+    )
+
+    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
+
+    #https://stackoverflow.com/questions/12451246/working-with-intptr-and-marshaling-using-add-type-in-powershell
+
+    $Job = Start-Job -ArgumentList $PID, (Resolve-Path ".\CreateProcess.cs"), $FilePath, $ArgumentList, $WorkingDirectory, $MinerVisibility {
+        param($ControllerProcessID, $CreateProcessPath, $FilePath, $ArgumentList, $WorkingDirectory, $MinerVisibility)
+
+        $ControllerProcess = Get-Process -Id $ControllerProcessID
+        if ($ControllerProcess -eq $null) {return}
+
+        #CreateProcess won't be usable inside this job if Add-Type is run outside the job
+        Add-Type -Path $CreateProcessPath
+
+        $lpApplicationName = $FilePath;
+
+        $lpCommandLine = '"' + $FilePath + '"' #Windows paths cannot contain ", so there is no need to escape
+        if ($ArgumentList -ne "") {$lpCommandLine += " " + $ArgumentList}
+
+        $lpProcessAttributes = New-Object SECURITY_ATTRIBUTES
+        $lpProcessAttributes.Length = [System.Runtime.InteropServices.Marshal]::SizeOf($lpProcessAttributes)
+
+        $lpThreadAttributes = New-Object SECURITY_ATTRIBUTES
+        $lpThreadAttributes.Length = [System.Runtime.InteropServices.Marshal]::SizeOf($lpThreadAttributes)
+
+        $bInheritHandles = $false
+
+        $dwCreationFlags = [CreationFlags]::CREATE_NEW_CONSOLE
+
+        $lpEnvironment = [IntPtr]::Zero
+
+        if ($WorkingDirectory -ne "") {$lpCurrentDirectory = $WorkingDirectory}
+        else {$lpCurrentDirectory = [IntPtr]::Zero}
+
+        $lpStartupInfo = New-Object STARTUPINFO
+        $lpStartupInfo.cb = [System.Runtime.InteropServices.Marshal]::SizeOf($lpStartupInfo)
+        $lpStartupInfo.wShowWindow = [ShowWindow]::SW_SHOWMINNOACTIVE
+        $lpStartupInfo.dwFlags = [STARTF]::STARTF_USESHOWWINDOW
+
+        $lpProcessInformation = New-Object PROCESS_INFORMATION
+
+        [Kernel32]::CreateProcess($lpApplicationName, $lpCommandLine, [ref] $lpProcessAttributes, [ref] $lpThreadAttributes, $bInheritHandles, $dwCreationFlags, $lpEnvironment, $lpCurrentDirectory, [ref] $lpStartupInfo, [ref] $lpProcessInformation)
+
+        $Process = Get-Process -Id $lpProcessInformation.dwProcessId
+        if ($Process -eq $null) {
+            [PSCustomObject]@{ProcessId = $null}
+            return
+        }
+
+        [PSCustomObject]@{ProcessId = $Process.Id; ProcessHandle = $Process.Handle}
+
+        $ControllerProcess.Handle | Out-Null
+        $Process.Handle | Out-Null
+
+        do {if ($ControllerProcess.WaitForExit(1000)) {$Process.CloseMainWindow() | Out-Null}}
+        while ($Process.HasExited -eq $false)
+    }
+
+    do {Start-Sleep 1; $JobOutput = Receive-Job $Job}
+    while ($JobOutput -eq $null)
+
+    $Process = Get-Process | Where-Object Id -EQ $JobOutput.ProcessId
+    if ($Process) {$Process.PriorityClass = $PriorityNames.$Priority}
+    Return $Job
+}
+
 function Expand-WebRequest {
     [CmdletBinding()]
     param(
@@ -739,7 +744,7 @@ function Get-Device {
         $Devices | Foreach-Object {
             $Device = $_
             if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
-                if ((-not $ExcludeNameName) -or ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -notlike ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
+                if (-not ($ExcludeNameName) -or ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -notlike ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
                     $Device
                 }
             }
@@ -758,7 +763,8 @@ function Get-Device {
 
     try {
         [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {
-            [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object {
+            #Fix for deviceID enumeration with main screen connected to onboard HD Graphics, allow Intel as valid GPU miner platform ID, but filter out all Intel entries
+            [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | Where-Object Vendor -ne "Intel(R) Corporation" | ForEach-Object {
                 $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
                 $Device = [PSCustomObject]@{
                     Index = [Int]$Index
@@ -769,7 +775,6 @@ function Get-Device {
                     Vendor_ShortName = $(Switch ([String]$Device_OpenCL.Vendor)
                         {
                         "Advanced Micro Devices, Inc." {"AMD"}
-                        "Intel(R) Corporation" {"INTEL"}
                         "NVIDIA Corporation" {"NVIDIA"}
                         default {[String]$Device_OpenCL.Vendor}
                         }
@@ -830,6 +835,10 @@ function Get-Device {
             Model = $CPUInfo.Name
             Model_Norm = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
         }
+        #Read CPU features
+        if (Test-Path ".\CpuFeatureDetector.Exe" -PathType Leaf) {
+            $Device | Add-member CpuFeatures @(& ".\CpuFeatureDetector.Exe")
+        }
 
         if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
             if ((-not $ExcludeName) -or (-not ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))}))) {
@@ -878,6 +887,27 @@ function Get-Region {
     else {$Region}
 }
 
+function Get-EquihashPers {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [String]$CoinName = "",
+        [Parameter(Mandatory = $false)]
+        [AllowEmptyString()]
+        [String]$Default = ""
+    )
+
+    if (-not (Test-Path Variable:Script:EquihashPers)) {
+        $Script:EquihashPers = Get-Content "EquihashPers.txt" | ConvertFrom-Json
+    }
+
+    $CoinName = (Get-Culture).TextInfo.ToTitleCase(($CoinName -replace "-", " " -replace "_", " ")) -replace " "
+    
+    if ($Script:EquihashPers.$CoinName) {$Script:EquihashPers.$CoinName}
+    else {$Default}
+}
+
 enum MinerStatus {
     Running
     Idle
@@ -888,7 +918,6 @@ class Miner {
     $Name
     $Path
     $Arguments
-    $Wrap
     $API
     $Port
     [string[]]$Algorithm = @()
@@ -914,6 +943,7 @@ class Miner {
     $ShowMinerWindow
     $BenchmarkIntervals
     $ProcessId
+    $Environment
 
     [String[]]GetProcessNames() {
         return @(([IO.FileInfo]($this.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName)
@@ -945,12 +975,13 @@ class Miner {
         }
 
         if (-not $this.Process) {
-            if ($this.ShowMinerWindow -and -not ($this.API -eq "Wrapper")) {
-                if (Test-Path ".\CreateProcess.cs" -PathType Leaf) {
+            $EnvCmd  = ($this.Environment | Foreach-Object {"```$env:$_; "}) -join ""
+            if ($this.ShowMinerWindow -and -not ($this.API -eq "Wrapper") -or $this.Environment) {
+                if ((Test-Path ".\CreateProcess.cs" -PathType Leaf) -and -not $this.Environment) {
                     $this.Process = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList $this.GetCommandLineParameters() -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Device.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
                 }
                 else {
-                    $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '$($this.GetCommandLineParameters())' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+                    $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command $EnvCmd```$Process = (Start-Process '$($this.Path)' '$($this.GetCommandLineParameters())' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
                 }
             }
             else {
