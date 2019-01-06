@@ -2,6 +2,13 @@
 
 Add-Type -Path .\OpenCL\*.cs
 
+try {
+    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -WarningAction SilentlyContinue -ReferencedAssemblies "System.Xml" -ErrorAction Stop
+}
+catch {
+    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -WarningAction SilentlyContinue
+}
+
 function Get-CommandPerDevice {
 
     # rewrites the command parameters
@@ -1090,6 +1097,13 @@ class Download {
     }
 
     hidden Start_TorrentEngine() {
+        if ($this.TorrentEngine_Manager) {
+            $this.TorrentEngine_Manager.Stop()
+            [Download]::TorrentEngine.Unregister($this.TorrentEngine_Manager)
+            $this.TorrentEngine_Manager.Dispose()
+            $this.TorrentEngine_Manager = $null
+        }
+
         $Address = [System.Net.IPAddress]::Any
         $Port = Get-Random -Minimum ([System.Net.IPEndPoint]::MinPort) -Maximum ([System.Net.IPEndPoint]::MaxPort)
 
@@ -1128,7 +1142,28 @@ class Download {
         $this.Status = [DownloadStatus]::Downloading
     }
 
+    hidden Start_HttpJob() {
+        if ($this.HttpJob) {
+            Remove-Job $this.HttpJob -Force
+            $this.HttpJob = $null
+        }
+
+        $this.HttpJob = Start-Job {
+            param($Uri, $DownloadFilePath)
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            $Download = Invoke-WebRequest $Uri
+            $Download_FileName = [String]($Download.Headers["Content-Disposition"] -Split '; ' | ForEach-Object {[PSCustomObject]@{($_ -Split '=')[0] = ($_ -Split '=')[1]}} | Where-Object filename | Select-Object -First 1 -ExpandProperty filename)
+            [System.IO.File]::WriteAllBytes((Join-Path $DownloadFilePath $Download_FileName), $Download.Content)
+        } -ArgumentList $this.Uri.AbsoluteUri, $this.DownloadFilePath.AbsolutePath
+
+        $this.Status = [DownloadStatus]::Downloading
+
+        return
+    }
+
     Start() {
+        if ($this.GetStatus() -eq "Downloading") {return}
+
         if ($this.Uri.Scheme -eq "magnet") {
             $this.Start_TorrentEngine()
         }
@@ -1136,16 +1171,32 @@ class Download {
             #To-do: add support for 'https://mega.nz'
         }
         else {
-            #To-do: add support for 'http:' and 'https:'
+            $this.Start_HttpJob()
         }
     }
 
     Stop() {
-        $this.TorrentEngine_Manager.Stop()
+        if ($this.Uri.Scheme -eq "magnet") {
+            $this.TorrentEngine_Manager.Stop()
+        }
+        elseif ($this.Uri.Scheme -eq "https" -and $this.Uri.Host -eq "mega.nz") {
+            #To-do: add support for 'https://mega.nz'
+        }
+        else {
+            Stop-Job $this.HttpJob
+        }
+
         $this.Status = [DownloadStatus]::Idle
     }
 
-    [DownloadStatus]GetStatus() {
+    hidden GetStatus_TorrentEngine() {
+        if (-not $this.TorrentEngine_Manager) {
+            if ($this.Status -ne "Idle") {
+                $this.Status = [DownloadStatus]::Failed
+            }
+            return
+        }
+
         $TorrentEngine_Manager_State = $this.TorrentEngine_Manager.State
 
         if ($TorrentEngine_Manager_State -eq "Error") {
@@ -1167,10 +1218,58 @@ class Download {
                 }
             }
             "Complete" {
-                if ($this.TorrentEngine_Manager.Complete -ne $true) {
+                if ($TorrentEngine_Manager_State -ne "Seeding") {
                     $this.Status = [DownloadStatus]::Failed
                 }
             }
+        }
+    }
+
+    hidden GetStatus_HttpJob() {
+        if (-not $this.HttpJob) {
+            if ($this.Status -ne "Idle") {
+                $this.Status = [DownloadStatus]::Failed
+            }
+            return
+        }
+
+        $HttpJob_State = $this.HttpJob.State
+
+        if ($HttpJob_State -eq "Failed") {
+            $this.Status = [DownloadStatus]::Failed
+        }
+
+        switch ($this.Status) {
+            "Idle" {
+                if ($HttpJob_State -ne "Stopped" -and $HttpJob_State -ne "Suspended" -and $HttpJob_State -ne "Stopping") {
+                    $this.Status = [DownloadStatus]::Failed
+                }
+            }
+            "Downloading" {
+                if ($HttpJob_State -eq "Completed") {
+                    $this.Status = [DownloadStatus]::Complete
+                }
+                elseif ($HttpJob_State -ne "Running") {
+                    $this.Status = [DownloadStatus]::Failed
+                }
+            }
+            "Complete" {
+                if ($HttpJob_State -ne "Completed") {
+                    $this.Status = [DownloadStatus]::Failed
+                }
+            }
+        }
+    }
+
+    [DownloadStatus]GetStatus() {
+        if ($this.Uri.Scheme -eq "magnet") {
+            $this.GetStatus_TorrentEngine()
+        }
+        elseif ($this.Uri.Scheme -eq "https" -and $this.Uri.Host -eq "mega.nz") {
+            #To-do: add support for 'https://mega.nz'
+        }
+        else {
+            $this.GetStatus_HttpJob()
         }
 
         return $this.Status
