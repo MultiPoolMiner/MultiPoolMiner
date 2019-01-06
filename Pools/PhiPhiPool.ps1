@@ -8,7 +8,7 @@ param(
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$PoolRegions = "us"
+$PoolRegions = "asia", "eu", "us"
 $PoolAPIStatusUri = "http://www.phi-phi-pool.com/api/status"
 
 # Guaranteed payout currencies
@@ -40,7 +40,7 @@ if ($Payout_Currencies) {
 
     $APIStatusRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APIStatusRequest.$_.hashrate -GT 0} | ForEach-Object {
 
-        $PoolHost       = "pool1.phi-phi-pool.com"
+        $PoolHost       = "phi-phi-pool.com"
         $Port           = $APIStatusRequest.$_.port
         $Algorithm      = $APIStatusRequest.$_.name
         $Algorithm_Norm = Get-Algorithm $Algorithm
@@ -65,7 +65,7 @@ if ($Payout_Currencies) {
                     StablePrice   = $Stat.Week
                     MarginOfError = $Stat.Week_Fluctuation
                     Protocol      = "stratum+tcp"
-                    Host          = $PoolHost
+                    Host          = "$Region.$PoolHost"
                     Port          = $Port
                     User          = $Wallets.$_
                     Pass          = "$Worker,c=$_"

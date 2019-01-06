@@ -8,7 +8,7 @@ param(
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$PoolRegions = "us"
+$PoolRegions = "asia", "eu", "us"
 $PoolAPIStatusUri = "http://www.phi-phi-pool.com/api/status"
 $PoolAPICurrenciesUri = "http://www.phi-phi-pool.com/api/currencies"
 
@@ -55,7 +55,7 @@ if ($Payout_Currencies) {
             $APICurrenciesRequest.$_ | Add-Member Symbol $_ -ErrorAction SilentlyContinue
             
             $Algorithm_Norm = Get-Algorithm $Algorithm
-            $PoolHost       = "pool1.phi-phi-pool.com"
+            $PoolHost       = "phi-phi-pool.com"
             $Port           = $APICurrenciesRequest.$_.port
             $CoinName       = (Get-Culture).TextInfo.ToTitleCase(($APICurrenciesRequest.$_.name -replace "-", " " -replace "_", " ").ToLower()) -replace " "
             $MiningCurrency = $APICurrenciesRequest.$_.symbol
@@ -78,7 +78,7 @@ if ($Payout_Currencies) {
                         StablePrice    = $Stat.Week
                         MarginOfError  = $Stat.Week_Fluctuation
                         Protocol       = "stratum+tcp"
-                        Host           = "$Algorithm.$PoolHost"
+                        Host           = "$Region.$PoolHost"
                         Port           = $Port
                         User           = $Wallets.$_
                         Pass           = "$Worker,c=$_"
