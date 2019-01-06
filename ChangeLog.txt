@@ -44,6 +44,7 @@
 #### Miner changes
 
 - Added AMD-JCECryptonote_v0.33b15
+- Added AMD-MkxminerLyra2z_v4.20
 - Added CPU-JCECryptonote_v0.33m
 - Added NVIDIA-GminerEquihash_v1.14
 - Added NVIDIA-MiniZEquihash_v1.0i
@@ -64,6 +65,7 @@
 
 - Fixed AMD_CPU_NVIDIA-FireiceCryptonight_v2.7.1; preserve existing config files
 
+- Fixed AMD_CPU_NVIDIA-FireiceCryptonight_v2.7.1: disabled 2 threads on NVIDIA (miner error 'NVIDIA Invalid Result GPU ID n')
 - Fixed AMD-XmrigCryptonight_v2.8.6 algo filtering based on minimum memory (CryptonightHeavy requires 4GB)
 - Fixed CPU-ClaymoreCryptonight_v4.0; api port is now in the 4000 range as all other miners
 - Fixed CPU-CryplyAvx_v3.8.8.3 Sha256 hash
