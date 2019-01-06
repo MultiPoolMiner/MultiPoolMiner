@@ -1,0 +1,12 @@
+﻿{
+    "ManagedByPool":  "auto",
+    "Anon":  "AnonyPoW",
+    "Bitcoingold":  "BgoldPoW",
+    "Bitcoinz":  "BitcoinZ",
+    "Safecoin":  "Safecoin",
+    "Snowgem":  "sngemPoW",
+    "Zelcash":  "ZelProof",
+    "Zero":  "ZERO_PoW",
+    "Zerocoin":  "ZERO_PoW",
+    "LitecoinZ":  "ZcashPoW"
+}
