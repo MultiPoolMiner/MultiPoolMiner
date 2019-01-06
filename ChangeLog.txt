@@ -43,9 +43,9 @@
 
 #### Miner changes
 
-- Added AMD-JCECryptonote_v0.33b14
-- Added CPU-JCECryptonote_v0.33j
-- Added NVIDIA-GminerEquihash_v1.13
+- Added AMD-JCECryptonote_v0.33b15
+- Added CPU-JCECryptonote_v0.33m
+- Added NVIDIA-GminerEquihash_v1.14
 - Added NVIDIA-MiniZEquihash_v1.0i
 
 - Changed config file handling of *-XmrigCryptonight_* miners
@@ -63,7 +63,6 @@
 - Enabled AMD_NVIDIA-EminerEthash_v0.6.1rc2 dev fee
 
 - Fixed AMD_CPU_NVIDIA-FireiceCryptonight_v2.7.1; preserve existing config files
-- Fixed AMD_NVIDIA-ClaymoreEthash_v11.9; removed double algo in miner name (when '-UseDeviceNameForStatsFileNaming:true' and single mining)
 
 - Fixed AMD-XmrigCryptonight_v2.8.6 algo filtering based on minimum memory (CryptonightHeavy requires 4GB)
 - Fixed CPU-ClaymoreCryptonight_v4.0; api port is now in the 4000 range as all other miners
@@ -81,20 +80,23 @@
 
 - Updated AMD-CastXmrVegaCryptonight_v1.66; support for algo CryptonightXfh, added support for Baffin chipset
 - Updated AMD-SgminerKL_v1.0.9
-- Updated AMD-SRBMinerCryptonight_v1.7.4
+- Updated AMD-SRBMinerCryptonight_v1.7.6
 - Updated AMD-TeamRed_v0.3.8
-- Updated AMD-WildRig_v0.14.0beta; support for Dedal, Lyra2v3, Lyra2vc0ban & X21s algo
+- Updated AMD-WildRig_v0.15.0.12beta; support for Dedal, Lyra2v3, Lyra2vc0ban, MTP, & X21s algo
 - Updated AMD-XmrigCryptonight_v2.8.6
 - Updated AMD_CPU_NVIDIA-FireiceCryptonight_v2.7.1
+- Updated AMD_NVIDIA-ClaymoreEthash_v12.0
+- Updated AMD_NVIDIA-EthminerEthash_v0.16.2
 - Updated AMD_NVIDIA-lolMinerEquihash_v0.6; support for Equihash 210/9 algo
 - Updated AMD_NVIDIA-PhoenixminerEthash_v4.0b; (support for dual mining Blake2s with AMD cards is not working in 4.0b!)
-- Updated NVIDIA-BMiner_v11.0.0; support for '-pers auto' and ETH/BTM dual mine
+- Updated NVIDIA-BMiner_v11.2.0; support for '-pers auto', algos Aeternity & BEAM, and ETH/BTM dual mine
 - Updated NVIDIA-CcminerAlexis_v1.4; requires CUDA 10.0.0
 - Updated NVIDIA-CcminerTrex_v0.8.9; support for Dedal, Geek, GltAstralHash, GltJeongHash, GltPadiHash, GltPawelHash & X21s algo
 - Updated NVIDIA-CcminerKlausT_vYescryptR16R32.V7
+- Updated NVIDIA-CcminerSuprMiner_v2.0.7; support for X16Rt
 - Updated NVIDIA-CcminerTpruvot_v2.3; requires CUDA 10.0.0, support for Exosis algo
 - Updated NVIDIA-CcminerZealot_v1.28; remove support for Renesis algo
-- Updated NVIDIA-CryptoDredge_v0.15.1; support for algo Dedal, Lyra2vc0banHash, Lyra2V3, MTP, Pipe & X21s, requires min. 5GB of VRAM
+- Updated NVIDIA-CryptoDredge_v0.15.2; support for algo Dedal, Lyra2vc0banHash, Lyra2V3, MTP, Pipe & X21s, requires min. 5GB of VRAM
 - Updated NVIDIA-ExcavatorNHMP_v1.5.14a
 
 #### Pool changes
