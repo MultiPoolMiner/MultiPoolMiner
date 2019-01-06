@@ -10,6 +10,7 @@
 #### Core changes
 - Added 'Bitcoin' to the list of unprofitable algos
 - Added 'CryptonightDark', 'CryptonightFreeHaven', 'CryptonightRed', 'YescryptR24' and 'YescryptR32' to Algorithms.txt
+- Added EquihashPers.txt to store Equihash 'pers' values
 - Added 'poolbalancesdata' to web API
 
 - Changed APIs files; simplified algo name detection
@@ -24,6 +25,7 @@
 - Enhancement: Loading pool data converted to job; shortens loop time
 
 - Fixed 'No pools available' message when no wallet was explicitly configured in the config file
+- Fixed DeviceID enumeration when main screen is connected to onboard Intel HD Graphics
 - Fixed donation addresses
 - Fixed error displaying Pool balances, but no wallet address / username was configured
 - Fixed 'ExcludeDeviceName; before it would not exclude more than one device
@@ -41,9 +43,10 @@
 
 #### Miner changes
 
-- Added AMD-JCECryptonote_v0.33b9
-- Added CPU-JCECryptonote_v0.36g
-- Added NVIDIA-GminerEquihash_v1.10
+- Added AMD-JCECryptonote_v0.33b14
+- Added CPU-JCECryptonote_v0.33j
+- Added NVIDIA-GminerEquihash_v1.13
+- Added NVIDIA-MiniZEquihash_v1.0i
 
 - Changed config file handling of *-XmrigCryptonight_* miners
 - Changed NVIDIA-CcminerTpruvot_v2.3; removed monero and graft algos
@@ -57,14 +60,11 @@
   - AMD-SgminerLyra2RE2_v5.1.0
   - AMD-SgminerXevan_v5.5.0
 
-- Enabled AMD_NVIDIA-EminerEthash_v0.6.1rc2 dev fee mining
+- Enabled AMD_NVIDIA-EminerEthash_v0.6.1rc2 dev fee
 
-- Fixed AMD_CPU_NVIDIA-FireiceCryptonight_v2.7.0; preserve existing config files
+- Fixed AMD_CPU_NVIDIA-FireiceCryptonight_v2.7.1; preserve existing config files
 - Fixed AMD_NVIDIA-ClaymoreEthash_v11.9; removed double algo in miner name (when '-UseDeviceNameForStatsFileNaming:true' and single mining)
-- Fixed AMD_NVIDIA-lolMinerEquihash_v0.5bugfix; preserve existing config files
-- Fixed NVIDIA-BMiner_v10.7.0; removed double algo in miner name (when '-UseDeviceNameForStatsFileNaming:true' and single mining), support for -pers auto'
 
-- Fixed AMD_NVIDIA-lolMinerEquihash_v0.5bugfix Sha256 hash
 - Fixed AMD-XmrigCryptonight_v2.8.6 algo filtering based on minimum memory (CryptonightHeavy requires 4GB)
 - Fixed CPU-ClaymoreCryptonight_v4.0; api port is now in the 4000 range as all other miners
 - Fixed CPU-CryplyAvx_v3.8.8.3 Sha256 hash
@@ -77,22 +77,24 @@
 
 - Reported graphics memory is rounded to the nearest 1/4 GB (Include.psm1/Get-Device)
 
-- Updated AMD-CastXmrVegaCryptonight_v1.65; support for algo CryptonightXfh, added support for Baffin chipset
+- Removed AMD_NVIDIA-lolMinerEquihash_v0.6beta4
+
+- Updated AMD-CastXmrVegaCryptonight_v1.66; support for algo CryptonightXfh, added support for Baffin chipset
 - Updated AMD-SgminerKL_v1.0.9
-- Updated AMD-SRBMinerCryptonight_v1.7.2
+- Updated AMD-SRBMinerCryptonight_v1.7.4
 - Updated AMD-TeamRed_v0.3.8
-- Updated AMD-WildRig_v0.13.6.2beta; support for Dedal, Lyra2vc0ban & X21s algo
+- Updated AMD-WildRig_v0.14.0beta; support for Dedal, Lyra2v3, Lyra2vc0ban & X21s algo
 - Updated AMD-XmrigCryptonight_v2.8.6
-- Updated AMD_NVIDIA-lolMinerEquihash_v0.6alpha4; support for Equihash 210/9 algo
-- Updated AMD_NVIDIA-PhoenixminerEthash_v4.0a; support for Blake2s dual mining with AMD cards
-- Updated NVIDIA-BMiner_v10.7.0; support for -pers auto'
-- Updated NVIDIA-CryptoDredge_v0.13.0; support for Dedal, Lyra2vc0banHash, Pipe & X21s algo
+- Updated AMD_CPU_NVIDIA-FireiceCryptonight_v2.7.1
+- Updated AMD_NVIDIA-lolMinerEquihash_v0.6; support for Equihash 210/9 algo
+- Updated AMD_NVIDIA-PhoenixminerEthash_v4.0b; (support for dual mining Blake2s with AMD cards is not working in 4.0b!)
+- Updated NVIDIA-BMiner_v11.0.0; support for '-pers auto' and ETH/BTM dual mine
 - Updated NVIDIA-CcminerAlexis_v1.4; requires CUDA 10.0.0
-- Updated NVIDIA-CcminerTrex_v0.8.5; support for Dedal, Geek & X21s algo
-- Updated NVIDIA-CcminerZealot_v1.24ver3
+- Updated NVIDIA-CcminerTrex_v0.8.9; support for Dedal, Geek, GltAstralHash, GltJeongHash, GltPadiHash, GltPawelHash & X21s algo
 - Updated NVIDIA-CcminerKlausT_vYescryptR16R32.V7
 - Updated NVIDIA-CcminerTpruvot_v2.3; requires CUDA 10.0.0, support for Exosis algo
-- Updated NVIDIA-CcminerZealot_v1.27; remove support for Renesis algo
+- Updated NVIDIA-CcminerZealot_v1.28; remove support for Renesis algo
+- Updated NVIDIA-CryptoDredge_v0.15.1; support for algo Dedal, Lyra2vc0banHash, Lyra2V3, MTP, Pipe & X21s, requires min. 5GB of VRAM
 - Updated NVIDIA-ExcavatorNHMP_v1.5.14a
 
 #### Pool changes
@@ -104,16 +106,23 @@
 - Fixed BlockMasters.ps1; returned empty data in some scenarios
 - Fixed MiningPoolHub(Coins); changed hosts for Equihash-BTG
 - Fixed NLPool; was using wrong host address (Zpool)
+- Fixed PhiPhiPool URLs, added regions "EU" and "ASIA"
 - Fixed Yiimp balance (message 'no wallet specified')
 
 - Pool queries are less likely to fail (try 3 times before giving up)
 - Pool objects contain fee information, will be used for profit calculation
 
-#### New algorithms
+#### New algorithms in Algorithms.txt
 - Dedal
 - Equihash 210/9
 - Geek
+- GltAstralHash
+- GltJeongHash
+- GltPadiHash
+- GltPawelHash
+- Lyra2v3
 - Lyra2vc0banHash
+- MTP
 - Pipe
 - X18
 - X21s
