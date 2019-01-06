@@ -46,6 +46,7 @@
 - Added AMD-JCECryptonote_v0.33b15
 - Added AMD-MkxminerLyra2z_v4.20
 - Added CPU-JCECryptonote_v0.33m
+- Added NVIDIA-CcminerMTP_v1.1.1
 - Added NVIDIA-GminerEquihash_v1.14
 - Added NVIDIA-MiniZEquihash_v1.0i
 
