@@ -377,8 +377,8 @@ Settings for each configured pool are stored in its own subsection. These settin
 Only mine the selected coins at the specified pool.
 
 E.g. you do not want to mine Zcash & ZeroCoin at Zpool:
-    
-    "ZpoolCoins": {
+
+"ZpoolCoins": {
         "CoinName":  [
             "Zcash",
             "ZeroCoin"
@@ -390,12 +390,13 @@ Note: Only the pools ending in ...Coins expose the coin name in their API.
 Do not use the configured algorithms for mining at the specified pool.
 
 E.g. you do not want to mine Equihash and Ethash2GB at Zpool:
+
     "ZpoolCoins": {
-		"ExcludeAlgorithm":  [
-			"Equihash",
-			"Ethash2Gb"
-		]
-	}
+        "ExcludeAlgorithm":  [
+            "Equihash",
+            "Ethash2Gb"
+        ]
+    }
 
 #### ExcludeCoinName [Zcash, ZeroCoin etc.]
 Exclude selected coins from being mined at the specified pool.
@@ -403,10 +404,10 @@ Exclude selected coins from being mined at the specified pool.
 E.g. you do not want to mine Zcash & ZeroCoin at Zpool:
 
     "ZpoolCoins": {
-		"ExcludeCoinName":  [
-			"Zcash",
-			"ZeroCoin"
-		]
+        "ExcludeCoinName":  [
+            "Zcash",
+            "ZeroCoin"
+        ]
     }
 Note: Only the pools ending in ...Coins expose the coin name in their API.
 

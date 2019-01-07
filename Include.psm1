@@ -2,14 +2,20 @@
 
 Add-Type -Path .\OpenCL\*.cs
 
+try {
+    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -WarningAction SilentlyContinue -ReferencedAssemblies "System.Xml" -ErrorAction Stop
+}
+catch {
+    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -WarningAction SilentlyContinue
+}
 
 function Get-CommandPerDevice {
 
-# rewrites the command parameters
-# if a parameter has multiple values, only the values for the available devices are returned
-# parameters with a single value are valid for all devices and remain untouched
+    # rewrites the command parameters
+    # if a parameter has multiple values, only the values for the available devices are returned
+    # parameters with a single value are valid for all devices and remain untouched
 
-[CmdletBinding()]
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
@@ -27,17 +33,20 @@ function Get-CommandPerDevice {
         $ValueSeparator = $null
         $Values = $null
 
-        if ($Token.TrimStart() -match "(?:^[-=]{1,})") { # supported prefix characters are listed in brackets: [-=]{1,}
+        if ($Token.TrimStart() -match "(?:^[-=]{1,})") {
+            # supported prefix characters are listed in brackets: [-=]{1,}
 
             $Prefix = "$($Token -split $Matches[0] | Select -Index 0)$($Matches[0])"
             $Token = $Token -split $Matches[0] | Select -Last 1
 
-            if ($Token -match "(?:[ =]{1,})") { # supported separators are listed in brackets: [ =]{1,}
+            if ($Token -match "(?:[ =]{1,})") {
+                # supported separators are listed in brackets: [ =]{1,}
                 $ParameterValueSeparator = $Matches[0]
                 $Parameter = $Token -split $ParameterValueSeparator | Select -Index 0
                 $Values = $Token.Substring(("$($Parameter)$($ParameterValueSeparator)").length)
 
-                if ($Values -match "(?:[,; ]{1})") { # supported separators are listed in brackets: [,; ]{1}
+                if ($Values -match "(?:[,; ]{1})") {
+                    # supported separators are listed in brackets: [,; ]{1}
                     $ValueSeparator = $Matches[0]
                     $RelevantValues = @()
                     $Devices | Foreach-Object {
@@ -767,25 +776,25 @@ function Get-Device {
             [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | Where-Object Vendor -ne "Intel(R) Corporation" | ForEach-Object {
                 $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
                 $Device = [PSCustomObject]@{
-                    Index = [Int]$Index
-                    PlatformId = [Int]$PlatformId
-                    PlatformId_Index = [Int]$PlatformId_Index."$($PlatformId)"
+                    Index                 = [Int]$Index
+                    PlatformId            = [Int]$PlatformId
+                    PlatformId_Index      = [Int]$PlatformId_Index."$($PlatformId)"
                     Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
-                    Vendor = [String]$Device_OpenCL.Vendor
-                    Vendor_ShortName = $(Switch ([String]$Device_OpenCL.Vendor)
-                        {
-                        "Advanced Micro Devices, Inc." {"AMD"}
-                        "NVIDIA Corporation" {"NVIDIA"}
-                        default {[String]$Device_OpenCL.Vendor}
+                    Vendor                = [String]$Device_OpenCL.Vendor
+                    Vendor_ShortName      = $(Switch ([String]$Device_OpenCL.Vendor) {
+                            "Advanced Micro Devices, Inc." {"AMD"}
+                            "Intel(R) Corporation" {"INTEL"}
+                            "NVIDIA Corporation" {"NVIDIA"}
+                            default {[String]$Device_OpenCL.Vendor}
                         }
                     )
-                    Vendor_Index = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
-                    Type_Vendor_Index = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
-                    Type = [String]$Device_OpenCL.Type
-                    Type_Index = [Int]$Type_Index."$($Device_OpenCL.Type)"
-                    OpenCL = $Device_OpenCL
-                    Model = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
-                    Model_Norm = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
+                    Vendor_Index          = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
+                    Type_Vendor_Index     = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
+                    Type                  = [String]$Device_OpenCL.Type
+                    Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
+                    OpenCL                = $Device_OpenCL
+                    Model                 = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
+                    Model_Norm            = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
@@ -825,15 +834,15 @@ function Get-Device {
         # Vendor and type the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
         $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
         $Device = [PSCustomObject]@{
-            Index = [Int]$Index
-            Vendor = $CPUInfo.Manufacturer
-            Vendor_ShortName = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") {"INTEL"} else {"AMD"})
+            Index             = [Int]$Index
+            Vendor            = $CPUInfo.Manufacturer
+            Vendor_ShortName  = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") {"INTEL"} else {"AMD"})
             Type_Vendor_Index = $CPUIndex
-            Type = "Cpu"
-            Type_Index = $CPUIndex
-            CIM = $CPUInfo
-            Model = $CPUInfo.Name
-            Model_Norm = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
+            Type              = "Cpu"
+            Type_Index        = $CPUIndex
+            CIM               = $CPUInfo
+            Model             = $CPUInfo.Name
+            Model_Norm        = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
         }
         #Read CPU features
         if (Test-Path ".\CpuFeatureDetector.Exe" -PathType Leaf) {
@@ -952,7 +961,7 @@ class Miner {
     [String]GetCommandLineParameters() {
         return $this.Arguments
     }
-    
+
     [String]GetCommandLine() {
         return "$($this.Path) $($this.GetCommandLineParameters())"
     }
@@ -1142,10 +1151,10 @@ class Miner {
                     $Lines += $Line
 
                     $this.Data += [PSCustomObject]@{
-                        Date = $Date
-                        Raw = $Line_Simple
+                        Date     = $Date
+                        Raw      = $Line_Simple
                         HashRate = [PSCustomObject]@{[String]$this.Algorithm = [Int64]$HashRates}
-                        Device = $Devices
+                        Device   = $Devices
                     }
                 }
             }
@@ -1194,5 +1203,210 @@ class Miner {
         else {
             return $HashRates_Average
         }
+    }
+}
+
+enum DownloadStatus {
+    Idle
+    Downloading
+    Complete
+    Failed
+}
+
+class Download {
+    hidden [DownloadStatus]$Status = [DownloadStatus]::Idle
+
+    hidden static $TorrentEngine
+    hidden static $TorrentEngine_DHT
+    hidden static $TorrentEngine_DHT_Listener
+
+    hidden $TorrentEngine_Manager
+    hidden [System.Management.Automation.Job]$HttpJob
+
+    hidden [System.Uri]$Uri
+    hidden [System.Uri]$DownloadFilePath
+
+    Download($Uri, $DownloadFilePath) {
+        $this.Uri = $Uri
+        $this.DownloadFilePath = $DownloadFilePath
+    }
+
+    hidden Start_TorrentEngine() {
+        if ($this.TorrentEngine_Manager) {
+            $this.TorrentEngine_Manager.Stop()
+            [Download]::TorrentEngine.Unregister($this.TorrentEngine_Manager)
+            $this.TorrentEngine_Manager.Dispose()
+            $this.TorrentEngine_Manager = $null
+        }
+
+        $Address = [System.Net.IPAddress]::Any
+        $Port = Get-Random -Minimum ([System.Net.IPEndPoint]::MinPort) -Maximum ([System.Net.IPEndPoint]::MaxPort)
+
+        if (-not [Download]::TorrentEngine_DHT) {
+            [Download]::TorrentEngine_DHT_Listener = New-Object "MonoTorrent.Dht.Listeners.DhtListener" ([System.Net.IPEndPoint]::new($Address, $Port))
+            [Download]::TorrentEngine_DHT = New-Object "MonoTorrent.Dht.DhtEngine" ([Download]::TorrentEngine_DHT_Listener)
+            [Download]::TorrentEngine_DHT.Start()
+
+            for ($i = 0; $i -lt 60 * 2 -and [Download]::TorrentEngine_DHT.State -ne "Ready"; $i += 10) {
+                Start-Sleep 10
+            }
+
+            if ([Download]::TorrentEngine_DHT.State -ne "Ready") {
+                [Download]::TorrentEngine_DHT.Dispose()
+                [Download]::TorrentEngine_DHT = $null
+                $this.Status = [DownloadStatus]::Failed
+                return
+            }
+        }
+
+        if (-not [Download]::TorrentEngine) {
+            $TorrentEngine_Settings = New-Object "MonoTorrent.Client.EngineSettings"
+            [Download]::TorrentEngine = New-Object "MonoTorrent.Client.ClientEngine" $TorrentEngine_Settings
+            [Download]::TorrentEngine.ChangeListenEndpoint([System.Net.IPEndPoint]::new($Address, $Port))
+            [Download]::TorrentEngine.RegisterDht([Download]::TorrentEngine_DHT)
+        }
+
+        if (-not $this.TorrentEngine_Manager) {
+            $Magnet = New-Object "MonoTorrent.Common.MagnetLink" $this.Uri
+            $TorrentEngine_Manager_Settings = New-Object "MonoTorrent.Client.TorrentSettings"
+            $this.TorrentEngine_Manager = New-Object "MonoTorrent.Client.TorrentManager" $Magnet, $this.DownloadFilePath.AbsolutePath, $TorrentEngine_Manager_Settings, (Join-Path $this.DownloadFilePath.AbsolutePath "$($Magnet.InfoHash).torrent")
+            [Download]::TorrentEngine.Register($this.TorrentEngine_Manager)
+        }
+
+        $this.TorrentEngine_Manager.Start()
+        $this.Status = [DownloadStatus]::Downloading
+    }
+
+    hidden Start_HttpJob() {
+        if ($this.HttpJob) {
+            Remove-Job $this.HttpJob -Force
+            $this.HttpJob = $null
+        }
+
+        $this.HttpJob = Start-Job {
+            param($Uri, $DownloadFilePath)
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            $Download = Invoke-WebRequest $Uri
+            $Download_FileName = [String]($Download.Headers["Content-Disposition"] -Split '; ' | ForEach-Object {[PSCustomObject]@{($_ -Split '=')[0] = ($_ -Split '=')[1]}} | Where-Object filename | Select-Object -First 1 -ExpandProperty filename)
+            [System.IO.File]::WriteAllBytes((Join-Path $DownloadFilePath $Download_FileName), $Download.Content)
+        } -ArgumentList $this.Uri.AbsoluteUri, $this.DownloadFilePath.AbsolutePath
+
+        $this.Status = [DownloadStatus]::Downloading
+
+        return
+    }
+
+    Start() {
+        if ($this.GetStatus() -eq "Downloading") {return}
+
+        if ($this.Uri.Scheme -eq "magnet") {
+            $this.Start_TorrentEngine()
+        }
+        elseif ($this.Uri.Scheme -eq "https" -and $this.Uri.Host -eq "mega.nz") {
+            #To-do: add support for 'https://mega.nz'
+        }
+        else {
+            $this.Start_HttpJob()
+        }
+    }
+
+    Stop() {
+        if ($this.Uri.Scheme -eq "magnet") {
+            $this.TorrentEngine_Manager.Stop()
+        }
+        elseif ($this.Uri.Scheme -eq "https" -and $this.Uri.Host -eq "mega.nz") {
+            #To-do: add support for 'https://mega.nz'
+        }
+        else {
+            Stop-Job $this.HttpJob
+        }
+
+        $this.Status = [DownloadStatus]::Idle
+    }
+
+    hidden GetStatus_TorrentEngine() {
+        if (-not $this.TorrentEngine_Manager) {
+            if ($this.Status -ne "Idle") {
+                $this.Status = [DownloadStatus]::Failed
+            }
+            return
+        }
+
+        $TorrentEngine_Manager_State = $this.TorrentEngine_Manager.State
+
+        if ($TorrentEngine_Manager_State -eq "Error") {
+            $this.Status = [DownloadStatus]::Failed
+        }
+
+        switch ($this.Status) {
+            "Idle" {
+                if ($TorrentEngine_Manager_State -ne "Stopped" -and $TorrentEngine_Manager_State -ne "Paused" -and $TorrentEngine_Manager_State -ne "Stopping") {
+                    $this.Status = [DownloadStatus]::Failed
+                }
+            }
+            "Downloading" {
+                if ($TorrentEngine_Manager_State -eq "Seeding") {
+                    $this.Status = [DownloadStatus]::Complete
+                }
+                elseif ($TorrentEngine_Manager_State -ne "Downloading" -and $TorrentEngine_Manager_State -ne "Hashing" -and $TorrentEngine_Manager_State -ne "Metadata") {
+                    $this.Status = [DownloadStatus]::Failed
+                }
+            }
+            "Complete" {
+                if ($TorrentEngine_Manager_State -ne "Seeding") {
+                    $this.Status = [DownloadStatus]::Failed
+                }
+            }
+        }
+    }
+
+    hidden GetStatus_HttpJob() {
+        if (-not $this.HttpJob) {
+            if ($this.Status -ne "Idle") {
+                $this.Status = [DownloadStatus]::Failed
+            }
+            return
+        }
+
+        $HttpJob_State = $this.HttpJob.State
+
+        if ($HttpJob_State -eq "Failed") {
+            $this.Status = [DownloadStatus]::Failed
+        }
+
+        switch ($this.Status) {
+            "Idle" {
+                if ($HttpJob_State -ne "Stopped" -and $HttpJob_State -ne "Suspended" -and $HttpJob_State -ne "Stopping") {
+                    $this.Status = [DownloadStatus]::Failed
+                }
+            }
+            "Downloading" {
+                if ($HttpJob_State -eq "Completed") {
+                    $this.Status = [DownloadStatus]::Complete
+                }
+                elseif ($HttpJob_State -ne "Running") {
+                    $this.Status = [DownloadStatus]::Failed
+                }
+            }
+            "Complete" {
+                if ($HttpJob_State -ne "Completed") {
+                    $this.Status = [DownloadStatus]::Failed
+                }
+            }
+        }
+    }
+
+    [DownloadStatus]GetStatus() {
+        if ($this.Uri.Scheme -eq "magnet") {
+            $this.GetStatus_TorrentEngine()
+        }
+        elseif ($this.Uri.Scheme -eq "https" -and $this.Uri.Host -eq "mega.nz") {
+            #To-do: add support for 'https://mega.nz'
+        }
+        else {
+            $this.GetStatus_HttpJob()
+        }
+
+        return $this.Status
     }
 }
