@@ -674,7 +674,9 @@ function Invoke-TcpRequest {
         [Parameter(Mandatory = $true)]
         [String]$Request, 
         [Parameter(Mandatory = $true)]
-        [Int]$Timeout = 10 #seconds
+        [Int]$Timeout = 10, #seconds
+        [Parameter(Mandatory = $false)]
+        [Bool]$ReadToEnd = $false
     )
 
     try {
@@ -687,7 +689,12 @@ function Invoke-TcpRequest {
         $Writer.AutoFlush = $true
 
         $Writer.WriteLine($Request)
-        $Response = $Reader.ReadLine()
+        if ($ReadToEnd) {
+            $Response = $Reader.ReadToEnd()
+        }
+        else {
+            $Response = $Reader.ReadLine()
+        }
     }
     finally {
         if ($Reader) {$Reader.Close()}
