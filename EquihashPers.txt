@@ -1,5 +1,7 @@
+
 ﻿{
     "ManagedByPool":  "auto",
+    "Aion":  "AION0PoW",
     "Anon":  "AnonyPoW",
     "Bitcoingold":  "BgoldPoW",
     "Bitcoinz":  "BitcoinZ",

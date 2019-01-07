@@ -22,18 +22,16 @@ class MiniZ : Miner {
         }
 
         $HashRate_Name = [String]$this.Algorithm[0]
-        $HashRate_Value = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum
-        $Accepted_Shares = [Double]($Data.result.accepted_shares | Measure-Object -Sum).Sum
-        $Rejected_Shares = [Double]($Data.result.rejected_shares | Measure-Object -Sum).Sum
+        $HashRate_Value = [Double]($Data.result.sol_ps | Measure-Object -Sum).Sum
+        if (-not $HashRate_Value) {$HashRate_Value = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum}
 
-        if ($HashRate_Name -and $HashRate_Value -GT 0 -and ($Accepted_Shares -ge $Rejected_Shares * 10)) {$HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}} #Allow max. 10% rejected shares
+        if ($HashRate_Name -and $HashRate_Value -GT 0) {$HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}}
 
         if ($HashRate | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) {
             $this.Data += [PSCustomObject]@{
                 Date       = (Get-Date).ToUniversalTime()
                 Raw        = $Response
                 HashRate   = $HashRate
-                PowerUsage = (Get-PowerUsage $this)
                 Device     = @()
             }
         }

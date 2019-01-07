@@ -19,7 +19,7 @@ $MinMem = [PSCustomObject]@{
     "Musicoin" = "3gb"
 }
 
-if ($Config.UserName) {
+if ($User) {
 
     $RetryCount = 3
     $RetryDelay = 2
