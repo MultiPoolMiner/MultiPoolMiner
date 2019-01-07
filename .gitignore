@@ -1,3 +1,10 @@
-
-.gitattributes
-_config.yml
+bin/
+stats/
+logs/
+wrapper/
+downloads/
+*.zip
+*.7z
+*.rar
+Pools/MiningDutch.ps1
+Config.txt
