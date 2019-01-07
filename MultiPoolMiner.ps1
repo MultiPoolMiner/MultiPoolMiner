@@ -418,7 +418,7 @@ while ($true) {
     }
 
     #Apply PricePenaltyFactor to pools
-    $NewPools | Foreach-Object {
+    $NewPools | ForEach-Object {
         $_.Price = [Double]($_.Price * $Config.Pools.$($_.Name).PricePenaltyFactor)
         $_.StablePrice = [Double]($_.StablePrice * $Config.Pools.$($_.Name).PricePenaltyFactor)
     }
@@ -657,7 +657,7 @@ while ($true) {
 
     #Use only use fastest miner per algo and device. E.g. if there are several miners available to mine the same algo, only the fastest of them will ever be used, the slower ones will also be hidden in the summary screen
     if ($Config.UseFastestMinerPerAlgoOnly) {
-        $Miners = @($Miners | Where-Object {($MinersNeedingBenchmark.DeviceName | Select-Object -Unique) -notcontains $_.DeviceName} | Sort-Object -Descending {"$($_.DeviceName -join '')$(($_.HashRates.PSObject.Properties.Name | Foreach-Object {$_ -split "-" | Select-Object -Index 0}) -join '')"}, {($_ | Where-Object Earning -EQ $null | Measure-Object).Count}, {([Double]($_ | Measure-Object Earning_Bias -Sum).Sum)}, {($_ | Where-Object Earning -NE 0 | Measure-Object).Count} | Group-Object {"$($_.DeviceName -join '')$(($_.HashRates.PSObject.Properties.Name | ForEach-Object {$_ -split "-" | Select-Object -Index 0}) -join '')"} | Foreach-Object {$_.Group[0]}) + @($Miners | Where-Object {($MinersNeedingBenchmark.DeviceName | Select-Object -Unique) -contains $_.DeviceName})
+        $Miners = @($Miners | Where-Object {($MinersNeedingBenchmark.DeviceName | Select-Object -Unique) -notcontains $_.DeviceName} | Sort-Object -Descending {"$($_.DeviceName -join '')$(($_.HashRates.PSObject.Properties.Name | ForEach-Object {$_ -split "-" | Select-Object -Index 0}) -join '')"}, {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {Profits_Bias}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count} | Group-Object {"$($_.DeviceName -join '')$(($_.HashRates.PSObject.Properties.Name | ForEach-Object {$_ -split "-" | Select-Object -Index 0}) -join '')"} | ForEach-Object {$_.Group[0]}) + @($Miners | Where-Object {($MinersNeedingBenchmark.DeviceName | Select-Object -Unique) -contains $_.DeviceName})
     }
 
     #Give API access to the fastest miners information
@@ -764,7 +764,7 @@ while ($true) {
     #Check for failed miner
     $RunningMiners | Where-Object {$_.GetStatus() -ne "Running"} | ForEach-Object {
         $_.SetStatus("Failed")
-        Write-Log -Level Error "Miner ($($_.Name) {$(($_.Algorithm | Foreach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}) has failed. "
+        Write-Log -Level Error "Miner ($($_.Name) {$(($_.Algorithm | ForEach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}) has failed. "
     }
     $API.FailedMiners = @($ActiveMiners | Where-Object {$_.GetStatus() -eq "Failed"})
 
@@ -794,7 +794,7 @@ while ($true) {
                 if ($WatchdogTimer) {
                     if ($WatchdogTimer.Kicked -lt $Timer.AddSeconds( - $WatchdogInterval)) {
                         $Miner.SetStatus("Failed")
-                        Write-Log -Level Warn "Watchdog: Miner ($Miner_Name {$(($Miner.Algorithm | Foreach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}) temporarily disabled. "
+                        Write-Log -Level Warn "Watchdog: Miner ($Miner_Name {$(($Miner.Algorithm | ForEach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}) temporarily disabled. "
                     }
                     else {
                         $WatchdogTimers = $WatchdogTimers -notmatch $WatchdogTimer
@@ -814,14 +814,14 @@ while ($true) {
     Start-Sleep $Config.Delay #Wait to prevent BSOD
 
     #Kill stray miners
-    Get-CIMInstance CIM_Process | Where-Object ExecutablePath | Where-Object {$_.ExecutablePath -like "$(Get-Location)\Bin\*"} | Where-Object {$ActiveMiners.ProcessID -notcontains $_.ProcessID} | Select-Object -ExpandProperty ProcessID | Foreach-Object {Stop-Process -Id $_ -Force -ErrorAction Ignore}
+    Get-CIMInstance CIM_Process | Where-Object ExecutablePath | Where-Object {$_.ExecutablePath -like "$(Get-Location)\Bin\*"} | Where-Object {$ActiveMiners.ProcessID -notcontains $_.ProcessID} | Select-Object -ExpandProperty ProcessID | ForEach-Object {Stop-Process -Id $_ -Force -ErrorAction Ignore}
 
     $RunningMiners = @()
     $ActiveMiners | Where-Object Best -EQ $true | ForEach-Object {
         $RunningMiners += $_
         $Miner_Name = $_.Name
         if ($_.GetStatus() -ne "Running") {
-            Write-Log "Starting miner ($Miner_Name {$(($_.Algorithm | Foreach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}). "
+            Write-Log "Starting miner ($Miner_Name {$(($_.Algorithm | ForEach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}). "
             Write-Log -Level Verbose $_.GetCommandLine().Replace("$(Convert-Path '.\')\","")
             $DecayStart = $Timer
             $_.SetStatus("Running")
@@ -846,7 +846,7 @@ while ($true) {
             }
         }
         if ($_.Algorithm | Where-Object {-not (Get-Stat -Name "$($Miner_Name)_$($_)_HashRate")}) {
-            Write-Log -Level Warn "Benchmarking miner ($Miner_Name {$(($_.Algorithm | Foreach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")})$(if ($_.BenchmarkIntervals -gt 1) {" requires extended benchmark duration (Benchmarking interval $($_.Benchmarked + 1)/$($_.BenchmarkIntervals))"}) [Attempt $($_.GetActivateCount()) of max. $Strikes]. "
+            Write-Log -Level Warn "Benchmarking miner ($Miner_Name {$(($_.Algorithm | ForEach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")})$(if ($_.BenchmarkIntervals -gt 1) {" requires extended benchmark duration (Benchmarking interval $($_.Benchmarked + 1)/$($_.BenchmarkIntervals))"}) [Attempt $($_.GetActivateCount()) of max. $Strikes]. "
         }
 
         #Update API miner information
@@ -920,20 +920,20 @@ while ($true) {
         $Columns = @()
         $ColumnFormat = [Array]@{Name = "Name$(' ' * (($BalancesData.Balances.Name | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum) -4))"; Expression = "Name"}
         if ($Config.ShowPoolBalancesDetails) {
-            $Columns += $BalancesData.Balances | Foreach-Object {$_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name} | Where-Object {$_ -like "Balance (*"} | Sort-Object -Unique
+            $Columns += $BalancesData.Balances | ForEach-Object {$_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name} | Where-Object {$_ -like "Balance (*"} | Sort-Object -Unique
         }
         else {
-            $ColumnFormat += @{Name = "Balance$(' ' * (($BalancesData.Balances.Balance | Select-Object | Foreach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum) -7))"; Expression = {$_.Total}}
+            $ColumnFormat += @{Name = "Balance$(' ' * (($BalancesData.Balances.Balance | Select-Object | ForEach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum) -7))"; Expression = {$_.Total}}
         }
-        $Columns += $BalancesData.Balances | Foreach-Object {$_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name} | Where-Object {$_ -like "Value in *"} | Sort-Object -Unique
-        $ColumnFormat += $Columns | Foreach-Object {@{Name = "$_"; Expression = "$_"; Align = "right"}}
+        $Columns += $BalancesData.Balances | ForEach-Object {$_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name} | Where-Object {$_ -like "Value in *"} | Sort-Object -Unique
+        $ColumnFormat += $Columns | ForEach-Object {@{Name = "$_"; Expression = "$_"; Align = "right"}}
         if (($BalancesData.Balances | Select-Object -Last 1 | Select-Object -ExpandProperty Name) -eq "*Total*") {
             #Insert footer separator
             $BalancesData.Balances += ($BalancesData.Balances | Select-Object -Last 1).PsObject.Copy()
             $BalancesData.Balances += ($BalancesData.Balances | Select-Object -Last 1).PsObject.Copy()
             ($BalancesData.Balances | Select-Object -Last 1).PSObject.Properties.Name | ForEach-Object {
-                ($BalancesData.Balances | Select-Object -Last 1 -Skip 2) | Add-Member $_ "$('-' * ($BalancesData.Balances.$_ | Select-Object | Foreach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum))" -Force
-                ($BalancesData.Balances | Select-Object -Last 1 ) | Add-Member $_ "$('=' * ($BalancesData.Balances.$_ | Select-Object | Foreach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum))" -Force
+                ($BalancesData.Balances | Select-Object -Last 1 -Skip 2) | Add-Member $_ "$('-' * ($BalancesData.Balances.$_ | Select-Object | ForEach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum))" -Force
+                ($BalancesData.Balances | Select-Object -Last 1 ) | Add-Member $_ "$('=' * ($BalancesData.Balances.$_ | Select-Object | ForEach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum))" -Force
             }
         }
         $BalancesData.Balances | Format-Table -Wrap -Property $ColumnFormat
@@ -996,11 +996,11 @@ while ($true) {
             if ($Miner.GetStatus() -eq "Running") {
                 $Miner_Data = $Miner.UpdateMinerData()
                 if ($Miner_Data -and (-not $Config.ShowMinerWindow -or ($Miner.Speed -contains $null))) {
-                    Write-Log -Level Verbose "$($Miner.Name): $($Miner_Data | Foreach-Object {$_})"
+                    Write-Log -Level Verbose "$($Miner.Name): $($Miner_Data | ForEach-Object {$_})"
                 }
             }
             if ($Miner.GetStatus() -eq "Failed") {
-                Write-Log -Level Error "Miner ($($Miner.Name) {$(($Miner.Algorithm | Foreach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}) has failed. "
+                Write-Log -Level Error "Miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}) has failed. "
                 if ($Miner.New -and $Miner.Benchmarked -ge 1) {$Miner.Benchmarked--}
                 # Update API information
                 $API.RunningMiners = $RunningMiners = @($RunningMiners | Where-Object {$_ -ne $Miner})
@@ -1055,7 +1055,7 @@ while ($true) {
                 #Limit benchmarking loops
                 if ((-not $Miner.New -and $Miner.Data.Count -gt 10) -or ($Miner.New -and $Miner.Benchmarked -ge $Miner.BenchmarkIntervals) -or ($Miner.GetActivateCount() -ge $Strikes)) {
                     $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Speed -Duration $StatSpan -FaultDetection ($Miner.BenchmarkIntervals -le 1)
-                    if (($Miner.GetActivateCount() -ge $Strikes) -and ($Miner.Benchmarked -ge $Miner.BenchmarkIntervals) -and -not $Miner_Speed) {Write-Log -Level Warn "Benchmarking: Miner ($Miner_Name {$(($Miner.Algorithm | Foreach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}) did not report any valid hashrate and will be disabled. To re-enable remove the stats file. "}
+                    if (($Miner.GetActivateCount() -ge $Strikes) -and ($Miner.Benchmarked -ge $Miner.BenchmarkIntervals) -and -not $Miner_Speed) {Write-Log -Level Warn "Benchmarking: Miner ($Miner_Name {$(($Miner.Algorithm | ForEach-Object {"$($_ -replace '-NHMP' -replace 'NiceHash')@$($Pools.$_.Name)"}) -join "; ")}) did not report any valid hashrate and will be disabled. To re-enable remove the stats file. "}
                 }
 
                 #Update watchdog timer
