@@ -80,6 +80,8 @@
 - Reported graphics memory is rounded to the nearest 1/4 GB (Include.psm1/Get-Device)
 
 - Removed AMD_NVIDIA-lolMinerEquihash_v0.6beta4
+- Removed AMD-MkxminerLyra2RE2_v3.10; it was for Lyre2RE2 only which is an unprofitable algo
+- Removed AMD-SgminerLyra2RE2_v5.1.0; miner was incorrectly named, it was for Lyre2RE only which is an unprofitable algo
 
 - Updated AMD-CastXmrVegaCryptonight_v1.66; support for algo CryptonightXfh, added support for Baffin chipset
 - Updated AMD-SgminerKL_v1.0.9
