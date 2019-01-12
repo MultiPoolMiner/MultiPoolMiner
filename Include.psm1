@@ -644,35 +644,6 @@ function Expand-WebRequest {
     }
 }
 
-function Get-TCPResponse {
-    [cmdletbinding()]
-    Param (        
-        [Parameter(Mandatory = $true)]
-        $Server = "localhost", 
-        [Parameter(Mandatory = $true)]
-        $Port,
-        [Parameter(Mandatory = $true)]
-        $Timeout = 100
-    )
-
-    try {
-        $Response = ""
-        $Client = New-Object System.Net.Sockets.TCPClient $Server, $Port
-        Start-Sleep -Milliseconds $TimeOut
-        if ([int64]$Client.Available -gt 0) {
-            $Stream = $Client.GetStream()
-            $BindResponseBuffer = New-Object Byte[] -ArgumentList $Client.Available
-            $Read = $Stream.Read($BindResponseBuffer, 0, $BindResponseBuffer.count)  
-            $Response = ($BindResponseBuffer | ForEach {[char][int]$_}) -join ''
-        }
-    }
-    finally {
-        if ($Client) {$Client.Close()}
-    }
-
-    $Response
-}
-
 function Invoke-TcpRequest {
     [CmdletBinding()]
     param(
