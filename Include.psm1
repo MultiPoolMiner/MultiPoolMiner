@@ -69,10 +69,12 @@ function Get-Balance {
     param($Config, $NewRates)
 
     $BalancesData = [PSCustomObject]@{}
-    $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
-        Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
-    } | Select-Object -ExpandProperty Content | Sort-Object Name)
-   
+    $Balances = @(
+        Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
+            Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
+        } | Select-Object -ExpandProperty Content | Sort-Object Name
+    )
+
     $BalancesData | Add-Member Balances $Balances
 
     #Get exchgange rates for all payout currencies
@@ -107,7 +109,7 @@ function Get-Balance {
                     $_ | Add-Member "Value in $Currency" "unknown" -Force
                 }
             }
-            if (($Balances."_Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)  {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ($Balances."_Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum) -Force}
+            if (($Balances."_Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum) {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ($Balances."_Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum) -Force}
         }
 
         #Add Balance (in currency)
@@ -125,7 +127,7 @@ function Get-Balance {
                 }
             }
             if (($Balances."_Balance ($Currency)" | Measure-Object -Sum).sum) {$Totals | Add-Member "Balance ($Currency)" ("{0:N$($Digits)}" -f ($Balances."_Balance ($Currency)" | Measure-Object -Sum).sum)}
-            
+
         }
 
         $Balances | Foreach-Object {
@@ -261,12 +263,12 @@ function Set-Stat {
             Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin) to $([Int]$ToleranceMax)). "
         }
         else {
-            $Span_Minute    = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
-            $Span_Minute_5  = [Math]::Min(($Duration.TotalMinutes / 5) / [Math]::Min(($Stat.Duration.TotalMinutes / 5), 1), 1)
+            $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
+            $Span_Minute_5 = [Math]::Min(($Duration.TotalMinutes / 5) / [Math]::Min(($Stat.Duration.TotalMinutes / 5), 1), 1)
             $Span_Minute_10 = [Math]::Min(($Duration.TotalMinutes / 10) / [Math]::Min(($Stat.Duration.TotalMinutes / 10), 1), 1)
-            $Span_Hour      = [Math]::Min($Duration.TotalHours / [Math]::Min($Stat.Duration.TotalHours, 1), 1)
-            $Span_Day       = [Math]::Min($Duration.TotalDays / [Math]::Min($Stat.Duration.TotalDays, 1), 1)
-            $Span_Week      = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
+            $Span_Hour = [Math]::Min($Duration.TotalHours / [Math]::Min($Stat.Duration.TotalHours, 1), 1)
+            $Span_Day = [Math]::Min($Duration.TotalDays / [Math]::Min($Stat.Duration.TotalDays, 1), 1)
+            $Span_Week = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
 
             $Stat = [PSCustomObject]@{
                 Live                  = $Value
@@ -452,7 +454,7 @@ function ConvertTo-LocalCurrency {
     $Digits = ([math]::truncate(10 - $Offset - [math]::log($BTCRate, 10)))
     if ($Digits -lt 0) {$Digits = 0}
     if ($Digits -gt 10) {$Digits = 10}
-    
+
     ($Value * $BTCRate).ToString("N$($Digits)")
 }
 
@@ -890,7 +892,7 @@ function Get-EquihashPers {
     }
 
     $CoinName = (Get-Culture).TextInfo.ToTitleCase(($CoinName -replace "-", " " -replace "_", " ")) -replace " "
-    
+
     if ($Script:EquihashPers.$CoinName) {$Script:EquihashPers.$CoinName}
     else {$Default}
 }
@@ -962,7 +964,7 @@ class Miner {
         }
 
         if (-not $this.Process) {
-            $EnvCmd  = ($this.Environment | Foreach-Object {"```$env:$_; "}) -join ""
+            $EnvCmd = ($this.Environment | Foreach-Object {"```$env:$_; "}) -join ""
             if ($this.ShowMinerWindow -and -not ($this.API -eq "Wrapper") -or $this.Environment) {
                 if ((Test-Path ".\CreateProcess.cs" -PathType Leaf) -and -not $this.Environment) {
                     $this.Process = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList $this.GetCommandLineParameters() -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Device.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
@@ -1040,7 +1042,8 @@ class Miner {
     }
 
     [MinerStatus]GetStatus() {
-        if ($this.Process.State -eq "Running" -and $this.ProcessId -and (Get-Process -Id $this.ProcessId -ErrorAction SilentlyContinue).ProcessName) { #Use ProcessName, some crashed miners are dead, but may still be found by their processId
+        if ($this.Process.State -eq "Running" -and $this.ProcessId -and (Get-Process -Id $this.ProcessId -ErrorAction SilentlyContinue).ProcessName) {
+            #Use ProcessName, some crashed miners are dead, but may still be found by their processId
             return [MinerStatus]::Running
         }
         elseif ($this.Status -eq "Running") {
