@@ -94,7 +94,7 @@ function Get-Balance {
     $BalancesData | Add-Member Balances $Balances
 
     #Get exchgange rates for all payout currencies
-    if ($CurrenciesWithBalances = @($Balances.currency | Sort-Object -Unique)) {
+    if ($CurrenciesWithBalances = @($Balances.currency | Select-Object -Unique)) {
         $BalancesData | Add-Member ApiRequest "https://min-api.cryptocompare.com/data/pricemulti?fsyms=$(($CurrenciesWithBalances | ForEach-Object {$_.ToUpper()}) -join ",")&tsyms=$(($Config.Currency | ForEach-Object {$_.ToUpper()}) -join ",")&extraParams=http://multipoolminer.io"
         try {
             $Rates = Invoke-RestMethod $BalancesData.ApiRequest -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
@@ -911,6 +911,25 @@ function Get-EquihashPers {
 
     if ($Script:EquihashPers.$CoinName) {$Script:EquihashPers.$CoinName}
     else {$Default}
+}
+
+function Get-EthashDAGSize {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [String]$CoinName = "",
+        [Parameter(Mandatory = $false)]
+        [AllowEmptyString()]
+        [String]$Default = ""
+    )
+
+    if (-not (Test-Path Variable:Script:EthashDAGSize)) {
+        $Script:EthashDAGSize = Get-Content "EthashDAGSize.txt" | ConvertFrom-Json
+    }
+
+    if ($Script:EthashDAGSize.$CoinName) {$Script:EthashDAGSize.$CoinName -replace "4gb"} #default 4gb
+    else {""} #default 4GB
 }
 
 enum MinerStatus {
