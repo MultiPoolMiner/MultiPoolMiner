@@ -410,7 +410,7 @@ while ($true) {
     }
 
     #Retrieve collected pool data
-    if ($GetPoolDataJobs) {
+    if ($GetPoolDataJobs.Count) {
         if ($GetPoolDataJobs | Where-Object State -NE "Completed") {Write-Log "Waiting for pool information. "}
         $NewPools = @(
             Get-Job | Where-Object Name -Like "GetPoolData_*" | Wait-Job | Receive-Job | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
@@ -958,7 +958,7 @@ while ($true) {
         #More samples if benchmarking
         Start-Sleep ([Int](6 / (@($RunningMiners | Where-Object Status -EQ "Running" | Where-Object Speed -contains $null).Count + 1)))
 
-        if ((Test-Path "Pools" -PathType Container) -and -not $GetPoolDataJobs -and ($StatEnd - $Timer).TotalSeconds -le $GetPoolDataJobsDuration) {
+        if ((Test-Path "Pools" -PathType Container) -and -not $GetPoolDataJobs.Count -and ($StatEnd - $Timer).TotalSeconds -le $GetPoolDataJobsDuration) {
             Write-Log "Pre-loading pool information"
             Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | ForEach-Object {
                 $Pool_Name = $_.BaseName
