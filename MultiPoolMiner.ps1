@@ -137,7 +137,7 @@ $Rates = [PSCustomObject]@{BTC = [Double]1}
 #Start the log
 Start-Transcript ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
 
-Write-Log "Starting MultiPoolMiner® v$Version © 2017-2018 MultiPoolMiner.io"
+Write-Log "Starting MultiPoolMiner® v$Version © 2017-2019 MultiPoolMiner.io"
 
 #Set process priority to BelowNormal to avoid hash rate drops on systems with weak CPUs
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
@@ -199,7 +199,13 @@ else {
     $Config | Add-Member Wallets ([PSCustomObject]@{BTC = "`$Wallet"})
 
     $Devices = Get-Device
+    if (-not $UseFastestMinerPerAlgoOnly) {
+        $Config.UseFastestMinerPerAlgoOnly = $true
+        Write-Log -Level Info -Message "For best profitability MPM will set 'UseFastestMinerPerAlgoOnly=true'. "
+    }
+
     if (-not $CreateMinerInstancePerDeviceModel) {
+        $Config.CreateMinerInstancePerDeviceModel = $true
         Write-Log -Level Info -Message "For best profitability MPM will set 'CreateMinerInstancePerDeviceModel=true'. "
     }
 
@@ -371,23 +377,19 @@ while ($true) {
     $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
     $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
 
-    #Update the exchange rates
-    try {
-        Write-Log "Updating exchange rates from Coinbase. "
-        $NewRates = Invoke-RestMethod "https://api.coinbase.com/v2/exchange-rates?currency=BTC" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop | Select-Object -ExpandProperty data | Select-Object -ExpandProperty rates
-        $Config.Currency | Where-Object {$NewRates.$_} | ForEach-Object {$Rates | Add-Member $_ ([Double]$NewRates.$_) -Force}
-
-        #Update the pool balances every n minute to minimize web requests or when currency settings have changed; pools usually do not update the balances in real time
-        if ((((Get-Date).AddMinutes(- $Config.PoolBalancesUpdateInterval) -gt $BalancesData.Updated) -and ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools)) -or ($Config.Currency -ne $ConfigBackup.Currency)) {
-            Write-Log "Getting pool balances. "
-            $BalancesData = Get-Balance -Config $UserConfig -NewRates $NewRates
-
-            #Give API access to the pool balances
-            $API.BalancesData = $BalancesData
+    #Load information about the pools
+    $NewPools = @()
+    if (Test-Path "Pools" -PathType Container) {
+        if (-not $GetPoolDataJobs.Count) {
+            $GetPoolDataJobs = @()
+            Write-Log "Loading pool information - this may take a minute or two. "
+            Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | ForEach-Object {
+                $Pool_Name = $_.BaseName
+                $Pool_Parameters = @{StatSpan = $StatSpan}
+                $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
+                $GetPoolDataJobs += Start-Job -Name "GetPoolData_$($Pool_Name)" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList $Pool_Name, "Pools\$($_.Name)", $Pool_Parameters -FilePath .\Get-PoolData.ps1
+            }
         }
-    }
-    catch {
-        Write-Log -Level Warn "Coinbase is down. "
     }
 
     #Load the stats
@@ -396,18 +398,30 @@ while ($true) {
 
     #Give API access to the current stats
     $API.Stats = $Stats
+    
+    #Update the exchange rates
+    try {
+        Write-Log "Updating exchange rates from Coinbase. "
+        $NewRates = Invoke-RestMethod "https://api.coinbase.com/v2/exchange-rates?currency=BTC" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop | Select-Object -ExpandProperty data | Select-Object -ExpandProperty rates
+        $Config.Currency | Where-Object {$NewRates.$_} | ForEach-Object {$Rates | Add-Member $_ ([Double]$NewRates.$_) -Force}
+    }
+    catch {
+        Write-Log -Level Warn "Coinbase is down. "
+    }
 
-    #Load information about the pools
-    $NewPools = @()
-    if (Test-Path "Pools" -PathType Container) {
-        if (-not $GetPoolDataJob) {
-            Write-Log "Loading pool information"
-            $GetPoolDataJob = Start-Job -Name GetPoolData -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($StatSpan, $Config) -FilePath .\Get-PoolData.ps1
-        }
+    #Update the pool balances every n minute to minimize web requests or when currency settings have changed; pools usually do not update the balances in real time
+    if ($NewRates -and (((Get-Date).AddMinutes(- $Config.PoolBalancesUpdateInterval) -gt $BalancesData.Updated) -and ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools)) -or (Compare-Object $Config.Currency $ConfigBackup.Currency)) {
+        Write-Log "Getting pool balances. "
+        $GetPoolBalancesJob = Start-Job -Name "GetPoolBalances" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList $UserConfig, $NewRates -FilePath .\Get-PoolBalances.ps1
+    }
 
-        Write-Log "Waiting for pool information. "
-        $NewPools = $GetPoolDataJob | Wait-Job | Receive-Job
-        $GetPoolDataJob = $null
+    #Retrieve collected pool data
+    if ($GetPoolDataJobs) {
+        if ($GetPoolDataJobs | Where-Object State -NE "Completed") {Write-Log "Waiting for pool information. "}
+        $NewPools = @(Get-Job | Where-Object Name -Like "GetPoolData_*" | Wait-Job | Receive-Job | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru})
+        Get-Job | Where-Object Name -Like "GetPoolData_*" | Remove-Job
+        $GetPoolDataJobsDuration = (($GetPoolDataJobs | Measure-Object PSEndTime -Maximum).Maximum - ($GetPoolDataJobs | Measure-Object PSBeginTime -Minimum).Minimum).TotalSeconds
+        $GetPoolDataJobs = @()
     }
 
     #Apply PricePenaltyFactor to pools
@@ -595,7 +609,7 @@ while ($true) {
     if (Get-Command "Get-MpPreference" -ErrorAction SilentlyContinue) {
         if ((Get-Command "Get-MpComputerStatus" -ErrorAction SilentlyContinue) -and (Get-MpComputerStatus -ErrorAction SilentlyContinue)) {
             if (Get-Command "Get-NetFirewallRule" -ErrorAction SilentlyContinue) {
-                if ($MinerFirewalls -eq $null) {$MinerFirewalls = Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program}
+                if ($null -eq $MinerFirewalls) {$MinerFirewalls = Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program}
                 if (@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ "=>") {
                     Start-Process (@{desktop = "powershell"; core = "pwsh"}.$PSEdition) ("-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1'; ('$(@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ '=>' | Select-Object -ExpandProperty InputObject | ConvertTo-Json -Compress)' | ConvertFrom-Json) | ForEach {New-NetFirewallRule -DisplayName 'MultiPoolMiner' -Program `$_}" -replace '"', '\"') -Verb runAs
                     $MinerFirewalls = $null
@@ -866,48 +880,62 @@ while ($true) {
         $MinerComparisons | Out-Host
     }
 
-    #Display pool balances, formatting it to show all the user specified currencies
-    if ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) {
-        Write-Host "Pool Balances (last updated $($BalancesData.Updated.ToString())):"
-        $Columns = @()
-        $ColumnFormat = [Array]@{Name = "Name$(' ' * (($BalancesData.Balances.Name | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum) -4))"; Expression = "Name"}
-        if ($Config.ShowPoolBalancesDetails) {
-            $Columns += $BalancesData.Balances | ForEach-Object {$_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name} | Where-Object {$_ -like "Balance (*"} | Sort-Object -Unique
-        }
-        else {
-            $ColumnFormat += @{Name = "Balance$(' ' * (($BalancesData.Balances.Balance | Select-Object | ForEach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum) -7))"; Expression = {$_.Total}}
-        }
-        $Columns += $BalancesData.Balances | ForEach-Object {$_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name} | Where-Object {$_ -like "Value in *"} | Sort-Object -Unique
-        $ColumnFormat += $Columns | ForEach-Object {@{Name = "$_"; Expression = "$_"; Align = "right"}}
-        if (($BalancesData.Balances | Select-Object -Last 1 | Select-Object -ExpandProperty Name) -eq "*Total*") {
-            #Insert footer separator
-            $BalancesData.Balances += ($BalancesData.Balances | Select-Object -Last 1).PsObject.Copy()
-            $BalancesData.Balances += ($BalancesData.Balances | Select-Object -Last 1).PsObject.Copy()
-            ($BalancesData.Balances | Select-Object -Last 1).PSObject.Properties.Name | ForEach-Object {
-                ($BalancesData.Balances | Select-Object -Last 1 -Skip 2) | Add-Member $_ "$('-' * ($BalancesData.Balances.$_ | Select-Object | ForEach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum))" -Force
-                ($BalancesData.Balances | Select-Object -Last 1 ) | Add-Member $_ "$('=' * ($BalancesData.Balances.$_ | Select-Object | ForEach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum))" -Force
-            }
-        }
-        $BalancesData.Balances | Format-Table -Wrap -Property $ColumnFormat
+    if ($GetPoolBalancesJob) {
+        $BalancesData = $GetPoolBalancesJob | Wait-Job | Receive-Job
+        $GetPoolBalancesJob = $null
     }
 
-    #Display exchange rates, get decimal places from $NewRates
-    if (($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) -and $Config.ShowPoolBalancesDetails -and $BalancesData.Rates) {
-        Write-Host "Exchange rates:"
-        $BalancesData.Rates.PSObject.Properties.Name | ForEach-Object {
-            $BalanceCurrency = $_
-            Write-Host "1 $BalanceCurrency = $(($BalancesData.Rates.$_.PSObject.Properties.Name | Where-Object {$_ -ne $BalanceCurrency} | Sort-Object | ForEach-Object {"$($_.ToUpper()) $(ConvertTo-LocalCurrency -Value $BalancesData.Rates.$BalanceCurrency.$_ -BTCRate $NewRates.BTC -Offset 2)"}) -join " = ")"
+    if ($BalancesData.Balances) {
+        #Give API access to the pool balances
+        $API.BalancesData = $BalancesData
+
+        #Display pool balances, formatting it to show all the user specified currencies
+        if ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) {
+            Write-Host "Pool Balances (last updated $($BalancesData.Updated.ToString())):"
+            $Columns = @()
+            $ColumnFormat = [Array]@{Name = "Name$(' ' * (($BalancesData.Balances.Name | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum) -4))"; Expression = "Name"}
+            if ($Config.ShowPoolBalancesDetails) {
+                $Columns += $BalancesData.Balances | ForEach-Object {$_.PSObject.Properties.Name} | Where-Object {$_ -like "Balance (*"} | Select-Object -Unique
+            }
+            else {
+                $ColumnFormat += @{Name = "Balance$(' ' * (($BalancesData.Balances.Balance | Select-Object | ForEach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum) -7))"; Expression = {$_.Total}}
+            }
+            $Columns += $BalancesData.Balances | ForEach-Object {$_.PSObject.Properties.Name} | Where-Object {$_ -like "Value in *"} | Select-Object -Unique
+            $ColumnFormat += $Columns | ForEach-Object {@{Name = "$_"; Expression = "$_"; Align = "right"}}
+            if (($BalancesData.Balances | Select-Object -Last 1 | Select-Object -ExpandProperty Name) -eq "*Total*") {
+                #Insert footer separator
+                $BalancesData.Balances += ($BalancesData.Balances | Select-Object -Last 1).PsObject.Copy()
+                $BalancesData.Balances += ($BalancesData.Balances | Select-Object -Last 1).PsObject.Copy()
+                ($BalancesData.Balances | Select-Object -Last 1).PSObject.Properties.Name | ForEach-Object {
+                    ($BalancesData.Balances | Select-Object -Last 1 -Skip 2) | Add-Member $_ "$('-' * ($BalancesData.Balances.$_ | Select-Object | ForEach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum))" -Force
+                    ($BalancesData.Balances | Select-Object -Last 1 ) | Add-Member $_ "$('=' * ($BalancesData.Balances.$_ | Select-Object | ForEach-Object {$_.ToString()} | Measure-Object Length -Maximum | Select-Object -ExpandProperty Maximum))" -Force
+                }
+            }
+            $BalancesData.Balances | Format-Table -Wrap -Property $ColumnFormat
         }
     }
-    else {
-        if ($Config.Currency | Where-Object {$_ -ne "BTC" -and $NewRates.$_}) {Write-Host "Exchange rates: 1 BTC = $(($Config.Currency | Where-Object {$_ -ne "BTC" -and $NewRates.$_} | ForEach-Object {"$($_.ToUpper()) " + ("{0:N$(if($(($NewRates.$_).ToString().Split(".")[1]).length -gt 2) {2} else {$(($NewRates.$_).ToString().Split(".")[1]).length})}" -f [Float]$NewRates.$_)}) -join " = ")"}
+
+    if ($NewRates) {
+        #Display exchange rates, get decimal places from $NewRates
+        if (($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools) -and $Config.ShowPoolBalancesDetails -and $BalancesData.Rates) {
+            Write-Host "Exchange rates:"
+            $BalancesData.Rates.PSObject.Properties.Name | ForEach-Object {
+                $BalanceCurrency = $_
+                Write-Host "1 $BalanceCurrency = $(($BalancesData.Rates.$_.PSObject.Properties.Name | Where-Object {$_ -ne $BalanceCurrency} | Sort-Object | ForEach-Object {
+                    "$($_.ToUpper()) $(ConvertTo-LocalCurrency -Value $BalancesData.Rates.$BalanceCurrency.$_ -BTCRate $NewRates.BTC -Offset 2)"
+                }) -join " = ")"
+            }
+        }
+        else {
+            if ($Config.Currency | Where-Object {$_ -ne "BTC" -and $NewRates.$_}) {Write-Host "Exchange rates: 1 BTC = $(($Config.Currency | Where-Object {$_ -ne "BTC" -and $NewRates.$_} | ForEach-Object {"$($_.ToUpper()) " + ("{0:N$(if($(($NewRates.$_).ToString().Split(".")[1]).length -gt 2) {2} else {$(($NewRates.$_).ToString().Split(".")[1]).length})}" -f [Float]$NewRates.$_)}) -join " = ")"}
+        }
     }
 
     #Give API access to WatchdogTimers information
     $API.WatchdogTimers = $WatchdogTimers
 
     #Reduce Memory
-    Get-Job -State Completed | Remove-Job
+    Get-Job | Where-Object {$_.Name -eq "Downloader" -and $_.State -eq "Completed"} | Remove-Job
     [GC]::Collect()
 
     #Ensure a full interval for benchmarking if no reported hashrate
@@ -922,11 +950,6 @@ while ($true) {
     Write-Log "Start waiting before next run. "
     #Get at least 10 hashrate samples when benchamrking
     for ($i = 11; $i -gt 0 -and $Timer -lt $StatEnd; $i--) {
-        if (-not $GetPoolDataJob -and ($StatEnd - $Timer).TotalSeconds -le 30) {
-            Write-Log "Pre-loading pool information"
-            $GetPoolDataJob = Start-Job -Name GetPoolData -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList ($StatSpan, $Config) -FilePath .\Get-PoolData.ps1
-        }
-
         if ($Downloader) {$Downloader | Receive-Job}
         if ($API.Stop) {Exit}
 
@@ -938,6 +961,16 @@ while ($true) {
         }
         #More samples if benchmarking
         Start-Sleep ([Int](6 / (@($RunningMiners | Where-Object Status -EQ "Running" | Where-Object Speed -contains $null).Count + 1)))
+
+        if ((Test-Path "Pools" -PathType Container) -and -not $GetPoolDataJobs -and ($StatEnd - $Timer).TotalSeconds -le $GetPoolDataJobsDuration) {
+            Write-Log "Pre-loading pool information"
+            Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | ForEach-Object {
+                $Pool_Name = $_.BaseName
+                $Pool_Parameters = @{StatSpan = $StatSpan}
+                $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
+                $GetPoolDataJobs += Start-Job -Name "GetPoolData_$($Pool_Name)" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList $Pool_Name, "Pools\$($_.Name)", $Pool_Parameters -FilePath .\Get-PoolData.ps1
+            }
+        }
 
         $ActiveMiners | Where-Object Best | Where-Object Status -EQ "Running" | ForEach-Object {
             $Miner = $_
