@@ -9,6 +9,8 @@
 
 @set "command=& .\multipoolminer.ps1 -Wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -UserName aaronsace -WorkerName multipoolminer -Region europe -Currency btc,usd,eur -DeviceName amd,nvidia,cpu -PoolName nicehash -Donate 24 -Watchdog -MinerStatusURL https://multipoolminer.io/monitor/miner.php -SwitchingPrevention 2 -UseFastestMinerPerAlgoOnly"
 
+del "~*.dll"
+
 rem REMOVE THE BELOW LINE ON MINING RIGS
 start /min pwsh -noexit -executionpolicy bypass -command "& .\reader.ps1 -log '.*\\MultiPoolMiner_\d\d\d\d-\d\d-\d\d.*\.txt$' -sort '^[^_]*_' -QuickStart"
 

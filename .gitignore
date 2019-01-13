@@ -6,5 +6,6 @@ downloads/
 *.zip
 *.7z
 *.rar
+~*.dll
 Pools/MiningDutch.ps1
 Config.txt

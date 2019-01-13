@@ -1,12 +1,28 @@
 ﻿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
-Add-Type -Path .\OpenCL\*.cs
-
 try {
-    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -WarningAction SilentlyContinue -ReferencedAssemblies "System.Xml" -ErrorAction Stop
+    Add-Type -Path .\~OpenCL.dll -ErrorAction Stop
 }
 catch {
-    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -WarningAction SilentlyContinue
+    Remove-Item .\~OpenCL.dll -Force -ErrorAction Ignore
+    Add-Type -Path .\OpenCL\*.cs -OutputAssembly ~OpenCL.dll
+    Add-Type -Path .\~OpenCL.dll
+}
+
+try {
+    Add-Type -Path .\~MonoTorrent.dll -ErrorAction Stop
+}
+catch {
+    try {
+        Remove-Item .\~MonoTorrent.dll -Force -ErrorAction Ignore
+        Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -WarningAction SilentlyContinue -ReferencedAssemblies "System.Xml" -OutputAssembly ~MonoTorrent.dll -ErrorAction Stop
+    }
+    catch {
+        Remove-Item .\~MonoTorrent.dll -Force -ErrorAction Ignore
+        Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -WarningAction SilentlyContinue -OutputAssembly ~MonoTorrent.dll
+    }
+
+    Add-Type -Path .\~MonoTorrent.dll
 }
 
 function Get-CommandPerDevice {
