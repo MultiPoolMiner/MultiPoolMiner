@@ -409,16 +409,12 @@ while ($true) {
         Write-Log -Level Warn "Coinbase is down. "
     }
 
-    #Update the pool balances every n minute to minimize web requests or when currency settings have changed; pools usually do not update the balances in real time
-    if ($NewRates -and (((Get-Date).AddMinutes(- $Config.PoolBalancesUpdateInterval) -gt $BalancesData.Updated) -and ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools)) -or (Compare-Object $Config.Currency $ConfigBackup.Currency)) {
-        Write-Log "Getting pool balances. "
-        $GetPoolBalancesJob = Start-Job -Name "GetPoolBalances" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList $UserConfig, $NewRates -FilePath .\Get-PoolBalances.ps1
-    }
-
     #Retrieve collected pool data
     if ($GetPoolDataJobs) {
         if ($GetPoolDataJobs | Where-Object State -NE "Completed") {Write-Log "Waiting for pool information. "}
-        $NewPools = @(Get-Job | Where-Object Name -Like "GetPoolData_*" | Wait-Job | Receive-Job | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru})
+        $NewPools = @(
+            Get-Job | Where-Object Name -Like "GetPoolData_*" | Wait-Job | Receive-Job | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru}
+        )
         Get-Job | Where-Object Name -Like "GetPoolData_*" | Remove-Job
         $GetPoolDataJobsDuration = (($GetPoolDataJobs | Measure-Object PSEndTime -Maximum).Maximum - ($GetPoolDataJobs | Measure-Object PSBeginTime -Minimum).Minimum).TotalSeconds
         $GetPoolDataJobs = @()
