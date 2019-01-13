@@ -1,4 +1,3 @@
-
 ﻿{
     "ManagedByPool":  "auto",
     "Aion":  "AION0PoW",
