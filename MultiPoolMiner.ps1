@@ -409,6 +409,12 @@ while ($true) {
         Write-Log -Level Warn "Coinbase is down. "
     }
 
+    #Update the pool balances every n minute to minimize web requests or when currency settings have changed; pools usually do not update the balances in real time
+    if ($NewRates -and (((Get-Date).AddMinutes(- $Config.PoolBalancesUpdateInterval) -gt $BalancesData.Updated) -and ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools)) -or (Compare-Object $Config.Currency $ConfigBackup.Currency)) {
+        Write-Log "Getting pool balances. "
+        $GetPoolBalancesJob = Start-Job -Name "GetPoolBalances" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList $UserConfig, $NewRates -FilePath .\Get-PoolBalances.ps1
+    }
+
     #Retrieve collected pool data
     if ($GetPoolDataJobs.Count) {
         if ($GetPoolDataJobs | Where-Object State -NE "Completed") {Write-Log "Waiting for pool information. "}
@@ -458,7 +464,6 @@ while ($true) {
         }
     )
 
-    #Update the active pools
     if ($AllPools.Count -eq 0) {
         Write-Log -Level Warn "No pools available. "
         if ($Downloader) {$Downloader | Receive-Job}
@@ -467,6 +472,7 @@ while ($true) {
     }
     $Pools = [PSCustomObject]@{}
 
+    #Update the active pools
     Write-Log "Selecting best pool for each algorithm. "
     $AllPools.Algorithm | ForEach-Object {$_.ToLower()} | Select-Object -Unique | ForEach-Object {$Pools | Add-Member $_ ($AllPools | Where-Object Algorithm -EQ $_ | Sort-Object -Descending {$Config.PoolName.Count -eq 0 -or (Compare-Object $Config.PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0}, {($Timer - $_.Updated).TotalMinutes -le ($SyncWindow * $Strikes)}, {$_.StablePrice * (1 - $_.MarginOfError)}, {$_.Region -EQ $Config.Region}, {$_.SSL -EQ $Config.SSL} | Select-Object -First 1)}
     if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_.Name} | Select-Object -Unique | ForEach-Object {$AllPools | Where-Object Name -EQ $_ | Measure-Object Updated -Maximum | Select-Object -ExpandProperty Maximum} | Measure-Object -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalMinutes) -gt $SyncWindow) {
@@ -955,8 +961,6 @@ while ($true) {
                 $LastReport = $Timer
             }
         }
-        #More samples if benchmarking
-        Start-Sleep ([Int](6 / (@($RunningMiners | Where-Object Status -EQ "Running" | Where-Object Speed -contains $null).Count + 1)))
 
         if ((Test-Path "Pools" -PathType Container) -and -not $GetPoolDataJobs.Count -and ($StatEnd - $Timer).TotalSeconds -le $GetPoolDataJobsDuration) {
             Write-Log "Pre-loading pool information"
@@ -968,10 +972,16 @@ while ($true) {
             }
         }
 
+        $SleepTime = [Int](6 - $UpdateMinerDataDuration)
+        if ($UpdateMinerDataDuration -and $SleepTime -gt 0) {
+            Start-Sleep $SleepTime
+        }
+
+        $UpdateMinerDataDuration = 0
         $ActiveMiners | Where-Object Best | Where-Object Status -EQ "Running" | ForEach-Object {
             $Miner = $_
             if ($Miner.GetStatus() -eq "Running") {
-                $Miner_Data = $Miner.UpdateMinerData()
+                $UpdateMinerDataDuration += (Measure-Command {$Miner_Data = $Miner.UpdateMinerData()}).TotalSeconds
                 if ($Miner_Data -and (-not $Config.ShowMinerWindow -or ($Miner.Speed -contains $null))) {
                     Write-Log -Level Verbose "$($Miner.Name): $($Miner_Data | ForEach-Object {$_})"
                 }
