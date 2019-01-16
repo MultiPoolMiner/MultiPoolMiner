@@ -37,6 +37,8 @@
 
 - Miner overview: Sort algorithms requiring benchmarking alphabetically; print either 'Benchmark pending' or 'Benchmark in progress' depending on status
 
+- Removed requirement for CpuFeatureDetector.exe, replaced with Get-CpuId (Include.psm1)
+
 - Start batch files, 'UseFastestMinerPerAlgoOnly' is now enabled by default
 
 - Updated README: NiceHash pool configuration details
