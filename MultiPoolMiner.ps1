@@ -950,8 +950,8 @@ while ($true) {
 
     #Do nothing for a few seconds as to not overload the APIs and display miner download status
     Write-Log "Start waiting before next run. "
-    #Get at least 10 hashrate samples when benchamrking
-    for ($i = 11; $i -gt 0 -and $Timer -lt $StatEnd; $i--) {
+    #Get at least 10 hashrate samples when benchmarking
+    for ($i = 11; $i -gt 0 -or $Timer -lt $StatEnd; $i--) {
         if ($Downloader) {$Downloader | Receive-Job}
         if ($API.Stop) {Exit}
 
