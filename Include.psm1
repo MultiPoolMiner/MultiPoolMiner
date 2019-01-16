@@ -1,4 +1,8 @@
-﻿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+﻿using namespace System.Reflection
+using namespace System.Reflection.Emit
+using namespace System.Runtime.InteropServices
+
+Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 try {
     Add-Type -Path .\~OpenCL.dll -ErrorAction Stop
@@ -23,6 +27,281 @@ catch {
     }
 
     Add-Type -Path .\~MonoTorrent.dll
+}
+
+Add-Type @"
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Reflection;
+using System.Runtime.InteropServices;
+
+public static class CpuID {
+
+    public static byte[] Invoke(int level) {
+        IntPtr codePointer = IntPtr.Zero;
+        try {
+            // compile
+            byte[] codeBytes;
+            if (IntPtr.Size == 4) {
+                codeBytes = x86CodeBytes;
+            } else {
+                codeBytes = x64CodeBytes;
+            }
+
+            codePointer = VirtualAlloc(
+                IntPtr.Zero,
+                new UIntPtr((uint)codeBytes.Length),
+                AllocationType.COMMIT | AllocationType.RESERVE,
+                MemoryProtection.EXECUTE_READWRITE
+            );
+
+            Marshal.Copy(codeBytes, 0, codePointer, codeBytes.Length);
+
+            CpuIDDelegate cpuIdDelg = (CpuIDDelegate)Marshal.GetDelegateForFunctionPointer(codePointer, typeof(CpuIDDelegate));
+
+            // invoke
+            GCHandle handle = default(GCHandle);
+            var buffer = new byte[16];
+
+            try {
+                handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+                cpuIdDelg(level, buffer);
+            } finally {
+                if (handle != default(GCHandle)) {
+                    handle.Free();
+                }
+            }
+
+            return buffer;
+        } finally {
+            if (codePointer != IntPtr.Zero) {
+                VirtualFree(codePointer, 0, 0x8000);
+                codePointer = IntPtr.Zero;
+            }
+        }
+    }
+
+    [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl)]
+    private delegate void CpuIDDelegate(int level, byte[] buffer);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr VirtualAlloc(IntPtr lpAddress, UIntPtr dwSize, AllocationType flAllocationType,
+        MemoryProtection flProtect);
+
+    [DllImport("kernel32")]
+    private static extern bool VirtualFree(IntPtr lpAddress, UInt32 dwSize, UInt32 dwFreeType);
+
+    [Flags()]
+    private enum AllocationType : uint {
+        COMMIT = 0x1000,
+        RESERVE = 0x2000,
+        RESET = 0x80000,
+        LARGE_PAGES = 0x20000000,
+        PHYSICAL = 0x400000,
+        TOP_DOWN = 0x100000,
+        WRITE_WATCH = 0x200000
+    }
+
+    [Flags()]
+    private enum MemoryProtection : uint {
+        EXECUTE = 0x10,
+        EXECUTE_READ = 0x20,
+        EXECUTE_READWRITE = 0x40,
+        EXECUTE_WRITECOPY = 0x80,
+        NOACCESS = 0x01,
+        READONLY = 0x02,
+        READWRITE = 0x04,
+        WRITECOPY = 0x08,
+        GUARD_Modifierflag = 0x100,
+        NOCACHE_Modifierflag = 0x200,
+        WRITECOMBINE_Modifierflag = 0x400
+    }
+
+    // Basic ASM strategy --
+    // void x86CpuId(int level, byte* buffer) 
+    // {
+    //    eax = level
+    //    cpuid
+    //    buffer[0] = eax
+    //    buffer[4] = ebx
+    //    buffer[8] = ecx
+    //    buffer[12] = edx
+    // }
+
+    private readonly static byte[] x86CodeBytes = {
+        0x55,                   // push        ebp  
+        0x8B, 0xEC,             // mov         ebp,esp
+        0x53,                   // push        ebx  
+        0x57,                   // push        edi
+
+        0x8B, 0x45, 0x08,       // mov         eax, dword ptr [ebp+8] (move level into eax)
+        0x0F, 0xA2,              // cpuid
+
+        0x8B, 0x7D, 0x0C,       // mov         edi, dword ptr [ebp+12] (move address of buffer into edi)
+        0x89, 0x07,             // mov         dword ptr [edi+0], eax  (write eax, ... to buffer)
+        0x89, 0x5F, 0x04,       // mov         dword ptr [edi+4], ebx 
+        0x89, 0x4F, 0x08,       // mov         dword ptr [edi+8], ecx 
+        0x89, 0x57, 0x0C,       // mov         dword ptr [edi+12],edx 
+
+        0x5F,                   // pop         edi  
+        0x5B,                   // pop         ebx  
+        0x8B, 0xE5,             // mov         esp,ebp  
+        0x5D,                   // pop         ebp 
+        0xc3                    // ret
+    };
+
+    private readonly static byte[] x64CodeBytes = {
+        0x53,                         // push rbx    this gets clobbered by cpuid
+    
+        // rcx is level
+        // rdx is buffer.
+        // Need to save buffer elsewhere, cpuid overwrites rdx
+        // Put buffer in r8, use r8 to reference buffer later.        
+    
+        // Save rdx (buffer addy) to r8
+        0x49, 0x89, 0xd0,             // mov r8,  rdx
+    
+        // Move ecx (level) to eax to call cpuid, call cpuid
+        0x89, 0xc8,                   // mov eax, ecx
+        0xB9, 0x00, 0x00, 0x00, 0x00, // mov ecx, 0
+        0x0F, 0xA2,                   // cpuid
+    
+        // Write eax et al to buffer
+        0x41, 0x89, 0x40, 0x00,       // mov    dword ptr [r8+0],  eax
+        0x41, 0x89, 0x58, 0x04,       // mov    dword ptr [r8+4],  ebx
+        0x41, 0x89, 0x48, 0x08,       // mov    dword ptr [r8+8],  ecx
+        0x41, 0x89, 0x50, 0x0c,       // mov    dword ptr [r8+12], edx
+    
+        0x5b,                         // pop rbx
+        0xc3                          // ret
+    };
+}
+"@
+
+# Brief : gets CPUID (CPU name and registers)
+function Get-CpuId {
+    #OS Features
+    $OS_x64 = "" #not implemented
+    $OS_AVX = "" #not implemented
+    $OS_AVX512 = "" #not implemented
+
+    #Vendor
+    $vendor = "" #not implemented
+
+    if ($vendor -eq "GenuineIntel") {
+        $Vendor_Intel = $true;
+    }
+    elseif ($vendor -eq "AuthenticAMD") {
+        $Vendor_AMD = $true;
+    }
+
+    $info = [CpuID]::Invoke(0)
+    #convert 16 bytes to 4 ints for compatibility with existing code
+    $info = [int[]]@(
+        [BitConverter]::ToInt32($info, 0*4)
+        [BitConverter]::ToInt32($info, 1*4)
+        [BitConverter]::ToInt32($info, 2*4)
+        [BitConverter]::ToInt32($info, 3*4)
+    )
+
+    $nIds = $info[0]
+
+    $info = [CpuID]::Invoke(0x80000000)
+    $nExIds = [BitConverter]::ToUInt32($info, 0*4) #not sure as to why 'nExIds' is unsigned; may not be necessary
+    #convert 16 bytes to 4 ints for compatibility with existing code
+    $info = [int[]]@(
+        [BitConverter]::ToInt32($info, 0*4)
+        [BitConverter]::ToInt32($info, 1*4)
+        [BitConverter]::ToInt32($info, 2*4)
+        [BitConverter]::ToInt32($info, 3*4)
+    )
+
+    #Detect Features
+    $features = @{}
+    if ($nIds -ge 0x00000001) {
+
+        $info = [CpuID]::Invoke(0x00000001)
+        #convert 16 bytes to 4 ints for compatibility with existing code
+        $info = [int[]]@(
+            [BitConverter]::ToInt32($info, 0*4)
+            [BitConverter]::ToInt32($info, 1*4)
+            [BitConverter]::ToInt32($info, 2*4)
+            [BitConverter]::ToInt32($info, 3*4)
+        )
+
+        $features.MMX    = ($info[3] -band ([int]1 -shl 23)) -ne 0
+        $features.SSE    = ($info[3] -band ([int]1 -shl 25)) -ne 0
+        $features.SSE2   = ($info[3] -band ([int]1 -shl 26)) -ne 0
+        $features.SSE3   = ($info[2] -band ([int]1 -shl 00)) -ne 0
+
+        $features.SSSE3  = ($info[2] -band ([int]1 -shl 09)) -ne 0
+        $features.SSE41  = ($info[2] -band ([int]1 -shl 19)) -ne 0
+        $features.SSE42  = ($info[2] -band ([int]1 -shl 20)) -ne 0
+        $features.AES    = ($info[2] -band ([int]1 -shl 25)) -ne 0
+
+        $features.AVX    = ($info[2] -band ([int]1 -shl 28)) -ne 0
+        $features.FMA3   = ($info[2] -band ([int]1 -shl 12)) -ne 0
+
+        $features.RDRAND = ($info[2] -band ([int]1 -shl 30)) -ne 0
+    }
+
+    if ($nIds -ge 0x00000007) {
+
+        $info = [CpuID]::Invoke(0x00000007)
+        #convert 16 bytes to 4 ints for compatibility with existing code
+        $info = [int[]]@(
+            [BitConverter]::ToInt32($info, 0*4)
+            [BitConverter]::ToInt32($info, 1*4)
+            [BitConverter]::ToInt32($info, 2*4)
+            [BitConverter]::ToInt32($info, 3*4)
+        )
+
+        $features.AVX2         = ($info[1] -band ([int]1 -shl 05)) -ne 0
+
+        $features.BMI1         = ($info[1] -band ([int]1 -shl 03)) -ne 0
+        $features.BMI2         = ($info[1] -band ([int]1 -shl 08)) -ne 0
+        $features.ADX          = ($info[1] -band ([int]1 -shl 19)) -ne 0
+        $features.MPX          = ($info[1] -band ([int]1 -shl 14)) -ne 0
+        $features.SHA          = ($info[1] -band ([int]1 -shl 29)) -ne 0
+        $features.PREFETCHWT1  = ($info[2] -band ([int]1 -shl 00)) -ne 0
+
+        $features.AVX512_F     = ($info[1] -band ([int]1 -shl 16)) -ne 0
+        $features.AVX512_CD    = ($info[1] -band ([int]1 -shl 28)) -ne 0
+        $features.AVX512_PF    = ($info[1] -band ([int]1 -shl 26)) -ne 0
+        $features.AVX512_ER    = ($info[1] -band ([int]1 -shl 27)) -ne 0
+        $features.AVX512_VL    = ($info[1] -band ([int]1 -shl 31)) -ne 0
+        $features.AVX512_BW    = ($info[1] -band ([int]1 -shl 30)) -ne 0
+        $features.AVX512_DQ    = ($info[1] -band ([int]1 -shl 17)) -ne 0
+        $features.AVX512_IFMA  = ($info[1] -band ([int]1 -shl 21)) -ne 0
+        $features.AVX512_VBMI  = ($info[2] -band ([int]1 -shl 01)) -ne 0
+    }
+
+    if ($nExIds -ge 0x80000001) {
+
+        $info = [CpuID]::Invoke(0x80000001)
+        #convert 16 bytes to 4 ints for compatibility with existing code
+        $info = [int[]]@(
+            [BitConverter]::ToInt32($info, 0*4)
+            [BitConverter]::ToInt32($info, 1*4)
+            [BitConverter]::ToInt32($info, 2*4)
+            [BitConverter]::ToInt32($info, 3*4)
+        )
+
+        $features.x64   = ($info[3] -band ([int]1 -shl 29)) -ne 0
+        $features.ABM   = ($info[2] -band ([int]1 -shl 05)) -ne 0
+        $features.SSE4a = ($info[2] -band ([int]1 -shl 06)) -ne 0
+        $features.FMA4  = ($info[2] -band ([int]1 -shl 16)) -ne 0
+        $features.XOP   = ($info[2] -band ([int]1 -shl 11)) -ne 0
+    }
+
+    # wrap data into PSObject
+    New-Object PSObject -Property @{
+        Vendor   = $vendor
+        Name     = $name
+        Features = $features.Keys.ForEach{if ($features.$_) {$_}}
+    }
 }
 
 function Get-CommandPerDevice {
@@ -749,7 +1028,7 @@ function Get-Device {
         $Devices | Foreach-Object {
             $Device = $_
             if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
-                if (-not ($ExcludeNameName) -or ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -notlike ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
+                if ((-not $ExcludeNameName) -or ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -notlike ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
                     $Device
                 }
             }
@@ -789,8 +1068,8 @@ function Get-Device {
                     Type                  = [String]$Device_OpenCL.Type
                     Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
                     OpenCL                = $Device_OpenCL
-                    Model                 = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
-                    Model_Norm            = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
+                    Model                 = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
+                    Model_Norm            = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
                 }
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
@@ -841,9 +1120,7 @@ function Get-Device {
             Model_Norm        = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
         }
         #Read CPU features
-        if (Test-Path ".\CpuFeatureDetector.Exe" -PathType Leaf) {
-            $Device | Add-member CpuFeatures @(& ".\CpuFeatureDetector.Exe")
-        }
+        $Device | Add-member CpuFeatures ((Get-CpuId).Features)
 
         if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
             if ((-not $ExcludeName) -or (-not ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))}))) {
