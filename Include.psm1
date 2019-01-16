@@ -1,8 +1,4 @@
-﻿using namespace System.Reflection
-using namespace System.Reflection.Emit
-using namespace System.Runtime.InteropServices
-
-Set-Location (Split-Path $MyInvocation.MyCommand.Path)
+﻿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
 try {
     Add-Type -Path .\~OpenCL.dll -ErrorAction Stop
@@ -31,10 +27,6 @@ catch {
 
 Add-Type @"
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
 public static class CpuID {
