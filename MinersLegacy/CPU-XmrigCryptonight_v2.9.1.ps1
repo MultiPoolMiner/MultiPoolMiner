@@ -9,39 +9,40 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\xmrig.exe"
-$HashSHA256 = "19600AEAD9EBC509DB57538E5ACE0A30604708C051B34F81C0BDC1B587624434"
-$Uri = "https://github.com/xmrig/xmrig/releases/download/v2.8.3/xmrig-2.8.3-msvc-win64.zip"
+$HashSHA256 = "7448B62DCF40B7488328ECEAC0BC9124A37A735F331955BF3D991A573056F308"
+$Uri = "https://github.com/xmrig/xmrig/releases/download/v2.9.1/xmrig-2.9.1-msvc-win64.zip"
 $ManualUri = "https://github.com/xmrig/xmrig"
-$Port = "40{0:d2}"
 
 $Commands = [PSCustomObject[]]@(
     # Note: For fine tuning directly edit [Pool]_[Algorithm]-[Port]-[User]-[Pass].json in the miner binary directory 
-    [PSCustomObject]@{Algorithm = "cryptonight/0";           MinMemGB = 2; Threads = 1; Params = ""} # CryptoNight    
-    [PSCustomObject]@{Algorithm = "cryptonight/1";           MinMemGB = 2; Threads = 1; Params = ""} # CryptoNightV7
-    [PSCustomObject]@{Algorithm = "cryptonight/2";           MinMemGB = 2; Threads = 1; Params = ""} # CryptoNightV8, new with 2.8.1
-    [PSCustomObject]@{Algorithm = "cryptonight/msr";         MinMemGB = 2; Threads = 1; Params = ""} # CryptoNightMsr
-    [PSCustomObject]@{Algorithm = "cryptonight/rto";         MinMemGB = 2; Threads = 1; Params = ""} # CryptoNightRto
-    [PSCustomObject]@{Algorithm = "cryptonight/xao";         MinMemGB = 2; Threads = 1; Params = ""} # CryptoNightXao
-    [PSCustomObject]@{Algorithm = "cryptonight/xtl";         MinMemGB = 2; Threads = 1; Params = ""} # CryptoNightXtl
-    [PSCustomObject]@{Algorithm = "cryptonight-lite/0";      MinMemGB = 1; Threads = 1; Params = ""} # CryptoNightLite
-    [PSCustomObject]@{Algorithm = "cryptonight-lite/1";      MinMemGB = 1; Threads = 1; Params = ""} # CryptoNightLiteV7
-    [PSCustomObject]@{Algorithm = "cryptonight-lite/2";      MinMemGB = 1; Threads = 1; Params = ""} # CryptoNightLiteV8
-    [PSCustomObject]@{Algorithm = "cryptonight-heavy";       MinMemGB = 4; Threads = 1; Params = ""} # CryptoNightHeavy
-    [PSCustomObject]@{Algorithm = "cryptonight-heavy/tube";  MinMemGB = 4; Threads = 1; Params = ""} # CryptoNightHeavyTube
-    [PSCustomObject]@{Algorithm = "cryptonight-heavy/xhv";   MinMemGB = 4; Threads = 1; Params = ""} # CryptoNightHeavyHaven
-    [PSCustomObject]@{Algorithm = "cryptonight/0";           MinMemGB = 2; Threads = 2; Params = ""} # CryptoNight  
-    [PSCustomObject]@{Algorithm = "cryptonight/1";           MinMemGB = 2; Threads = 2; Params = ""} # CryptoNightV7
-    [PSCustomObject]@{Algorithm = "cryptonight/2";           MinMemGB = 2; Threads = 2; Params = ""} # CryptoNightV8, new with 2.8.1
-    [PSCustomObject]@{Algorithm = "cryptonight/msr";         MinMemGB = 2; Threads = 2; Params = ""} # CryptoNightMsr
-    [PSCustomObject]@{Algorithm = "cryptonight/rto";         MinMemGB = 2; Threads = 2; Params = ""} # CryptoNightRto
-    [PSCustomObject]@{Algorithm = "cryptonight/xao";         MinMemGB = 2; Threads = 2; Params = ""} # CryptoNightXao
-    [PSCustomObject]@{Algorithm = "cryptonight/xtl";         MinMemGB = 2; Threads = 2; Params = ""} # CryptoNightXtl
-    [PSCustomObject]@{Algorithm = "cryptonight-lite/0";      MinMemGB = 1; Threads = 2; Params = ""} # CryptoNightLite
-    [PSCustomObject]@{Algorithm = "cryptonight-lite/1";      MinMemGB = 1; Threads = 2; Params = ""} # CryptoNightLiteV7
-    [PSCustomObject]@{Algorithm = "cryptonight-lite/2";      MinMemGB = 1; Threads = 2; Params = ""} # CryptoNightLiteV8
-    [PSCustomObject]@{Algorithm = "cryptonight-heavy";       MinMemGB = 4; Threads = 2; Params = ""} # CryptoNightHeavy
-    [PSCustomObject]@{Algorithm = "cryptonight-heavy/tube";  MinMemGB = 4; Threads = 2; Params = ""} # CryptoNightHeavyTube
-    [PSCustomObject]@{Algorithm = "cryptonight-heavy/xhv";   MinMemGB = 4; Threads = 2; Params = ""} # CryptoNightHeavyHaven
+    [PSCustomObject]@{Algorithm = "Cryptonight/0";           MinMemGB = 2; Threads = 1; Params = ""} # Cryptonight    
+    [PSCustomObject]@{Algorithm = "Cryptonight/1";           MinMemGB = 2; Threads = 1; Params = ""} # CryptonightV7
+    [PSCustomObject]@{Algorithm = "Cryptonight/2";           MinMemGB = 2; Threads = 1; Params = ""} # CryptonightV8, new with 2.8.1
+    [PSCustomObject]@{Algorithm = "Cryptonight/half";        MinMemGB = 2; Threads = 1; Params = ""} # CryptonightHalf, new with 2.9.1
+    [PSCustomObject]@{Algorithm = "Cryptonight/msr";         MinMemGB = 2; Threads = 1; Params = ""} # CryptonightMsr
+    [PSCustomObject]@{Algorithm = "Cryptonight/rto";         MinMemGB = 2; Threads = 1; Params = ""} # CryptonightRto
+    [PSCustomObject]@{Algorithm = "Cryptonight/xao";         MinMemGB = 2; Threads = 1; Params = ""} # CryptonightXao
+    [PSCustomObject]@{Algorithm = "Cryptonight/xtl";         MinMemGB = 2; Threads = 1; Params = ""} # CryptonightXtl
+    [PSCustomObject]@{Algorithm = "Cryptonight-lite/0";      MinMemGB = 1; Threads = 1; Params = ""} # CryptonightLite
+    [PSCustomObject]@{Algorithm = "Cryptonight-lite/1";      MinMemGB = 1; Threads = 1; Params = ""} # CryptonightLiteV7
+    [PSCustomObject]@{Algorithm = "Cryptonight-lite/2";      MinMemGB = 1; Threads = 1; Params = ""} # CryptonightLiteV8
+    [PSCustomObject]@{Algorithm = "Cryptonight-heavy";       MinMemGB = 4; Threads = 1; Params = ""} # CryptonightHeavy
+    [PSCustomObject]@{Algorithm = "Cryptonight-heavy/tube";  MinMemGB = 4; Threads = 1; Params = ""} # CryptonightHeavyTube
+    [PSCustomObject]@{Algorithm = "Cryptonight-heavy/xhv";   MinMemGB = 4; Threads = 1; Params = ""} # CryptonightHeavyHaven
+#    [PSCustomObject]@{Algorithm = "Cryptonight/0";           MinMemGB = 2; Threads = 2; Params = ""} # Cryptonight  
+#    [PSCustomObject]@{Algorithm = "Cryptonight/1";           MinMemGB = 2; Threads = 2; Params = ""} # CryptonightV7
+#    [PSCustomObject]@{Algorithm = "Cryptonight/2";           MinMemGB = 2; Threads = 2; Params = ""} # CryptonightV8, new with 2.8.1
+#    [PSCustomObject]@{Algorithm = "Cryptonight/half";        MinMemGB = 2; Threads = 2; Params = ""} # CryptonightHalf, new with 2.9.1
+#    [PSCustomObject]@{Algorithm = "Cryptonight/msr";         MinMemGB = 2; Threads = 2; Params = ""} # CryptonightMsr
+#    [PSCustomObject]@{Algorithm = "Cryptonight/rto";         MinMemGB = 2; Threads = 2; Params = ""} # CryptonightRto
+#    [PSCustomObject]@{Algorithm = "Cryptonight/xao";         MinMemGB = 2; Threads = 2; Params = ""} # CryptonightXao
+#    [PSCustomObject]@{Algorithm = "Cryptonight/xtl";         MinMemGB = 2; Threads = 2; Params = ""} # CryptonightXtl
+#    [PSCustomObject]@{Algorithm = "Cryptonight-lite/0";      MinMemGB = 1; Threads = 2; Params = ""} # CryptonightLite
+#    [PSCustomObject]@{Algorithm = "Cryptonight-lite/1";      MinMemGB = 1; Threads = 2; Params = ""} # CryptonightLiteV7
+#    [PSCustomObject]@{Algorithm = "Cryptonight-lite/2";      MinMemGB = 1; Threads = 2; Params = ""} # CryptonightLiteV8
+#    [PSCustomObject]@{Algorithm = "Cryptonight-heavy";       MinMemGB = 4; Threads = 2; Params = ""} # CryptonightHeavy
+#    [PSCustomObject]@{Algorithm = "Cryptonight-heavy/tube";  MinMemGB = 4; Threads = 2; Params = ""} # CryptonightHeavyTube
+#    [PSCustomObject]@{Algorithm = "Cryptonight-heavy/xhv";   MinMemGB = 4; Threads = 2; Params = ""} # CryptonightHeavyHaven
 )
 $CommonCommands = ""
 
@@ -49,7 +50,7 @@ $Devices = @($Devices | Where-Object Type -EQ "CPU")
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)    
+    $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 3   
 
     $Commands | ForEach-Object {
 
