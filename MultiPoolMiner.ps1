@@ -1015,7 +1015,7 @@ while ($true) {
                 $StatSpan = New-TimeSpan $StatStart $StatEnd
                 break
             }
-            if ((($RunningMiners | Where-Object Speed -contains $null | ForEach-Object {$_.Data.Count}) | Measure-Object -Minimum).Minimum -ge $Config.MinHashRateSamples) {
+            if ((($RunningMiners | Where-Object {$_.HashRates.PSObject.Properties.Value -contains $null} | ForEach-Object {$_.Data.Count}) | Measure-Object -Minimum).Minimum -ge $Config.MinHashRateSamples) {
                 #All benchmarking miners have at least MinHashRateSamples hash rate samples, start new loop immediately
                 $StatEnd = (Get-Date).ToUniversalTime()
                 $StatSpan = New-TimeSpan $StatStart $StatEnd
