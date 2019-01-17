@@ -750,7 +750,7 @@ while ($true) {
     $BestMiners_Combo_Comparison | ForEach-Object {$_.Best_Comparison = $true}
 
     #Stop or start miners in the active list depending on if they are the most profitable
-    $ActiveMiners | Where-Object {$_.GetActivateCount() -GT 0} | Where-Object Best -EQ $false | ForEach-Object {
+    $ActiveMiners | Where-Object {$_.GetActivateCount() -GT 0} | Where-Object {$_.Best -EQ $false -or ($Config.ShowMinerWindow -ne $ConfigOld.ShowMinerWindow)} | ForEach-Object {
         $Miner = $_
         $RunningMiners = $RunningMiners | Where-Object $_ -NE $Miner 
         $Miner_Name = $_.Name
