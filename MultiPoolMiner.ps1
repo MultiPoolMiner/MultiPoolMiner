@@ -310,7 +310,7 @@ while ($true) {
     if (Test-Path ".\UnprofitableAlgorithms.txt" -PathType Leaf) {$UnprofitableAlgorithms = Get-Content ".\UnprofitableAlgorithms.txt" | ConvertFrom-Json -ErrorAction SilentlyContinue | Sort-Object -Unique} else {$UnprofitableAlgorithms = $null}
 
     #Need to read pools and balances file list. The pool balance query fails if the pool file does not exist and no wallet information is configured in $Config.Pools.[PoolName]
-    (@(Get-ChildItem "Pools" -File) + @(Get-ChildItem "Balances" -File)).BaseName | Select-Object -Unique | ForEach-Object {
+    @($(if (Test-Path "Pools" -PathType Container ) {Get-ChildItem "Pools" -File}) + $(if (Test-Path "Balances" -PathType Container) {Get-ChildItem "Balances" -File})).BaseName | Select-Object -Unique | ForEach-Object {
         #Set values if not explicitly set in pool section
         $Config.Pools | Add-Member $_ ([PSCustomObject]@{}) -ErrorAction SilentlyContinue
         $Config.Pools.($_) | Add-Member User               $Config.UserName           -ErrorAction SilentlyContinue
@@ -331,16 +331,14 @@ while ($true) {
     if ($Timer.AddDays(-1).AddMinutes($Config.Donate) -ge $LastDonated) {
         if ($WalletDonate -and $UserNameDonate -and $WorkerNameDonate) {
             Write-Log "Donation run, mining to donation address for the next $(($LastDonated - ($Timer.AddDays(-1))).Minutes +1) minutes. Note: MPM will use ALL available pools. "
-            (Get-ChildItem "Pools" -File).BaseName | ForEach-Object {
-                $Config.Pools | Add-Member $_ (
-                    [PSCustomObject]@{
-                        User               = $UserNameDonate
-                        Worker             = $WorkerNameDonate
-                        Wallets            = [PSCustomObject]@{BTC = $WalletDonate}
-                        PricePenaltyFactor = $Config.Pools.$($_).PricePenaltyFactor
-                    }
-                ) -Force
-            }
+            $Config.Pools | Add-Member $_ (
+                [PSCustomObject]@{
+                    User               = $UserNameDonate
+                    Worker             = $WorkerNameDonate
+                    Wallets            = [PSCustomObject]@{BTC = $WalletDonate}
+                    PricePenaltyFactor = $Config.Pools.$($_).PricePenaltyFactor
+                }
+            ) -Force
             $Config | Add-Member ExcludePoolName @() -Force
         }
         else {
@@ -373,7 +371,7 @@ while ($true) {
     if ($Config.Proxy) {$PSDefaultParameterValues["*:Proxy"] = $Config.Proxy}
     else {$PSDefaultParameterValues.Remove("*:Proxy")}
 
-    Get-ChildItem "APIs" -File | ForEach-Object {. $_.FullName}
+    if (Test-Path "APIs" -PathType Container) {Get-ChildItem "APIs" -File | ForEach-Object {. $_.FullName}}
 
     $Timer = (Get-Date).ToUniversalTime()
 
@@ -388,16 +386,14 @@ while ($true) {
 
     #Load information about the pools
     $NewPools = @()
-    if (Test-Path "Pools" -PathType Container) {
-        if (-not $GetPoolDataJobs.Count) {
-            $GetPoolDataJobs = @()
-            Write-Log "Loading pool information - this may take a minute or two. "
-            Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | ForEach-Object {
-                $Pool_Name = $_.BaseName
-                $Pool_Parameters = @{StatSpan = $StatSpan}
-                $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
-                $GetPoolDataJobs += Start-Job -Name "GetPoolData_$($Pool_Name)" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList $Pool_Name, "Pools\$($_.Name)", $Pool_Parameters -FilePath .\Get-PoolData.ps1
-            }
+    if ((-not $GetPoolDataJobs.Count) -and (Test-Path "Pools" -PathType Container)) {
+        $GetPoolDataJobs = @()
+        Write-Log "Loading pool information - this may take a minute or two. "
+        Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | ForEach-Object {
+            $Pool_Name = $_.BaseName
+            $Pool_Parameters = @{StatSpan = $StatSpan}
+            $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
+            $GetPoolDataJobs += Start-Job -Name "GetPoolData_$($Pool_Name)" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList $Pool_Name, "Pools\$($_.Name)", $Pool_Parameters -FilePath .\Get-PoolData.ps1
         }
     }
 
@@ -419,7 +415,7 @@ while ($true) {
     }
 
     #Update the pool balances every n minute to minimize web requests or when currency settings have changed; pools usually do not update the balances in real time
-    if ($NewRates -and (((Get-Date).AddMinutes(- $Config.PoolBalancesUpdateInterval) -gt $BalancesData.Updated) -and ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools)) -or (Compare-Object $Config.Currency $ConfigBackup.Currency)) {
+    if ($NewRates -and (Test-Path "Balances" -PathType Container) -and (((Get-Date).AddMinutes(- $Config.PoolBalancesUpdateInterval) -gt $BalancesData.Updated) -and ($Config.ShowPoolBalances -or $Config.ShowPoolBalancesExcludedPools)) -or (Compare-Object $Config.Currency $ConfigBackup.Currency)) {
         Write-Log "Getting pool balances. "
         $GetPoolBalancesJob = Start-Job -Name "GetPoolBalances" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList $UserConfig, $NewRates -FilePath .\Get-PoolBalances.ps1
     }
@@ -949,11 +945,18 @@ while ($true) {
     Get-Job | Where-Object {$_.Name -eq "Downloader" -and $_.State -eq "Completed"} | Remove-Job
     [GC]::Collect()
 
-    if ($RunningMiners | Where-Object Speed -contains $null) {
-        #Ensure a full benchmarking interval if no reported hashrate
-        $StatEnd = (Get-Date).ToUniversalTime().AddSeconds($Config.BenchmarkInterval)
+    if ($RunningMiners | Where-Object {$_.HashRates.PSObject.Properties.Value -contains $null}) {
+        #Ensure a minimal benchmarking interval if no stored hashrate
+        if ($RunningMiners | Where-Object Speed -EQ $null) {
+            #Ensure a full benchmarking interval if no reported hashrate
+            $StatEnd = (Get-Date).ToUniversalTime().AddSeconds($Config.BenchmarkInterval)
+        }
+        elseif ((Get-Date).ToUniversalTime().AddSeconds($Config.BenchmarkInterval / 2) -lt $StatEnd) {
+            #Ensure at least half a benchmarking interval if reported  hashrate
+            $StatEnd = (Get-Date).ToUniversalTime().AddSeconds($Config.BenchmarkInterval / 2)
+        }
     }
-    elseif ((Get-Date).ToUniversalTime().AddSeconds($Config.Interval / 2) -ge $StatEnd) {
+    elseif ((Get-Date).ToUniversalTime().AddSeconds($Config.Interval / 2) -lt $StatEnd) {
         # Ensure minimum half loop duration
         $StatEnd = (Get-Date).ToUniversalTime().AddSeconds($Config.Interval / 2)
     }
@@ -962,7 +965,7 @@ while ($true) {
     #Read hash rate info from miners as to not overload the APIs and display miner download status
     Write-Log "Start waiting before next run. "
     Do {
-        $LoopStart = (Get-Date).ToUniversalTime()
+        $Timer = (Get-Date).ToUniversalTime()
         if ($Downloader) {$Downloader | Receive-Job}
         if ($API.Stop) {Exit}
 
@@ -981,11 +984,11 @@ while ($true) {
                     $Sample = $Miner.Data | Select-Object -last 1
                     Write-Log -Level Verbose "$($Miner.Name) data sample retrieved: [$(($Sample.Hashrate.PSObject.Properties.Name | ForEach-Object {"$_ = $(($Sample.Hashrate.$_ | ConvertTo-Hash) -replace ' ')"}) -join '; ')] (total samples: $($Miner.Data.count) [$(($Miner.Data | Select-Object -First 1).Date.ToLongTimeString()) - $(($Miner.Data | Select-Object -Last 1).Date.ToLongTimeString())])"
                 }
-                #Extend loop time, enforce minimum hashrate samples when benchmarking
-                if ($Miner.Speed -contains $null -and $Timer -ge $StatEnd ) {
+                if ($Miner.Speed -contains $null -and $Timer -ge $StatEnd) {
                     #Must have at least one sample from the current loop, otherwise we cannot detect broken miners
                     if (@($Miner.Data | Where-Object Date -GE $StatStart).count -lt $Config.MinHashRateSamples) {
-                        $StatEnd = (Get-Date).ToUniversalTime().AddSeconds($GetPoolDataJobsDuration)
+                        #Extend loop time, enforce minimum hashrate samples when benchmarking
+                        $StatEnd = (Get-Date).ToUniversalTime()
                         $StatSpan = New-TimeSpan $StatStart $StatEnd
                     }
                 }
@@ -998,7 +1001,6 @@ while ($true) {
             }
         }
 
-        $Timer = (Get-Date).ToUniversalTime()
         if (-not $RunningMiners) {
             #No more running miners, start new loop immediately
             break
@@ -1036,7 +1038,7 @@ while ($true) {
 
         if ($Timer -le $StatEnd) {
             #Dynamically adjust waiting time
-            $SleepTime = (0, (60 / $Config.HashRateSamplesPerMinute - ((Get-Date).ToUniversalTime() - $LoopStart).TotalSeconds) | Measure-Object -Maximum).Maximum
+            $SleepTime = (0, (60 / $Config.HashRateSamplesPerMinute - ((Get-Date).ToUniversalTime() - $Timer).TotalSeconds) | Measure-Object -Maximum).Maximum
             if ($SleepTime) {Start-Sleep $SleepTime}
         }
 
@@ -1076,7 +1078,7 @@ while ($true) {
                     $WatchdogTimer.Kicked = $Stat.Updated
                 }
                 #Always kick watchdog for new miners or running miners with at least one and less than MinHashRateSamples hash rate samples in current loop
-                elseif ($WatchdogTimer -and ($Miner.New -or (($Miner.Data | Where-Object Date -GE $StatStart).Count -and ($Miner.Data | Where-Object Date -GE $StatStart).Count -lt $Config.MinHashRateSamples))) {
+                elseif ($WatchdogTimer -and ($Miner.New -and ($Miner.Data | Where-Object Date -GE $StatStart).Count -and $Miner.Data | Where-Object Date -GE $StatStart).Count -lt $Config.MinHashRateSamples) {
                     $WatchdogTimer.Kicked = (Get-Date).ToUniversalTime()
                 }
             }
