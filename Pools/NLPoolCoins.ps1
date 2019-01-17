@@ -9,8 +9,8 @@ param(
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 $PoolRegions = "europe"
-$PoolAPIStatusUri = "http://www.nlpool.nl/api/status"
-$PoolAPICurrenciesUri = "http://www.nlpool.nl/api/currencies"
+$PoolAPIStatusUri = "https://www.nlpool.nl/api/status"
+$PoolAPICurrenciesUri = "https://www.nlpool.nl/api/currencies"
 
 # Guaranteed payout currencies
 $Payout_Currencies = @("BTC", "LTC") | Where-Object {$Wallets.$_}
