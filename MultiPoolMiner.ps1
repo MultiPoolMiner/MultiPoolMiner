@@ -92,7 +92,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$UseDeviceNameForStatsFileNaming = $false, #if true the benchmark files will be named like 'NVIDIA-CryptoDredge-2xGTX1080Ti_Lyra2RE2_HashRate'. This will keep benchmarks files valid even when the order of the cards are changed in your rig
     [Parameter(Mandatory = $false)]
-    [String]$ConfigFile = ".\Config.txt",
+    [String]$ConfigFile = ".\Config.txt", #default config file
     [Parameter(Mandatory = $false)]
     [Switch]$RemoteAPI = $false,
     [Parameter(Mandatory = $false)]
@@ -950,7 +950,7 @@ while ($true) {
     [GC]::Collect()
 
     if ($RunningMiners | Where-Object Speed -contains $null) {
-        #Ensure a full interval for benchmarking if no reported hashrate
+        #Ensure a full benchmarking interval if no reported hashrate
         $StatEnd = (Get-Date).ToUniversalTime().AddSeconds($Config.BenchmarkInterval)
     }
     elseif ((Get-Date).ToUniversalTime().AddSeconds($Config.Interval / 2) -ge $StatEnd) {
@@ -1055,6 +1055,7 @@ while ($true) {
         if ($Miner.New) {$Miner.Benchmarked++}
 
         if ($Miner.GetStatus() -eq "Running" -or $Miner.New) {
+            #Read miner speed from miner data
             $Miner.Algorithm | ForEach-Object {
                 $Algorithm = $_ -replace "-NHMP"
                 $Miner_Speed = [Double]($Miner.GetHashRate($Algorithm, ($Config.Interval * $Miner.BenchmarkIntervals), ($Miner.New -and $Miner.Benchmarked -lt $Miner.BenchmarkIntervals)))
