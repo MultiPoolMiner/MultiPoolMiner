@@ -9,10 +9,9 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\excavator.exe"
-$HashSHA256 = "5AFFBBBD18676359904380ECF36E1A96C222E01B04F657147DC40B090AF1E058"
-$Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.14a/excavator_v1.5.14a_Win64.zip"
+$HashSHA256 = "EF430E6E743813D6CA505FBCC59620B842715744BA51FF58851C5C62D292E55C"
+$Uri = "https://github.com/nicehash/excavator/releases/download/v1.5.15a/excavator_v1.5.15a_Win64.zip"
 $ManualUri = "https://github.com/nicehash/excavator/releases"
-$Port = "5401"
 
 $Commands = [PSCustomObject[]]@(
     #1 Thread
@@ -23,9 +22,9 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "lyra2rev2";              Threads = 1; MinMemGB = 1; BenchmarkIntervals = 1; Params = @()} #Lyra2RE2
     [PSCustomObject]@{Algorithm = "lyra2z";                 Threads = 1; MinMemGB = 1; BenchmarkIntervals = 1; Params = @()} #Lyra2z
     [PSCustomObject]@{Algorithm = "neoscrypt";              Threads = 1; MinMemGB = 2; BenchmarkIntervals = 1; Params = @()} #NeoScrypt
+    [PSCustomObject]@{Algorithm = "skunk";                  Threads = 1; MinMemGB = 2; BenchmarkIntervals = 1; Params = @()} #Skunk
     [PSCustomObject]@{Algorithm = "x16r";                   Threads = 1; MinMemGB = 2; BenchmarkIntervals = 5; Params = @()} #X16R
     [PSCustomObject]@{Algorithm = "daggerhashimoto_decred"; Threads = 1; MinMemGB = 4; BenchmarkIntervals = 2; Params = @()} #Dual mining
-    [PSCustomObject]@{Algorithm = "daggerhashimoto_pascal"; Threads = 1; MinMemGB = 4; BenchmarkIntervals = 2; Params = @()} #Dual mining
 
     #2 Threads
     [PSCustomObject]@{Algorithm = "cryptonightV7";          Threads = 2; MinMemGB = 2*6; BenchmarkIntervals = 1; Params = @()} #CryptonightV7
@@ -34,23 +33,22 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "equihash";               Threads = 2; MinMemGB = 2*6; BenchmarkIntervals = 1; Params = @()} #Equihash
     [PSCustomObject]@{Algorithm = "lyra2rev2";              Threads = 2; MinMemGB = 2*1; BenchmarkIntervals = 1; Params = @()} #Lyra2RE2
     [PSCustomObject]@{Algorithm = "lyra2z";                 Threads = 2; MinMemGB = 2*1; BenchmarkIntervals = 1; Params = @()} #Lyra2z
-    #[PSCustomObject]@{Algorithm = "neoscrypt";              Threads = 2; MinMemGB = 2*2; BenchmarkIntervals = 1; Params = @()} #NeoScrypt 2 threads crashes
-    [PSCustomObject]@{Algorithm = "x16r";                   Threads = 2; MinMemGB = 2*2; BenchmarkIntervals = 5; Params = @()} #X16R
+#    #[PSCustomObject]@{Algorithm = "neoscrypt";              Threads = 2; MinMemGB = 2*2; BenchmarkIntervals = 1; Params = @()} #NeoScrypt 2 threads crashes
+    [PSCustomObject]@{Algorithm = "skunk";                  Threads = 2; MinMemGB = 2*2; BenchmarkIntervals = 1; Params = @()} #Skunk
+#    [PSCustomObject]@{Algorithm = "x16r";                   Threads = 2; MinMemGB = 2*2; BenchmarkIntervals = 5; Params = @()} #X16R 2 threads out-of memory
     [PSCustomObject]@{Algorithm = "daggerhashimoto_decred"; Threads = 2; MinMemGB = 2*4; BenchmarkIntervals = 2; Params = @()} #Dual mining
-    [PSCustomObject]@{Algorithm = "daggerhashimoto_pascal"; Threads = 2; MinMemGB = 2*4; BenchmarkIntervals = 2; Params = @()} #Dual mining
 
     #ASIC mining only 2018/06/11
     #[PSCustomObject]@{Algorithm = "blake2s";                Threads = 1; MinMemGB = 1; BenchmarkIntervals = 1; Params = @()} #Blake2s
     #[PSCustomObject]@{Algorithm = "decred";                 Threads = 1; MinMemGB = 1; BenchmarkIntervals = 1; Params = @()} #DecredNicehash
     #[PSCustomObject]@{Algorithm = "keccak";                 Threads = 1; MinMemGB = 1; BenchmarkIntervals = 1; Params = @()} #Keccak
-    #[PSCustomObject]@{Algorithm = "pascal";                 Threads = 1; MinMemGB = 1; BenchmarkIntervals = 1; Params = @()} #Pascal
 )
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Port -f ($Device | Select-Object -First 1 -ExpandProperty Index)
+    $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 2 
 
     $Commands | ForEach-Object {
         $Algorithm = $_.Algorithm
