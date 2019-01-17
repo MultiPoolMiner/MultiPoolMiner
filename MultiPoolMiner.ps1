@@ -307,7 +307,7 @@ while ($true) {
     if (-not $Config.MinerStatusKey -and $Config.Wallets.BTC) {$Config | Add-Member MinerStatusKey $Config.Wallets.BTC -Force}
 
     #Unprofitable algorithms
-    if (Test-Path ".\UnprofitableAlgorithms.txt" -PathType Leaf) {$UnprofitableAlgorithms = Get-Content ".\UnprofitableAlgorithms.txt" | ConvertFrom-Json -ErrorAction SilentlyContinue | Sort-Object -Unique} else {$UnprofitableAlgorithms = $null}
+    if (Test-Path ".\UnprofitableAlgorithms.txt" -PathType Leaf) {$UnprofitableAlgorithms = [Array](Get-Content ".\UnprofitableAlgorithms.txt" | ConvertFrom-Json -ErrorAction SilentlyContinue | Sort-Object -Unique)} else {$UnprofitableAlgorithms = @()}
 
     #Need to read pools and balances file list. The pool balance query fails if the pool file does not exist and no wallet information is configured in $Config.Pools.[PoolName]
     @($(if (Test-Path "Pools" -PathType Container ) {Get-ChildItem "Pools" -File}) + $(if (Test-Path "Balances" -PathType Container) {Get-ChildItem "Balances" -File})).BaseName | Select-Object -Unique | ForEach-Object {
@@ -331,14 +331,16 @@ while ($true) {
     if ($Timer.AddDays(-1).AddMinutes($Config.Donate) -ge $LastDonated) {
         if ($WalletDonate -and $UserNameDonate -and $WorkerNameDonate) {
             Write-Log "Donation run, mining to donation address for the next $(($LastDonated - ($Timer.AddDays(-1))).Minutes +1) minutes. Note: MPM will use ALL available pools. "
-            $Config.Pools | Add-Member $_ (
-                [PSCustomObject]@{
-                    User               = $UserNameDonate
-                    Worker             = $WorkerNameDonate
-                    Wallets            = [PSCustomObject]@{BTC = $WalletDonate}
-                    PricePenaltyFactor = $Config.Pools.$($_).PricePenaltyFactor
-                }
-            ) -Force
+            (Get-ChildItem "Pools" -File).BaseName | ForEach-Object {
+                $Config.Pools | Add-Member $_ (
+                    [PSCustomObject]@{
+                        User               = $UserNameDonate
+                        Worker             = $WorkerNameDonate
+                        Wallets            = [PSCustomObject]@{BTC = $WalletDonate}
+                        PricePenaltyFactor = $Config.Pools.$($_).PricePenaltyFactor
+                    }
+                ) -Force
+            }
             $Config | Add-Member ExcludePoolName @() -Force
         }
         else {
