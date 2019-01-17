@@ -11,7 +11,7 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 $PoolRegions = "europe", "us-east", "asia"
 $PoolAPIUri= "http://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics&$(Get-Date -Format "yyyy-MM-dd_HH-mm")"
 
-if ($Config.UserName) {
+if ($UserName) {
 
     $RetryCount = 3
     $RetryDelay = 2
