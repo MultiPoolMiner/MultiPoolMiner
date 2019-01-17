@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 15/12/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 17/01/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -72,6 +72,9 @@ The following algorithms are currently supported:
 
 *Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-PoolName) will be ignored when mining certain algorithms. The *-Algorithm* command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). **WARNING!** If you add all algorithms listed above, you may find your earnings spread across multiple pools regardless what pool(s) you specified with the *-PoolName* command.*
 
+**-BenchmarkInterval**
+MultiPoolMiner's update interval when benchmarking in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60. Allowed values 60 - 300. Also see *-Interval*.
+
 **-CreateMinerInstancePerDeviceModel**
 Newer miner files can create separate instances for each card model. This increases profit. Not all miners currently support this feature (more coming). 
 By default this feature is turned off. To enable add '-CreateMinerInstancePerDeviceModel' to your start batch file.
@@ -118,12 +121,18 @@ Important: Newer miners, e.g. ClaymoreEthash create several child-miner names, e
 **-ExcludePoolName**
 Similar to the *-PoolName* command but it is used to exclude unwanted mining pools.
 
+**-HashRateSamplesPerMinute**
+Number of hashrate samples that MPM will collect per minute (higher numbers produce more exact numbers, but use more CPU cycles and memory). Allowed values: 5 - 10
+
 **-IgnoreFees**
 Beginning with version 3.1.0 MPM makes miner and pool fees part of the profitability calculation. This will lead to somewhat lower, but more accurate profit estimates.
 Set this flag to ignore miner and pool fees (as older versions did)
 
 **-Interval**
-MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
+MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc). Default is 60. Allowed values 60 - 300. Also see *-BenchmarkInterval*. 
+
+**-MinHashRateSamples**
+Minumum number of hashrate samples that MPM will collect in benchmark operation (higher numbers produce more exact numbers, but will prolongue benchmarking. Allowed values: 10 - 30
 
 **-MinerName**
 Specify to only include (restrict to) certain miner applications.
@@ -320,50 +329,58 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
 
 ```
 {
-    "VersionCompatibility":  "3.2.0",
-    "UserName":  "$UserName",
-    "WorkerName":  "$WorkerName",
+    "Algorithm":  "$Algorithm",
     "API_ID":  "$API_ID",
     "API_Key":  "$API_Key",
-    "Interval":  "$Interval",
-    "Region":  "$Region",
-    "SSL":  "$SSL",
-    "DeviceName":  "$DeviceName",
-    "ExcludeDeviceName":  "$ExcludeDeviceName",
-    "MinerName":  "$MinerName",
-    "ExcludeMinerName":  "$ExcludeMinerName",
-    "Algorithm":  "$Algorithm",
-    "ExcludeAlgorithm":  "$ExcludeAlgorithm",
-    "PoolName":  "$PoolName",
-    "ExcludePoolName":  "$ExcludePoolName",
+    "BenchmarkInterval":  "$BenchmarkInterval",
     "CoinName":  "$CoinName",
-    "ExcludeCoinName":  "$ExcludeCoinName",
+    "CreateMinerInstancePerDeviceModel":  true,
     "Currency":  "$Currency",
-    "Donate":  "$Donate",
-    "Proxy":  "$Proxy",
     "Delay":  "$Delay",
-    "Watchdog":  "$Watchdog",
-    "DisableDualMining":  "DisableDualMining",
-    "MinerStatusUrl":  "$MinerStatusUrl",
-    "MinerStatusKey":  "$MinerStatusKey",
-    "SwitchingPrevention":  "$SwitchingPrevention",
-    "ShowMinerWindow":  "$ShowMinerWindow",
-    "UseFastestMinerPerAlgoOnly":  "$UseFastestMinerPerAlgoOnly",
+    "DeviceName":  "$DeviceName",
+    "DisableDualMining":  "$DisableDualMining",
+    "Donate":  "$Donate",
+    "ExcludeAlgorithm":  "$ExcludeAlgorithm",
+    "ExcludeCoinName":  "$ExcludeCoinName",
+    "ExcludeDeviceName":  "$ExcludeDeviceName",
+    "ExcludeMinerName":  "$ExcludeMinerName",
+    "ExcludeMiningCurrency":  "$ExcludeMiningCurrency",
+    "ExcludePoolName":  "$ExcludePoolName",
+    "HashRateSamplesPerMinute":  "$HashRateSamplesPerMinute",
     "IgnoreFees":  "$IgnoreFees",
+    "Interval":  "$Interval",
+    "MinerName":  "$MinerName",
+    "MinerStatusKey":  "$MinerStatusKey",
+    "MinerStatusUrl":  "$MinerStatusUrl",
+    "MinHashRateSamples":  "$MinHashRateSamples",
+    "MiningCurrency":  "$MiningCurrency",
+    "PoolBalancesUpdateInterval":  "$PoolBalancesUpdateInterval",
+    "PoolName":  "$PoolName",
+    "PricePenaltyFactor":  "$PricePenaltyFactor",
+    "Proxy":  "$Proxy",
+    "Region":  "$Region",
+    "RemoteAPI":  "$RemoteAPI",
+    "ShowMinerWindow":  "$ShowMinerWindow",
     "ShowPoolBalances":  "$ShowPoolBalances",
     "ShowPoolBalancesDetails":  "$ShowPoolBalancesDetails",
     "ShowPoolBalancesExcludedPools":  "$ShowPoolBalancesExcludedPools",
-    "PoolBalancesUpdateInterval":  "$PoolBalancesUpdateInterval",
-    "CreateMinerInstancePerDeviceModel":  "$CreateMinerInstancePerDeviceModel",
-    "UseDeviceNameForStatsFileNaming":  "$UseDeviceNameForStatsFileNaming",
-    "PricePenaltyFactor":  "$PricePenaltyFactor",
+    "SSL":  "$SSL",
+    "SwitchingPrevention":  "$SwitchingPrevention",
+    "UseDeviceNameForStatsFileNaming":  true,
+    "UseFastestMinerPerAlgoOnly":  true,
+    "UserName":  "$UserName",
+    "Watchdog":  "$Watchdog",
+    "WorkerName":  "$WorkerName",
+    "VersionCompatibility":  "3.2.0",
     "Pools":  {
-    },
+
+              },
     "Miners":  {
-    },
-    "Wallets":  [
-        "BTC":  "$Wallet",
-    ]
+
+               },
+    "Wallets":  {
+                    "BTC":  "$Wallet"
+                }
 }
 ```
 

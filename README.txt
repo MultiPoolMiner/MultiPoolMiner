@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 15/12/2018 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 17/01/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -85,6 +85,10 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 	   decrednicehash - if you want to include non-dual, non-Claymore Decred mining on Nicehash. NH created their own implementation of Decred mining protocol.
 	Note that the pool selected also needs to support the required algorithm(s) or your specified pool (-poolname) will be ignored when mining certain algorithms. The -algorithm command is higher in execution hierarchy and can override pool selection. This feature comes handy when you mine on Zpool but also want to mine ethash coins (which is not supported by Zpool). WARNING! If you add all algorithms listed above, you may find your earnings spread across multiple pools regardless what pool(s) you specified with the -poolname command.
 
+-BenchmarkInterval
+	MultiPoolMiner's update interval when benchmarking in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60. Allowed values 60 - 300. Also see '-Interval'.
+
+
 -CreateMinerInstancePerDeviceModel
 	Newer miner files can create separate instances for each card model. This increases profit. Not all miners currently support this feature (more coming). 
 	By default this feature is turned off. To enable add '-CreateMinerInstancePerDeviceModel' to your start batch file.
@@ -136,7 +140,7 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
     Set this flag to ignore miner and pool fees (as older versions did)
 
 -Interval
-	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
+	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc). Default is 60. Allowed values 60 - 300. Also see '-BenchmarkInterval'.
 
 -MinerName
 	Specify to only include (restrict to) certain miner applications.
