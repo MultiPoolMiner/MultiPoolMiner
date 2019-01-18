@@ -1050,7 +1050,7 @@ while ($true) {
 
     #Save current hash rates
     Write-Log "Saving hash rates. "
-    $RunningMiners | ForEach-Object {
+    $ActiveMiners | Where-Object Best | ForEach-Object {
         $Miner = $_
         $Miner.Speed_Live = [Double[]]@()
 
