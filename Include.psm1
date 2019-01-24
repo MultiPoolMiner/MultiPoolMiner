@@ -192,22 +192,22 @@ function Get-CpuId {
     $info = [CpuID]::Invoke(0)
     #convert 16 bytes to 4 ints for compatibility with existing code
     $info = [int[]]@(
-        [BitConverter]::ToInt32($info, 0*4)
-        [BitConverter]::ToInt32($info, 1*4)
-        [BitConverter]::ToInt32($info, 2*4)
-        [BitConverter]::ToInt32($info, 3*4)
+        [BitConverter]::ToInt32($info, 0 * 4)
+        [BitConverter]::ToInt32($info, 1 * 4)
+        [BitConverter]::ToInt32($info, 2 * 4)
+        [BitConverter]::ToInt32($info, 3 * 4)
     )
 
     $nIds = $info[0]
 
     $info = [CpuID]::Invoke(0x80000000)
-    $nExIds = [BitConverter]::ToUInt32($info, 0*4) #not sure as to why 'nExIds' is unsigned; may not be necessary
+    $nExIds = [BitConverter]::ToUInt32($info, 0 * 4) #not sure as to why 'nExIds' is unsigned; may not be necessary
     #convert 16 bytes to 4 ints for compatibility with existing code
     $info = [int[]]@(
-        [BitConverter]::ToInt32($info, 0*4)
-        [BitConverter]::ToInt32($info, 1*4)
-        [BitConverter]::ToInt32($info, 2*4)
-        [BitConverter]::ToInt32($info, 3*4)
+        [BitConverter]::ToInt32($info, 0 * 4)
+        [BitConverter]::ToInt32($info, 1 * 4)
+        [BitConverter]::ToInt32($info, 2 * 4)
+        [BitConverter]::ToInt32($info, 3 * 4)
     )
 
     #Detect Features
@@ -217,24 +217,24 @@ function Get-CpuId {
         $info = [CpuID]::Invoke(0x00000001)
         #convert 16 bytes to 4 ints for compatibility with existing code
         $info = [int[]]@(
-            [BitConverter]::ToInt32($info, 0*4)
-            [BitConverter]::ToInt32($info, 1*4)
-            [BitConverter]::ToInt32($info, 2*4)
-            [BitConverter]::ToInt32($info, 3*4)
+            [BitConverter]::ToInt32($info, 0 * 4)
+            [BitConverter]::ToInt32($info, 1 * 4)
+            [BitConverter]::ToInt32($info, 2 * 4)
+            [BitConverter]::ToInt32($info, 3 * 4)
         )
 
-        $features.MMX    = ($info[3] -band ([int]1 -shl 23)) -ne 0
-        $features.SSE    = ($info[3] -band ([int]1 -shl 25)) -ne 0
-        $features.SSE2   = ($info[3] -band ([int]1 -shl 26)) -ne 0
-        $features.SSE3   = ($info[2] -band ([int]1 -shl 00)) -ne 0
+        $features.MMX = ($info[3] -band ([int]1 -shl 23)) -ne 0
+        $features.SSE = ($info[3] -band ([int]1 -shl 25)) -ne 0
+        $features.SSE2 = ($info[3] -band ([int]1 -shl 26)) -ne 0
+        $features.SSE3 = ($info[2] -band ([int]1 -shl 00)) -ne 0
 
-        $features.SSSE3  = ($info[2] -band ([int]1 -shl 09)) -ne 0
-        $features.SSE41  = ($info[2] -band ([int]1 -shl 19)) -ne 0
-        $features.SSE42  = ($info[2] -band ([int]1 -shl 20)) -ne 0
-        $features.AES    = ($info[2] -band ([int]1 -shl 25)) -ne 0
+        $features.SSSE3 = ($info[2] -band ([int]1 -shl 09)) -ne 0
+        $features.SSE41 = ($info[2] -band ([int]1 -shl 19)) -ne 0
+        $features.SSE42 = ($info[2] -band ([int]1 -shl 20)) -ne 0
+        $features.AES = ($info[2] -band ([int]1 -shl 25)) -ne 0
 
-        $features.AVX    = ($info[2] -band ([int]1 -shl 28)) -ne 0
-        $features.FMA3   = ($info[2] -band ([int]1 -shl 12)) -ne 0
+        $features.AVX = ($info[2] -band ([int]1 -shl 28)) -ne 0
+        $features.FMA3 = ($info[2] -band ([int]1 -shl 12)) -ne 0
 
         $features.RDRAND = ($info[2] -band ([int]1 -shl 30)) -ne 0
     }
@@ -244,30 +244,30 @@ function Get-CpuId {
         $info = [CpuID]::Invoke(0x00000007)
         #convert 16 bytes to 4 ints for compatibility with existing code
         $info = [int[]]@(
-            [BitConverter]::ToInt32($info, 0*4)
-            [BitConverter]::ToInt32($info, 1*4)
-            [BitConverter]::ToInt32($info, 2*4)
-            [BitConverter]::ToInt32($info, 3*4)
+            [BitConverter]::ToInt32($info, 0 * 4)
+            [BitConverter]::ToInt32($info, 1 * 4)
+            [BitConverter]::ToInt32($info, 2 * 4)
+            [BitConverter]::ToInt32($info, 3 * 4)
         )
 
-        $features.AVX2         = ($info[1] -band ([int]1 -shl 05)) -ne 0
+        $features.AVX2 = ($info[1] -band ([int]1 -shl 05)) -ne 0
 
-        $features.BMI1         = ($info[1] -band ([int]1 -shl 03)) -ne 0
-        $features.BMI2         = ($info[1] -band ([int]1 -shl 08)) -ne 0
-        $features.ADX          = ($info[1] -band ([int]1 -shl 19)) -ne 0
-        $features.MPX          = ($info[1] -band ([int]1 -shl 14)) -ne 0
-        $features.SHA          = ($info[1] -band ([int]1 -shl 29)) -ne 0
-        $features.PREFETCHWT1  = ($info[2] -band ([int]1 -shl 00)) -ne 0
+        $features.BMI1 = ($info[1] -band ([int]1 -shl 03)) -ne 0
+        $features.BMI2 = ($info[1] -band ([int]1 -shl 08)) -ne 0
+        $features.ADX = ($info[1] -band ([int]1 -shl 19)) -ne 0
+        $features.MPX = ($info[1] -band ([int]1 -shl 14)) -ne 0
+        $features.SHA = ($info[1] -band ([int]1 -shl 29)) -ne 0
+        $features.PREFETCHWT1 = ($info[2] -band ([int]1 -shl 00)) -ne 0
 
-        $features.AVX512_F     = ($info[1] -band ([int]1 -shl 16)) -ne 0
-        $features.AVX512_CD    = ($info[1] -band ([int]1 -shl 28)) -ne 0
-        $features.AVX512_PF    = ($info[1] -band ([int]1 -shl 26)) -ne 0
-        $features.AVX512_ER    = ($info[1] -band ([int]1 -shl 27)) -ne 0
-        $features.AVX512_VL    = ($info[1] -band ([int]1 -shl 31)) -ne 0
-        $features.AVX512_BW    = ($info[1] -band ([int]1 -shl 30)) -ne 0
-        $features.AVX512_DQ    = ($info[1] -band ([int]1 -shl 17)) -ne 0
-        $features.AVX512_IFMA  = ($info[1] -band ([int]1 -shl 21)) -ne 0
-        $features.AVX512_VBMI  = ($info[2] -band ([int]1 -shl 01)) -ne 0
+        $features.AVX512_F = ($info[1] -band ([int]1 -shl 16)) -ne 0
+        $features.AVX512_CD = ($info[1] -band ([int]1 -shl 28)) -ne 0
+        $features.AVX512_PF = ($info[1] -band ([int]1 -shl 26)) -ne 0
+        $features.AVX512_ER = ($info[1] -band ([int]1 -shl 27)) -ne 0
+        $features.AVX512_VL = ($info[1] -band ([int]1 -shl 31)) -ne 0
+        $features.AVX512_BW = ($info[1] -band ([int]1 -shl 30)) -ne 0
+        $features.AVX512_DQ = ($info[1] -band ([int]1 -shl 17)) -ne 0
+        $features.AVX512_IFMA = ($info[1] -band ([int]1 -shl 21)) -ne 0
+        $features.AVX512_VBMI = ($info[2] -band ([int]1 -shl 01)) -ne 0
     }
 
     if ($nExIds -ge 0x80000001) {
@@ -275,17 +275,17 @@ function Get-CpuId {
         $info = [CpuID]::Invoke(0x80000001)
         #convert 16 bytes to 4 ints for compatibility with existing code
         $info = [int[]]@(
-            [BitConverter]::ToInt32($info, 0*4)
-            [BitConverter]::ToInt32($info, 1*4)
-            [BitConverter]::ToInt32($info, 2*4)
-            [BitConverter]::ToInt32($info, 3*4)
+            [BitConverter]::ToInt32($info, 0 * 4)
+            [BitConverter]::ToInt32($info, 1 * 4)
+            [BitConverter]::ToInt32($info, 2 * 4)
+            [BitConverter]::ToInt32($info, 3 * 4)
         )
 
-        $features.x64   = ($info[3] -band ([int]1 -shl 29)) -ne 0
-        $features.ABM   = ($info[2] -band ([int]1 -shl 05)) -ne 0
+        $features.x64 = ($info[3] -band ([int]1 -shl 29)) -ne 0
+        $features.ABM = ($info[2] -band ([int]1 -shl 05)) -ne 0
         $features.SSE4a = ($info[2] -band ([int]1 -shl 06)) -ne 0
-        $features.FMA4  = ($info[2] -band ([int]1 -shl 16)) -ne 0
-        $features.XOP   = ($info[2] -band ([int]1 -shl 11)) -ne 0
+        $features.FMA4 = ($info[2] -band ([int]1 -shl 16)) -ne 0
+        $features.XOP = ($info[2] -band ([int]1 -shl 11)) -ne 0
     }
 
     # wrap data into PSObject
