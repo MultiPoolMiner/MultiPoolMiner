@@ -9,8 +9,9 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\TT-Miner.exe"
-$HashSHA256 = "A3CCDC7D9240094F27BB522D4C75286824D5EC06FFA49B9DCA0C82902C536637"
-$Uri = "https://tradeproject.de/download/Miner/TT-Miner.zip"
+$HashSHA256 = "5BE8696FDE19FAC090E6B1AD74422885D3DBDA08BD00F9B2C786C61C7F459266"
+$Uri = "https://TradeProject.de/download/Miner/TT-Miner-2.1.7.zip"
+$ManualUri = "https://bitcointalk.org/index.php?topic=5025783.0"
 
 # Miner requires CUDA 9.2.00 or higher
 $DriverVersion = ((Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
