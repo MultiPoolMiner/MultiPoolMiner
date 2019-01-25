@@ -12,6 +12,7 @@ $Path = ".\Bin\$($Name)\TT-Miner.exe"
 $HashSHA256 = "5BE8696FDE19FAC090E6B1AD74422885D3DBDA08BD00F9B2C786C61C7F459266"
 $Uri = "https://TradeProject.de/download/Miner/TT-Miner-2.1.7.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5025783.0"
+$Port = "40{0:d2}"
 
 # Miner requires CUDA 9.2.00 or higher
 $DriverVersion = ((Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
@@ -51,7 +52,7 @@ $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "N
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 3
+    $Miner_Port = $Port -f ($Device | Select-Object -First 1 -ExpandProperty Index)
 
     $Commands | Where-Object {$Pools.(Get-Algorithm ($_.Algorithm -split '-' | Select-Object -Index 0)).Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Algorithm = $_.Algorithm -replace "ETHASH(\dgb)-", "ETHASH-" -replace "PROGPOW(\dgb)-", "PROGPOW-"
