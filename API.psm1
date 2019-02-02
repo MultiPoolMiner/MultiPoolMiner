@@ -129,11 +129,11 @@
                         Break
                     }
                     "/balances" {
-                        $Data = ConvertTo-Json @($API.BalancesData.Balances | Select-Object)
+                        $Data = ConvertTo-Json @($API.Balances | Select-Object)
                         Break
                     }
-                    "/balancesdata" {
-                        $Data = ConvertTo-Json @($API.BalancesData | Select-Object)
+                    "/rates" {
+                        $Data = ConvertTo-Json @($API.Rates | Select-Object)
                         Break
                     }
                     "/currentprofit" {

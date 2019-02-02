@@ -2,10 +2,8 @@
 
 [CmdletBinding()]
 param (
-    [Parameter(Mandatory = $true)]
-    [PSCustomObject]$Config,
-    [Parameter(Mandatory = $true)]
-    [PSCustomObject]$ActiveMiners
+    [PSCustomObject]$Config = @{},
+    [Miner[]]$ActiveMiners = @()
 )
 
 Write-Log "Pinging monitoring server. "
