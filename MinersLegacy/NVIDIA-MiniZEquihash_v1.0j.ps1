@@ -9,19 +9,17 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\MiniZ.exe"
-$HashSHA256 = "0D3E1D685487A378EDAC006E042F328B6BD66A60282073D513BD82397C112A14"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.0i_win-x64.zip"
+$HashSHA256 = "75557F22E072263038EF08FEEF38B5D9C53234FFDC7A9C06EFFF2018A2A1F880"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.0j_cuda10_win-x64.zip"
 $ManualUri = "https://miniz.ch/download"
 
-# Miner requires CUDA 9.2.00 or higher
+# Miner requires CUDA 10.0.00 or higher
 $DriverVersion = ((Get-Device | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
-$RequiredVersion = "9.2.00"
+$RequiredVersion = "10.0.00"
 if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$RequiredVersion) {
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredVersion) or above (installed version is $($DriverVersion)). Please update your Nvidia drivers. "
     return
 }
-
-$Port = "40{0:d2}"
 
 $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Equihash144,5"; MinMemGB = 2.0; Params = ""}
@@ -32,7 +30,7 @@ $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVI
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Port -f ($Miner_Device | Select-Object -First 1 -ExpandProperty Index)
+    $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 3
 
     $Commands | Where-Object {$Pools.(Get-Algorithm ($_.Algorithm -replace ",")).Host} | ForEach-Object {
         $Algorithm = $_.Algorithm -replace "Equihash"
