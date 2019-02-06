@@ -15,7 +15,6 @@ $PoolAPIUri = "http://api.nicehash.com/api?method=simplemultialgo.info"
 #Pool currenctly allows payout in BTC only
 $Payout_Currencies = @("BTC") | Where-Object {$Wallets.$_}
 
-
 if ($Payout_Currencies) {
 
     $RetryCount = 3
