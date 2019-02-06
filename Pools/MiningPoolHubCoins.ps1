@@ -11,21 +11,13 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 $PoolAPIUri= "http://miningpoolhub.com/index.php?page=api&action=getminingandprofitsstatistics&$(Get-Date -Format "yyyy-MM-dd_HH-mm")"
 $PoolRegions = "europe", "us-east", "asia"
 
-#defines minimum memory required per coin, default is 4gb
-$MinMem = [PSCustomObject]@{
-    "Expanse"  = "2gb"
-    "Soilcoin" = "2gb"
-    "Ubiq"     = "2gb"
-    "Musicoin" = "3gb"
-}
-
 if ($User) {
 
     $RetryCount = 3
     $RetryDelay = 2
-    while (-not ($APIRequest) -and $RetryCount -gt 0) {
+    while (-not ($APIRequest.return) -and $RetryCount -gt 0) {
         try {
-            if (-not $APIRequest) {$APIRequest = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+            if (-not $APIRequest.return) {$APIRequest = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction SilentlyContinue}
         }
         catch {
             Start-Sleep -Seconds $RetryDelay
@@ -58,7 +50,7 @@ if ($User) {
 
         $Divisor = 1000000000
 
-        $Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$_.profit / $Divisor) -Duration $StatSpan -ChangeDetection $true
+        $Stat = Set-Stat -Name "$($Name)_$($CoinName)_Profit" -Value ([Double]$_.profit / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
         $PoolRegions | ForEach-Object {
             $Region = $_
@@ -100,6 +92,6 @@ if ($User) {
     }
 }
 else { 
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no username specified. "
 }
 
