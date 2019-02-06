@@ -22,7 +22,7 @@ class Eminer : Miner {
         }
 
         $HashRate_Name = [String]$this.Algorithm[0]
-        $HashRate_Value = [Double]($Data.total_hashrate_mean | Measure-Object -Sum).Sum
+        $HashRate_Value = [Double]$Data.total_hashrate_mean
 
         if ($HashRate_Name -and $HashRate_Value -GT 0) {$HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}}
 

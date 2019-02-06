@@ -246,6 +246,10 @@ class Excavator : Miner {
             "Idle" {
                 $this.StopMining()
             }
+            "Failed" {
+                $this.StopMining()
+                $this.Status = $Status
+            }
             Default {
                 if ([Excavator]::Service | Get-Job -ErrorAction SilentlyContinue) {
                     [Excavator]::Service | Remove-Job -Force
