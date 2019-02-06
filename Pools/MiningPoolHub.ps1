@@ -15,9 +15,9 @@ if ($UserName) {
 
     $RetryCount = 3
     $RetryDelay = 2
-    while (-not ($APIRequest) -and $RetryCount -gt 0) {
+    while (-not ($APIRequest.return) -and $RetryCount -gt 0) {
         try {
-            if (-not $APIRequest) {$APIRequest = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+            if (-not $APIRequest.return) {$APIRequest = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
         }
         catch {
             Start-Sleep -Seconds $RetryDelay
@@ -93,5 +93,5 @@ if ($UserName) {
     }
 }
 else { 
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no username specified. "
 }
