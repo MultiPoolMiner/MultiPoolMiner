@@ -905,7 +905,7 @@ function Get-Device {
             Model_Norm        = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
         }
         #Read CPU features
-        $Device | Add-member CpuFeatures ((Get-CpuId).Features)
+        $Device | Add-member CpuFeatures ((Get-CpuId).Features | Sort-Object)
 
         if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
             if ((-not $ExcludeName) -or (-not ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))}))) {
@@ -1181,7 +1181,7 @@ class Miner {
                 $Line_Simple = $Line -replace "\x1B\[[0-?]*[ -/]*[@-~]", ""
 
                 if ($Line_Simple) {
-                    $HashRates = @()
+                    $HashRate = 0
                     $Devices = @()
 
                     if ($Line_Simple -match "/s") {
@@ -1204,8 +1204,6 @@ class Miner {
                                 "th/s*" {$HashRate *= [Math]::Pow(1000, 4)}
                                 "ph/s*" {$HashRate *= [Math]::Pow(1000, 5)}
                             }
-
-                            $HashRates += $HashRate
                         }
                     }
 
@@ -1228,11 +1226,13 @@ class Miner {
 
                     $Lines += $Line
 
-                    $this.Data += [PSCustomObject]@{
-                        Date     = $Date
-                        Raw      = $Line_Simple
-                        HashRate = [PSCustomObject]@{[String]$this.Algorithm = [Int64]$HashRates}
-                        Device   = $Devices
+                    if ($HashRate) {
+                        $this.Data += [PSCustomObject]@{
+                            Date     = $Date
+                            Raw      = $Line_Simple
+                            HashRate = [PSCustomObject]@{[String]$this.Algorithm = [Int64]$HashRate}
+                            Device   = $Devices
+                        }
                     }
                 }
             }
@@ -1250,10 +1250,10 @@ class Miner {
         $HashRates_Counts = @{}
         $HashRates_Averages = @{}
         $HashRates_Variances = @{}
-        $Hashrates_Samples = @{}
+
+        $Hashrates_Samples = @($this.Data | Where-Object {$_.HashRate.$Algorithm} | Where-Object {$_.Date -GE (Get-Date).ToUniversalTime().AddSeconds( - $Seconds)})
 
         #strip lower 10% and upper 10% of all values for better hashrate stability
-        $Hashrates_Samples = @($this.Data | Where-Object {$_.HashRate.$Algorithm} | Where-Object {$_.Date -GE (Get-Date).ToUniversalTime().AddSeconds( - $Seconds)})
         $Hashrates_Samples | Sort-Object {$_.HashRate.$Algorithm} | Select-Object -Skip ([Int]($HashRates_Samples.Count * 0.1)) | Select-Object -SkipLast ([Int]($HashRates_Samples.Count * 0.1)) | ForEach-Object {
 
             $Data_Devices = $_.Device
