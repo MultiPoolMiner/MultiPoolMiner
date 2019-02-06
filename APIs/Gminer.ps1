@@ -31,7 +31,6 @@ class Gminer : Miner {
                 Date       = (Get-Date).ToUniversalTime()
                 Raw        = $Response
                 HashRate   = $HashRate
-                PowerUsage = (Get-PowerUsage $this)
                 Device     = @()
             }
         }
