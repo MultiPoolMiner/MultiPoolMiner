@@ -5,7 +5,7 @@ class lolMinerApi : Miner {
         if ($this.GetStatus() -ne [MinerStatus]::Running) {return @()}
 
         $Server = "localhost"
-        $Timeout = 5 #seconds
+        $Timeout = 10 #seconds
 
         $Request = ""
         $Response = ""
