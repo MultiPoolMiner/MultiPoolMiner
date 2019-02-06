@@ -441,7 +441,7 @@ while (-not $API.Stop) {
                 ForEach-Object {if (-not $_.DeviceName) {$_ | Add-Member DeviceName (Get-Device $_.Type).Name -Force}; $_} | #for backward compatibility
                 ForEach-Object {if (-not $_.IntervalMultplier) {$_ | Add-Member IntervalMultplier ([Math]::Max(1, $_.BenchmarkIntervals)) -Force}; $_} | #for backward compatibility
                 Where-Object {$_.DeviceName} | #filter miners for non-present hardware
-                Where-Object {$UnprofitableAlgorithms -notcontains ($_.HashRates.PSObject.Properties.Name | Select-Object -Index 0)} | #filter unprofitable algorithms, allow them as secondary algo
+                Where-Object {$UnprofitableAlgorithms -notcontains (($_.HashRates.PSObject.Properties.Name | Select-Object -Index 0) -replace '-NHMP'<#temp fix#> -replace 'NiceHash'<#temp fix#>)} | #filter unprofitable algorithms, allow them as secondary algo
                 Where-Object {-not $Config.SingleAlgoMining -or $_.HashRates.PSObject.Properties.Name.Count -EQ 1} | #filter dual algo miners
                 Where-Object {(Compare-Object @($Devices.Name | Select-Object) @($_.DeviceName | Select-Object) | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0} | 
                 Where-Object {(Compare-Object $Pools.PSObject.Properties.Name $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0} | 
@@ -712,7 +712,7 @@ while (-not $API.Stop) {
     $API.WatchdogTimers = $WatchdogTimers #Give API access to WatchdogTimers information
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Config.Delay #Wait to prevent BSOD
-    if ($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) {Get-Process -Name @($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best -EQ $true | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {$_.GetProcessNames()}) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}} #Kill stray miners
+    Get-CIMInstance CIM_Process | Where-Object ExecutablePath | Where-Object {$_.ExecutablePath -like "$(Get-Location)\Bin\*"} | Where-Object {$ActiveMiners.ProcessID -notcontains $_.ProcessID} | Select-Object -ExpandProperty ProcessID | ForEach-Object {Stop-Process -Id $_ -Force -ErrorAction Ignore} #Kill stray miners
 
     #Start miners in the active list depending on if they are the most profitable
     $RunningMiners = @()
