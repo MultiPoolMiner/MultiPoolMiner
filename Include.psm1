@@ -1226,7 +1226,7 @@ class Miner {
 
                     $Lines += $Line
 
-                    if ($HashRate) {
+                    if ($HashRates) {
                         $this.Data += [PSCustomObject]@{
                             Date     = $Date
                             Raw      = $Line_Simple
