@@ -1230,7 +1230,7 @@ class Miner {
                         $this.Data += [PSCustomObject]@{
                             Date     = $Date
                             Raw      = $Line_Simple
-                            HashRate = [PSCustomObject]@{[String]$this.Algorithm = [Int64]$HashRate}
+                            HashRate = [PSCustomObject]@{[String]$this.Algorithm = [Double]($HashRates | Measure-Object -Sum).Sum}
                             Device   = $Devices
                         }
                     }
