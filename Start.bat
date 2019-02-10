@@ -12,7 +12,7 @@
 del "~*.dll"
 
 rem REMOVE THE BELOW LINE ON MINING RIGS
-start pwsh -noexit -executionpolicy bypass -command "& .\reader.ps1 -sort '^[^_]*_' -QuickStart"
+start pwsh -noexit -executionpolicy bypass -command "& .\reader.ps1 -log 'MultiPoolMiner_\d\d\d\d-\d\d-\d\d\.txt' -sort '^[^_]*_' -quickstart"
 
 rem REMOVE THE BELOW LINE ON MINING RIGS
 start pwsh -executionpolicy bypass -command "Start-Sleep 30; Start-Process 'http://localhost:3999/'"
