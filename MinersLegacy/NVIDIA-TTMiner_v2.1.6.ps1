@@ -20,7 +20,7 @@ if ($DriverVersion -and [System.Version]$DriverVersion -lt [System.Version]$Requ
     return
 }
 
-if ([System.Version]$DriverVersion -ge "10.0") {
+if ($DriverVersion -and [System.Version]$DriverVersion -ge "10.0") {
     $Commands = [PSCustomObject[]]@(
         [PSCustomObject]@{Algorithm = "ETHASH2gb-100"  ; MinMemGB = 2; Params = ""} #Ethash2GB algo for CUDA 10.0
         [PSCustomObject]@{Algorithm = "ETHASH3gb-100"  ; MinMemGB = 3; Params = ""} #Ethash3GB algo for CUDA 10.0
@@ -32,7 +32,7 @@ if ([System.Version]$DriverVersion -ge "10.0") {
         [PSCustomObject]@{Algorithm = "MTP-100"        ; MinMemGB = 6; Params = ""} #MTP algo for CUDA 10.0
     )
 }
-elseif ([System.Version]$DriverVersion -ge "9.2") {
+elseif ($DriverVersion -and [System.Version]$DriverVersion -ge "9.2") {
     $Commands = [PSCustomObject[]]@(
         [PSCustomObject]@{Algorithm = "ETHASH2gb-92"  ; MinMemGB = 2; Params = ""} #Ethash2GB algo for CUDA 9.2
         [PSCustomObject]@{Algorithm = "ETHASH3gb-92"  ; MinMemGB = 3; Params = ""} #Ethash3GB algo for CUDA 9.2
