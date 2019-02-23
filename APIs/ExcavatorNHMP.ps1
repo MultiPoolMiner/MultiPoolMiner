@@ -256,10 +256,6 @@ class ExcavatorNHMP : Miner {
             "Idle" {
                 $this.StopMining()
             }
-            "Failed" {
-                $this.StopMining()
-                $this.Status = $Status
-            }
             Default {
                 if ([ExcavatorNHMP]::Service | Get-Job -ErrorAction SilentlyContinue) {
                     [ExcavatorNHMP]::Service | Remove-Job -Force
