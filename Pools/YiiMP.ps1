@@ -82,6 +82,3 @@ $APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore 
         }
     }
 }
-else { 
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
-}
