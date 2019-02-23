@@ -712,7 +712,7 @@ while (-not $API.Stop) {
     $API.WatchdogTimers = $WatchdogTimers #Give API access to WatchdogTimers information
     if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Config.Delay #Wait to prevent BSOD
-    Get-CIMInstance CIM_Process | Where-Object ExecutablePath | Where-Object {$_.ExecutablePath -like "$(Get-Location)\Bin\*"} | Where-Object {$ActiveMiners.ProcessID -notcontains $_.ProcessID} | Select-Object -ExpandProperty ProcessID | ForEach-Object {Stop-Process -Id $_ -Force -ErrorAction Ignore} #Kill stray miners
+    if ($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) {Get-Process -Name @($ActiveMiners | ForEach-Object {$_.GetProcessNames()} | Select-Object) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {$_.GetProcessNames()} | Select-Object) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}} #Kill stray miners
 
     #Start miners in the active list depending on if they are the most profitable
     $RunningMiners = @()
