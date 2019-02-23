@@ -338,11 +338,6 @@ while (-not $API.Stop) {
         }
     }
 
-    #Load the stats
-    Write-Log "Loading saved statistics. "
-    $Stats = Get-Stat
-    $API.Stats = $Stats #Give API access to the current stats
-
     #Retrieve collected balance data
     if ($Balances_Jobs) {
         $Balances = $Balances_Jobs | Receive-Job -Wait -AutoRemoveJob | Select-Object -ExpandProperty Content
@@ -426,6 +421,11 @@ while (-not $API.Stop) {
         $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_ | Add-Member Price_Unbias ($Pools.$_.Price * (1 - $Pools.$_.Fee)) -Force}
     }
     $API.Pools = $Pools #Give API access to the pools information
+
+    #Load the stats
+    Write-Log "Loading saved statistics. "
+    $Stats = Get-Stat
+    $API.Stats = $Stats #Give API access to the current stats
 
     #Load information about the miners
     #Messy...?
