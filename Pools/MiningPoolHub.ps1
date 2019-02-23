@@ -17,7 +17,7 @@ if ($UserName) {
     $RetryDelay = 2
     while (-not ($APIRequest.return) -and $RetryCount -gt 0) {
         try {
-            if (-not $APIRequest.return) {$APIRequest = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
+            if (-not $APIRequest.return) {$APIRequest = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
         }
         catch {
             Start-Sleep -Seconds $RetryDelay
