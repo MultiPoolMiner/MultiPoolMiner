@@ -166,6 +166,9 @@ $WorkerNameDonate = "multipoolminer"
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
 
 while (-not $API.Stop) {
+    #Display downloader progress
+    if ($Downloader) {$Downloader | Receive-Job}
+
     #Reduce memory
     Get-Job -State Completed | Receive-Job -Wait -AutoRemoveJob
     $Error.Clear()
@@ -247,7 +250,6 @@ while (-not $API.Stop) {
     $API.Devices = $Devices #Give API access to the device information
     if ($Devices.Count -eq 0) {
         Write-Log -Level Warn "No mining devices found. "
-        if ($Downloader) {$Downloader | Receive-Job}
         while ((Get-Date).ToUniversalTime() -lt $StatEnd) {Start-Sleep 10}
         continue
     }
@@ -295,7 +297,6 @@ while (-not $API.Stop) {
             $Miner.UpdateMinerData() | ForEach-Object {Write-Log -Level Verbose "$($Miner.Name): $($Miner.Data | ForEach-Object {$_})"}
         }
 
-        if ($Downloader) {$Downloader | Receive-Job}
         $API.RunningMiners = $RunningMiners
     }
 
@@ -393,7 +394,6 @@ while (-not $API.Stop) {
     $API.AllPools = $AllPools #Give API access to the current running configuration
     if ($AllPools.Count -eq 0) {
         Write-Log -Level Warn "No pools available. "
-        if ($Downloader) {$Downloader | Receive-Job}
         while ((Get-Date).ToUniversalTime() -lt $StatEnd) {Start-Sleep 10}
         continue
     }
@@ -575,7 +575,6 @@ while (-not $API.Stop) {
     #Update the active miners
     if ($Miners.Count -eq 0) {
         Write-Log -Level Warn "No miners available. "
-        if ($Downloader) {$Downloader | Receive-Job}
         while ((Get-Date).ToUniversalTime() -lt $StatEnd) {Start-Sleep 10}
         continue
     }
@@ -710,7 +709,6 @@ while (-not $API.Stop) {
         }
     }
     $API.WatchdogTimers = $WatchdogTimers #Give API access to WatchdogTimers information
-    if ($Downloader) {$Downloader | Receive-Job}
     Start-Sleep $Config.Delay #Wait to prevent BSOD
     if ($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) {Get-Process -Name @($ActiveMiners | ForEach-Object {$_.GetProcessNames()} | Select-Object) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {$_.GetProcessNames()} | Select-Object) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}} #Kill stray miners
 
@@ -820,7 +818,6 @@ while (-not $API.Stop) {
     #Display exchange rates
     Write-Host "Exchange Rates: $(($Config.Currency | Where-Object {$Rates.BTC.$_} | ForEach-Object {"$($Rates.BTC.$_) $($_)"}) -join " = ")"
 
-    if ($Downloader) {$Downloader | Receive-Job}
     Write-Log "Interval will end in approximately $([Math]::Max(0, [Math]::Ceiling((($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds) / 10) * 10)) seconds. "
     while ((Get-Date).ToUniversalTime() -lt $StatEnd) {Start-Sleep 10}
     Write-Log "Interval overrun by approximately $([Math]::Max(0, [Math]::Floor((((Get-Date).ToUniversalTime() - $StatStart).TotalSeconds - $Config.Interval) / 10) * 10)) seconds. "
