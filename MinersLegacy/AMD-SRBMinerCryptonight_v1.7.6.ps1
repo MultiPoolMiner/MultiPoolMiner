@@ -90,7 +90,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             }
 
             #Get commands for active miner devices
-            $Params = Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index
+            $Params = <#temp fix#> Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index
 
             $ConfigFileName = "GpuConf_$($Miner_Device.count)x$($Miner_Device.Model_Norm | Sort-Object -unique)-$Algorithm_Norm-$Threads-$Miner_Port-$($Pools.$Algorithm_Norm.User)-$($Pools.$Algorithm_Norm.Pass).json"
             $PoolFileName = "PoolConf_$($Pools.$Algorithm_Norm.Name)-$($Algorithm_Norm).json"

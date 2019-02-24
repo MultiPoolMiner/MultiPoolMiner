@@ -73,7 +73,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             else {$Pers = ""}
 
             #Get commands for active miner devices
-            $Params = Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index
+            $Params = <#temp fix#> Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index
 
             #define stratum
             switch ($Main_Algorithm -replace "2gb" -replace "3gb") {

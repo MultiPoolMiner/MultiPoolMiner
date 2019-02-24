@@ -92,7 +92,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                         "retry-pause"  = 5
                     }
                 }
-                Commands = ("$PoolParameters$(if ($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker) {" --rig-id=$($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker)"}) --config=$ConfigFileName$(Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index)$CommonCommands" -replace "\s+", " ").trim()
+                Commands = ("$PoolParameters$(if ($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker) {" --rig-id=$($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker)"}) --config=$ConfigFileName$(<#temp fix#> Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index)$CommonCommands" -replace "\s+", " ").trim()
                 ThreadsConfigFileName = $ThreadsConfigFileName
                 Threads = $Threads * (($Miner_Device.CIM | Measure-Object ThreadCount -Minimum).Minimum -1)
                 HwDetectCommands = "$PoolParameters --config=$ThreadsConfigFileName$Params$CommonCommands"

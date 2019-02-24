@@ -46,7 +46,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             }
 
             #Get commands for active miner devices
-            $Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
+            $Params = <#temp fix#> Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
 
             if ($Algorithm_Norm -like "Equihash1445") {
                 #define --pers for equihash1445

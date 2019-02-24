@@ -101,7 +101,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         if ($Pools.$Main_Algorithm_Norm.Host -and $Arguments_Platform -and $Miner_Device) {
 
             #Get commands for active miner devices
-            $Params = Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index
+            $Params = <#temp fix#> Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index
 
             if ($_.SecondaryAlgorithm) {
                 $Secondary_Algorithm = $_.SecondaryAlgorithm

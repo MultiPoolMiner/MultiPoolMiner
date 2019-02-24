@@ -158,6 +158,7 @@ function Get-CpuId {
     }
 }
 
+#Temp fix: function to be removed after legacy miners are removed
 function Get-CommandPerDevice {
 
     # rewrites the command parameters

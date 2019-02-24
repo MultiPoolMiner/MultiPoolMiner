@@ -85,7 +85,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             }
             
             #Get commands for active miner devices
-            $Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
+            $Params = <#temp fix#> Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
             $ConfigFileName = "$((@("Config") + @($Platform) + @($Pools.$Algorithm_Norm.Algorithm) + @($Miner_Device.Model_Norm -Join "_") + @($Miner_Port) | Select-Object) -join '-').txt"
             $PoolsFileName = "$((@("Pools") + @($Pools.$Algorithm_Norm.Name) + @($Pools.$Algorithm_Norm.Algorithm) | Select-Object) -join '-').txt"
             $PlatformThreadsConfigFile = "$((@("HwConfig") + @($Platform) + @($Algorithm_Norm) + @((Get-Device | Where-Object {$_.Type -EQ ($Miner_Device.Type | Select-Object -First 1) -and $_.Vendor -EQ ($Miner_Device.Vendor | Select-Object -First 1)} | Select-Object -ExpandProperty Model_Norm) -Join "_") | Select-Object) -join '-').json"

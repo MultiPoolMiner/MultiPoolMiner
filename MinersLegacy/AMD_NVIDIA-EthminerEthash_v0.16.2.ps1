@@ -49,7 +49,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             $Miner_Name = $Miner_Name -replace "[-]{2,}", "-"
 
             #Get commands for active miner devices
-            $Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
+            $Params = <#temp fix#> Get-CommandPerDevice $_.Params $Miner_Device.Type_Vendor_Index
 
             #Stratum autodetection
             if ($Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp") {$Protocol = "stratum://"} else {$Protocol = "stratums://"}

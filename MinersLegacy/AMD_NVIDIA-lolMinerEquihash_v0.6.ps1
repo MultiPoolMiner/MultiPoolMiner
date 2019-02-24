@@ -60,7 +60,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             }
 
             #Get commands for active miner devices
-            $Params = Get-CommandPerDevice $_.Params $Miner_Device.Type_Index
+            $Params = <#temp fix#> Get-CommandPerDevice $_.Params $Miner_Device.Type_Index
 
             switch ($Algorithm_Norm) {
                 "Equihash965" {

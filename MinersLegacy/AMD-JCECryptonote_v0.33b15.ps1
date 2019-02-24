@@ -58,7 +58,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             }
 
             #Get Params for active miner devices
-            $Params = Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index
+            $Params = <#temp fix#> Get-CommandPerDevice $Params $Miner_Device.Type_Vendor_Index
 
             [PSCustomObject]@{
                 Name       = $Miner_Name
