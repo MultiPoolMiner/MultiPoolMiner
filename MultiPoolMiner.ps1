@@ -122,7 +122,6 @@ $DecayBase = 1 - 0.1 #decimal percentage
 $WatchdogTimers = @()
 
 $ActiveMiners = @()
-$RunningMiners = @()
 
 #Start the log
 Start-Transcript ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
@@ -297,7 +296,7 @@ while (-not $API.Stop) {
             $Miner.UpdateMinerData() | ForEach-Object {Write-Log -Level Verbose "$($Miner.Name): $($Miner.Data | ForEach-Object {$_})"}
         }
 
-        $API.RunningMiners = $RunningMiners
+        $API.RunningMiners = $ActiveMiners | Where-Object Best
     }
 
     #Update monitoring service
@@ -635,8 +634,8 @@ while (-not $API.Stop) {
         }
     }
 
-    #Don't penalize active miners
-    $ActiveMiners | Where-Object {$_.GetStatus() -EQ "Running"} | ForEach-Object {$_.Profit_Bias = $_.Profit_Unbias}
+    $ActiveMiners | Where-Object {$_.GetStatus() -EQ "Running"} | ForEach-Object {$_.Profit_Bias = $_.Profit_Unbias} #Don't penalize active miners
+    $API.RunningMiners = @($ActiveMiners | Where-Object Best) #Update API miner information
     $API.ActiveMiners = $ActiveMiners #Update API miner information
 
     #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
@@ -668,11 +667,12 @@ while (-not $API.Stop) {
     $BestMiners_Combo_Comparison = $BestMiners_Combos_Comparison | Sort-Object -Descending {($_.Combination | Where-Object Profit -EQ $null | Measure-Object).Count}, {($_.Combination | Measure-Object Profit_Comparison -Sum).Sum}, {($_.Combination | Where-Object Profit -NE 0 | Measure-Object).Count} | Select-Object -First 1 | Select-Object -ExpandProperty Combination
 
     #Check for failed miner
-    $RunningMiners | Where-Object {$_.GetStatus() -ne "Running"} | ForEach-Object {
+    $ActiveMiners | Where-Object Best | Where-Object {$_.GetStatus() -ne "Running"} | ForEach-Object {
         $_.SetStatus("Failed")
         Write-Log -Level Error "Miner ($($_.Name) {$(($_.Algorithm | ForEach-Object {"$($_ -replace '-NHMP'<#temp fix#> -replace 'NiceHash'<#temp fix#>)@$($Pools.$_.Name)"}) -join "; ")}) has failed. "
     }
-    $API.FailedMiners = @($ActiveMiners | Where-Object {$_.GetStatus() -eq "Failed"})
+    $API.RunningMiners = @($ActiveMiners | Where-Object Best) #Update API miner information
+    $API.FailedMiners = @($ActiveMiners | Where-Object {$_.GetStatus() -eq "Failed"}) #Update API miner information
 
     if ($ActiveMiners.Count -eq 1) {
         $BestMiners_Combo_Comparison = $BestMiners_Combo = @($ActiveMiners)
@@ -684,7 +684,6 @@ while (-not $API.Stop) {
     #Stop miners in the active list depending on if they are the most profitable
     $ActiveMiners | Where-Object {$_.GetActivateCount()} | Where-Object {$_.Best -EQ $false -or ($Config.ShowMinerWindow -ne $OldConfig.ShowMinerWindow)} | ForEach-Object {
         $Miner = $_
-        $RunningMiners = $RunningMiners | Where-Object $_ -NE $Miner
         if ($Miner.GetStatus() -eq "Running") {
             Write-Log "Stopping miner (($($Miner.Name) {$(($_.Algorithm | ForEach-Object {"$($_ -replace '-NHMP'<#temp fix#> -replace 'NiceHash'<#temp fix#>)@$($Pools.$_.Name)"}) -join "; ")}). "
             $Miner.SetStatus("Idle")
@@ -713,9 +712,7 @@ while (-not $API.Stop) {
     if ($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) {Get-Process -Name @($ActiveMiners | ForEach-Object {$_.GetProcessNames()} | Select-Object) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {$_.GetProcessNames()} | Select-Object) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}} #Kill stray miners
 
     #Start miners in the active list depending on if they are the most profitable
-    $RunningMiners = @()
     $ActiveMiners | Where-Object Best | ForEach-Object {
-        $RunningMiners += $_
         $Miner_Name = $_.Name
         if ($_.GetStatus() -ne "Running") {
             Write-Log "Starting miner ($Miner_Name {$(($_.Algorithm | ForEach-Object {"$($_ -replace '-NHMP'<#temp fix#> -replace 'NiceHash'<#temp fix#>)@$($Pools.$_.Name)"}) -join "; ")}). "
@@ -746,7 +743,7 @@ while (-not $API.Stop) {
             Write-Log -Level Warn "Benchmarking miner ($Miner_Name {$(($_.Algorithm | ForEach-Object {"$($_ -replace '-NHMP'<#temp fix#> -replace 'NiceHash'<#temp fix#>)@$($Pools.$_.Name)"}) -join "; ")})) [Attempt $($_.GetActivateCount()) of max. $Strikes]. "
         }
     }
-    $API.RunningMiners = $RunningMiners #Update API miner information
+    $API.RunningMiners = @($ActiveMiners | Where-Object Best) #Update API miner information
     $API.WatchdogTimers = $WatchdogTimers #Give API access to WatchdogTimers information
 
     Clear-Host
