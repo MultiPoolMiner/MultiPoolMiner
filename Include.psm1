@@ -1023,7 +1023,7 @@ class Miner {
     hidden [TimeSpan]$Active = [TimeSpan]::Zero
     hidden [Int]$Activated = 0
     hidden [MinerStatus]$Status = [MinerStatus]::Idle
-    $IntervalCount
+    [TimeSpan[]]$Intervals
     $LogFile
     $Pool
     hidden [Array]$Data = @()

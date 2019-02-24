@@ -310,22 +310,22 @@ while (-not $API.Stop) {
     $ActiveMiners | Where-Object Best | ForEach-Object {
         $Miner = $_
         $Miner.Speed_Live = @()
-        $Miner.IntervalCount++
+        $Miner.Intervals += $StatSpan
 
         if ($Miner.New) {$Miner.New = $Miner.Algorithm | Where-Object {-not (Get-Stat -Name "$($Miner.Name)_$($_)_HashRate")}}
 
-        if ($Miner.IntervalCount % $Miner.IntervalMultplier -eq 0 -or ($Miner.New -and $Miner.GetActivateCount() -gt $Strikes)) {
+        if ($Miner.Intervals.Count % $Miner.IntervalMultplier -eq 0 -or ($Miner.New -and $Miner.Intervals.Count -ge $Miner.IntervalMultplier)) {
             $Miner.Algorithm | ForEach-Object {
                 $Miner_Algorithm = $_ -replace "-NHMP" #temp fix
-                $Miner.Speed_Live += $Miner.GetHashRate($Miner_Algorithm, ($Config.Interval * $Miner.IntervalMultplier * 2), $false)
+                $Miner.Speed_Live += $Miner.GetHashRate($Miner_Algorithm, (($Miner.Intervals | Select-Object -Last $Miner.IntervalMultplier | Measure-Object TotalSeconds -Sum).Sum + $Config.Interval), $false)
 
-                $Miner_Speed = $Miner.GetHashRate($Miner_Algorithm, ($Config.Interval * $Miner.IntervalMultplier * 2), $Miner.New)
-                if (-not $Miner_Speed -and $Miner.IntervalCount -ge ($Strikes * $Miner.IntervalMultplier)) {$Miner_Speed = $Miner.GetHashRate($Miner_Algorithm, ($Config.Interval * $Miner.IntervalMultplier), $false)}
-                if (-not $Miner_Speed -and $Miner.IntervalCount -ge ($Strikes * $Strikes * $Miner.IntervalMultplier) -and $Miner.New) {$Miner_Speed = $Miner.GetHashRate($Miner_Algorithm, ($Config.Interval * $Miner.IntervalMultplier * $Miner.IntervalCount), $false)}
-                if ($Miner_Speed -or $Miner.IntervalCount -ge ($Strikes * $Strikes * $Miner.IntervalMultplier) -or ($Miner.New -and $Miner.GetActivateCount() -gt $Strikes)) {
-                    $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Speed -Duration $StatSpan -FaultDetection ($Miner.IntervalMultplier -le 1)
+                $Miner_Speed = $Miner.GetHashRate($Miner_Algorithm, (($Miner.Intervals | Select-Object -Last $Miner.IntervalMultplier | Measure-Object TotalSeconds -Sum).Sum + $Config.Interval), $Miner.New)
+                if (-not $Miner_Speed -and $Miner.Intervals.Count -ge ($Strikes * $Miner.IntervalMultplier)) {$Miner_Speed = $Miner.GetHashRate($Miner_Algorithm, (($Miner.Intervals | Select-Object -Last $Miner.IntervalMultplier | Measure-Object TotalSeconds -Sum).Sum + $Config.Interval), $false)}
+                if (-not $Miner_Speed -and $Miner.Intervals.Count -ge ($Strikes * $Strikes * $Miner.IntervalMultplier) -and $Miner.New) {$Miner_Speed = $Miner.GetHashRate($Miner_Algorithm, (($Miner.Intervals | Measure-Object TotalSeconds -Sum).Sum + $Config.Interval), $false)}
+                if ($Miner_Speed -or $Miner.Intervals.Count -ge ($Strikes * $Strikes * $Miner.IntervalMultplier) -or ($Miner.New -and $Miner.GetActivateCount() -gt $Strikes)) {
+                    $Stat = Set-Stat -Name "$($Miner.Name)_$($_)_HashRate" -Value $Miner_Speed -Duration ($Miner.Intervals | Measure-Object TotalSeconds -Sum).Sum -FaultDetection ($Miner.IntervalMultplier -le 1)
                 }
-                if ($Miner_Speed) {$Miner.IntervalCount = 0}
+                if ($Miner_Speed) {$Miner.Intervals = @()}
 
                 #Update watchdog timer
                 $Miner_Name = $Miner.Name
@@ -626,7 +626,7 @@ while (-not $API.Stop) {
                 Best                 = $false
                 Best_Comparison      = $false
                 New                  = $false
-                IntervalCount        = 0
+                Intervals            = @()
                 Pool                 = [Array]$Miner.Pools.PSObject.Properties.Value.Name #temp fix, must use 'PSObject.Properties' to preserve order
                 ShowMinerWindow      = $Config.ShowMinerWindow
                 IntervalMultplier    = $Miner.IntervalMultplier
@@ -639,8 +639,8 @@ while (-not $API.Stop) {
     $API.ActiveMiners = $ActiveMiners #Update API miner information
 
     #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
-    $BestMiners = $ActiveMiners | Select-Object DeviceName -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0 -and $_.Profit -ne 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {$_.Profit_Bias}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count}, {$_.IntervalCount}, {$_.IntervalMultplier} | Select-Object -First 1)}
-    $BestMiners_Comparison = $ActiveMiners | Select-Object DeviceName -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0 -and $_.Profit -ne 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {$_.Profit_Comparison}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count}, {$_.IntervalCount}, {$_.IntervalMultplier} | Select-Object -First 1)}
+    $BestMiners = $ActiveMiners | Select-Object DeviceName -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0 -and $_.Profit -ne 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {$_.Profit_Bias}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count}, {$_.Intervals.Count}, {$_.IntervalMultplier} | Select-Object -First 1)}
+    $BestMiners_Comparison = $ActiveMiners | Select-Object DeviceName -Unique | ForEach-Object {$Miner_GPU = $_; ($ActiveMiners | Where-Object {(Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0 -and $_.Profit -ne 0} | Sort-Object -Descending {($_ | Where-Object Profit -EQ $null | Measure-Object).Count}, {$_.Profit_Comparison}, {($_ | Where-Object Profit -NE 0 | Measure-Object).Count}, {$_.Intervals.Count}, {$_.IntervalMultplier} | Select-Object -First 1)}
     $Miners_Device_Combos = (Get-Combination ($ActiveMiners | Select-Object DeviceName -Unique) | Where-Object {(Compare-Object ($_.Combination | Select-Object -ExpandProperty DeviceName -Unique) ($_.Combination | Select-Object -ExpandProperty DeviceName) | Measure-Object).Count -eq 0})
     $BestMiners_Combos = $Miners_Device_Combos | ForEach-Object {
         $Miner_Device_Combo = $_.Combination
@@ -718,7 +718,7 @@ while (-not $API.Stop) {
             Write-Log "Starting miner ($Miner_Name {$(($_.Algorithm | ForEach-Object {"$($_ -replace '-NHMP'<#temp fix#> -replace 'NiceHash'<#temp fix#>)@$($Pools.$_.Name)"}) -join "; ")}). "
             Write-Log -Level Verbose $_.GetCommandLine().Replace("$(Convert-Path '.\')\", "")
             $_.SetStatus("Running")
-            $_.IntervalCount = 0
+            $_.Intervals = @()
 
             #Add watchdog timer
             if ($Config.Watchdog -and $_.Profit -ne $null) {
