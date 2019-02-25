@@ -3,18 +3,15 @@
 [CmdletBinding()]
 param (
     [PSCustomObject]$Config = @{},
-    $ActiveMiners = @()
+    [Miner[]]$ActiveMiners = @()
 )
 
-Write-Log "Pinging monitoring server. "
-Write-Host "Your miner status key is: $($Config.MinerStatusKey)"
+$Profit = [Double]($ActiveMiners | Where-Object Best | Where-Object {$_.GetStatus() -eq "Running"} | Measure-Object Profit -Sum).Sum | ConvertTo-Json
 
-$Profit = ($ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.GetStatus() -eq "Running"} | Measure-Object Profit -Sum).Sum | ConvertTo-Json
-
-# Format the miner values for reporting. Set relative path so the server doesn't store anything personal (like your system username, if running from somewhere in your profile)
-$Minerreport = ConvertTo-Json @(
-    $ActiveMiners | Where-Object {$_.Activated -GT 0 -and $_.GetStatus() -eq "Running"} | Foreach-Object {
-        # Create a custom object to convert to json. Type, Pool, CurrentSpeed and EstimatedSpeed are all forced to be arrays, since they sometimes have multiple values.
+#Format the miner values for reporting. Set relative path so the server doesn't store anything personal (like your system username, if running from somewhere in your profile)
+$Minerreport = @(
+    $ActiveMiners | Where-Object Best | ForEach-Object {
+        #Create a custom object to convert to json. Type, Pool, CurrentSpeed and EstimatedSpeed are all forced to be arrays, since they sometimes have multiple values.
         [PSCustomObject]@{
             Name           = $_.Name
             Path           = Resolve-Path -Relative $_.Path
@@ -27,18 +24,31 @@ $Minerreport = ConvertTo-Json @(
             'BTC/day'      = $_.Profit
         }
     }
-)
+) | ConvertTo-Json
 
-try {
-    $Response = Invoke-RestMethod -Uri $Config.MinerStatusURL -Method Post -Body @{address = $($Config.MinerStatusKey); workername = $Config.WorkerName; miners = $Minerreport; profit = $Profit} -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+Start-Job -Name ReportStatus -ArgumentList $Config.MinerStatusURL, $Config.MinerStatusKey, $Config.WorkerName, $Profit, $Minerreport -ScriptBlock {
+    param (
+        [String]$MinerStatusURL, 
+        [String]$MinerStatusKey, 
+        [String]$WorkerName, 
+        [string]$Profit, 
+        [string]$Minerreport
+    )
 
-    if ($Response -eq "success") {
-        Write-Log "Miner Status ($($Config.MinerStatusURL)): $Response"
+    Write-Log "Pinging monitoring server. "
+    Write-Host "Your miner status key is: $MinerStatusKey"    
+
+    try {
+        $Response = Invoke-RestMethod -Uri $MinerStatusURL -Method Post -Body @{address = $MinerStatusKey; workername = $WorkerName; miners = $Minerreport; profit = $Profit} -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+
+        if ($Response -eq "success") {
+            Write-Log "Miner Status ($MinerStatusURL): $Response"
+        }
+        else {
+            Write-Log -Level Warn "Miner Status ($MinerStatusURL): $Response"
+        }
     }
-    else {
-        Write-Log -Level Warn "Miner Status ($($Config.MinerStatusURL)): $Response"
+    catch {
+        Write-Log -Level Warn "Miner Status ($MinerStatusURL) has failed. "
     }
-}
-catch {
-    Write-Log -Level Warn "Miner Status ($($Config.MinerStatusURL)) has failed. "
 }

@@ -282,7 +282,7 @@ while (-not $API.Stop) {
     #Update monitoring service
     if ($ActiveMiners -and $Config.MinerStatusURL -and $Config.MinerStatusKey) {
         $ReportStatus_Job | Remove-Job -Force -ErrorAction SilentlyContinue
-        $ReportStatus_Job = Start-Job -Name "ReportStatus" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList $Config, $ActiveMiners -FilePath .\ReportStatus.ps1
+        $ReportStatus_Job = & .\ReportStatus.ps1 $Config $ActiveMiners
     }
 
     #Wait 10 to 30 seconds to read miner hash rates
@@ -302,7 +302,7 @@ while (-not $API.Stop) {
     #Update monitoring service
     if ($ActiveMiners -and $Config.MinerStatusURL -and $Config.MinerStatusKey) {
         $ReportStatus_Job | Remove-Job -Force -ErrorAction SilentlyContinue
-        $ReportStatus_Job = Start-Job -Name "ReportStatus" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList $Config, $ActiveMiners -FilePath .\ReportStatus.ps1
+        $ReportStatus_Job = & .\ReportStatus.ps1 $Config $ActiveMiners
     }
 
     #Save current hash rates
