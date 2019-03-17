@@ -232,6 +232,8 @@ while (-not $API.Stop) {
     else {
         Write-Log ("Mining for you. Donation run will start in {0:hh} hour(s) {0:mm} minute(s). " -f $($LastDonated.AddDays(1) - ($Timer.AddMinutes($Config.Donate))))
     }
+    #Clear pool cache if the pool configuration has changed
+    if ((($OldConfig.Pools | ConvertTo-Json -Compress -Depth 10) -ne ($Config.Pools | ConvertTo-Json -Compress -Depth 10)) -or ($OldConfig.PoolName -ne $Config.PoolName) -or ($OldConfig.ExcludePoolName -ne $Config.ExcludePoolName)) {$AllPools = $null}
 
     if (Test-Path "APIs" -PathType Container -ErrorAction Ignore) {Get-ChildItem "APIs" -File | ForEach-Object {. $_.FullName}}
 
