@@ -122,6 +122,7 @@ $DecayBase = 1 - 0.1 #decimal percentage
 $WatchdogTimers = @()
 
 $ActiveMiners = @()
+$AllMinerPaths = @()
 
 #Start the log
 Start-Transcript ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
@@ -438,7 +439,8 @@ while (-not $API.Stop) {
         if (Test-Path "MinersLegacy" -PathType Container -ErrorAction Ignore) {
             #Strip Model information from devices -> will create only one miner instance
             if ($Config.CreateMinerInstancePerDeviceModel) {$DevicesTmp = $Devices} else {$DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object {$_.Model = ""}}
-            Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp} | ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | 
+            Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp} | 
+                ForEach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force; $_.Content.Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($_.Content.Path); $AllMinerPaths += $_.Content.Path} | 
                 ForEach-Object {if (-not $_.DeviceName) {$_ | Add-Member DeviceName (Get-Device $_.Type).Name -Force}; $_} | #for backward compatibility
                 ForEach-Object {if (-not $_.IntervalMultiplier) {$_ | Add-Member IntervalMultiplier ([Math]::Max(1, $_.BenchmarkIntervals)) -Force}; $_} | #for backward compatibility
                 Where-Object {$_.DeviceName} | #filter miners for non-present hardware
@@ -526,7 +528,6 @@ while (-not $API.Stop) {
 
         $Miner | Add-Member DeviceName @($Miner.DeviceName | Select-Object -Unique | Sort-Object) -Force
 
-        $Miner.Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Miner.Path)
         if ($Miner.PrerequisitePath) {$Miner.PrerequisitePath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Miner.PrerequisitePath)}
 
         if ($Miner.Arguments -isnot [String]) {$Miner.Arguments = $Miner.Arguments | ConvertTo-Json -Depth 10 -Compress}
@@ -711,7 +712,7 @@ while (-not $API.Stop) {
     }
     $API.WatchdogTimers = $WatchdogTimers #Give API access to WatchdogTimers information
     Start-Sleep $Config.Delay #Wait to prevent BSOD
-    if ($ActiveMiners | ForEach-Object {$_.GetProcessNames()}) {Get-Process -Name @($ActiveMiners | ForEach-Object {$_.GetProcessNames()} | Select-Object) -ErrorAction Ignore | Select-Object -ExpandProperty ProcessName | Compare-Object @($ActiveMiners | Where-Object Best | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {$_.GetProcessNames()} | Select-Object) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | Select-Object -Unique | ForEach-Object {Stop-Process -Name $_ -Force -ErrorAction Ignore}} #Kill stray miners
+    Get-CIMInstance CIM_Process | Where-Object ExecutablePath | Where-Object {$AllMinerPaths -contains $_.ExecutablePath} | Where-Object {$ActiveMiners.ProcessID -notcontains $_.ProcessID} | Select-Object -ExpandProperty ProcessID | ForEach-Object {Stop-Process -Id $_ -Force -ErrorAction Ignore}
 
     #Start miners in the active list depending on if they are the most profitable
     $ActiveMiners | Where-Object Best | ForEach-Object {
