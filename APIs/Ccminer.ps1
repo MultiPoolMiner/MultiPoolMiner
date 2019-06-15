@@ -5,7 +5,7 @@ class Ccminer : Miner {
         if ($this.GetStatus() -ne [MinerStatus]::Running) {return @()}
 
         $Server = "localhost"
-        $Timeout = 10 #seconds
+        $Timeout = 5 #seconds
 
         $Request = "summary"
         $Response = ""
@@ -17,22 +17,30 @@ class Ccminer : Miner {
             $Data = $Response -split ";" | ConvertFrom-StringData -ErrorAction Stop
         }
         catch {
-            if ((Get-Date) -gt ($this.Process.PSBeginTime.AddSeconds(30))) {Write-Log -Level Error "Failed to connect to miner ($($this.Name)) [ProcessId: $($this.ProcessId)]. "}
             return @($Request, $Response)
         }
 
-        $HashRate_Name = [String]($this.Algorithm -like (Get-Algorithm $Data.algo))
-        if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -like "$(Get-Algorithm $Data.algo)*")} #temp fix
-        $HashRate_Value = [Double]$Data.KHS * 1000
+        $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
 
-        if ($HashRate_Name -and $HashRate_Value -GT 0) {$HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}}
+        if ($this.AllowedBadShareRatio) {
+            $Shares_Accepted = [Int64]($Data.ACC | Measure-Object -Sum).Sum
+            $Shares_Rejected = [Int64]($Data.REJ | Measure-Object -Sum).Sum
+            if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) {
+                $this.SetStatus("Failed")
+                $this.StatusMessage = " was stopped because of too many bad shares for algorithm $($HashRate_Name) (total: $($Shares_Accepted + $Shares_Rejected) / bad: $($Shares_Rejected) [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
+                return @($Request, $Response)
+            }
+        }
 
-        if ($HashRate | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) {
+        $HashRate | Add-Member @{$HashRate_Name = [Double]$Data.KHS * 1000}
+
+        if ($HashRate.PSObject.Properties.Value -gt 0) {
             $this.Data += [PSCustomObject]@{
-                Date     = (Get-Date).ToUniversalTime()
-                Raw      = $Response
-                HashRate = $HashRate
-                Device   = @()
+                Date       = (Get-Date).ToUniversalTime()
+                Raw        = $Response
+                HashRate   = $HashRate
+                PowerUsage = (Get-PowerUsage $this.DeviceName)
+                Device     = @()
             }
         }
 

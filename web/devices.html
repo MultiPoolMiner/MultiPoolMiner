@@ -2,15 +2,19 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
   <h1 id="title" data-navbaractive="navdevices" class="h2">Devices</h1>
 </div>
-<p>These are the devices (GPUs and CPUs) detected by MultiPoolMiner.</p>
+<div class="alert alert-info" role="alert">These are the devices (GPUs and CPUs) detected by MultiPoolMiner. </div>
+
 <table id="devices" class="table"
+  data-buttons-align="left"
   data-toggle="table"
-  data-url="/devices"
+  data-url="/alldevices"
   data-response-handler="formatDevices"
   data-cache="false"
   data-show-columns="true"
   data-show-toggle="true"
   data-show-refresh="true"
+  data-sort-order="desc"
+  data-sort-name="Status, Name"
   data-icons-prefix="fa"
   data-icons="icons"
   data-detail-view="true"
@@ -19,6 +23,7 @@
   <thead>
     <tr>
       <th data-field="Name" data-sortable="true">Name</th>
+      <th data-field="Status" data-sortable="true">Status</th>
       <th data-field="Vendor" data-sortable="true">Vendor</th>
       <th data-field="Model" data-sortable="true">Model</th>
       <th data-field="tMemory" data-sortable="true">Memory</th>

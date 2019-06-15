@@ -447,8 +447,6 @@ namespace MonoTorrent.Client
 
         public TorrentManager(MagnetLink magnetLink, string savePath, TorrentSettings settings, string torrentSave)
         {
-            Torrent torrent;
-
             Check.MagnetLink(magnetLink);
             Check.InfoHash(magnetLink.InfoHash);
             Check.SavePath(savePath);
@@ -465,14 +463,6 @@ namespace MonoTorrent.Client
             if (magnetLink.Webseeds != null)
                 foreach (string webseed in magnetLink.Webseeds)
                     this.webseeds.Add(webseed);
-
-            if(Torrent.TryLoad(torrentSave, out torrent) && torrent.InfoHash == magnetLink.InfoHash)
-            {
-                this.torrent = torrent;
-                Initialise(savePath, "", announces);
-                ChangePicker(CreateStandardPicker());
-                return;
-            }
 
             Initialise(savePath, "", announces);
         }

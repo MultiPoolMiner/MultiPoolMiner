@@ -1,75 +1,93 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [alias("WorkerName")]
-    [String]$Worker, 
-    [TimeSpan]$StatSpan
+    [TimeSpan]$StatSpan,
+    [PSCustomObject]$Config
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
+$PoolRegions = "us"
+$PoolAPIStatusUri = "http://api.yiimp.eu/api/status"
+$PoolAPICurrenciesUri = "http://api.yiimp.eu/api/currencies"
+
 $RetryCount = 3
 $RetryDelay = 2
-while (-not ($YiiMP_Request -and $YiiMPCoins_Request) -and $RetryCount -gt 0) {
+while (-not ($APIStatusRequest -and $APICurrenciesRequest) -and $RetryCount -gt 0) {
     try {
-        if (-not $YiiMP_Request) {$YiiMP_Request = Invoke-RestMethod "http://api.yiimp.eu/api/status" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
-        if (-not $YiiMPCoins_Request) {$YiiMPCoins_Request = Invoke-RestMethod "http://api.yiimp.eu/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APIStatusRequest) {$APIStatusRequest = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APICurrenciesRequest) {$APICurrenciesRequest  = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
     }
     catch {
-        Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
+        Start-Sleep -Seconds $RetryDelay
         $RetryCount--        
     }
 }
 
-if (-not $YiiMP_Request) {
+if (-not $APIStatusRequest) {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
     return
 }
 
-if (($YiiMPCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
-    Write-Log -Level Warn "Pool API ($Name) returned nothing. "
+if (($APIStatusRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+    Write-Log -Level Warn "Pool API ($Name) [StatusUri] returned nothing. "
     return
 }
 
-$YiiMP_Regions = "us"
-$YiiMP_Currencies = ($YiiMPCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
-
-if (-not $YiiMP_Currencies) {
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+if (($APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+    Write-Log -Level Warn "Pool API ($Name) [CurrenciesUri] returned nothing. "
     return
 }
 
-$YiiMP_Currencies | Where-Object {$YiiMPCoins_Request.$_.hashrate -gt 0} | ForEach-Object {
-    $YiiMP_Host = "yiimp.eu"
-    $YiiMP_Port = $YiiMPCoins_Request.$_.port
-    $YiiMP_Algorithm = $YiiMPCoins_Request.$_.algo
-    $YiiMP_Algorithm_Norm = Get-Algorithm $YiiMP_Algorithm
-    $YiiMP_Coin = $YiiMPCoins_Request.$_.name
-    $YiiMP_Currency = $_
+#Pool allows payout in any currency available in API
+if ($APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Sort-Object | Select-Object -Unique | Where-Object {$Config.Pools.$Name.Wallets.$_}) {
+    $APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Sort-Object | Select-Object -Unique | Where-Object {$APICurrenciesRequest.$_.hashrate -GT 0 -and $Config.Pools.$Name.Wallets.$_} | Foreach-Object {
 
-    $Divisor = 1000000000 * [Double]$YiiMP_Request.$YiiMP_Algorithm.mbtc_mh_factor
+        $MiningCurrency = $APICurrenciesRequest.$_.symbol
+        if ($Config.Pools.$Name.Wallets.$MiningCurrency) {
+            $APICurrenciesRequest.$_ | Add-Member Symbol $_ -ErrorAction SilentlyContinue
 
-    $Stat = Set-Stat -Name "$($Name)_$($_)_Profit" -Value ([Double]$YiiMPCoins_Request.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
+            $PoolHost       = "yiimp.eu"
+            $Port           = $APICurrenciesRequest.$_.port
+            $Algorithm      = $APICurrenciesRequest.$_.algo
+            $CoinName       = Get-CoinName $(if ($APIStatusRequest.$_.coins -eq 1) {$APICurrenciesRequest.$($APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesRequest.$_.algo -eq $Algorithm}).Name})
+            $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
+            if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
 
-    $YiiMP_Regions | ForEach-Object {
-        $YiiMP_Region = $_
-        $YiiMP_Region_Norm = Get-Region $YiiMP_Region
+            $MiningCurrency = $APICurrenciesRequest.$_.symbol
+            $Workers        = $APICurrenciesRequest.$_.workers
+            $Fee            = $APIStatusRequest.$Algorithm.Fees / 100
 
-        [PSCustomObject]@{
-            Algorithm     = $YiiMP_Algorithm_Norm
-            CoinName      = $YiiMP_Coin
-            Price         = $Stat.Live
-            StablePrice   = $Stat.Week
-            MarginOfError = $Stat.Week_Fluctuation
-            Protocol      = "stratum+tcp"
-            Host          = $YiiMP_Host
-            Port          = $YiiMP_Port
-            User          = Get-Variable $YiiMP_Currency -ValueOnly
-            Pass          = "$Worker,c=$YiiMP_Currency"
-            Region        = $YiiMP_Region_Norm
-            SSL           = $false
-            Updated       = $Stat.Updated
-            PayoutScheme  = "PPLNS"
+            $Divisor = 1000000 * [Double]$APIStatusRequest.$Algorithm.mbtc_mh_factor
+
+            $Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$APICurrenciesRequest.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
+
+            $PoolRegions | ForEach-Object {
+                $Region = $_
+                $Region_Norm = Get-Region $Region
+
+                [PSCustomObject]@{
+                    Algorithm      = $Algorithm_Norm
+                    CoinName       = $CoinName
+                    Price          = $Stat.Live
+                    StablePrice    = $Stat.Week
+                    MarginOfError  = $Stat.Week_Fluctuation
+                    Protocol       = "stratum+tcp"
+                    Host           = $PoolHost
+                    Port           = $Port
+                    User           = $Config.Pools.$Name.Wallets.$MiningCurrency
+                    Pass           = "$($Config.Pools.$Name.Worker),c=$MiningCurrency"
+                    Region         = $Region_Norm
+                    SSL            = $false
+                    Updated        = $Stat.Updated
+                    Fee            = $Fee
+                    Workers        = [Int]$Workers
+                    MiningCurrency = $MiningCurrency
+                }
+            }
         }
     }
+}
+else { 
+    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
 }

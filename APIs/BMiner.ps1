@@ -5,7 +5,7 @@ class BMiner : Miner {
         if ($this.GetStatus() -ne [MinerStatus]::Running) {return @()}
 
         $Server = "localhost"
-        $Timeout = 10 #seconds
+        $Timeout = 5 #seconds
 
         $Request = ""
         $Response = ""
@@ -13,35 +13,58 @@ class BMiner : Miner {
         $HashRate_Name = ""
         $HashRate_Value = 0
         $HashRate = [PSCustomObject]@{}
-
         try {
             $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/api/v1/status/solver" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
             $Data = $Response | ConvertFrom-Json -ErrorAction Stop
         }
         catch {
-            if ((Get-Date) -gt ($this.Process.PSBeginTime.AddSeconds(30))) {Write-Log -Level Error "Failed to connect to miner ($($this.Name)) [ProcessId: $($this.ProcessId)]. "}
             return @($Request, $Response)
         }
 
+        if ($this.AllowedBadShareRatio) {
+            #Read stratum info from API
+            try {
+                $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/api/v1/status/stratum" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
+                $Data | Add-member stratums ($Response | ConvertFrom-Json -ErrorAction Stop).stratums
+            }
+            catch {
+                if ((Get-Date) -gt ($this.Process.PSBeginTime.AddSeconds($this.WarmupTime))) {$this.SetStatus("Failed")}
+                return @($Request, $Response, "Reason: Could not retrieve data from API ")
+            }
+        }        
+
         $this.Algorithm | Select-Object -Unique | ForEach-Object {
+
             $HashRate_Name = [String]($this.Algorithm -like (Get-Algorithm $_))
             if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -like "$(Get-Algorithm $_)*")} #temp fix
 
-            $Data.devices | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
-                $Data.devices.$_.solvers | Where-Object {$HashRate_Name -like "$(Get-Algorithm $_.Algorithm)*"} | ForEach-Object {
-                    if ($_.speed_info.hash_rate) {$HashRate_Value += [Int64]$_.speed_info.hash_rate}
-                    else {$HashRate_Value += [Int64]$_.speed_info.solution_rate}
+            if ($this.AllowedBadShareRatio) {
+                $Shares_Accepted = [Int64]$Data.stratums.$_.accepted_shares
+                $Shares_Rejected = [Int64]$Data.stratums.$_.rejected_shares
+                if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) {
+                    $this.SetStatus("Failed")
+                    $this.StatusMessage = " was stopped because of too many bad shares for algorithm $($HashRate_Name) (total: $($Shares_Accepted + $Shares_Rejected) / bad: $($Shares_Rejected) [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
+                    return @($Request, $Response)
                 }
             }
-            if ($HashRate_Name -and $HashRate_Value -GT 0) {$HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}}
+
+            $HashRate_Value = 0
+            $Data.devices | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
+                $Data.devices.$_.solvers | Where-Object {$HashRate_Name -like "$(Get-Algorithm $_.Algorithm)*"} | ForEach-Object {
+                    if ($_.speed_info.hash_rate) {$HashRate_Value += [Double]$_.speed_info.hash_rate}
+                    else {$HashRate_Value += [Double]$_.speed_info.solution_rate}
+                }
+            }
+            $HashRate | Add-Member @{$HashRate_Name = [Double]$HashRate_Value}
         }
 
-        if ($HashRate | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) {
+        if ($HashRate.PSObject.Properties.Value -gt 0) {
             $this.Data += [PSCustomObject]@{
-                Date     = (Get-Date).ToUniversalTime()
-                Raw      = $Response
-                HashRate = $HashRate
-                Device   = @()
+                Date       = (Get-Date).ToUniversalTime()
+                Raw        = $Response
+                HashRate   = $HashRate
+                PowerUsage = (Get-PowerUsage $this.DeviceName)
+                Device     = @()
             }
         }
 

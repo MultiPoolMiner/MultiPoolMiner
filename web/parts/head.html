@@ -2,43 +2,40 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
       <link rel="shortcut icon" type="image/x-icon" href="https://multipoolminer.io/images/mpm_logo64.ico" />
       <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
-      <!-- link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.min.css" integrity="sha256-UP+6xezmmsC027u61a8Ks+Xnp+TftBfw4PcrNyPXC40=" crossorigin="anonymous" / -->
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.1/bootstrap-table.min.css" integrity="sha256-eU4xmpfQx1HSi5q1q2rHNcMEzTNJov7r2Wr/6zF3ANc=" crossorigin="anonymous" />
-      <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/extensions/filter-control/bootstrap-table-filter-control.css" integrity="sha256-scTkOuxpT3mjWR36xEaWlCEKBjieTRteuOk3tICdM7M=" crossorigin="anonymous" / -->
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.14.2/bootstrap-table.min.css" integrity="sha256-pxMFc5RPsIXrouYF4MXPEQe5TtTv+LVM0pyiWDWHyFY=" crossorigin="anonymous">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.14.2/extensions/filter-control/bootstrap-table-filter-control.css" integrity="sha256-scTkOuxpT3mjWR36xEaWlCEKBjieTRteuOk3tICdM7M=" crossorigin="anonymous">
       <link rel="stylesheet" href="/css/dashboard.css">
       <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
       <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
-
-      <!-- Use older version of bootstrap-table until bug is fixed: https://github.com/wenzhixin/bootstrap-table/issues/3729 -->
-      <!-- script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.min.js" integrity="sha256-l+jZldmOASkIPelan4NKyAFD+oGNqPulrVQwsjxuCXc=" crossorigin="anonymous"></script -->
-      <!-- script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/extensions/auto-refresh/bootstrap-table-auto-refresh.min.js" integrity="sha256-wM+7Q0ikz4eLE3kaE/Q4Dgb495iz2UzN3leHPLCdXCY=" crossorigin="anonymous"></script -->
-      <!-- script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/extensions/filter-control/bootstrap-table-filter-control.min.js" integrity="sha256-JpqYkcCJyvE+kxrFvhclJVe8LXkDIrqlio0V90A/yuM=" crossorigin="anonymous"></script -->
-      <!-- script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/extensions/export/bootstrap-table-export.min.js" integrity="sha256-dgKPXFPCSahQeFL/1cdwPPeEOBLAZR8hUdYIPLb/Jyw=" crossorigin="anonymous"></script -->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.1/bootstrap-table.min.js" integrity="sha256-eXHLyyVI+v6X1wbfg9NB05IWqOqY4E9185nHZgeDIhg=" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.1/extensions/filter-control/bootstrap-table-filter-control.min.js" integrity="sha256-qyXaapsr+PVNpdEqfU2yiqRLYUfClBp88YvLJ6q26/8=" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.11.1/extensions/export/bootstrap-table-export.min.js" integrity="sha256-bNaAGj3n4fpGsbo2WDr9JJoalh5/CSrz4wlkbk3TS88=" crossorigin="anonymous"></script>
-      
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.min.js" integrity="sha256-l+jZldmOASkIPelan4NKyAFD+oGNqPulrVQwsjxuCXc=" crossorigin="anonymous"></script / -->
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/extensions/auto-refresh/bootstrap-table-auto-refresh.min.js" integrity="sha256-wM+7Q0ikz4eLE3kaE/Q4Dgb495iz2UzN3leHPLCdXCY=" crossorigin="anonymous"></script / -->
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/extensions/filter-control/bootstrap-table-filter-control.min.js" integrity="sha256-JpqYkcCJyvE+kxrFvhclJVe8LXkDIrqlio0V90A/yuM=" crossorigin="anonymous"></script / -->
+      <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/extensions/export/bootstrap-table-export.min.js" integrity="sha256-dgKPXFPCSahQeFL/1cdwPPeEOBLAZR8hUdYIPLb/Jyw=" crossorigin="anonymous"></script / -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.14.2/bootstrap-table.min.js" integrity="sha256-/xffGMKcg3EPCNGt1lHxJ9dN/eMlD8noOvtptABHRls=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.14.2/extensions/auto-refresh/bootstrap-table-auto-refresh.min.js" integrity="sha256-uX90hAGKlvhBgfXH31UBwFGueSEafN+pnUrz9812di4=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.14.2/extensions/filter-control/bootstrap-table-filter-control.min.js" integrity="sha256-VtnQcNpVPmbC5y4XOkype1UqBLe2a+4kc+w/NkZyx3M=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.14.2/extensions/export/bootstrap-table-export.min.js" integrity="sha256-og9lyS0fdTS9umQY9NRojsWIddgRFjHG2D46EFpqxZg=" crossorigin="anonymous"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js" integrity="sha256-+JMHsXRyeTsws/tzbIh5YHQxRdKCuNjmvNcTFtY6DLc=" crossorigin="anonymous"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.min.js"></script>
       <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" integrity="sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe" crossorigin="anonymous"></script>
       <script src="/js/utilities.js"></script>
+      <script src="/js/bootstrap-table-contextmenu.js"></script>
       <title>MultiPoolMiner Local Dashboard</title>
     </head>
     <body>
     <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
       <a class="navbar-brand" href="/">MultiPoolMiner</a>
-      <div class="text-white" id="profit">Unknown</div>
+      <div class="text-white" id="profit"></div>
       <div class="text-white" id="exchangerates"></div>
-      
     </nav>
     
     <div class="container-fluid">
       <div class="row">
-                <nav class="d-none d-md-block bg-light sidebar nav-collapse" id="sidebar">
+        <nav class="d-none d-md-block bg-light sidebar nav-collapse" id="sidebar">
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               <li class="nav-item">

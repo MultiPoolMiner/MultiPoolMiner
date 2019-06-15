@@ -1,8 +1,10 @@
 <!--#include file="/parts/head.html" -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-  <h1 id="title" data-navbaractive="navallminers" class="h2">Miners</h1>
+  <h1 id="title"  class="h2"data-navbaractive="navallminers">Miners</h1>
 </div>
+<p>Shows all available miners for each algorithm</p>
 <table id="miners" class="table"
+  data-buttons-align="left"
   data-toggle="table"
   data-url="/miners"
   data-response-handler="formatMiners"
@@ -21,13 +23,19 @@
 >
   <thead>
     <tr>
-      <th data-field="Name" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Name</th>
+      <th data-field="Name" data-sortable="true" data-filter-control="input" data-filter-strict-search="false">Name</th>
       <th data-field="tDevices" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Devices</th>
       <th data-field="Profit" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit</th>
-      <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Algorithm</th>
-      <th data-field="tPrimaryHashRate" data-sortable="true" data-formatter="formatHashRateValue">Primary Speed</th>
+      <th data-field="Profit_Bias" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit Bias</th>
+      <th data-field="Earning" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning</th>
+      <th data-field="Earning_Bias" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning Bias</th>
+      <th data-field="PowerUsage" data-align="right" data-sortable="true" data-formatter="formatWatt">Power Usage</th>
+      <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Primary Algorithm</th>
+      <th data-field="tPrimaryHashRate" data-align="right"  data-sortable="true" data-formatter="formatHashRateValue">Speed</th>
+      <th data-field="tPrimaryFee" data-align="right" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
       <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Secondary Algorithm</th>
-      <th data-field="tSecondaryHashRate" data-sortable="true" data-formatter="formatHashRateValue">Secondary Speed</th>
+      <th data-field="tSecondaryHashRate" data-align="right"  data-sortable="true" data-formatter="formatHashRateValue">Speed</th>
+      <th data-field="tSecondaryFee" data-align="right" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
     </tr>
   </thead>
 </table>
@@ -41,13 +49,15 @@
     // Format the device(s)
     item.tDevices = item.DeviceName.toString();
 
-    // Format the algorithms and hashrates
+    // Format the algorithms, hashrates & fees
     var algorithms = Object.keys(item.HashRates);
     item.tPrimaryAlgorithm = algorithms[0];
     item.tSecondaryAlgorithm = algorithms[1];
     item.tPrimaryHashRate = item.HashRates[algorithms[0]];
     item.tSecondaryHashRate = item.HashRates[algorithms[1]];
-
+    var fees = Object.values(item.Fees);
+    item.tPrimaryFee = fees[0];
+    item.tSecondaryFee = fees[1];
   });
   return data;
 }

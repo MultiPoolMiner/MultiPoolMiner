@@ -10,33 +10,35 @@ function timeSince(date) {
   var seconds = Math.floor((new Date() - date) / 1000);
   var interval = Math.floor(seconds / 31536000);
   if (interval > 1) {
-    return interval + " years ago";
+    return interval + ' years ago"';
   }
   interval = Math.floor(seconds / 2592000);
   if (interval > 1) {
-    return interval + " months ago";
+    return interval + ' months ago';
   }
   interval = Math.floor(seconds / 86400);
   if (interval > 1) {
-    return interval + " days ago";
+    return interval + ' days ago';
   }
   interval = Math.floor(seconds / 3600);
   if (interval > 1) {
-     return interval + " hours ago";
+     return interval + ' hours ago';
   }
   interval = Math.floor(seconds / 60);
   if (interval > 1) {
-    return interval + " minutes ago";
+    return interval + ' minutes ago';
   }
-  return Math.floor(seconds) + " seconds ago";
+  return Math.floor(seconds) + ' seconds ago';
 }
 
 function formatHashRateValue(value) {
   var sizes = ['H/s','KH/s','MH/s','GH/s','TH/s'];
-  if (value == 0) return '0 H/s';
   if (isNaN(value)) return '-';
+  if (value == 0) return '-failed-';
+  if (value > 0 && value <= 1) return value.toFixed(2) + ' H/s';
   var i = Math.floor(Math.log(value) / Math.log(1000));
-  return parseFloat((value / Math.pow(1000, i)).toFixed(2)) + ' ' + sizes[i];
+  if (value >= 1) return parseFloat((value / Math.pow(1000, i)).toFixed(2)) + ' ' + sizes[i];
+  return '-';
 };
 
 function formatHashRate(value) {
@@ -48,7 +50,21 @@ function formatHashRate(value) {
 }
   
 function formatBTC(value) {
-  return parseFloat(value).toFixed(8);
+    if (isNaN(value)) return '-';
+    if (value > 0) return parseFloat(value * rate).toFixed(8);
+    if (value == 0) return parseFloat(0).toFixed(8);
+    if (value < 0) return parseFloat(value * rate).toFixed(8);
+    return '-';
+};
+
+function formatWatt(value) {
+  if (value > 0) return parseFloat(value).toFixed(2) + ' W';
+  return '-';
+};
+
+function formatPercent(value) {
+  if (isNaN(value)) return '-';
+  return parseFloat(value * 100).toFixed(2) + ' %';
 };
 
 function formatArrayAsString(value) {

@@ -1,7 +1,6 @@
 using module ..\Include.psm1
 
 class SRBMiner : Miner {
-
     [String]GetCommandLineParameters() {
         return ($this.Arguments | ConvertFrom-Json).Commands
     }
@@ -14,8 +13,8 @@ class SRBMiner : Miner {
 
         $Parameters = $this.Arguments | ConvertFrom-Json
 
-        #Write config files. Keep separate files and do not overwrite to preserve optional manual customization
-        $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -ErrorAction Ignore
+        #Write config files. Keep separate files, do not overwrite to preserve optional manual customization
+        if (-not (Test-Path "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -PathType Leaf)) {$Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -ErrorAction Ignore}
 
         #Write pool file. Keep separate files
         $Parameters.PoolFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.PoolFile.FileName)" -Force -ErrorAction SilentlyContinue
@@ -34,17 +33,24 @@ class SRBMiner : Miner {
 
         if (-not $this.Process) {
             if ($this.ShowMinerWindow) {
-                $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '$($Parameters.Commands)' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+                if ((Test-Path ".\CreateProcess.cs" -PathType Leaf) -and ($this.API -ne "Wrapper")) {
+                    $this.Process = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList $this.GetCommandLineParameters() -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object {if ($_ -like "CPU#*") {-2} else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
+                }
+                else {
+                    $EnvCmd = ($this.Environment | Foreach-Object {"```$env:$($_)"}) -join "; "
+                    $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command $EnvCmd```$Process = (Start-Process '$($this.Path)' '$($this.GetCommandLineParameters())' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+                }
             }
             else {
                 $this.LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\$($this.Name)-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt")
-                $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $($Parameters.Commands) -LogPath $this.LogFile -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object {if ((Get-Device $_).Type -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
+                $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.GetCommandLineParameters() -LogPath $this.LogFile -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object {if ($_ -like "CPU#*") {-2} else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
             }
 
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
                 for ($WaitForPID = 0; $WaitForPID -le 20; $WaitForPID++) {
                     if ($this.ProcessId = (Get-CIMInstance CIM_Process | Where-Object {$_.ExecutablePath -eq $this.Path -and $_.CommandLine -like "*$($this.Path)*$($this.GetCommandLineParameters())*"}).ProcessId) {
                         $this.Status = [MinerStatus]::Running
+                        $this.BeginTime = (Get-Date).ToUniversalTime()
                         break
                     }
                     Start-Sleep -Milliseconds 100
@@ -57,7 +63,7 @@ class SRBMiner : Miner {
         if ($this.GetStatus() -ne [MinerStatus]::Running) {return @()}
 
         $Server = "localhost"
-        $Timeout = 10 #seconds
+        $Timeout = 5 #seconds
 
         $Request = ""
         $Response = ""
@@ -65,24 +71,33 @@ class SRBMiner : Miner {
         $HashRate = [PSCustomObject]@{}
 
         try {
-            $Data = Invoke-RestMethod "http://$($Server):$($this.Port)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+            $Data = Invoke-RestMethod "http://$($Server):$($this.Port)" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
         }
         catch {
-            if ((Get-Date) -gt ($this.Process.PSBeginTime.AddSeconds(30))) {Write-Log -Level Error "Failed to connect to miner ($($this.Name)) [ProcessId: $($this.ProcessId)]. "}
             return @($Request, $Response)
         }
 
-        $HashRate_Name = [String]$this.Algorithm[0]
-        $HashRate_Value = [Double]$Data.hashrate_total_now
+        $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
 
-        if ($HashRate_Name -and $HashRate_Value -GT 0) {$HashRate | Add-Member @{$HashRate_Name = [Int64]$HashRate_Value}}
+        if ($this.AllowedBadShareRatio) {
+            $Shares_Accepted = [Int64]$Data.shares.accepted
+            $Shares_Rejected = [Int64]$Data.shares.rejected
+            if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) {
+                $this.SetStatus("Failed")
+                $this.StatusMessage = " was stopped because of too many bad shares for algorithm $($HashRate_Name) (total: $($Shares_Accepted + $Shares_Rejected) / bad: $($Shares_Rejected) [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
+                return @($Request, $Response)
+            }
+        }
 
-        if ($HashRate | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) {
+        $HashRate | Add-Member @{$HashRate_Name = [Double]$Data.hashrate_total_now}
+
+        if ($HashRate.PSObject.Properties.Value -gt 0) {
             $this.Data += [PSCustomObject]@{
-                Date     = (Get-Date).ToUniversalTime()
-                Raw      = $Response
-                HashRate = $HashRate
-                Device   = @()
+                Date       = (Get-Date).ToUniversalTime()
+                Raw        = $Response
+                HashRate   = $HashRate
+                PowerUsage = (Get-PowerUsage $this.DeviceName)
+                Device     = @()
             }
         }
 
