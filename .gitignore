@@ -8,3 +8,9 @@ downloads/
 *.rar
 Pools/MiningDutch.ps1
 Config.txt
+*.dll
+SnakeTail.exe
+MPM_SnakeTail_LogReader.xml
+Config.txt
+Config.txt
+Config.txt
