@@ -53,7 +53,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         if ($null -eq $Miner_Config) {$Miner_Config = [PSCustomObject]@{DisableDevFeeMining = $Config.DisableDevFeeMining}}
         if ($Miner_Config.DisableDevFeeMining) {
             $NoFee = " --fee 0"
-            $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 0 / 100}
+            $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 0}
         }
         else {
             $NoFee = ""
