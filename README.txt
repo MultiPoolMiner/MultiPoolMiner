@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 14/06/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 22/06/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -61,7 +61,7 @@ Done. You are all set to mine the most profitable coins and maximise your profit
 IMPORTANT NOTES:
 
 - It is not recommended but to upgrade from a previous version of MultiPoolMiner, you may simply copy the 'Stats' folder.
-- Having PowerShell 6.2 installed is now a requirement. Windows 64bit: https://github.com/PowerShell/PowerShell/releases/download/v6.2.0/PowerShell-6.2.0-win-x64.msi, ALL OTHER VERSIONS: https://github.com/PowerShell/PowerShell/releases
+- Having PowerShell 6.2 installed is now a requirement. Windows 64bit: https://github.com/PowerShell/PowerShell/releases/download/v6.2.1/PowerShell-6.2.1-win-x64.msi, ALL OTHER VERSIONS: https://github.com/PowerShell/PowerShell/releases
 - Microsoft .NET Framework 4.5.1 or later is required for MultiPoolMiner to function properly. Please update from here: https://www.microsoft.com/en-us/download/details.aspx?id=40773
 - CCMiner (NVIDIA cards only) may need 'MSVCR120.dll' if you don't already have it: https://www.microsoft.com/en-gb/download/details.aspx?id=40784. Make sure that you install both the x86 and the x64 versions. 
 - CCMiner (NVIDIA cards only) may need 'VCRUNTIME140.DLL' if you don't already have it: https://www.microsoft.com/en-us/download/details.aspx?id=48145. Make sure that you install both the x86 and the x64 versions. 
@@ -97,6 +97,10 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 -BasePowerUsage
 	Additional base power usage (in Watt) for running the computer, monitor etc. regardless of mining hardware. Allowed values: 0.0 - 999, default is 0
 
+-BenchmarkInterval
+	MultiPoolMiner's update interval in seconds during benchmarks / power metering. This is an universal timer for running the entire script (downloading/processing APIs, calculation etc). It determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
+	Note: This value correlates with '-MinHashRateSamples'. If you set '-MinHashRateSamples' too high, then MPM cannot get enough samples for reliable measurement (recommendation: 10 or more). In this case increase the benchmark interval length.
+
 -CreateMinerInstancePerDeviceModel
 	All miner files can create separate instances for each card model. This increases profit.
 	By default this feature is turned on. To disable add '-CreateMinerInstancePerDeviceModel:false' to your start batch file.
@@ -129,7 +133,7 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 	Use only miners that do not have a dev fee built in
 
 -DisableDevFeeMining
-	Disable miner developer fees (Note: not all miners support turning off their built in fees, others will reduce the hashrate); ; this is also a per-miner setting (see Advanced Configuration)
+	Disable miner developer fees (Note: not all miners support turning off their built in fees, others will reduce the hashrate); this is also a per-miner setting (see Advanced Configuration)
 
 -Donate
 	Donation of mining time in minutes per day to aaronsace. Default is 24, minimum is 10 minutes per day (less than 0.7% fee). The downloaded miner software can have their own donation system built in. Check the readme file of the respective miner used for more details.
@@ -147,16 +151,19 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 -ExcludeMinerName
 	Similar to the '-MinerName' command but it is used to exclude certain miners you don't want to use. This is useful if a miner is causing issues with your machine. A full list of available miners and parameters used can be found here: https://multipoolminer.io/miners
 	Important: Newer miners, e.g. ClaymoreEthash create several child-miner names, e.g. ClaymoreEthash-GPU#01-Pascal-40. These can also be used with '-ExcludeMinerName'.
-	
+	The parameter value(s) can be in one of the 3 forms: MinerBaseName e.g. 'AMD-TeamRed', MinerBaseName_Version, e.g. 'AMD-TeamRed_v0.5.1' or MinerName, e.g. 'AMD-TeamRed_v0.5.1-1xEllesmere8GB'. Use commas to separate multiple values.
+
 -ExcludePoolName
 	Similar to the '-PoolName' command but it is used to exclude unwanted mining pools. Use commas to separate multiple values.
 
 -MinHashRateSamples
 	Minimum number of hashrate samples MPM will collect during benchmark per interval (higher numbers produce more exact numbers, but might prolong benchmaking). Allowed values: 10 - 99 (default is 10)
+    Note: This value correlates with '-BenchmarkInterval'. If MPM cannot get the minimum valid has rate samples during the configured interval, it will automatically extend the interval to up to 3x the interval length.
 
 -HashRateSamplesPerInterval
-	Approximate number of hashrate samples that MPM will collect per interval (higher numbers produce more exact numbers, but use more CPU cycles and memory). Allowed values: 5 - 20
-    
+	Approximate number of hashrate samples that MPM tries to collect per interval (higher numbers produce more exact numbers, but use more CPU cycles and memory). Allowed values: 5 - 20
+	Note: This value correlates with '-Interval'. If you set '-Interval' too short, then MPM  cannot get enough samples for reliable measurement (recommendation: 10 or more). In this case increase the interval length.
+
 -HWiNFO64_SensorMapping
 	Custom HWiNFO64 sensor mapping, only required when $MeasurePowerUsage is $true, see ConfigHWinfo64.pdf
 	Note: This requires advanced configuration steps (see ConfigHWinfo64.pdf)
@@ -166,10 +173,11 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 	Include this command to ignore miner and pool fees (as older versions did)
 
 -IgnorePowerCost
-	Include this command to ignore the calculated power costs when calculating profit
+	Include this command to ignore the power costs when calculating profit. MPM will use the miner(s) that create the highest earning regardless of the power cost, so the resulting profit may be lower.
 
 -Interval
-	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc).  It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
+	MultiPoolMiner's update interval in seconds. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc). It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
+	Note: This value correlates with *-Interval*. If you set *-Interval* too short, then MPM cannot get enough samples for reliable measurement (anything over 10 is fine). In this case increase the interval length.
 
 -MeasurePowerUsage
 	Include this command to to gather power usage per device. This is a pre-requisite to calculate power costs and effective earnings. 
@@ -336,7 +344,7 @@ if not "%GPU_MAX_ALLOC_PERCENT%"=="100" (setx GPU_MAX_ALLOC_PERCENT 100) > nul
 if not "%GPU_SINGLE_ALLOC_PERCENT%"=="100" (setx GPU_SINGLE_ALLOC_PERCENT 100) > nul
 if not "%CUDA_DEVICE_ORDER%"=="PCI_BUS_ID" (setx CUDA_DEVICE_ORDER PCI_BUS_ID) > nul
 
-set "command=& .\multipoolminer.ps1 -Wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -UserName aaronsace -WorkerName multipoolminer -Region europe -Currency btc,usd,eur -DeviceName amd,nvidia,cpu -PoolName miningpoolhubcoins,zpool,nicehash -Algorithm blake2s,cuckaroo39,cuckatoo31,cryptonightR,cryptonightV8,cryptonightheavy,decrednicehash,ethash,ethash2gb,ethash3gb,equihash,equihash1445,equihash1505,keccak,lbry,lyra2re3,mtp,mtpnicehash,neoscrypt,pascal,sib,skein,skunk,sonoa,timetravel10,x16r,x16rt,x16s,x17,x22i -Donate 24 -Watchdog -MinerStatusURL https://multipoolminer.io/monitor/miner.php -SwitchingPrevention 2
+set "command=& .\multipoolminer.ps1 -Wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -UserName aaronsace -WorkerName multipoolminer -Region europe -Currency btc,usd,eur -DeviceName amd,nvidia,cpu -PoolName miningpoolhubcoins,zpool,nicehash -Algorithm blake2s,cuckaroo39,cuckatoo31,cryptonightR,cryptonightV8,cryptonightheavy,decrednicehash,ethash,ethash2gb,ethash3gb,equihash,equihash1445,equihash1505,keccak,lbry,lyra2re3,mtp,mtpnicehash,neoscrypt,pascal,sib,skein,skunk,sonoa,timetravel10,x16r,x16rt,x16s,x17,x22i -Donate 24 -Watchdog -MinerStatusURL https://multipoolminer.io/monitor/miner.php -SwitchingPrevention 2"
 
 if exist "~*.dll" del "~*.dll" > nul 2>&1
 
@@ -356,8 +364,8 @@ if "%ERRORLEVEL%"=="1" start /min .\SnakeTail.exe .\MPM_SnakeTail_LogReader.xml
 
 :MINING
 pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
-powershell -version 5.0 -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
 
+echo Powershell 6 or later is required. Cannot continue.
 pause
 
 ############ END OF CONTENT OF START.BAT ############
