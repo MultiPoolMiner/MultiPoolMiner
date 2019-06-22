@@ -138,7 +138,7 @@ param(
 
 Clear-Host
 
-$Version = "3.4.0 Beta 4"
+$Version = "3.4.0"
 $VersionCompatibility = "3.3.0"
 $Strikes = 3
 $SyncWindow = 5 #minutes
@@ -1309,7 +1309,7 @@ while (-not $API.Stop) {
             #Have hashrate from all miners for this point in time
             Start-Sleep 1
         }
-        elseif ($MinimumReceivedHashRateSamples -ge $HashRateSamplesPerInterval) {
+        elseif ($MinimumReceivedHashRateSamples -ge $HashRateSamplesPerInterval -and (Get-Date).ToUniversalTime() -le $StatEnd) {
             Start-Sleep ($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds
         }
         if ((Get-Date).ToUniversalTime() -ge $StatEnd -and $MinimumReceivedHashRateSamples -lt $ExpectedHashRateSamples -and $MinimumReceivedHashRateSamples -lt $Config.MinHashRateSamples) {
