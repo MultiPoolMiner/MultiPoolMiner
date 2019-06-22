@@ -48,38 +48,55 @@ if ($Payout_Currencies) {
     $APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesRequest.$_.hashrate -gt 0} | Foreach-Object {
      
         $Algorithm = $APICurrenciesRequest.$_.algo
+        $CoinName = Get-CoinName $APICurrenciesRequest.$_.name
 
-        # Not all algorithms are always exposed in API
-        if ($APIStatusRequest.$Algorithm) {
+        $Divisor = 1000000000 * [Double]$APICurrenciesRequest.$_.mbtc_mh_factor
+        if ($Divisor -eq 0) {
+            Write-Log -Level Info "$($Name): Unable to determine divisor for coin $CoinName and algorithm $Algorithm. "
+            return
+        }
+        else {
+            $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
+            if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
+            if ($Algorithm_Norm -eq $Algorithm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
+            if ($Algorithm_Norm -match "Equihash1445|Equihash1927") {$CoinName = "ManagedByPool"}
 
-            $CoinName = Get-CoinName $APICurrenciesRequest.$_.name
+            $PoolHost       = "mine.zergpool.com"
+            $Port           = $APICurrenciesRequest.$_.port
+            $MiningCurrency = $_ -split "-" | Select-Object -Index 0
+            $Workers        = $APICurrenciesRequest.$_.workers
+            $Fee            = if ($APIStatusRequest.$Algorithm) {$APIStatusRequest.$Algorithm.Fees / 100} else {5 / 100}
 
-            $Divisor = 1000000000 * [Double]$APICurrenciesRequest.$_.mbtc_mh_factor
-            if ($Divisor -eq 0) {
-                Write-Log -Level Info "$($Name): Unable to determine divisor for coin $CoinName and algorithm $Algorithm. "
-                return
-            }
-            else {
-                $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
-                if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
+            $Stat = Set-Stat -Name "$($Name)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$APICurrenciesRequest.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
-                $PoolHost       = "mine.zergpool.com"
-                $Port           = $APICurrenciesRequest.$_.port
-                $MiningCurrency = $_ -split "-" | Select-Object -Index 0
-                $Workers        = $APICurrenciesRequest.$_.workers
-                $Fee            = $APIStatusRequest.$Algorithm.Fees / 100
+            $PoolRegions | ForEach-Object {
+                $Region = $_
+                $Region_Norm = Get-Region $Region
 
-                $Stat = Set-Stat -Name "$($Name)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$APICurrenciesRequest.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
-
-                if ($Algorithm_Norm -eq $Algorithm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
-                if ($Algorithm_Norm -match "Equihash1445|Equihash1927") {$CoinName = "ManagedByPool"}
-
-                $PoolRegions | ForEach-Object {
-                    $Region = $_
-                    $Region_Norm = Get-Region $Region
-
-                    if ($($Config.Pools.$Name.Wallets).$MiningCurrency) {
-                        #Option 3
+                if ($($Config.Pools.$Name.Wallets).$MiningCurrency) {
+                    #Option 3
+                    [PSCustomObject]@{
+                        Algorithm      = $Algorithm_Norm
+                        CoinName       = $CoinName
+                        Price          = $Stat.Live
+                        StablePrice    = $Stat.Week
+                        MarginOfError  = $Stat.Week_Fluctuation
+                        Protocol       = "stratum+tcp"
+                        Host           = "$($Algorithm).$($PoolHost)"
+                        Port           = $Port
+                        User           = $Config.Pools.$Name.Wallets.$_
+                        Pass           = "$($Config.Pools.$Name.Worker),c=$($_),mc=$MiningCurrency$($Config.Pools.$Name.PasswordSuffix.Algorithm."*")$($Config.Pools.$Name.PasswordSuffix.Algorithm.$Algorithm_Norm)$($Config.Pools.$Name.PasswordSuffix.CoinName."*")$($Config.Pools.$Name.PasswordSuffix.CoinName.$CoinName)"
+                        Region         = $Region_Norm
+                        SSL            = $false
+                        Updated        = $Stat.Updated
+                        Fee            = $Fee
+                        Workers        = [Int]$Workers
+                        MiningCurrency = $MiningCurrency
+                    }
+                }
+                elseif ($APICurrenciesRequest.$MiningCurrency.noautotrade -eq 0) {
+                    $Payout_Currencies | ForEach-Object {
+                        #Option 2
                         [PSCustomObject]@{
                             Algorithm      = $Algorithm_Norm
                             CoinName       = $CoinName
@@ -87,7 +104,7 @@ if ($Payout_Currencies) {
                             StablePrice    = $Stat.Week
                             MarginOfError  = $Stat.Week_Fluctuation
                             Protocol       = "stratum+tcp"
-                            Host           = "$($Algorithm).$($PoolHost)"
+                            Host           = "$Algorithm.$PoolHost"
                             Port           = $Port
                             User           = $Config.Pools.$Name.Wallets.$_
                             Pass           = "$($Config.Pools.$Name.Worker),c=$($_),mc=$MiningCurrency$($Config.Pools.$Name.PasswordSuffix.Algorithm."*")$($Config.Pools.$Name.PasswordSuffix.Algorithm.$Algorithm_Norm)$($Config.Pools.$Name.PasswordSuffix.CoinName."*")$($Config.Pools.$Name.PasswordSuffix.CoinName.$CoinName)"
@@ -97,29 +114,6 @@ if ($Payout_Currencies) {
                             Fee            = $Fee
                             Workers        = [Int]$Workers
                             MiningCurrency = $MiningCurrency
-                        }
-                    }
-                    elseif ($APICurrenciesRequest.$MiningCurrency.noautotrade -eq 0) {
-                        $Payout_Currencies | ForEach-Object {
-                            #Option 2
-                            [PSCustomObject]@{
-                                Algorithm      = $Algorithm_Norm
-                                CoinName       = $CoinName
-                                Price          = $Stat.Live
-                                StablePrice    = $Stat.Week
-                                MarginOfError  = $Stat.Week_Fluctuation
-                                Protocol       = "stratum+tcp"
-                                Host           = "$Algorithm.$PoolHost"
-                                Port           = $Port
-                                User           = $Config.Pools.$Name.Wallets.$_
-                                Pass           = "$($Config.Pools.$Name.Worker),c=$($_),mc=$MiningCurrency$($Config.Pools.$Name.PasswordSuffix.Algorithm."*")$($Config.Pools.$Name.PasswordSuffix.Algorithm.$Algorithm_Norm)$($Config.Pools.$Name.PasswordSuffix.CoinName."*")$($Config.Pools.$Name.PasswordSuffix.CoinName.$CoinName)"
-                                Region         = $Region_Norm
-                                SSL            = $false
-                                Updated        = $Stat.Updated
-                                Fee            = $Fee
-                                Workers        = [Int]$Workers
-                                MiningCurrency = $MiningCurrency
-                            }
                         }
                     }
                 }
