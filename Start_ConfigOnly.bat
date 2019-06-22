@@ -31,6 +31,6 @@ if "%ERRORLEVEL%"=="1" start /min .\SnakeTail.exe .\MPM_SnakeTail_LogReader.xml
 
 :MINING
 pwsh -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
-powershell -version 5.0 -noexit -executionpolicy bypass -windowstyle maximized -command "%command%"
 
+echo Powershell 6 or later is required. Cannot continue.
 pause
