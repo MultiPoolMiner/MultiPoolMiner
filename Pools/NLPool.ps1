@@ -53,6 +53,7 @@ if ($Payout_Currencies) {
         $CoinName       = Get-CoinName $(if ($APIStatusRequest.$_.coins -eq 1) {$APICurrenciesRequest.$($APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesRequest.$_.algo -eq $Algorithm}).Name})
         $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
         if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
+        if ($Algorithm_Norm -match "Equihash1445|Equihash1927") {$CoinName = "ManagedByPool"}
         $Workers        = $APIStatusRequest.$_.workers
         $Fee            = $APIStatusRequest.$_.Fees / 100
 
@@ -64,6 +65,7 @@ if ($Payout_Currencies) {
 
         if ((Get-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusRequest.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
         else {$Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusRequest.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
+
 
         $PoolRegions | ForEach-Object {
             $Region = $_
