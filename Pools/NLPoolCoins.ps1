@@ -58,6 +58,8 @@ if ($Payout_Currencies) {
             $CoinName       = Get-CoinName $APICurrenciesRequest.$_.name
             $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
             if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
+            if ($Algorithm_Norm -eq $Algorithm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
+            if ($Algorithm_Norm -match "Equihash1445|Equihash1927") {$CoinName = "ManagedByPool"}
 
             $MiningCurrency = $APICurrenciesRequest.$_.symbol
             $Workers        = $APICurrenciesRequest.$_.workers
