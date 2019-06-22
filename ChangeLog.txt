@@ -1,6 +1,6 @@
 ﻿## Changelog Version 3.4.0
 
-### Breaking changes
+### Breaking changes from 3.3.x
 **Parameter '-UseDeviceNameForStatsFileNaming' is no longer valid**
 **'-UseDeviceNameForStatsFileNaming:true will be enforced**
 This will trigger all benchmarks to be re-executed (unless you were running MPM with '-UseDeviceNameForStatsFileNaming:true' already)
@@ -8,7 +8,7 @@ This will trigger all benchmarks to be re-executed (unless you were running MPM 
 #### Core changes
 - Added parameter '-DisableMinersWithDevFee'
 - Added config item 'DevicePciOrderMapping' for configurations where PCI deviceID order does not match OpenCL deviceID order (see README)
-- API: updated to version 0.94; added '/alldevices' & '/allminers'
+- API: updated to version 0.95; added '/alldevices', '/allminers' & '/intervals'
 - Fixed miners Claymore*, Gminer, lolMinerEquihash, Nanominer, SRBMinerCryptonight & Wildrig; device enumeration can now use mapping as configured by 'DevicePciOrderMapping' 
 - Improved config file validation
 - Parameters '-MinerName' and '-ExcludeMinerName' can be in one of the 3 forms: MinerBaseName e.g. 'AMD-TeamRed'; MinerBaseName_Version, e.g. 'AMD-TeamRed_v0.5.1' or MinerName, e.g. 'AMD-TeamRed_v0.5.1-1xEllesmere8GB'
@@ -24,19 +24,21 @@ This will trigger all benchmarks to be re-executed (unless you were running MPM 
 - Renamed NVIDIA-CcminerZenemy_v2.00 to NVIDIA-CcminerZenemy_v20.0 (typo)
 - Removed CPU-Cryply_v3.8.8.4; (moved to 'Deprecated' folder); CPU-Jayddee_v3.9.3.1 is newer and has no dev fee
 - Updated AMD_CPU_NVIDIA-FireiceCryptonight_v2.10.5
-- Updated AMD_NVIDIA-ClaymoreEthash_v14.6
-- Updated AMD_NVIDIA-GminerEquihash_v1.45
+- Updated AMD_NVIDIA-ClaymoreEthash_v14.7
+- Updated AMD_NVIDIA-GminerEquihash_v1.47; support for Equihash 1255
 - Updated AMD_NVIDIA-NanoMiner_v1.3.4
 - Updated AMD-JCECryptonote_v0.33b18; changed API to XmRig
+- Updated AMD-SRBMinerCryptonight_v1.9.0
 - Updated AMD-TeamRed_v0.5.2
-- Updated AMD-WildRig_v0.17.5; support for Blake2b-BTCC & Blake2b-Glt
+- Updated AMD-WildRig_v0.17.8; support for Blake2b-BTCC, Blake2b-Glt & Skein2
 - Updated AMD-XmrigCryptonight_v2.14.4
 - Updated CPU-Jayddee_v3.9.3.1; support for Lyra2rev3, Sha256q & Sonoa
 - Updated CPU-JCECryptonote_v0.33q; changed API to XmRig
 - Updated CPU-XmrigCryptonight_v2.14.4
-- Updated NVIDIA-CcminerTrex_v0.11.1
+- Updated NVIDIA-CcminerMTP_v1.1.20
+- Updated NVIDIA-CcminerTrex_v0.12.0; support for Honeycomb
 - Updated NVIDIA-CryptoDredge_v0.20.1
-- Updated NVIDIA-NBMiner_v23.3
+- Updated NVIDIA-NBMiner_v23.3; fixed min. memory requirements (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2343#issuecomment-503419922)
 - Updated NVIDIA-TTMiner_v2.2.5
 - Updated NVIDIA-XmrigCryptonight_v2.14.4
 
@@ -46,7 +48,7 @@ This will trigger all benchmarks to be re-executed (unless you were running MPM 
 ## Changelog Version 3.3.0
 
 #### New features
-- Pro / Post miner command execution (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2305)
+- Pre / Post miner command execution (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2305)
 - Ability to set a minimum profit threshold, do not mine if mining earns less ('-ProfitabilityThreshold:n.nn' [Float])
 - API port is configurable, default is 3999 ('-APIPort' [Int])
 - Added support for miner-specific environment variable settings (e.g. SGMiner requires "GPU_FORCE_64BIT_PTR=0"), Note: this does NOT work for miner using the wrapper API
