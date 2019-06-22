@@ -161,6 +161,7 @@ $StatEnd = $Timer
 $DecayStart = $Timer
 $DecayPeriod = 60 #seconds
 $DecayBase = 1 - 0.1 #decimal percentage
+$Intervals = @()
 
 $WatchdogTimers = @()
 
@@ -1068,12 +1069,12 @@ while (-not $API.Stop) {
             if ($MiningEarning) {
                 $API.CurrentEarning = "Current Earning: $(($Rates.BTC | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {"$_ $(((($RunningMiners | Measure-Object -Sum -Property Earning).Sum) * $Rates.BTC.$_).ToString("N$((($Rates.BTC.$FirstCurrency).ToString().split('.') | Select-Object -Index 0).Length)"))"}) -join ' = ')"
             }
-            else {$API.CurrentEarning = "Current Earning: N/A"}
+            else {$API.CurrentEarning = "Current Earning: N/A $(if ($MinersNeedingBenchmark -or $MinersNeedingPowerUsageMeasurement) {" (Benchmarking)"})"}
             if ((-not $Config.IgnorePowerCost) -and $PowerPrice) {
                 if ($MiningProfit) {
                     $API.CurrentProfit = "Current Profit: $(($Rates.BTC | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {"$_ $(((($RunningMiners | Measure-Object -Sum -Property Profit).Sum) * $Rates.BTC.$_).ToString("N$((($Rates.BTC.$FirstCurrency).ToString().split('.') | Select-Object -Index 0).Length)"))"}) -join ' = ')"
                 }
-                else {$API.CurrentProfit = "Current Profit: N/A"}
+                else {$API.CurrentProfit = "Current Profit: N/A $(if ($MinersNeedingBenchmark -or $MinersNeedingPowerUsageMeasurement) {" (Benchmarking)"})"}
             }
             else {$API.CurrentProfit = ""}
         }
@@ -1199,28 +1200,24 @@ while (-not $API.Stop) {
     }
 
     Write-Log "Start waiting before next run. "
-    $PollCount = 1
     $PollStart = (Get-Date).ToUniversalTime()
-    $ThisPoll = $PollStart
-    $NextPoll = $PollStart.AddSeconds(($StatEnd - $PollStart).TotalSeconds / $Config.MinHashRateSamples)
+    $PollEnd = $PollStart
+    $ExpectedHashRateSamples = 1
 
     Do {
 
         if ($Downloader) {$Downloader | Receive-Job -ErrorAction SilentlyContinue}
 
-        # Update API information
-        if ($API) {Update-APIDeviceStatus $API $Devices}
-        
-        $RunningMiners | Where-Object {$_.GetStatus() -eq "Running"} | ForEach-Object {
+        $RunningMiners | Where-Object {$_.GetStatus() -eq "Running"} | Sort-Object {@($_.Data | Sort-Object Date)} | ForEach-Object {
             $Miner = $_
-            if ((@($Miner.Data | Where-Object Date -GT $ThisPoll).Count -lt 1) -or (@($Miner.Data | Where-Object Date -GT $PollStart).Count -lt $PollCount)) {
+            if (($Miner.Data | Where-Object Date -GT $PollStart).count -lt $ExpectedHashRateSamples -and ($Miner.Data | Where-Object Date -GT $PollStart).count -lt $Config.HashRateSamplesPerInterval) {
                 $Miner_Data = $Miner.UpdateMinerData()
-                $Sample = $Miner.Data | Where-Object Date -GE $ThisPoll | Select-Object -last 1
+                $Sample = $Miner.Data | Where-Object Date -GE $PollEnd | Select-Object -last 1
                 if ($Sample) {
-                    Write-Log -Level Verbose "$($Miner.Name) data sample retrieved: [$(($Sample.Hashrate.PSObject.Properties.Name | ForEach-Object {"$_ = $(($Sample.Hashrate.$_ | ConvertTo-Hash) -replace ' ')"}) -join '; ')$(if ($Sample.PowerUsage) {" / $($Sample.PowerUsage.ToString("N2"))W"})] (total samples: $(@($Miner.Data).count) [$(($Miner.Data | Select-Object -First 1).Date.ToLocalTime().ToLongTimeString()) - $(($Miner.Data | Select-Object -Last 1).Date.ToLocalTime().ToLongTimeString())])"
+                    Write-Log -Level Verbose "$($Miner.Name) data sample retrieved: [$(($Sample.Hashrate.PSObject.Properties.Name | ForEach-Object {"$_ = $(($Sample.Hashrate.$_ | ConvertTo-Hash) -replace ' ')"}) -join '; ')$(if ($Sample.PowerUsage) {" / $($Sample.PowerUsage.ToString("N2"))W"})]" # (total samples: $(@($Miner.Data).count) [$(($Miner.Data | Select-Object -First 1).Date.ToLocalTime().ToLongTimeString()) - $(($Miner.Data | Select-Object -Last 1).Date.ToLocalTime().ToLongTimeString())])"
                 }
-                if ($Miner.WarmupTime -and (((Get-Date).ToUniversalTime() - $PollStart).TotalSeconds -gt $Miner.WarmupTime) -and (-not @($Miner.Data | Where-Object Date -GT (Get-Date).ToUniversalTime().AddSeconds(- $Miner.WarmupTime)))) {
-                    #No data samples received for $warmup seconds, set miner idle
+                elseif  ($Miner.WarmupTime -and (Get-Date).ToUniversalTime().AddSeconds(- $Miner.WarmupTime) -gt $PollStart -and -not @($Miner.Data | Where-Object Date -GT (Get-Date).ToUniversalTime().AddSeconds(- $Miner.WarmupTime))) {
+                    #No data samples received for more than $warmup seconds, set miner idle
                     #Pre miner stop exec
                     $Command = $ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PreStop"))
                     if ($Command) {Start-PrePostCommand -Command $Command -Event "PreStop"}
@@ -1232,95 +1229,109 @@ while (-not $API.Stop) {
                     $Command = $ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PostStop"))
                     if ($Command) {Start-PrePostCommand -Command $Command -Event "PostStop"}
                 }
-                elseif ((Get-Date).ToUniversalTime() -ge $StatEnd) {
-                    if (($Miner.Data | Where-Object Date -GE $StatStart) -or ($Miner.WarmupTime -and ((Get-Date).ToUniversalTime() - $PollStart).TotalSeconds -lt $Miner.WarmupTime)) {
-                        #At least one sample or still in warmup phase
-                        if (@($Miner.Data | Where-Object Date -GE $StatStart).count -lt $Config.MinHashRateSamples) {
-                            #Extend loop time to ensure some more hash rate samples
-                            $StatEnd = (Get-Date).ToUniversalTime()
-                            $StatSpan = New-TimeSpan $StatStart $StatEnd
-                        }
-                    }
-                }
             }
-        }
+            if ($Miner.GetStatus() -ne "Running") {
+                #Failed miner detected
+                Write-Log -Level Error "Miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Pools.$_.Name)"}) -join "; ")})$(if ($Miner.StatusMessage) {$Miner.StatusMessage} else {" has failed"}). "
+                $RunningMiners = @($RunningMiners | Where-Object {$_ -ne $Miner})
+                $FailedMiners += $Miner
 
-        $RunningMiners | Where-Object {$_.GetStatus() -ne "Running"} | ForEach-Object {
-            #Failed miner detected
-            $Miner = $_
-            Write-Log -Level Error "Miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Pools.$_.Name)"}) -join "; ")})$(if ($Miner.StatusMessage) {$Miner.StatusMessage} else {" has failed"}). "
-            $RunningMiners = @($RunningMiners | Where-Object {$_ -ne $Miner})
-            $FailedMiners += $Miner
-
-            #Post miner failure exec
-            $Command = $ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PostFailure"))
-            if ($Command) {Start-PrePostCommand -Command $Command -Event "PostFailure"}
-
-            # Update API information
-            if ($API) {
-                $API.RunningMiners = $RunningMiners
-                $API.FailedMiners = $FailedMiners
-                $API.AllDevices | ForEach-Object {if ($Devices.Name -contains $_.Name) {$Device =  $_; if ($Miner = $ActiveMiners | Where-Object {$_.DeviceName -contains $Device.Name} | Select-Object -Unique) {$Device | Add-Member Status $Miner.GetStatus() -Force} else {$Device | Add-Member Status "Idle" -Force}} else {$_ | Add-Member Status "Disabled" -Force}}
+                #Post miner failure exec
+                $Command = $ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PostFailure"))
+                if ($Command) {Start-PrePostCommand -Command $Command -Event "PostFailure"}
             }
-        }
-        
-        if (-not $RunningMiners) {
-            #No more running miners, start new loop immediately
-            $StatEnd = (Get-Date).ToUniversalTime()
-            $StatSpan = New-TimeSpan $StatStart $StatEnd
-            break
-        }
-        if ($ActiveMiners | Where-Object Best | Where-Object Speed -contains $null) {
-            #We're benchmarking
-            if (-not @($RunningMiners | Where-Object Speed -contains $null | Where-Object {$_.GetStatus() -eq "Running"})) {
-                #All benchmarking miners have failed, start new loop immediately
-                $StatEnd = (Get-Date).ToUniversalTime()
-                $StatSpan = New-TimeSpan $StatStart $StatEnd
-                break
-            }
-        }
-        $RunningMiners | ForEach-Object {
-            $Miner = $_
+            
             $Miner.Speed_Live = [Double[]]@()
             $Miner.Algorithm | ForEach-Object {
                 $Miner_Algorithm = $_
                 $Miner_Speed = [Double]($Miner.GetHashRate($Miner_Algorithm, $false))
                 $Miner.Speed_Live += [Double]$Miner_Speed
             }
-        }
 
-       # Update API information
-        if ($API) {Update-APIDeviceStatus $API $Devices}
-
-        if (-not ($RunningMiners | Where-Object {$_.DeviceName -like "CPU#*"})) {#Do not preload pool information when CPU mining
-            if ((-not $NewPools_Jobs) -and (Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and ((($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds) -le $($NewPools_JobsDurations | Measure-Object -Average).Average)) {
-                Write-Log "Pre-loading pool information"
-                $NewPools_Jobs = @(
-                    Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | ForEach-Object {
-                        $Pool_Name = $_.BaseName
-                        $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)"}
-                        $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
-                        Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded
-                    } | Select-Object
-                )
-                if ($API) {$API.NewPools_Jobs = $NewPools_Jobs} #Give API access to pool jobs information
-                if ((Get-Date).ToUniversalTime() -lt $NextPoll) {Start-Sleep ((Get-Date).ToUniversalTime() - $NextPoll).TotalSeconds}
+            # Update API information7
+            if ($API) {
+                $API.RunningMiners = $RunningMiners
+                $API.FailedMiners = $FailedMiners
+                $API.AllDevices | ForEach-Object {if ($Devices.Name -contains $_.Name) {$Device =  $_; if ($Miner = $ActiveMiners | Where-Object {$_.DeviceName -contains $Device.Name} | Select-Object -Unique) {$Device | Add-Member Status $Miner.GetStatus() -Force} else {$Device | Add-Member Status "Idle" -Force}} else {$_ | Add-Member Status "Disabled" -Force}}
+                Update-APIDeviceStatus $API $Devices
             }
-            elseif ((Get-Date).ToUniversalTime().AddSeconds(- 1) -lt $NextPoll) {Start-Sleep 1}
-        }
-        elseif ((Get-Date).ToUniversalTime() -lt $NextPoll) {Start-Sleep ((Get-Date).ToUniversalTime() - $NextPoll).TotalSeconds}
 
-        if ((Get-Date).ToUniversalTime() -ge $NextPoll) {
-            $ThisPoll = $NextPoll
-            if ($PollCount -lt $Config.MinHashRateSamples) {$NextPoll = $ThisPoll.AddSeconds(($StatEnd - $ThisPoll).TotalSeconds / ($Config.MinHashRateSamples - $PollCount))}
-            else {$NextPoll = $StatEnd}
-            $PollCount ++
+            if (-not $RunningMiners) {
+                #No more running miners, start new loop immediately
+                Write-Log "No more running miners, start new loop immediately. "
+                $MinimumReceivedHashRateSamples = $HashRateSamplesPerInterval
+                break
+            }
+
+            if ($ActiveMiners | Where-Object Best | Where-Object {$Miner_Name = $_.Name; $_.Algorithm | Where-Object {-not (Get-Stat -Name "$($Miner_Name)_$($_)_HashRate")}}) {
+                #We're benchmarking
+                if (-not ($RunningMiners | Where-Object {$_.GetStatus() -eq "Running"} | Where-Object {$Miner_Name = $_.Name; $_.Algorithm | Where-Object {-not (Get-Stat -Name "$($Miner_Name)_$($_)_HashRate")}})) {
+                    #All benchmarking miners have failed, start new loop immediately
+                    Write-Log "All benchmarking miners have failed, start new loop immediately. "
+                    $MinimumReceivedHashRateSamples = $HashRateSamplesPerInterval
+                    break
+                }
+            }
+            elseif ($ActiveMiners | Where-Object Best | Where-Object {$_.GetStatus() -ne "Running"}) {
+                #A non benchmarking miner has failed, start new loop immediately
+                Write-Log "A non benchmarking miner has failed, start new loop immediately. "
+                $MinimumReceivedHashRateSamples = $HashRateSamplesPerInterval
+                break
+            }
+
+            if (-not ($RunningMiners | Where-Object {$_.DeviceName -like "CPU#*"})) {
+                #Preload pool information only when not CPU mining, otherwise the background process takes ages
+                if ((-not $NewPools_Jobs) -and (Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and ((($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds) -le $($NewPools_JobsDurations | Measure-Object -Average).Average)) {
+                    Write-Log "Pre-loading pool information"
+                    $NewPools_Jobs = @(
+                        Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | ForEach-Object {
+                            $Pool_Name = $_.BaseName
+                            $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)"}
+                            $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
+                            Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded
+                        } | Select-Object
+                    )
+                    if ($API) {$API.NewPools_Jobs = $NewPools_Jobs} #Give API access to pool jobs information
+                }
+            }
         }
-    } Until ($PollCount -gt $Config.MinHashRateSamples) 
+        $PollDuration = ($StatEnd - $PollStart).TotalSeconds / $Config.HashRateSamplesPerInterval
+        $ExpectedHashRateSamples = [math]::Round(((((Get-Date).ToUniversalTime() - $PollStart).TotalSeconds) + $PollDuration) / $PollDuration)
+        $MinimumReceivedHashRateSamples = [Int](@($RunningMiners | ForEach-Object {@($_.Data | Where-Object Date -GE $PollStart).Count} | Measure-Object -Minimum).Minimum)
+        $HashRateSamples = @($RunningMiners | ForEach-Object {@($_.Data | Where-Object Date -GE $PollStart).Count})
+        $PollEnd = (Get-Date).ToUniversalTime()
+
+        if (-not $MinimumReceivedHashRateSamples) {
+            #No samples yet, try again after one second
+            Start-Sleep 1
+        } 
+        elseif ($MinimumReceivedHashRateSamples -ge $ExpectedHashRateSamples -and (Get-Date).ToUniversalTime() -le $StatEnd) {
+            #Have hashrate from all miners for this point in time
+            Start-Sleep 1
+        }
+        elseif ($MinimumReceivedHashRateSamples -ge $HashRateSamplesPerInterval) {
+            Start-Sleep ($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds
+        }
+        if ((Get-Date).ToUniversalTime() -ge $StatEnd -and $MinimumReceivedHashRateSamples -lt $ExpectedHashRateSamples -and $MinimumReceivedHashRateSamples -lt $Config.MinHashRateSamples) {
+            if ( ($RunningMiners | Where-Object {$Miner_Name = $_.Name; $_.Algorithm | Where-Object {-not (Get-Stat -Name "$($Miner_Name)_$($_)_HashRate")}}) -and ($Config.MeasurePowerUsage -and ($RunningMiners | Where-Object {-not $_.PowerUsage}))) {
+                #Benchmarking miner found
+                if ((Get-Date).ToUniversalTime() -lt $StatStart.AddSeconds(3 * $Config.BenchmarkInterval)) {
+                    #Limit extension to max. 3x BenchmarkInterval
+                    $StatEnd = (Get-Date).ToUniversalTime().AddSeconds(1)
+                    $StatSpan = New-TimeSpan $StatStart $StatEnd
+                }
+            }
+        }
+    } While  ((Get-Date).ToUniversalTime() -lt $StatEnd)
 
     #In case effective loop time was longer than configured interval
     $StatEnd = (Get-Date).ToUniversalTime()
     $StatSpan = New-TimeSpan $StatStart $StatEnd
+
+    $Intervals += "$StatStart - $StatEnd"
+    if ($API) {$API.Intervals = $Intervals}
+
+    if ($Intervals.Count -gt 1 -and ($HashRateSamples | Measure-Object -Maximum).Maximum -lt $HashRateSamplesPerInterval) {Write-Log -Level Warn "Collected hash rate samples during last interval ($($StatStart.ToLocalTime().ToLongTimeString()) - $($StatEnd.ToLocalTime().ToLongTimeString())) for all miners: $($HashRateSamples -join '; '), configured number of samples is $($HashRateSamplesPerInterval). If you see this message frequently then increase '-interval' time."}
 
     Write-Log "Finish waiting before next run. "
 
