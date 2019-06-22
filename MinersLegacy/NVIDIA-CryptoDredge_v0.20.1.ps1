@@ -77,7 +77,7 @@ else {
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = " --no-watchdog $(if (-not $Config.ShowMinerWindow) {" --no-color"})"}
+else {$CommonParameters = " --no-watchdog --no-crashreport $(if (-not $Config.ShowMinerWindow) {" --no-color"})"}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
@@ -118,7 +118,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 URI                = $Uri
                 Fees               = [PSCustomObject]@{$Algorithm_Norm = $Fee / 100}
                 IntervalMultiplier = $IntervalMultiplier
-                WarmupTime         = 30
+                WarmupTime         = 45
             }
         }
     }
