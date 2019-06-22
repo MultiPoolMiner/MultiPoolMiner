@@ -598,7 +598,7 @@ while (-not $API.Stop) {
     if ($Balances_Jobs) {
         $Balances = @($Balances_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Content | Sort-Object Name)
         $Balances_Jobs = $null
-        if ($API) {$API.Balances_Jobs = $null}
+        if ($API) {$API.Balances_Jobs = $Balances_Jobs 
     }
 
     #Update the exchange rates
