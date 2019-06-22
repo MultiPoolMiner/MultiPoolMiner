@@ -222,9 +222,6 @@ $UserNameDonate = ((@("aaronsace") * 3) + (@("grantemsley") * 2) + (@("uselessgu
 #Set process priority to BelowNormal to avoid hash rate drops on systems with weak CPUs
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
 
-#HWiNFO64 ready? If HWiNFO64 is running it will recreate the reg key automatically
-if (Test-Path "HKCU:\Software\HWiNFO64\VSB") {Remove-Item -Path "HKCU:\Software\HWiNFO64\VSB" -Recurse -ErrorAction SilentlyContinue}
-
 while (-not $API.Stop) {
     #Reduce memory
     [GC]::Collect()
@@ -308,12 +305,14 @@ while (-not $API.Stop) {
     #API start
     if ($Config.APIPort) {
         if (-not $API.Port) {
-            try {
-                if ((New-Object Net.Sockets.TcpClient "localhost", $Config.APIPort).Connected) {
-                    Write-Log -Level Error "Error starting web dashboard and API on port $($Config.APIPort). Port is in use. "
-                }
+            $TCPClient = New-Object System.Net.Sockets.TCPClient
+            $AsyncResult = $TCPClient.BeginConnect("localhost", $Config.APIPort, $null, $null)
+            if ($AsyncResult.AsyncWaitHandle.WaitOne(100)) {
+                Write-Log -Level Error "Error starting web dashboard and API on port $($Config.APIPort). Port is in use. "
+                try {$Null = $TCPClient.EndConnect($AsyncResult)}
+                catch {}
             }
-            catch {
+            else {
                 #Start API server
                 Remove-Variable API -ErrorAction SilentlyContinue
                 Start-APIServer -Port $Config.APIPort
@@ -331,6 +330,8 @@ while (-not $API.Stop) {
                     $API = @{}
                 }
             }
+            Remove-Variable AsyncResult
+            Remove-Variable TCPClient
         }
     }
     #Start monitoring service, requires running API
@@ -429,7 +430,6 @@ while (-not $API.Stop) {
 
     #Power cost preparations
     $PowerPrice = [Double]0
-    $PowerPriceDigits = (Get-Culture).NumberFormat.CurrencyDecimalDigits
     $PowerCostBTCperW = [Double]0
     $BasePowerCost = [Double]0
     if ($Config.MeasurePowerUsage) {
@@ -598,7 +598,7 @@ while (-not $API.Stop) {
     if ($Balances_Jobs) {
         $Balances = @($Balances_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Content | Sort-Object Name)
         $Balances_Jobs = $null
-        if ($API) {$API.Balances_Jobs = $Balances_Jobs 
+        if ($API) {$API.Balances_Jobs = $Balances_Jobs}
     }
 
     #Update the exchange rates
@@ -1180,11 +1180,11 @@ while (-not $API.Stop) {
 
     if ($MiningEarning -lt $MiningCost) {
         #Mining causes a loss
-        Write-Host -BackgroundColor Yellow -ForegroundColor Black "Mining is currently NOT profitable and causes a loss of $FirstCurrency $(($MiningEarning - $MiningCost).ToString("N$($PowerPriceDigits)"))/day (Earning: $($MiningEarning.ToString("N$($PowerPriceDigits)"))/day; Cost: $($MiningCost.ToString("N$($PowerPriceDigits)"))/day$(if ($Config.BasePowerUsage) {"; base power cost of $FirstCurrency $(($BasePowerCost * $Rates.BTC.$FirstCurrency).ToString("N$($PowerPriceDigits)"))/day for $($Config.BasePowerUsage)W is included in the calculation"})). "
+        Write-Host -BackgroundColor Yellow -ForegroundColor Black "Mining is currently NOT profitable and causes a loss of $FirstCurrency $(($MiningEarning - $MiningCost).ToString("N$((Get-Culture).NumberFormat.CurrencyDecimalDigits)"))/day (Earning: $($MiningEarning.ToString("N$((Get-Culture).NumberFormat.CurrencyDecimalDigits)"))/day; Cost: $($MiningCost.ToString("N$((Get-Culture).NumberFormat.CurrencyDecimalDigits)"))/day$(if ($Config.BasePowerUsage) {"; base power cost of $FirstCurrency $(($BasePowerCost * $Rates.BTC.$FirstCurrency).ToString("N$((Get-Culture).NumberFormat.CurrencyDecimalDigits)"))/day for $($Config.BasePowerUsage)W is included in the calculation"})). "
     }
     if (($MiningEarning - $MiningCost) -lt $Config.ProfitabilityThreshold -and $MinersNeedingBenchmark.Count -eq 0 -and $MinersNeedingPowerUsageMeasurement.count -eq 0) {
         #Mining at loss
-        Write-Host -BackgroundColor Yellow -ForegroundColor Black "Mining profit is below the configured threshold of $FirstCurrency $($Config.ProfitabilityThreshold.ToString("N$($PowerPriceDigits)"))/day; mining is suspended until threshold is reached."
+        Write-Host -BackgroundColor Yellow -ForegroundColor Black "Mining profit is below the configured threshold of $FirstCurrency $($Config.ProfitabilityThreshold.ToString("N$((Get-Culture).NumberFormat.CurrencyDecimalDigits)"))/day; mining is suspended until threshold is reached."
     }
 
     #Reduce memory
