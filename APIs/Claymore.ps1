@@ -10,8 +10,6 @@ class Claymore : Miner {
         $Request = @{id = 1; jsonrpc = "2.0"; method = "miner_getstat1"} | ConvertTo-Json -Compress
         $Response = ""
 
-        $HashRate = [PSCustomObject]@{}
-
         try {
             $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
             $Data = $Response | ConvertFrom-Json -ErrorAction Stop
@@ -20,6 +18,7 @@ class Claymore : Miner {
             return @($Request, $Response)
         }
 
+        $HashRate = [PSCustomObject]@{}
         $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
 
         if ($this.AllowedBadShareRatio) {

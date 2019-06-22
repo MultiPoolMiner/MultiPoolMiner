@@ -7,22 +7,19 @@ class NBMiner : Miner {
         $Server = "localhost"
         $Timeout = 5 #seconds
 
-        $Request = ""
+        $Request = "http://$($Server):$($this.Port)/api/v1/status"
         $Response = ""
 
-        $HashRate_Name = ""
-        $HashRate_Value = 0
-        $HashRate = [PSCustomObject]@{}
         try {
-            $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/api/v1/status" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
+            $Response = Invoke-WebRequest $Request -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
             $Data = $Response | ConvertFrom-Json -ErrorAction Stop
         }
         catch {
             return @($Request, $Response)
         }
 
+        $HashRate = [PSCustomObject]@{}
         $HashRate_Name = $this.Algorithm | Select-Object -Index 0
-        $HashRate | Add-Member @{$HashRate_Name = [Double]$Data.miner.total_hashrate_raw}
 
         if ($this.AllowedBadShareRatio) {
             $Shares_Accepted = [Int64]$Data.stratum.accepted_shares
@@ -34,16 +31,20 @@ class NBMiner : Miner {
             }
         }
 
+        $HashRate | Add-Member @{$HashRate_Name = [Double]$Data.miner.total_hashrate_raw}
+
         if ($Data.stratum.url2) {
             $HashRate_Name = $this.Algorithm | Select-Object -Index 1
             $HashRate | Add-Member @{$HashRate_Name = [Double]$Data.miner.total_hashrate2_raw}
 
-            $Shares_Accepted = [Int64]$Data.stratum.accepted_shares2
-            $Shares_Rejected = [Int64]$Data.stratum.rejected_shares2
-            if ($this.AllowedBadShareRatio -and ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted)))) {
-                $this.SetStatus("Failed")
-                $this.StatusMessage = " was stopped because of too many bad shares for algorithm $($HashRate_Name) (total: $($Shares_Accepted + $Shares_Rejected) / bad: $($Shares_Rejected) [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
-                return @($Request, $Response)
+            if ($this.AllowedBadShareRatio) {
+                $Shares_Accepted = [Int64]$Data.stratum.accepted_shares2
+                $Shares_Rejected = [Int64]$Data.stratum.rejected_shares2
+                if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) {
+                    $this.SetStatus("Failed")
+                    $this.StatusMessage = " was stopped because of too many bad shares for algorithm $($HashRate_Name) (total: $($Shares_Accepted + $Shares_Rejected) / bad: $($Shares_Rejected) [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
+                    return @($Request, $Response)
+                }
             }
         }
 

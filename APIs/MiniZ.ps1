@@ -10,8 +10,6 @@ class MiniZ : Miner {
         $Request = '{"id":"0", "method":"getstat"}'
         $Response = ""
 
-        $HashRate = [PSCustomObject]@{}
-
         try {
             $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
             $Data = $Response | ConvertFrom-Json -ErrorAction Stop
@@ -20,6 +18,7 @@ class MiniZ : Miner {
             return @($Request, $Response)
         }
 
+        $HashRate = [PSCustomObject]@{}
         $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
 
         if ($this.AllowedBadShareRatio) {

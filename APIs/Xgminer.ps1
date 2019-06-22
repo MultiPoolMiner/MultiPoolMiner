@@ -10,8 +10,6 @@ class Xgminer : Miner {
         $Request = @{command = "summary"; parameter = ""} | ConvertTo-Json -Compress
         $Response = ""
 
-        $HashRate = [PSCustomObject]@{}
-
         try {
             $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
             $Data = $Response.Substring($Response.IndexOf("{"), $Response.LastIndexOf("}") - $Response.IndexOf("{") + 1) -replace " ", "_" | ConvertFrom-Json -ErrorAction Stop
@@ -20,6 +18,7 @@ class Xgminer : Miner {
             return @($Request, $Response)
         }
 
+        $HashRate = [PSCustomObject]@{}
         $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
 
         if ($this.AllowedBadShareRatio) {

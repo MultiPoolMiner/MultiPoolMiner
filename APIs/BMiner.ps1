@@ -7,14 +7,11 @@ class BMiner : Miner {
         $Server = "localhost"
         $Timeout = 5 #seconds
 
-        $Request = ""
+        $Request = "http://$($Server):$($this.Port)/api/v1/status/solver"
         $Response = ""
 
-        $HashRate_Name = ""
-        $HashRate_Value = 0
-        $HashRate = [PSCustomObject]@{}
         try {
-            $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/api/v1/status/solver" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
+            $Response = Invoke-WebRequest $Request -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
             $Data = $Response | ConvertFrom-Json -ErrorAction Stop
         }
         catch {
@@ -22,9 +19,10 @@ class BMiner : Miner {
         }
 
         if ($this.AllowedBadShareRatio) {
+            $Request = "http://$($Server):$($this.Port)/api/v1/status/stratum"
             #Read stratum info from API
             try {
-                $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/api/v1/status/stratum" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
+                $Response = Invoke-WebRequest $Request -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
                 $Data | Add-member stratums ($Response | ConvertFrom-Json -ErrorAction Stop).stratums
             }
             catch {
@@ -32,6 +30,10 @@ class BMiner : Miner {
                 return @($Request, $Response, "Reason: Could not retrieve data from API ")
             }
         }        
+
+        $HashRate = [PSCustomObject]@{}
+        $HashRate_Name = ""
+        $HashRate_Value = 0
 
         $this.Algorithm | Select-Object -Unique | ForEach-Object {
 

@@ -7,19 +7,18 @@ class Eminer : Miner {
         $Server = "localhost"
         $Timeout = 5 #seconds
 
-        $Request = ""
+        $Request = "http://$($Server):$($this.Port)/api/v1/stats"
         $Response = ""
 
-        $HashRate = [PSCustomObject]@{}
-
         try {
-            $Response = Invoke-WebRequest "http://$($Server):$($this.Port)/api/v1/stats" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop            
+            $Response = Invoke-WebRequest $Request -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop            
             $Data = $Response | ConvertFrom-Json -ErrorAction Stop
         }
         catch {
             return @($Request, $Response)
         }
 
+        $HashRate = [PSCustomObject]@{}
         $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
 
         if ($this.AllowedBadShareRatio) {

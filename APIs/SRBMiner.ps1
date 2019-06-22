@@ -65,18 +65,17 @@ class SRBMiner : Miner {
         $Server = "localhost"
         $Timeout = 5 #seconds
 
-        $Request = ""
+        $Request = "http://$($Server):$($this.Port)"
         $Response = ""
-     
-        $HashRate = [PSCustomObject]@{}
 
         try {
-            $Data = Invoke-RestMethod "http://$($Server):$($this.Port)" -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
+            $Data = Invoke-RestMethod $Request -UseBasicParsing -TimeoutSec $Timeout -ErrorAction Stop
         }
         catch {
             return @($Request, $Response)
         }
 
+        $HashRate = [PSCustomObject]@{}
         $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
 
         if ($this.AllowedBadShareRatio) {

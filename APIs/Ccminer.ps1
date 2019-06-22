@@ -10,8 +10,6 @@ class Ccminer : Miner {
         $Request = "summary"
         $Response = ""
 
-        $HashRate = [PSCustomObject]@{}
-
         try {
             $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
             $Data = $Response -split ";" | ConvertFrom-StringData -ErrorAction Stop
@@ -20,6 +18,7 @@ class Ccminer : Miner {
             return @($Request, $Response)
         }
 
+        $HashRate = [PSCustomObject]@{}
         $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
 
         if ($this.AllowedBadShareRatio) {
