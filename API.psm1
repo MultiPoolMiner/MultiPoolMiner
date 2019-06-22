@@ -6,7 +6,7 @@
 
     # Create a global synchronized hashtable that all threads can access to pass data between the main script and API
     $Global:API = [hashtable]::Synchronized(@{})
-    $API.APIVersion = 0.94
+    $API.APIVersion = 0.95
 
     # Setup flags for controlling script execution
     $API.Stop = $false
@@ -141,6 +141,10 @@
                     }
                     "/miners" {
                         $Data = ConvertTo-Json @($API.Miners | Select-Object)
+                        Break
+                    }
+                    "/intervals" {
+                        $Data = ConvertTo-Json @($API.Intervals | Select-Object)
                         Break
                     }
                     "/minersneedingbenchmark" {
