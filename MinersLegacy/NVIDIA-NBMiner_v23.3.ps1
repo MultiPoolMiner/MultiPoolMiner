@@ -32,17 +32,17 @@ if ($Devices.Vendor -contains "NVIDIA Corporation" -and $CUDAVersion -and [Syste
 if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject[]]@(
-        [PSCustomObject]@{Algorithm = "tensority";           MinMemGB = 1; MinMemGBWin10 = 1; SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Tensority (BTM)
-# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash";              MinMemGB = 4; MinMemGBWin10 = 4; SecondaryIntensity = 0;  Fee = 0.65; Params = ""} #Ethash
-# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash2gb";           MinMemGB = 2; MinMemGBWin10 = 2; SecondaryIntensity = 0;  Fee = 0.65; Params = ""} #Ethash2GB
-# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash3gb";           MinMemGB = 3; MinMemGBWin10 = 3; SecondaryIntensity = 0;  Fee = 0.65; Params = ""} #Ethash3GB
-        [PSCustomObject]@{Algorithm = "tensority_ethash";    MinMemGB = 4; MinMemGBWin10 = 4; SecondaryIntensity = 17; Fee = 2;    Params = ""} #Tensority (BTM) & Ethash
-        [PSCustomObject]@{Algorithm = "tensority_ethash2gb"; MinMemGB = 3; MinMemGBWin10 = 2; SecondaryIntensity = 17; Fee = 2;    Params = ""} #Tensority (BTM) & Ethash2GB
-        [PSCustomObject]@{Algorithm = "tensority_ethash3gb"; MinMemGB = 3; MinMemGBWin10 = 3; SecondaryIntensity = 17; Fee = 2;    Params = ""} #Tensority (BTM) & Ethash3GB
-        [PSCustomObject]@{Algorithm = "cuckaroo";            MinMemGB = 5; MinMemGBWin10 = 6; SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckaroo29 (Grin29)
-        [PSCustomObject]@{Algorithm = "cuckaroo_swap";       MinMemGB = 5; MinMemGBWin10 = 6; SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckaroo29s (Swap29)
-        [PSCustomObject]@{Algorithm = "cuckatoo";            MinMemGB = 8; MinMemGBWin10 = 8; SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckatoo31 (Grin31)
-        [PSCustomObject]@{Algorithm = "cuckoo_ae";           MinMemGB = 5; MinMemGBWin10 = 6; SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckoo29 (Aeternity)
+        [PSCustomObject]@{Algorithm = "tensority";           MinMemGB = 1; MinMemGBWin10 = 1;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Tensority (BTM)
+# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash";               MinMemGB = 4; MinMemGBWin10 = 4; SecondaryIntensity = 0;  Fee = 0.65; Params = ""} #Ethash
+# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash2gb";            MinMemGB = 2; MinMemGBWin10 = 2; SecondaryIntensity = 0;  Fee = 0.65; Params = ""} #Ethash2GB
+# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash3gb";            MinMemGB = 3; MinMemGBWin10 = 3; SecondaryIntensity = 0;  Fee = 0.65; Params = ""} #Ethash3GB
+        [PSCustomObject]@{Algorithm = "tensority_ethash";    MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 2;    Params = ""} #Tensority (BTM) & Ethash
+        [PSCustomObject]@{Algorithm = "tensority_ethash2gb"; MinMemGB = 3; MinMemGBWin10 = 2;  SecondaryIntensity = 17; Fee = 2;    Params = ""} #Tensority (BTM) & Ethash2GB
+        [PSCustomObject]@{Algorithm = "tensority_ethash3gb"; MinMemGB = 3; MinMemGBWin10 = 3;  SecondaryIntensity = 17; Fee = 2;    Params = ""} #Tensority (BTM) & Ethash3GB
+        [PSCustomObject]@{Algorithm = "cuckaroo";            MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckaroo29 (Grin29)
+        [PSCustomObject]@{Algorithm = "cuckaroo_swap";       MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckaroo29s (Swap29)
+        [PSCustomObject]@{Algorithm = "cuckatoo";            MinMemGB = 8; MinMemGBWin10 = 10; SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckatoo31 (Grin31)
+        [PSCustomObject]@{Algorithm = "cuckoo_ae";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckoo29 (Aeternity)
     )
 }
 
