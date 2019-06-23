@@ -1,0 +1,86 @@
+<!--#include file="/parts/head.html" -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 id="title"  class="h2"data-navbaractive="navallminers">Miners</h1>
+</div>
+<div class="alert alert-info" role="alert">Shows all available miners for each algorithm</div>
+
+<!-- context menu -->
+<ul id="context-menu" class="dropdown-menu">
+  <li data-item="edit"><a>Edit</a></li>
+  <li data-item="delete"><a>Delete</a></li>
+  <li data-item="action1"><a>Action Here</a></li>
+  <li data-item="action2"><a>And Action Here</a></li>
+</ul>  
+
+<table id="miners" class="table"
+  data-buttons-align="left"
+  data-toggle="table"
+  data-url="/miners"
+  data-response-handler="formatMiners"
+  data-filter-control="true"
+  data-filter-show-clear="true"
+  data-sort-order="desc"
+  data-sort-name="Profit"
+  data-cache="false"
+  data-show-columns="true"
+  data-show-toggle="true"
+  data-show-refresh="true"
+  data-icons-prefix="fa"
+  data-icons="icons"
+  data-detail-view="true"
+  data-detail-formatter="detailFormatter"
+>
+  <thead>
+    <tr>
+      <th data-field="Name" data-sortable="true" data-filter-control="input" data-filter-strict-search="false">Name</th>
+      <th data-field="tDevices" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Devices</th>
+      <th data-field="Profit" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit</th>
+      <th data-field="Profit_Bias" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit Bias</th>
+      <th data-field="Earning" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning</th>
+      <th data-field="Earning_Bias" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning Bias</th>
+      <th data-field="PowerUsage" data-align="right" data-sortable="true" data-formatter="formatWatt">Power Usage</th>
+      <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Primary Algorithm</th>
+      <th data-field="tPrimaryHashRate" data-align="right"  data-sortable="true" data-formatter="formatHashRateValue">Speed</th>
+      <th data-field="tPrimaryFee" data-align="right" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent">Fee</th>
+      <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Secondary Algorithm</th>
+      <th data-field="tSecondaryHashRate" data-align="right"  data-sortable="true" data-formatter="formatHashRateValue">Speed</th>
+      <th data-field="tSecondaryFee" data-align="right" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent">Fee</th>
+    </tr>
+  </thead>
+</table>
+
+<!-- End of page scripts -->
+<script type="text/javascript">
+  $(function() {
+    $("#miners").bootstrapTable({
+      contextMenu: "#context-menu",
+      onContextMenuItem: function(row, $el){
+        if($el.data("item") == "edit"){
+          alert(row.itemid);
+        }
+      }
+    });
+  })
+
+  function formatMiners(data) {
+    // This function can alter the returned data before building the table, formatting it in a way
+    // that is easier to display and manipulate in a table
+    $.each(data, function(index, item) {
+      // Format the device(s)
+      item.tDevices = item.DeviceName.toString();
+
+      // Format the algorithms, hashrates & fees
+      var algorithms = Object.keys(item.HashRates);
+      item.tPrimaryAlgorithm = algorithms[0];
+      item.tSecondaryAlgorithm = algorithms[1];
+      item.tPrimaryHashRate = item.HashRates[algorithms[0]];
+      item.tSecondaryHashRate = item.HashRates[algorithms[1]];
+      var fees = Object.values(item.Fees);
+      item.tPrimaryFee = fees[0];
+      item.tSecondaryFee = fees[1];
+    });
+    return data;
+  }
+</script>
+
+<!--#include file="/parts/foot.html" -->
