@@ -19,6 +19,7 @@ This will trigger all benchmarks to be re-executed (unless you were running MPM 
 - Web dashboard: Added column 'Status' to devices overview (available status: 'Disabled', 'Idle', 'Running (MinerName)', 'Benchmarking (MinerName)' & 'Failed'
 
 #### Miner Changes
+- Added CcminerRfv2; support for RainforestV2
 - Fixed NVIDIA-CcminerZenemy_v2.00; invalid --devices0 parameter (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2339#issuecomment-495972633)
 - Fixed AMD_NVIDIA-BMiner_v15.5.3 SSL for secondary algorithm
 - Renamed NVIDIA-CcminerZenemy_v2.00 to NVIDIA-CcminerZenemy_v20.0 (typo)
