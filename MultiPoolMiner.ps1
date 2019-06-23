@@ -583,7 +583,7 @@ while (-not $API.Stop) {
                 Where-Object {-not $Config.SingleAlgoMining -or @($_.HashRates.PSObject.Properties.Name).Count -EQ 1} | #filter dual algo miners
                 Where-Object {$Config.MinerName.Count -eq 0 -or (Compare-Object @($Config.MinerName | Select-Object) @($_.BaseName, "$($_.BaseName)_$($_.Version)", $_.Name | Select-Object -Unique) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} | 
                 Where-Object {$Config.ExcludeMinerName.Count -eq 0 -or (Compare-Object @($Config.ExcludeMinerName | Select-Object) @($_.BaseName, "$($_.BaseName)_$($_.Version)", $_.Name | Select-Object -Unique) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0} |
-                Where-Object {-not $Config.DisableMinersWithDevFee -or (-not $_.Fees.PSObject.Properties.Value)} |
+                Where-Object {-not $Config.DisableMinersWithDevFee -or (-not $_.Fees)} |
                 Where-Object {$Config.MinersLegacy.$($_.BaseName).$($_.Version).ExcludeAlgorithm.Count -eq 0 -or (Compare-Object @($Config.MinersLegacy.$($_.BaseName).$($_.Version).ExcludeAlgorithm | Select-Object) @($_.HashRates.PSObject.Properties.Name -replace 'NiceHash'<#temp fix#> | Select-Object) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0} | 
                 Where-Object {$Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm.Count -eq 0 -or (Compare-Object @($Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm | Select-Object) @($_.HashRates.PSObject.Properties.Name -replace 'NiceHash'<#temp fix#> | Select-Object) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0} | 
                 ForEach-Object {if (-not $_.ShowMinerWindow) {$_ | Add-Member ShowMinerWindow $Config.ShowMinerWindow -Force}; $_} | #default ShowMinerWindow 
@@ -1331,7 +1331,7 @@ while (-not $API.Stop) {
     $Intervals += "$StatStart - $StatEnd"
     if ($API) {$API.Intervals = $Intervals}
 
-    if ($Intervals.Count -gt 1 -and ($HashRateSamples | Measure-Object -Maximum).Maximum -lt $HashRateSamplesPerInterval) {Write-Log -Level Warn "Collected hash rate samples during last interval ($($StatStart.ToLocalTime().ToLongTimeString()) - $($StatEnd.ToLocalTime().ToLongTimeString())) for all miners: $($HashRateSamples -join '; '), configured number of samples is $($HashRateSamplesPerInterval). If you see this message frequently then increase '-interval' time."}
+    if ($HashRateSamples -and $Intervals.Count -gt 1 -and ($HashRateSamples | Measure-Object -Maximum).Maximum -lt $HashRateSamplesPerInterval) {Write-Log -Level Warn "Collected hash rate samples during last interval ($($StatStart.ToLocalTime().ToLongTimeString()) - $($StatEnd.ToLocalTime().ToLongTimeString())) for all miners: $($HashRateSamples -join '; '), configured number of samples is $($HashRateSamplesPerInterval). If you see this message frequently then increase '-interval' time."}
 
     Write-Log "Finish waiting before next run. "
 
