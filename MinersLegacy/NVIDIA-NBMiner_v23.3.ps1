@@ -97,16 +97,16 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 if ($Secondary_Protocol -like "ethash*") {$Secondary_Protocol = $Secondary_Protocol -replace "stratum", "ethnh"}
 
                 $Arguments_Secondary = " -do $($Secondary_Protocol)://$($Pools.$Secondary_Algorithm_Norm.Host):$($Pools.$Secondary_Algorithm_Norm.Port) -du $($Pools.$Secondary_Algorithm_Norm.User):$($Secondary_Algorithm_Norm.Pass)$(if($_.SecondaryIntensity -ge 0){" -di $($_.SecondaryIntensity)"})"
-                $Miner_HashRates = [PSCustomObject]@{"$Main_Algorithm_Norm" = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week; "$Secondary_Algorithm_Norm" = $Stats."$($Miner_Name)_$($Secondary_Algorithm_Norm)_HashRate".Week}
-                $Miner_Fees = [PSCustomObject]@{"$Main_Algorithm_Norm" = $Fee / 100; "$Secondary_Algorithm_Norm" = $Fee / 100}
+                $Miner_HashRates = [PSCustomObject]@{$Main_Algorithm_Norm = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week; $Secondary_Algorithm_Norm = $Stats."$($Miner_Name)_$($Secondary_Algorithm_Norm)_HashRate".Week}
+                $Miner_Fees = [PSCustomObject]@{$Main_Algorithm_Norm = $Fee / 100; $Secondary_Algorithm_Norm = $Fee / 100}
                 $IntervalMultiplier = 2
                 $WarmupTime = 45
             }
             else {
                 $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
 
-                $Miner_HashRates = [PSCustomObject]@{"$Main_Algorithm_Norm" = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week}
-                $Miner_Fees = [PSCustomObject]@{"$Main_Algorithm_Norm" = $Fee / 100}
+                $Miner_HashRates = [PSCustomObject]@{$Main_Algorithm_Norm = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week}
+                $Miner_Fees = [PSCustomObject]@{$Main_Algorithm_Norm = $Fee / 100}
                 $Arguments_Secondary = ""
                 $WarmupTime = 30
             }
