@@ -41,7 +41,7 @@ else {
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = " --intensity 100 --latency --extra"}
+else {$CommonParameters = " --latency --show-shares --all-shares --show-pers"}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
