@@ -23,7 +23,7 @@ $CUDAVersion = ($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ
 $AMDVersion  = ($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Advanced Micro Devices, Inc." | Select-Object -Unique).OpenCL.DriverVersion
 
 if ($UnsupportedDriverVersions -contains $AMDVersion) {
-    Write-Log -Level Warn "Miner ($($Name)) does not support the installed AMD driver version $($AMDVersion). Please update your AMD drivers. "
+    Write-Log -Level Warn "Miner ($($Name)) does not support the installed AMD driver version $($AMDVersion). Please use a different AMD driver version. "
 }
 
 #Commands from config file take precedence
