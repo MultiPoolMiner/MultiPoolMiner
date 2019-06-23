@@ -69,7 +69,7 @@ else {
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = " --opencl-threads auto --opencl-launch auto --donate-level 1"}
+else {$CommonParameters = " --opencl-threads auto --opencl-launch auto --multiple-instance"}
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Advanced Micro Devices, Inc.")
 $Devices | Select-Object Model -Unique | ForEach-Object {
@@ -95,6 +95,17 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             default {$IntervalMultiplier = 1}
         }
 
+        #Optionally disable dev fee mining, cannot be done for Honeycomb or Wildkeccak algorithm
+        if ($null -eq $Miner_Config) {$Miner_Config = [PSCustomObject]@{DisableDevFeeMining = $Config.DisableDevFeeMining}}
+        if ($Algorithm_Norm -notmatch "Honeycomb|Wildkeccak" -and $Miner_Config.DisableDevFeeMining) {
+            $NoFee = "--donate-level 0"
+            $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 0}
+        }
+        else {
+            $NoFee = ""
+            $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 2 / 100}
+        }
+
         [PSCustomObject]@{
             Name               = $Miner_Name
             BaseName           = $Miner_BaseName
@@ -107,7 +118,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             API                = "XmRig"
             Port               = $Miner_Port
             URI                = $Uri
-            Fees               = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
+            Fees               = $Miner_Fees
             IntervalMultiplier = $IntervalMultiplier
             WarmupTime         = $(if (@($Device | Where-Object {$_.Type -eq "CPU" -or ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge 2})) {30} else {60})
         }
