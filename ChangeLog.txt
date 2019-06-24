@@ -20,8 +20,9 @@ This will trigger all benchmarks to be re-executed (unless you were running MPM 
 
 #### Miner Changes
 - Added CcminerRfv2; support for RainforestV2
-- Fixed NVIDIA-CcminerZenemy_v2.00; invalid --devices0 parameter (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2339#issuecomment-495972633)
 - Fixed AMD_NVIDIA-BMiner_v15.5.3 SSL for secondary algorithm
+- Fixed NVIDIA-CcminerZenemy_v2.00; invalid --devices0 parameter (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2339#issuecomment-495972633)
+- Fixed NVIDIA-MiniZEquihash_v1.3n5; added '--pers auto' for Equihash 1927 algo
 - Renamed NVIDIA-CcminerZenemy_v2.00 to NVIDIA-CcminerZenemy_v20.0 (typo)
 - Removed CPU-Cryply_v3.8.8.4; (moved to 'Deprecated' folder); CPU-Jayddee_v3.9.4 is newer and has no dev fee
 - Updated AMD_CPU_NVIDIA-FireiceCryptonight_v2.10.5
@@ -31,7 +32,7 @@ This will trigger all benchmarks to be re-executed (unless you were running MPM 
 - Updated AMD-JCECryptonote_v0.33b18; changed API to XmRig
 - Updated AMD-SRBMinerCryptonight_v1.9.0
 - Updated AMD-TeamRed_v0.5.2
-- Updated AMD-WildRig_v0.17.8; support for Blake2b-BTCC, Blake2b-Glt & Skein2
+- Updated AMD-WildRig_v0.17.9; support for Blake2b-BTCC, Blake2b-Glt & Skein2
 - Updated AMD-XmrigCryptonight_v2.14.4
 - Updated CPU-Jayddee_v3.9.4; support for Lyra2rev3, Sha256q, Sonoa, Yespower, YespowerR16 & Yescryptr16
 - Updated CPU-JCECryptonote_v0.33q; changed API to XmRig
