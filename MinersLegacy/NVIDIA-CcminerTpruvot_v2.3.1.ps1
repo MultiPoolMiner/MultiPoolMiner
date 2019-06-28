@@ -77,7 +77,7 @@ else {
         #"whirlcoin"     = "" #Old Whirlcoin (Whirlpool algo) - whirlcoin not in algorithms.txt
         #"whirlpool"     = "" #WhirlPool
         #"whirlpoolx"    = "" #whirlpoolx
-        "x11evo"        = "" #X11evo
+      # "x11evo"        = "" #X11evo; CcminerAlexis_v1.5 is faster
         "x12"           = "" #X12
       # "x16r"          = "" #X16R; Other free miners are faster
         #"X16s"         = "" #X16S
