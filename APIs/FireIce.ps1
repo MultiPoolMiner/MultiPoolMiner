@@ -1,14 +1,8 @@
 ﻿using module ..\Include.psm1
 
-class XmRig : Miner {
+class Fireice : Miner {
     [String]GetCommandLineParameters() {
-        if ($this.Arguments -like "{*}") {
-            return ($this.Arguments | ConvertFrom-Json -ErrorAction SilentlyContinue).Commands
-        }
-        else {
-            return $this.Arguments
-        }    
-        
+        return ($this.Arguments | ConvertFrom-Json).Commands
     }
     
     hidden StartMining() {
@@ -18,13 +12,20 @@ class XmRig : Miner {
         $this.Activated++
 
         if ($this.Arguments -like "{*}") {
-            $Parameters = $this.Arguments | ConvertFrom-Json -ErrorAction SilentlyContinue
-
             try {
+                $Parameters = $this.Arguments | ConvertFrom-Json
                 $ConfigFile = "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)"
+                $PoolFile = "$(Split-Path $this.Path)\$($Parameters.PoolFile.FileName)"
+                $MinerThreadsConfigFile = "$(Split-Path $this.Path)\$($Parameters.MinerThreadsConfigFile)"
+                $ThreadsConfigFile = "$(Split-Path $this.Path)\$($Parameters.ThreadsConfigFile)"
+                $Platform = $Parameters.Platform
+                $PlatformThreadsConfigFile = "$(Split-Path $this.Path)\$($Parameters.PlatformThreadsConfigFile)"
+                $ThreadsConfig = ""
 
-                $ThreadsConfig = [PSCustomObject]@{}
-                $ThreadsConfigFile = "$(Split-Path $this.Path)\$($Parameters.ThreadsConfigFileName)"
+                #Write pool config file, overwrite every time
+                ($Parameters.PoolFile.Content | ConvertTo-Json -Depth 10) -replace '^{' -replace '}$', ',' | Set-Content $PoolFile -Force
+                #Write config file, keep existing file to preserve user custom config
+                if (-not (Test-Path $ConfigFile -PathType Leaf)) {($Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10) -replace '^{' -replace '}$' | Set-Content $ConfigFile}
 
                 if ($Parameters.ConfigFile.Content.threads) {
                     #Write full config file, ignore possible hw change
@@ -32,15 +33,14 @@ class XmRig : Miner {
                 }
                 else {
                     #Check if we have a valid hw file for all installed hardware. If hardware / device order has changed we need to re-create the config files.
-                    $ThreadsConfig = Get-Content $ThreadsConfigFile -ErrorAction SilentlyContinue | ConvertFrom-Json -ErrorAction SilentlyContinue
-                    if ($ThreadsConfig.Count -lt 1) {
-                        if (Test-Path "$(Split-Path $this.Path)\$($this.Algorithm[0])-*.json" -PathType Leaf) {
+                    if (-not (Test-Path $PlatformThreadsConfigFile -PathType Leaf)) {
+                        if (Test-Path "$(Split-Path $this.Path)\ThreadsConfig-$($Platform)-$($this.Algorithm[0])-*.txt" -PathType Leaf) {
                             #Remove old config files, thread info is no longer valid
                             Write-Log -Level Warn "Hardware change detected. Deleting existing configuration files for miner ($($this.Name) {$($this.Algorithm[0] -replace 'NiceHash')@$($this.Pool[0])}). "
-                            Remove-Item "$(Split-Path $this.Path)\ThreadsConfig-$($this.Algorithm[0])-*.json" -Force -ErrorAction SilentlyContinue
+                            Remove-Item "$(Split-Path $this.Path)\ThreadsConfig-$($Platform)-$($this.Algorithm[0])-*.txt" -Force -ErrorAction SilentlyContinue
                         }
-                        #Temporarily start miner with pre-config file (without threads config). Miner will then update hw config file with threads info
-                        $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ThreadsConfigFile -Force
+                        #Temporarily start miner with empty thread conf file. The miner will then create a hw config file with default threads info for all platform hardware
+
                         if ((Test-Path ".\CreateProcess.cs" -PathType Leaf) -and ($this.API -ne "Wrapper")) {
                             $this.Process = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList $Parameters.HwDetectCommands -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object {if ($_ -like "CPU#*") {-2} else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
                         }
@@ -48,6 +48,7 @@ class XmRig : Miner {
                             $EnvCmd = ($this.Environment | Foreach-Object {"```$env:$($_)"}) -join "; "
                             $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command $EnvCmd```$Process = (Start-Process '$($this.Path)' '$($Parameters.HwDetectCommands)' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
                         }
+                        
                         if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
                             for ($WaitForPID = 0; $WaitForPID -le 20; $WaitForPID++) {
                                 if ($this.ProcessId = (Get-CIMInstance CIM_Process | Where-Object {$_.ExecutablePath -eq $this.Path -and $_.CommandLine -like "*$($this.Path)*$($Parameters.HwDetectCommands)*"}).ProcessId) {
@@ -57,13 +58,17 @@ class XmRig : Miner {
                                 Start-Sleep -Milliseconds 100
                             }
                             for ($WaitForThreadsConfig = 0; $WaitForThreadsConfig -le 60; $WaitForThreadsConfig++) {
-                                if ($ThreadsConfig = @(Get-Content $ThreadsConfigFile -ErrorAction SilentlyContinue | ConvertFrom-Json -ErrorAction SilentlyContinue).threads) {
-                                    if ($this.DeviceName -like "GPU*") {
-                                        ConvertTo-Json -InputObject @($ThreadsConfig | Sort-Object -Property Index -Unique) -Depth 10 | Set-Content $ThreadsConfigFile -ErrorAction SilentlyContinue -Force
-                                    }
-                                    else {
-                                        ConvertTo-Json -InputObject @($ThreadsConfig| Select-Object -Unique) -Depth 10 | Set-Content $ThreadsConfigFile -ErrorAction SilentlyContinue -Force
-                                    }
+                                if (Test-Path ($PlatformThreadsConfigFile)) {
+                                    #Read hw config created by miner
+                                    $ThreadsConfig = (Get-Content $PlatformThreadsConfigFile) -replace '^\s*//.*' | Out-String
+                                    #Set bfactor to 11 (default is 6 which makes PC unusable)
+                                    $ThreadsConfig = $ThreadsConfig -replace '"bfactor"\s*:\s*\d,', '"bfactor" : 11,'
+                                    #Reformat to proper json
+                                    $ThreadsConfigJson = "{$($ThreadsConfig -replace '\/\*.*' -replace '\*\/' -replace '\*.+' -replace '\s' -replace ',\},]','}]' -replace ',\},\{','},{' -replace '},]', '}]' -replace ',$','')}" | ConvertFrom-Json
+                                    #Keep one instance per gpu config
+                                    $ThreadsConfigJson | Add-Member gpu_threads_conf ($ThreadsConfigJson.gpu_threads_conf | Sort-Object -Property Index -Unique) -Force
+                                    #Write json file
+                                    $ThreadsConfigJson | ConvertTo-Json -Depth 10 | Set-Content $PlatformThreadsConfigFile -Force
                                     break
                                 }
                                 Start-Sleep -Milliseconds 500
@@ -75,25 +80,15 @@ class XmRig : Miner {
                             return
                         }
                     }
-
-                    if (-not ((Get-Content $ConfigFile -ErrorAction SilentlyContinue | ConvertFrom-Json -ErrorAction SilentlyContinue).threads)) {
-                        #Threads config in config file is invalid, retrieve from threads config file
-                        $ThreadsConfig = Get-Content $ThreadsConfigFile | ConvertFrom-Json
-                        if ($ThreadsConfig.Count -ge 1) {
-                            #Write config files. Overwrite because we need to add thread info
-                            if ($this.DeviceName -like "GPU*") {
-                                $Parameters.ConfigFile.Content | Add-Member threads ([Array](($ThreadsConfig | Where-Object {$Parameters.Devices -contains $_.index})) * $Parameters.Threads) -Force
-                            }
-                            else {
-                                #CPU thread config does not contain index information
-                                $Parameters.ConfigFile.Content | Add-Member threads ([Array]($ThreadsConfig * $Parameters.Threads)) -Force
-                            }
-                            $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -Force
-                        }
-                        else {
-                            Write-Log -Level Error "Error parsing threads config file - cannot create miner config file ($($this.Name) {$($this.Algorithm[0] -replace 'NiceHash')@$($this.Pool[0])}) [Error: '$($Error[0])']. "
-                            return
-                        }                
+                    if (-not (Test-Path $MinerThreadsConfigFile -PathType Leaf)) {
+                        #Retrieve hw config from platform config file
+                        $ThreadsConfigJson = Get-Content $PlatformThreadsConfigFile | ConvertFrom-Json -ErrorAction SilentlyContinue
+                        #Filter index for current cards and apply threads
+                        $ThreadsConfigJson | Add-Member gpu_threads_conf ([Array]($ThreadsConfigJson.gpu_threads_conf | Where-Object {$Parameters.Devices -contains $_.Index}) * $Parameters.Threads) -Force
+                        #Create correct numer of CPU threads
+                        $ThreadsConfigJson | Add-Member cpu_threads_conf ([Array]$ThreadsConfigJson.cpu_threads_conf * $Parameters.Threads) -Force
+                        #Write config file
+                        ($ThreadsConfigJson | ConvertTo-Json -Depth 10) -replace '^{' -replace '}$' | Set-Content $MinerThreadsConfigFile -Force
                     }
                 }
             }
@@ -101,7 +96,6 @@ class XmRig : Miner {
                 Write-Log -Level Error "Creating miner config files failed ($($this.Name) {$($this.Algorithm[0] -replace 'NiceHash')@$($this.Pool[0])}) [Error: '$($Error[0])']. "
                 return
             }
-            
         }
 
         if ($this.Process) {
@@ -188,7 +182,7 @@ class XmRig : Miner {
         $HashRate | Add-Member @{$HashRate_Name = [Double]$HashRate_Value}
 
         if ($HashRate.PSObject.Properties.Value -gt 0) {
-                $this.Data += [PSCustomObject]@{
+            $this.Data += [PSCustomObject]@{
                 Date       = (Get-Date).ToUniversalTime()
                 Raw        = $Data
                 HashRate   = $HashRate

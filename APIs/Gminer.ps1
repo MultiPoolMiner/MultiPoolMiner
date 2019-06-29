@@ -1,44 +1,46 @@
 using module ..\Include.psm1
 
-class Dstm : Miner {
+class Gminer : Miner {
     [String[]]UpdateMinerData () {
         if ($this.GetStatus() -ne [MinerStatus]::Running) {return @()}
 
-        $Server = "localhost"
+        $Server = "127.0.0.1"
         $Timeout = 5 #seconds
 
-        $Request = @{id = 1; method = "getstat"} | ConvertTo-Json -Compress
-        $Response = ""
+        $Request = "http://$($Server):$($this.Port)/stat"
+        $Data = ""
 
         try {
-            $Response = Invoke-TcpRequest $Server $this.Port $Request $Timeout -ErrorAction Stop
-            $Data = $Response | ConvertFrom-Json -ErrorAction Stop
+            if ($Global:PSVersionTable.PSVersion -ge [System.Version]("6.0.0")) {
+                $Data = Invoke-RestMethod $Request -TimeoutSec $Timeout -DisableKeepAlive -MaximumRetryCount 3 -RetryIntervalSec 1 -ErrorAction Stop
+            }
+            else {
+                $Data = Invoke-RestMethod $Request -TimeoutSec $Timeout -DisableKeepAlive -ErrorAction Stop
+            }
         }
         catch {
-            return @($Request, $Response)
+            return @($Request, $Data)
         }
 
         $HashRate = [PSCustomObject]@{}
         $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
 
         if ($this.AllowedBadShareRatio) {
-            $Shares_Accepted = [Double]($Data.result.accepted_shares | Measure-Object -Sum).Sum
-            $Shares_Rejected = [Double]($Data.result.rejected_shares | Measure-Object -Sum).Sum
+            $Shares_Accepted = [Int64]($Data.gpu_status.good_shares | Measure-Object -Sum).Sum
+            $Shares_Rejected = [Int64]($Data.gpu_status.bad_shares | Measure-Object -Sum).Sum
             if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) {
                 $this.SetStatus("Failed")
                 $this.StatusMessage = " was stopped because of too many bad shares for algorithm $($HashRate_Name) (total: $($Shares_Accepted + $Shares_Rejected) / bad: $($Shares_Rejected) [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
-                return @($Request, $Response)
+                return @($Request, $Data)
             }
         }
 
-        $HashRate_Value = [Double]($Data.result.sol_ps | Measure-Object -Sum).Sum
-        if (-not $HashRate_Value) {$HashRate_Value = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum} #ewbf fix
-        $HashRate | Add-Member @{$HashRate_Name = [Double]$HashRate_Value}
+        $HashRate | Add-Member @{$HashRate_Name = [Double]($Data.devices.speed | Measure-Object -Sum).Sum}
 
         if ($HashRate.PSObject.Properties.Value -gt 0) {
             $this.Data += [PSCustomObject]@{
                 Date       = (Get-Date).ToUniversalTime()
-                Raw        = $Response
+                Raw        = $Data
                 HashRate   = $HashRate
                 PowerUsage = (Get-PowerUsage $this.DeviceName)
                 Device     = @()

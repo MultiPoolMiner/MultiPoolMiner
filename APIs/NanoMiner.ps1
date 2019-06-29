@@ -1,6 +1,6 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
-class SRBMiner : Miner {
+class NanoMiner : Miner {
     [String]GetCommandLineParameters() {
         return ($this.Arguments | ConvertFrom-Json).Commands
     }
@@ -14,11 +14,7 @@ class SRBMiner : Miner {
         $Parameters = $this.Arguments | ConvertFrom-Json
 
         #Write config files. Keep separate files, do not overwrite to preserve optional manual customization
-        if (-not (Test-Path "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -PathType Leaf)) {$Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -ErrorAction Ignore}
-
-        #Write pool file. Keep separate files
-        $Parameters.PoolFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.PoolFile.FileName)" -Force -ErrorAction SilentlyContinue
-
+        if (-not (Test-Path "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -PathType Leaf)) {$Parameters.ConfigFile.Content | Set-Content "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -ErrorAction Ignore}
 
         if ($this.Process) {
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
@@ -65,7 +61,7 @@ class SRBMiner : Miner {
         $Server = "localhost"
         $Timeout = 5 #seconds
 
-        $Request = "http://$($Server):$($this.Port)"
+        $Request = "http://$($Server):$($this.Port)/stats"
         $Data = ""
 
         try {
@@ -84,8 +80,9 @@ class SRBMiner : Miner {
         $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
 
         if ($this.AllowedBadShareRatio) {
-            $Shares_Accepted = [Int64]$Data.shares.accepted
-            $Shares_Rejected = [Int64]$Data.shares.rejected
+            $Shares_Accepted = [Int64](($Data.Algorithms | Select-Object -Index 0).(($Data.Algorithms | Select-Object -Index 0) | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name).Total.Accepted)
+            $Shares_Rejected = [Int64](($Data.Algorithms | Select-Object -Index 0).(($Data.Algorithms | Select-Object -Index 0) | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name).Total.Denied)
+
             if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) {
                 $this.SetStatus("Failed")
                 $this.StatusMessage = " was stopped because of too many bad shares for algorithm $($HashRate_Name) (total: $($Shares_Accepted + $Shares_Rejected) / bad: $($Shares_Rejected) [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
@@ -93,7 +90,7 @@ class SRBMiner : Miner {
             }
         }
 
-        $HashRate | Add-Member @{$HashRate_Name = [Double]$Data.hashrate_total_now}
+        $HashRate | Add-Member @{$HashRate_Name = [Double](($Data.Algorithms | Select-Object -Index 0).(($Data.Algorithms | Select-Object -Index 0) | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name).Total.Hashrate)}
 
         if ($HashRate.PSObject.Properties.Value -gt 0) {
             $this.Data += [PSCustomObject]@{
