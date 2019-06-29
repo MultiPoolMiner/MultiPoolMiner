@@ -9,9 +9,9 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "82477387C860517C5FACE8758BCB7AAC890505280BF713ACA9F86D7B306AC711"
-$Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z"
-$ManualUri = "https://github.com/sp-hash/ccminer"
+$HashSHA256 = "B0517639B174E2A7776A5567F566E1C0905A7FE439049D33D44A7502DE581F7B"
+$Uri = "https://github.com/scaras/ccminer-2.2-mod-r1/releases/download/2.2-r1/2.2-mod-r1.zip"
+$ManualUri = "https://github.com/scaras/ccminer-2.2-mod-r1"
 
 $Miner_Version = Get-MinerVersion $Name
 $Miner_BaseName = Get-MinerBaseName $Name
@@ -22,46 +22,33 @@ if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*
 if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject]@{
-        #GPU - profitable 20/04/2018
-        "bastion"       = "" #bastion
-        #"c11"           = "" #C11/Flax
-        "credit"        = "" #Credit
-        "deep"          = "" #deep
-        "dmd-gr"        = "" #dmd-gr
-        "fresh"         = "" #fresh
-        "fugue256"      = "" #Fugue256
-        "heavy"         = "" #heavy
-        "jackpot"       = "" #JackPot
-        "keccak"        = "" #Keccak
-        "luffa"         = "" #Luffa
-        "mjollnir"      = "" #Mjollnir
-        "pentablake"    = "" #pentablake
-        "scryptjane:nf" = "" #scryptjane:nf
-        "s3"            = "" #S3
-        "spread"        = "" #Spread
-        "x17"           = "" #x17
-
+        "blake2s"   = "" #Blake2s
+        "blakecoin" = "" #Blakecoin
+        "c11"       = "" #C11
+        "hmq1725"   = "" #HMQ1725
+        "lyra2v2"   = "" #Lyra2RE2
+        "lyra2z"    = "" #Lyra2z
+        "neoscrypt" = "" #NeoScrypt
+        "skein"     = "" #Skein
+        "skunk"     = "" #Skunk
+        "timetravel"= "" #Timetravel
+        "tribus"    = "" #Tribus
+        "x11evo"    = "" #X11evo
+        "x17"       = "" #X17
+        
         # ASIC - never profitable 24/06/2018
-        #"blake"         = "" #blake
-        #"blakecoin"     = "" #Blakecoin
-        #"blake2s"       = "" #Blake2s
-        #"decred"        = "" #Decred
-        #"groestl"       = "" #Groestl
-        #"lbry"          = "" #Lbry
-        #"lyra2"         = "" #lyra2RE
-        #"myr-gr"        = "" #MyriadGroestl
-        #"nist5"         = "" #Nist5
-        #"quark"         = "" #Quark
-        #"qubit"         = "" #Qubit
-        #"scrypt"        = "" #Scrypt
-        #"scrypt:N"      = "" #scrypt:N
-        #"sha256d"       = "" #sha256d Bitcoin
-        #"sia"           = "" #SiaCoin
-        #"vanilla"       = "" #BlakeVanilla
-        #"x11"           = "" #X11
-        #"x13"           = "" #x13
-        #"x14"           = "" #x14
-        #"x15"           = "" #x15
+        #"decred"   = "" #Decred
+        #"groestl"  = "" #Groestl
+        #"lbry"     = "" #Lbry
+        #"myr-gr"   = "" #MyriadGroestl
+        #"nist5"    = "" #Nist5
+        #"qubit"    = "" #qubit
+        #"quark"    = "" #Quark
+        #"sib"      = "" #Sib
+        #"x11"      = "" #X11
+        #"x12"      = "" #X12
+        #"x13"      = "" #X13
+        #"x14"      = "" #X14
     }
 }
 
@@ -73,7 +60,7 @@ $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "N
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 1
-
+        
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
 

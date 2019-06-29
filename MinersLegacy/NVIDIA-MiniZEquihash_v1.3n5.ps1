@@ -8,39 +8,49 @@ param(
 )
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Path = ".\Bin\$($Name)\miner.exe"
-$HashSHA256 = "C3CB1770B93611F45CC194DF11188E56ACE58DD718F5E4260C3ED65EABB1F6B7"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/EWBF2/EWBF.Equihash.miner.v0.6.zip"
-$ManualUri = "https://bitcointalk.org/index.php?topic=4466962.0"
+$Path = ".\Bin\$($Name)\MiniZ.exe"
+$HashSHA256 = "186FADA7B3A6EEB5C9C4E3B24D671A769F6C3941D8CCB65CB629A5EB75772C2A"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.3n5_cuda10_win-x64.zip"
+$ManualUri = "https://miniz.ch/download"
 
 $Miner_Version = Get-MinerVersion $Name
 $Miner_BaseName = Get-MinerBaseName $Name
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
+$Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation"
+
+# Miner requires CUDA 10.0.00 or higher
+$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+$RequiredCUDAVersion = "10.0.00"
+if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) {
+    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
+    return
+}
+
 #Commands from config file take precedence
 if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject[]]@(
-        [PSCustomObject]@{Algorithm = "Equihash-96_5";  MinMemGB = 1.8; Params = ""}
-        [PSCustomObject]@{Algorithm = "Equihash-144_5"; MinMemGB = 1.7; Params = ""}
-        [PSCustomObject]@{Algorithm = "Equihash-192_7"; MinMemGB = 2.7; Params = ""}
-        [PSCustomObject]@{Algorithm = "Equihash-210_9"; MinMemGB = 1.3; Params = ""}
+        [PSCustomObject]@{Algorithm = "Equihash144,5"; MinMemGB = 2.0; Params = ""}
+        [PSCustomObject]@{Algorithm = "Equihash150,5"; MinMemGB = 2.0; Params = ""}
+        [PSCustomObject]@{Algorithm = "Equihash192,7"; MinMemGB = 3.0; Params = ""}
+        [PSCustomObject]@{Algorithm = "Equihash96,5";  MinMemGB = 2.0; Params = ""}
     )
 }
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = " --pec --intensity 64"}
+else {$CommonParameters = " --latency --show-shares --all-shares --show-pers"}
 
-$Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation"
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 1
 
-    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
-        $Algorithm = ($_.Algorithm) -replace "Equihash-"
+    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm ($_.Algorithm -replace ","); $_} | Where-Object {$Pools.$Algorithm_Norm.Host} | ForEach-Object {
+        $Algorithm = $_.Algorithm -replace "Equihash"
         $MinMemGB = $_.MinMemGB
+        $Parameters = $_.Parameters
 
         if ($Miner_Device = @($Miner_Device | Where-Object {$([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
             $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
@@ -56,8 +66,8 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 $Parameters = Get-ParameterPerDevice $_.Parameters $Miner_Device.Type_Vendor_Index
             }
 
-            if ($Algorithm_Norm -like "Equihash1445") {
-                #define --pers for equihash1445
+            if ($Algorithm_Norm -match "Equihash1445|Equihash1927") {
+                #define --pers for quihash1445 & Equihash1927
                 $Pers = " --pers $(Get-EquihashPers -CoinName $Pools.$Algorithm_Norm.CoinName -Default 'auto')"
             }
             else {$Pers = ""}
@@ -65,7 +75,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             #Optionally disable dev fee mining
             if ($null -eq $Miner_Config) {$Miner_Config = [PSCustomObject]@{DisableDevFeeMining = $Config.DisableDevFeeMining}}
             if ($Miner_Config.DisableDevFeeMining) {
-                $NoFee = " --fee 0"
+                $NoFee = " --donate=0"
                 $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 0 / 100}
             }
             else {
@@ -73,23 +83,19 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 2 / 100}
             }
 
-            if ($Algorithm_Norm -ne "Equihash1445" -or $Pers) {
-                [PSCustomObject]@{
-                    Name             = $Miner_Name
-                    BaseName         = $Miner_BaseName
-                    Version          = $Miner_Version
-                    DeviceName       = $Miner_Device.Name
-                    Path             = $Path
-                    HashSHA256       = $HashSHA256
-                    Arguments        = ("--algo $Algorithm$Pers --eexit 1 --api 127.0.0.1:$($Miner_Port) --server $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$Parameters$CommonParameters$NoFee --cuda_devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')" -replace "\s+", " ").trim()
-                    HashRates        = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
-                    API              = "DSTM"
-                    Port             = $Miner_Port
-                    URI              = $Uri
-                    Fees             = $Miner_Fees
-                    PrerequisitePath = "$env:SystemRoot\System32\msvcr120.dll"
-                    PrerequisiteURI  = "http://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe"
-                }
+            [PSCustomObject]@{
+                Name       = $Miner_Name
+                BaseName   = $Miner_BaseName
+                Version    = $Miner_Version
+                DeviceName = $Miner_Device.Name
+                Path       = $Path
+                HashSHA256 = $HashSHA256
+                Arguments  = ("--par=$Algorithm$Pers --telemetry 0.0.0.0:$($Miner_Port) --server $(if ($Pools.$Algorithm_Norm.SSL) {"ssl://"})$($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$Parameters$CommonParameters$NoFee --cuda-devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')" -replace "\s+", " ").trim()
+                HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
+                API        = "MiniZ"
+                Port       = $Miner_Port
+                URI        = $Uri
+                Fees       = $Miner_Fees
             }
         }
     }

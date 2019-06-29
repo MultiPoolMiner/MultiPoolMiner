@@ -9,9 +9,9 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\sgminer.exe"
-$HashSHA256 = "3bb5081ab3d1ddeca6bcb63914f3d1c5c39387fb423d1234f4cb9e05ed79b149"
-$Uri = "https://github.com/brian112358/avermore-miner/releases/download/v1.4.1/avermore-v1.4.1-windows.zip"
-$ManualUri = "https://github.com/brian112358/avermore-miner"
+$HashSHA256 = "A24024BEA8789B62D61CB3F41432EA1A62EE5AD97CD3DEAB1E2308F40B127A4D"
+$Uri = "https://github.com/KL0nLutiy/sgminer-kl/releases/download/kl-1.0.9/sgminer-kl-1.0.9-windows.zip"
+$ManualUri = "https://github.com/KL0nLutiy/sgminer-kl"
 
 $Miner_Version = Get-MinerVersion $Name
 $Miner_BaseName = Get-MinerBaseName $Name
@@ -22,9 +22,16 @@ if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*
 if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject]@{
-        #"X16r"  = " -k x16r -g 2 -w 64 -X 64" #Crashes on NVIDIA 1080Ti
-        "X16s"  = " -k x16s -g 2 -w 64 -X 64"
-        "Xevan" = " -k xevan -g 2 -w 64 -X 64"
+      "aergo"     = " -X 256 -g 2" #Aergo
+      "geek"      = " -X 256 -g 2" # Geek
+      "phi"       = " -X 256 -g 2 -w 256" # Phi
+      "polytimos" = " -X 256 -g 2 -w 256" # Polytimos
+      "skunk"     = " -X 256 -g 2 -w 256" # Skunk
+      "tribus"    = " -X 256 -g 2" #Tribus
+      "xevan"     = " -X 256 -g 2" #Xevan
+      "x16s"      = " -X 256 -g 2" #X16S Pigeoncoin
+      "x16r"      = " -X 256 -g 2" #X16R Ravencoin
+      "x17"       = " -X 256 -g 2"
     }
 }
 
@@ -69,10 +76,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             Port               = $Miner_Port
             URI                = $Uri
             Fees               = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
-            IntervalMultiplier = $IntervalMultiplier
             Environment        = @("GPU_FORCE_64BIT_PTR=0")
             WarmupTime         = 90
+            IntervalMultiplier = $IntervalMultiplier
         }
     }
 }
-

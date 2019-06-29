@@ -9,9 +9,9 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "82477387C860517C5FACE8758BCB7AAC890505280BF713ACA9F86D7B306AC711"
-$Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z"
-$ManualUri = "https://github.com/sp-hash/ccminer"
+$HashSHA256 = "F9A69BA3C00E80BBBE7054E8705FE07DC23B7C408FA5405B778441A24D1AD223"
+$Uri = "https://github.com/djm34/ccminer-msvc2015/releases/download/v0.3.0/ccminer.rar"
+$ManualUri = "https://github.com/djm34/ccminer-msvc2015"
 
 $Miner_Version = Get-MinerVersion $Name
 $Miner_BaseName = Get-MinerBaseName $Name
@@ -22,46 +22,31 @@ if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*
 if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject]@{
-        #GPU - profitable 20/04/2018
-        "bastion"       = "" #bastion
-        #"c11"           = "" #C11/Flax
-        "credit"        = "" #Credit
-        "deep"          = "" #deep
-        "dmd-gr"        = "" #dmd-gr
-        "fresh"         = "" #fresh
-        "fugue256"      = "" #Fugue256
-        "heavy"         = "" #heavy
-        "jackpot"       = "" #JackPot
-        "keccak"        = "" #Keccak
-        "luffa"         = "" #Luffa
-        "mjollnir"      = "" #Mjollnir
-        "pentablake"    = "" #pentablake
-        "scryptjane:nf" = "" #scryptjane:nf
-        "s3"            = "" #S3
-        "spread"        = "" #Spread
-        "x17"           = "" #x17
-
+        "blake2s"   = "" #Blake2s
+        "blakecoin" = "" #Blakecoin
+        "c11"       = "" #C11
+        "keccak"    = "" #Keccak
+        "lyra2h"    = "" #Lyra2h
+        #"lyra2v2"  = "" #Lyra2RE2 - Beaten by ccminerXevan by 80%
+        "lyra2z"    = "" #Lyra2z
+        "neoscrypt" = "" #NeoScrypt
+        "skein"     = "" #Skein
+        "x11evo"    = "" #X11evo
+        "x17"       = "" #X17
+        
         # ASIC - never profitable 24/06/2018
-        #"blake"         = "" #blake
-        #"blakecoin"     = "" #Blakecoin
-        #"blake2s"       = "" #Blake2s
-        #"decred"        = "" #Decred
-        #"groestl"       = "" #Groestl
-        #"lbry"          = "" #Lbry
-        #"lyra2"         = "" #lyra2RE
-        #"myr-gr"        = "" #MyriadGroestl
-        #"nist5"         = "" #Nist5
-        #"quark"         = "" #Quark
-        #"qubit"         = "" #Qubit
-        #"scrypt"        = "" #Scrypt
-        #"scrypt:N"      = "" #scrypt:N
-        #"sha256d"       = "" #sha256d Bitcoin
-        #"sia"           = "" #SiaCoin
-        #"vanilla"       = "" #BlakeVanilla
-        #"x11"           = "" #X11
-        #"x13"           = "" #x13
-        #"x14"           = "" #x14
-        #"x15"           = "" #x15
+        #"decred"   = "" #Decred
+        #"groestl"  = "" #Groestl
+        #"lbry"     = "" #Lbry
+        #"myr-gr"   = "" #MyriadGroestl
+        #"nist5"    = "" #Nist5
+        #"qubit"    = "" #Qubit
+        #"quark"    = "" #Quark
+        #"sib"      = "" #Sib
+        #"x11"      = "" #X11
+        #"x12"      = "" #X12
+        #"x13"      = "" #X13
+        #"x14"      = "" #X14
     }
 }
 

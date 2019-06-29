@@ -9,59 +9,72 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "82477387C860517C5FACE8758BCB7AAC890505280BF713ACA9F86D7B306AC711"
-$Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z"
-$ManualUri = "https://github.com/sp-hash/ccminer"
+$HashSHA256 = ""
+$Uri = "https://github.com/nemosminer/ccminer-KlausT-8.21-mod-r18-src-fix/releases/download/8.21-r18-fix%2Blyra2v3/ccminer-8.21-yescrypt-algos+lyra2v3.7z"
+$ManualUri = "https://github.com/nemosminer/ccminer-KlausT-8.21-mod-r18-src-fix"
 
 $Miner_Version = Get-MinerVersion $Name
 $Miner_BaseName = Get-MinerBaseName $Name
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
+$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
+
+# Miner requires CUDA 10.0.00
+$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+$RequiredCUDAVersion = "10.0.00"
+if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) {
+    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
+    return
+}
+
 #Commands from config file take precedence
 if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject]@{
-        #GPU - profitable 20/04/2018
-        "bastion"       = "" #bastion
+        #GPU - profitable 25/11/2018
         #"c11"           = "" #C11/Flax
-        "credit"        = "" #Credit
         "deep"          = "" #deep
         "dmd-gr"        = "" #dmd-gr
         "fresh"         = "" #fresh
         "fugue256"      = "" #Fugue256
-        "heavy"         = "" #heavy
-        "jackpot"       = "" #JackPot
+        "jackpot"       = "" #Jackpot
         "keccak"        = "" #Keccak
         "luffa"         = "" #Luffa
-        "mjollnir"      = "" #Mjollnir
-        "pentablake"    = "" #pentablake
-        "scryptjane:nf" = "" #scryptjane:nf
+        "lyra2v2"       = "" #Lyra2RE2
+        "lyra2v3"       = "" #Lyra2RE3
+        "neoscrypt"     = "" #NeoScrypt
+        "penta"         = "" #Pentablake
         "s3"            = "" #S3
-        "spread"        = "" #Spread
-        "x17"           = "" #x17
+        "skein"         = "" #Skein
+        "whirl"         = "" #Whirlpool
+        "whirlpoolx"    = "" #whirlpoolx
+        "x17"           = "" #X17 Verge
+        "yescrypt"      = "" #yescrypt
+        "yescryptr8"    = "" #yescryptr8
+        "yescryptr16"   = " -i 12.5" #YescryptR16 #Yenten
+        "yescryptr16v2" = " -i 12.5" #PPTP
+        "yescryptr24"   = "" #JagariCoinR
+        "yescryptr32"   = " -i 12.5" #WAVI
 
-        # ASIC - never profitable 24/06/2018
-        #"blake"         = "" #blake
-        #"blakecoin"     = "" #Blakecoin
-        #"blake2s"       = "" #Blake2s
-        #"decred"        = "" #Decred
-        #"groestl"       = "" #Groestl
-        #"lbry"          = "" #Lbry
-        #"lyra2"         = "" #lyra2RE
-        #"myr-gr"        = "" #MyriadGroestl
-        #"nist5"         = "" #Nist5
-        #"quark"         = "" #Quark
-        #"qubit"         = "" #Qubit
-        #"scrypt"        = "" #Scrypt
-        #"scrypt:N"      = "" #scrypt:N
-        #"sha256d"       = "" #sha256d Bitcoin
-        #"sia"           = "" #SiaCoin
-        #"vanilla"       = "" #BlakeVanilla
-        #"x11"           = "" #X11
-        #"x13"           = "" #x13
-        #"x14"           = "" #x14
-        #"x15"           = "" #x15
+        # ASIC - never profitable 25/11/2018
+        #"bitcoin"    = "" #Bitcoin
+        #"blake"      = "" #Blake
+        #"blakecoin"  = "" #Blakecoin
+        #"blake2s"    = "" #Blake2s
+        #"groestl"    = "" #Groestl
+        #"keccak"     = "" #Keccak-256 (Maxcoin)
+        #"myr-gr"     = "" #MyriadGroestl
+        #"nist5"      = "" #Nist5
+        #"quark"      = "" #Quark
+        #"qubit"      = "" #Qubit
+        #"vanilla"    = "" #BlakeVanilla
+        #"sha256d"    = "" #sha256d
+        #"sia"        = "" #SiaCoin
+        #"x11"        = "" #X11
+        #"x13"        = "" #x13
+        #"x14"        = "" #x14
+        #"x15"        = "" #x15
     }
 }
 
@@ -69,11 +82,10 @@ else {
 if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
 else {$CommonParameters = ""}
 
-$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 1
-
+        
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
 

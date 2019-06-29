@@ -9,9 +9,9 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "82477387C860517C5FACE8758BCB7AAC890505280BF713ACA9F86D7B306AC711"
-$Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z"
-$ManualUri = "https://github.com/sp-hash/ccminer"
+$HashSHA256 = "1974bab01a30826497a76b79e227f3eb1c9eb9ffa6756c801fcd630122bdb5c7"
+$Uri = "https://github.com/Nanashi-Meiyo-Meijin/ccminer/releases/download/v2.2-mod-r2/2.2-mod-r2-CUDA9.binary.zip"
+$ManualUri = "https://github.com/Nanashi-Meiyo-Meijin/ccminer_v2.2_mod_r2"
 
 $Miner_Version = Get-MinerVersion $Name
 $Miner_BaseName = Get-MinerBaseName $Name
@@ -24,44 +24,64 @@ else {
     $Commands = [PSCustomObject]@{
         #GPU - profitable 20/04/2018
         "bastion"       = "" #bastion
-        #"c11"           = "" #C11/Flax
-        "credit"        = "" #Credit
+        "bitcore"       = "" #Timetravel10 and Bitcore are technically the same
+        "bmw"           = "" #bmw
+        "c11"           = "" #C11
+        "cryptonight"   = "" #CryptoNight
         "deep"          = "" #deep
         "dmd-gr"        = "" #dmd-gr
         "fresh"         = "" #fresh
         "fugue256"      = "" #Fugue256
         "heavy"         = "" #heavy
-        "jackpot"       = "" #JackPot
+        "hmq1725"       = "" #HMQ1725
+        "jha"           = "" #JHA
         "keccak"        = "" #Keccak
         "luffa"         = "" #Luffa
+        "lyra2v2"       = "" #Lyra2RE2
+        "lyra2z"        = "" #Lyra2z, ZCoin
         "mjollnir"      = "" #Mjollnir
-        "pentablake"    = "" #pentablake
+        "neoscrypt"     = "" #NeoScrypt
+        "penta"         = "" #Pentablake
         "scryptjane:nf" = "" #scryptjane:nf
+        "sha256t"       = "" #sha256t
+        "skein"         = "" #Skein
+        "skein2"        = "" #skein2
+        "skunk"         = "" #Skunk
         "s3"            = "" #S3
-        "spread"        = "" #Spread
+        "shavite3"      = "" #shavite3
+        "timetravel"    = "" #Timetravel
+        "tribus"        = "" #Tribus
+        "veltor"        = "" #Veltor
+        #"whirlpool"    = "" #Whirlpool
+        "wildkeccak"    = "" #wildkeccak
+        "x11evo"        = "" #X11evo
         "x17"           = "" #x17
+        "zr5"           = "" #zr5
 
-        # ASIC - never profitable 24/06/2018
-        #"blake"         = "" #blake
-        #"blakecoin"     = "" #Blakecoin
-        #"blake2s"       = "" #Blake2s
-        #"decred"        = "" #Decred
-        #"groestl"       = "" #Groestl
-        #"lbry"          = "" #Lbry
-        #"lyra2"         = "" #lyra2RE
-        #"myr-gr"        = "" #MyriadGroestl
-        #"nist5"         = "" #Nist5
-        #"quark"         = "" #Quark
-        #"qubit"         = "" #Qubit
-        #"scrypt"        = "" #Scrypt
-        #"scrypt:N"      = "" #scrypt:N
-        #"sha256d"       = "" #sha256d Bitcoin
-        #"sia"           = "" #SiaCoin
-        #"vanilla"       = "" #BlakeVanilla
-        #"x11"           = "" #X11
-        #"x13"           = "" #x13
-        #"x14"           = "" #x14
-        #"x15"           = "" #x15
+        # ASIC - never profitable 11/08/2018
+        #"blake"        = "" #blake
+        #"blakecoin"    = "" #Blakecoin
+        #"blake2s"      = "" #Blake2s
+        #"cryptolight"  = "" #cryptolight
+        #"cryptonight"  = "" #CryptoNight
+        #"decred"       = "" #Decred
+        #"groestl"      = "" #Groestl
+        #"lbry"         = "" #Lbry
+        #"lyra2"        = "" #lyra2re
+        #"myr-gr"       = "" #MyriadGroestl
+        #"nist5"        = "" #Nist5
+        #"quark"        = "" #Quark
+        #"qubit"        = "" #Qubit
+        #"scrypt"       = "" #Scrypt
+        #"scrypt:N"     = "" #scrypt:N
+        #"sha256d"      = "" #sha256d
+        #"sia"          = "" #SiaCoin
+        #"sib"          = "" #Sib
+        #"vanilla"      = "" #BlakeVanilla
+        #"x11"          = "" #X11
+        #"x13"          = "" #x13
+        #"x14"          = "" #x14
+        #"x15"          = "" #x15
     }
 }
 
@@ -73,7 +93,7 @@ $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "N
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 1
-
+    
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
 

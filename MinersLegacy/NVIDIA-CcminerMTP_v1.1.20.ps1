@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -9,67 +9,37 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "82477387C860517C5FACE8758BCB7AAC890505280BF713ACA9F86D7B306AC711"
-$Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z"
-$ManualUri = "https://github.com/sp-hash/ccminer"
+$HashSHA256 = "98DC39C5D323992702FF9D9A31F53BD2065D6DB0231553E950495ADE15650CE8"
+$Uri = "https://github.com/zcoinofficial/ccminer/releases/download/1.1.19-test/ccminer.exe"
+$ManualUri = "https://github.com/zcoinofficial/ccminer/releases"
 
 $Miner_Version = Get-MinerVersion $Name
 $Miner_BaseName = Get-MinerBaseName $Name
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
+$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
+
+# Miner requires CUDA 10-0.00 or higher
+$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+$RequiredCUDAVersion = "10.0.00"
+if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) {
+    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
+    return
+}
+
 #Commands from config file take precedence
 if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject]@{
-        #GPU - profitable 20/04/2018
-        "bastion"       = "" #bastion
-        #"c11"           = "" #C11/Flax
-        "credit"        = "" #Credit
-        "deep"          = "" #deep
-        "dmd-gr"        = "" #dmd-gr
-        "fresh"         = "" #fresh
-        "fugue256"      = "" #Fugue256
-        "heavy"         = "" #heavy
-        "jackpot"       = "" #JackPot
-        "keccak"        = "" #Keccak
-        "luffa"         = "" #Luffa
-        "mjollnir"      = "" #Mjollnir
-        "pentablake"    = "" #pentablake
-        "scryptjane:nf" = "" #scryptjane:nf
-        "s3"            = "" #S3
-        "spread"        = "" #Spread
-        "x17"           = "" #x17
-
-        # ASIC - never profitable 24/06/2018
-        #"blake"         = "" #blake
-        #"blakecoin"     = "" #Blakecoin
-        #"blake2s"       = "" #Blake2s
-        #"decred"        = "" #Decred
-        #"groestl"       = "" #Groestl
-        #"lbry"          = "" #Lbry
-        #"lyra2"         = "" #lyra2RE
-        #"myr-gr"        = "" #MyriadGroestl
-        #"nist5"         = "" #Nist5
-        #"quark"         = "" #Quark
-        #"qubit"         = "" #Qubit
-        #"scrypt"        = "" #Scrypt
-        #"scrypt:N"      = "" #scrypt:N
-        #"sha256d"       = "" #sha256d Bitcoin
-        #"sia"           = "" #SiaCoin
-        #"vanilla"       = "" #BlakeVanilla
-        #"x11"           = "" #X11
-        #"x13"           = "" #x13
-        #"x14"           = "" #x14
-        #"x15"           = "" #x15
+        "mtp" = "" #Zcoin
     }
 }
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = ""}
+else {$CommonParameters = " --retry-pause="}
 
-$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 1
@@ -88,6 +58,16 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             $Parameters = Get-ParameterPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
         }
 
+        #Optionally disable dev fee mining
+        if ($null -eq $Miner_Config) {$Miner_Config = [PSCustomObject]@{DisableDevFeeMining = $Config.DisableDevFeeMining}}
+        if ($Miner_Config.DisableDevFeeMining) {
+            $NoFee = " --no-donation"
+            $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 0}
+        }
+        else {
+            $NoFee = ""
+            $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 1 / 400}
+        }
         [PSCustomObject]@{
             Name       = $Miner_Name
             BaseName   = $Miner_BaseName
@@ -100,6 +80,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             API        = "Ccminer"
             Port       = $Miner_Port
             URI        = $Uri
+            Fees       = $Miner_Fees
         }
     }
 }
