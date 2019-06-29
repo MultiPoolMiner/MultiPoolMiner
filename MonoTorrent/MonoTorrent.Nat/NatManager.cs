@@ -49,11 +49,11 @@ namespace MonoTorrent.Nat
             }
             catch (NatDeviceNotFoundException ex)
             {
-                Trace.WriteLine("Unable to find NAT device: " + ex.Message);
+                Trace.WriteLine("Unable to find NAT device: " + ex);
             }
             catch (Exception ex)
             {
-                Trace.WriteLine("NAT failed: " + ex.Message);
+                Trace.WriteLine("NAT failed: " + ex);
             }
         }
 
@@ -73,11 +73,11 @@ namespace MonoTorrent.Nat
             }
             catch (MappingException ex)
             {
-                Trace.WriteLine("Unable to open NAT device: " + ex.Message);
+                Trace.WriteLine("Unable to open NAT device: " + ex);
             }
             catch (Exception ex)
             {
-                Trace.WriteLine("NAT failed: " + ex.Message);
+                Trace.WriteLine("NAT failed: " + ex);
             }
         }
 
@@ -97,11 +97,11 @@ namespace MonoTorrent.Nat
             }
             catch (MappingException ex)
             {
-                Trace.WriteLine("Unable to close NAT device: " + ex.Message);
+                Trace.WriteLine("Unable to close NAT device: " + ex);
             }
             catch (Exception ex)
             {
-                Trace.WriteLine("NAT failed: " + ex.Message);
+                Trace.WriteLine("NAT failed: " + ex);
             }
         }
 

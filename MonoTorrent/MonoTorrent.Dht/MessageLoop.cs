@@ -112,12 +112,12 @@ namespace MonoTorrent.Dht
                 }
                 catch (MessageException ex)
                 {
-                    Trace.WriteLine("Message Received Exception: " + ex.Message);
+                    Trace.WriteLine("Message Received Exception: " + ex);
                     // Caused by bad transaction id usually - ignore
                 }
                 catch (Exception ex)
                 {
-                    Trace.WriteLine("Message Received Exception: " + ex.Message);
+                    Trace.WriteLine("Message Received Exception: " + ex);
                     //throw new Exception("IP:" + endpoint.Address.ToString() + "bad transaction:" + e.Message);
                 }
             }
@@ -204,12 +204,12 @@ namespace MonoTorrent.Dht
             }
             catch (MessageException ex)
             {
-                Trace.WriteLine("Receive Message Exception: " + ex.Message);
+                Trace.WriteLine("Receive Message Exception: " + ex);
                 // Normal operation (FIXME: do i need to send a response error message?) 
             }
             catch (Exception ex)
             {
-                Trace.WriteLine("Receive Message Exception: " + ex.Message);
+                Trace.WriteLine("Receive Message Exception: " + ex);
                 this.EnqueueSend(new ErrorMessage(ErrorCode.GenericError, "Misshandle received message!"), source);
             }
         }
