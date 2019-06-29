@@ -1,15 +1,297 @@
 ﻿Set-Location (Split-Path $MyInvocation.MyCommand.Path)
 
-Add-Type -Path .\OpenCL\*.cs
-
 try {
-    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -WarningAction SilentlyContinue -ReferencedAssemblies "System.Xml" -ErrorAction Stop
+    Add-Type -Path .\~OpenCL.dll -ErrorAction Stop
 }
 catch {
-    Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -WarningAction SilentlyContinue
+    Remove-Item .\~OpenCL.dll -Force -ErrorAction Ignore
+    Add-Type -Path .\OpenCL\*.cs -OutputAssembly ~OpenCL.dll
+    Add-Type -Path .\~OpenCL.dll
 }
 
-function Get-CommandPerDevice {
+try {
+    Add-Type -Path .\~MonoTorrent.dll -ErrorAction Stop
+}
+catch {
+    try {
+        Remove-Item .\~MonoTorrent.dll -Force -ErrorAction Ignore
+        Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -WarningAction SilentlyContinue -ReferencedAssemblies "System.Xml" -OutputAssembly ~MonoTorrent.dll -ErrorAction Stop
+    }
+    catch {
+        Remove-Item .\~MonoTorrent.dll -Force -ErrorAction Ignore
+        Add-Type -Path (".\MonoTorrent\*.cs" | Get-ChildItem -Recurse).FullName -IgnoreWarnings -WarningAction SilentlyContinue -OutputAssembly ~MonoTorrent.dll
+    }
+
+    Add-Type -Path .\~MonoTorrent.dll
+}
+
+try {
+    Add-Type -Path .\~CPUID.dll -ErrorAction Stop
+}
+catch {
+    Remove-Item .\~CPUID.dll -Force -ErrorAction Ignore
+    Add-Type -Path .\CPUID.cs -OutputAssembly ~CPUID.dll
+    Add-Type -Path .\~CPUID.dll
+}
+
+function Update-APIDeviceStatus {
+
+    #Update device status in API
+
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [HashTable]$Api,
+        [Parameter(Mandatory = $false)]
+        [Array]$Devices 
+    )
+
+    $API.AllDevices | ForEach-Object {
+        if ($Devices.Name -contains $_.Name) {
+            if ($Miner = $API.FailedMiners | Where-Object DeviceName -contains $_.Name) {$_ | Add-Member Status "Failed ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force}
+            elseif ($Miner = $API.RunningMiners | Where-Object DeviceName -contains $_.Name) {
+                if ($Miner.Speed -contains $null) {
+                    $_ | Add-Member Status "Benchmarking ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force
+                }
+                else {
+                    $_ | Add-Member Status "Running ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force
+                }
+            }
+            else {$_ | Add-Member Status "Idle" -Force}
+        }
+        else {$_ | Add-Member Status "Disabled" -Force}
+    }
+}
+
+function Get-PrePostCommand {
+
+    #Get Pre / Post miner exec commands
+
+
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [PSCustomObject]$Miner,
+        [Parameter(Mandatory = $true)]
+        [PSCustomObject]$Config,
+        [Parameter(Mandatory = $true)]
+        [String]$Event
+    )
+
+    try {
+        $Miner_Config = $Config.MinersLegacy.($Miner.BaseName).($Miner.Version)
+        if (-not $Miner_Config."$($Event)Command") {$Miner_Config = $Config.MinersLegacy.($Miner.BaseName)."*"}
+        if (-not $Miner_Config."$($Event)Command") {$Miner_Config = $Config.MinersLegacy."*"}
+    }
+    catch {}
+
+    return ($Miner_Config."$($Event)Command")
+
+}
+
+function Start-PrePostCommand {
+
+    #Pre / Post miner exec commands
+
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]$Command,
+        [Parameter(Mandatory = $true)]
+        [String]$Event
+    )
+
+    if ($Command) {
+        try {
+            Switch ($Event) {
+                "PreStart"    {Write-Log "Executing ($Command) before miner start. "}
+                "PostStart"   {Write-Log "Executing ($Command) after miner start. "}
+                "PreStop"     {Write-Log "Executing ($Command) before miner stop. "}
+                "PostStop"    {Write-Log "Executing ($Command) after miner stop. "}
+                "PostFailure" {Write-Log "Executing ($Command) after miner failure. "}
+            }
+
+            if ($Command -match "^'.*") {
+                $Exe = ($Command -split "' " | Select-Object -Index 0) -replace "'"
+                $Arguments = @($Command  -split "' " | Select-Object -Skip 1) -join ' '
+            }
+            else {
+                $Exe = ($Command -split ' ' | Select-Object -Index 0)
+                $Arguments = @($Command -split ' ' | Select-Object -Skip 1) -join ' '
+            }
+
+            Start-Process $Exe $Arguments
+        }
+        catch {}
+    }
+}
+
+function Get-CpuId {
+
+    # Brief : gets CPUID (CPU name and registers)
+
+    #OS Features
+    $OS_x64 = "" #not implemented
+    $OS_AVX = "" #not implemented
+    $OS_AVX512 = "" #not implemented
+
+    #Vendor
+    $vendor = "" #not implemented
+
+    if ($vendor -eq "GenuineIntel") {
+        $Vendor_Intel = $true;
+    }
+    elseif ($vendor -eq "AuthenticAMD") {
+        $Vendor_AMD = $true;
+    }
+
+    $info = [CpuID]::Invoke(0)
+    #convert 16 bytes to 4 ints for compatibility with existing code
+    $info = [int[]]@(
+        [BitConverter]::ToInt32($info, 0 * 4)
+        [BitConverter]::ToInt32($info, 1 * 4)
+        [BitConverter]::ToInt32($info, 2 * 4)
+        [BitConverter]::ToInt32($info, 3 * 4)
+    )
+
+    $nIds = $info[0]
+
+    $info = [CpuID]::Invoke(0x80000000)
+    $nExIds = [BitConverter]::ToUInt32($info, 0 * 4) #not sure as to why 'nExIds' is unsigned; may not be necessary
+    #convert 16 bytes to 4 ints for compatibility with existing code
+    $info = [int[]]@(
+        [BitConverter]::ToInt32($info, 0 * 4)
+        [BitConverter]::ToInt32($info, 1 * 4)
+        [BitConverter]::ToInt32($info, 2 * 4)
+        [BitConverter]::ToInt32($info, 3 * 4)
+    )
+
+    #Detect Features
+    $features = @{}
+    if ($nIds -ge 0x00000001) {
+
+        $info = [CpuID]::Invoke(0x00000001)
+        #convert 16 bytes to 4 ints for compatibility with existing code
+        $info = [int[]]@(
+            [BitConverter]::ToInt32($info, 0 * 4)
+            [BitConverter]::ToInt32($info, 1 * 4)
+            [BitConverter]::ToInt32($info, 2 * 4)
+            [BitConverter]::ToInt32($info, 3 * 4)
+        )
+
+        $features.MMX = ($info[3] -band ([int]1 -shl 23)) -ne 0
+        $features.SSE = ($info[3] -band ([int]1 -shl 25)) -ne 0
+        $features.SSE2 = ($info[3] -band ([int]1 -shl 26)) -ne 0
+        $features.SSE3 = ($info[2] -band ([int]1 -shl 00)) -ne 0
+
+        $features.SSSE3 = ($info[2] -band ([int]1 -shl 09)) -ne 0
+        $features.SSE41 = ($info[2] -band ([int]1 -shl 19)) -ne 0
+        $features.SSE42 = ($info[2] -band ([int]1 -shl 20)) -ne 0
+        $features.AES = ($info[2] -band ([int]1 -shl 25)) -ne 0
+
+        $features.AVX = ($info[2] -band ([int]1 -shl 28)) -ne 0
+        $features.FMA3 = ($info[2] -band ([int]1 -shl 12)) -ne 0
+
+        $features.RDRAND = ($info[2] -band ([int]1 -shl 30)) -ne 0
+    }
+
+    if ($nIds -ge 0x00000007) {
+
+        $info = [CpuID]::Invoke(0x00000007)
+        #convert 16 bytes to 4 ints for compatibility with existing code
+        $info = [int[]]@(
+            [BitConverter]::ToInt32($info, 0 * 4)
+            [BitConverter]::ToInt32($info, 1 * 4)
+            [BitConverter]::ToInt32($info, 2 * 4)
+            [BitConverter]::ToInt32($info, 3 * 4)
+        )
+
+        $features.AVX2         = ($info[1] -band ([int]1 -shl 05)) -ne 0
+
+        $features.BMI1         = ($info[1] -band ([int]1 -shl 03)) -ne 0
+        $features.BMI2         = ($info[1] -band ([int]1 -shl 08)) -ne 0
+        $features.ADX          = ($info[1] -band ([int]1 -shl 19)) -ne 0
+        $features.MPX          = ($info[1] -band ([int]1 -shl 14)) -ne 0
+        $features.SHA          = ($info[1] -band ([int]1 -shl 29)) -ne 0
+        $features.PREFETCHWT1  = ($info[2] -band ([int]1 -shl 00)) -ne 0
+
+        $features.AVX512_F     = ($info[1] -band ([int]1 -shl 16)) -ne 0
+        $features.AVX512_CD    = ($info[1] -band ([int]1 -shl 28)) -ne 0
+        $features.AVX512_PF    = ($info[1] -band ([int]1 -shl 26)) -ne 0
+        $features.AVX512_ER    = ($info[1] -band ([int]1 -shl 27)) -ne 0
+        $features.AVX512_VL    = ($info[1] -band ([int]1 -shl 31)) -ne 0
+        $features.AVX512_BW    = ($info[1] -band ([int]1 -shl 30)) -ne 0
+        $features.AVX512_DQ    = ($info[1] -band ([int]1 -shl 17)) -ne 0
+        $features.AVX512_IFMA  = ($info[1] -band ([int]1 -shl 21)) -ne 0
+        $features.AVX512_VBMI  = ($info[2] -band ([int]1 -shl 01)) -ne 0
+    }
+
+    if ($nExIds -ge 0x80000001) {
+
+        $info = [CpuID]::Invoke(0x80000001)
+        #convert 16 bytes to 4 ints for compatibility with existing code
+        $info = [int[]]@(
+            [BitConverter]::ToInt32($info, 0 * 4)
+            [BitConverter]::ToInt32($info, 1 * 4)
+            [BitConverter]::ToInt32($info, 2 * 4)
+            [BitConverter]::ToInt32($info, 3 * 4)
+        )
+
+        $features.x64   = ($info[3] -band ([int]1 -shl 29)) -ne 0
+        $features.ABM   = ($info[2] -band ([int]1 -shl 05)) -ne 0
+        $features.SSE4a = ($info[2] -band ([int]1 -shl 06)) -ne 0
+        $features.FMA4  = ($info[2] -band ([int]1 -shl 16)) -ne 0
+        $features.XOP   = ($info[2] -band ([int]1 -shl 11)) -ne 0
+    }
+
+    # wrap data into PSObject
+    [PSCustomObject]@{
+        Vendor   = $vendor
+        Name     = $name
+        Features = $features.Keys.ForEach{if ($features.$_) {$_}}
+    }
+}
+
+function Get-PowerUsage {
+
+    # Reads current power draw from devices
+    #
+    # returned values are:
+    # PowerDraw:    0 - max (in watts)
+    #
+    # Requirement: Running instance of HWiNFO64
+    # https://www.hwinfo.com/download/
+    #
+    # For each device (CPU & GPU) the power usage sensor must be exposed to the HWiNFO Gadget
+    # and the power sensor name must end in $DeviceName as found in the web GUI (http://localhost:3999/devices.html)
+    # e.g. GPU Chip Power (RX 580) GPU#00
+    #
+    # For details see ConfigHWinfo64.pdf
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [String[]]$DeviceNames
+    )
+
+    $HwINFO64_RegKey = "HKCU:\Software\HWiNFO64\VSB"
+
+    if (Test-Path $HwINFO64_RegKey) {
+        $PowerUsage = [Float]0
+        $Hashtable = @{}
+
+        $RegistryValue = Get-ItemProperty $HwINFO64_RegKey
+        $RegistryValue.PSObject.Properties | Where-Object {$_.Name -match "^Label[0-9]+$" -and (Compare-Object @($_.Value -split ' ' | Select-Object) @($DeviceNames | Select-Object) -IncludeEqual -ExcludeDifferent)} | ForEach-Object {
+            $Hashtable[(($_.Value -split ' ') | Select-Object -last 1)] = $RegistryValue.($_.Name -replace "Label", "Value")
+        }
+        $DeviceNames | ForEach-Object {
+            $PowerUsage += $Hashtable.$_ -split ' ' | Select-Object -First 1
+        }
+    }
+
+    $PowerUsage
+}
+
+function Get-ParameterPerDevice {
 
     # rewrites the command parameters
     # if a parameter has multiple values, only the values for the available devices are returned
@@ -19,119 +301,69 @@ function Get-CommandPerDevice {
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
-        [String]$Command,
+        [String]$Parameters,
         [Parameter(Mandatory = $false)]
-        [Int[]]$Devices
+        [Int[]]$DeviceIDs
     )
 
-    $CommandPerDevice = ""
+    $ParameterPerDevice = ""
 
-    $Command -split "(?=\s{1,}--|\s{1,}-| ,|^,)" | ForEach-Object {
+    $Parameters -split "(?=\s+}--|\s+-| ,|^,)" | ForEach-Object {
         $Token = $_
         $Prefix = $null
         $ParameterValueSeparator = $null
         $ValueSeparator = $null
         $Values = $null
 
-        if ($Token.TrimStart() -match "(?:^[-=]{1,})") {
-            # supported prefix characters are listed in brackets: [-=]{1,}
+        if ($Token.TrimStart() -match "(?:^[-=]+)") {
+            # supported prefix characters are listed in brackets: [-=]+
 
-            $Prefix = "$($Token -split $Matches[0] | Select -Index 0)$($Matches[0])"
-            $Token = $Token -split $Matches[0] | Select -Last 1
+            $Prefix = "$($Token -split $Matches[0] | Select-Object -Index 0)$($Matches[0])"
+            $Token = $Token -split $Matches[0] | Select-Object -Last 1
 
-            if ($Token -match "(?:[ =]{1,})") {
-                # supported separators are listed in brackets: [ =]{1,}
+            if ($Token -match "(?:[ =]+)") {
+                # supported separators are listed in brackets: [ =]+
                 $ParameterValueSeparator = $Matches[0]
-                $Parameter = $Token -split $ParameterValueSeparator | Select -Index 0
+                $Parameter = $Token -split $ParameterValueSeparator | Select-Object -Index 0
                 $Values = $Token.Substring(("$($Parameter)$($ParameterValueSeparator)").length)
 
                 if ($Values -match "(?:[,; ]{1})") {
                     # supported separators are listed in brackets: [,; ]{1}
                     $ValueSeparator = $Matches[0]
                     $RelevantValues = @()
-                    $Devices | Foreach-Object {
-                        if ($Values.Split($ValueSeparator) | Select -Index $_) {$RelevantValues += ($Values.Split($ValueSeparator) | Select -Index $_)}
+                    $DeviceIDs | Foreach-Object {
+                        if ($Values.Split($ValueSeparator) | Select-Object -Index $_) {$RelevantValues += ($Values.Split($ValueSeparator) | Select-Object -Index $_)}
                         else {$RelevantValues += ""}
                     }                    
-                    $CommandPerDevice += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$(($RelevantValues -join $ValueSeparator).TrimEnd($ValueSeparator))"
+                    $ParameterPerDevice += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$(($RelevantValues -join $ValueSeparator).TrimEnd($ValueSeparator))"
                 }
-                else {$CommandPerDevice += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$($Values)"}
+                else {$ParameterPerDevice += "$($Prefix)$($Parameter)$($ParameterValueSeparator)$($Values)"}
             }
-            else {$CommandPerDevice += "$($Prefix)$($Token)"}
+            else {$ParameterPerDevice += "$($Prefix)$($Token)"}
         }
-        else {$CommandPerDevice += $Token}
+        else {$ParameterPerDevice += $Token}
     }
-    $CommandPerDevice
-}
-
-function Get-Balance {
-    [CmdletBinding()]
-    param($Config, $NewRates)
-
-    $Data = [PSCustomObject]@{}
-
-    $Balances = @(Get-ChildItem "Balances" -File | Where-Object {$Config.Pools.$($_.BaseName) -and ($Config.ExcludePoolName -inotcontains $_.BaseName -or $Config.ShowPoolBalancesExcludedPools)} | ForEach-Object {
-            Get-ChildItemContent "Balances\$($_.Name)" -Parameters @{Config = $Config}
-        } | Foreach-Object {$_.Content | Add-Member Name $_.Name -PassThru -Force} | Sort-Object Name)
-
-    #Get exchgange rates for all payout currencies
-    $CurrenciesWithBalances = @($Balances.currency | Sort-Object -Unique)
-    try {
-        $Rates = Invoke-RestMethod "https://min-api.cryptocompare.com/data/pricemulti?fsyms=$($CurrenciesWithBalances -join ",")&tsyms=$($Config.Currency -join ",")&extraParams=http://multipoolminer.io" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-    }
-    catch {
-        Write-Log -Level Warn "Pool API (CryptoCompare) has failed - cannot convert balances to other currencies. "
-        Return $Balances
-    }
-
-    #Add total of totals
-    $Totals = [PSCustomObject]@{
-        Name = "*Total*"
-    }
-    #Add Balance (in currency)
-    $Rates.PSObject.Properties.Name | ForEach-Object {
-        $Currency = $_.ToUpper()
-        $Balances | Foreach-Object {
-            if ($NewRates.$Currency -ne $null) {$Digits = ($($NewRates.$Currency).ToString().Split(".")[1]).length}else {$Digits = 8}
-            $_.Total = ("{0:N$($Digits)}" -f ([Float]$($_.Total)))
-            if ($Currency -eq $_.Currency) {
-                $_ | Add-Member "Balance ($Currency)" $_.Total
-            }
-        }
-        if (($Balances."Balance ($Currency)" | Measure-Object -Sum).sum) {$Totals | Add-Member "Balance ($Currency)" ("{0:N$($Digits)}" -f ([Float]$($Balances."Balance ($Currency)" | Measure-Object -Sum).sum))}
-    }
-
-    #Add converted values
-    $Config.Currency | ForEach-Object {
-        $Currency = $_.ToUpper()
-        #Get number of digits from $NewRates
-        if ($NewRates.$Currency -ne $null) {$Digits = ($($NewRates.$Currency).ToString().Split(".")[1]).length}else {$Digits = 8}
-        $Balances | Foreach-Object {
-            $_ | Add-Member "Value in $Currency" $(if ($Rates.$($_.Currency).$Currency) {("{0:N$($Digits)}" -f ([Float]$_.Total * [Float]$Rates.$($_.Currency).$Currency))}else {"unknown"}) -Force
-        }
-        if (($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum) {$Totals | Add-Member "Value in $Currency" ("{0:N$($Digits)}" -f ([Float]$($Balances."Value in $Currency" | Measure-Object -Sum -ErrorAction Ignore).sum)) -Force}
-    }
-    $Balances += $Totals
-
-    $Data | Add-Member Balances $Balances
-    $Data | Add-Member Rates $Rates
-
-    Return $Data
+    $ParameterPerDevice
 }
 
 function Write-Log {
     [CmdletBinding()]
     Param(
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)][ValidateNotNullOrEmpty()][Alias("LogContent")][string]$Message,
-        [Parameter(Mandatory = $false)][ValidateSet("Error", "Warn", "Info", "Verbose", "Debug")][string]$Level = "Info"
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
+        [ValidateNotNullOrEmpty()]
+        [Alias("LogContent")]
+        [string]$Message,
+        [Parameter(Mandatory = $false)]
+        [ValidateSet("Error", "Warn", "Info", "Verbose", "Debug")]
+        [string]$Level = "Info"
     )
 
     Begin { }
     Process {
         # Inherit the same verbosity settings as the script importing this
-        if (-not $PSBoundParameters.ContainsKey('InformationPreference')) { $InformationPreference = $PSCmdlet.GetVariableValue('InformationPreference') }
-        if (-not $PSBoundParameters.ContainsKey('Verbose')) { $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference') }
-        if (-not $PSBoundParameters.ContainsKey('Debug')) { $DebugPreference = $PSCmdlet.GetVariableValue('DebugPreference') }
+        if (-not $PSBoundParameters.ContainsKey('InformationPreference')) {$InformationPreference = $PSCmdlet.GetVariableValue('InformationPreference')}
+        if (-not $PSBoundParameters.ContainsKey('Verbose')) {$VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference')}
+        if (-not $PSBoundParameters.ContainsKey('Debug')) {$DebugPreference = $PSCmdlet.GetVariableValue('DebugPreference')}
 
         # Get mutex named MPMWriteLog. Mutexes are shared across all threads and processes.
         # This lets us ensure only one thread is trying to write to the file at a time.
@@ -145,7 +377,7 @@ function Write-Log {
         switch ($Level) {
             'Error' {
                 $LevelText = 'ERROR:'
-                Write-Error -Message $Message
+                Write-Warning -Message $Message
             }
             'Warn' {
                 $LevelText = 'WARNING:'
@@ -196,13 +428,11 @@ function Set-Stat {
 
     $Updated = $Updated.ToUniversalTime()
 
-    $Path = "Stats\$Name.txt"
+    $Path = "Stats\$($Name -split '_' | Select-Object -Last 1)"
     $SmallestValue = 1E-20
 
-    $Stat = Get-Content $Path -ErrorAction SilentlyContinue
-
     try {
-        $Stat = $Stat | ConvertFrom-Json -ErrorAction Stop
+        $Stat = Get-Stat $Name
         $Stat = [PSCustomObject]@{
             Live                  = [Double]$Stat.Live
             Minute                = [Double]$Stat.Minute
@@ -219,6 +449,7 @@ function Set-Stat {
             Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
             Duration              = [TimeSpan]$Stat.Duration
             Updated               = [DateTime]$Stat.Updated
+            ToleranceExceeded     = [Int]$Stat.ToleranceExceeded
         }
 
         $ToleranceMin = $Value
@@ -231,44 +462,73 @@ function Set-Stat {
 
         if ($ChangeDetection -and [Decimal]$Value -eq [Decimal]$Stat.Live) {$Updated = $Stat.updated}
 
-        if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) {
-            Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin) to $([Int]$ToleranceMax)). "
+        if (($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) -and ($Stat.ToleranceExceeded -lt 3)) {
+            $Stat.ToleranceExceeded ++
+            if ($Name -match ".+_HashRate$") {
+                Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($(($Value | ConvertTo-Hash) -replace '\s+', '')) is outside fault tolerance ($(($ToleranceMin | ConvertTo-Hash) -replace '\s+', ' ') to $(($ToleranceMax | ConvertTo-Hash) -replace '\s+', ' ')) [$($Stat.ToleranceExceeded) of 3 until enforced update]. "
+            }
+            else {
+                Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($($Value.ToString("N2"))W) is outside fault tolerance ($($ToleranceMin.ToString("N2"))W to $($ToleranceMax.ToString("N2"))W) [$($Stat.ToleranceExceeded) of 3 until enforced update]. "
+            }
         }
         else {
-            $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
-            $Span_Minute_5 = [Math]::Min(($Duration.TotalMinutes / 5) / [Math]::Min(($Stat.Duration.TotalMinutes / 5), 1), 1)
-            $Span_Minute_10 = [Math]::Min(($Duration.TotalMinutes / 10) / [Math]::Min(($Stat.Duration.TotalMinutes / 10), 1), 1)
-            $Span_Hour = [Math]::Min($Duration.TotalHours / [Math]::Min($Stat.Duration.TotalHours, 1), 1)
-            $Span_Day = [Math]::Min($Duration.TotalDays / [Math]::Min($Stat.Duration.TotalDays, 1), 1)
-            $Span_Week = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
+            if ($Stat.ToleranceExceeded -ge 3) {
+                if ($Name -match ".+_HashRate$") {
+                    Write-Log -Level Warn "Stat file ($Name) was forcefully updated with value ($(($Value | ConvertTo-Hash) -replace '\s+', '')) because it was outside fault tolerance ($(($ToleranceMin | ConvertTo-Hash) -replace '\s+', ' ')) to $(($ToleranceMax | ConvertTo-Hash) -replace '\s+', ' ')) for $($Stat.ToleranceExceeded) times in a row. "
+                }
+                else {
+                    Write-Log -Level Warn "Stat file ($Name) was forcefully updated with value ($($Value.ToString("N2"))W) because it was outside fault tolerance ($($ToleranceMin.ToString("N2"))W to $($ToleranceMax.ToString("N2"))W) for $($Stat.ToleranceExceeded) times in a row. "
+                }
+                $Stat = [PSCustomObject]@{
+                    Live                  = $Value
+                    Minute                = $Value
+                    Minute_Fluctuation    = 0
+                    Minute_5              = $Value
+                    Minute_5_Fluctuation  = 0
+                    Minute_10             = $Value
+                    Minute_10_Fluctuation = 0
+                    Hour                  = $Value
+                    Hour_Fluctuation      = 0
+                    Day                   = $Value
+                    Day_Fluctuation       = 0
+                    Week                  = $Value
+                    Week_Fluctuation      = 0
+                    Duration              = $Stat.Duration + $Duration
+                    Updated               = $Updated
+                    ToleranceExceeded     = [Int]0
+                }
+            }
+            else {
+                $Span_Minute    = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
+                $Span_Minute_5  = [Math]::Min(($Duration.TotalMinutes / 5) / [Math]::Min(($Stat.Duration.TotalMinutes / 5), 1), 1)
+                $Span_Minute_10 = [Math]::Min(($Duration.TotalMinutes / 10) / [Math]::Min(($Stat.Duration.TotalMinutes / 10), 1), 1)
+                $Span_Hour      = [Math]::Min($Duration.TotalHours / [Math]::Min($Stat.Duration.TotalHours, 1), 1)
+                $Span_Day       = [Math]::Min($Duration.TotalDays / [Math]::Min($Stat.Duration.TotalDays, 1), 1)
+                $Span_Week      = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
 
-            $Stat = [PSCustomObject]@{
-                Live                  = $Value
-                Minute                = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
-                Minute_Fluctuation    = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + 
-                ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
-                Minute_5              = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
-                Minute_5_Fluctuation  = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + 
-                ($Span_Minute_5 * ([Math]::Abs($Value - $Stat.Minute_5) / [Math]::Max([Math]::Abs($Stat.Minute_5), $SmallestValue)))
-                Minute_10             = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
-                Minute_10_Fluctuation = ((1 - $Span_Minute_10) * $Stat.Minute_10_Fluctuation) + 
-                ($Span_Minute_10 * ([Math]::Abs($Value - $Stat.Minute_10) / [Math]::Max([Math]::Abs($Stat.Minute_10), $SmallestValue)))
-                Hour                  = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
-                Hour_Fluctuation      = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + 
-                ($Span_Hour * ([Math]::Abs($Value - $Stat.Hour) / [Math]::Max([Math]::Abs($Stat.Hour), $SmallestValue)))
-                Day                   = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
-                Day_Fluctuation       = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + 
-                ($Span_Day * ([Math]::Abs($Value - $Stat.Day) / [Math]::Max([Math]::Abs($Stat.Day), $SmallestValue)))
-                Week                  = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
-                Week_Fluctuation      = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + 
-                ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
-                Duration              = $Stat.Duration + $Duration
-                Updated               = $Updated
+                $Stat = [PSCustomObject]@{
+                    Live                  = $Value
+                    Minute                = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
+                    Minute_Fluctuation    = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
+                    Minute_5              = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
+                    Minute_5_Fluctuation  = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + ($Span_Minute_5 * ([Math]::Abs($Value - $Stat.Minute_5) / [Math]::Max([Math]::Abs($Stat.Minute_5), $SmallestValue)))
+                    Minute_10             = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
+                    Minute_10_Fluctuation = ((1 - $Span_Minute_10) * $Stat.Minute_10_Fluctuation) + ($Span_Minute_10 * ([Math]::Abs($Value - $Stat.Minute_10) / [Math]::Max([Math]::Abs($Stat.Minute_10), $SmallestValue)))
+                    Hour                  = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
+                    Hour_Fluctuation      = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + ($Span_Hour * ([Math]::Abs($Value - $Stat.Hour) / [Math]::Max([Math]::Abs($Stat.Hour), $SmallestValue)))
+                    Day                   = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
+                    Day_Fluctuation       = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + ($Span_Day * ([Math]::Abs($Value - $Stat.Day) / [Math]::Max([Math]::Abs($Stat.Day), $SmallestValue)))
+                    Week                  = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
+                    Week_Fluctuation      = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
+                    Duration              = $Stat.Duration + $Duration
+                    Updated               = $Updated
+                    ToleranceExceeded     = [Int]0
+                }
             }
         }
     }
     catch {
-        if (Test-Path $Path -PathType Leaf) {Write-Log -Level Warn "Stat file ($Name) is corrupt and will be reset. "}
+        if (Test-Path "$($Path)\$Name.txt" -PathType Leaf -ErrorAction SilentlyContinue) {Write-Log -Level Warn "Stat file ($Name) is corrupt and will be reset. "}
 
         $Stat = [PSCustomObject]@{
             Live                  = $Value
@@ -286,10 +546,12 @@ function Set-Stat {
             Week_Fluctuation      = 0
             Duration              = $Duration
             Updated               = $Updated
+            ToleranceExceeded     = [Int]0
         }
     }
 
-    if (-not (Test-Path "Stats" -PathType Container)) {New-Item "Stats" -ItemType "directory" | Out-Null}
+    if (-not (Test-Path "$Path" -PathType Container -ErrorAction SilentlyContinue)) {New-Item "Path" -ItemType "directory" -ErrorAction SilentlyContinue | Out-Null}
+    
     [PSCustomObject]@{
         Live                  = [Decimal]$Stat.Live
         Minute                = [Decimal]$Stat.Minute
@@ -306,7 +568,8 @@ function Set-Stat {
         Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
         Duration              = [String]$Stat.Duration
         Updated               = [DateTime]$Stat.Updated
-    } | ConvertTo-Json | Set-Content $Path
+        ToleranceExceeded     = [Int]$Stat.ToleranceExceeded
+    } | ConvertTo-Json | Set-Content "$($Path)\$Name.txt" -ErrorAction SilentlyContinue
 
     $Stat
 }
@@ -315,32 +578,42 @@ function Get-Stat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String]$Name
+        [String]$Name,
+        [Parameter(Mandatory = $false)]
+        [String[]]$Type
     )
-
-    if (-not (Test-Path "Stats" -PathType Container)) {New-Item "Stats" -ItemType "directory" | Out-Null}
 
     if ($Name) {
         # Return single requested stat
-        Get-ChildItem "Stats" -File | Where-Object BaseName -EQ $Name | Get-Content | ConvertFrom-Json
+        $Path = "Stats\$($Name -split '_' | Select-Object -Last 1)"
+        if (-not (Test-Path $Path -PathType Container -ErrorAction SilentlyContinue)) {New-Item $Path -ItemType "directory" -ErrorAction SilentlyContinue | Out-Null}
+        if (Test-Path "$($Path)\$Name.txt" -ErrorAction SilentlyContinue) {Get-ChildItem "$($Path)\$Name.txt" -File -ErrorAction SilentlyContinue | Get-Content | ConvertFrom-Json}
     }
     else {
         # Return all stats
         $Stats = [PSCustomObject]@{}
-        Get-ChildItem "Stats" -File | ForEach-Object {
-            $BaseName = $_.BaseName
-            $FullName = $_.FullName
-            try {
-                $_ | Get-Content -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop | ForEach-Object {
-                    $Stats | Add-Member $BaseName $_
+        if (-not $Type) {$Type = Get-ChildItem "Stats" -Directory -ErrorAction SilentlyContinue}
+        $Type | ForEach-Object {
+            $Path = "Stats\$_"
+            if (-not (Test-Path $Path -PathType Container -ErrorAction SilentlyContinue)) {New-Item $Path -ItemType "directory" -ErrorAction SilentlyContinue | Out-Null}
+            Get-ChildItem $Path -File | ForEach-Object {
+                $BaseName = $_.BaseName
+                $FullName = $_.FullName
+                try {
+                    $_ | Get-Content -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop | ForEach-Object {
+                        $Stats | Add-Member $BaseName $_
+                    }
+                }
+                catch {
+                    #Remove broken stat file
+                    if (Test-Path $FullName) {
+                        Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
+                        Remove-Item -Path  $FullName -Force -Confirm:$false -ErrorAction SilentlyContinue
+                    }
                 }
             }
-            catch {
-                #Remove broken stat file
-                Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
-                Remove-Item -Path  $FullName -Force -Confirm:$false
-            }
         }
+
         Return $Stats
     }
 }
@@ -351,54 +624,90 @@ function Get-ChildItemContent {
         [Parameter(Mandatory = $true)]
         [String]$Path, 
         [Parameter(Mandatory = $false)]
-        [Hashtable]$Parameters = @{}
+        [Hashtable]$Parameters = @{}, 
+        [Parameter(Mandatory = $false)]
+        [Switch]$Threaded = $false
     )
 
-    function Invoke-ExpressionRecursive ($Expression) {
-        if ($Expression -is [String]) {
-            if ($Expression -match '(\$|")') {
-                try {$Expression = Invoke-Expression $Expression}
-                catch {$Expression = Invoke-Expression "`"$Expression`""}
-            }
-        }
-        elseif ($Expression -is [PSCustomObject]) {
-            $Expression | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
-                $Expression.$_ = Invoke-ExpressionRecursive $Expression.$_
-            }
-        }
-        return $Expression
-    }
+    $Job = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -Name $Parameters.JobName -ArgumentList $Path, $Parameters -ScriptBlock {
+        param(
+            [Parameter(Mandatory = $true)]
+            [String]$Path, 
+            [Parameter(Mandatory = $false)]
+            [Hashtable]$Parameters = @{}
+        )
 
-    Get-ChildItem $Path -File -ErrorAction SilentlyContinue | ForEach-Object {
-        $Name = $_.BaseName
-        $Content = @()
-        if ($_.Extension -eq ".ps1") {
-            $Content = & {
-                $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters.$_}
-                & $_.FullName @Parameters
-            }
-        }
-        else {
-            $Content = & {
-                $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters.$_}
-                try {
-                    ($_ | Get-Content | ConvertFrom-Json) | ForEach-Object {Invoke-ExpressionRecursive $_}
-                }
-                catch [ArgumentException] {
-                    $null
+        ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass = 'BelowNormal'
+
+        function Invoke-ExpressionRecursive ($Expression) {
+            if ($Expression -is [String]) {
+                if ($Expression -match '^\$[A-Za-z]') {
+                    try {$Expression = Invoke-Expression $Expression}
+                    catch {$Expression = Invoke-Expression "`"$Expression`""}
                 }
             }
-            if ($Content -eq $null) {$Content = $_ | Get-Content}
+            elseif ($Expression -is [PSCustomObject]) {
+                $Expression | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {
+                    $Expression.$_ = Invoke-ExpressionRecursive $Expression.$_
+                }
+            }
+            return $Expression
         }
-        $Content | ForEach-Object {
-            if ($_.Name) {
-                [PSCustomObject]@{Name = $_.Name; Content = $_}
+
+        Get-ChildItem $Path -File -ErrorAction SilentlyContinue | ForEach-Object {
+            $Name = $_.BaseName
+            $Content = @()
+            if ($_.Extension -eq ".ps1") {
+                $Content = & {
+                    $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters.$_}
+                    & $_.FullName @Parameters
+                }
             }
             else {
-                [PSCustomObject]@{Name = $Name; Content = $_}
+                $Content = & {
+                    $Parameters.Keys | ForEach-Object {Set-Variable $_ $Parameters.$_}
+                    try {
+                        ($_ | Get-Content | ConvertFrom-Json) | ForEach-Object {Invoke-ExpressionRecursive $_}
+                    }
+                    catch [ArgumentException] {
+                        $null
+                    }
+                }
+                if ($null -eq $Content) {$Content = $_ | Get-Content}
+            }
+            $Content | ForEach-Object {
+                if ($_.Name) {
+                    [PSCustomObject]@{Name = $_.Name; Content = $_}
+                }
+                else {
+                    [PSCustomObject]@{Name = $Name; Content = $_}
+                }
             }
         }
     }
+
+    if ($Threaded) {$Job}
+    else {$Job | Receive-Job -Wait -AutoRemoveJob}
+}
+
+function Get-MinerVersion {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]$MinerName 
+    )
+
+    ($MinerName -split '-' | Select-Object -Index 1) -split '_' | Select-Object -Last 1
+}
+
+function Get-MinerBaseName {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]$MinerName 
+    )
+
+    (($MinerName -split '-' | Select-Object -Index 0),(($MinerName -split '-' | Select-Object -Index 1) -split '_' | Select-Object -Index 0) | Select-Object) -join '-'
 }
 
 filter ConvertTo-Hash { 
@@ -411,15 +720,16 @@ filter ConvertTo-Hash {
         2 {"{0:n2} MH" -f ($Hash / [Math]::Pow(1000, 2))}
         3 {"{0:n2} GH" -f ($Hash / [Math]::Pow(1000, 3))}
         4 {"{0:n2} TH" -f ($Hash / [Math]::Pow(1000, 4))}
-        Default {"{0:n2} PH" -f ($Hash / [Math]::Pow(1000, 5))}
+        Default {"{0:N2} PH" -f ($Hash / [Math]::Pow(1000, 5))}
     }
 }
 
 function ConvertTo-LocalCurrency { 
-    [CmdletBinding()]
+
     # To get same numbering scheme regardless of value BTC value (size) to determine formatting
     # Use $Offset to add/remove decimal places
 
+    [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [Double]$Value, 
@@ -432,7 +742,7 @@ function ConvertTo-LocalCurrency {
     $Digits = ([math]::truncate(10 - $Offset - [math]::log($BTCRate, 10)))
     if ($Digits -lt 0) {$Digits = 0}
     if ($Digits -gt 10) {$Digits = 10}
-
+    
     ($Value * $BTCRate).ToString("N$($Digits)")
 }
 
@@ -482,8 +792,12 @@ function Start-SubProcess {
         [String]$WorkingDirectory = "", 
         [ValidateRange(-2, 3)]
         [Parameter(Mandatory = $false)]
-        [Int]$Priority = 0
+        [Int]$Priority = 0,
+        [Parameter(Mandatory = $false)]
+        [String[]]$EnvBlock
     )
+
+    if ($EnvBlock) {$EnvBlock | ForEach-Object {Set-Item -Path "Env:$($_ -split '=' | Select-Object -Index 0)" "$($_ -split '=' | Select-Object -Index 1)" -Force}}
 
     $ScriptBlock = "Set-Location '$WorkingDirectory'; (Get-Process -Id `$PID).PriorityClass = '$(@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}[$Priority])'; "
     $ScriptBlock += "& '$FilePath'"
@@ -493,6 +807,89 @@ function Start-SubProcess {
     if ($LogPath) {$ScriptBlock += " | Tee-Object '$LogPath'"}
 
     Start-Job ([ScriptBlock]::Create($ScriptBlock))
+}
+
+function Start-SubProcessWithoutStealingFocus {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]$FilePath,
+        [Parameter(Mandatory = $false)]
+        [String]$ArgumentList = "",
+        [Parameter(Mandatory = $false)]
+        [String]$LogPath = "",
+        [Parameter(Mandatory = $false)]
+        [String]$WorkingDirectory = "", 
+        [ValidateRange(-2, 3)]
+        [Parameter(Mandatory = $false)]
+        [Int]$Priority = 0,
+        [Parameter(Mandatory = $false)]
+        [String[]]$EnvBlock
+    )
+
+    $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}
+
+    if ($EnvBlock) {$EnvBlock | ForEach-Object {Set-Item -Path "Env:$($_ -split '=' | Select-Object -Index 0)" "$($_ -split '=' | Select-Object -Index 1)" -Force}}
+
+    $Job = Start-Job -ArgumentList $PID, (Resolve-Path ".\CreateProcess.cs"), $FilePath, $ArgumentList, $WorkingDirectory, $MinerVisibility, $EnvBlock {
+        param($ControllerProcessID, $CreateProcessPath, $FilePath, $ArgumentList, $WorkingDirectory, $MinerVisibility, $EnvBlock)
+
+        $ControllerProcess = Get-Process -Id $ControllerProcessID
+        if ($null -eq $ControllerProcess) {return}
+
+        #CreateProcess won't be usable inside this job if Add-Type is run outside the job
+        Add-Type -Path $CreateProcessPath
+
+        $lpApplicationName = $FilePath;
+
+        $lpCommandLine = '"' + $FilePath + '"' #Windows paths cannot contain ", so there is no need to escape
+        if ($ArgumentList -ne "") {$lpCommandLine += " " + $ArgumentList}
+
+        $lpProcessAttributes = New-Object SECURITY_ATTRIBUTES
+        $lpProcessAttributes.Length = [System.Runtime.InteropServices.Marshal]::SizeOf($lpProcessAttributes)
+
+        $lpThreadAttributes = New-Object SECURITY_ATTRIBUTES
+        $lpThreadAttributes.Length = [System.Runtime.InteropServices.Marshal]::SizeOf($lpThreadAttributes)
+
+        $bInheritHandles = $false
+
+        $dwCreationFlags = [CreationFlags]::CREATE_NEW_CONSOLE
+
+        $lpEnvironment = [IntPtr]::Zero
+
+        if ($WorkingDirectory -ne "") {$lpCurrentDirectory = $WorkingDirectory}
+        else {$lpCurrentDirectory = [IntPtr]::Zero}
+
+        $lpStartupInfo = New-Object STARTUPINFO
+        $lpStartupInfo.cb = [System.Runtime.InteropServices.Marshal]::SizeOf($lpStartupInfo)
+        $lpStartupInfo.wShowWindow = [ShowWindow]::SW_SHOWMINNOACTIVE
+        $lpStartupInfo.dwFlags = [STARTF]::STARTF_USESHOWWINDOW
+
+        $lpProcessInformation = New-Object PROCESS_INFORMATION
+
+        [Kernel32]::CreateProcess($lpApplicationName, $lpCommandLine, [ref] $lpProcessAttributes, [ref] $lpThreadAttributes, $bInheritHandles, $dwCreationFlags, $lpEnvironment, $lpCurrentDirectory, [ref] $lpStartupInfo, [ref] $lpProcessInformation)
+
+        $Process = Get-Process -Id $lpProcessInformation.dwProcessId
+        if ($null -eq $Process) {
+            [PSCustomObject]@{ProcessId = $null}
+            return
+        }
+
+        [PSCustomObject]@{ProcessId = $Process.Id; ProcessHandle = $Process.Handle}
+
+        $ControllerProcess.Handle | Out-Null
+        $Process.Handle | Out-Null
+
+        do {if ($ControllerProcess.WaitForExit(1000)) {$Process.CloseMainWindow() | Out-Null}}
+        while ($Process.HasExited -eq $false)
+    }
+
+    do {Start-Sleep 1; $JobOutput = Receive-Job $Job}
+    while ($null -eq $JobOutput)
+
+    $Process = Get-Process | Where-Object Id -EQ $JobOutput.ProcessId
+    if ($Process) {$Process.PriorityClass = $PriorityNames.$Priority}
+    Return $Job
 }
 
 function Expand-WebRequest {
@@ -531,7 +928,7 @@ function Expand-WebRequest {
         $Path_Old = (Get-ChildItem $Path_Old -File -Recurse | Where-Object {$_.Name -EQ $(Split-Path $Path -Leaf)}).Directory | Select-Object -First 1
 
         if ($Path_Old) {
-            Move-Item $Path_Old $Path_New -PassThru | ForEach-Object -Process {$_.LastWritetime = Get-Date}
+            Move-Item $Path_Old $Path_New -PassThru | ForEach-Object -Process {$_.LastWriteTime = Get-Date}
             $Path_Old = (Join-Path (Split-Path (Split-Path $Path)) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
             if (Test-Path $Path_Old -PathType Container) {Remove-Item $Path_Old -Recurse -Force}
         }
@@ -539,35 +936,6 @@ function Expand-WebRequest {
             Throw "Error: Cannot find $($Path). "
         }
     }
-}
-
-function Get-TCPResponse {
-    [cmdletbinding()]
-    Param (        
-        [Parameter(Mandatory = $true)]
-        $Server = "localhost", 
-        [Parameter(Mandatory = $true)]
-        $Port,
-        [Parameter(Mandatory = $true)]
-        $Timeout = 100
-    )
-
-    try {
-        $Response = ""
-        $Client = New-Object System.Net.Sockets.TCPClient $Server, $Port
-        Start-Sleep -Milliseconds $TimeOut
-        if ([int64]$Client.Available -gt 0) {
-            $Stream = $Client.GetStream()
-            $BindResponseBuffer = New-Object Byte[] -ArgumentList $Client.Available
-            $Read = $Stream.Read($BindResponseBuffer, 0, $BindResponseBuffer.count)  
-            $Response = ($BindResponseBuffer | ForEach {[char][int]$_}) -join ''
-        }
-    }
-    finally {
-        if ($Client) {$Client.Close()}
-    }
-
-    $Response
 }
 
 function Invoke-TcpRequest {
@@ -580,7 +948,9 @@ function Invoke-TcpRequest {
         [Parameter(Mandatory = $true)]
         [String]$Request, 
         [Parameter(Mandatory = $true)]
-        [Int]$Timeout = 10 #seconds
+        [Int]$Timeout = 10, #seconds
+        [Parameter(Mandatory = $false)]
+        [Bool]$ReadToEnd = $false
     )
 
     try {
@@ -588,18 +958,18 @@ function Invoke-TcpRequest {
         $Stream = $Client.GetStream()
         $Writer = New-Object System.IO.StreamWriter $Stream
         $Reader = New-Object System.IO.StreamReader $Stream
-        $client.SendTimeout = $Timeout * 1000
-        $client.ReceiveTimeout = $Timeout * 1000
+        $Client.SendTimeout = $Timeout * 1000
+        $Client.ReceiveTimeout = $Timeout * 1000
         $Writer.AutoFlush = $true
 
         $Writer.WriteLine($Request)
-        $Response = $Reader.ReadLine()
+        if ($ReadToEnd) {$Response = $Reader.ReadToEnd()} else {$Response = $Reader.ReadLine()}
     }
     finally {
-        if ($Reader) {$Reader.Close()}
-        if ($Writer) {$Writer.Close()}
-        if ($Stream) {$Stream.Close()}
-        if ($Client) {$Client.Close()}
+        if ($Reader) {$Reader.Close(); $Reader.Dispose()}
+        if ($Writer) {$Writer.Close(); $Writer.Dispose()}
+        if ($Stream) {$Stream.Close(); $Stream.Dispose()}
+        if ($Client) {$Client.Close(); $Client.Dispose()}
     }
 
     $Response
@@ -612,6 +982,8 @@ function Get-Device {
         [String[]]$Name = @(),
         [Parameter(Mandatory = $false)]
         [String[]]$ExcludeName = @(),
+        [Parameter(Mandatory = $false)]
+        [PSCustomObject]$Config = [PSCustomObject]@{},
         [Parameter(Mandatory = $false)]
         [Switch]$Refresh = $false
     )
@@ -669,7 +1041,8 @@ function Get-Device {
 
     try {
         [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object {
-            [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object {
+            #Fix for deviceID enumeration with main screen connected to onboard HD Graphics, allow Intel as valid GPU miner platform ID, but filter out all Intel entries
+            [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | Where-Object Vendor -ne "Intel(R) Corporation" | ForEach-Object {
                 $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
                 $Device = [PSCustomObject]@{
                     Index                 = [Int]$Index
@@ -684,14 +1057,27 @@ function Get-Device {
                             default {[String]$Device_OpenCL.Vendor}
                         }
                     )
-                    Vendor_Index          = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
-                    Type_Vendor_Index     = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
-                    Type                  = [String]$Device_OpenCL.Type
-                    Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
-                    OpenCL                = $Device_OpenCL
-                    Model                 = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
-                    Model_Norm            = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$($Device_OpenCL.GlobalMemSize / 1GB)GB"})"
+                    Vendor_Index = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
+                    Type_Vendor_Index = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
+                    Type = [String]$Device_OpenCL.Type
+                    Type_Index = [Int]$Type_Index."$($Device_OpenCL.Type)"
+                    OpenCL = $Device_OpenCL
+                    Model = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
+                    Model_Norm = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
                 }
+
+                #Optional custom device mapping where PciDeviceID order does not match OpenCL DeviceId order
+                if ($Config.DevicePciOrderMapping.(("{0}#{1:d2}" -f $_.Type, $Device.Type_Index).ToUpper())) {
+                    $Index_Difference = $Config.DevicePciOrderMapping.(("{0}#{1:d2}" -f $_.Type, $Device.Type_Index).ToUpper()) - $Device.Type_Index
+                }
+                else {
+                    $Index_Difference = 0
+                }
+                $Device | Add-Member PCIBus_Index ([Int]($Device.Index + $Index_Difference))
+                $Device | Add-Member PCIBus_Type_Index ([Int]($Device.Type_Index + $Index_Difference))
+                $Device | Add-Member PCIBus_Type_PlatformId_Index ([Int]($Device.Type_PlatformId_Index + $Index_Difference))
+                $Device | Add-Member PCIBus_Type_Vendor_Index ([Int]($Device.Type_Vendor_Index + $Index_Difference))
+                $Device | Add-Member PCIBus_Vendor_Index  ([Int]($Device.Vendor_Index + $Index_Difference))
 
                 if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
                     if ((-not $ExcludeName) -or (-not ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))}))) {
@@ -740,6 +1126,8 @@ function Get-Device {
             Model             = $CPUInfo.Name
             Model_Norm        = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
         }
+        #Read CPU features
+        $Device | Add-member CpuFeatures ((Get-CpuId).Features | Sort-Object)
 
         if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
             if ((-not $ExcludeName) -or (-not ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))}))) {
@@ -761,14 +1149,47 @@ function Get-Algorithm {
         [String]$Algorithm = ""
     )
 
-    if (-not (Test-Path Variable:Script:Algorithms)) {
+    if (-not (Test-Path Variable:Script:Algorithms -ErrorAction SilentlyContinue)) {
         $Script:Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
     }
 
-    $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm -replace "-", " " -replace "_", " ")) -replace " "
+    $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm.ToLower() -replace "-", " " -replace "_", " " -replace "/", " ")) -replace " "
 
     if ($Script:Algorithms.$Algorithm) {$Script:Algorithms.$Algorithm}
     else {$Algorithm}
+}
+
+function Get-AlgorithmFromCoinName {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [String]$CoinName = ""
+    )
+
+    if (-not (Test-Path Variable:Script:Algorithms -ErrorAction SilentlyContinue)) {
+        $Script:Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
+    }
+    if ($Script:Algorithms.$CoinName) {$Script:Algorithms.$CoinName}
+    else {$null}
+}
+
+
+function Get-CoinName {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [String]$CoinName = ""
+    )
+
+    if (-not (Test-Path Variable:Script:CoinNames -ErrorAction SilentlyContinue)) {
+        $Script:CoinNames = Get-Content "CoinNames.txt" | ConvertFrom-Json
+    }
+
+    $CoinName = (Get-Culture).TextInfo.ToTitleCase(($CoinName.ToLower() -replace "-", " " -replace "_", " ")) -replace " "
+    
+    if ($Script:CoinNames.$CoinName) {$Script:CoinNames.$CoinName}
+    else {$CoinName -replace "coin", "Coin" -replace "cash", "Cash"}
 }
 
 function Get-Region {
@@ -778,7 +1199,7 @@ function Get-Region {
         [String]$Region = ""
     )
 
-    if (-not (Test-Path Variable:Script:Regions)) {
+    if (-not (Test-Path Variable:Script:Regions -ErrorAction SilentlyContinue)) {
         $Script:Regions = Get-Content "Regions.txt" | ConvertFrom-Json
     }
 
@@ -799,11 +1220,9 @@ function Get-EquihashPers {
         [String]$Default = ""
     )
 
-    if (-not (Test-Path Variable:Script:EquihashPers)) {
+    if (-not (Test-Path Variable:Script:EquihashPers -ErrorAction SilentlyContinue)) {
         $Script:EquihashPers = Get-Content "EquihashPers.txt" | ConvertFrom-Json
     }
-
-    $CoinName = (Get-Culture).TextInfo.ToTitleCase(($CoinName -replace "-", " " -replace "_", " ")) -replace " "
     
     if ($Script:EquihashPers.$CoinName) {$Script:EquihashPers.$CoinName}
     else {$Default}
@@ -817,16 +1236,24 @@ enum MinerStatus {
 
 class Miner {
     $Name
+    $BaseName
+    $Version
     $Path
     $Arguments
-    $Wrap
     $API
     $Port
+    hidden [DateTime]$BeginTime = 0
+    hidden [DateTime]$EndTime = 0
     [string[]]$Algorithm = @()
     $DeviceName
+    [Array]$DeviceId
+    $Earning
+    $Earning_Comparison
+    $Earning_MarginOfError
+    $Earning_Bias
+    $Earning_Unbias
     $Profit
     $Profit_Comparison
-    $Profit_MarginOfError
     $Profit_Bias
     $Profit_Unbias
     $Speed
@@ -834,21 +1261,24 @@ class Miner {
     $Best
     $Best_Comparison
     hidden [System.Management.Automation.Job]$Process = $null
-    $New
+    [Boolean]$New
     hidden [TimeSpan]$Active = [TimeSpan]::Zero
-    hidden [Int]$Activated = 0
+    hidden [Int64]$Activated = 0
     hidden [MinerStatus]$Status = [MinerStatus]::Idle
-    $Benchmarked
     $LogFile
     $Pool
     hidden [Array]$Data = @()
     $ShowMinerWindow
-    $BenchmarkIntervals
+    $IntervalMultiplier
+    $Benchmarked
+    $Intervals
     $ProcessId
-
-    [String[]]GetProcessNames() {
-        return @(([IO.FileInfo]($this.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName)
-    }
+    $PowerCost
+    $PowerUsage
+    $Environment
+    $WarmupTime
+    $AllowedBadShareRatio
+    $StatusMessage
 
     [String]GetCommandLineParameters() {
         return $this.Arguments
@@ -877,17 +1307,24 @@ class Miner {
 
         if (-not $this.Process) {
             if ($this.ShowMinerWindow) {
-                $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command ```$Process = (Start-Process '$($this.Path)' '$($this.Arguments)' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+                if ((Test-Path ".\CreateProcess.cs" -PathType Leaf) -and ($this.API -ne "Wrapper")) {
+                    $this.Process = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList $this.GetCommandLineParameters() -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object {if ($_ -like "CPU#*") {-2} else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
+                }
+                else {
+                    $EnvCmd = ($this.Environment | Foreach-Object {"```$env:$($_)"}) -join "; "
+                    $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command $EnvCmd```$Process = (Start-Process '$($this.Path)' '$($this.GetCommandLineParameters())' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+                }
             }
             else {
                 $this.LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\$($this.Name)-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt")
-                $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.Arguments -LogPath $this.LogFile -WorkingDirectory (Split-Path $this.Path) -Priority ($this.Device.Type | ForEach-Object {if ($_ -eq "CPU") {-2}else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum)
+                $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.GetCommandLineParameters() -LogPath $this.LogFile -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object {if ($_ -like "CPU#*") {-2} else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
             }
 
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
                 for ($WaitForPID = 0; $WaitForPID -le 20; $WaitForPID++) {
                     if ($this.ProcessId = (Get-CIMInstance CIM_Process | Where-Object {$_.ExecutablePath -eq $this.Path -and $_.CommandLine -like "*$($this.Path)*$($this.GetCommandLineParameters())*"}).ProcessId) {
                         $this.Status = [MinerStatus]::Running
+                        $this.BeginTime = (Get-Date).ToUniversalTime()
                         break
                     }
                     Start-Sleep -Milliseconds 100
@@ -898,7 +1335,7 @@ class Miner {
 
     hidden StopMining() {
         $this.Status = [MinerStatus]::Failed
-
+        $this.EndTime = (Get-Date).ToUniversalTime()
         if ($this.ProcessId) {
             if (Get-Process -Id $this.ProcessId -ErrorAction SilentlyContinue) {
                 Stop-Process -Id $this.ProcessId -Force -ErrorAction Ignore
@@ -924,7 +1361,7 @@ class Miner {
             return $this.Process.PSEndTime
         }
         elseif ($this.Process.PSBeginTime) {
-            return Get-Date
+            return (Get-Date).ToUniversalTime()
         }
         else {
             return [DateTime]::MinValue
@@ -936,7 +1373,7 @@ class Miner {
             return $this.Active + ($this.Process.PSEndTime - $this.Process.PSBeginTime)
         }
         elseif ($this.Process.PSBeginTime) {
-            return $this.Active + ((Get-Date) - $this.Process.PSBeginTime)
+            return $this.Active + ((Get-Date).ToUniversalTime() - $this.Process.PSBeginTime)
         }
         else {
             return $this.Active
@@ -948,13 +1385,14 @@ class Miner {
     }
 
     [MinerStatus]GetStatus() {
-        if ($this.Process.State -eq "Running" -and $this.ProcessId -and (Get-Process -Id $this.ProcessId -ErrorAction SilentlyContinue)) {
+        if ($this.Process.State -eq "Running" -and $this.ProcessId -and (Get-Process -Id $this.ProcessId -ErrorAction SilentlyContinue).ProcessName) {
+            #Use ProcessName, some crashed miners are dead, but may still be found by their processId
             return [MinerStatus]::Running
         }
         elseif ($this.Status -eq "Running") {
             $this.ProcessId = $null
             $this.Status = [MinerStatus]::Failed
-            return [MinerStatus]::Failed
+            return $this.Status
         }
         else {
             return $this.Status
@@ -1036,11 +1474,14 @@ class Miner {
 
                     $Lines += $Line
 
-                    $this.Data += [PSCustomObject]@{
-                        Date     = $Date
-                        Raw      = $Line_Simple
-                        HashRate = [PSCustomObject]@{[String]$this.Algorithm = [Int64]$HashRates}
-                        Device   = $Devices
+                    if ($HashRates) {
+                        $this.Data += [PSCustomObject]@{
+                            Date     = $Date
+                            Raw      = $Line_Simple
+                            HashRate = [PSCustomObject]@{[String]$this.Algorithm = [Double]($HashRates | Measure-Object -Sum).Sum}
+                            PowerUsage = (Get-PowerUsage $this.DeviceName)
+                            Device   = $Devices
+                        }
                     }
                 }
             }
@@ -1051,19 +1492,18 @@ class Miner {
         return $Lines
     }
 
-    [Int64]GetHashRate([String]$Algorithm = [String]$this.Algorithm, [Int]$Seconds = 60, [Boolean]$Safe = $this.New) {
+    [Double]GetHashRate([String]$Algorithm = [String]$this.Algorithm, [Boolean]$Safe = $this.New) {
         $HashRates_Devices = @($this.Data | Where-Object Device | Select-Object -ExpandProperty Device -Unique)
         if (-not $HashRates_Devices) {$HashRates_Devices = @("Device")}
 
         $HashRates_Counts = @{}
         $HashRates_Averages = @{}
         $HashRates_Variances = @{}
-        $Hashrates_Samples = @{}
+
+        $Hashrates_Samples = @($this.Data | Where-Object {$_.HashRate.$Algorithm} | Sort-Object {$_.HashRate.$Algorithm}) #Do not use 0 valued samples
 
         #strip lower 10% and upper 10% of all values for better hashrate stability
-        $Hashrates_Samples = @($this.Data | Where-Object {$_.HashRate.$Algorithm} | Where-Object {$_.Date -GE (Get-Date).ToUniversalTime().AddSeconds( - $Seconds)})
-        $Hashrates_Samples | Sort-Object {$_.HashRate.$Algorithm} | Select-Object -Skip ([Int]($HashRates_Samples.Count * 0.1)) | Select-Object -SkipLast ([Int]($HashRates_Samples.Count * 0.1)) | ForEach-Object {
-
+        $Hashrates_Samples | Select-Object -Skip ([Int]($HashRates_Samples.Count * 0.1)) | Select-Object -SkipLast ([Int]($HashRates_Samples.Count * 0.1)) | ForEach-Object {
             $Data_Devices = $_.Device
             if (-not $Data_Devices) {$Data_Devices = $HashRates_Devices}
 
@@ -1088,6 +1528,45 @@ class Miner {
         }
         else {
             return $HashRates_Average
+        }
+    }
+
+    [Double]GetPowerUsage([Boolean]$Safe = $this.New) {
+        $PowerUsages_Devices = @($this.Data | Where-Object Device | Select-Object -ExpandProperty Device -Unique)
+        if (-not $PowerUsages_Devices) {$PowerUsages_Devices = @("Device")}
+
+        $PowerUsages_Counts = @{}
+        $PowerUsages_Averages = @{}
+        $PowerUsages_Variances = @{}
+
+        $PowerUsages_Samples = @($this.Data | Where-Object PowerUsage) #Do not use 0 valued samples
+
+        #strip lower 20% and upper 20% of all values for better value stability
+        $PowerUsages_Samples | Sort-Object PowerUsage | Select-Object -Skip ([Int]($PowerUsages_Samples.Count * 0.2)) | Select-Object -SkipLast ([Int]($PowerUsages_Samples.Count * 0.2)) | ForEach-Object {
+            $Data_Devices = $_.Device
+            if (-not $Data_Devices) {$Data_Devices = $PowerUsages_Devices}
+
+            $Data_PowerUsages = $_.PowerUsage
+
+            $Data_Devices | ForEach-Object {$PowerUsages_Counts.$_++}
+            $Data_Devices | ForEach-Object {$PowerUsages_Averages.$_ += @(($Data_PowerUsages | Measure-Object -Sum | Select-Object -ExpandProperty Sum) / $Data_Devices.Count)}
+            $PowerUsages_Variances."$($Data_Devices | ConvertTo-Json)" += @($Data_PowerUsages | Measure-Object -Sum | Select-Object -ExpandProperty Sum)
+        }
+
+        $PowerUsages_Count = $PowerUsages_Counts.Values | ForEach-Object {$_} | Measure-Object -Minimum | Select-Object -ExpandProperty Minimum
+        $PowerUsages_Average = ($PowerUsages_Averages.Values | ForEach-Object {$_} | Measure-Object -Average | Select-Object -ExpandProperty Average) * $PowerUsages_Averages.Keys.Count
+        $PowerUsages_Variance = $PowerUsages_Variances.Keys | ForEach-Object {$_} | ForEach-Object {$PowerUsages_Variances.$_ | Measure-Object -Average -Minimum -Maximum} | ForEach-Object {if ($_.Average) {($_.Maximum - $_.Minimum) / $_.Average}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
+
+        if ($Safe) {
+            if ($PowerUsages_Count -lt 3 -or $PowerUsages_Variance -gt 0.1) {
+                return 0
+            }
+            else {
+                return $PowerUsages_Average * (1 + ($PowerUsages_Variance / 2))
+            }
+        }
+        else {
+            return $PowerUsages_Average
         }
     }
 }
