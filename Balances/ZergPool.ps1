@@ -10,7 +10,7 @@ $RetryCount = 3
 $RetryDelay = 2
 while (-not ($APIRequest) -and $RetryCount -gt 0) {
     try {
-        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "https://www.zpool.ca/api/currencies" -UseBasicParsing -Headers @{"Cache-Control" = "no-cache"} -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "http://api.zergpool.com:8080/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
     }
     catch {
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
@@ -40,7 +40,7 @@ if (-not $Payout_Currencies) {
 $Payout_Currencies | Foreach-Object {
     $Payout_Currency = $_
     try {
-        $APIRequest = Invoke-RestMethod "http://zpool.ca/api/wallet?address=$($Wallets.$Payout_Currency)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+        $APIRequest = Invoke-RestMethod "http://www.zergpool.com:8080/api/wallet?address=$($Wallets.$Payout_Currency)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
         if (($APIRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
             Write-Log -Level Warn "Pool Balance API ($Name) for $Payout_Currency returned nothing. "
         }

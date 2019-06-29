@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Wallets
@@ -6,7 +6,7 @@ param(
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-if (-not $Wallets.BTC) {
+if (-not $Wallets.RVN) {
     Write-Log -Level Verbose "Cannot get balance on pool ($Name) - no wallet address specified. "
     return
 }
@@ -15,10 +15,7 @@ $RetryCount = 3
 $RetryDelay = 2
 while (-not ($APIRequest) -and $RetryCount -gt 0) {
     try {
-        #NH API does not total all of your balances for each algo up, so you have to do it with another call then total them manually.
-        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "https://api.nicehash.com/api?method=stats.provider&addr=$($Wallets.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
-        $Sum = 0
-        $APIRequest.result.stats.balance | Foreach {$Sum += $_}
+        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "https://ravenminer.com/api/wallet?address=$($Wallets.RVN)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop -UserAgent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"}
     }
     catch {
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
@@ -35,12 +32,13 @@ if (($APIRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Mea
     Write-Log -Level Warn "Pool Balance API ($Name) returned nothing. "
     return
 }
+
 [PSCustomObject]@{
-    Name        = "$($Name) (BTC)"
+    Name        = "$($Name) ($($APIRequest.currency))"
     Pool        = $Name
-    Currency    = "BTC"
-    Balance     = $Sum
-    Pending     = 0 # Pending is always 0 since NiceHash doesn't report unconfirmed or unexchanged profits like other pools do
-    Total       = $Sum
+    Currency    = $APIRequest.currency
+    Balance     = $APIRequest.balance
+    Pending     = $APIRequest.unsold
+    Total       = $APIRequest.unpaid
     LastUpdated = (Get-Date).ToUniversalTime()
 }
