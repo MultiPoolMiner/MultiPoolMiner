@@ -2,7 +2,10 @@
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
   <h1 id="title" class="h2" data-navbaractive="navactiveminers">Active Miners</h1>
 </div>
+<div class="alert alert-info" role="alert">Shows the miner for each algorithm and device that was selected as the most profitable</div>
+
 <table id="miners" class="table"
+  data-buttons-align="left"
   data-toggle="table"
   data-url="/activeminers"
   data-response-handler="formatActiveMiners"
@@ -21,12 +24,16 @@
 >
   <thead>
     <tr>
-      <th data-field="Name" data-sortable="true" data-filter-control="select">Name</th>
+      <th data-field="Name" data-sortable="true" data-filter-control="input" data-filter-strict-search="false">Name</th>
       <th data-field="tDevices" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Devices</th>
       <th data-field="Profit" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit</th>
-      <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select">Algorithm</th>
-      <th data-field="tPrimarySpeed" data-align="right" data-sortable="true" data-formatter="formatHashRateValue">Speed</th>
-      <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select">Secondary Algorithm</th>
+      <th data-field="Profit_Bias" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit Bias</th>
+      <th data-field="Earning" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning</th>
+      <th data-field="Earning_Bias" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning Bias</th>
+      <th data-field="PowerUsage" data-align="right" data-sortable="true" data-formatter="formatWatt">Power Usage</th>
+      <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Primary Algorithm</th>
+      <th data-field="tPrimarySpeed" data-align="right" data-sortable="true" data-formatter="formatHashRateValue">Primary Speed</th>
+      <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Secondary Algorithm</th>
       <th data-field="tSecondarySpeed" data-align="right" data-sortable="true" data-formatter="formatHashRateValue">Secondary Speed</th>
     </tr>
   </thead>
@@ -38,6 +45,9 @@
     // This function can alter the returned data before building the table, formatting it in a way
     // that is easier to display and manipulate in a table
     $.each(data, function(index, item) {
+      // Format the device(s)
+      item.tDevices = item.DeviceName.toString();
+
       // Format the algorithm(s)
       item.tPrimaryAlgorithm = item.Algorithm[0];
       item.tSecondaryAlgorithm = item.Algorithm[1];
@@ -49,9 +59,6 @@
       } else {
         item.tPrimarySpeed = item.Speed;
       }
-
-      // Format the device(s)
-      item.tDevices = item.DeviceName.toString();
     });
     return data;
   }

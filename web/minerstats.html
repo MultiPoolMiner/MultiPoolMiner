@@ -10,8 +10,28 @@
     </div>
     <div class="card-body">
       <p>Clear the stats for miners that have a benchmarked hashrate of 0H/s.</p>
-      <p>These miners may have failed to benchmark properly, clearing their stats allows them to try benchmarking again.  You should watch closely for failed miners after doing this.</p>
+      <p>These miners may have failed to benchmark properly, clearing their stats allows them to try benchmarking again. You should watch closely for failed miners after doing this. </p>
       <a href="#" id="resetzerohashrateminers" class="btn btn-primary">Reset 0H/s miner stats</a>
+    </div>
+  </div>
+  <div class="card m-2">
+    <div class="card-header">
+      <h5>Reset PowerUsage for 0W miners</h5>
+    </div>
+    <div class="card-body">
+      <p>Clear the stats for miners that have a measured power usage of 0W.</p>
+      <p>These miners may have failed to measure power usage properly, clearing their recorded value allows them to try measuring again. </p>
+      <a href="#" id="resetzeropowerusageminers" class="btn btn-primary">Reset 0W power usage data</a>
+    </div>
+  </div>
+  <div class="card m-2 bg-info">
+    <div class="card-header">
+      <h5>Reset Profit Data</h5>
+    </div>
+    <div class="card-body">
+      <p>Reset profit data.</p>
+      <p>To ensure your profit data is accurate, you should do this after hardware changes, changing overclock settings, driver updates, and miner updates. This will force profit data to start fresh. </p>
+      <a href="#" id="resetallprofit" class="btn btn-danger">Reset profit data</a>
     </div>
   </div>
   <div class="card m-2 bg-warning">
@@ -20,8 +40,18 @@
     </div>
     <div class="card-body">
       <p>Reset the stats for all miners.</p>
-      <p>To ensure your benchmarks are accurate, you should do this after hardware changes, changing overclock settings, driver updates, and miner updates. This will force benchmarking to start fresh.</p>
+      <p>To ensure your benchmarks are accurate, you should do this after hardware changes, changing overclock settings, driver updates, and miner updates. This will force benchmarking to start fresh. </p>
       <a href="#" id="resetallbenchmarks" class="btn btn-danger">Reset all miner stats</a>
+    </div>
+  </div>
+  <div class="card m-2 bg-warning">
+    <div class="card-header">
+      <h5>Reset All Power Usage</h5>
+    </div>
+    <div class="card-body">
+      <p>Clear the power usage recordings for all miners.</p>
+      <p>To ensure your power usage recordings are accurate, you should do this after hardware changes, changing overclock settings, driver updates, and miner updates. This will force power usage measurements to start fresh. </p>
+      <a href="#" id="resetallpowerusage" class="btn btn-danger">Reset all power usage data</a>
     </div>
   </div>
 </div>
@@ -43,6 +73,26 @@ $('#resetzerohashrateminers').on('click',function(){
     });
 });
 
+$('#resetallpowerusage').on('click',function(){
+    $('.modal-body').load('scripts/resetallpowerusage.ps1',function(){
+        $('.modal-title').text('Reset All Power Usage');
+        $('#myModal').modal({show:true});
+    });
+});
+
+$('#resetzeropowerusageminers').on('click',function(){
+    $('.modal-body').load('scripts/resetzeropowerusageminers.ps1',function(){
+        $('.modal-title').text('Reset 0W Power Usage');
+        $('#myModal').modal({show:true});
+    });
+});
+
+$('#resetallprofit').on('click',function(){
+    $('.modal-body').load('scripts/resetallprofit.ps1',function(){
+        $('.modal-title').text('Reset All Profit Data');
+        $('#myModal').modal({show:true});
+    });
+});
 
 </script>
 <!--#include file="/parts/foot.html" -->

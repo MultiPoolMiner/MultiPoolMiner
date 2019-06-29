@@ -3,11 +3,16 @@
   <h1 id="title" data-navbaractive="navdashboard" class="h2">Dashboard</h1>
 </div>
 
+<meta http-Equiv="Cache-Control" Content="no-cache">
+<meta http-Equiv="Pragma" Content="no-cache">
+<meta http-Equiv="Expires" Content="0"><meta http-equiv="refresh" content="10">
+
 <h3>Running Miners</h3>
 <table id="miners" class="table mb-4"
   data-toggle="table"
   data-url="/runningminers"
   data-response-handler="formatRunningMiners"
+  data-buttons-align="left"
   data-sort-order="desc"
   data-sort-name="Profit"
   data-cache="false"
@@ -25,12 +30,14 @@
       <th data-field="Pool" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Pool</th>
       <th data-field="tDevices" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Devices</th>
       <th data-field="Profit" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit</th>
+      <th data-field="Earning" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning</th>
+      <th data-field="PowerUsage" data-align="right" data-sortable="true" data-formatter="formatWatt">Power Usage</th>
       <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Algorithm</th>
       <th data-field="tPrimaryHashRate" data-sortable="true" data-formatter="formatHashRateValue" data-filter-strict-search="true">Benchmarked Speed</th>
       <th data-field="tPrimaryHashRateLive" data-sortable="true" data-formatter="formatHashRateValue">Actual Speed</th>
       <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Secondary Algorithm</th>
-      <th data-field="tSecondaryHashRate" data-sortable="true" data-formatter="formatHashRateValue">Secondary Benchmarked Speed</th>
-      <th data-field="tSecondaryHashRateLive" data-sortable="true" data-formatter="formatHashRateValue">Secondary Actual Speed</th>
+      <th data-field="tSecondaryHashRate" data-sortable="true" data-formatter="formatHashRateValue">Benchmarked Speed</th>
+      <th data-field="tSecondaryHashRateLive" data-sortable="true" data-formatter="formatHashRateValue">Actual Speed</th>
     </tr>
   </thead>
 </table>
@@ -57,25 +64,30 @@
 <script type="text/javascript">
   $(function() {
     function updatePoolBalances() {
+      var rates;
+      $.ajax({url: '/rates', success: function(result) {
+        console.log(result);
+        rates = result[0];
+      }});
+      var data_total = {name: "Total Balance From All Pools", balances: {}, total: true};
       $.ajax({url: '/balances', success: function(result) {
         console.log(result);
         $("#balanceboxes").empty();
         var template = Handlebars.compile($("#poolbalance_template").html());
+        var footer = new RegExp("-.+|=.+");
         $.each(result, function(index, item) {
-          var properties = Object.keys(item);
-          var currencies = properties.filter((properties) => properties.startsWith("Value in "));
-
-          if (item.Name == "*Total*") { 
-            var data = {name: "Total Balance From All Pools", balances: {}, total: true};
-          } else {
+          if (!(footer.test(item.Name))) {
+            var currencies = Object.keys(rates[item.Currency]);
             var data = {name: item.Name, balances: {}};
+            $.each(currencies, function(cindex, currency) {
+              data["balances"][currency] = item.Total * rates[item.Currency][currency];
+              if (!(data_total["balances"][currency])) {data_total["balances"][currency] = 0}
+              data_total["balances"][currency] = data_total["balances"][currency] + item.Total * rates[item.Currency][currency];
+            });
+            $("#balanceboxes").append(template(data));
           }
-          $.each(currencies, function(cindex, currency) {
-            var name = currency.replace("Total_","");
-              data["balances"][name] = item[currency];
-          });
-          $("#balanceboxes").append(template(data));
         });
+        $("#balanceboxes").append(template(data_total));
       }});
     }
 

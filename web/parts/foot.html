@@ -3,19 +3,33 @@
     </div>
   </body>
 <script type="text/javascript">
-  // Set the active sidebar item
-  $(function() {
+
+//get BTC rate of first currency
+var rate;
+$.ajax({url: '/btcratefirstcurrency', success: function(result) {
+    console.log(result);
+    rate = result;;
+}});
+  
+// Set the active sidebar item
+$(function() {
     $('#'+$('#title').data('navbaractive')).addClass('active');
-  });
-  
-  // set the values in the header
-  $(function() {
+});
+
+// set the values in the header
+$(function() {
+    $.ajax({url: '/currentearning', success: function(result) {
+        earning = result;
+    }});
     $.ajax({url: '/currentprofit', success: function(result) {
+        profit = result;
+    }});
+    $.ajax({url: '/exchangerates', success: function(result) {
+        exchangerates = result;
         $("#profit").empty();
-        $("#profit").append("<h6>Current profit: " + formatBTC(result) + " BTC/Day</h6>");
-      }});
-  
-  });
+        $("#profit").append("<h6>" + profit + "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" + earning + "&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp" + exchangerates + "</h6>");
+    }});
+});
   
 </script>
 </html>
