@@ -34,11 +34,11 @@ $DownloadList | ForEach-Object {
             Write-Progress -Activity "Downloader" -Status $Path -CurrentOperation "Acquiring Offline (Computer)" -PercentComplete $Progress
 
             $ProgressPreference = "SilentlyContinue"
-            if ($URI) {Write-Log -Level Warn "Cannot download $($Path) distributed at $($URI). "}
-            else {Write-Log -Level Warn "Cannot download $($Path). "}
+            if ($URI) {Write-Log -Level Warn "Cannot download $(Split-Path $Path -Leaf) distributed at $($URI). "}
+            else {Write-Log -Level Warn "Cannot download $(Split-Path $Path -Leaf). "}
 
             if ($Searchable) {
-                Write-Log -Level Warn "Searching for $($Path). "
+                Write-Log -Level Warn "Searching for $(Split-Path $Path -Leaf). "
 
                 $Path_Old = Get-PSDrive -PSProvider FileSystem | ForEach-Object {Get-ChildItem -Path $_.Root -Include (Split-Path $Path -Leaf) -Recurse -ErrorAction Ignore} | Sort-Object LastWriteTimeUtc -Descending | Select-Object -First 1
                 $Path_New = $Path
