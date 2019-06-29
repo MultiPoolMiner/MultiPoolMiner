@@ -1,112 +1,104 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [alias("Wallet")]
-    [String]$BTC, 
-    [alias("WorkerName")]
-    [String]$Worker, 
-    [TimeSpan]$StatSpan
+    [TimeSpan]$StatSpan,
+    [PSCustomObject]$Config
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-if (-not $BTC) {
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
-    return
-}
+$PoolRegions = "eu", "usa", "hk", "jp", "in", "br"
+$PoolAPIUri = "http://api.nicehash.com/api?method=simplemultialgo.info"
 
-$RetryCount = 3
-$RetryDelay = 2
-while (-not ($NiceHash_Request) -and $RetryCount -gt 0) {
-    try {
-        if (-not $NiceHash_Request) {$NiceHash_Request = Invoke-RestMethod "http://api.nicehash.com/api?method=simplemultialgo.info" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
-    }
-    catch {
-        Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
-        $RetryCount--        
-    }
-}
+#Pool currenctly allows payout in BTC only
+$Payout_Currencies = @("BTC") | Where-Object {$Config.Pools.$Name.Wallets.$_}
 
-if (-not $NiceHash_Request) {
-    Write-Log -Level Warn "Pool API ($Name) has failed. "
-    return
-}
+if ($Payout_Currencies) {
 
-if (($NiceHash_Request.result.simplemultialgo | Measure-Object).Count -le 1) {
-    Write-Log -Level Warn "Pool API ($Name) returned nothing. "
-    return
-}
-
-$NiceHash_Regions = "eu", "usa", "hk", "jp", "in", "br"
-
-$NiceHash_Request.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos paying 0 fail stratum #> | ForEach-Object {
-    $NiceHash_Host = "nicehash.com"
-    $NiceHash_Port = $_.port
-    $NiceHash_Algorithm = $_.name
-    $NiceHash_Algorithm_Norm = Get-Algorithm $NiceHash_Algorithm
-    $NiceHash_Coin = ""
-
-    if ($NiceHash_Algorithm_Norm -eq "Sia") {$NiceHash_Algorithm_Norm = "SiaNiceHash"} #temp fix
-    if ($NiceHash_Algorithm_Norm -eq "Decred") {$NiceHash_Algorithm_Norm = "DecredNiceHash"} #temp fix
-
-    $Divisor = 1000000000
-
-    $Stat = Set-Stat -Name "$($Name)_$($NiceHash_Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor) -Duration $StatSpan -ChangeDetection $true
-
-    $NiceHash_Regions | ForEach-Object {
-        $NiceHash_Region = $_
-        $NiceHash_Region_Norm = Get-Region $NiceHash_Region
-
-        [PSCustomObject]@{
-            Algorithm     = $NiceHash_Algorithm_Norm
-            CoinName      = $NiceHash_Coin
-            Price         = $Stat.Live
-            StablePrice   = $Stat.Week
-            MarginOfError = $Stat.Week_Fluctuation
-            Protocol      = "stratum+tcp"
-            Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
-            Port          = $NiceHash_Port
-            User          = "$BTC.$Worker"
-            Pass          = "x"
-            Region        = $NiceHash_Region_Norm
-            SSL           = $false
-            Updated       = $Stat.Updated
-            PayoutScheme  = "PPS"
+    $RetryCount = 3
+    $RetryDelay = 2
+    while (-not ($APIRequest) -and $RetryCount -gt 0) {
+        try {
+            if (-not $APIRequest) {$APIRequest = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction SilentlyContinue}
         }
-        [PSCustomObject]@{
-            Algorithm     = "$($NiceHash_Algorithm_Norm)-NHMP"
-            CoinName      = $NiceHash_Coin
-            Price         = $Stat.Live
-            StablePrice   = $Stat.Week
-            MarginOfError = $Stat.Week_Fluctuation
-            Protocol      = "stratum+tcp"
-            Host          = "nhmp.$($NiceHash_Region.ToLower()).nicehash.com"
-            Port          = 3200
-            User          = "$BTC.$Worker"
-            Pass          = "x"
-            Region        = $NiceHash_Region_Norm
-            SSL           = $false
-            Updated       = $Stat.Updated
-            PayoutScheme  = "PPS"
+        catch {
+            Start-Sleep -Seconds $RetryDelay
+            $RetryCount--        
         }
+    }
 
-        if ($NiceHash_Algorithm_Norm -match "Cryptonight*" -or $NiceHash_Algorithm_Norm -eq "Equihash") {
-            [PSCustomObject]@{
-                Algorithm     = $NiceHash_Algorithm_Norm
-                CoinName      = $NiceHash_Coin
-                Price         = $Stat.Live
-                StablePrice   = $Stat.Week
-                MarginOfError = $Stat.Week_Fluctuation
-                Protocol      = "stratum+ssl"
-                Host          = "$NiceHash_Algorithm.$NiceHash_Region.$NiceHash_Host"
-                Port          = $NiceHash_Port + 30000
-                User          = "$BTC.$Worker"
-                Pass          = "x"
-                Region        = $NiceHash_Region_Norm
-                SSL           = $true
-                Updated       = $Stat.Updated
-                PayoutScheme  = "PPS"
+    if (-not $APIRequest) {
+        Write-Log -Level Warn "Pool API ($Name) has failed. "
+        return
+    }
+
+    if ($APIRequest.result.simplemultialgo.count -le 1) {
+        Write-Log -Level Warn "Pool API ($Name) returned nothing. "
+        return
+    }
+
+    if ($Config.Pools.$Name.IsInternalWallet) {$Fee = 0.01} else {$Fee = 0.03}
+
+    $APIRequest.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos paying 0 fail stratum #> | ForEach-Object {
+        $PoolHost = "nicehash.com"
+        $Port = $_.port
+        $Algorithm = $_.name
+        $Algorithm_Norm = Get-Algorithm $Algorithm
+        $CoinName = ""
+        
+        if ($Algorithm_Norm -eq "Decred") {$Algorithm_Norm = "DecredNiceHash"} #temp fix
+        if ($Algorithm_Norm -eq "Mtp")    {$Algorithm_Norm = "MtpNiceHash"} #temp fix
+        if ($Algorithm_Norm -eq "Sia")    {$Algorithm_Norm = "SiaNiceHash"} #temp fix
+
+        $Divisor = 1000000000
+
+        $Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor) -Duration $StatSpan -ChangeDetection $true
+
+        $PoolRegions | ForEach-Object {
+            $Region = $_
+            $Region_Norm = Get-Region $Region
+            
+            $Payout_Currencies | ForEach-Object {
+                [PSCustomObject]@{
+                    Algorithm     = $Algorithm_Norm
+                    CoinName      = $CoinName
+                    Price         = $Stat.Live
+                    StablePrice   = $Stat.Week
+                    MarginOfError = $Stat.Week_Fluctuation
+                    Protocol      = "stratum+tcp"
+                    Host          = "$Algorithm.$Region.$PoolHost"
+                    Port          = $Port
+                    User          = "$($Config.Pools.$Name.Wallets.$_).$($Config.Pools.$Name.Worker)"
+                    Pass          = "x"
+                    Region        = $Region_Norm
+                    SSL           = $false
+                    Updated       = $Stat.Updated
+                    Fee           = $Fee
+                    PayoutScheme  = "PPLNS"
+                }
+                if ($Algorithm_Norm -match "Cryptonight*|Equihash.*") {
+                    [PSCustomObject]@{
+                        Algorithm     = $Algorithm_Norm
+                        CoinName      = $CoinName
+                        Price         = $Stat.Live
+                        StablePrice   = $Stat.Week
+                        MarginOfError = $Stat.Week_Fluctuation
+                        Protocol      = "stratum+ssl"
+                        Host          = "$Algorithm.$Region.$PoolHost"
+                        Port          = $Port + 30000
+                        User          = "$($Config.Pools.$Name.Wallets.$_).$($Config.Pools.$Name.Worker)"
+                        Pass          = "x"
+                        Region        = $Region_Norm
+                        SSL           = $true
+                        Updated       = $Stat.Updated
+                        Fee           = $Fee
+                        PayoutScheme  = "PPLNS"
+                    }
+                }
             }
         }
     }
+}
+else {
+    Write-Log -Level Verbose "No wallet address for Pool ($Name) specified. Cannot mine on pool. "
 }

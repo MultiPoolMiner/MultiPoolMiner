@@ -1,79 +1,108 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [alias("Wallet")]
-    [String]$BTC, 
-    [alias("WorkerName")]
-    [String]$Worker, 
-    [TimeSpan]$StatSpan
+    [TimeSpan]$StatSpan,
+    [PSCustomObject]$Config
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
+$PoolRegions = "us"
+$PoolAPIStatusUri = "http://pool.hashrefinery.com/api/status"
+$PoolAPICurrenciesUri = "http://pool.hashrefinery.com/api/currencies"
+
+# Guaranteed payout currencies
+$Payout_Currencies = @("BTC")
+
 $RetryCount = 3
 $RetryDelay = 2
-while (-not ($HashRefinery_Request -and $HashRefineryCoins_Request) -and $RetryCount -gt 0) {
+while (-not ($APIStatusRequest -and $APICurrenciesRequest) -and $RetryCount -gt 0) {
     try {
-        if (-not $HashRefinery_Request) {$HashRefinery_Request = Invoke-RestMethod "http://pool.hashrefinery.com/api/status" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
-        if (-not $HashRefineryCoins_Request) {$HashRefineryCoins_Request = Invoke-RestMethod "http://pool.hashrefinery.com/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APIStatusRequest) {$APIStatusRequest = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction SilentlyContinue}
+        if (-not $APICurrenciesRequest) {$APICurrenciesRequest  = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction SilentlyContinue}
     }
     catch {
-        Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
+        Start-Sleep -Seconds $RetryDelay
         $RetryCount--        
     }
 }
 
-if (-not $HashRefinery_Request) {
+if (-not $APIStatusRequest) {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
     return
 }
 
-if (($HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
-    Write-Log -Level Warn "Pool API ($Name) returned nothing. "
+if (($APIStatusRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+    Write-Log -Level Warn "Pool API ($Name) [StatusUri] returned nothing. "
     return
 }
 
-$HashRefinery_Regions = "us"
-$HashRefinery_Currencies = @("BTC") + ($HashRefineryCoins_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Select-Object -Unique | Where-Object {Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue}
-
-if (-not $HashRefinery_Currencies) {
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+if (($APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+    Write-Log -Level Warn "Pool API ($Name) [CurrenciesUri] returned nothing. "
     return
 }
 
-$HashRefinery_Request | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$Hashrefinery_Request.$_.hashrate -gt 0} | ForEach-Object {
-    $HashRefinery_Host = "hashrefinery.com"
-    $HashRefinery_Port = $HashRefinery_Request.$_.port
-    $HashRefinery_Algorithm = $HashRefinery_Request.$_.name
-    $HashRefinery_Algorithm_Norm = Get-Algorithm $HashRefinery_Algorithm
-    $HashRefinery_Coin = ""
+$Payout_Currencies = ($Payout_Currencies + @($APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Sort-Object | Select-Object -Unique | Where-Object {$Config.Pools.$Name.Wallets.$_}
 
-    $Divisor = 1000000 * [Double]$HashRefinery_Request.$HashRefinery_Algorithm.mbtc_mh_factor
+if ($Payout_Currencies) {
 
-    if ((Get-Stat -Name "$($Name)_$($HashRefinery_Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($HashRefinery_Algorithm_Norm)_Profit" -Value ([Double]$HashRefinery_Request.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
-    else {$Stat = Set-Stat -Name "$($Name)_$($HashRefinery_Algorithm_Norm)_Profit" -Value ([Double]$HashRefinery_Request.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
+    $APIStatusRequest = [PSCustomObject]@{}
 
-    $HashRefinery_Regions | ForEach-Object {
-        $HashRefinery_Region = $_
-        $HashRefinery_Region_Norm = Get-Region $HashRefinery_Region
+    try {
+        $APIStatusRequest = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    }
+    catch {
+        Write-Log -Level Warn "Pool API ($Name) [StatusUri] has failed. "
+        return
+    }
 
-        $HashRefinery_Currencies | ForEach-Object {
-            [PSCustomObject]@{
-                Algorithm     = $HashRefinery_Algorithm_Norm
-                CoinName      = $HashRefinery_Coin
-                Price         = $Stat.Live
-                StablePrice   = $Stat.Week
-                MarginOfError = $Stat.Week_Fluctuation
-                Protocol      = "stratum+tcp"
-                Host          = "$HashRefinery_Algorithm.$HashRefinery_Region.$HashRefinery_Host"
-                Port          = $HashRefinery_Port
-                User          = Get-Variable $_ -ValueOnly
-                Pass          = "$Worker,c=$_"
-                Region        = $HashRefinery_Region_Norm
-                SSL           = $false
-                Updated       = $Stat.Updated
-                PayoutScheme  = "PPLNS"
+    if (($APIStatusRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+        Write-Log -Level Warn "Pool API ($Name) [StatusUri] returned nothing. "
+        return
+    }
+
+    $APIStatusRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
+
+        $PoolHost       = "hashrefinery.com"
+        $Port           = $APIStatusRequest.$_.port
+        $Algorithm      = $APIStatusRequest.$_.name
+        $CoinName       = Get-CoinName $(if ($APIStatusRequest.$_.coins -eq 1) {$APICurrenciesRequest.$($APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesRequest.$_.algo -eq $Algorithm}).Name})
+        $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
+        if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
+        $Workers        = $APIStatusRequest.$_.workers
+        $Fee            = $APIStatusRequest.$Algorithm.Fees / 100
+
+        $Divisor = 1000000 * [Double]$APIStatusRequest.$Algorithm.mbtc_mh_factor
+
+        if ((Get-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusRequest.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
+        else {$Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusRequest.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
+
+        $PoolRegions | ForEach-Object {
+            $Region = $_
+            $Region_Norm = Get-Region $Region
+
+            $Payout_Currencies | ForEach-Object {
+                [PSCustomObject]@{
+                    Algorithm     = $Algorithm_Norm
+                    CoinName      = $CoinName
+                    Price         = $Stat.Live
+                    StablePrice   = $Stat.Week
+                    MarginOfError = $Stat.Week_Fluctuation
+                    Protocol      = "stratum+tcp"
+                    Host          = "$Algorithm.$Region.$PoolHost"
+                    Port          = $Port
+                    User          = $Config.Pools.$Name.Wallets.$_
+                    Pass          = "$($Config.Pools.$Name.Worker),c=$_"
+                    Region        = $Region_Norm
+                    SSL           = $false
+                    Updated       = $Stat.Updated
+                    Fee           = $Fee
+                    Workers       = [Int]$Workers
+                }
             }
         }
     }
+}
+else { 
+    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
 }

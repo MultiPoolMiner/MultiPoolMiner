@@ -1,92 +1,98 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [alias("UserName")]
-    [String]$User, 
-    [alias("WorkerName")]
-    [String]$Worker, 
-    [TimeSpan]$StatSpan
+    [TimeSpan]$StatSpan,
+    [PSCustomObject]$Config
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-$RetryCount = 3
-$RetryDelay = 2
-while (-not ($MiningPoolHub_Request) -and $RetryCount -gt 0) {
-    try {
-        if (-not $MiningPoolHub_Request) {$MiningPoolHub_Request = Invoke-RestMethod "http://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics&$(Get-Date -Format "yyyy-MM-dd_HH-mm")" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+$PoolAPIUri= "http://miningpoolhub.com/index.php?page=api&action=getautoswitchingandprofitsstatistics&$(Get-Date -Format "yyyy-MM-dd_HH-mm")"
+$PoolRegions = "europe", "us-east", "asia"
+
+if ($Config.Pools.$Name.User) {
+
+    $RetryCount = 3
+    $RetryDelay = 2
+    while (-not ($APIRequest.return) -and $RetryCount -gt 0) {
+        try {
+            if (-not $APIRequest.return) {$APIRequest = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction SilentlyContinue}
+        }
+        catch {
+            Start-Sleep -Seconds $RetryDelay
+            $RetryCount--        
+        }
     }
-    catch {
-        Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
-        $RetryCount--        
+
+    if (-not $APIRequest) {
+        Write-Log -Level Warn "Pool API ($Name) has failed. "
+        return
     }
-}
 
-if (-not $MiningPoolHub_Request) {
-    Write-Log -Level Warn "Pool API ($Name) has failed. "
-    return
-}
+    if ($APIRequest.return.count -le 1) {
+        Write-Log -Level Warn "Pool API ($Name) returned nothing. "
+        return
+    }
 
-if (($MiningPoolHub_Request.return | Measure-Object).Count -le 1) {
-    Write-Log -Level Warn "Pool API ($Name) returned nothing. "
-    return
-}
+    $APIRequest.return | ForEach-Object {
 
-$MiningPoolHub_Regions = "europe", "us-east", "asia"
+        $CoinName       = $_.current_mining_coin
+        $_.algo -split "-" | ForEach-Object {$CoinName = $CoinName -replace "-$($_)", ""}
+        $CoinName       = Get-CoinName $CoinName
+        
+        $PoolHosts      = @($_.all_host_list.split(";"))
+        $Port           = $_.algo_switch_port
+        $Algorithm      = $_.algo
+        $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
+        if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
 
-$MiningPoolHub_Request.return | ForEach-Object {
-    $MiningPoolHub_Hosts = $_.all_host_list.split(";")
-    $MiningPoolHub_Port = $_.algo_switch_port
-    $MiningPoolHub_Algorithm = $_.algo
-    $MiningPoolHub_Algorithm_Norm = Get-Algorithm $MiningPoolHub_Algorithm
-    $MiningPoolHub_Coin = (Get-Culture).TextInfo.ToTitleCase(($_.current_mining_coin -replace "-", " " -replace "_", " ")) -replace " "
-    
-    if ($MiningPoolHub_Algorithm_Norm -eq "Sia") {$MiningPoolHub_Algorithm_Norm = "SiaClaymore"} #temp fix
+        if ($Algorithm_Norm -eq "Sia") {$Algorithm_Norm = "SiaClaymore"} #temp fix
 
-    $Divisor = 1000000000
+        $Divisor = 1000000000
 
-    $Stat = Set-Stat -Name "$($Name)_$($MiningPoolHub_Algorithm_Norm)_Profit" -Value ([Double]$_.profit / $Divisor) -Duration $StatSpan -ChangeDetection $true
+        $Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$_.profit / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
-    $MiningPoolHub_Regions | ForEach-Object {
-        $MiningPoolHub_Region = $_
-        $MiningPoolHub_Region_Norm = Get-Region ($MiningPoolHub_Region -replace "^us-east$", "us")
+        if ($PoolHosts.Count -gt 1) {$Regions = $PoolRegions} else {$Regions = $Config.Region} #Do not create multiple pool objects if there is only one host
 
-        if ($User) {
+        $PoolRegions | ForEach-Object {
+            $Region = $_
+            $Region_Norm = Get-Region ($Region -replace "^us-east$", "us")
+
             [PSCustomObject]@{
-                Algorithm     = $MiningPoolHub_Algorithm_Norm
-                CoinName      = $MiningPoolHub_Coin
+                Algorithm     = $Algorithm_Norm
+                CoinName      = $CoinName
                 Price         = $Stat.Live
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Region*"} | Select-Object -First 1
-                Port          = $MiningPoolHub_Port
-                User          = "$User.$Worker"
+                Host          = $PoolHosts | Sort-Object -Descending {$_ -ilike "$Region*"} | Select-Object -First 1
+                Port          = $Port
+                User          = "$($Config.Pools.$Name.User).$($Config.Pools.$Name.Worker)"
                 Pass          = "x"
-                Region        = $MiningPoolHub_Region_Norm
+                Region        = $Region_Norm 
                 SSL           = $false
                 Updated       = $Stat.Updated
-                PayoutScheme  = "PPLNS"
+                Fee           = 0.9 / 100
             }
-
-            if ($MiningPoolHub_Algorithm_Norm -eq "CryptonightV7" -or $MiningPoolHub_Algorithm_Norm -eq "Equihash") {
-                [PSCustomObject]@{
-                    Algorithm     = $MiningPoolHub_Algorithm_Norm
-                    CoinName      = $MiningPoolHub_Coin
-                    Price         = $Stat.Live
-                    StablePrice   = $Stat.Week
-                    MarginOfError = $Stat.Week_Fluctuation
-                    Protocol      = "stratum+ssl"
-                    Host          = $MiningPoolHub_Hosts | Sort-Object -Descending {$_ -ilike "$MiningPoolHub_Region*"} | Select-Object -First 1
-                    Port          = $MiningPoolHub_Port
-                    User          = "$User.$Worker"
-                    Pass          = "x"
-                    Region        = $MiningPoolHub_Region_Norm
-                    SSL           = $true
-                    Updated       = $Stat.Updated
-                    PayoutScheme  = "PPLNS"
-                }
+            [PSCustomObject]@{
+                Algorithm     = $Algorithm_Norm
+                CoinName      = $CoinName
+                Price         = $Stat.Live
+                StablePrice   = $Stat.Week
+                MarginOfError = $Stat.Week_Fluctuation
+                Protocol      = "stratum+ssl"
+                Host          = $PoolHosts | Sort-Object -Descending {$_ -ilike "$Region*"} | Select-Object -First 1
+                Port          = $Port
+                User          = "$($Config.Pools.$Name.User).$($Config.Pools.$Name.Worker)"
+                Pass          = "x"
+                Region        = $Region_Norm
+                SSL           = $true
+                Updated       = $Stat.Updated
+                Fee           = 0.9 / 100
             }
         }
     }
+}
+else { 
+    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no username specified. "
 }
