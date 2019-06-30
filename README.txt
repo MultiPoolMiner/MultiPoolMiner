@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 29/06/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 30/06/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -262,7 +262,7 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
       IMPORTANT: For the list of default configured pools consult 'start.bat.' This does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the '-Algorithm' command for further details and example.*
 
 -PowerPrices
-	Power price per KW, set value for each time frame, e.g. {"00:00"=0.3;"06:30"=0.6;"18:30"=0.3}, 24hr format!
+	Power price per kW·h, set value for each time frame, e.g. {"00:00"=0.3;"06:30"=0.6;"18:30"=0.3}, 24hr format!
 
 -PricePenaltyFactor
 	Default factor with which MPM multiplies the prices reported by ALL pools. The default value is 1 (valid range is from 0.1 to 1.0). 
@@ -379,7 +379,7 @@ ADVANCED CONFIGURATION
 Advanced config options are available via config file
 
 MPM supports customized configuration via config files. The default config file name is '.\Config.txt'.
-If you do not include the command line parameter -ConfigFile [Path\FileName.txt] the MPM will use the default file name. 
+If you do not include the command line parameter -ConfigFile [Path\FileName.txt] then MPM will use the default file name. 
 
 If the config file does not exist MPM will create a config file with default values. If the file name does not have an extension MPM will add .txt file name extension.
 The default config file contains only the parameters which are also available per command line. 
@@ -469,8 +469,6 @@ Sample content of 'Config.txt'
 }
 
 
-
-
 There is a section for Pools, Miners and a general section
 
 Advanced configuration for Pools
@@ -478,9 +476,10 @@ Advanced configuration for Pools
 Settings for each configured pool are stored in its own subsection. These settings are only valid for the named pool.
 
 CoinName per pool [Zcash, ZeroCoin etc.]
+
 Only mine the selected coins at the specified pool.
 
-E.g. To mine Zcash & ZeroCoin at Zpool:
+E.g. To mine only Zcash & ZeroCoin at Zpool:
 
     "ZpoolCoins": {
       "CoinName":  [
@@ -490,7 +489,9 @@ E.g. To mine Zcash & ZeroCoin at Zpool:
     }
 Note: Only the pools ending in ...Coins expose the coin name in their API.
 
+
 ExcludeAlgorithm per pool
+
 Do not use the configured algorithms for mining at the specified pool.
 
 E.g. To NOT mine Equihash and Ethash2gb at Zpool:
@@ -502,7 +503,9 @@ E.g. To NOT mine Equihash and Ethash2gb at Zpool:
       ]
     }
 
+
 ExcludeCoinName per pool [Zcash, ZeroCoin etc.]
+
 Exclude selected coins from being mined at the specified pool.
 
 E.g. To NOT mine Zcash & ZeroCoin at Zpool:
@@ -515,10 +518,12 @@ E.g. To NOT mine Zcash & ZeroCoin at Zpool:
     }
 Note: Only the pools ending in ...Coins expose the coin name in their API.
 
-ExcludeRegion per pool
-Do not use the pool endpoints is select regions. This may be useful when a pool has a problem with its endpoints in some regions, e.g. https://bitcointalk.org/index.php?topic=472510.msg51637436#msg51637436.
 
-E.g. To not use the MiningPoolHub ming endpoints in region 'Europe':
+ExcludeRegion per pool
+
+Do not use the pool endpoints in select regions. This may be useful when a pool has a problem with its endpoints in some regions, e.g. https://bitcointalk.org/index.php?topic=472510.msg51637436#msg51637436.
+
+E.g. To NOT use the MiningPoolHub mining endpoints in region 'Europe':
 
     "MiningPoolHub": {
       "ExcludeRegion":  [
@@ -527,7 +532,9 @@ E.g. To not use the MiningPoolHub ming endpoints in region 'Europe':
     }
 Note: The values for 'Regions' must match the definitions in 'Regions.txt'.
 
+
 MinWorker
+
 This parameter allows to define a required minimum number of workers at the pool per algorithm. If there are less then the configured number of workers MPM will skip the affected algorithms.
 Wildcards (* and ?) for the algorithm names are supported. If an algorithm name/wildcard matches more than one entry then the lower number takes priority.
 Important: The general '-MinWorker' value is always applied. Only algorithms matching the global workers count will eventually be handled by the per-pool config. 
@@ -542,6 +549,20 @@ E.g. To ignore 'Ethash*' & 'Equihash1445' algorithms at MiningPoolHub if there a
     }
 Note: Not all pools support this, for more information consult the pools web page or check the MPM web GUI
 If *-MinWorker* is set on a general AND pool level, then the lower number takes priority.
+
+
+NiceHash internal wallet
+
+If you have a NiceHash internal wallet you can configure MPM/NiceHash Pool to mine to the internal address. MPM will then use the lower pool fee of 1% for calculations.
+To use the NiceHash internal wallet modify the NiceHash pool section (you may have to create is first). Enter your "<YOUR_NICEHASH_INTERNAL_WALLET>" (of course you need to insert the real BTC address), and set the flag '"IsInternalWallet":  true':
+
+    "NiceHash":  {
+      "Wallets":  {
+        "BTC":  "<YOUR_NICEHASH_INTERNAL_WALLET>"
+      },
+      "IsInternalWallet":  true
+    }
+
 
 Payout currency
 
@@ -569,6 +590,7 @@ E.g. to change the payout currency for Zpool to LiteCoin replace the line for BT
     }
 Note: Not all pools support this, for more information consult the pools web page
 
+
 PricePenaltyFactor per pool
 
 If you feel that a pool is exaggerating its estimations then set a penalty factor to lower projected projected calculations.
@@ -581,10 +603,12 @@ E.g. You feel that Zpool is exaggerating its estimations by 10% - Set PricePenal
     }
 Note: This is also a general parameter (see -PricePenaltyFactor). If both parameters - general and pool - are present, then the pool parameter takes precedence.
 
-Regions per pool
-Only use the pool endpoints is selected regions. This may be useful a pools endpoints are only operational in some regions, e.g. https://bitcointalk.org/index.php?topic=472510.msg51637436#msg51637436.
 
-E.g. To use only the MiningPoolHub ming endpoints in regions 'Asia' and 'US':
+Regions per pool
+
+Only use pool endpoints is selected regions. This may be useful when a pool has a problem with its endpoints in some regions, e.g. https://bitcointalk.org/index.php?topic=472510.msg51637436#msg51637436.
+
+E.g. To use MiningPoolHub mining endpoints in regions 'Asia' and 'US' ONLY:
 
     "MiningPoolHub": {
       "Region":  [
@@ -594,17 +618,6 @@ E.g. To use only the MiningPoolHub ming endpoints in regions 'Asia' and 'US':
     }
 Note: The values for 'Regions' must match the definitions in 'Regions.txt'.
 
-NiceHash internal wallet
-
-If you have a NiceHash internal wallet you can configure MPM/NiceHash Pool to mine to the internal address. MPM will then use the lower pool fee of 1% for calculations.
-To use the NiceHash internal wallet modify the NiceHash pool section (you may have to create is first). Enter your "<YOUR_NICEHASH_INTERNAL_WALLET>" (of course you need to insert the real BTC address), and set the flag '"IsInternalWallet":  true':
-
-    "NiceHash":  {
-      "Wallets":  {
-        "BTC":  "<YOUR_NICEHASH_INTERNAL_WALLET>"
-      },
-      "IsInternalWallet":  true
-    }
 
 ZergPool(Coins) Solo/Party mining
 
@@ -656,7 +669,7 @@ E.g. To exclude the Ethash3gb algorithm from any version of the AMD_NVIDIA-Claym
       },
     },
 
-E.g. To exclude the Ethash2gb or Blake2s algorithms from AMD_NVIDIA-ClaymoreEthash_v14.6 miner:
+E.g. To exclude the Ethash2gb or Blake2s algorithms from AMD_NVIDIA-ClaymoreEthash_v14.7 miner:
 
     "MinersLegacy": {
       "AMD_NVIDIA-ClaymoreEthash": {
@@ -672,7 +685,9 @@ E.g. To exclude the Ethash2gb or Blake2s algorithms from AMD_NVIDIA-ClaymoreEtha
 The algorithm name must be entered in the normalized form as returned by Get-Algorithm.
 If both, a version specific and generic config ("*") exist, then all matching algorithms are excluded.
 
-Disable miner developer fee per miner 
+
+Disable miner developer fee per miner
+
 Note: not all miners support turning off their built in fees, others will reduce the hashrate, check the miners web page for more information
 
 E.g. To disable the dev fee mining from any version of the AMD_NVIDIA-ClaymoreEthash miner:
@@ -685,7 +700,7 @@ E.g. To disable the dev fee mining from any version of the AMD_NVIDIA-ClaymoreEt
       },
     },
 
-E.g. To disable the dev fee mining from AMD_NVIDIA-ClaymoreEthash_v14.6 miner:
+E.g. To disable the dev fee mining from AMD_NVIDIA-ClaymoreEthash_v14.7 miner:
 
     "MinersLegacy": {
       "AMD_NVIDIA-ClaymoreEthash": {
@@ -697,7 +712,9 @@ E.g. To disable the dev fee mining from AMD_NVIDIA-ClaymoreEthash_v14.6 miner:
 "*" stands for ANY miner version.
 If this setting is defined in multiple places (version specific, version generic ("*") and global), then the most specific value is used.
 
+
 Persistent miner configuration
+
 Storing the miner configuration in the config file allows for easier version / miner file upgrades. There is no need to edit the miner files.
 
     "MinersLegacy": {
@@ -721,7 +738,7 @@ Storing the miner configuration in the config file allows for easier version / m
       }
     }
 
-The miner name must be entered without the ending version number (e.g. for AMD_NVIDIA-ClaymoreEthash_v14.6 remove _v14.6)
+The miner name must be entered without the ending version number (e.g. for AMD_NVIDIA-ClaymoreEthash_v14.7 remove _v14.6)
 The algorithm name must be entered in the normalized form as returned by Get-Algorithm.
 Note: All parameter values must be entered with a leading space (' ') character!
 
@@ -733,7 +750,9 @@ Parameters: These settings will be added to the miner command line for the selec
 CommonParameters: These settings will be added to the miner command line for ALL miner algorithms.
 Parameters and CommonParameters are cumulative.
 
+
 Add custom miner commands
+
 MPM stores all default miner commands (= what algos to mine) in the miner file. You can override these commands with your own by modifing the config file:
 
     "MinersLegacy": {
@@ -777,7 +796,7 @@ MPM stores all default miner commands (= what algos to mine) in the miner file. 
       }
     }
 
-The miner name must be entered without the ending version number (e.g. for AMD_NVIDIA-ClaymoreEthash_v14.6 remove _v14.6)
+The miner name must be entered without the ending version number (e.g. for AMD_NVIDIA-ClaymoreEthash_v14.7 remove _v14.6)
 The algorithm name must be entered in the normalized form as returned by Get-Algorithm.
 Commands must match the data structure as found in the exeisting miner files. Not all miners use the same parameters.
 
@@ -785,7 +804,9 @@ Commands must match the data structure as found in the exeisting miner files. No
 If both, specific (e.g. miner version / algorithm name) and generic config ("*") exist, then only the specific config is used. The generic config will be ignored entirely.
 Important: The miner commands defined in the config file override all 'out-of-the-box' commands that are defined in the miner definition file.
 
+
 Pre- / post miner program execution
+
 MPM can execute any program/script/batch file on any of these events:
 
 - before a miner gets started (PreStopCommand)
@@ -862,6 +883,7 @@ More info can be found here:
 https://github.com/nanopool/nanominer/issues/30
 https://github.com/develsoftware/GMinerRelease/issues/18
 
+
 Ignore pool and miner fees
 
 Beginning with version 3.1.0 MPM makes miner and pool fees part of the profitability calculation. This will lead to somewhat lower, but more accurate profit estimates.
@@ -874,6 +896,7 @@ To ignore miner and pool fees (as older versions did) add '"IgnoreFees":  true' 
       "IgnoreFees":  true,
       ...
     }
+
 
 PricePenaltyFactor
 
@@ -901,6 +924,7 @@ To show the miner windows add '"ShowMinerWindow":  true' to the general section:
       ...
     }
 Note: Showing the miner windows disables writing the miner output to log files. Miners of API type 'Wrapper' will remain hidden.
+
 
 Pool Balances
 
