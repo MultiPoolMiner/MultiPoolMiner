@@ -1,6 +1,6 @@
 ## Changelog Version 3.4.2
 
-#### Pool changes
+#### Miner changes
 - Updated NVIDIA-CcminerTrex_v0.12.1
 
 ## Changelog Version 3.4.1
