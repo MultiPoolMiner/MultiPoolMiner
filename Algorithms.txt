@@ -144,6 +144,7 @@
     "equihash1254":  "EquihashR12540",
     "equihashr1254":  "EquihashR12540",
     "equihash12540":  "EquihashR12540",
+    "equihashr12540":  "EquihashR12540",
     "equihash144":  "Equihash1445",
     "equihash1445":  "Equihash1445",
     "equihash150":  "EquihashR1505",
