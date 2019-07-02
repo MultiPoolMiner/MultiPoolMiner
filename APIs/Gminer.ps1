@@ -8,10 +8,10 @@ class Gminer : Miner {
         $Timeout = 5 #seconds
 
         $Request = "http://$($Server):$($this.Port)/stat"
-        $Data = ""
+        $Data = [PSCustomObject]@{}
 
         try {
-            if ($Global:PSVersionTable.PSVersion -ge [System.Version]("6.0.0")) {
+            if ($Global:PSVersionTable.PSVersion -ge [System.Version]("6.2.0")) {
                 $Data = Invoke-RestMethod $Request -TimeoutSec $Timeout -DisableKeepAlive -MaximumRetryCount 3 -RetryIntervalSec 1 -ErrorAction Stop
             }
             else {
@@ -31,7 +31,7 @@ class Gminer : Miner {
             if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) {
                 $this.SetStatus("Failed")
                 $this.StatusMessage = " was stopped because of too many bad shares for algorithm $($HashRate_Name) (total: $($Shares_Accepted + $Shares_Rejected) / bad: $($Shares_Rejected) [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
-                return @($Request, $Data)
+                return @($Request, $Data | ConvertTo-Json -Depth 10 -Compress)
             }
         }
 
@@ -47,6 +47,6 @@ class Gminer : Miner {
             }
         }
 
-        return @($Request, $Data | ConvertTo-Json -Compress)
+        return @($Request, $Data | ConvertTo-Json -Depth 10 -Compress)
     }
 }

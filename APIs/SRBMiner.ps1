@@ -43,12 +43,12 @@ class SRBMiner : Miner {
             }
             else {
                 $this.LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\$($this.Name)-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt")
-                $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList $this.GetCommandLineParameters() -LogPath $this.LogFile -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object {if ($_ -like "CPU#*") {-2} else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
+                $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList (($this.GetCommandLineParameters() -replace '\(', '`(') -replace '\)', '`)') -LogPath $this.LogFile -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object {if ($_ -like "CPU#*") {-2} else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
             }
 
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
                 for ($WaitForPID = 0; $WaitForPID -le 20; $WaitForPID++) {
-                    if ($this.ProcessId = (Get-CIMInstance CIM_Process | Where-Object {$_.ExecutablePath -eq $this.Path -and $_.CommandLine -like "*$($this.Path)*$($this.GetCommandLineParameters())*"}).ProcessId) {
+                    if ($this.ProcessId = (Get-CIMInstance CIM_Process | Where-Object {$_.ExecutablePath -eq $this.Path} | Where-Object {$_.CommandLine -like ("*$($this.Path)*$($this.GetCommandLineParameters())*")}).ProcessId) {
                         $this.Status = [MinerStatus]::Running
                         $this.BeginTime = (Get-Date).ToUniversalTime()
                         break
@@ -66,10 +66,10 @@ class SRBMiner : Miner {
         $Timeout = 5 #seconds
 
         $Request = "http://$($Server):$($this.Port)"
-        $Data = ""
+        $Data = [PSCustomObject]@{}
 
         try {
-            if ($Global:PSVersionTable.PSVersion -ge [System.Version]("6.0.0")) {
+            if ($Global:PSVersionTable.PSVersion -ge [System.Version]("6.2.0")) {
                 $Data = Invoke-RestMethod $Request -TimeoutSec $Timeout -DisableKeepAlive -MaximumRetryCount 3 -RetryIntervalSec 1 -ErrorAction Stop
             }
             else {
@@ -89,7 +89,7 @@ class SRBMiner : Miner {
             if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) {
                 $this.SetStatus("Failed")
                 $this.StatusMessage = " was stopped because of too many bad shares for algorithm $($HashRate_Name) (total: $($Shares_Accepted + $Shares_Rejected) / bad: $($Shares_Rejected) [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
-                return @($Request, $Data)
+                return @($Request, $Data | ConvertTo-Json -Depth 10 -Compress)
             }
         }
 
@@ -105,6 +105,6 @@ class SRBMiner : Miner {
             }
         }
 
-        return @($Request, $Data | ConvertTo-Json -Compress)
+        return @($Request, $Data | ConvertTo-Json -Depth 10 -Compress)
     }
 }
