@@ -79,7 +79,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 Port           = $Miner_Port
                 URI            = $Uri
                 Fees           = [PSCustomObject]@{$Algorithm_Norm = 2 / 100}
-                WarmupTime     = $WarmupTime
+                WarmupTime     = $WarmupTime #seconds
             }
         }
     }

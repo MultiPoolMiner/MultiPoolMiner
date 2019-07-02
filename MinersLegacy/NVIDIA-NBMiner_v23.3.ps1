@@ -124,6 +124,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 Port       = $Miner_Port
                 URI        = $Uri
                 Fees       = $Miner_Fees
+                WarmupTime = $WarmupTime #seconds
             }
         }
     }

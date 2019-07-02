@@ -118,7 +118,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 URI                = $Uri
                 Fees               = [PSCustomObject]@{$Algorithm_Norm = $Fee / 100}
                 IntervalMultiplier = $IntervalMultiplier
-                WarmupTime         = 45
+                WarmupTime         = 45 #seconds
             }
         }
     }
