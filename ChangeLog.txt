@@ -1,3 +1,15 @@
+## Changelog Version 3.4.3
+
+#### Core Changes
+- Background jobs are faster (using https://www.powershellgallery.com/packages/ThreadJob/2.0.1)
+- Fixed miner APIs to be compatible with PWSH 6.2.0
+- Fixed miner APIs; fixed crashing miners when miner windows are hidden (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2345#issuecomment-506898390)
+
+#### Miner Updates
+- Fixed AMD_CPU_NVIDIA-FireiceCryptonight_v2.10.5; PlatformThreadsConfigFile naming was invalid
+- Fixed AMD_NVIDIA-GminerEquihash_v1.47; EquihashR12540 is supported on AMD only
+- Updated CPU-Jayddee_v3.9.5; disabled Skein2, seems to be broken (https://github.com/JayDDee/cpuminer-opt/issues/194)
+
 ## Changelog Version 3.4.2
 
 #### Miner changes
