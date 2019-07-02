@@ -172,7 +172,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 URI                = $Uri
                 Fees               = $Miner_Fees
                 IntervalMultiplier = $IntervalMultiplier
-                WarmupTime         = $WarmupTime #seconds
+                WarmupTime         = $WarmupTime
             }
         }
     }

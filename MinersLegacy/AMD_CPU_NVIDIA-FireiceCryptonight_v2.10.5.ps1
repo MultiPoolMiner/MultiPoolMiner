@@ -166,7 +166,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 Port       = $Miner_Port
                 URI        = $Uri
                 Fees       = [PSCustomObject]@{$Algorithm_Norm = 2 / 100}
-                WarmupTime = $(if($Platform-eq "AMD") {120} else {$Config.WarmupTime}) #seconds
+                WarmupTime = $(if($Platform-eq "AMD") {120} else {$Config.WarmupTime})
             }
         }
     }

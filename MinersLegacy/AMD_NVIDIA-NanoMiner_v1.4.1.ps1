@@ -114,7 +114,7 @@ wallet = $($Pools.$Algorithm_Norm.User)"
                     Port       = $Miner_Port
                     URI        = $Uri
                     Fees       = [PSCustomObject]@{$Algorithm_Norm = $Fee / 100}
-                    WarmupTime = 60 #seconds
+                    WarmupTime = 60
                 }
             }
         }

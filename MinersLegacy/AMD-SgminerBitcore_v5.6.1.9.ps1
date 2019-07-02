@@ -61,7 +61,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             API        = "Xgminer"
             Port       = $Miner_Port
             URI        = $Uri
-            WarmupTime = 90 #seconds
+            WarmupTime = 90
         }
     }
 }
