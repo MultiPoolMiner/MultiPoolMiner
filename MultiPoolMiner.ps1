@@ -141,7 +141,7 @@ param(
 
 Clear-Host
 
-$Version = "3.4.2"
+$Version = "3.4.3"
 $VersionCompatibility = "3.3.0"
 $Strikes = 3
 $SyncWindow = 5 #minutes
@@ -153,6 +153,10 @@ Import-Module NetSecurity -ErrorAction Ignore
 Import-Module Defender -ErrorAction Ignore
 Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore
 Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1" -ErrorAction Ignore
+if (-not (Get-InstalledModule -Name "ThreadJob")) {
+    Install-Module ThreadJob -Scope CurrentUser -Force
+}
+Import-Module ThreadJob -ErrorAction Ignore
 
 $Algorithm = $Algorithm | ForEach-Object {@(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'}
 $ExcludeAlgorithm = $ExcludeAlgorithm | ForEach-Object {@(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'}
@@ -207,10 +211,6 @@ if (-not (Test-Path $ConfigFile -PathType Leaf -ErrorAction Ignore)) {
         $Config_Temp.CreateMinerInstancePerDeviceModel = $true
         Write-Log -Level Info -Message "For best profitability MPM will set 'CreateMinerInstancePerDeviceModel=true'. "
     }
-    if (-not $UseDeviceNameForStatsFileNaming) {
-        $Config_Temp.UseDeviceNameForStatsFileNaming = $true
-        Write-Log -Level Info -Message "For best compatibility MPM will set 'UseDeviceNameForStatsFileNaming=true'. "
-    }
     Write-Log -Level Info -Message "You can change settings directly in the config file - see the README for detailed instructions. "
     $Config_Temp | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile
 }
@@ -236,6 +236,7 @@ while (-not $API.Stop) {
 
     #Load the configuration
     $OldConfig = $Config | ConvertTo-Json -Depth 10 | ConvertFrom-Json
+    $Config_Parameters.JobName = "GetConfig"
     $Config = Get-ChildItemContent $ConfigFile -Parameters $Config_Parameters | Select-Object -ExpandProperty Content | Sort-Object
     if ($Config -isnot [PSCustomObject]) {
         Write-Log -Level Error "Config file ($ConfigFile) is not a valid configuration file (JSON structure is broken). Cannot continue. "
@@ -1304,20 +1305,18 @@ while (-not $API.Stop) {
                 break
             }
 
-            if (-not ($RunningMiners | Where-Object {$_.DeviceName -like "CPU#*"})) {
-                #Preload pool information only when not CPU mining, otherwise the background process takes ages
-                if ((-not $NewPools_Jobs) -and (Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and ((($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds) -le $($NewPools_JobsDurations | Measure-Object -Average).Average)) {
-                    Write-Log "Pre-loading pool information"
-                    $NewPools_Jobs = @(
-                        Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | ForEach-Object {
-                            $Pool_Name = $_.BaseName
-                            $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)"}
-                            $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
-                            Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded
-                        } | Select-Object
-                    )
-                    if ($API) {$API.NewPools_Jobs = $NewPools_Jobs} #Give API access to pool jobs information
-                }
+            #Preload pool information
+            if ((-not $NewPools_Jobs) -and (Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and ((($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds) -le $($NewPools_JobsDurations | Measure-Object -Average).Average)) {
+                Write-Log "Pre-loading pool information"
+                $NewPools_Jobs = @(
+                    Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | ForEach-Object {
+                        $Pool_Name = $_.BaseName
+                        $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)"}
+                        $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
+                        Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded
+                    } | Select-Object
+                )
+                if ($API) {$API.NewPools_Jobs = $NewPools_Jobs} #Give API access to pool jobs information
             }
         }
         $PollDuration = ($StatEnd - $PollStart).TotalSeconds / $Config.HashRateSamplesPerInterval
@@ -1412,23 +1411,6 @@ while (-not $API.Stop) {
                     $WatchdogTimer.Kicked = (Get-Date).ToUniversalTime()
                 }
             }
-        }
-    }
-    #Benchmarking: Stop all CPU miners (otherwise the loop might take ages)
-    if ($MinersNeedingBenchmark) {
-        $ActiveMiners | Where-Object {$_.GetStatus() -eq "Running"} | Where-Object {$_.DeviceName -like "CPU#*"} | Foreach-Object {
-            $Miner =  $_
-            #Pre miner failure exec
-            $Command = $ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PreStop"))
-            if ($Command) {Start-PrePostCommand -Command $Command -Event "PreStop"}
-            Write-Log "Stopping miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Miner.Pool | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))"}) -join "; ")}). "
-            $Miner.SetStatus("Idle")
-            $Miner.StatusMessage = " stopped gracefully"
-            #Post miner stop exec
-            $Command = $ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PostStop"))
-            if ($Command) {Start-PrePostCommand -Command $Command -Event "PostStop"}
-            $RunningMiners = @($RunningMiners | Where-Object {$_ -ne $Miner})
-            if ($API) {$API.RunningMiners = $RunningMiners}
         }
     }
     Write-Log "Starting next run. "
