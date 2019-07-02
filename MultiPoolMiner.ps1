@@ -141,7 +141,7 @@ param(
 
 Clear-Host
 
-$Version = "3.4.3"
+$Version = "3.4.4"
 $VersionCompatibility = "3.3.0"
 $Strikes = 3
 $SyncWindow = 5 #minutes
@@ -602,7 +602,7 @@ while (-not $API.Stop) {
                 Where-Object {$Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm.Count -eq 0 -or (Compare-Object @($Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm | Select-Object) @($_.HashRates.PSObject.Properties.Name -replace 'NiceHash'<#temp fix#> | Select-Object) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0} | 
                 ForEach-Object {if (-not $_.ShowMinerWindow) {$_ | Add-Member ShowMinerWindow $Config.ShowMinerWindow -Force}; $_} | #default ShowMinerWindow 
                 ForEach-Object {if (-not $_.IntervalMultiplier) {$_ | Add-Member IntervalMultiplier 1 -Force}; $_} | #default interval multiplier is 1
-                ForEach-Object {if ($_.WarmupTime -eq $null) {$_ | Add-Member WarmupTime $Config.WarmupTime -Force}; $_} #default WarmupTime is taken from config file
+                ForEach-Object {if (-not $_.WarmupTime) {$_ | Add-Member WarmupTime $Config.WarmupTime -Force}; $_} #default WarmupTime is taken from config file
         }
     )
     if ($API) {$API.AllMiners = $AllMiners} #Give API access to the AllMiners information
@@ -1087,17 +1087,24 @@ while (-not $API.Stop) {
     #Update CurrentEarning and CurrentProfit in API
     if ($API) {
         if ($RunningMiners -and $Rates.BTC.$FirstCurrency) {
-            if ($MiningEarning) {
-                $API.CurrentEarning = "Current Earning: $(($Rates.BTC | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {"$_ $(((($RunningMiners | Measure-Object -Sum -Property Earning).Sum) * $Rates.BTC.$_).ToString("N$((($Rates.BTC.$FirstCurrency).ToString().split('.') | Select-Object -Index 0).Length)"))"}) -join ' = ')"
-            }
-            else {$API.CurrentEarning = "Current Earning: N/A $(if ($MinersNeedingBenchmark -or $MinersNeedingPowerUsageMeasurement) {" (Benchmarking)"})"}
-            if ((-not $Config.IgnorePowerCost) -and $PowerPrice) {
-                if ($MiningProfit) {
-                    $API.CurrentProfit = "Current Profit: $(($Rates.BTC | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {"$_ $(((($RunningMiners | Measure-Object -Sum -Property Profit).Sum) * $Rates.BTC.$_).ToString("N$((($Rates.BTC.$FirstCurrency).ToString().split('.') | Select-Object -Index 0).Length)"))"}) -join ' = ')"
+            if ($MinersNeedingBenchmark.Count -eq 0 -and $MinersNeedingPowerUsageMeasurement.count -eq 0) {
+                if ($MiningEarning) {
+                    $API.CurrentEarning = "Current Earning: $(($Rates.BTC | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {"$_ $(((($RunningMiners | Measure-Object -Sum -Property Earning).Sum) * $Rates.BTC.$_).ToString("N$((($Rates.BTC.$FirstCurrency).ToString().split('.') | Select-Object -Index 0).Length)"))"}) -join ' = ')"
                 }
-                else {$API.CurrentProfit = "Current Profit: N/A $(if ($MinersNeedingBenchmark -or $MinersNeedingPowerUsageMeasurement) {" (Benchmarking)"})"}
+                if ($PowerPrice) {
+                    if ($Config.ShowPowerCost) {
+                        $API.MiningCost = "Current Power Cost: MiningCost"
+                    }
+                    if ($MiningProfit) {
+                        $API.CurrentProfit = "Current Profit: $(($Rates.BTC | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {"$_ $(((($RunningMiners | Measure-Object -Sum -Property Profit).Sum) * $Rates.BTC.$_).ToString("N$((($Rates.BTC.$FirstCurrency).ToString().split('.') | Select-Object -Index 0).Length)"))"}) -join ' = ')"
+                    }
+                }
+                else {$API.CurrentProfit = "N/A"}
+                $API.MiningCost = "/NA"
             }
-            else {$API.CurrentProfit = ""}
+            else {
+                {$API.CurrentEarning = "N/A (Benchmarking)"; $API.CurrentProfit = "N/A (Benchmarking)"}
+            }
         }
         else {$API.CurrentEarning = ""; $API.CurrentProfit = ""}
     }
@@ -1257,10 +1264,8 @@ while (-not $API.Stop) {
                 $Miner = $_
                 Write-Log -Level Error "Miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Pools.$_.Name)"}) -join "; ")})$(if ($Miner.StatusMessage) {$Miner.StatusMessage} else {" has failed"}). "
                 if ($Miner.New) {$Miner.Benchmarked--}
-
-                # Update API information
-                $API.RunningMiners = $RunningMiners = @($RunningMiners | Where-Object {$_ -ne $Miner})
-                $API.FailedMiners += $Miner
+                $RunningMiners = @($RunningMiners | Where-Object {$_ -ne $Miner})
+                $FailedMiners += $Miner
 
                 #Post miner failure exec
                 $Command = $ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PostFailure"))
