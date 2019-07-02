@@ -54,7 +54,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         if ($Algorithm -match "cuckaroo29|cuckaroo29s|cuckoo" -and ([System.Version]$PSVersionTable.BuildVersion -ge "10.0.0.0")) {$MinMemGB += 1}
 
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
-            if ($Miner_Device.Vendor -contains "NVIDIA Corporation" -or $Algorithm -notmatch "cuckatoo31|equihash96_5|equihash192_7|equihash210_9") {
+            if ($Miner_Device.Vendor -contains "NVIDIA Corporation" -or $Algorithm -notmatch "cuckatoo31|equihash96_5|equihash210_9|equihash125_4|equihash192_7") {
                 $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
 
                 #Get parameters for active miner devices
