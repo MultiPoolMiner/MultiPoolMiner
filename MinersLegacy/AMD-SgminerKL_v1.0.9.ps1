@@ -77,8 +77,8 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             URI                = $Uri
             Fees               = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
             Environment        = @("GPU_FORCE_64BIT_PTR=0")
-            WarmupTime         = 90
             IntervalMultiplier = $IntervalMultiplier
+            WarmupTime         = 90 #seconds
         }
     }
 }

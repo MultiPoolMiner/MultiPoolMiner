@@ -120,7 +120,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             URI                = $Uri
             Fees               = $Miner_Fees
             IntervalMultiplier = $IntervalMultiplier
-            WarmupTime         = $(if (@($Device | Where-Object {$_.Type -eq "CPU" -or ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge 2})) {30} else {60})
+            WarmupTime         = $(if (@($Device | Where-Object {$_.Type -eq "CPU" -or ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge 2})) {30} else {60}) #seconds
         }
     }
 }

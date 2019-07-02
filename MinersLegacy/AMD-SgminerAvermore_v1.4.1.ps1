@@ -71,7 +71,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             Fees               = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
             IntervalMultiplier = $IntervalMultiplier
             Environment        = @("GPU_FORCE_64BIT_PTR=0")
-            WarmupTime         = 90
+            WarmupTime         = 90 #seconds
         }
     }
 }
