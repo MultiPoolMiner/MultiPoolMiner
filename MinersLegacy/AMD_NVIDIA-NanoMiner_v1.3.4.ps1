@@ -36,12 +36,12 @@ else {
         [PSCustomObject]@{Algorithm = "Ethash3gb";               MinMemGB = 3; Fee = 1; Params = ""} #Ethash3GB
         [PSCustomObject]@{Algorithm = "Ethash";                  MinMemGB = 4; Fee = 1; Params = ""} #Ethash
         [PSCustomObject]@{Algorithm = "Ubqhash";                 MinMemGB = 4; Fee = 1; Params = ""} #Ubqhash
-        [PSCustomObject]@{Algorithm = "CryptoNightV5";           MinMemGB = 2; Fee = 1; Params = ""} #CryptoNightV5
-        [PSCustomObject]@{Algorithm = "CryptoNightV6";           MinMemGB = 2; Fee = 1; Params = ""} #CryptoNightV6
-        [PSCustomObject]@{Algorithm = "CryptoNightV7";           MinMemGB = 2; Fee = 1; Params = ""} #CryptoNightV7
-        [PSCustomObject]@{Algorithm = "CryptoNightV8";           MinMemGB = 2; Fee = 1; Params = ""} #CryptoNightV8
+        [PSCustomObject]@{Algorithm = "CryptoNightV5";           MinMemGB = 2; Fee = 1; Params = ""} #CryptonightV5
+        [PSCustomObject]@{Algorithm = "CryptoNightV6";           MinMemGB = 2; Fee = 1; Params = ""} #CryptonightV6
+        [PSCustomObject]@{Algorithm = "CryptoNightV7";           MinMemGB = 2; Fee = 1; Params = ""} #CryptonightV7
+        [PSCustomObject]@{Algorithm = "CryptoNightV8";           MinMemGB = 2; Fee = 1; Params = ""} #CryptonightV8
         [PSCustomObject]@{Algorithm = "CryptoNightReverseWaltz"; MinMemGB = 2; Fee = 1; Params = ""} #CryptonightRwzV8
-        [PSCustomObject]@{Algorithm = "Cuckaroo29"             ; MinMemGB = 4; Fee = 2; Params = ""} #Cuckaroo29
+        [PSCustomObject]@{Algorithm = "Cuckaroo29";              MinMemGB = 4; Fee = 2; Params = ""} #Cuckaroo29
     )
 }
 
