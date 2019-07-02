@@ -2,6 +2,7 @@
 
 #### Miner Changes
 - Updated AMD_NVIDIA-NanoMiner_v1.4.1
+- Updated NVIDIA-MiniZEquihash_v1.4o; support for EquihashR12540
 
 ## Changelog Version 3.4.3
 
