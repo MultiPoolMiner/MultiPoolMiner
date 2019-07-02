@@ -10,7 +10,7 @@ param(
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
 $HashSHA256 = ""
-$Uri = "https://github.com/nemosminer/ccminer-KlausT-8.21-mod-r18-src-fix/releases/download/8.21-r18-fix%2Blyra2v3/ccminer-8.21-yescrypt-algos+lyra2v3.7z"
+$Uri = "https://github.com/nemosminer/ccminer-KlausT-8.21-mod-r18-src-fix/releases/download/v3/ccminerKlausT.7z"
 $ManualUri = "https://github.com/nemosminer/ccminer-KlausT-8.21-mod-r18-src-fix"
 
 $Miner_Version = Get-MinerVersion $Name
@@ -43,6 +43,7 @@ else {
         "luffa"         = "" #Luffa
         "lyra2v2"       = "" #Lyra2RE2
         "lyra2v3"       = "" #Lyra2RE3
+        #"lyra2z330"    = " -i 10" #Lyra2z330 single gpu only, multicards rigs need work
         "neoscrypt"     = "" #NeoScrypt
         "penta"         = "" #Pentablake
         "s3"            = "" #S3
