@@ -629,7 +629,7 @@ function Get-ChildItemContent {
         [Switch]$Threaded = $false
     )
 
-    $Job = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -Name $Parameters.JobName -ArgumentList $Path, $Parameters -ScriptBlock {
+    $Job = Start-ThreadJob -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -Name $Parameters.JobName -ScriptBlock {
         param(
             [Parameter(Mandatory = $true)]
             [String]$Path, 
@@ -684,7 +684,7 @@ function Get-ChildItemContent {
                 }
             }
         }
-    }
+    } -ArgumentList $Path, $Parameters
 
     if ($Threaded) {$Job}
     else {$Job | Receive-Job -Wait -AutoRemoveJob}
