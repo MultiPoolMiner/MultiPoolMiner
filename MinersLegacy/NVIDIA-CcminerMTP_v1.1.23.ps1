@@ -38,7 +38,7 @@ else {
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = " --retry-pause="}
+else {$CommonParameters = ""}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
