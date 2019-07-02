@@ -5,7 +5,7 @@
 - Fixed dashboard banner information when benchmarking
 
 #### Miner Changes
-- Updated NVIDIA-NBMiner_v23.3; device enumeration was broken
+- Fixed NVIDIA-NBMiner_v23.3; device enumeration was broken
 - Updated AMD_NVIDIA-NanoMiner_v1.4.1
 - Updated CPU-Jayddee_v3.9.5.1; fixes Skein2 crash
 - Updated NVIDIA-MiniZEquihash_v1.4o; support for EquihashR12540
