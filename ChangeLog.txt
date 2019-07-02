@@ -1,10 +1,11 @@
-## Changelog Version 3.4.next
+## Changelog Version 3.4.4
 
 #### Core changes
 - Enabled default WarmupTime for all miners
 - Fixed dashboard banner information when benchmarking
 
 #### Miner Changes
+- Updated NVIDIA-NBMiner_v23.3; device enumeration was broken
 - Updated AMD_NVIDIA-NanoMiner_v1.4.1
 - Updated CPU-Jayddee_v3.9.5.1; fixes Skein2 crash
 - Updated NVIDIA-MiniZEquihash_v1.4o; support for EquihashR12540
@@ -38,13 +39,14 @@
 - Updated NVIDIA-CcminerKlausT_v8.21modR18.ps1; support for Lyra2z330
 
 #### Pool changes
+- Fixed MiningPoolHubCoins; pool did not return any pool objects
 - Removed Yiimp pool; closed since June 22nd 2019 (https://twitter.com/tpruvot)
 
 #### Changes in Algorithms.txt
 - Added EquihashR12540
 - Added "zelcash":  "EquihashR12540"
 - Changed "beam":  "EquihashR15050"
-- Renamed Equihash1505 to EquihashR15050
+- Renamed Equihash1550 to EquihashR1550
 
 ## Changelog Version 3.4.0
 
