@@ -41,8 +41,8 @@ if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonPar
 else {$CommonParameters = ""}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
-    $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 1
+    $Device = @($Devices | Where-Object Model -EQ $_.Model)
+    $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
         
     $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Algorithm = $_.Algorithm
