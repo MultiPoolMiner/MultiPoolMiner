@@ -73,55 +73,54 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     }
 
     $Commands | ForEach-Object {$Main_Algorithm_Norm = Get-Algorithm $_.MainAlgorithm; $_} | Where-Object {$Pools.$Main_Algorithm_Norm.Host} | ForEach-Object {
+        $Arguments_Primary = ""
+        $Arguments_Secondary = ""
         $Main_Algorithm = $_.MainAlgorithm
         $MinMemGB = $_.MinMemGB
         $Parameters = $_.Parameters
+        $Secondary_Algorithm = $_.SecondaryAlgorithm
+        $Secondary_Algorithm_Norm = Get-Algorithm $Secondary_Algorithm
         $TurboKernel = ""
-        $Arguments_Primary = ""
-        $Arguments_Secondary = ""
         
-        #define -coin parameter for bci or ubq
-        switch ($Main_Algorithm_Norm) {
-            "ProgPOW" {$Arguments_Primary = " -coin bci"}
-            "Ubqhash" {$Arguments_Primary = " -coin ubq"}
-        }
-        switch ($Pools.$Main_Algorithm_Norm.CoinName) {#Ethash coin to use for devfee to avoid switching DAGs
-            "Akroma"          {$Coin = " -coin akroma"}
-            "Atheios"         {$Coin = " -coin ath"} 
-            "Aura"            {$Coin = " -coin aura"}
-            "Bitcoin2Gen"     {$Coin = " -coin b2g"}
-            "BitcoinInterest" {$Coin = " -coin bci"}
-            "Callisto"        {$Coin = " -coin clo"}
-            "DubaiCoin"       {$Coin = " -coin dbix"}
-            "Ellaism"         {$Coin = " -coin ella"}
-            "Ether1"          {$Coin = " -coin etho"} 
-            "EtherCC"         {$Coin = " -coin etcc"} 
-            "EtherGem"        {$Coin = " -coin egem"}
-            "Ethersocial"     {$Coin = " -coin esn"}
-            "EtherZero"       {$Coin = " -coin etz"}
-            "Ethereum"        {$Coin = " -coin eth"}
-            "EthereumClassic" {$Coin = " -coin etc"}
-            "Expanse"         {$Coin = " -coin exp"}
-            "Genom"           {$Coin = " -coin gen"}
-            "HotelbyteCoin"   {$Coin = " -coin hbc"}
-            "Metaverse"       {$Coin = " -coin etp"}
-            "Mix"             {$Coin = " -coin mix"} 
-            "Moac"            {$Coin = " -coin moac"}
-            "Musicoin"        {$Coin = " -coin music"}
-            "Nekonium"        {$Coin = " -coin nuko"}
-            "Pegascoin"       {$Coin = " -coin pgc"}
-            "Pirl"            {$Coin = " -coin pirl"} 
-            "Reosc"           {$Coin = " -coin reosc"} 
-            "Ubiq"            {$Coin = " -coin ubq"}
-            "Victorium"       {$Coin = " -coin vic"}
-            "WhaleCoin"       {$Coin = " -coin whale"}
-            "Yocoin"          {$Coin = " -coin yoc"}
-            default           {$Coin = " -coin auto"}
-        }
-
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
-            $Secondary_Algorithm = $_.SecondaryAlgorithm
-            $Secondary_Algorithm_Norm = Get-Algorithm $Secondary_Algorithm
+            #define -coin parameter for bci or ubq
+            switch ($Main_Algorithm_Norm) {
+                "ProgPOW" {$Arguments_Primary = " -coin bci"}
+                "Ubqhash" {$Arguments_Primary = " -coin ubq"}
+            }
+            switch ($Pools.$Main_Algorithm_Norm.CoinName) {#Ethash coin to use for devfee to avoid switching DAGs
+                "Akroma"          {$Coin = " -coin akroma"}
+                "Atheios"         {$Coin = " -coin ath"} 
+                "Aura"            {$Coin = " -coin aura"}
+                "Bitcoin2Gen"     {$Coin = " -coin b2g"}
+                "BitcoinInterest" {$Coin = " -coin bci"}
+                "Callisto"        {$Coin = " -coin clo"}
+                "DubaiCoin"       {$Coin = " -coin dbix"}
+                "Ellaism"         {$Coin = " -coin ella"}
+                "Ether1"          {$Coin = " -coin etho"} 
+                "EtherCC"         {$Coin = " -coin etcc"} 
+                "EtherGem"        {$Coin = " -coin egem"}
+                "Ethersocial"     {$Coin = " -coin esn"}
+                "EtherZero"       {$Coin = " -coin etz"}
+                "Ethereum"        {$Coin = " -coin eth"}
+                "EthereumClassic" {$Coin = " -coin etc"}
+                "Expanse"         {$Coin = " -coin exp"}
+                "Genom"           {$Coin = " -coin gen"}
+                "HotelbyteCoin"   {$Coin = " -coin hbc"}
+                "Metaverse"       {$Coin = " -coin etp"}
+                "Mix"             {$Coin = " -coin mix"} 
+                "Moac"            {$Coin = " -coin moac"}
+                "Musicoin"        {$Coin = " -coin music"}
+                "Nekonium"        {$Coin = " -coin nuko"}
+                "Pegascoin"       {$Coin = " -coin pgc"}
+                "Pirl"            {$Coin = " -coin pirl"} 
+                "Reosc"           {$Coin = " -coin reosc"} 
+                "Ubiq"            {$Coin = " -coin ubq"}
+                "Victorium"       {$Coin = " -coin vic"}
+                "WhaleCoin"       {$Coin = " -coin whale"}
+                "Yocoin"          {$Coin = " -coin yoc"}
+                default           {$Coin = " -coin auto"}
+            }
 
             #Get parameters for active miner devices
             if ($Miner_Config.Parameters.$Algorithm_Norm) {
