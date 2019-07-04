@@ -14,6 +14,7 @@
 - Updated AMD-TeamRed_v0.5.3; support for MTP algorithm
 - Updated CPU-Jayddee_v3.9.5.2; fixes Skein2 crash
 - Updated NVIDIA-CcminerMTP_v1.1.23
+- Updated NVIDIA-CryptoDredge_v0.20.2
 - Updated NVIDIA-MiniZEquihash_v1.4o; support for EquihashR12540
 
 ## Changelog Version 3.4.3
