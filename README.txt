@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 30/06/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 07/07/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -245,10 +245,10 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
       Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or DOGE and LTC (Advanced configuration via config file required, see below)
       NLPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
-    ## PhiPhiPool / PhiPhiPoolCoins
-      WebSite: http://pool.hashrefinery.com
-      Payout in BTC (Bitcoin address must be provided using the '-Wallet' command) or any currency available in API (Advanced configuration via config file required, see below)
-      PhiPhiPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below)
+	## PhiPhiPoolCoins
+      WebSite: https://www.phi-phi-pool.com
+      Note: PhiPhiPool no longer offers auto-conversion to BTC and is no longer an auto-exchange pool. Do NOT mine with a BTC address.
+      A separate wallet address for each mined currency must be provided in config file (Advanced configuration via config file required, see below)
 
     ## Ravenminer 
       WebSite: https://ravenminer.com

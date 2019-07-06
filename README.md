@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 30/06/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 37/07/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -240,12 +240,11 @@ The following pools are currently supported (in alphabetical order); use commas 
 	  
 	  NLPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
-	- PhiPhiPool / PhiPhiPoolCoins http://pool.hashrefinery.com
+	- PhiPhiP§oolCoins https://www.phi-phi-pool.com/
 
-	  Payout in BTC (Bitcoin address must be provided using the '-Wallet' command) or any currency available in API (Advanced configuration via config file required, see below)
- 
-	  PhiPhiPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below)
-
+	  Note: PhiPhiPool no longer offers auto-conversion to BTC and is no longer an auto-exchange pool. Do NOT mine with a BTC address.
+      A separate wallet address for each mined currency must be provided in config file (Advanced configuration via config file required, see below)
+      
 	- Ravenminer https://ravenminer.com
 
 	  Payout in RVN (Ravencoin address must be provided using config.txt in Pools section use "Ravenminer" & RVN address)
