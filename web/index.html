@@ -81,7 +81,7 @@
             var currencies = Object.keys(rates[item.Currency]);
             var data = {name: item.Name, lastupdated: formatDate(item.LastUpdated), balances: {}};
             $.each(currencies, function(cindex, currency) {
-              data["balances"][currency] = item.Total * rates[item.Currency][currency];
+              data["balances"][currency] = (item.Total * rates[item.Currency][currency]).toFixed(10);
               if (!(data_total["balances"][currency])) {data_total["balances"][currency] = 0}
               data_total["balances"][currency] = data_total["balances"][currency] + item.Total * rates[item.Currency][currency];
             });
