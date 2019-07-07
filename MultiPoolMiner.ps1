@@ -479,17 +479,19 @@ while (-not $API.Stop) {
     }
 
     #Update the pool balances every n minute to minimize web requests or when currency or pool settings have changed; pools usually do not update the balances in real time
-    if ((Test-Path "Balances" -PathType Container -ErrorAction Ignore) -and (((Get-Date).ToUniversalTime().AddMinutes(-$Config.PoolBalancesUpdateInterval) -gt ($Balances.LastUpdated | Sort-Object | Select-Object -Last 1)) -or (Compare-Object @($Config.Currency | Select-Object) @($OldConfig.Currency | Select-Object)) -or (Compare-Object @($Config.ExcludePoolName | Select-Object) @($OldConfig.ExcludePoolName | Select-Object)) -or (Compare-Object @($Config.PoolName | Select-Object) @($OldConfig.PoolName | Select-Object)))) {
-        Write-Log "Loading balances information. "
-        $Balances_Jobs = @(
-            Get-ChildItem "Balances" -File | Where-Object {$Config.ShowAllPoolBalances -or ($BackupConfig.Pools.$($_.BaseName) -and @($BackupConfig.ExcludePoolName -replace "Coins") -inotcontains $_.BaseName)} | Where-Object {$Config.ShowAllPoolBalances -or ($BackupConfig.PoolName.Count -eq 0 -or @($BackupConfig.PoolName -replace "Coins") -contains $_.BaseName)} | ForEach-Object {
-                $Pool_Name = $_.BaseName
-                $Pool_Parameters = @{JobName = "Balance_$($_.BaseName)"}
-                $BackupConfig.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $BackupConfig.Pools.$Pool_Name.($_.Name)}
-                Get-ChildItemContent "Balances\$($_.Name)" -Parameters $Pool_Parameters -Threaded
-            } | Select-Object
-        )
-        if ($API) {$API.Balances_Jobs = $Balances_Jobs} #Give API access to balances jobs information
+    if (Test-Path "Balances" -PathType Container -ErrorAction Ignore) {
+        if ($BalancesRequest = @(Get-ChildItem "Balances" -File | Where-Object {$Config.ShowAllPoolBalances -or ($BackupConfig.Pools.$($_.BaseName) -and @($BackupConfig.ExcludePoolName -replace "Coins") -inotcontains $_.BaseName)} | Where-Object {$Config.ShowAllPoolBalances -or ($BackupConfig.PoolName.Count -eq 0 -or @($BackupConfig.PoolName -replace "Coins") -contains $_.BaseName)} | Where-Object {$PoolName = $_.BaseName; ($Balances | Where-Object {$_.Pool -eq $PoolName} | Sort-Object Pool -Unique | Sort-Object "LastUpdated").LastUpdated -lt (Get-Date).ToUniversalTime().AddMinutes(-$Config.PoolBalancesUpdateInterval)})) {
+            Write-Log "Loading balances information ($($BalancesRequest.BaseName -join '; ')). "
+            $Balances_Jobs = @(
+                $BalancesRequest | ForEach-Object {
+                    $Pool_Name = $_.BaseName
+                    $Pool_Parameters = @{JobName = "Balance_$($_.BaseName)"}
+                    $BackupConfig.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $BackupConfig.Pools.$Pool_Name.($_.Name)}
+                    Get-ChildItemContent "Balances\$($_.Name)" -Parameters $Pool_Parameters -Threaded
+                } | Select-Object
+            )
+            if ($API) {$API.Balances_Jobs = $Balances_Jobs} #Give API access to balances jobs information
+        }
     }
 
     #Retrieve collected pool data
@@ -610,7 +612,7 @@ while (-not $API.Stop) {
 
     #Retrieve collected balance data
     if ($Balances_Jobs) {
-        $Balances = @($Balances_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Content | Sort-Object Name)
+        $Balances = @(($Balances + @($Balances_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Content | Sort-Object Name)) | Sort-Object LastUpdated | Sort-Object "Name" -Unique | Where-Object Total -GT 0)
         $Balances_Jobs = $null
         if ($API) {$API.Balances_Jobs = $Balances_Jobs}
     }
