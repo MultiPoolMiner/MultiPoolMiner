@@ -18,7 +18,7 @@ $RetryCount = 3
 $RetryDelay = 2
 while (-not ($APIRequest) -and $RetryCount -gt 0) {
     try {
-        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "http://blockmasters.co/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        $APIRequest = Invoke-RestMethod "http://blockmasters.co/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
     }
     catch {
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
@@ -63,10 +63,5 @@ $Payout_Currencies | Foreach-Object {
     }
     catch {
         Write-Log -Level Warn "Pool Balance API ($Name) has failed. "
-    }
-
-    if (($APIRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
-        Write-Log -Level Warn "Pool Balance API ($Name) for $Payout_Currency returned nothing. "
-        return
     }
 }

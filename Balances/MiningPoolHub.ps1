@@ -34,11 +34,23 @@ if (($APIRequest.getuserallbalances.data | Get-Member -MemberType NoteProperty -
 }
 
 $APIRequest.getuserallbalances.data | Foreach-Object {
-
-    #Define currency
-    $Currency = $_.coin
-    try {
-        $Currency = Invoke-RestMethod "http://$($_.coin).miningpoolhub.com/index.php?page=api&action=getpoolinfo&api_key=$($API_Key)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop | Select-Object -ExpandProperty getpoolinfo | Select-Object -ExpandProperty data | Select-Object -ExpandProperty currency 
+    $Currency = ""
+    $RetryCount = 3
+    $RetryDelay = 2
+    while (-not ($Currency) -and $RetryCount -gt 0) {
+        try {
+            $Currency = Invoke-RestMethod "http://$($_.coin).miningpoolhub.com/index.php?page=api&action=getpoolinfo&api_key=$($API_Key)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop | Select-Object -ExpandProperty getpoolinfo | Select-Object -ExpandProperty data | Select-Object -ExpandProperty currency
+        }
+        catch {
+            Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
+        }
+        $RetryCount--
+    }
+    
+    if (-not $Currency) {
+        Write-Log -Level Warn "Cannot determine balance for currency ($(if ($_.coin) {$_.coin} else {"unknown"})) - cannot convert some balances to BTC or other currencies. "
+    }
+    else {
         [PSCustomObject]@{
         Name        = "$($Name) ($($Currency))"
             Pool        = $Name
@@ -48,8 +60,5 @@ $APIRequest.getuserallbalances.data | Foreach-Object {
             Total       = $_.confirmed + $_.unconfirmed + $_.ae_confirmed + $_.ae_unconfirmed + $_.exchange
             LastUpdated = (Get-Date).ToUniversalTime()
         }
-    }
-    catch {
-        Write-Log -Level Warn "Cannot determine balance for currency ($(if ($_.coin) {$_.coin} else {"unknown"})) - cannot convert some balances to BTC or other currencies. "
     }
 }

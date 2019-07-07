@@ -42,26 +42,32 @@ if ($Payout_Currencies) {
 
 $Payout_Currencies | Foreach-Object {
     $Payout_Currency = $_
-    try {
-        $APIRequest = Invoke-RestMethod "http://api.yiimp.eu/api/wallet?address=$($Wallets.$Payout_Currency)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-
-        if (($APIRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
-            Write-Log -Level Warn "Pool Balance API ($Name) for $Payout_Currency returned nothing. "
-            
+    $APIRequest = ""        
+    $RetryCount = 3
+    $RetryDelay = 2
+    while (-not ($APIRequest) -and $RetryCount -gt 0) {
+        try {
+            $APIRequest = Invoke-RestMethod "http://api.yiimp.eu/api/wallet?address=$($Wallets.$Payout_Currency)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
         }
-        else {
-            [PSCustomObject]@{
-                Name        = "$($Name) ($($APIRequest.currency))"
-                Pool        = $Name
-                Currency    = $APIRequest.currency
-                Balance     = $APIRequest.balance
-                Pending     = $APIRequest.unsold
-                Total       = $APIRequest.unpaid
-                LastUpdated = (Get-Date).ToUniversalTime()
-            }
+        catch {
+            Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
         }
+        $RetryCount--
     }
-    catch {
+
+    if (($APIRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
         Write-Log -Level Warn "Pool Balance API ($Name) for $Payout_Currency has failed. "
+        
+    }
+    else {
+        [PSCustomObject]@{
+            Name        = "$($Name) ($($APIRequest.currency))"
+            Pool        = $Name
+            Currency    = $APIRequest.currency
+            Balance     = $APIRequest.balance
+            Pending     = $APIRequest.unsold
+            Total       = $APIRequest.unpaid
+            LastUpdated = (Get-Date).ToUniversalTime()
+        }
     }
 }

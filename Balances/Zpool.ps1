@@ -18,7 +18,7 @@ $RetryCount = 3
 $RetryDelay = 2
 while (-not ($APIRequest) -and $RetryCount -gt 0) {
     try {
-        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "https://www.zpool.ca/api/currencies" -UseBasicParsing -Headers @{"Cache-Control" = "no-cache"} -TimeoutSec 3 -ErrorAction Stop}
+        $APIRequest = Invoke-RestMethod "https://www.zpool.ca/api/currencies" -UseBasicParsing -Headers @{"Cache-Control" = "no-cache"} -TimeoutSec 3 -ErrorAction Stop
     }
     catch {
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests

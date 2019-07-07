@@ -16,9 +16,9 @@ $RetryDelay = 2
 while (-not ($APIRequest) -and $RetryCount -gt 0) {
     try {
         #NH API does not total all of your balances for each algo up, so you have to do it with another call then total them manually.
-        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod "https://api.nicehash.com/api?method=stats.provider&addr=$($Wallets.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        $APIRequest = Invoke-RestMethod "https://api.nicehash.com/api?method=stats.provider&addr=$($Wallets.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
         $Sum = 0
-        $APIRequest.result.stats.balance | Foreach {$Sum += $_}
+        $APIRequest.result.stats.balance | ForEach-Object {$Sum += $_}
     }
     catch {
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
