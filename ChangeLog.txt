@@ -13,7 +13,7 @@
 - Fixed NVIDIA-Zjazz_v1.2; device selection was broken
 - Updated AMD_NVIDIA-Gminer_v1.50; removed 'Equihash' from its name 'cause it does non Equihash algos as well
 - Updated AMD_NVIDIA-NanoMiner_v1.4.1
-- Updated AMD-TeamRed_v0.5.4; support for  CryptonightHeavyHaven, CryptonightHeavyTube, CryptonightHeavy & MTP algorithm
+- Updated AMD-TeamRed_v0.5.5; support for Cuckatoo31, CryptonightHeavyHaven, CryptonightHeavyTube, CryptonightHeavy & MTP algorithm
 - Updated CPU-Jayddee_v3.9.5.2; fixes Skein2 crash
 - Updated NVIDIA-CcminerMTP_v1.1.23
 - Updated NVIDIA-CryptoDredge_v0.20.2
