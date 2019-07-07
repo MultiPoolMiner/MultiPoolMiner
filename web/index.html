@@ -50,6 +50,7 @@
   <div class="mb-2 card {{#if total}}text-white bg-primary {{else}}text-dark bg-light{{/if}}" style="min-width: {{#if total}}100%{{else}}200px{{/if}}";>
     <div class="card-header text-center">
       <h5>{{name}}</h5>
+      {{lastupdated}}
     </div>
     <div class="card-body text-center">
       <p class="card-text currencies">
@@ -78,7 +79,7 @@
         $.each(result, function(index, item) {
           if (!(footer.test(item.Name))) {
             var currencies = Object.keys(rates[item.Currency]);
-            var data = {name: item.Name, balances: {}};
+            var data = {name: item.Name, lastupdated: formatDate(item.LastUpdated), balances: {}};
             $.each(currencies, function(cindex, currency) {
               data["balances"][currency] = item.Total * rates[item.Currency][currency];
               if (!(data_total["balances"][currency])) {data_total["balances"][currency] = 0}
@@ -126,6 +127,11 @@
       }
     });
     return data;
+  }
+  
+  function formatDate(data) {
+    return timeSince(new Date(data));
+    return new Date(parseInt(data.replace(/\D/g,''))).toLocaleString();
   }
 </script>
 <!--#include file="/parts/foot.html" -->
