@@ -40,5 +40,5 @@ if (($APIRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Mea
     Balance     = $APIRequest.balance
     Pending     = $APIRequest.unsold
     Total       = $APIRequest.unpaid
-    Lastupdated = (Get-Date).ToUniversalTime()
+    LastUpdated = (Get-Date).ToUniversalTime()
 }
