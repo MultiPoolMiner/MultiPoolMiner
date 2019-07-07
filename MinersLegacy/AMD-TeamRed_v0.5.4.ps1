@@ -32,9 +32,6 @@ else {
         [PSCustomObject]@{Algorithm = "cnv8_trtl"; Fee = 2.5; MinMemGB = 2.0; Parameters = " --auto_tune=NONE"} #CryptonightTurtle, new in 0.4.3
         [PSCustomObject]@{Algorithm = "cnv8_rwz";  Fee = 2.5; MinMemGB = 2.0; Parameters = " --auto_tune=NONE"} #CryptonightRwzV8, new in 0.4.2
         [PSCustomObject]@{Algorithm = "cnv8_upx2"; Fee = 2.5; MinMemGB = 2.0; Parameters = " --auto_tune=NONE"} #CryptonightUpx2V8, new in 0.4.2
-        cn_heavy    (classic CN heavy)
-        cn_haven    (haven)
-        cn_saber    (bittube)        
         [PSCustomObject]@{Algorithm = "lyra2rev3"; Fee = 2.5; MinMemGB = 2.0; Parameters = ""} #Lyra2rev3, new in 0.3.9
         [PSCustomObject]@{Algorithm = "lyra2z";    Fee = 3;   MinMemGB = 2.0; Parameters = ""} #Lyra2Z, new in 0.3.5
         [PSCustomObject]@{Algorithm = "mtp";       Fee = 2.5; MinMemGB = 2.0; Parameters = ""} #MTP (Zcoin), new in 0.5.3
