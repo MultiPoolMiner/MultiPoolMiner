@@ -245,9 +245,9 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
       Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or DOGE and LTC (Advanced configuration via config file required, see below)
       NLPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via Config.txt required, see below)
 
-	## PhiPhiPoolCoins
+	## PhiPhiPool
       WebSite: https://www.phi-phi-pool.com
-      Note: PhiPhiPool no longer offers auto-conversion to BTC and is no longer an auto-exchange pool. Do NOT mine with a BTC address.
+      Note: PhiPhiPool no longer offers auto-conversion to BTC. Do NOT mine with a BTC address.
       A separate wallet address for each mined currency must be provided in config file (Advanced configuration via config file required, see below)
 
     ## Ravenminer 
