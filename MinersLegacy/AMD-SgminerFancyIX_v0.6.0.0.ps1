@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -6,12 +6,11 @@ param(
     [PSCustomObject]$Config,
     [PSCustomObject[]]$Devices
 )
-
+ 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\sgminer.exe"
-$HashSHA256 = "F20223113CF9A2A65ED3C787006FD09CC750243682537C86BACB5BDC563B6DDF"
-$Uri = "https://github.com/LIMXTEC/Xevan-GPU-Miner/releases/download/1/sgminer-xevan-5.5.0-nicehash-1-windows-amd64.zip"
-$ManualUri = "https://github.com/LIMXTEC/Xevan-GPU-Miner"
+$Uri = "https://github.com/fancyIX/sgminer-phi2-branch/releases/download/5.6.1.3.b6/sgminer-phi2-fancyIX-win64-0.6.0.0.zip"
+$ManualUri = "https://github.com/fancyIX/sgminer-phi2-branch"
 
 $Miner_Version = Get-MinerVersion $Name
 $Miner_BaseName = Get-MinerBaseName $Name
@@ -22,7 +21,15 @@ if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*
 if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject]@{
-        "xevan-mod" = " --intensity 15" #Xevan
+        "allium"      = " --gpu-threads 1 --worksize 256 -I 20"
+        "argon2d-dyn" = " --gpu-threads 2 --worksize 64"
+        "lyra2v3"     = " --gpu-threads 1 --worksize 256 -I 24"
+        "lyra2z"      = " --gpu-threads 1 --worksize 256 -I 22"
+        "lyra2zz"     = " --gpu-threads 1 --worksize 256 -I 22"
+        "mtp"         = " -I 18"
+        "phi2"        = " --gpu-threads 1 --worksize 256 -I 22"
+        "x22i"        = " --gpu-threads 2 --worksize 256 -I 22"
+        "x25x"        = " --gpu-threads 1 --worksize 256 -I 22"
     }
 }
 
@@ -50,19 +57,19 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         }
 
         [PSCustomObject]@{
-            Name        = $Miner_Name
-            BaseName    = $Miner_BaseName
-            Version     = $Miner_Version
-            DeviceName  = $Miner_Device.Name
-            Path        = $Path
-            HashSHA256  = $HashSHA256
-            Arguments   = ("--kernel $_ --api-listen --api-port $Miner_Port --url $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$Parameters$CommonParameters --gpu-platform $($Miner_Device.PlatformId | Sort-Object -Unique) --device $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
-            HashRates   = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
-            API         = "Xgminer"
-            Port        = $Miner_Port
-            URI         = $Uri
-            Environment = @("GPU_FORCE_64BIT_PTR=0")
-            WarmupTime  = 90 #seconds
+            Name               = $Miner_Name
+            BaseName           = $Miner_BaseName
+            Version            = $Miner_Version
+            DeviceName         = $Miner_Device.Name
+            Path               = $Path
+            HashSHA256         = $HashSHA256
+            Arguments          = ("--kernel $_ --api-listen --api-port $Miner_Port --url $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$Parameters$CommonParameters --gpu-platform $($Miner_Device.PlatformId | Sort-Object -Unique) --device $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
+            HashRates          = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
+            API                = "Xgminer"
+            Port               = $Miner_Port
+            URI                = $Uri
+            Environment        = @("GPU_FORCE_64BIT_PTR=0")
+            WarmupTime         = 90 #seconds
         }
     }
 }
