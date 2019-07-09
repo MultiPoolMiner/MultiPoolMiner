@@ -141,7 +141,7 @@ param(
 
 Clear-Host
 
-$Version = "3.4.4"
+$Version = "3.4.5"
 $VersionCompatibility = "3.3.0"
 $Strikes = 3
 $SyncWindow = 5 #minutes
@@ -426,16 +426,18 @@ while (-not $API.Stop) {
 
     #Load information about the pools
     if ((Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and (-not $NewPools_Jobs)) {
-        Write-Log "Loading pool information - this may take a minute or two. "
-        $NewPools_Jobs = @(
-            Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | ForEach-Object {
-                $Pool_Name = $_.BaseName
-                $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)"}
-                $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
-                Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded
-            } | Select-Object
-        )        
-        if ($API) {$API.NewPools_Jobs = $NewPools_Jobs} #Give API access to pool jobs information
+        if ($PoolsRequest = @(Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | Sort-Object BaseName)) {
+            Write-Log "Loading pool information ($($PoolsRequest.BaseName -join '; ')) - this may take a minute or two. "
+            $NewPools_Jobs = @(
+                $PoolsRequest | ForEach-Object {
+                    $Pool_Name = $_.BaseName
+                    $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)"}
+                    $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
+                    Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded
+                } | Select-Object
+            )        
+            if ($API) {$API.NewPools_Jobs = $NewPools_Jobs} #Give API access to pool jobs information
+        }
     }
 
     #Power cost preparations
@@ -1314,16 +1316,18 @@ while (-not $API.Stop) {
 
             #Preload pool information
             if ((-not $NewPools_Jobs) -and (Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and ((($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds) -le $($NewPools_JobsDurations | Measure-Object -Average).Average)) {
-                Write-Log "Pre-loading pool information"
-                $NewPools_Jobs = @(
-                    Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | ForEach-Object {
-                        $Pool_Name = $_.BaseName
-                        $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)"}
-                        $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
-                        Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded
-                    } | Select-Object
-                )
-                if ($API) {$API.NewPools_Jobs = $NewPools_Jobs} #Give API access to pool jobs information
+                if ($PoolsRequest = @(Get-ChildItem "Pools" -File | Where-Object {$Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName} | Where-Object {$Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName} | Sort-Object BaseName)) {
+                    Write-Log "Loading pool information ($($PoolsRequest.BaseName -join '; ')) - this may take a minute or two. "
+                    $NewPools_Jobs = @(
+                        $PoolsRequest | ForEach-Object {
+                            $Pool_Name = $_.BaseName
+                            $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)"}
+                            $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name)}
+                            Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded
+                        } | Select-Object
+                    )        
+                    if ($API) {$API.NewPools_Jobs = $NewPools_Jobs} #Give API access to pool jobs information
+                }
             }
         }
         $PollDuration = ($StatEnd - $PollStart).TotalSeconds / $Config.HashRateSamplesPerInterval
