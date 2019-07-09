@@ -19,7 +19,7 @@ $RetryDelay = 2
 while (-not ($APIStatusRequest -and $APICurrenciesRequest) -and $RetryCount -gt 0) {
     try {
         if (-not $APIStatusRequest) {$APIStatusRequest = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
-        if (-not $APICurrenciesRequest) {$APICurrenciesRequest  = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APICurrenciesRequest) {Start-Sleep 10 <#Temp fix: workaround for Zpool(Coins) anti-DDoS protect (pool allows only 6 API calls per minute)#>; $APICurrenciesRequest = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
     }
     catch {
         Start-Sleep -Seconds $RetryDelay
