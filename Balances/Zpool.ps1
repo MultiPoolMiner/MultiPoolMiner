@@ -15,7 +15,7 @@ if (-not $Wallets) {
 $Payout_Currencies = @("BTC", "LTC", "DASH")
 
 $RetryCount = 3
-$RetryDelay = 2
+$RetryDelay = 11
 while (-not ($APIRequest) -and $RetryCount -gt 0) {
     try {
         $APIRequest = Invoke-RestMethod "https://www.zpool.ca/api/currencies" -UseBasicParsing -Headers @{"Cache-Control" = "no-cache"} -TimeoutSec 3 -ErrorAction Stop
