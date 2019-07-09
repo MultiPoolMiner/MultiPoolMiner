@@ -42,7 +42,7 @@ if (($APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ig
     return
 }
 
-$Payout_Currencies = ($Payout_Currencies + @($APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object {$Config.Pools.$Name.Wallets.$_ | Sort-Object -Unique
+$Payout_Currencies = ($Payout_Currencies + @($APICurrenciesRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object {$Config.Pools.$Name.Wallets.$_} | Sort-Object -Unique
 if (-not $Payout_Currencies) {
     Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
     return
