@@ -401,8 +401,14 @@ while (-not $API.Stop) {
 
     if (Test-Path "APIs" -PathType Container -ErrorAction Ignore) {Get-ChildItem "APIs" -File | ForEach-Object {. $_.FullName}}
     #Load information about the devices
-    if ($API -and -not $API.AllDevices) {$API.AllDevices = Get-Device -Config $Config -refresh}
-    $Devices = @(Get-Device -Name @($Config.DeviceName) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) -Refresh:([Boolean]((Compare-Object @($Config.DeviceName | Select-Object) @($OldConfig.DeviceName | Select-Object)) -or (Compare-Object @($Config.ExcludeDeviceName | Select-Object) @($OldConfig.ExcludeDeviceName | Select-Object)))) -Config $Config | Select-Object)
+    if ($API -and -not $API.AllDevices) {
+        $API.AllDevices = Get-Device -Config $Config -Refresh:$true
+        #Need to refresh again to use only configured devices
+        $Devices = @(Get-Device -Name @($Config.DeviceName) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) -Refresh:$true)
+    }
+    else {
+        $Devices = @(Get-Device -Name @($Config.DeviceName) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) -Refresh:([Boolean]((Compare-Object @($Config.DeviceName | Select-Object) @($OldConfig.DeviceName | Select-Object)) -or (Compare-Object @($Config.ExcludeDeviceName | Select-Object) @($OldConfig.ExcludeDeviceName | Select-Object)))) -Config $Config | Select-Object)
+    }
     if ($API) {
         #Give API access to the device information
         $API.Devices = $Devices
@@ -488,7 +494,7 @@ while (-not $API.Stop) {
                 $BalancesRequest | ForEach-Object {
                     $Pool_Name = $_.BaseName
                     $Pool_Parameters = @{JobName = "Balance_$($_.BaseName)"}
-                    $BackupConfig.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $BackupConfig.Pools.$Pool_Name.($_.Name)}
+                    $BackupConfig.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object {$Pool_Parameters.($_.Name) = $BackupConfig.Pools.$Pool_Name.($_.Name)} # Use BackupConfig to get around dev mining
                     Get-ChildItemContent "Balances\$($_.Name)" -Parameters $Pool_Parameters -Threaded
                 } | Select-Object
             )
