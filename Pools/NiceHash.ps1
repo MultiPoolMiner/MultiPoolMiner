@@ -9,9 +9,15 @@ $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty Ba
 
 #Pool currenctly allows payout in BTC only
 $Payout_Currencies = @("BTC") | Where-Object {$Config.Pools.$Name.Wallets.$_}
+if (-not $Payout_Currencies) {
+    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+    return
+}
 
-$PoolRegions = "eu", "usa", "hk", "jp", "in", "br"
-$PoolAPIUri = "http://api.nicehash.com/api?method=simplemultialgo.info"
+$PoolRegions = "eu", "jp", "us"
+$PoolHost = "-new.nicehash.com"
+$PoolAPIUri =  "https://api2.nicehash.com/main/api/v2/public/simplemultialgo/info/"
+$PoolAPIAlgodetailsUri = "https://api2.nicehash.com/main/api/v2/mining/algorithms/"
 
 if (-not $Payout_Currencies) {
     Write-Log -Level Verbose "No wallet address for Pool ($Name) specified. Cannot mine on pool. "
@@ -20,9 +26,10 @@ if (-not $Payout_Currencies) {
 
 $RetryCount = 3
 $RetryDelay = 2
-while (-not ($APIRequest) -and $RetryCount -gt 0) {
+while (-not ($APIResponse) -and $RetryCount -gt 0) {
     try {
-        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APIResponse) {$APIResponse = Invoke-RestMethod $PoolAPIUri -TimeoutSec 3 -UseBasicParsing -Headers @{"Cache-Control" = "no-cache"}}
+        if (-not $APIResponseAlgoDetails) {$APIResponseAlgoDetails = Invoke-RestMethod $PoolAPIAlgodetailsUri -TimeoutSec 3 -UseBasicParsing -Headers @{"Cache-Control" = "no-cache"}}
     }
     catch {
         Start-Sleep -Seconds $RetryDelay
@@ -30,23 +37,31 @@ while (-not ($APIRequest) -and $RetryCount -gt 0) {
     }
 }
 
-if (-not $APIRequest) {
+if (-not $APIResponse) {
+    Write-Log -Level Warn "Pool API ($Name) has failed. "
+    return
+}
+if (-not $APIResponseAlgoDetails) {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
     return
 }
 
-if ($APIRequest.result.simplemultialgo.count -le 1) {
+if ($APIResponse.miningAlgorithms.count -le 1) {
+    Write-Log -Level Warn "Pool API ($Name) returned nothing. "
+    return
+}
+if ($APIResponseAlgoDetails.miningAlgorithms.count -le 1) {
     Write-Log -Level Warn "Pool API ($Name) returned nothing. "
     return
 }
 
 if ($Config.Pools.$Name.IsInternalWallet) {$Fee = 0.01} else {$Fee = 0.03}
 
-$APIRequest.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos paying 0 fail stratum #> | ForEach-Object {
+$APIResponse.miningAlgorithms | ForEach-Object {$Algorithm = $_.Algorithm; $_ | Add-Member -force @{algodetails = $APIResponseAlgoDetails.miningAlgorithms | Where-Object {$_.Algorithm -eq $Algorithm}}}
+$APIResponse.miningAlgorithms | Where-Object {$_.paying -gt 0} <# algos paying 0 fail stratum #> | ForEach-Object {
 
-    $PoolHost = "nicehash.com"
-    $Port = $_.port
-    $Algorithm = $_.name
+    $Port = $_.algodetails.port
+    $Algorithm = $_.algorithm.ToLower()
     $Algorithm_Norm = Get-Algorithm $Algorithm
     $CoinName = ""
     
@@ -54,7 +69,7 @@ $APIRequest.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos pay
     if ($Algorithm_Norm -eq "Mtp")    {$Algorithm_Norm = "MtpNiceHash"} #temp fix
     if ($Algorithm_Norm -eq "Sia")    {$Algorithm_Norm = "SiaNiceHash"} #temp fix
 
-    $Divisor = 1000000000
+    $Divisor = 100000000
 
     $Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
@@ -70,7 +85,7 @@ $APIRequest.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos pay
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = "$Algorithm.$Region.$PoolHost"
+                Host          = "$Algorithm.$Region$PoolHost"
                 Port          = $Port
                 User          = "$($Config.Pools.$Name.Wallets.$_).$($Config.Pools.$Name.Worker)"
                 Pass          = "x"
@@ -80,24 +95,22 @@ $APIRequest.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos pay
                 Fee           = $Fee
                 PayoutScheme  = "PPLNS"
             }
-            if ($Algorithm_Norm -match "Cryptonight*|Equihash.*") {
-                [PSCustomObject]@{
-                    Algorithm     = $Algorithm_Norm
-                    CoinName      = $CoinName
-                    Price         = $Stat.Live
-                    StablePrice   = $Stat.Week
-                    MarginOfError = $Stat.Week_Fluctuation
-                    Protocol      = "stratum+ssl"
-                    Host          = "$Algorithm.$Region.$PoolHost"
-                    Port          = $Port + 30000
-                    User          = "$($Config.Pools.$Name.Wallets.$_).$($Config.Pools.$Name.Worker)"
-                    Pass          = "x"
-                    Region        = $Region_Norm
-                    SSL           = $true
-                    Updated       = $Stat.Updated
-                    Fee           = $Fee
-                    PayoutScheme  = "PPLNS"
-                }
+            [PSCustomObject]@{
+                Algorithm     = $Algorithm_Norm
+                CoinName      = $CoinName
+                Price         = $Stat.Live
+                StablePrice   = $Stat.Week
+                MarginOfError = $Stat.Week_Fluctuation
+                Protocol      = "stratum+ssl"
+                Host          = "$Algorithm.$Region$PoolHost"
+                Port          = $Port
+                User          = "$($Config.Pools.$Name.Wallets.$_).$($Config.Pools.$Name.Worker)"
+                Pass          = "x"
+                Region        = $Region_Norm
+                SSL           = $true
+                Updated       = $Stat.Updated
+                Fee           = $Fee
+                PayoutScheme  = "PPLNS"
             }
         }
     }
