@@ -7,6 +7,7 @@
 - Added AMD-SgminerFancyIX_v0.6.0.0; support for Allium, Argon2Ddyn, Lyra2v3, Lyra2z, Lyra2zz, MTP, Phi2, X22i & X25x
 - Added NVIDIA-CcminerBMW512.ps1; support for BMW512
 - Fixed AMD_NVIDIA-PhoenixminerEthash_v4.2c, does not work with AMD driver versions 2841.5, 2841.19 or 2906.8
+- Fixed AMD-TeamRed_v0.5.5; enabled detection of failed GPUs
 - Fixed NVIDIA-CcminerMTP_v1.1.23; requires CUDA 10.1.00 or higher
 - Updated AMD_CPU_NVIDIA-NanoMiner_v1.5.0; support for Cuckarood29 and RandomHash (CPU only)
 - Updated AMD_NVIDIA-lolMiner_v0.84; removed 'Equihash' from its name 'cause it does non Equihash algos as well
@@ -15,9 +16,11 @@
 #### Pool changes
 - Fixed BlockMasters; did not return any objects
 - Implement workaround for Zpool(Coins) anti-DDoS protect (pool allows only 6 API calls per minute)
+- Nicehash: Use API v2 (new Nicehash)
 
 #### Balances changes
 - Implement workaround for Zpool(Coins) anti-DDoS protect (pool allows only 6 API calls per minute)
+- Nicehash: Request API v1 & v2 (new Nicehash) and sum up the values
 
 ## Changelog Version 3.4.4
 
