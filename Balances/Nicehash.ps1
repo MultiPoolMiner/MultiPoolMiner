@@ -6,19 +6,23 @@ param(
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-if (-not $Wallets.BTC) {
+# Guaranteed payout currencies
+$Payout_Currencies = @("BTC") | Where-Object {$Wallets.$_}
+if (-not $Payout_Currencies) {
     Write-Log -Level Verbose "Cannot get balance on pool ($Name) - no wallet address specified. "
     return
 }
 
+$APIUri   = "https://api.nicehash.com/api?method=stats.provider&addr=$($Wallets.BTC)"
+$APIv2Uri = "https://api2.nicehash.com/main/api/v2/mining/external/$($Wallets.BTC)/rigs/"
+$Sum = 0
+
 $RetryCount = 3
 $RetryDelay = 2
-while (-not ($APIRequest) -and $RetryCount -gt 0) {
+while (-not ($APIResponse -and $APIv2Response) -and $RetryCount -gt 0) {
     try {
-        #NH API does not total all of your balances for each algo up, so you have to do it with another call then total them manually.
-        $APIRequest = Invoke-RestMethod "https://api.nicehash.com/api?method=stats.provider&addr=$($Wallets.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
-        $Sum = 0
-        $APIRequest.result.stats.balance | ForEach-Object {$Sum += $_}
+        if (-not $APIResponse)   {$APIResponse = Invoke-RestMethod $APIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APIv2Response) {$APIv2Response = Invoke-RestMethod $APIv2Uri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
     }
     catch {
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
@@ -26,21 +30,37 @@ while (-not ($APIRequest) -and $RetryCount -gt 0) {
     $RetryCount--
 }
 
-if (-not $APIRequest) {
-    Write-Log -Level Warn "Pool Balance API ($Name) has failed. "
-    return
+if (-not $APIResponse) {
+    Write-Log -Level Warn "Pool Balance API v1 ($Name) has failed. "
+}
+elseif (($APIResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
+    Write-Log -Level Warn "Pool Balance API v1 ($Name) returned nothing. "
+}
+else {
+    #NH API (v1) does not total all of your balances for each algo up, so you have to do it with another call then total them manually.
+    $APIResponse.result.stats.balance | ForEach-Object {$Sum += $_}
 }
 
-if (($APIRequest | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
-    Write-Log -Level Warn "Pool Balance API ($Name) returned nothing. "
-    return
+if (-not $APIv2Response) {
+    Write-Log -Level Warn "Pool Balance API v2 ($Name) has failed. "
 }
-[PSCustomObject]@{
-    Name        = "$($Name) (BTC)"
-    Pool        = $Name
-    Currency    = "BTC"
-    Balance     = $Sum
-    Pending     = 0 # Pending is always 0 since NiceHash doesn't report unconfirmed or unexchanged profits like other pools do
-    Total       = $Sum
-    LastUpdated = (Get-Date).ToUniversalTime()
+elseif (($APIv2Response | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
+    Write-Log -Level Warn "Pool Balance API v2 ($Name) returned nothing. "
+}
+else {
+    #Add balance of API v2
+    $Sum += $APIv2Response.unpaidAmount
+}
+
+if ($Sum) {
+    [PSCustomObject]@{
+        Name        = "$($Name) (BTC)"
+        Pool        = $Name
+        Currency    = "BTC"
+        Balance     = $Sum
+        Pending     = 0 # Pending is always 0 since NiceHash doesn't report unconfirmed or unexchanged profits like other pools do
+        Total       = $Sum
+        LastUpdated = (Get-Date).ToUniversalTime()
+        #NextPayout  = [datetime]$APIv2Response.NextPayoutTimestamp
+    }
 }
