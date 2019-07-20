@@ -17,9 +17,9 @@ $PoolRegions = "europe", "us-east", "asia"
 
 $RetryCount = 3
 $RetryDelay = 2
-while (-not ($APIRequest.return) -and $RetryCount -gt 0) {
+while (-not ($APIResponse.return) -and $RetryCount -gt 0) {
     try {
-        if (-not $APIRequest.return) {$APIRequest = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APIResponse.return) {$APIResponse = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
     }
     catch {
         Start-Sleep -Seconds $RetryDelay
@@ -27,17 +27,17 @@ while (-not ($APIRequest.return) -and $RetryCount -gt 0) {
     }
 }
 
-if (-not $APIRequest) {
+if (-not $APIResponse) {
     Write-Log -Level Warn "Pool API ($Name) has failed. "
     return
 }
 
-if ($APIRequest.return.count -le 1) {
+if ($APIResponse.return.count -le 1) {
     Write-Log -Level Warn "Pool API ($Name) returned nothing. "
     return
 }
 
-$APIRequest.return | ForEach-Object {
+$APIResponse.return | ForEach-Object {
 
     $CoinName       = $_.coin_name
     $_.algo -split "-" | ForEach-Object {$CoinName = $CoinName -replace "-$($_)", ""}
