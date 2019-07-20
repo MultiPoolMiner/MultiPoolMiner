@@ -89,6 +89,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $IntervalMultiplier = $_.IntervalMultiplier
         $Fee = $_.Fee
         $Parameters = $_.Parameters
+        if ($Algorithm -like "x*") {$WarmupTime = 30} else {$WarmupTime = 60} #seconds
 
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
             $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
@@ -118,7 +119,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 URI                = $Uri
                 Fees               = [PSCustomObject]@{$Algorithm_Norm = $Fee / 100}
                 IntervalMultiplier = $IntervalMultiplier
-                WarmupTime         = 45 #seconds
+                WarmupTime         = $WarmupTime
             }
         }
     }
