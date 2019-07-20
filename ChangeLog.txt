@@ -1,26 +1,41 @@
 ## Changelog Version 3.4.5
 ## Core changes
+- Added config parameter '-DisableEstimateCorrection'; reduce the algo price by a correction factor (actual_last24h / estimate_last24h) to counter pool overestimated prices
+- Changed funtion Get-EquihasPers to Get-AlgoCoinPers & EquihashPers.txt to AlgoCoinPers.txt
 - List pool names being queried for pricing information
-- Use only configured devices when API becomes available 
+- Use only configured devices when API becomes available
+- Workround when module 'ThreadJob' cannot be loaded: use normal 'Start-Job'
 
 #### Miner changes
 - Added AMD-SgminerFancyIX_v0.6.0.0; support for Allium, Argon2Ddyn, Lyra2v3, Lyra2z, Lyra2zz, MTP, Phi2, X22i & X25x
 - Added NVIDIA-CcminerBMW512.ps1; support for BMW512
+- Fixed AMD-SgminerFancyIX_v0.6.0.0; algorithm Argon2d was broken
 - Fixed AMD_NVIDIA-PhoenixminerEthash_v4.2c, does not work with AMD driver versions 2841.5, 2841.19 or 2906.8
 - Fixed AMD-TeamRed_v0.5.5; enabled detection of failed GPUs
 - Fixed NVIDIA-CcminerMTP_v1.1.23; requires CUDA 10.1.00 or higher
-- Updated AMD_CPU_NVIDIA-NanoMiner_v1.5.0; support for Cuckarood29 and RandomHash (CPU only)
-- Updated AMD_NVIDIA-lolMiner_v0.84; removed 'Equihash' from its name 'cause it does non Equihash algos as well
+- Fixed WarmupTime for Sgminer*; allow up to 90 seconds to build binaries
+- Updated AMD_CPU_NVIDIA-NanoMiner_v1.5.2; support for Cuckarood29 and RandomHash (CPU only), added Ethash binaries for AMD Radeon RX 5700 and AMD Radeon RX 5700 XT cards
+- Updated AMD_NVIDIA-BMiner_v15.7.2; support for Cuckarood29
+- Updated AMD_NVIDIA-Gminer_v1.51; support for Cuckarood29
+- Updated AMD_NVIDIA-lolMiner_v0.85; removed 'Equihash' from its name 'cause it does non Equihash algos as well
+- Updated AMD-SRBMinerCryptonight_v1.9.1
 - Updated AMD-WildRig_v0.18.0; suppport for GltGlobalHash
+- Updated CPU-Jayddee_v3.9.6.1; crash mining Hodl with aes-sse42
+- Updated NVIDIA-CcminerKlausT_v8.25
+- Updated NVIDIA-CcminerZenemy_v2.1
+- Updated NVIDIA-NBMiner_v23.3; support for Cuckarood29
+- Updated NVIDIA-TTMiner_v2.2.6; support for Cuckarood29
+
 
 #### Pool changes
 - Fixed BlockMasters; did not return any objects
 - Implement workaround for Zpool(Coins) anti-DDoS protect (pool allows only 6 API calls per minute)
 - Nicehash: Use API v2 (new Nicehash)
+- Support for new config parameter '-DisableEstimateCorrection'
 
 #### Balances changes
 - Implement workaround for Zpool(Coins) anti-DDoS protect (pool allows only 6 API calls per minute)
-- Nicehash: Request API v1 & v2 (new Nicehash) and sum up the values
+- Nicehash: Request API v1 (old Nicehash) & v2 (Nicehash)
 
 ## Changelog Version 3.4.4
 
