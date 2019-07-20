@@ -28,7 +28,7 @@ else {
       "polytimos" = " -X 256 -g 2 -w 256" # Polytimos
       "skunk"     = " -X 256 -g 2 -w 256" # Skunk
       "tribus"    = " -X 256 -g 2" #Tribus
-      "xevan"     = " -X 256 -g 2" #Xevan
+      # "xevan"     = " -X 256 -g 2" #Xevan, AMD-SgminerAvermore_v1.4.1 is 20% faster
       "x16s"      = " -X 256 -g 2" #X16S Pigeoncoin
       "x16r"      = " -X 256 -g 2" #X16R Ravencoin
       "x17"       = " -X 256 -g 2"
@@ -63,6 +63,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             default {$IntervalMultiplier = 1}
         }
 
+        #Allow time to build binaries
+        if (-not (Get-Stat "$($Miner_Name)_$($Algorithm_Norm)_HashRate")) {$WarmupTime = 90} else {$WarmupTime = 30}
+
         [PSCustomObject]@{
             Name               = $Miner_Name
             BaseName           = $Miner_BaseName
@@ -78,7 +81,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             Fees               = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
             Environment        = @("GPU_FORCE_64BIT_PTR=0")
             IntervalMultiplier = $IntervalMultiplier
-            WarmupTime         = 90 #seconds
+            WarmupTime         = $WarmupTime #seconds
         }
     }
 }
