@@ -1,4 +1,5 @@
 ## Changelog Version 3.4.5
+
 ## Core changes
 - List pool names being queried for pricing information
 - Use only configured devices when API becomes available 
