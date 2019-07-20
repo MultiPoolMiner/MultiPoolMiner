@@ -35,6 +35,7 @@
     "Garlic":  "GarliCoin",
     "Gin":  "GinCoin",
     "Globalboosty":  "GlobalboostY",
+    "Globaltoken":  "GlobalToken",
     "Grandmaster":  "GrandmasterCoin",
     "Groestl":  "GroestlCoin",
     "Gulden":  "GuldenCoin",
