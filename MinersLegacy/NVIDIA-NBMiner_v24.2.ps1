@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\nbminer.exe"
-$HashSHA256 = "BEF420099C0F7161A25EFD2F1C1E19F43D8CEC5ED8A4AA7988CBA3AD806FBBDE"
-$Uri = "https://github.com/NebuTech/NBMiner/releases/download/v23.3/NBMiner_23.3_Win.zip"
+$HashSHA256 = ""
+$Uri = "https://github.com/NebuTech/NBMiner/releases/download/v24.2/NBMiner_24.2_Win.zip"
 $ManualUri = "https://github.com/gangnamtestnet/progminer/releases"
 
 $Miner_Version = Get-MinerVersion $Name
@@ -39,10 +39,11 @@ else {
         [PSCustomObject]@{Algorithm = "tensority_ethash";    MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 2;    Params = ""} #Tensority (BTM) & Ethash
         [PSCustomObject]@{Algorithm = "tensority_ethash2gb"; MinMemGB = 3; MinMemGBWin10 = 2;  SecondaryIntensity = 17; Fee = 2;    Params = ""} #Tensority (BTM) & Ethash2GB
         [PSCustomObject]@{Algorithm = "tensority_ethash3gb"; MinMemGB = 3; MinMemGBWin10 = 3;  SecondaryIntensity = 17; Fee = 2;    Params = ""} #Tensority (BTM) & Ethash3GB
-        [PSCustomObject]@{Algorithm = "cuckaroo";            MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckaroo29 (Grin29)
+        [PSCustomObject]@{Algorithm = "cuckarood";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckarood29 (Grin29)
         [PSCustomObject]@{Algorithm = "cuckaroo_swap";       MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckaroo29s (Swap29)
         [PSCustomObject]@{Algorithm = "cuckatoo";            MinMemGB = 8; MinMemGBWin10 = 10; SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckatoo31 (Grin31)
         [PSCustomObject]@{Algorithm = "cuckoo_ae";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckoo29 (Aeternity)
+        [PSCustomObject]@{Algorithm = "progpow_sero";        MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Progpow92 (Sero)
     )
 }
 
@@ -80,9 +81,12 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             }
             
             #define main algorithm protocol
-            $Main_Protocol = "stratum+tcp"
-            if ($Pools.$Main_Algorithm_Norm.SSL) {$Main_Protocol = "stratum+ssl"}
-            if ($Main_Algorithm -like "ethash*") {$Main_Protocol = $Main_Protocol -replace "stratum", "ethnh"}
+            if ($Pools.$Main_Algorithm_Norm.Name = "Nicehash") {$Main_Protocol = "nicehash+tcp"}
+            else {
+                $Main_Protocol = "stratum+tcp"
+                if ($Pools.$Main_Algorithm_Norm.SSL) {$Main_Protocol = "stratum+ssl"}
+                if ($Main_Algorithm -like "ethash*") {$Main_Protocol = $Main_Protocol -replace "stratum", "ethnh"}
+            }
 
             #Tensority: higher fee on Touring cards
             if ($Main_Algorithm_Norm -eq "Tensority" -and $Miner_Device.Model_Norm -match "^GTX16.+|^RTX20.+") {$Fee = 3}

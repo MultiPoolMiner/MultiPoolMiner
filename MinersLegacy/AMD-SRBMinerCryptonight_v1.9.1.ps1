@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\SRBMiner-CN.exe"
-$HashSHA256 = "BBD1D7AAA304AFA64CEDE1ED5A577A8C0BC7F507D54A79C8DB2FA2718FE63169"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/SRBMiner/SRBMiner-CN-V1-9-0.zip"
+$HashSHA256 = "8B6DEA9470CB6223AC97592225A8C4E2480DF4697DB132C0DC1273BA292C05CB"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/SRBMiner/SRBMiner-CN-V1-9-1.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3167363.0"
  
 $Miner_Version = Get-MinerVersion $Name
@@ -29,34 +29,35 @@ else {
         [PSCustomObject]@{Algorithm = "b2n";         MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightB2N
         [PSCustomObject]@{Algorithm = "bittubev2";   MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightDark 
         [PSCustomObject]@{Algorithm = "conceal";     MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightConceal, new in 1.7.9
-        [PSCustomObject]@{Algorithm = "dark";        MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightHeavyTube
-        [PSCustomObject]@{Algorithm = "fast";        MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightFast
         [PSCustomObject]@{Algorithm = "fast2";       MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightFast2
         [PSCustomObject]@{Algorithm = "gpu";         MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightRwzV8
         [PSCustomObject]@{Algorithm = "graft";       MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightGpu
         [PSCustomObject]@{Algorithm = "haven";       MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightHeavyHaven
-        [PSCustomObject]@{Algorithm = "heavy";       MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightHeavy
         [PSCustomObject]@{Algorithm = "hospital";    MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight???
         [PSCustomObject]@{Algorithm = "hycon";       MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight???, new in 1.7.3
-        [PSCustomObject]@{Algorithm = "italo";       MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightItalo
-        [PSCustomObject]@{Algorithm = "lite";        MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightLite
         [PSCustomObject]@{Algorithm = "litev7";      MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightLiteV7
         [PSCustomObject]@{Algorithm = "marketcash";  MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightMarketCash
         [PSCustomObject]@{Algorithm = "mox ";        MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightRed
         [PSCustomObject]@{Algorithm = "normalv4";    MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightV4
-        [PSCustomObject]@{Algorithm = "normalv4_64"; MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightV4_64
         [PSCustomObject]@{Algorithm = "normalv7";    MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightV7
         [PSCustomObject]@{Algorithm = "normalv8";    MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightV8, new in 1.6.8
         [PSCustomObject]@{Algorithm = "stellitev8";  MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight???, new in 1.7.3
         [PSCustomObject]@{Algorithm = "turtle";      MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight???, new in 1.7.4
-        [PSCustomObject]@{Algorithm = "upx";         MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight???, new in 1.7.3
-        [PSCustomObject]@{Algorithm = "upx";         MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight???, new in 1.7.3
         [PSCustomObject]@{Algorithm = "upx2";        MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight???, new in 1.8.6
-        [PSCustomObject]@{Algorithm = "wownero";     MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight???, new in 1.7.9
         [PSCustomObject]@{Algorithm = "xcash";       MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight???, new in 1.7.9
         [PSCustomObject]@{Algorithm = "zelerius";    MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight???, new in 1.7.9
-        # Asic only (2018/07/12)
-        #[PSCustomObject]@{Algorithm = "normal";     MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight
+        # Obsolete, but still supported (20170711)
+        #[PSCustomObject]@{Algorithm = "normal";      MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight
+        #[PSCustomObject]@{Algorithm = "dark";        MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightHeavyTube
+        #[PSCustomObject]@{Algorithm = "fast";        MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightFast
+        #[PSCustomObject]@{Algorithm = "festival";    MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightFestival
+        #[PSCustomObject]@{Algorithm = "heavy";       MinMemGb = 2; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightHeavy
+        #[PSCustomObject]@{Algorithm = "italo";       MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightItalo
+        #[PSCustomObject]@{Algorithm = "lite";        MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightLite
+        #[PSCustomObject]@{Algorithm = "normalv4_64"; MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightV4_64
+        #[PSCustomObject]@{Algorithm = "stellitev4";  MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # CryptonightLite
+        #[PSCustomObject]@{Algorithm = "upx";         MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight???, new in 1.7.3
+        #[PSCustomObject]@{Algorithm = "wownero";     MinMemGb = 1; Params = ""; Intensity = @(); DoubleThreads = $true} # Cryptonight???, new in 1.7.9
     )
 }
 

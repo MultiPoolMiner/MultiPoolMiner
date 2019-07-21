@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\lolminer.exe"
-$HashSHA256 = "25F12B7CEC1E34AADD83F89E48A0E6E595A685A641AEFBB7B5476D0EFA6E7743"
-$Uri = "https://github.com/Lolliedieb/lolMiner-releases/releases/download/0.8.4/lolMiner_v084_Win64.zip"
+$HashSHA256 = "1110FB7130E05A97249D47176E17550CF0E0E13AD94A95FCF2FA8F9FFE46C4E8"
+$Uri = "https://github.com/Lolliedieb/lolMiner-releases/releases/download/0.8.5/lolMiner_v085_Win64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4724735.0"
 
 $Miner_Version = Get-MinerVersion $Name
@@ -23,11 +23,12 @@ if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject[]]@(
         [PSCustomObject]@{Algorithm = "Equihash965";    MinMemGB = 1.35; Params = ""}
-        [PSCustomObject]@{Algorithm = "EquihashR12540"; MinMemGB = 1.85; Params = ""}
+        [PSCustomObject]@{Algorithm = "EquihashR12540"; MinMemGB = 3.00; Params = ""}
         [PSCustomObject]@{Algorithm = "Equihash1445";   MinMemGB = 1.85; Params = ""}
         [PSCustomObject]@{Algorithm = "EquihashR15050"; MinMemGB = 2.75; Params = ""}
         [PSCustomObject]@{Algorithm = "Equihash1927";   MinMemGB = 3.0;  Params = ""}
         [PSCustomObject]@{Algorithm = "Equihash2109";   MinMemGB = 1.0;  Params = ""} # new with 0.6 alpha 3
+        [PSCustomObject]@{Algorithm = "Cuckarood29";    MinMemGB = 4.0;  Params = ""} # new with 0.8
         [PSCustomObject]@{Algorithm = "Cuckatoo31";     MinMemGB = 4.0;  Params = ""} # new with 0.8
     )
 }
@@ -61,7 +62,8 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
 
-    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | ForEach-Object {
+    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$Pools.$Algorithm_Norm.Name -ne "Nicehash" <#Temp fix#>} | ForEach-Object {
+        $Algorithm = $_.Algorithm
         $MinMemGB = $_.MinMemGB
 
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
@@ -78,33 +80,29 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $Parameters = Get-ParameterPerDevice $_.Parameters $Miner_Device.Type_Vendor_Index
             }
 
-            #Miner uses --coin parameter (as opposed to algo name like other miners)
+            #Miner uses --coin parameter (unklike other miners that use algo name)
             $Coin = $Coins.$($Pools.$Algorithm_Norm.CoinName)
-            if (-not $Coin -or $Coin -eq "AUTO") {
+            if (-not $Coin) {
                 switch ($Algorithm_Norm) {
-                    "Equihash965" {
-                        #Try auto if no coinname is available
-                        $Coin = "MNX"
-                    }
-                    "EquihashR12540" {
-                        #Try auto if no coinname is available
-                        $Coin = "ZEL"
-                    }
+                    "Equihash965"    {$Coin = "MNX"}
+                    "EquihashR12540" {$Coin = "ZEL"}
+                    "EquihashR15050" {$Coin = "BEAM"}
+                    "Cuckarood29"    {$Coin = "GRIN-AD29"}
+                    "Cuckatoo31"     {$Coin = "GRIN-AT31"}
+                    default          {$Coin = ""}
+                }
+            }
+            elseif ($Coin -eq "AUTO") {
+                $Coin = ""
+                switch ($Algorithm_Norm) {
                     "Equihash1445" {
                         #Try auto if no coinname is available
                         $Coin = "AUTO144_5"
-                    }
-                    "EquihashR15050" {
-                        $Coin = "BEAM"
                     }
                     "Equihash1927" {
                         #Try auto if no coinname is available
                         $Coin = "AUTO192_7"
                     }
-                    "Cuckatoo31" {
-                        $Coin = "GRIN-AT31"
-                    }
-                    default {$Coin = ""}
                 }
             }
 
@@ -119,7 +117,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                     DeviceName       = $Miner_Device.Name
                     Path             = $Path
                     HashSHA256       = $HashSHA256
-                    Arguments        = ("--coin $coin --pool $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.pass) --apiport $Miner_Port$Parameters$CommonParameters $(if ($Pools.$Algorithm_Norm.SSL) {"--tls 1 "} else {"--tls 0 "})--devices $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.PCIBus_Type_Index}) -join ',')").trim()
+                    Arguments        = ("--coin $Coin --pool $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.pass) --apiport $Miner_Port$Parameters$CommonParameters $(if ($Pools.$Algorithm_Norm.SSL) {"--tls 1 "} else {"--tls 0 "})--devices $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.PCIBus_Type_Index}) -join ',')").trim()
                     HashRates        = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                     API              = "lolMinerApi"
                     Port             = $Miner_Port

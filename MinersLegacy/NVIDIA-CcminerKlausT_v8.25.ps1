@@ -9,9 +9,9 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = ""
-$Uri = "https://github.com/nemosminer/ccminer-KlausT-8.21-mod-r18-src-fix/releases/download/v3/ccminerKlausT.7z"
-$ManualUri = "https://github.com/nemosminer/ccminer-KlausT-8.21-mod-r18-src-fix"
+$HashSHA256 = "FEB39973E6DE9DCC507C4919B05830AC58D2948AF24E206CA1ACE8933ED5EA29"
+$Uri = "https://github.com/KlausT/ccminer/releases/download/8.25/ccminer-825-cuda100-x64.zip"
+$ManualUri = "https://github.com/KlausT/ccminer"
 
 $Miner_Version = Get-MinerVersion $Name
 $Miner_BaseName = Get-MinerBaseName $Name
@@ -42,8 +42,7 @@ else {
         "keccak"        = "" #Keccak
         "luffa"         = "" #Luffa
         "lyra2v2"       = "" #Lyra2RE2
-        "lyra2v3"       = "" #Lyra2RE3
-        #"lyra2z330"    = " -i 10" #Lyra2z330 single gpu only, multicards rigs need work
+        "lyra2v3"       = "" #Lyra2RE3, new in 8.23
         "neoscrypt"     = "" #NeoScrypt
         "penta"         = "" #Pentablake
         "s3"            = "" #S3
@@ -52,11 +51,6 @@ else {
         "whirlpoolx"    = "" #whirlpoolx
         "x17"           = "" #X17 Verge
         "yescrypt"      = "" #yescrypt
-        "yescryptr8"    = "" #yescryptr8
-        "yescryptr16"   = " -i 12.5" #YescryptR16 #Yenten
-        "yescryptr16v2" = " -i 12.5" #PPTP
-        "yescryptr24"   = "" #JagariCoinR
-        "yescryptr32"   = " -i 12.5" #WAVI
 
         # ASIC - never profitable 25/11/2018
         #"bitcoin"    = "" #Bitcoin
