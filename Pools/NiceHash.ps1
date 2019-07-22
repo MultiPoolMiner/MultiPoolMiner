@@ -19,11 +19,6 @@ $PoolHost = "-new.nicehash.com"
 $PoolAPIUri =  "https://api2.nicehash.com/main/api/v2/public/simplemultialgo/info/"
 $PoolAPIAlgodetailsUri = "https://api2.nicehash.com/main/api/v2/mining/algorithms/"
 
-if (-not $Payout_Currencies) {
-    Write-Log -Level Verbose "No wallet address for Pool ($Name) specified. Cannot mine on pool. "
-    return
-}
-
 $RetryCount = 3
 $RetryDelay = 2
 while (-not ($APIResponse) -and $RetryCount -gt 0) {

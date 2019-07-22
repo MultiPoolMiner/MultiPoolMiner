@@ -67,6 +67,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             $Parameters = Get-ParameterPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
         }
 
+        #Allow time to build binaries
+        if (-not (Get-Stat "$($Miner_Name)_$($Algorithm_Norm)_HashRate")) {$WarmupTime = 90} else {$WarmupTime = 30}
+
         [PSCustomObject]@{
             Name        = $Miner_Name
             BaseName    = $Miner_BaseName
@@ -80,7 +83,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             Port        = $Miner_Port
             URI         = $Uri
             Environment = @("GPU_FORCE_64BIT_PTR=0")
-            WarmupTime  = 90 #seconds
+            WarmupTime  = $WarmupTime #seconds
         }
     }
 }

@@ -1,0 +1,22 @@
+﻿{
+    "Equihash1445":  {
+        "ManagedByPool":  "auto",
+        "Anon":  "AnonyPoW",
+        "Bitcoingold":  "BgoldPoW",
+        "Bitcoinz":  "BitcoinZ",
+        "Snowgem":  "sngemPoW",
+        "LitecoinZ":  "ZcashPoW"
+    },
+    "Equihash1927":  {
+        "ManagedByPool":  "auto",
+        "Safecoin":  "Safecoin",
+        "Zero":  "ZERO_PoW",
+        "Zerocoin":  "ZERO_PoW"
+    },
+    "Progpow92":  {
+        "ManagedByPool":  "auto",
+        "SuperSero":  "sero",
+        "Hora":  "hora"
+    }
+}
+

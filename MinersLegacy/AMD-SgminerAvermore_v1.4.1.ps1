@@ -23,8 +23,8 @@ if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject]@{
         "X16r"  = " -g 2 -w 64 -X 64"
-        "X16s"  = " -g 2 -w 64 -X 64"
-        "Xevan" = " -g 2 -w 64 -X 64"
+        #"X16s"  = " -g 2 -w 64 -X 64" # AMD-SgminerKL_v1.0.9 is 25 % faster
+        #"Xevan" = " -g 2 -w 64 -X 64" # AMD-SgminerKL_v1.0.9 is faster
     }
 }
 
@@ -56,6 +56,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             default {$IntervalMultiplier = 1}
         }
 
+        #Allow time to build binaries
+        if (-not (Get-Stat "$($Miner_Name)_$($Algorithm_Norm)_HashRate")) {$WarmupTime = 90} else {$WarmupTime = 30}
+
         [PSCustomObject]@{
             Name               = $Miner_Name
             BaseName           = $Miner_BaseName
@@ -71,7 +74,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             Fees               = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
             IntervalMultiplier = $IntervalMultiplier
             Environment        = @("GPU_FORCE_64BIT_PTR=0")
-            WarmupTime         = 90 #seconds
+            WarmupTime         = $WarmupTime #seconds
         }
     }
 }

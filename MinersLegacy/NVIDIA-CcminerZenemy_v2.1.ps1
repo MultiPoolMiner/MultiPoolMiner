@@ -27,12 +27,12 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
 }
 
 if ($CUDAVersion -lt [System.Version]("10.0.0")) {
-    $HashSHA256 = "C921AEA4D3386EDFACE31EBEA8F61EF164B2A868ACBE45B806C72075686EC1D0"
-    $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.2-00-cuda9.2.zip"
+    $HashSHA256 = "AE09498A48CF075153CCA06BB1597CB1237BFB8FD3668743387A055767D692BD"
+    $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy-2.1-cuda9.2.zip"
 }
 else {
-    $HashSHA256 = "70AF828E6A02EE8A3E0BAA603CBA9B7D2DB3BAFD5592D7CBDDF3A2C3492AD53A"
-    $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy.2-00-cuda10.0.zip"
+    $HashSHA256 = "66C636BD6B34E5C803748D9224C8448F8EEB4167A46688D04E6112C24C69947D"
+    $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/Zenemy/z-enemy-2.1-cuda10.0.zip"
 }
 
 #Commands from config file take precedence
@@ -81,8 +81,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         }
 
         Switch ($Algorithm_Norm) {
-            "X16R"  {$IntervalMultiplier = 5}
-            default {$IntervalMultiplier = 1}
+            "C11"   {$IntervalMultiplier = 1; $WarmupTime = 60}
+            "X16R"  {$IntervalMultiplier = 5; $WarmupTime = 30}
+            default {$IntervalMultiplier = 1; $WarmupTime = 30}
         }
 
         [PSCustomObject]@{
@@ -99,7 +100,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             URI                = $Uri
             Fees               = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
             IntervalMultiplier = $IntervalMultiplier
-            WarmupTime         = 45 #seconds
+            WarmupTime         = $WarmupTime #seconds
         }
     } 
 }

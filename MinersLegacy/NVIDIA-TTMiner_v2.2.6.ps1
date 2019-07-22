@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\TT-Miner.exe"
-$HashSHA256 = "AE6B83839E9B6ACC78E30975597CB633BD029FAA51A31B88B23B6D53138851D5"
-$Uri = "https://tradeproject.de/download/Miner/TT-Miner-2.2.5.zip"
+$HashSHA256 = "E6E70FEE3C38F284F7025E2A1092E140A6CD4E066D1D8148794CE1E36FB5D0DD"
+$Uri = "https://tradeproject.de/download/Miner/TT-Miner-2.2.6.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5025783.0"
 
 $Miner_Version = Get-MinerVersion $Name
@@ -43,7 +43,6 @@ else {
         [PSCustomObject]@{Algorithm = "PROGPOW2gb";  MinMemGB = 2; Params = ""} #ProgPoW2gb
         [PSCustomObject]@{Algorithm = "PROGPOW3gb";  MinMemGB = 3; Params = ""} #ProgPoW3gb
         [PSCustomObject]@{Algorithm = "PROGPOW";     MinMemGB = 4; Params = ""} #ProgPoW
-        [PSCustomObject]@{Algorithm = "PROGPOWH";    MinMemGB = 4; Params = ""} #ProgPoWh (Hora)
         [PSCustomObject]@{Algorithm = "PROGPOW092";  MinMemGB = 4; Params = ""} #ProgPoW092 (Hydnora)
         [PSCustomObject]@{Algorithm = "PROGPOWZ";    MinMemGB = 4; Params = ""} #ProgPoWZ
         [PSCustomObject]@{Algorithm = "TETHASHV1";   MinMemGB = 4; Params = ""} #TETHASHV1 (Teo)
@@ -52,7 +51,7 @@ else {
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = " -RH"}
+else {$CommonParameters = " -RH -luck -ccd"}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
@@ -77,6 +76,12 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 $Parameters = Get-ParameterPerDevice $_.Parameters $Miner_Device.Type_Vendor_Index
             }
 
+            if ($Algorithm_Norm -eq "Progpow92") {
+                #define --coin for Progpow92
+                $CoinPers = "$(Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default '')"
+                if ($CoinPers) {$CoinPers = " --coin $CoinPers"}
+            }                
+
             [PSCustomObject]@{
                 Name       = $Miner_Name
                 BaseName   = $Miner_BaseName
@@ -84,7 +89,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
-                Arguments  = ("--api-bind 127.0.0.1:$($Miner_Port) -A $Algorithm -P $($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass)@$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)$($Commands.$_)$CommonParameters -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')" -replace "\s+", " ").trim()
+                Arguments  = ("--api-bind 127.0.0.1:$($Miner_Port)$CoinPers -A $Algorithm -P $($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass)@$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)$($Commands.$_)$CommonParameters -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')" -replace "\s+", " ").trim()
                 HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                 API        = "Claymore"
                 Port       = $Miner_Port

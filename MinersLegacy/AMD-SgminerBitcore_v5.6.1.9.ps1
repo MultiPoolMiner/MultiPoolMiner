@@ -49,6 +49,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             $Parameters = Get-ParameterPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
         }
 
+        #Allow time to build binaries
+        if (-not (Get-Stat "$($Miner_Name)_$($Algorithm_Norm)_HashRate")) {$WarmupTime = 90} else {$WarmupTime = 30}
+
         [PSCustomObject]@{
             Name       = $Miner_Name
             BaseName   = $Miner_BaseName
@@ -61,7 +64,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             API        = "Xgminer"
             Port       = $Miner_Port
             URI        = $Uri
-            WarmupTime = 90 #seconds
+            WarmupTime = $WarmupTime #seconds
         }
     }
 }

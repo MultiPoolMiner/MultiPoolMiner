@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\nanominer.exe"
-$HashSHA256 = "6166D4D07DA7A402C75E4EBBFAFAD76E2141AB1E2D43CBA23E6349B5E9C7EF91"
-$Uri = "https://github.com/nanopool/nanominer/releases/download/v1.5.0/nanominer-windows-1.5.0.zip"
+$HashSHA256 = "33FB865BBC8F8708ADF997AF2438FF7DAD9ED023064DE6F3206D7E92152C1EC7"
+$Uri = "https://github.com/nanopool/nanominer/releases/download/v1.5.2/nanominer-windows-1.5.2.zip"
 $ManualUri = "https://github.com/nanopool/nanominer/releases"
 
 $Miner_Version = Get-MinerVersion $Name
@@ -30,18 +30,18 @@ if ($Devices.Vendor -contains "NVIDIA Corporation" -and $CUDAVersion -and [Syste
 if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject[]]@(
-        [PSCustomObject]@{Algorithm = "Ethash2gb";               AmdMinMemGB = 2; NvidiaMinMemGB = 2; Type = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #Ethash2GB
-        [PSCustomObject]@{Algorithm = "Ethash3gb";               AmdMinMemGB = 3; NvidiaMinMemGB = 3; Type = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #Ethash3GB
-        [PSCustomObject]@{Algorithm = "Ethash";                  AmdMinMemGB = 4; NvidiaMinMemGB = 4; Type = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #Ethash
-        [PSCustomObject]@{Algorithm = "Ubqhash";                 AmdMinMemGB = 4; NvidiaMinMemGB = 4; Type = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #Ubqhash
-        [PSCustomObject]@{Algorithm = "CryptoNightV5";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Type = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightV5
-        [PSCustomObject]@{Algorithm = "CryptoNightV6";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Type = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightV6
-        [PSCustomObject]@{Algorithm = "CryptoNightV7";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Type = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightV7
-        [PSCustomObject]@{Algorithm = "CryptoNightV8";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Type = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightV8
-        [PSCustomObject]@{Algorithm = "CryptoNightReverseWaltz"; AmdMinMemGB = 2; NvidiaMinMemGB = 2; Type = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightRwzV8
-        [PSCustomObject]@{Algorithm = "Cuckaroo29";              AmdMinMemGB = 6; NvidiaMinMemGB = 4; Type = @("AMD", "NVIDIA"); Fee = 2; Params = ""} #Cuckaroo29
-        [PSCustomObject]@{Algorithm = "Cuckarood29";             AmdMinMemGB = 6; NvidiaMinMemGB = 4; Type = @("AMD", "NVIDIA"); Fee = 2; Params = ""} #Cuckarood29, new with 1.5.0
-        [PSCustomObject]@{Algorithm = "RandomHash";              AmdMinMemGB = 0; NvidiaMinMemGB = 0; Type = @("CPU");           Fee = 2; Params = ""} #RandomHash, CPU only
+        [PSCustomObject]@{Algorithm = "Ethash2gb";               AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #Ethash2GB
+        [PSCustomObject]@{Algorithm = "Ethash3gb";               AmdMinMemGB = 3; NvidiaMinMemGB = 3; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #Ethash3GB
+        [PSCustomObject]@{Algorithm = "Ethash";                  AmdMinMemGB = 4; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #Ethash
+        [PSCustomObject]@{Algorithm = "Ubqhash";                 AmdMinMemGB = 4; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #Ubqhash
+        [PSCustomObject]@{Algorithm = "CryptoNightV5";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightV5
+        [PSCustomObject]@{Algorithm = "CryptoNightV6";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightV6
+        [PSCustomObject]@{Algorithm = "CryptoNightV7";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightV7
+        [PSCustomObject]@{Algorithm = "CryptoNightV8";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightV8
+        [PSCustomObject]@{Algorithm = "CryptoNightReverseWaltz"; AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightRwzV8
+        [PSCustomObject]@{Algorithm = "Cuckaroo29";              AmdMinMemGB = 6; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 2; Params = ""} #Cuckaroo29
+        [PSCustomObject]@{Algorithm = "Cuckarood29";             AmdMinMemGB = 6; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 2; Params = ""} #Cuckarood29, new with 1.5.0
+        [PSCustomObject]@{Algorithm = "RandomHash";              AmdMinMemGB = 0; NvidiaMinMemGB = 0; Vendor = @("CPU");           Fee = 2; Params = ""} #RandomHash, CPU only
     )
 }
 
@@ -53,7 +53,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
 
-    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$_.Type -contains $Device.Vendor_ShortName -and $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
+    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$_.Vendor -contains $Device.Vendor_ShortName -and $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Algorithm = $_.Algorithm -replace "ethash(\dgb)", "Ethash"
         $Fee = $_.Fee
         $MinMemGB = $_."$($Device.Vendor_ShortName)MinMemGB"

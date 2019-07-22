@@ -9,7 +9,7 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $HashSHA256 = ""
-$Uri = "https://github.com/JayDDee/cpuminer-opt/releases/download/v3.9.5.2/cpuminer-opt-3.9.5.2-windows.zip"
+$Uri = "https://github.com/JayDDee/cpuminer-opt/releases/download/v3.9.6.1/cpuminer-opt-3.9.6.1-windows.zip"
 $ManualUri = "https://github.com/JayDDee/cpuminer-opt"
 
 $Miner_Version = Get-MinerVersion $Name
@@ -32,8 +32,10 @@ else {
         ### CPU PROFITABLE ALGOS AS OF 30/03/2019
         ### these algorithms are profitable algorithms on supported pools
         "allium"        = "" #Garlicoin
+        "bmw512"        = "" #Bmw512, new in 3.9.6
+        "hex"           = "" #Hex, new in 3.9.6.1
         "hmq1725"       = "" #HMQ1725
-        "hodl"          = "" # hodlcoin
+        "hodl"          = "" #Hodlcoin
         "lyra2z330"     = "" #Lyra2z330
         "m7m"           = "" #m7m
         "x12"           = "" #x12
@@ -41,8 +43,10 @@ else {
         "yespowerr16"   = "" #YespowerR16
         "yescrypt"      = "" #Yescrypt
         "yescryptr16"   = "" #YescryptR16
-
-
+        "x16rt"         = "" #X16rt, new in 3.9.6
+        "x16rt-veil"    = "" #X16rt-veil, new in 3.9.6
+        "x13bcd"        = "" #X13bcd, new in 3.9.6
+        "x21s"          = "" #X212, new in 3.9.6
         ### MAYBE PROFITABLE ALGORITHMS - NOT MINEABLE IN SUPPORTED POOLS AS OF 30/03/20198
         ### these algorithms are not mineable on supported pools but may be profitable
         ### once/if support begins. They should be classified accordingly when or if
