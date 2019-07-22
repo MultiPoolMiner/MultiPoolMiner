@@ -71,7 +71,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         $Parameters = $_.Parameters
 
         if ($Miner_Device = @($Device | Where-Object {$_.Type -eq "CPU" -or ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
-            $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '-') | Select-Object) -join '-'
+            $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
             $Currency = if ($Coins -icontains $Pools.$Algorithm_Norm.CoinName) {$Pools.$Algorithm_Norm.CoinName} else {$Algorithm}
             
             if ($Miner_Device.Type -eq "CPU") {
