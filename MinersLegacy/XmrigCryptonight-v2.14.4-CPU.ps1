@@ -62,7 +62,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Threads = $_.Threads
 
         if ($Miner_Device = @($Device | Where-Object {[math]::Round((Get-CIMInstance -Class Win32_ComputerSystem).TotalPhysicalMemory / 1GB) -ge $MinMemGB})) {
-            $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) + @($Threads) | Select-Object) -join '-'
+            $Miner_Name = (@($Name) + @($Threads) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
 
             #Get parameters for active miner devices
             if ($Miner_Config.Parameters.$Algorithm_Norm) {
