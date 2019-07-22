@@ -71,7 +71,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         $Parameters = $_.Parameters
 
         if ($Miner_Device = @($Device | Where-Object {$_.Type -eq "CPU" -or ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
-            $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '_') | Select-Object) -join '-'
+            $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '-') | Select-Object) -join '-'
             $Currency = if ($Coins -icontains $Pools.$Algorithm_Norm.CoinName) {$Pools.$Algorithm_Norm.CoinName} else {$Algorithm}
             
             if ($Miner_Device.Type -eq "CPU") {
@@ -98,9 +98,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $Parameters = Get-ParameterPerDevice $Parameters $Miner_Device.Type_Vendor_Index
             }            
 
-            $ConfigFileName = "$((@("Config") + @($Platform) + @(($Miner_Device.Model_Norm | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm($(($Miner_Device | Sort-Object Name | Where-Object Model_Norm -eq $Model_Norm).Name -join ';'))"} | Select-Object) -join '_') + @($Miner_Port) | Select-Object) -join '-').txt"
-            $MinerThreadsConfigFile = "$((@("ThreadsConfig") + @($Platform) + @($Algorithm_Norm) + @(($Miner_Device.Model_Norm | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm($(($Miner_Device | Sort-Object Name | Where-Object Model_Norm -eq $Model_Norm).Name -join ';'))"} | Select-Object) -join '_') | Select-Object) -join '-').txt"
-            $PlatformThreadsConfigFile = "$((@("HwConfig") + @($Platform) + @($Algorithm_Norm) + @(($Devices_Platform.Model_Norm | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model_Norm = $_; "$(@($Devices_Platform | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm($(($Devices_Platform | Sort-Object Name | Where-Object Model_Norm -eq $Model_Norm).Name -join ';'))"} | Select-Object) -join '_') | Select-Object) -join '-').txt"
+            $ConfigFileName = "$((@("Config") + @($Platform) + @(($Miner_Device.Model_Norm | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm($(($Miner_Device | Sort-Object Name | Where-Object Model_Norm -eq $Model_Norm).Name -join ';'))"} | Select-Object) -join '-') + @($Miner_Port) | Select-Object) -join '-').txt"
+            $MinerThreadsConfigFile = "$((@("ThreadsConfig") + @($Platform) + @($Algorithm_Norm) + @(($Miner_Device.Model_Norm | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm($(($Miner_Device | Sort-Object Name | Where-Object Model_Norm -eq $Model_Norm).Name -join ';'))"} | Select-Object) -join '-') | Select-Object) -join '-').txt"
+            $PlatformThreadsConfigFile = "$((@("HwConfig") + @($Platform) + @($Algorithm_Norm) + @(($Devices_Platform.Model_Norm | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model_Norm = $_; "$(@($Devices_Platform | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm($(($Devices_Platform | Sort-Object Name | Where-Object Model_Norm -eq $Model_Norm).Name -join ';'))"} | Select-Object) -join '-') | Select-Object) -join '-').txt"
             $PoolFileName = "$((@("PoolConf") + @($Pools.$Algorithm_Norm.Name) + @($Algorithm_Norm) + @($Pools.$Algorithm_Norm.User) + @($Pools.$Algorithm_Norm.Pass) | Select-Object) -join '-').txt"
 
             $Parameters = [PSCustomObject]@{
