@@ -15,7 +15,7 @@ class BMiner : Miner {
                 $Data = Invoke-RestMethod $Request -TimeoutSec $Timeout -DisableKeepAlive -MaximumRetryCount 3 -RetryIntervalSec 1 -ErrorAction Stop
             }
             else {
-                $Data = Invoke-RestMethod $Request -TimeoutSec $Timeout -DisableKeepAlive -ErrorAction Stop
+                $Data = Invoke-RestMethod $Request -UseBasicParsing -TimeoutSec $Timeout -DisableKeepAlive -ErrorAction Stop
             }
         }
         catch {
@@ -26,10 +26,10 @@ class BMiner : Miner {
             #Read stratum info from API
             try {
                 if ($Global:PSVersionTable.PSVersion -ge [System.Version]("6.2.0")) {
-                        $Data | Add-member stratums (Invoke-RestMethod "http://$($Server):$($this.Port)/api/v1/status/stratum" -TimeoutSec $Timeout -DisableKeepAlive -MaximumRetryCount 3 -RetryIntervalSec 1 -ErrorAction Stop).stratums
+                    $Data | Add-member stratums (Invoke-RestMethod "http://$($Server):$($this.Port)/api/v1/status/stratum" -TimeoutSec $Timeout -DisableKeepAlive -MaximumRetryCount 3 -RetryIntervalSec 1 -ErrorAction Stop).stratums
                 }
                 else {
-                        $Data | Add-member stratums (Invoke-RestMethod "http://$($Server):$($this.Port)/api/v1/status/stratum" -TimeoutSec $Timeout -DisableKeepAlive -ErrorAction Stop).stratums
+                    $Data | Add-member stratums (Invoke-RestMethod "http://$($Server):$($this.Port)/api/v1/status/stratum" -TimeoutSec $Timeout -UseBasicParsing -DisableKeepAlive -ErrorAction Stop).stratums
                 }
             }
             catch {
