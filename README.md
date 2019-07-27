@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 16/07/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 27/07/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -148,7 +148,7 @@ Similar to the *-DeviceName* command but it is used to *exclude* unwanted device
 **-ExcludeMinerName**
 Similar to the *-MinerName* command but it is used to *exclude* certain miners you don't want to use. This is useful if a miner is causing issues with your machine. Use commas to separate multiple values.
 Important: Newer miners, e.g. ClaymoreEthash create several child-miner names, e.g. ClaymoreEthash-GPU#01-Pascal-40. These can also be used with *-ExcludeMinerName*.
-The parameter value(s) can be in one of the 3 forms: MinerBaseName e.g. 'AMD-TeamRed', MinerBaseName_Version, e.g. 'AMD-TeamRed_v0.5.1' or MinerName, e.g. 'AMD-TeamRed_v0.5.1-1xEllesmere8GB'. Use commas to separate multiple values.
+The parameter value(s) can be in one of the 3 forms: MinerBaseName e.g. 'TeamRed', MinerBaseName-Version, e.g. 'TeamRed-v0.5.6' or MinerName, e.g. 'TeamRed-v0.5.6-1xEllesmere8GB'. Use commas to separate multiple values.
 
 **-ExcludePoolName**
 Similar to the *-PoolName* command but it is used to exclude unwanted mining pools. Use commas to separate multiple values.
@@ -186,7 +186,7 @@ Sometimes pools report erroneously high price spikes, just to self-correct after
 
 **-MinerName**
 Specify to only include (restrict to) certain miner applications.
-The parameter value(s) can be in one of the 3 forms: MinerBaseName e.g. 'AMD-TeamRed', MinerBaseName_Version, e.g. 'AMD-TeamRed_v0.5.1' or MinerName, e.g. 'AMD-TeamRed_v0.5.1-1xEllesmere8GB'. Use commas to separate multiple values.
+The parameter value(s) can be in one of the 3 forms: MinerBaseName e.g. 'TeamRed', MinerBaseName-Version, e.g. 'TeamRed-v0.5.6' or MinerName, e.g. 'TeamRed-v0.5.6-1xEllesmere8GB'. Use commas to separate multiple values.
 
 **-MinerstatusKey**
 By default the MPM monitor uses the BTC address ('-Wallet') to identify your mining machine (rig). Use -MinerstatusKey [your-miner-status-key] to anonymize your rig. To get your minerstatuskey goto to https://multipoolminer.io/monitor
@@ -581,12 +581,12 @@ To use the NiceHash internal wallet modify the NiceHash pool section (you may ha
       "IsInternalWallet":  true
     }
 
-    #### Payout currency
+#### Payout currency
 
 If a pool allows payout in another currency than BTC you can set the currency you wish to be paid.
 By default MPM will add ALL currencies configured by $Wallet as possible payout currencies for the pool.
 
-For each pool you can statically add a section similar to this (see http://localhost:3999/config) to your config file:
+For each pool you can statically add a section similar to this to your config file:
 
     "Zpool": {
       "Wallets":  {
@@ -594,7 +594,6 @@ For each pool you can statically add a section similar to this (see http://local
       },
       "Worker": "$WorkerName"
     }
-
 The payout currency is defined by this line:
 "BTC": "$Wallet", (MPM will use the the wallet address from the start.bat file)
 
@@ -661,7 +660,6 @@ For ZergPool(Coins) solo or party mining edit the config file as follows:
         }
       }
     }
-
 "*" will be appended to any algorithm / coinname. No other wildcards are allowed.
 All values are cumulative, so if you specify a value for algorithm AND coinname, then both values will be appended.
     
@@ -672,10 +670,10 @@ Settings for each configured miner are stored in its own subsection. These setti
 
 #### ExcludeAlgorithm per miner
 
-E.g. To exclude the Ethash3gb algorithm from any version of the AMD_NVIDIA-ClaymoreEthash miner:
+E.g. To exclude the Ethash3gb algorithm from any version of the ClaymoreEthash miner:
 
     "MinersLegacy": {
-      "AMD_NVIDIA-ClaymoreEthash": {
+      "ClaymoreEthash": {
         "*": {
           "ExcludeAlgorithm": [
             "Ethash2gb"
@@ -684,11 +682,11 @@ E.g. To exclude the Ethash3gb algorithm from any version of the AMD_NVIDIA-Claym
       },
     },
 
-E.g. To exclude the Ethash2gb or Blake2s algorithms from AMD_NVIDIA-ClaymoreEthash_v14.7 miner:
+E.g. To exclude the Ethash2gb or Blake2s algorithms from ClaymoreEthash-v14.7 miner:
 
     "MinersLegacy": {
-      "AMD_NVIDIA-ClaymoreEthash": {
-        "v14.6": {
+      "ClaymoreEthash": {
+        "v14.7": {
           "ExcludeAlgorithm": [
             "Blake2s",
             "Ethash2gb"
@@ -703,21 +701,21 @@ If both, a version specific and generic config ("*") exist, then all matching al
 #### Disable miner developer fee per miner
 Note: not all miners support turning off their built in fees, others will reduce the hashrate, check the miners web page for more information
 
-E.g. To disable the dev fee mining from any version of the AMD_NVIDIA-ClaymoreEthash miner:
+E.g. To disable the dev fee mining from any version of the ClaymoreEthash miner:
 
     "MinersLegacy": {
-      "AMD_NVIDIA-ClaymoreEthash": {
+      "ClaymoreEthash": {
         "*": {
           "DisableDevFeeMining":  true
         },
       },
     },
 
-E.g. To disable the dev fee mining from AMD_NVIDIA-ClaymoreEthash_v14.7 miner:
+E.g. To disable the dev fee mining from ClaymoreEthash-v14.7 miner:
 
     "MinersLegacy": {
-      "AMD_NVIDIA-ClaymoreEthash": {
-        "v14.6": {
+      "ClaymoreEthash": {
+        "v14.7": {
           "DisableDevFeeMining":  true
         },
       },
@@ -725,11 +723,45 @@ E.g. To disable the dev fee mining from AMD_NVIDIA-ClaymoreEthash_v14.7 miner:
 "*" stands for ANY miner version.
 If this setting is defined in multiple places (version specific, version generic ("*") and global), then the most specific value is used.
 
+#### Secondary algorithm intensities (dual algo miners only)
+
+The mining intensities for secondary algorithms can be configured in the config file.
+
+The miner name must be entered without the ending version number (e.g. for ClaymoreEthash-v14.7 remove -v14.7)
+The algorithm names must be entered as the miner uses it, do not use the normalized algorithm name as returned by Get-Algorithm.
+
+    "MinersLegacy": {
+      "ClaymoreEthash": {
+        "*": {
+        "SecondaryAlgoIntensities": {
+           "blake2s": [
+              45,
+              60,
+              75
+            ]
+        },
+        "v14.7": {
+        "SecondaryAlgoIntensities": {
+           "decred": [
+              25,
+              40,
+              65
+            ]
+        },
+    }
+"*" stands for ANY version
+If both, specific (e.g. miner version) and generic config ("*") exist, then only the specific config is used. The generic config will be ignored entirely.
+If you do not specify clustom values for all algorithms, then the miners default values will be applied for the unconfigured algorithms.
+
 #### Persistent miner configuration
 Storing the miner configuration in the config file allows for easier version / miner file upgrades. There is no need to edit the miner files.
 
+The miner name must be entered without the ending version number (e.g. for ClaymoreEthash-v14.7 remove -v14.7)
+The algorithm name must be entered in the normalized form as returned by Get-Algorithm.
+Note: All parameter values must be entered with a leading space (' ') character!
+
     "MinersLegacy": {
-      "AMD_NVIDIA-ClaymoreEthash": {
+      "ClaymoreEthash": {
         "*": {
         "CommonParameters": "",
           "Parameters": {
@@ -738,7 +770,7 @@ Storing the miner configuration in the config file allows for easier version / m
             "Ethash2gbPascal-20": " -colors"
           }
         },
-        "v14.6": {
+        "v14.7": {
           "CommonParameters": "",
           "Parameters": {
             "*": " --no-crashreport",
@@ -748,11 +780,6 @@ Storing the miner configuration in the config file allows for easier version / m
         }
       }
     }
-
-The miner name must be entered without the ending version number (e.g. for AMD_NVIDIA-ClaymoreEthash_v14.7 remove _v14.6)
-The algorithm name must be entered in the normalized form as returned by Get-Algorithm.
-Note: All parameter values must be entered with a leading space (' ') character!
-
 "*" stands for ANY version or ANY algorithm.
 **If both, specific (e.g. miner version / algorithm name) and generic config ("*") exist, then only the specific config is used. The generic config will be ignored entirely.**
 **Important: The miner config defined in the config file overrides all 'out-of-the-box' config that is defined in the miner definition file.**
@@ -764,8 +791,12 @@ Parameters and CommonParameters are cumulative.
 #### Add custom miner commands
 MPM stores all default miner commands (= what algos to mine) in the miner file. You can override these commands with your own by modifing the config file:
 
+The miner name must be entered without the ending version number (e.g. for ClaymoreEthash-v14.7 remove -v14.7)
+The algorithm name must be entered in the normalized form as returned by Get-Algorithm.
+Commands must match the data structure as found in the existing miner files. Not all miners use the same parameters.
+
     "MinersLegacy": {
-      "AMD_NVIDIA-ClaymoreEthash": {
+      "ClaymoreEthash": {
         "*": {
           "Commands": [
             {
@@ -784,7 +815,7 @@ MPM stores all default miner commands (= what algos to mine) in the miner file. 
             }
           ]
         },
-        "v14.6": {
+        "v14.7": {
           "Commands": [
             {
               "MainAlgorithm": "Ethash2gb",
@@ -804,11 +835,6 @@ MPM stores all default miner commands (= what algos to mine) in the miner file. 
         }
       }
     }
-
-The miner name must be entered without the ending version number (e.g. for AMD_NVIDIA-ClaymoreEthash_v14.7 remove _v14.6)
-The algorithm name must be entered in the normalized form as returned by Get-Algorithm.
-Commands must match the data structure as found in the exeisting miner files. Not all miners use the same parameters.
-
 "*" stands for ANY version or ANY algorithm.
 **If both, specific (e.g. miner version / algorithm name) and generic config ("*") exist, then only the specific config is used. The generic config will be ignored entirely.**
 **Important: The miner commands defined in the config file override all 'out-of-the-box' commands that are defined in the miner definition file.**
@@ -832,28 +858,27 @@ Modify the config file to define the program and its parameters. E.g.
         "PostStopCommand": "cmd.exe /c ECHO $((Get-Date).ToUniversalTime()): Stopped miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {\"$($_)@$($Pools.$_.Name)\"}) -join \"; \")}).  >> .\\Logs\\minerstop.log",
         "PostFailureCommand": "_ the command put here would be run after any miner failure"
       },
-      "AMD_NVIDIA-lolMinerEquihash": {
+      "lolMinerEquihash": {
         "*": {
           "PreStartCommand": "'C:\\Program Files (x86)\\MSI Afterburner\\MSIAfterburner.exe' -Profile1",
           "PostStartCommand": ""
-          "PreStopCommand": "_ the command put here would be run  before AMD_NVIDIA-lolMinerEquihash miner (any version) gets stopped",
+          "PreStopCommand": "_ the command put here would be run  before lolMinerEquihash miner (any version) gets stopped",
           "PostStopCommand": "",
           "PostFailureCommand": ""
         }
       },
-      "NVIDIA-CryptoDredge": {
-        "v0.19.1": {
+      "CryptoDredge": {
+        "v0.20.2": {
           "PreStartCommand": "'C:\\Program Files (x86)\\MSI Afterburner\\MSIAfterburner.exe' -Profile2",
           "PostStartCommand": ""
-          "PreStopCommand": "_ the command put here would be run before NVIDIA-CryptoDredge_v0.18.0 miner gets stopped",
+          "PreStopCommand": "_ the command put here would be run before CryptoDredge-v0.20.2 miner gets stopped",
           "PostStopCommand": "",
           "PostFailureCommand": "shutdown /r /t 10"
         }
       }
     }
-
 "*" stands for ANY miner or ANY miner version.
-The miner name must be entered without the ending version number (e.g. for NVIDIA-CryptoDredge_v18.0 remove _v18.0)
+The miner name must be entered without the ending version number (e.g. for CryptoDredge-v0.20.2 remove -v0.20.2)
 **Important: If two or more entries match, then the more specific entry is executed.**
 
 **Double quotes (") or backslashes must be escaped with backslash as shown below.**
@@ -874,7 +899,7 @@ Some miners (currently Claymore*, Gminer, lolMinerEquihash, Nanominer, SRBMinerC
 All other miners use the device order as returned by the OpenCL API.
 The result of the two ordering methods can be differnt and will lead to invalid device selectons where two miners, e.g. Gminer and ClaymoreDual, are selecting different device IDs, but as a consequence will finally end up running on the same GPU causing errors.
 
-To manually override the PCI deviceID mapping create a section in the config file similar to this:
+To override the PCI deviceID mapping create a section in the config file similar to this:
 
     {
       ...
@@ -1070,7 +1095,7 @@ In practice, this explains why when you first launch MPM it may pick a pool/algo
 
 ## MULTIPOOLMINER WEB GUI:
 
-MultiPoolMiner has a built in Web GUI at http://localhost:3999
+MultiPoolMiner has a built in Web GUI at http://localhost:3999 (port is 3999 unless you have changed the default API port)
 
 
 
@@ -1078,7 +1103,7 @@ MultiPoolMiner has a built in Web GUI at http://localhost:3999
 
 MultiPoolMiner allows basic monitoring through its built in API.
 
-API data is available at http://localhost:3999/<resource>
+API data is available at http://localhost:3999/<resource> (port is 3999 unless you have changed the default API port)
 
 For a list of supported API commands open [MPM directory\]APIDocs.html with your web browser.
 
