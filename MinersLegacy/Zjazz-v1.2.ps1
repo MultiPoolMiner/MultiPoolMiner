@@ -13,8 +13,8 @@ $HashSHA256 = "A65ED6394F667B5BB4126445A832BAA51C6D9E9AFDC9E868EE6CB3D99E9CB8ED"
 $Uri = "https://github.com/zjazz/zjazz_cuda_miner/releases/download/1.2/zjazz_cuda_win64_1.2.zip"
 $ManualUri = "https://github.com/zjazz/zjazz_cuda_miner"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

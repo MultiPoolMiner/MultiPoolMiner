@@ -13,8 +13,8 @@ $HashSHA256 = "1AD850A5336A1C76FFA724C8DA0630BAEAF4E9D8A6D59ECDA45336DCD7396C8A"
 $Uri = "https://github.com/nemosminer/ccminer/releases/download/1.1.15/ccminermtp.7z"
 $ManualUri = "https://github.com/nemosminer/ccminer/releases"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

@@ -13,8 +13,8 @@ $HashSHA256 = "FEB39973E6DE9DCC507C4919B05830AC58D2948AF24E206CA1ACE8933ED5EA29"
 $Uri = "https://github.com/KlausT/ccminer/releases/download/8.25/ccminer-825-cuda100-x64.zip"
 $ManualUri = "https://github.com/KlausT/ccminer"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -49,7 +49,7 @@ else {
         "skein"         = "" #Skein
         "whirl"         = "" #Whirlpool
         "whirlpoolx"    = "" #whirlpoolx
-        "x17"           = "" #X17 Verge
+        # "x17"           = "" #X17 Verge, NVIDIA-CcminerAlexis_v1.5 is faster
         "yescrypt"      = "" #yescrypt
 
         # ASIC - never profitable 25/11/2018

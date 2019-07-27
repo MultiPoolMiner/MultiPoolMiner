@@ -13,8 +13,8 @@ $HashSHA256 = "D82269A66F8495FC5113EA6B333B45EC5A282BE0E148DB956D3660E3AAB919B1"
 $Uri = "https://github.com/tpruvot/ccminer/releases/download/2.3.1-tpruvot/ccminer-2.3.1-cuda10.7z"
 $ManualUri = "https://github.com/tpruvot/ccminer"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -65,7 +65,7 @@ else {
         "sha256q"       = "" # new with 2.3.1
         "sha256t"       = "" #SHA256t
         #"skein"        = "" #Skein
-        "skein2"        = "" #Skein2
+        #"skein2"        = "" #Skein2, NVIDIA-CcminerAlexis_v1.5 is faster
         #"skunk"        = "" #Skunk
         #"sonoa"         = "" #97 hashes based on X17 ones (Sono)
         "stellite"      = "" #CryptoNightXtl

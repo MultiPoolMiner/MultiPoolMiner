@@ -13,8 +13,8 @@ $HashSHA256 = "B12418006BA11F9548EC484217C737FBF586892AF294307EBFFB111BF1B96631"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/SGMinerMTP/SgminerMTP_v0.1.1.zip"
 $ManualUri = "https://github.com/zcoinofficial/sgminer"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

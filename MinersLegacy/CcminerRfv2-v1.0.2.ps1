@@ -13,8 +13,8 @@ $HashSHA256 = ""
 $Uri = "https://github.com/MicroBitcoinOrg/CudaMiner/releases/download/1.0.2/ccminer.exe"
 $ManualUri = "https://github.com/MicroBitcoinOrg/CudaMiner"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

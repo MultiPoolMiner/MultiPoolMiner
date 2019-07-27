@@ -13,8 +13,8 @@ $HashSHA256 = ""
 $Uri = "https://github.com/nemosminer/Dynamic-GPU-Miner-Nvidia/releases/download/v1.0.2/ccminerdyn.7z"
 $ManualUri = "https://github.com/nemosminer/Dynamic-GPU-Miner-Nvidia"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -22,7 +22,7 @@ if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*
 if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject[]]@(
-        [PSCustomObject]@{Algorithm = "argon2d"; MinMemGB = 6.7; Params = ""} #Argon2dDYN
+        [PSCustomObject]@{Algorithm = "argon2d"; MinMemGB = 6; Params = ""} #Argon2dDYN
     )
 }
 

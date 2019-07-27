@@ -13,8 +13,8 @@ $HashSHA256 = "9d2aedd64b34331f3345e9ae230d5f56701b9da9b5b90a0b5b123bf90f3b2d7c"
 $Uri = "https://nemosminer.com/data/optional/progpowminer0.16-FinalCuda10.7z"
 $ManualUri = "https://nemosminer.com"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

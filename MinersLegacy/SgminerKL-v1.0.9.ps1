@@ -13,8 +13,8 @@ $HashSHA256 = "A24024BEA8789B62D61CB3F41432EA1A62EE5AD97CD3DEAB1E2308F40B127A4D"
 $Uri = "https://github.com/KL0nLutiy/sgminer-kl/releases/download/kl-1.0.9/sgminer-kl-1.0.9-windows.zip"
 $ManualUri = "https://github.com/KL0nLutiy/sgminer-kl"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

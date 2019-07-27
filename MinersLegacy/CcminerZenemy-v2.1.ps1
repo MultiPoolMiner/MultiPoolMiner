@@ -11,8 +11,8 @@ $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty
 $Path = ".\Bin\$($Name)\z-enemy.exe"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3378390.0"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -45,7 +45,7 @@ else {
         "c11"        = "" #C11, new in 1.11
         "hex"        = "" #Hex
         "phi"        = "" #PHI
-        "phi2"       = "" #Phi2
+        #"phi2"       = "" #Phi2, NVIDIA-CcminerZenemy_v2.1 is faster
         "poly"       = "" #Polytimos
         "skunk"      = "" #Skunk, new in 1.11
         "sonoa"      = "" #SONOA, new in 1.12

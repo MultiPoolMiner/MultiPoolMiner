@@ -13,8 +13,8 @@ $HashSHA256 = "95ED063A94FA1F18F4E703FD5FF09B9BE35AEBFF5FF80EC9A7CE1551D99C4258"
 $Uri = "https://github.com/zjazz/zjazz_amd_miner/releases/download/v1.2/zjazz_amd_win64_1.2.zip"
 $ManualUri = "https://github.com/zjazz/zjazz_amd_miner"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

@@ -13,8 +13,8 @@ $HashSHA256 = "0A181FF0EA3A0F2CDC0A2C151397496F1AA159F092BDD4D0022BD1D24A63E8FE"
 $Uri = "https://github.com/Pigeoncoin-Miner/Pigeoncoin/releases/download/v2.6-64bit-cu92/Pigeoncoin-Miner.cu92.64bit.2.6.zip"
 $ManualUri = "https://github.com/Pigeoncoin-Miner/Pigeoncoin"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

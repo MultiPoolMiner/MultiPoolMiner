@@ -13,8 +13,8 @@ $HashSHA256 = "E6E70FEE3C38F284F7025E2A1092E140A6CD4E066D1D8148794CE1E36FB5D0DD"
 $Uri = "https://tradeproject.de/download/Miner/TT-Miner-2.2.6.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5025783.0"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

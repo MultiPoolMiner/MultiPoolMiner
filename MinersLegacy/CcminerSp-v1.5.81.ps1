@@ -13,8 +13,8 @@ $HashSHA256 = "82477387C860517C5FACE8758BCB7AAC890505280BF713ACA9F86D7B306AC711"
 $Uri = "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z"
 $ManualUri = "https://github.com/sp-hash/ccminer"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -39,7 +39,7 @@ else {
         "scryptjane:nf" = "" #scryptjane:nf
         "s3"            = "" #S3
         "spread"        = "" #Spread
-        "x17"           = "" #x17
+        #"x17"           = "" #x17, NVIDIA-CcminerAlexis_v1.5 is faster
 
         # ASIC - never profitable 24/06/2018
         #"blake"         = "" #blake

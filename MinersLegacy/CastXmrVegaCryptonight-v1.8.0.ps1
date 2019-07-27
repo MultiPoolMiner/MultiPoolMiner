@@ -13,8 +13,8 @@ $HashSHA256 = "169C1DE91F6FB3402C9843A90997E3CD82D3F9BBF74EEA9C99F998A2CEEDC658"
 $Uri = "https://github.com/glph3k/cast_xmr/releases/download/v180/cast_xmr-vega-win64_180.zip"
 $ManualUri = "http://www.gandalph3000.com"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

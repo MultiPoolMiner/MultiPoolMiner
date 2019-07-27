@@ -11,8 +11,8 @@ $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty
 $Path = ".\Bin\$($Name)\CryptoDredge.exe"
 $ManualUri = "https://github.com/technobyl/CryptoDredge"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -67,7 +67,7 @@ else {
         [PSCustomObject]@{Algorithm = "skunk";       MinMemGB = 1; IntervalMultiplier = 1; Fee = 1; Params = ""} #Skunk
         [PSCustomObject]@{Algorithm = "tribus" ;     MinMemGB = 1; IntervalMultiplier = 1; Fee = 1; Params = ""} #Tribus, new with 0.8
         [PSCustomObject]@{Algorithm = "x16r";        MinMemGB = 1; IntervalMultiplier = 5; Fee = 1; Params = ""} #X16R, new in 0.11.0
-        [PSCustomObject]@{Algorithm = "x16rt";       MinMemGB = 1; IntervalMultiplier = 1; Fee = 1; Params = ""} #X16rt, new in 0.16.0
+        [PSCustomObject]@{Algorithm = "x16rt";       MinMemGB = 1; IntervalMultiplier = 3; Fee = 1; Params = ""} #X16rt, new in 0.16.0
         [PSCustomObject]@{Algorithm = "x16s";        MinMemGB = 1; IntervalMultiplier = 1; Fee = 1; Params = ""} #X16S, new in 0.11.0
         [PSCustomObject]@{Algorithm = "x17";         MinMemGB = 1; IntervalMultiplier = 1; Fee = 1; Params = ""} #X17, new in 0.9.5
         [PSCustomObject]@{Algorithm = "x21s";        MinMemGB = 1; IntervalMultiplier = 1; Fee = 1; Params = ""} #X21s, new in 0.13.0

@@ -13,8 +13,8 @@ $HashSHA256 = "940EB4C246019216C8F95FFB2F2E65FA147B13A65756A38D660146672E47844B"
 $Uri = "https://github.com/nemosminer/ccminerx16r-x16s/releases/download/v0.5/ccminerx16rx16s64-bit.7z"
 $ManualUri = "https://github.com/nemosminer/ccminerx16r-x16s"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -23,7 +23,7 @@ if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
 else {
     $Commands = [PSCustomObject]@{
         "bitcore"     = "" #Timetravel10 and Bitcore are technically the same
-        "c11"         = "" #C11
+        #"c11"         = "" #C11, NVIDIA-CcminerAlexis_v1.5 is faster
         #"equihash"   = "" #Equihash - Beaten by Bminer by 30%
         "hmq1725"     = "" #HMQ1725
         "hsr"         = "" #HSR
@@ -43,7 +43,7 @@ else {
         "x11evo"      = "" #X11evo
         "x12"         = "" #X12 - NOT TESTED
         "x16r"        = "" #X16R
-        "x17"         = "" #X17
+        #"x17"         = "" #X17, NVIDIA-CcminerAlexis_v1.5 is faster
        
         # ASIC - never profitable 24/06/2018
         #"blake"      = "" #blake

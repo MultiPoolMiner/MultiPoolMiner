@@ -13,8 +13,8 @@ $HashSHA256 = "C3CB1770B93611F45CC194DF11188E56ACE58DD718F5E4260C3ED65EABB1F6B7"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/EWBF2/EWBF.Equihash.miner.v0.6.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4466962.0"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -73,7 +73,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 2 / 100}
             }
 
-            if ($Algorithm_Norm -ne "Equihash1445" -or $Pers) {
+            if ($Algorithm_Norm -ne "Equihash1445" -or $AlgoPers) {
                 [PSCustomObject]@{
                     Name             = $Miner_Name
                     BaseName         = $Miner_BaseName
