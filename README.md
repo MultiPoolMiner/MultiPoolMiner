@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 27/07/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 28/07/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -195,7 +195,7 @@ By default the MPM monitor uses the BTC address ('-Wallet') to identify your min
 Report and monitor your mining rig's status by including the command above. Wallet address must be set even if you are only using MiningPoolHub as a pool. You can access the reported information by entering your wallet address on the https://multipoolminer.io/monitor web address. By using this service you understand and accept the terms and conditions detailed in this document (further below). 
 
 **-MinWorker**
-Minimum numner of workers at the pool required to mine on algo / coin, if less skip the algo / coin, there is little point in mining an algo or coin if there are only very few miners working on it, default: {"*": = 10}, to always mine all coins set to 0.
+Minimum numner of workers at the pool required to mine on algo / coin, if less skip the algo / coin, there is little point in mining an algo or coin if there are only very few miners working on it, default: {"\*": = 10}, to always mine all coins set to 0.
 Wildcards (* and ?) for the algorithm names are supported. If an algorithm name/wildcard matches more than one entry then the lower number takes priority.
 This is also a per-pool setting (see Advanced Configuration).
 
@@ -660,7 +660,7 @@ For ZergPool(Coins) solo or party mining edit the config file as follows:
         }
       }
     }
-"*" will be appended to any algorithm / coinname. No other wildcards are allowed.
+"\*" stands for any algorithm / coinname. No other wildcards are allowed.
 All values are cumulative, so if you specify a value for algorithm AND coinname, then both values will be appended.
     
 
@@ -694,9 +694,9 @@ E.g. To exclude the Ethash2gb or Blake2s algorithms from ClaymoreEthash-v14.7 mi
         },
       },
     },
-"*" stands for ANY miner version.
+"\*" stands for ANY miner version.
 The algorithm name must be entered in the normalized form as returned by Get-Algorithm.
-If both, a version specific and generic config ("*") exist, then all matching algorithms are excluded.
+If both, a version specific and generic config ("\*") exist, then all matching algorithms are excluded.
 
 #### Disable miner developer fee per miner
 Note: not all miners support turning off their built in fees, others will reduce the hashrate, check the miners web page for more information
@@ -720,8 +720,8 @@ E.g. To disable the dev fee mining from ClaymoreEthash-v14.7 miner:
         },
       },
     },
-"*" stands for ANY miner version.
-If this setting is defined in multiple places (version specific, version generic ("*") and global), then the most specific value is used.
+"\*" stands for ANY miner version.
+If this setting is defined in multiple places (version specific, version generic ("\*") and global), then the most specific value is used.
 
 #### Secondary algorithm intensities (dual algo miners only)
 
@@ -749,8 +749,8 @@ The algorithm names must be entered as the miner uses it, do not use the normali
             ]
         },
     }
-"*" stands for ANY version
-If both, specific (e.g. miner version) and generic config ("*") exist, then only the specific config is used. The generic config will be ignored entirely.
+"\*" stands for ANY version
+If both, specific (e.g. miner version) and generic config ("\*") exist, then only the specific config is used. The generic config will be ignored entirely.
 If you do not specify clustom values for all algorithms, then the miners default values will be applied for the unconfigured algorithms.
 
 #### Persistent miner configuration
@@ -780,8 +780,8 @@ Note: All parameter values must be entered with a leading space (' ') character!
         }
       }
     }
-"*" stands for ANY version or ANY algorithm.
-**If both, specific (e.g. miner version / algorithm name) and generic config ("*") exist, then only the specific config is used. The generic config will be ignored entirely.**
+"\*" stands for ANY version or ANY algorithm.
+**If both, specific (e.g. miner version / algorithm name) and generic config ("\*") exist, then only the specific config is used. The generic config will be ignored entirely.**
 **Important: The miner config defined in the config file overrides all 'out-of-the-box' config that is defined in the miner definition file.**
 
 Parameters: These settings will be added to the miner command line for the selected miner algorithm.
@@ -835,8 +835,8 @@ Commands must match the data structure as found in the existing miner files. Not
         }
       }
     }
-"*" stands for ANY version or ANY algorithm.
-**If both, specific (e.g. miner version / algorithm name) and generic config ("*") exist, then only the specific config is used. The generic config will be ignored entirely.**
+"\*" stands for ANY version or ANY algorithm.
+**If both, specific (e.g. miner version / algorithm name) and generic config ("\*") exist, then only the specific config is used. The generic config will be ignored entirely.**
 **Important: The miner commands defined in the config file override all 'out-of-the-box' commands that are defined in the miner definition file.**
 
 #### Pre- / post miner program execution
@@ -877,7 +877,7 @@ Modify the config file to define the program and its parameters. E.g.
         }
       }
     }
-"*" stands for ANY miner or ANY miner version.
+"\*" stands for ANY miner or ANY miner version.
 The miner name must be entered without the ending version number (e.g. for CryptoDredge-v0.20.2 remove -v0.20.2)
 **Important: If two or more entries match, then the more specific entry is executed.**
 
@@ -969,7 +969,6 @@ To display the balances of all enabled pools (excluding those that are excluded 
     }
 
 To display the sum of each currency in the balances (depending on 'ShowPoolBalancesExcludedPools' including those that are excluded with 'ExcludeMinerName') and the exchange rates for all currencies on the summary screen add '"ShowPoolBalancesDetails": true' to the general section:
-```
     {
       ...
       "SwitchingPrevention":  "$SwitchingPrevention",
@@ -991,7 +990,7 @@ Note: Only balances in BTC are listed, other currencies are currently not suppor
 
 As more and more algorithms can be mined with ASICs mining them with GPUs becomes unprofitable.
 To add algorithms to the list edit 'UnprofitableAlgorithms.txt' in the MPM directory.
-
+```
 [
      "Bitcoin",
      "Blake2s",
@@ -1023,7 +1022,7 @@ To add algorithms to the list edit 'UnprofitableAlgorithms.txt' in the MPM direc
      "X14",
      "X15"
  ]
-
+```
 
 Note: MPM will no longer mine/benchmark these algorithms as main algorithms, but they will still be used as secondary algorithm for dual miners.
 
