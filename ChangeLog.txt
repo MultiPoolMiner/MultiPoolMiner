@@ -1,4 +1,4 @@
-# MultiPoolMiner dev versions
+# MultiPoolMiner dev version
 
 Download link:
 https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.4.6.zip
@@ -6,7 +6,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.4.6.zip
 ## Changelog Version 3.4.6
 
 Important!!!
-The miner naming scheme has been changed by Aaronsace.This will cause all miners to benchmark everything again!
+The miner naming scheme has been changed by Aaronsace. This will cause all miners to benchmark everything again!
 
 #### Core changes
 - Changed miner naming scheme
@@ -41,6 +41,8 @@ The miner naming scheme has been changed by Aaronsace.This will cause all miners
 
 #### Known issues
 WildRig-v0.19.0: Some algorithms will fail on Radeon RX 5700 models (see https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2361)
+
+## Changelog Version 3.4.5
 
 #### Core changes
 - Added config parameter '-DisableEstimateCorrection'; reduce the algo price by a correction factor (actual_last24h / estimate_last24h) to counter pool overestimated prices
