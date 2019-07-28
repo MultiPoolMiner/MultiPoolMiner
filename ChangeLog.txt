@@ -40,7 +40,7 @@ The miner naming scheme has been changed by Aaronsace. This will cause all miner
 - Pools / All Pools: added columns StablePrice & MarginOfError
 
 #### Known issues
-WildRig-v0.19.0: Some algorithms will fail on Radeon RX 5700 models (see https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2361)
+- WildRig-v0.19.0: Some algorithms will fail on Radeon RX 5700 models (see https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2361)
 
 ## Changelog Version 3.4.5
 
