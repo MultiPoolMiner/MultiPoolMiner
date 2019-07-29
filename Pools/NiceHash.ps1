@@ -14,9 +14,9 @@ if (-not $Payout_Currencies) {
     return
 }
 
-$PoolRegions = "eu", "jp", "us"
+$PoolRegions = "eu", "jp", "usa"
 $PoolHost = "-new.nicehash.com"
-$PoolAPIUri =  "https://api2.nicehash.com/main/api/v2/public/simplemultialgo/info/"
+$PoolAPIUri = "https://api2.nicehash.com/main/api/v2/public/simplemultialgo/info/"
 $PoolAPIAlgodetailsUri = "https://api2.nicehash.com/main/api/v2/mining/algorithms/"
 
 $RetryCount = 3
