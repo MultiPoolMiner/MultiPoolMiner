@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 28/07/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 31/07/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -507,7 +507,7 @@ Note: Only the pools ending in ...Coins expose the coin name in their API.
 
 #### DisableEstimateCorrection per pool
 
-Some pools overestimate the projected profits. By default MPM will reduce the projected algo price by a correction factor (actual_last24h / estimate_last24h) to counter pool the overestimated prices.
+Some pools overestimate the projected profits. By default MPM will reduce the projected algo price by a correction factor (actual_last24h / estimate_last24h) to counter the pool overestimated prices.
 E.g. To disable this at Zpool:
 
     "Zpool": {
@@ -614,9 +614,7 @@ If you feel that a pool is exaggerating its estimations then set a penalty facto
 E.g. You feel that Zpool is exaggerating its estimations by 10% - Set PricePenaltyFactor to 0.9:
 
     "Zpool": {
-      ...
-      "PricePenaltyFactor":  0.9,
-      ...
+      "PricePenaltyFactor":  0.9
     }
 Note: This is also a general parameter (see *-PricePenaltyFactor*). If both parameters - general and pool - are present, then the pool parameter takes precedence.
 
@@ -678,9 +676,9 @@ E.g. To exclude the Ethash3gb algorithm from any version of the ClaymoreEthash m
           "ExcludeAlgorithm": [
             "Ethash2gb"
           ]
-        },
-      },
-    },
+        }
+      }
+    }
 
 E.g. To exclude the Ethash2gb or Blake2s algorithms from ClaymoreEthash-v14.7 miner:
 
@@ -691,9 +689,9 @@ E.g. To exclude the Ethash2gb or Blake2s algorithms from ClaymoreEthash-v14.7 mi
             "Blake2s",
             "Ethash2gb"
           ]
-        },
-      },
-    },
+        }
+      }
+    }
 "\*" stands for ANY miner version.
 The algorithm name must be entered in the normalized form as returned by Get-Algorithm.
 If both, a version specific and generic config ("\*") exist, then all matching algorithms are excluded.
@@ -707,9 +705,9 @@ E.g. To disable the dev fee mining from any version of the ClaymoreEthash miner:
       "ClaymoreEthash": {
         "*": {
           "DisableDevFeeMining":  true
-        },
-      },
-    },
+        }
+      }
+    }
 
 E.g. To disable the dev fee mining from ClaymoreEthash-v14.7 miner:
 
@@ -717,9 +715,9 @@ E.g. To disable the dev fee mining from ClaymoreEthash-v14.7 miner:
       "ClaymoreEthash": {
         "v14.7": {
           "DisableDevFeeMining":  true
-        },
-      },
-    },
+        }
+      }
+    }
 "\*" stands for ANY miner version.
 If this setting is defined in multiple places (version specific, version generic ("\*") and global), then the most specific value is used.
 
@@ -734,20 +732,22 @@ The algorithm names must be entered as the miner uses it, do not use the normali
       "ClaymoreEthash": {
         "*": {
         "SecondaryAlgoIntensities": {
-           "blake2s": [
-              45,
-              60,
-              75
-            ]
+          "blake2s": [
+            45,
+            60,
+            75
+          ]
         },
         "v14.7": {
-        "SecondaryAlgoIntensities": {
-           "decred": [
+          "SecondaryAlgoIntensities": {
+            "decred": [
               25,
               40,
               65
             ]
-        },
+          }
+        }
+      }
     }
 "\*" stands for ANY version
 If both, specific (e.g. miner version) and generic config ("\*") exist, then only the specific config is used. The generic config will be ignored entirely.
@@ -897,19 +897,17 @@ Settings in this section affect the overall behaviour of MPM and will take prece
 
 Some miners (currently Claymore*, Gminer, lolMinerEquihash, Nanominer, SRBMinerCryptonight & Wildrig) enumerate the GPU devices based on the PCI deviceID.
 All other miners use the device order as returned by the OpenCL API.
-The result of the two ordering methods can be differnt and will lead to invalid device selectons where two miners, e.g. Gminer and ClaymoreDual, are selecting different device IDs, but as a consequence will finally end up running on the same GPU causing errors.
+The result of the two ordering methods can be different and will lead to invalid device selections where the  affected miners will not mine on the correct device.
 
 To override the PCI deviceID mapping create a section in the config file similar to this:
 
     {
-      ...
       "DevicePciOrderMapping": {
         "GPU#00": "0",
         "GPU#01": "1",
         "GPU#02": "3",
         "GPU#03": "2"
-      },
-    ...
+      }
     }
 Note: In most cases there is no need for this extra mapping and all miners will operate just fine. This mapping only applies to miners using the PCI deviceID for the device enumeration. 
 More info can be found here:
@@ -923,10 +921,8 @@ Beginning with version 3.1.0 MPM makes miner and pool fees part of the profitabi
 To ignore miner and pool fees (as older versions did) add '"IgnoreFees":  true' to the general section:
 
     {
-      ...
       "SwitchingPrevention":  "$SwitchingPrevention",
-      "IgnoreFees":  true,
-      ...
+      "IgnoreFees":  true
     }
 
 #### PricePenaltyFactor
@@ -935,10 +931,8 @@ Default factor with which MPM multiplies the prices reported by ALL pools. The d
 E.g. You feel that MPM is exaggerating its profit estimations by 20% for ALL pools - Set PricePenaltyFactor to 0.8:
 
     }
-      ...
       "SwitchingPrevention":  "$SwitchingPrevention",
-      "PricePenaltyFactor":  0.8,
-      ...
+      "PricePenaltyFactor":  0.8
     }
 Note: This is also a pool parameter (see *PricePenaltyFactor per pool*). If both parameters - general and pool - are present, then the pool parameter takes precedence.
 
@@ -949,10 +943,8 @@ By default MPM hides most miner windows as to not steal focus. All miners write 
 To show the miner windows add '"ShowMinerWindow":  true' to the general section:
 
     {
-      ...
       "SwitchingPrevention":  "$SwitchingPrevention",
-      "ShowMinerWindow":  true,
-      ...
+      "ShowMinerWindow":  true
     }
 Note: Showing the miner windows disables writing the miner output to log files. Miners of API type 'Wrapper' will remain hidden.
 
@@ -962,26 +954,20 @@ MPM can gather the pending BTC balances from all configured pools.
 
 To display the balances of all enabled pools (excluding those that are excluded with *-ExcludeMinerName*) on the summary screen and in the web GUI add '"ShowPoolBalances":  true' to the general section:
     {
-      ...
       "SwitchingPrevention":  "$SwitchingPrevention",
       "ShowPoolBalances":  true
-      ...
     }
 
 To display the sum of each currency in the balances (depending on 'ShowPoolBalancesExcludedPools' including those that are excluded with 'ExcludeMinerName') and the exchange rates for all currencies on the summary screen add '"ShowPoolBalancesDetails": true' to the general section:
     {
-      ...
       "SwitchingPrevention":  "$SwitchingPrevention",
-      "ShowPoolBalancesDetails": true,
-      ...
+      "ShowPoolBalancesDetails": true
     }	
 
 To display the balances of all pools (including those that are excluded with *-ExcludeMinerName*) on the summary screen and in the web GUI add '"ShowPoolBalances":  true' to the general section:
     {
-      ...
       "SwitchingPrevention":  "$SwitchingPrevention",
       "ShowPoolBalancesExcludedPools":  true
-      ...
     }
 Note: Only balances in BTC are listed, other currencies are currently not supported.
 
@@ -1017,6 +1003,7 @@ To add algorithms to the list edit 'UnprofitableAlgorithms.txt' in the MPM direc
      "SHA256t",
      "Sia",
      "Sib",
+     "Skein",
      "X11",
      "X13",
      "X14",
