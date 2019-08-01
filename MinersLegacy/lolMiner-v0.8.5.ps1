@@ -24,9 +24,9 @@ else {
     $Commands = [PSCustomObject[]]@(
         [PSCustomObject]@{Algorithm = "Equihash965";    MinMemGB = 1.35; Params = ""}
         [PSCustomObject]@{Algorithm = "EquihashR12540"; MinMemGB = 3.00; Params = ""}
-        # [PSCustomObject]@{Algorithm = "Equihash1445";   MinMemGB = 1.85; Params = ""} # AMD_NVIDIA-Gminer_v1.52 is faster
+        # [PSCustomObject]@{Algorithm = "Equihash1445";   MinMemGB = 1.85; Params = ""} # AMD_NVIDIA-Gminer_v1.53 is faster
         [PSCustomObject]@{Algorithm = "EquihashR15050"; MinMemGB = 2.75; Params = ""}
-        #[PSCustomObject]@{Algorithm = "Equihash1927";   MinMemGB = 3.0;  Params = ""} # AMD_NVIDIA-Gminer_v1.52 is faster
+        #[PSCustomObject]@{Algorithm = "Equihash1927";   MinMemGB = 3.0;  Params = ""} # AMD_NVIDIA-Gminer_v1.53 is faster
         [PSCustomObject]@{Algorithm = "Equihash2109";   MinMemGB = 1.0;  Params = ""} # new with 0.6 alpha 3
         [PSCustomObject]@{Algorithm = "Cuckarood29";    MinMemGB = 4.0;  Params = ""} # new with 0.8
         [PSCustomObject]@{Algorithm = "Cuckatoo31";     MinMemGB = 4.0;  Params = ""} # new with 0.8
