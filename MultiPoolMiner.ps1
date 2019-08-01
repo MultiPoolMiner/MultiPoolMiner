@@ -143,7 +143,7 @@ param(
 
 Clear-Host
 
-$Version = "3.4.6"
+$Version = "3.4.7"
 $VersionCompatibility = "3.3.0"
 $Strikes = 3
 $SyncWindow = 5 #minutes
@@ -571,7 +571,8 @@ while (-not $API.Stop) {
     if (($Config | ConvertTo-Json -Compress -Depth 10) -ne ($OldConfig | ConvertTo-Json -Compress -Depth 10)) {$AllPools = $null}
     $OldestAcceptedPoolData = (Get-Date).ToUniversalTime().AddHours( -24) # Allow only pools which were updated within the last 24hrs
 
-    $AllPools = @($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object {$AllPools | Where-Object Name -EQ $_}) | 
+
+    $AllPools = @(@($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object {$AllPools | Where-Object Name -EQ $_}) | 
         Where-Object {$_.MarginOfError -le (1 - $Config.MinAccuracy)} |
         Where-Object {$_.Updated -ge $OldestAcceptedPoolData} | 
         Where-Object {$Config.PoolName.Count -eq 0 -or (Compare-Object $Config.PoolName $_.Name -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0} |
@@ -593,7 +594,10 @@ while (-not $API.Stop) {
         Where-Object {$PoolName = $_.Name; $_.Workers -eq $null -or $_.Workers -ge (($Config.Pools.$($PoolName).MinWorker.PSObject.Properties.Name | Where-Object {$Algorithm -like $_} | ForEach-Object {$Config.Pools.$($PoolName).MinWorker.$_}) | Measure-Object -Minimum).Minimum} | 
         ForEach-Object {if ($_.EstimateCorrection -le 0) {$_ | Add-Member EstimateCorrection 1 -Force}; $_} | 
         ForEach-Object {if ((-not $Config.Pools.$Name.DisableEstimateCorrection) -and $_.EstimateCorrection -ge 0 -and $_.EstimateCorrection -lt 1) {$_.Price = $_.Price * $_.EstimateCorrection; $_.StablePrice = $_.StablePrice * $_.EstimateCorrection}; $_} | 
-        Sort-Object Algorithm
+        Sort-Object Algorithm)
+
+     Remove-Variable NewPools
+
     if ($API) {$API.AllPools = $AllPools} #Give API access to the current running configuration
 
     if ($AllPools.Count -eq 0) {
@@ -968,7 +972,7 @@ while (-not $API.Stop) {
         Update-APIDeviceStatus $API $Devices
     }
 
-    #Hack: temporarily make all profits positive, BestMiners_Combos(_Comparison) produces wrong sort order when profits are negative
+
     #Hack: temporarily make all earnings & profits positive, BestMiners_Combos(_Comparison) produces wrong sort order when earnings or profits are negative
     $SmallestEarningBias = ([Double][Math]::Abs(($ActiveMiners | Sort-Object Earning_Bias | Select-Object -First 1).Earning_Bias)) * 2
     $SmallestEarningComparison = ([Double][Math]::Abs(($ActiveMiners | Sort-Object Earning_Comparison | Select-Object -First 1).Earning_Comparison)) * 2
@@ -1185,7 +1189,7 @@ while (-not $API.Stop) {
         @{Width = 15; Label = "$($FirstCurrency)/GH/Day"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {ConvertTo-LocalCurrency -Value ($_.Price * 1000000000) -BTCRate ($Rates.BTC.$FirstCurrency) -Offset 4}}; Align = "right"}, 
         @{Width = [Int](($Miners | ForEach-Object Name | Measure-Object Length -Maximum).maximum + ($Miners | ForEach-Object CoinName | Measure-Object Length -Maximum).maximum); Label = "Pool[Fee]"; Expression = {$_.Pools.PSObject.Properties.Value | ForEach-Object {if ($_.CoinName) {"$($_.Name)-$($_.CoinName)$("[{0:P2}]" -f [Double]$_.Fee)"} else {"$($_.Name)$("[{0:P2}]" -f [Double]$_.Fee)"}}}}
     ))
-    $Miners | Where-Object {$_.Earning_Unbias -ge 1E-6 -or $_.Earning -ge 1E-6 -or $_.Earning -eq $null -or ($Config.MeasurePowerUsage -and $_.PowerUsage -eq $null -and $_.Profit -ne 0)} | Sort-Object DeviceName, @{Expression = $( if ($Config.IgnorePowerCost) {"Earning_Bias"} else {"Profit_Bias"}); Descending = $True}, @{Expression = {$_.HashRates.PSObject.Properties.Name}} | Format-Table $Miner_Table -GroupBy @{Name = "Device$(if (@($_).count -ne 1) {"s"})"; Expression = {"$($_.DeviceName) [$(($Devices | Where-Object Name -eq $_.DeviceName).Model)]"}} | Out-Host
+    $Miners | Where-Object {$_.DeviceName -like "CPU*" -or  $_.Earning_Unbias -ge 1E-6 -or $_.Earning -ge 1E-6 -or $_.Earning -eq $null -or ($Config.MeasurePowerUsage -and $_.PowerUsage -eq $null -and $_.Profit -ne 0)} | Sort-Object DeviceName, @{Expression = $( if ($Config.IgnorePowerCost) {"Earning_Bias"} else {"Profit_Bias"}); Descending = $True}, @{Expression = {$_.HashRates.PSObject.Properties.Name}} | Format-Table $Miner_Table -GroupBy @{Name = "Device$(if (@($_).count -ne 1) {"s"})"; Expression = {"$($_.DeviceName) [$(($Devices | Where-Object Name -eq $_.DeviceName).Model)]"}} | Out-Host
     Remove-Variable Miner_Table
 
     #Display benchmarking progress
@@ -1354,7 +1358,7 @@ while (-not $API.Stop) {
                 $Miner.Speed_Live += [Double]$Miner_Speed
             }
 
-            # Update API information7
+            # Update API information
             if ($API) {
                 $API.RunningMiners = $RunningMiners
                 $API.FailedMiners = $FailedMiners
@@ -1498,6 +1502,23 @@ while (-not $API.Stop) {
                     $WatchdogTimer.Kicked = (Get-Date).ToUniversalTime()
                 }
             }
+        }
+    }
+    #Benchmarking: Stop all CPU miners (otherwise the loop might take ages)
+    if ($MinersNeedingBenchmark) {
+        $ActiveMiners | Where-Object {$_.GetStatus() -eq "Running"} | Where-Object {$_.DeviceName -like "CPU#*"} | Foreach-Object {
+            $Miner =  $_
+            #Pre miner failure exec
+            $Command = $ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PreStop"))
+            if ($Command) {Start-PrePostCommand -Command $Command -Event "PreStop"}
+            Write-Log "Stopping miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Miner.Pool | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))"}) -join "; ")}). "
+            $Miner.SetStatus("Idle")
+            $Miner.StatusMessage = " stopped gracefully"
+            #Post miner stop exec
+            $Command = $ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PostStop"))
+            if ($Command) {Start-PrePostCommand -Command $Command -Event "PostStop"}
+            $RunningMiners = @($RunningMiners | Where-Object {$_ -ne $Miner})
+            if ($API) {$API.RunningMiners = $RunningMiners}
         }
     }
     Write-Log "Starting next run. "
