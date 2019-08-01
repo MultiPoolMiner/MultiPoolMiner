@@ -62,18 +62,19 @@ class NanoMiner : Miner {
         $Timeout = 5 #seconds
 
         $Request = "http://$($Server):$($this.Port)/stats"
-        $Data = [PSCustomObject]@{}
+        $Response = ""
 
         try {
             if ($Global:PSVersionTable.PSVersion -ge [System.Version]("6.2.0")) {
-                $Data = Invoke-RestMethod $Request -TimeoutSec $Timeout -DisableKeepAlive -MaximumRetryCount 3 -RetryIntervalSec 1 -ErrorAction Stop
+                $Response = Invoke-WebRequest $Request -TimeoutSec $Timeout -DisableKeepAlive -MaximumRetryCount 3 -RetryIntervalSec 1 -ErrorAction Stop
             }
             else {
-                $Data = Invoke-RestMethod $Request -UseBasicParsing -TimeoutSec $Timeout -DisableKeepAlive -ErrorAction Stop
+                $Response = Invoke-WebRequest $Request -UseBasicParsing -TimeoutSec $Timeout -DisableKeepAlive -ErrorAction Stop
             }
+            $Data = $Response | ConvertFrom-Json -ErrorAction Stop
         }
         catch {
-            return @($Request, $Data)
+            return @($Request, $Response)
         }
 
         $HashRate = [PSCustomObject]@{}
