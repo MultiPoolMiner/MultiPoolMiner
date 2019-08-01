@@ -1,12 +1,32 @@
 # MultiPoolMiner dev version
 
 Download link:
-https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.4.6.zip
+https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.4.7.zip
+
+## Changelog Version 3.4.7
+
+#### Core changes
+- Added 'Skein' algorithm to list unprofitable algos
+- Always list all available CPU miners in the list of available miners (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2363#issuecomment-516267640)
+- Fixed an issue where MPM did not properly detect when there are no more pools available
+- Stop all CPU miners at the end of a benchmark loop to decrease overall time required for benchmarking
+
+#### Miner changes
+- Changed CcminerTrex-v0.12.2b; added ' --no-watchdog' parameter (https://github.com/UselessGuru/MultiPoolMiner/pull/20#issuecomment-515229917)
+- Fixed Bminer-v15.7.6, GMiner-v1.53 & NanoMiner-v1.5.2; device selection did not work for rigs with multiple cards of the same type (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2363#issuecomment-516311895)
+- Updated Jayddee-v3.9.6.2; support for Blake2s
+- Updated NanoMiner-v1.5.3
+
+#### Pool changes
+- NiceHash.ps1: Fixed pool name resolution for region 'US' (https://github.com/UselessGuru/MultiPoolMiner/issues/18#issuecomment-515206493)
+
+#### API changes
+- Replaced function calls 'Invoke-RestMethod' with 'Invoke-WebRequest' in an attempt to fix irregular lockups
 
 ## Changelog Version 3.4.6
 
-Important!!!
-The miner naming scheme has been changed by Aaronsace. This will cause all miners to benchmark everything again!
+**Important!!!
+The miner naming scheme has been changed by Aaronsace. This will cause all miners to benchmark everything again!**
 
 #### Core changes
 - Changed miner naming scheme
