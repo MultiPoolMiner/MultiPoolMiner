@@ -27,7 +27,6 @@ else {
         "bcd"        = "" #BitcoinDiamond, new in 0.6.5
         "bitcore"    = "" #Timetravel10 and Bitcore are technically the same
         "c11"        = "" #C11
-        "dedal"      = "" #Dedal, new in 0.8.2
         "geek"       = "" #Geek, new in 0.8.0
         # "hmq1725"    = "" #Hmq1725, new in 0.6.4; NVIDIA-CryptoDredge_v0.20.2 is faster
         "honeycomb"  = "" #Honeycomb, new in 12.0
@@ -38,7 +37,6 @@ else {
         "pawelhash"  = "" #GltPawelHash, new in 0.8.6
         "phi"        = "" #Phi
         "polytimos"  = "" #Polytimos, new in 0.6.3
-        "renesis"    = "" #Renesis
         "sha256q"    = "" #Sha256q, new in 0.9.1
         "sha256t"    = "" #Sha256t
         "skunk"      = "" #Skunk, new in 0.6.3
