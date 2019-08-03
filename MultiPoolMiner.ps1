@@ -143,7 +143,7 @@ param(
 
 Clear-Host
 
-$Version = "3.4.7"
+$Version = "3.4.8"
 $VersionCompatibility = "3.3.0"
 $Strikes = 3
 $SyncWindow = 5 #minutes
@@ -1026,6 +1026,12 @@ while (-not $API.Stop) {
     $MiningProfit = (($BestMiners_Combo | Measure-Object Profit -Sum).Sum) * $Rates.BTC.$FirstCurrency
     $MiningCost = (($BestMiners_Combo | Measure-Object PowerCost -Sum).Sum + $BasePowerCost) * $Rates.BTC.$FirstCurrency
     if ($API) {
+        $API.BestMiners = $BestMiners
+        $API.BestMiners_Comparison = $BestMiners_Comparison
+        $API.BestMiners_Combos = $BestMiners_Combos
+        $API.BestMiners_Combos_Comparison = $BestMiners_Combos_Comparison
+        $API.BestMiners_Combo = $BestMiners_Combo
+        $API.BestMiners_Combo_Comparison = $BestMiners_Combo_Comparison
         $API.MiningEarning = $MiningEarning
         $API.MiningProfit = $MiningProfit
         $API.MiningCost = $MiningCost
@@ -1447,7 +1453,6 @@ while (-not $API.Stop) {
     Remove-Variable ExpectedHashRateSamples -ErrorAction SilentlyContinue
     Remove-Variable MinimumReceivedHashRateSamples -ErrorAction SilentlyContinue
     Remove-Variable HashRateSamples -ErrorAction SilentlyContinue
-    Remove-Variable HashRateSamplesPerInterval -ErrorAction SilentlyContinue
     Remove-Variable PollEnd -ErrorAction SilentlyContinue
 
     Write-Log "Finish waiting before next run. "
