@@ -13,8 +13,8 @@ $HashSHA256 = "AF7E52C6F71B2B114299BB2AFAAF11B65800AC0390C037473E0CEBAE8E9D4BC5"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/neoscryptminer/Claymore.s.NeoScrypt.AMD.GPU.Miner.v1.2.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3012600.0"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

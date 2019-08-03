@@ -9,12 +9,12 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\teamredminer.exe"
-$HashSHA256 = "934EE7F13BFCB72838B81309E9A091944C3966FF55934213EBD666C912C42B19"
-$Uri = "https://github.com/todxx/teamredminer/releases/download/0.5.5/teamredminer-v0.5.5-win.zip"
+$HashSHA256 = "19B54420844118EAF06AEDE1FEFD9CAF86869545252DF945FD268A7E07638CA5"
+$Uri = "https://github.com/todxx/teamredminer/releases/download/0.5.6/teamredminer-v0.5.6-win.zip"
 $ManualUri = "https://github.com/todxx/teamredminer"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -71,19 +71,26 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 $Parameters = Get-ParameterPerDevice $Parameters $Miner_Device.Type_Vendor_Index
             }
 
+            Switch ($Algorithm_Norm) {
+                "X16R"  {$IntervalMultiplier = 5}
+                "X16Rt" {$IntervalMultiplier = 3}
+                default {$IntervalMultiplier = 1}
+            }
+
             [PSCustomObject]@{
-                Name       = $Miner_Name
-                BaseName   = $Miner_BaseName
-                Version    = $Miner_Version
-                DeviceName = $Miner_Device.Name
-                Path       = $Path
-                HashSHA256 = $HashSHA256
-                Arguments  = ("--algo=$($Algorithm) --api_listen=127.0.0.1:$Miner_Port --url=$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user=$($Pools.$Algorithm_Norm.User) --pass=$($Pools.$Algorithm_Norm.Pass)$Parameters$CommonParameters --platform=$($Miner_Device.PlatformId | Sort-Object -Unique) --devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
-                HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
-                API        = "Xgminer"
-                Port       = $Miner_Port
-                URI        = $Uri
-                Fees       = [PSCustomObject]@{$Algorithm_Norm = $_.Fee / 100}
+                Name               = $Miner_Name
+                BaseName           = $Miner_BaseName
+                Version            = $Miner_Version
+                DeviceName         = $Miner_Device.Name
+                Path               = $Path
+                HashSHA256         = $HashSHA256
+                Arguments          = ("--algo=$($Algorithm) --api_listen=127.0.0.1:$Miner_Port --url=$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user=$($Pools.$Algorithm_Norm.User) --pass=$($Pools.$Algorithm_Norm.Pass)$Parameters$CommonParameters --platform=$($Miner_Device.PlatformId | Sort-Object -Unique) --devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
+                HashRates          = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
+                API                = "Xgminer"
+                Port               = $Miner_Port
+                URI                = $Uri
+                Fees               = [PSCustomObject]@{$Algorithm_Norm = $_.Fee / 100}
+                IntervalMultiplier = $IntervalMultiplier
             }
         }
     }

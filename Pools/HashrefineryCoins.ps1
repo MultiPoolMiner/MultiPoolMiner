@@ -5,104 +5,168 @@ param(
     [PSCustomObject]$Config
 )
 
-$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-
-# Guaranteed payout currencies
-$Payout_Currencies = @("BTC") | Where-Object {$Config.Pools.$Name.Wallets.$_}
-if (-not $Payout_Currencies) {
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
-    return
-}
-
+$PoolFileName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $PoolRegions = "us"
 $PoolAPIStatusUri = "http://pool.hashrefinery.com/api/status"
 $PoolAPICurrenciesUri = "http://pool.hashrefinery.com/api/currencies"
-
-if (-not $Payout_Currencies) {
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
-    return
-}
-
 $RetryCount = 3
 $RetryDelay = 2
-while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -gt 0) {
-    try {
-        if (-not $APIStatusResponse) {$APIStatusResponse = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
-        if (-not $APICurrenciesResponse) {$APICurrenciesResponse  = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+
+$Name = $PoolFileName -replace "Coins"
+$NameCoins = "$($Name)Coins"
+$PoolNames = @(@($Name, $NameCoins) | Where-Object {((Test-Path "Pools\$_.ps1" -PathType Leaf -ErrorAction SilentlyContinue) -and (-not $Config.PoolName -or $Config.PoolName -contains $_ -and $Config.ExcludePoolName -notcontains $_))})
+
+$PoolNames | ForEach-Object {
+    $PoolName = $_
+
+    #*Coins quit immediately if both files (Coins and Non-Coins) exist in pool dir. One pool file works for both kinds.
+    if ($PoolFileName -eq $NameCoins -and $PoolNames.Count -eq 2) {return}
+
+    # Guaranteed payout currencies
+    $Payout_Currencies = @("BTC") | Where-Object {$Config.Pools.$PoolName.Wallets.$_}
+    if (-not $Payout_Currencies) {
+        Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
+        break
     }
-    catch {
-        Start-Sleep -Seconds $RetryDelay
-        $RetryCount--        
+
+    if (-not $Payout_Currencies) {
+        Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
+        return
     }
-}
 
-if (-not ($APIStatusResponse -and $APICurrenciesResponse)) {
-    Write-Log -Level Warn "Pool API ($Name) has failed. "
-    return
-}
-
-if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
-    Write-Log -Level Warn "Pool API ($Name) [StatusUri] returned nothing. "
-    return
-}
-
-if (($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
-    Write-Log -Level Warn "Pool API ($Name) [CurrenciesUri] returned nothing. "
-    return
-}
-
-$APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesResponse.$_.hashrate -GT 0} | Foreach-Object {
-
-    # Not all algorithms are always exposed in API
-    $Algorithm = $APICurrenciesResponse.$_.algo
-
-    if ($APIStatusResponse.$Algorithm) {
-
-        $APICurrenciesResponse.$_ | Add-Member Symbol $_ -ErrorAction SilentlyContinue
-
-        $CoinName       = Get-CoinName $APICurrenciesResponse.$_.name
-        $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
-        if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
-
-        $PoolHost       = "mine.ahashpool.com"
-        $Port           = $APICurrenciesResponse.$_.port
-        $MiningCurrency = $APICurrenciesResponse.$_.symbol
-        $Workers        = $APICurrenciesResponse.$_.workers
-        $Fee            = $APIStatusResponse.$Algorithm.Fees / 100
-
-        $Divisor = 1000000000000 * [Double]$APIStatusResponse.$Algorithm.mbtc_mh_factor
-
-        $Stat = Set-Stat -Name "$($Name)_$($CoinName)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
-        $Stat = Set-Stat -Name "$($Name)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
-
+    while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -gt 0) {
         try {
-            $EstimateCorrection = ($APIStatusResponse.$Algorithm.actual_last24h / 1000) / $APIStatusResponse.$Algorithm.estimate_last24h
+            if (-not $APIStatusResponse) {$APIStatusResponse = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+            if (-not $APICurrenciesResponse) {$APICurrenciesResponse  = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
         }
-        catch {}
+        catch {
+            Start-Sleep -Seconds $RetryDelay
+            $RetryCount--
+        }
+    }
 
-        $PoolRegions | ForEach-Object {
-            $Region = $_
-            $Region_Norm = Get-Region $Region
+    if (-not ($APIStatusResponse -and $APICurrenciesResponse)) {
+        Write-Log -Level Warn "Pool API ($PoolName) has failed. "
+        break
+    }
 
-            $Payout_Currencies | ForEach-Object {
-                [PSCustomObject]@{
-                    Algorithm          = $Algorithm_Norm
-                    CoinName           = $CoinName
-                    Price              = $Stat.Live
-                    StablePrice        = $Stat.Week
-                    MarginOfError      = $Stat.Week_Fluctuation
-                    Protocol           = "stratum+tcp"
-                    Host               = "$Algorithm.$PoolHost"
-                    Port               = $Port
-                    User               = $Config.Pools.$Name.Wallets.$_
-                    Pass               = "$($Config.Pools.$Name.Worker),c=$_"
-                    Region             = $Region_Norm
-                    SSL                = $false
-                    Updated            = $Stat.Updated
-                    Fee                = $Fee
-                    Workers            = [Int]$Workers
-                    MiningCurrency     = $MiningCurrency
-                    EstimateCorrection = $EstimateCorrection
+    if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+        Write-Log -Level Warn "Pool API ($PoolName) [StatusUri] returned nothing. "
+        break
+    }
+
+    if (($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+        Write-Log -Level Warn "Pool API ($PoolName) [CurrenciesUri] returned nothing. "
+        break
+    }
+
+    if ($PoolName -eq ($PoolName -replace "Coins")) {
+        $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APIStatusResponse.$_.hashrate -gt 0} | ForEach-Object {
+
+            $PoolHost       = "hashrefinery.com"
+            $Port           = $APIStatusResponse.$_.port
+            $Algorithm      = $APIStatusResponse.$_.name
+            $CoinName       = Get-CoinName $(if ($APIStatusResponse.$_.coins -eq 1) {$APICurrenciesResponse.$($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesResponse.$_.algo -eq $Algorithm}).Name})
+            $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
+            if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
+            $Workers        = $APIStatusResponse.$_.workers
+            $Fee            = $APIStatusResponse.$Algorithm.Fees / 100
+        
+            $Divisor = 1000000 * [Double]$APIStatusResponse.$Algorithm.mbtc_mh_factor
+        
+            if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
+            else {$Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
+        
+            try {
+                $EstimateCorrection = ($APIStatusResponse.$_.actual_last24h / 1000) / $APIStatusResponse.$_.estimate_last24h
+            }
+            catch {}
+        
+            $PoolRegions | ForEach-Object {
+                $Region = $_
+                $Region_Norm = Get-Region $Region
+        
+                $Payout_Currencies | ForEach-Object {
+                    [PSCustomObject]@{
+                        Name               = $PoolName
+                        Algorithm          = $Algorithm_Norm
+                        CoinName           = $CoinName
+                        Price              = $Stat.Live
+                        StablePrice        = $Stat.Week
+                        MarginOfError      = $Stat.Week_Fluctuation
+                        Protocol           = "stratum+tcp"
+                        Host               = "$Algorithm.$Region.$PoolHost"
+                        Port               = $Port
+                        User               = $Config.Pools.$PoolName.Wallets.$_
+                        Pass               = "$($Config.Pools.$PoolName.Worker),c=$_"
+                        Region             = $Region_Norm
+                        SSL                = $false
+                        Updated            = $Stat.Updated
+                        Fee                = $Fee
+                        Workers            = [Int]$Workers
+                        EstimateCorrection = $EstimateCorrection
+                    }
+                }
+            }
+        }
+    }
+
+    if ($PoolName -eq "$($PoolName -replace "Coins")Coins") {
+        $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesResponse.$_.hashrate -gt 0} | ForEach-Object {
+
+            $Algorithm = $APICurrenciesResponse.$_.algo
+
+            # Not all algorithms are always exposed in API
+            if ($APIStatusResponse.$Algorithm) {
+
+                $APICurrenciesResponse.$_ | Add-Member Symbol $_ -ErrorAction SilentlyContinue
+
+                $CoinName       = Get-CoinName $APICurrenciesResponse.$_.name
+                $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
+                if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
+
+                $PoolHost       = "mine.ahashpool.com"
+                $Port           = $APICurrenciesResponse.$_.port
+                $MiningCurrency = $APICurrenciesResponse.$_.symbol
+                $Workers        = $APICurrenciesResponse.$_.workers
+                $Fee            = $APIStatusResponse.$Algorithm.Fees / 100
+
+                $Divisor = 1000000000000 * [Double]$APIStatusResponse.$Algorithm.mbtc_mh_factor
+
+                $Stat = Set-Stat -Name "$($PoolName)_$($CoinName)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
+                $Stat = Set-Stat -Name "$($PoolName)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
+
+                try {
+                    $EstimateCorrection = ($APIStatusResponse.$Algorithm.actual_last24h / 1000) / $APIStatusResponse.$Algorithm.estimate_last24h
+                }
+                catch {}
+
+                $PoolRegions | ForEach-Object {
+                    $Region = $_
+                    $Region_Norm = Get-Region $Region
+
+                    $Payout_Currencies | ForEach-Object {
+                        [PSCustomObject]@{
+                            Name               = $PoolName
+                            Algorithm          = $Algorithm_Norm
+                            CoinName           = $CoinName
+                            Price              = $Stat.Live
+                            StablePrice        = $Stat.Week
+                            MarginOfError      = $Stat.Week_Fluctuation
+                            Protocol           = "stratum+tcp"
+                            Host               = "$Algorithm.$PoolHost"
+                            Port               = $Port
+                            User               = $Config.Pools.$PoolName.Wallets.$_
+                            Pass               = "$($Config.Pools.$PoolName.Worker),c=$_"
+                            Region             = $Region_Norm
+                            SSL                = $false
+                            Updated            = $Stat.Updated
+                            Fee                = $Fee
+                            Workers            = [Int]$Workers
+                            MiningCurrency     = $MiningCurrency
+                            EstimateCorrection = $EstimateCorrection
+                        }
+                    }
                 }
             }
         }

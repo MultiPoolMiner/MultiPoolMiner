@@ -13,8 +13,8 @@ $HashSHA256 = "2D359EC26DE8C150341DC8665FB0F7C94909D1DE061A12ABE5C2EE391B5ADBF8"
 $Uri = "https://github.com/jceminer/cn_gpu_miner/raw/master/jce_cn_gpu_miner.033b18.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3281187.0"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

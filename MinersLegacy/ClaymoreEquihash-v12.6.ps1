@@ -13,8 +13,8 @@ $HashSHA256 = "46294BF3FD21DD0EE3CC0F0D376D5C8DFB341DE771B47F00AE2F02E7660F06B9"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/zecminer64/Claymore.s.ZCash.AMD.GPU.Miner.v12.6.-.Catalyst.15.12-17.x.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=1670733.0"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

@@ -13,8 +13,8 @@ $HashSHA256 = "7962745B0E110F16CD0DE2527143E4E7A6F37860BDE3910431CC850E079F2268"
 $Uri = "https://github.com/Minerx117/ccminer-bmw512/releases/download/v2.2.5/ccminerbmw.7z"
 $ManualUri = "https://github.com/pallas1/ccminer-bmw512"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

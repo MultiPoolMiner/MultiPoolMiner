@@ -9,12 +9,12 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\SRBMiner-CN.exe"
-$HashSHA256 = "8B6DEA9470CB6223AC97592225A8C4E2480DF4697DB132C0DC1273BA292C05CB"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/SRBMiner/SRBMiner-CN-V1-9-1.zip"
+$HashSHA256 = "41F6E563E96A1D2E8AF3B2C6351B25CE0D05E9976A88B29FE3291BBB98424C4D"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/SRBMiner/SRBMiner-CN-V1-9-3.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3167363.0"
  
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
                
@@ -99,7 +99,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                     Content  = [PSCustomObject]@{
                         cryptonight_type = $Algorithm
                         double_threads = $DoubleThreads
-                        gpu_conf = @($Miner_Device.PCIBus_Type_PlatformId_Index | Foreach-Object {
+                        gpu_conf = @($Miner_Device.PCIBus_Type_PlatformId_Index | ForEach-Object {
                             [PSCustomObject]@{
                                 "id"        = $_  
                                 "intensity" = $(if ($Intensity | Select-Object -Index $_ -ErrorAction SilentlyContinue) {$Intensity | Select-Object -Index $_} else {0})

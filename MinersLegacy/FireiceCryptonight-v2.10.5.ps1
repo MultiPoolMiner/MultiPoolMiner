@@ -13,8 +13,8 @@ $HashSHA256 = "DAA7E84E9F8BE9EECB664A955CB74C64743A7027B1CC068439DA97950C83FCCC"
 $Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.10.5/xmr-stak-win64-2.10.5.zip"
 $ManualUri = "https://github.com/fireice-uk/xmr-stak"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

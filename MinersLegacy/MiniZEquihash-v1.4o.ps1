@@ -13,8 +13,8 @@ $HashSHA256 = "3591C6F6101A59DA571209C7F00047EF8BF0BD538576E0FAAC4F123EB53C602F"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.4o_cuda10_win-x64.zip"
 $ManualUri = "https://miniz.ch/download"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -73,17 +73,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             }
             else {$AlgoPers = ""}
 
-            #Optionally disable dev fee mining
-            if ($null -eq $Miner_Config) {$Miner_Config = [PSCustomObject]@{DisableDevFeeMining = $Config.DisableDevFeeMining}}
-            if ($Miner_Config.DisableDevFeeMining) {
-                $NoFee = " --donate=0"
-                $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 0 / 100}
-            }
-            else {
-                $NoFee = ""
-                $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 2 / 100}
-            }
-
             [PSCustomObject]@{
                 Name       = $Miner_Name
                 BaseName   = $Miner_BaseName
@@ -96,7 +85,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 API        = "MiniZ"
                 Port       = $Miner_Port
                 URI        = $Uri
-                Fees       = $Miner_Fees
+                Fees       = [PSCustomObject]@{$Algorithm_Norm = 2 / 100}
             }
         }
     }

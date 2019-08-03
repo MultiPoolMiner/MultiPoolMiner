@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -9,12 +9,12 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\miner.exe"
-$HashSHA256 = "32158C2B40D92844BDB1FB810D6F3C2F09C0DE7BE9E07AAE9686C98F3BDEB536"
-$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.52/gminer_1_52_windows64.zip"
+$HashSHA256 = "FF6E8B9B71993ABEBCBCABF18DE59D95153CA83BF7DF6031E32FB2663676CE18"
+$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.53/gminer_1_53_windows64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5034735.0"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -47,7 +47,7 @@ $Devices | Select-Object Type, Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Type -EQ $_.Type | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
 
-    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$_.Vendor -contains $Device.Vendor_ShortName -and $Pools.$Algorithm_Norm.Host} | ForEach-Object {
+    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$_.Vendor -contains ($Device.Vendor_ShortName | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Host} | ForEach-Object {
         $Algorithm = $_.Algorithm
         $MinMemGB = $_.MinMemGB
         $Parameters = $_.Parameters

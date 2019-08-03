@@ -20,7 +20,7 @@
   data-icons="icons"
   data-detail-view="true"
   data-detail-formatter="detailFormatter"
-  data-response-handler="formatPools"
+#  data-response-handler="formatPools"
 >
   <thead>
     <tr>
@@ -28,6 +28,8 @@
       <th data-field="Algorithm" data-sortable="true" data-filter-control="select">Algorithm</th>
       <th data-field="CoinName" data-sortable="true" data-filter-control="select">CoinName</th>
       <th data-field="Price" data-align="right" data-sortable="true" data-formatter="formatPrices">BTC/GH/Day</th>
+      <th data-field="StablePrice" data-align="right" data-sortable="true" data-formatter="formatPrices">BTC/GH/Day (Week)</th>
+      <th data-field="MarginOfError" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=2>MarginOfError</th>
       <th data-field="Host" data-sortable="true" data-filter-control="input" data-filter-strict-search="false">Host</th>
       <th data-field="Port" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-width=1>Port&nbsp</th>
       <th data-field="Workers" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Workers</th>

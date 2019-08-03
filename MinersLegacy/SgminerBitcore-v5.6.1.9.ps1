@@ -13,8 +13,8 @@ $HashSHA256 = "C00DE0D33BD20BE3B5014FC019ED8A81D3AA5273C8AF96B17D6B51C5D8FA3933"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/sgminerbitcore/sgminer-bitcore-5.6.1.9.zip"
 $ManualUri = "https://github.com/MultiPoolMiner/miner-binaries/releases/tag/sgminerbitcore"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

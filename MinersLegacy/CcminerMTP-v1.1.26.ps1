@@ -9,12 +9,12 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "D96E5383437916075596FDEBEB84A37F587D034CFCE44B8C5EF2E27966FECF91"
-$Uri = "https://github.com/zcoinofficial/ccminer/releases/download/1.1.23/ccminer.exe"
+$HashSHA256 = "DE6092B6B8D1A87380A058C425BD2C452D864C93BE39D41188498685456EAA11"
+$Uri = "https://github.com/zcoinofficial/ccminer/releases/download/1.1.26/ccminer.exe"
 $ManualUri = "https://github.com/zcoinofficial/ccminer/releases"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

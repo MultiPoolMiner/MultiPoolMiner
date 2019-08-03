@@ -13,8 +13,8 @@ $HashSHA256 = "15E5B1BFCD972F1D2E6C4298ED955603890D6C77F83C19591EF558A3E9606F35"
 $Uri = "https://github.com/jceminer/cn_cpu_miner/raw/master/jce_cn_cpu_miner.windows.033q.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3281187.0"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

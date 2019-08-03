@@ -9,11 +9,11 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $HashSHA256 = ""
-$Uri = "https://github.com/JayDDee/cpuminer-opt/releases/download/v3.9.6.1/cpuminer-opt-3.9.6.1-windows.zip"
+$Uri = "https://github.com/JayDDee/cpuminer-opt/releases/download/v3.9.6.2/cpuminer-opt-3.9.6.2-windows.zip"
 $ManualUri = "https://github.com/JayDDee/cpuminer-opt"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -32,6 +32,7 @@ else {
         ### CPU PROFITABLE ALGOS AS OF 30/03/2019
         ### these algorithms are profitable algorithms on supported pools
         "allium"        = "" #Garlicoin
+        "blake2b"       = "" #Blake2b, new in 3.9.6.2
         "bmw512"        = "" #Bmw512, new in 3.9.6
         "hex"           = "" #Hex, new in 3.9.6.1
         "hmq1725"       = "" #HMQ1725
@@ -131,7 +132,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Port = $Config.APIPort + ($Devices | Select-Object -First 1 -ExpandProperty Index) + 1
 
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
-        $Miner_Name = (@($Name -replace "_", "$(($Miner_Path -split "\\" | Select-Object -Last 1) -replace "cpuminer" -replace ".exe" -replace "-")_") + @($Devices.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
+        $Miner_Name = (@($Name -replace "_", "$(($Miner_Path -split "\\" | Select-Object -Last 1) -replace "cpuminer" -replace ".exe" -replace "-")_") + @(($Devices.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '-') | Select-Object) -join '-'
 
         #Get parameters for active miner devices
         if ($Miner_Config.Parameters.$Algorithm_Norm) {

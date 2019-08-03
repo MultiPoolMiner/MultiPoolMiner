@@ -1,6 +1,87 @@
+# MultiPoolMiner dev version
+
+Download link:
+https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.4.8.zip
+
+## Changelog Version 3.4.7
+
+#### Core changes
+#### Miner changes
+- Fixed CcminerTrex-v0.12.2b; removed unsupported algos 'dedal' & 'renesis'
+- Updated SRBMinerCryptonight-v1.9.3
+
+#### Pool changes
+#### Balances changes
+#### API changes
+#### Web Interface changes
+#### Known issues
+- WildRig-v0.19.0: Some algorithms will fail on Radeon RX 5700 models (see https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2361)
+
+## Changelog Version 3.4.7
+
+#### Core changes
+- Added 'Skein' algorithm to list unprofitable algos
+- Always list all available CPU miners in the list of available miners (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2363#issuecomment-516267640)
+- Fixed an issue where MPM did not properly detect when there are no more pools available
+- Stop all CPU miners at the end of a benchmark loop to decrease overall time required for benchmarking
+
+#### Miner changes
+- Changed CcminerTrex-v0.12.2b; added ' --no-watchdog' parameter (https://github.com/UselessGuru/MultiPoolMiner/pull/20#issuecomment-515229917)
+- Fixed Bminer-v15.7.6, GMiner-v1.53 & NanoMiner-v1.5.2; device selection did not work for rigs with multiple cards of the same type (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2363#issuecomment-516311895)
+- Updated Jayddee-v3.9.6.2; support for Blake2s
+- Updated NanoMiner-v1.5.3
+
+#### Pool changes
+- NiceHash.ps1: Fixed pool name resolution for region 'US' (https://github.com/UselessGuru/MultiPoolMiner/issues/18#issuecomment-515206493)
+
+#### API changes
+- Replaced function calls 'Invoke-RestMethod' with 'Invoke-WebRequest' in an attempt to fix irregular lockups
+
+#### Known issues
+- WildRig-v0.19.0: Some algorithms will fail on Radeon RX 5700 models (see https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2361)
+
+## Changelog Version 3.4.6
+
+**Important!!!
+The miner naming scheme has been changed by Aaronsace. This will cause all miners to benchmark everything again!**
+
+#### Core changes
+- Changed miner naming scheme
+- Removed functions 'Get-MinerBaseName' & 'Get-MinerVersion'
+
+#### Miner changes
+- Changed BMiner, ClaymoreEthash & PhoenixminerEthash: Make secondary algorithm intensities configurable via config file (see README)
+- Changed IntervalMultiplier to 3x for X16rt algo (https://github.com/UselessGuru/MultiPoolMiner/issues/18#issuecomment-513575129)
+- Fixed Ewbf2Equihash_v0.6; Equihash1445 algo was broken
+- Fixed MiniZEquihash_v1.4o; donation cannot be lowered to 0%
+- Fixed NanoMiner_v1.5.2; added memory tweaks to config file
+- Renamed lolMiner_v0.85 to lolMiner_v0.8.5
+- Removed need for functions 'Get-MinerBaseName' & 'Get-MinerVersion'
+- Updated BMiner_v15.7.6; support 4GB cards for Cuckaroo29d
+- Updated CcminerTrex-v0.12.2b
+- Updated EthminerEthash_v0.18.0
+- Updated Gminer_v1.53
+- Updated NBMiner_v24.2
+- Updated PhoenixminerEthash_v4.5c; support for AMD drivers up to 19.7.3
+- Updated TeamRed_v0.5.6
+- Updated WildRig-v0.19.0
+
+#### Pool changes
+- Combined 'normal' & '*Coins' pool file code resulting in less pools API requests and better performance (this should also fix the Zpool issue)
+- Disabled PhiPhiPool; moved to deprecated folder (pool does not suport BTC auto conversion and there are almost no miners)
+- Fixed Zpool(Coins); MarginOfError shows now correct value (regression from 3.4.4)
+
+#### Balances changes
+
+#### Web Interface changes
+- Pools / All Pools: added columns StablePrice & MarginOfError
+
+#### Known issues
+- WildRig-v0.19.0: Some algorithms will fail on Radeon RX 5700 models (see https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2361)
+
 ## Changelog Version 3.4.5
 
-## Core changes
+#### Core changes
 - Added config parameter '-DisableEstimateCorrection'; reduce the algo price by a correction factor (actual_last24h / estimate_last24h) to counter pool overestimated prices
 - Changed funtion Get-EquihasPers to Get-AlgoCoinPers & EquihashPers.txt to AlgoCoinPers.txt
 - List pool names being queried for pricing information
@@ -26,7 +107,6 @@
 - Updated NVIDIA-CcminerZenemy_v2.1
 - Updated NVIDIA-NBMiner_v23.3; support for Cuckarood29
 - Updated NVIDIA-TTMiner_v2.2.6; support for Cuckarood29
-
 
 #### Pool changes
 - Fixed BlockMasters; did not return any objects

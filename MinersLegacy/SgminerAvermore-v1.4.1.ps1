@@ -13,8 +13,8 @@ $HashSHA256 = "3bb5081ab3d1ddeca6bcb63914f3d1c5c39387fb423d1234f4cb9e05ed79b149"
 $Uri = "https://github.com/brian112358/avermore-miner/releases/download/v1.4.1/avermore-v1.4.1-windows.zip"
 $ManualUri = "https://github.com/brian112358/avermore-miner"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

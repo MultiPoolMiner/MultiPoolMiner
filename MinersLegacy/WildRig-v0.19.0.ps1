@@ -9,12 +9,12 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\wildrig.exe"
-$HashSHA256 = "4AA9FEBCEFEC81CBFEB0CEE3ECD788046BE362EAAD09F42379856B941550B213"
-$Uri = "https://github.com/andru-kun/wildrig-multi/releases/download/0.18.0/wildrig-multi-windows-0.18.0-beta.7z"
+$HashSHA256 = "731696881592D631659933340B1714E4B188FC671AAEF103614519F3931CD4EE"
+$Uri = "https://github.com/andru-kun/wildrig-multi/releases/download/0.19.0/wildrig-multi-windows-0.19.0-preview.7z"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5023676.0"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -74,7 +74,7 @@ else {$CommonParameters = " --opencl-threads auto --opencl-launch auto --multipl
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Advanced Micro Devices, Inc.")
 $Devices | Select-Object Model -Unique | ForEach-Object {
-    $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model | Where-Object {$_.Model_Norm -match "^Baffin.*|^Ellesmere.*|^Fiji.*|^gfx804.*|^gfx900.*|^Tonga.*"})
+    $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 1
 
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
@@ -93,6 +93,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         Switch ($Algorithm_Norm) {
             "X16R"  {$IntervalMultiplier = 5}
+            "X16Rt" {$IntervalMultiplier = 3}
             default {$IntervalMultiplier = 1}
         }
 

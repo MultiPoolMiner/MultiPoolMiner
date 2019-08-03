@@ -13,8 +13,8 @@ $HashSHA256 = "1C8F4B7C252FD2C2F58F69F9D39FD89D255B9DAB1CDA4AC0BC8137EE60C383C6"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/dstm/zm_0.6.2_win.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=2021765.0"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

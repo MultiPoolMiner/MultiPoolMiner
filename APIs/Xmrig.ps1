@@ -45,7 +45,7 @@ class XmRig : Miner {
                             $this.Process = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList $Parameters.HwDetectCommands -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object {if ($_ -like "CPU#*") {-2} else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
                         }
                         else {
-                            $EnvCmd = ($this.Environment | Foreach-Object {"```$env:$($_)"}) -join "; "
+                            $EnvCmd = ($this.Environment | ForEach-Object {"```$env:$($_)"}) -join "; "
                             $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command $EnvCmd```$Process = (Start-Process '$($this.Path)' '$($Parameters.HwDetectCommands)' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
                         }
                         if ($this.Process | Get-Job -ErrorAction SilentlyContinue) {
@@ -126,7 +126,7 @@ class XmRig : Miner {
                     $this.Process = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList $this.GetCommandLineParameters() -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object {if ($_ -like "CPU#*") {-2} else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
                 }
                 else {
-                    $EnvCmd = ($this.Environment | Foreach-Object {"```$env:$($_)"}) -join "; "
+                    $EnvCmd = ($this.Environment | ForEach-Object {"```$env:$($_)"}) -join "; "
                     $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command $EnvCmd```$Process = (Start-Process '$($this.Path)' '$($this.GetCommandLineParameters())' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
                 }
             }
@@ -155,18 +155,19 @@ class XmRig : Miner {
         $Timeout = 5 #seconds
 
         $Request = "http://$($Server):$($this.Port)/api.json"
-        $Data = [PSCustomObject]@{}
+        $Response = ""
 
         try {
-            if ($Global:PSVersionTable.PSVersion -ge [System.Version]("6.0.0")) {
-                $Data = Invoke-RestMethod $Request -TimeoutSec $Timeout -DisableKeepAlive -MaximumRetryCount 3 -RetryIntervalSec 1 -ErrorAction Stop
+            if ($Global:PSVersionTable.PSVersion -ge [System.Version]("6.2.0")) {
+                $Response = Invoke-WebRequest $Request -TimeoutSec $Timeout -DisableKeepAlive -MaximumRetryCount 3 -RetryIntervalSec 1 -ErrorAction Stop
             }
             else {
-                $Data = Invoke-RestMethod $Request -TimeoutSec $Timeout -DisableKeepAlive -ErrorAction Stop
+                $Response = Invoke-WebRequest $Request -UseBasicParsing -TimeoutSec $Timeout -DisableKeepAlive -ErrorAction Stop
             }
+            $Data = $Response | ConvertFrom-Json -ErrorAction Stop
         }
         catch {
-            return @($Request, $Data)
+            return @($Request, $Response)
         }
 
         $HashRate = [PSCustomObject]@{}

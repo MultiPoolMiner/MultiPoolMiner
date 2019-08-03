@@ -13,8 +13,8 @@ $HashSHA256 = "84DD02DEBBF2B0C5ED7EEBF813305543265E34EC98635139787BF8B882E7C7B4"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ewbf/Zec.Miner.0.3.4b.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=1707546.0"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 

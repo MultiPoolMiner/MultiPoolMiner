@@ -6,7 +6,7 @@
 
     # Create a global synchronized hashtable that all threads can access to pass data between the main script and API
     $Global:API = [hashtable]::Synchronized(@{})
-    $API.APIVersion = 0.95
+    $API.APIVersion = 0.96
 
     # Setup flags for controlling script execution
     $API.Stop = $false
@@ -99,8 +99,28 @@
                         $Data = ConvertTo-Json @($API.Balances | Select-Object)
                         Break
                     }
-                    "/balances_jobs" {
-                        $Data = ConvertTo-Json @($API.Balances_Jobs | Select-Object)
+                    "/bestminers" {
+                        $Data = ConvertTo-Json @($API.BestMiners | Select-Object)
+                        Break
+                    }
+                    "/bestminers_comparison" {
+                        $Data = ConvertTo-Json @($API.BestMiners_Comparison | Select-Object)
+                        Break
+                    }
+                    "/bestminers_combos" {
+                        $Data = ConvertTo-Json @($API.BestMiners_Combos | Select-Object)
+                        Break
+                    }
+                    "/bestminers_combos_comparison" {
+                        $Data = ConvertTo-Json @($API.BestMiners_Combos_Comparison | Select-Object)
+                        Break
+                    }
+                    "/bestminers_combo" {
+                        $Data = ConvertTo-Json @($API.BestMiners_Combo | Select-Object)
+                        Break
+                    }
+                    "/bestminers_combo_comparison" {
+                        $Data = ConvertTo-Json @($API.BestMiners_Combo_Comparison | Select-Object)
                         Break
                     }
                     "/btcratefirstcurrency" {

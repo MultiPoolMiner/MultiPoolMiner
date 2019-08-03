@@ -13,8 +13,8 @@ $HashSHA256 = "32E36BD667A3CCF49C3394C40E2FF15DE0ADDBA8E25C093F952E26157854FDC4"
 $Uri = "https://github.com/ocminer/suprminer/releases/download/2.0/suprminer-2.0.7z"
 $ManualUri = "https://github.com/ocminer/suprminer"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
@@ -25,7 +25,7 @@ else {
         "bitcore"    = "" #Timetravel10 and Bitcore are technically the same
         "blake2s"    = "" #Blake2s
         "blakecoin"  = "" #Blakecoin
-        "c11"        = "" #C11
+        # "c11"        = "" #C11, NVIDIA-CcminerAlexis_v1.5 is faster
         "hmq1725"    = "" #HMQ1725
         "hsr"        = "" #HSR
         "keccak"     = "" #Keccak
@@ -42,7 +42,7 @@ else {
         "x16r"       = "" #X16R
         "x16rt"      = "" #X16Rt, for Veil only (see https://github.com/ocminer/suprminer/issues/5)
         "x16s"       = "" #X16S
-        "x17"        = "" #X17
+        #"x17"        = "" #X17, NVIDIA-CcminerAlexis_v1.5 is faster
         
         # ASIC - never profitable 24/06/2018
         #"decred"    = "" #Decred
@@ -85,6 +85,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         Switch ($Algorithm_Norm) {
             "X16R"  {$IntervalMultiplier = 5}
+            "X16Rt" {$IntervalMultiplier = 3}
             default {$IntervalMultiplier = 1}
         }
 

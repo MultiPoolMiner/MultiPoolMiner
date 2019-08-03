@@ -284,7 +284,7 @@ function Get-PowerUsage {
             $Hashtable[(($_.Value -split ' ') | Select-Object -last 1)] = $RegistryValue.($_.Name -replace "Label", "Value")
         }
         $DeviceNames | ForEach-Object {
-            $PowerUsage += $Hashtable.$_ -split ' ' | Select-Object -First 1
+            $PowerUsage += [Float]($Hashtable.$_ -split ' ' | Select-Object -First 1)
         }
     }
 
@@ -588,7 +588,7 @@ function Get-Stat {
     if ($Name) {
         # Return single requested stat
         $Path = "Stats\$($Name -split '_' | Select-Object -Last 1)"
-        if (-not (Test-Path $Path -PathType Container -ErrorAction SilentlyContinue)) {New-Item $Path -ItemType "directory" -ErrorAction SilentlyContinue | Out-Null}
+        if (-not (Test-Path $Path -PathType Container -ErrorAction SilentlyContinue)) {New-Item $Path -ItemType Directory -ErrorAction SilentlyContinue | Out-Null}
         if (Test-Path "$($Path)\$Name.txt" -ErrorAction SilentlyContinue) {Get-ChildItem "$($Path)\$Name.txt" -File -ErrorAction SilentlyContinue | Get-Content | ConvertFrom-Json}
     }
     else {
@@ -597,7 +597,7 @@ function Get-Stat {
         if (-not $Type) {$Type = Get-ChildItem "Stats" -Directory -ErrorAction SilentlyContinue}
         $Type | ForEach-Object {
             $Path = "Stats\$_"
-            if (-not (Test-Path $Path -PathType Container -ErrorAction SilentlyContinue)) {New-Item $Path -ItemType "directory" -ErrorAction SilentlyContinue | Out-Null}
+            if (-not (Test-Path $Path -PathType Container -ErrorAction SilentlyContinue)) {New-Item $Path -ItemType Directory -ErrorAction SilentlyContinue | Out-Null}
             Get-ChildItem $Path -File | ForEach-Object {
                 $BaseName = $_.BaseName
                 $FullName = $_.FullName
@@ -608,7 +608,7 @@ function Get-Stat {
                 }
                 catch {
                     #Remove broken stat file
-                    if (Test-Path $FullName) {
+                    if (Test-Path $FullName -PathType Leaf -ErrorAction SilentlyContinue) {
                         Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
                         Remove-Item -Path  $FullName -Force -Confirm:$false -ErrorAction SilentlyContinue
                     }
@@ -693,30 +693,13 @@ function Get-ChildItemContent {
     else {$Job | Receive-Job -Wait -AutoRemoveJob}
 }
 
-function Get-MinerVersion {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]
-        [String]$MinerName 
-    )
 
-    ($MinerName -split '-' | Select-Object -Index 1) -split '_' | Select-Object -Last 1
-}
-
-function Get-MinerBaseName {
-    [CmdletBinding()]
-    param(
-        [Parameter(Mandatory = $true)]
-        [String]$MinerName 
-    )
-
-    (($MinerName -split '-' | Select-Object -Index 0),(($MinerName -split '-' | Select-Object -Index 1) -split '_' | Select-Object -Index 0) | Select-Object) -join '-'
-}
 
 filter ConvertTo-Hash { 
     [CmdletBinding()]
     $Hash = $_
     switch ([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1)))) {
+        $null {"0  H"}
         "-Infinity" {"0  H"}
         0 {"{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0))}
         1 {"{0:n2} KH" -f ($Hash / [Math]::Pow(1000, 1))}

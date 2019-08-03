@@ -48,19 +48,30 @@ elseif (($APIv2Response | Get-Member -MemberType NoteProperty -ErrorAction Ignor
     Write-Log -Level Warn "Pool Balance API v2 ($Name) returned nothing. "
 }
 else {
-    #Add balance of API v2
-    $Sum += $APIv2Response.unpaidAmount
+    $SumV2 = [Double]($APIv2Response.unpaidAmount) + [Double]($APIv2Response.externalBalance)
 }
 
 if ($Sum) {
     [PSCustomObject]@{
-        Name        = "$($Name) (BTC)"
-        Pool        = $Name
+        Name        = "Old$($Name) (BTC)"
+        Pool        = "Old$($Name)"
         Currency    = "BTC"
         Balance     = $Sum
         Pending     = 0 # Pending is always 0 since NiceHash doesn't report unconfirmed or unexchanged profits like other pools do
         Total       = $Sum
         LastUpdated = (Get-Date).ToUniversalTime()
-        #NextPayout  = [datetime]$APIv2Response.NextPayoutTimestamp
+    }
+}
+
+if ($SumV2) {
+    [PSCustomObject]@{
+        Name        = "$Name (BTC)"
+        Pool        = $Name
+        Currency    = "BTC"
+        Balance     = [double]($APIv2Response.unpaidAmount)
+        Pending     = [double]($APIv2Response.externalBalance)
+        Total       = $SumV2
+        LastUpdated = (Get-Date).ToUniversalTime()
+        NextPayout  = [datetime]$APIv2Response.NextPayoutTimestamp
     }
 }

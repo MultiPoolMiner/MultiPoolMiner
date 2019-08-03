@@ -51,7 +51,7 @@ if (-not $Payout_Currencies) {
     return
 }
 
-$APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesResponse.$_.hashrate -gt 0} | Foreach-Object {
+$APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesResponse.$_.hashrate -gt 0} | ForEach-Object {
  
     $Algorithm = $APICurrenciesResponse.$_.algo
 

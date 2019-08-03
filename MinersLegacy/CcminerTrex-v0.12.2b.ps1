@@ -10,30 +10,13 @@ param(
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\t-rex.exe"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4432704.0"
+$HashSHA256 = "45e31955f504618e87c54f3f3a3d1d42b94d3e35ddda967688d68e888a9ee897"
+$Uri = "https://github.com/Minerx117/miner-binaries/releases/download/0.12.2b/t-rex-0.12.2b-win-cuda10.0.7z"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
-
-$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
-
-# Miner requires CUDA 9.2.00 or higher
-$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
-$RequiredCUDAVersion = "9.2.00"
-if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) {
-    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
-    return
-}
-
-if ($CUDAVersion -lt [System.Version]("10.0.0")) {
-    $HashSHA256 = "285974FC7A1CF0730B209A21F3BB19EEBF787BE399528FDD2A394A24104E2CD9"
-    $Uri = "https://github.com/trexminer/T-Rex/releases/download/0.12.1/t-rex-0.12.1-win-cuda9.2.zip"
-}
-else {
-    $HashSHA256 = "30B8EE9B81CDC5E8757B498425D3CC4A1BBBF3A2DAD6190DFC54446E6CA23537"
-    $Uri = "https://github.com/trexminer/T-Rex/releases/download/0.12.1/t-rex-0.12.1-win-cuda10.0.zip"
-}
 
 #Commands from config file take precedence
 if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
@@ -44,9 +27,8 @@ else {
         "bcd"        = "" #BitcoinDiamond, new in 0.6.5
         "bitcore"    = "" #Timetravel10 and Bitcore are technically the same
         "c11"        = "" #C11
-        "dedal"      = "" #Dedal, new in 0.8.2
         "geek"       = "" #Geek, new in 0.8.0
-        "hmq1725"    = "" #Hmq1725, new in 0.6.4
+        # "hmq1725"    = "" #Hmq1725, new in 0.6.4; NVIDIA-CryptoDredge_v0.20.2 is faster
         "honeycomb"  = "" #Honeycomb, new in 12.0
         "jeonghash"  = "" #GltJeongHash, new in 0.8.6
         "lyra2z"     = "" #Lyra2z
@@ -55,7 +37,6 @@ else {
         "pawelhash"  = "" #GltPawelHash, new in 0.8.6
         "phi"        = "" #Phi
         "polytimos"  = "" #Polytimos, new in 0.6.3
-        "renesis"    = "" #Renesis
         "sha256q"    = "" #Sha256q, new in 0.9.1
         "sha256t"    = "" #Sha256t
         "skunk"      = "" #Skunk, new in 0.6.3
@@ -74,8 +55,9 @@ else {
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = ""}
+else {$CommonParameters = " --no-watchdog"}
 
+$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 1
@@ -96,6 +78,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         Switch ($Algorithm_Norm) {
             "X16R"  {$IntervalMultiplier = 5}
+            "X16Rt" {$IntervalMultiplier = 3}
             default {$IntervalMultiplier = 1}
         }
 

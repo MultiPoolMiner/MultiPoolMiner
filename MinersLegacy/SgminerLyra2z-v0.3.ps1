@@ -13,8 +13,8 @@ $HashSHA256 = "A63F63C723CD896AC4434CCC03D4074A7794AE39E6B1E80003825D62DFE9B44E"
 $Uri = "https://github.com/djm34/sgminer-msvc2015/releases/download/v0.3/kernel.rar"
 $ManualUri = "https://github.com/djm34/sgminer-msvc2015"
 
-$Miner_Version = Get-MinerVersion $Name
-$Miner_BaseName = Get-MinerBaseName $Name
+$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+$Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
