@@ -1,7 +1,21 @@
 # MultiPoolMiner dev version
 
 Download link:
-https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.4.7.zip
+https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.4.8.zip
+
+## Changelog Version 3.4.7
+
+#### Core changes
+#### Miner changes
+- Fixed CcminerTrex-v0.12.2b; removed unsupported algos 'dedal' & 'renesis'
+- Updated SRBMinerCryptonight-v1.9.3
+
+#### Pool changes
+#### Balances changes
+#### API changes
+#### Web Interface changes
+#### Known issues
+- WildRig-v0.19.0: Some algorithms will fail on Radeon RX 5700 models (see https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2361)
 
 ## Changelog Version 3.4.7
 
@@ -22,6 +36,9 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.4.7.zip
 
 #### API changes
 - Replaced function calls 'Invoke-RestMethod' with 'Invoke-WebRequest' in an attempt to fix irregular lockups
+
+#### Known issues
+- WildRig-v0.19.0: Some algorithms will fail on Radeon RX 5700 models (see https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2361)
 
 ## Changelog Version 3.4.6
 
