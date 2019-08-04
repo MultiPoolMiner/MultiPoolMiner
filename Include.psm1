@@ -1216,6 +1216,31 @@ function Get-AlgoCoinPers {
     else {$Default}
 }
 
+class Pool {
+    [String]$Name
+    [String]$Algorithm
+    [String]$CoinName
+    [String]$Protocol
+    [String]$Host
+    [UInt16]$Port
+    [String]$User
+    [String]$Pass
+    [String]$Region
+    [Boolean]$SSL
+    [String]$PayoutScheme
+    [Double]$Fee
+    [Double]$Price
+    [Double]$Price_Bias
+    [Double]$Price_Unbias
+    [Double]$StablePrice
+    [Double]$MarginOfError
+    [DateTime]$Updated
+
+    #[Int]$Workers
+    #[Double]$EstimateCorrection
+    #[String]$MiningCurrency
+}
+
 enum MinerStatus {
     Running
     Idle
@@ -1223,6 +1248,9 @@ enum MinerStatus {
 }
 
 class Miner {
+    static [Pool[]]$Pools = @()
+    [Pool[]]$Pool = @()
+
     $Name
     $BaseName
     $Version
