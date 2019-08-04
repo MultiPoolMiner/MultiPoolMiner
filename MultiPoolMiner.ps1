@@ -156,14 +156,11 @@ Import-Module Defender -ErrorAction Ignore
 Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore
 Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1" -ErrorAction Ignore
 try {
-    if (-not (Get-InstalledModule -Name "ThreadJob")) {
-        Install-Module ThreadJob -Scope CurrentUser -SkipPublisherCheck -Force -ErrorAction Stop
-    }
     Import-Module ThreadJob -ErrorAction Stop
     Set-Alias Start-Job Start-ThreadJob
 }
 catch {
-    Write-Log -Level Error "Failed to import module (ThreadJob) - using normal 'Start-Job' instead. "
+    Write-Log "Failed to import module (ThreadJob) - using normal 'Start-Job' instead. "
 }
 
 $Algorithm = $Algorithm | ForEach-Object {@(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'}
