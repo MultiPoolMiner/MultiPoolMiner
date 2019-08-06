@@ -1218,6 +1218,56 @@ function Get-AlgoCoinPers {
     else { $Default }
 }
 
+function Add-Object { 
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [Object[]]$ReferenceObject, #Original Array
+        [Parameter(Mandatory = $true)]
+        [Object[]]$DifferenceObject, #New Array
+        [Parameter(Mandatory = $true)]
+        [Object[]]$Property, #Primary Key(s)
+        [Parameter(Mandatory = $false)]
+        [Switch]$Force = $false #Update Existing Object
+    )
+
+    if ($Force) { 
+        $DifferenceObject | ForEach-Object { 
+            [Object]$Object_Temp = $_
+            [Object[]]$Object_Old = $ReferenceObject
+            [Object]$Object = $null
+
+            $Property | ForEach-Object { 
+                $Object_Old = $Object_Old | Where-Object -Property $_ -EQ -Value ($Object_Temp | Select-Object -ExpandProperty $_)
+            }
+
+            $Object = $Object_Old | Select-Object -First 1
+
+            if ($Object) {
+                $Object | Get-Member -MemberType Properties | Select-Object -ExpandProperty Name | ForEach-Object { 
+                    $Object.$_ = $Object_Temp.$_
+                }
+            }
+        }
+    }
+
+    Compare-Object -ReferenceObject @($ReferenceObject | Select-Object -Property $Property -Unique) -DifferenceObject @($DifferenceObject | Select-Object -Property $Property -Unique) -Property $Property | Where-Object SideIndicator -EQ "=>" | ForEach-Object { 
+        [Object]$Object_Temp = $_
+        [Object[]]$Object_New = $DifferenceObject
+        [Object]$Object = $null
+
+        $Property | ForEach-Object { 
+            $Object_New = $Object_New | Where-Object -Property $_ -EQ -Value ($Object_Temp | Select-Object -ExpandProperty $_)
+        }
+
+        $Object = $Object_New | Select-Object -First 1
+
+        if ($Object) { $ReferenceObject += $Object }
+    }
+
+    $ReferenceObject
+}
+
 class Pool { 
     [String]$Name
     [String]$Algorithm
