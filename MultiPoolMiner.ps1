@@ -89,7 +89,7 @@ param(
     [ValidateRange(1, 999)]
     [Int]$PoolBalancesUpdateInterval = 15, #MPM will update balances every n minutes to limit pool API requests (but never more than ONCE per loop). Allowed values 1 - 999 minutes
     [Parameter(Mandatory = $false)]
-    [Switch]$CreateMinerInstancePerDeviceModel = $false, #if true MPM will create separate miner instances per device model. This will improve profitability.
+    [Switch]$DisableDeviceDetection = $false, #if true MPM won't create separate miner instances per device model. This will decrease profitability.
     [Parameter(Mandatory = $false)]
     [String]$ConfigFile = ".\Config.txt", #default config file
     [ValidateRange(5, 20)]
@@ -173,15 +173,15 @@ $StatEnd = $Timer
 $DecayStart = $Timer
 $DecayPeriod = 60 #seconds
 $DecayBase = 1 - 0.1 #decimal percentage
-$Intervals = @()
+<#legacy#>$Intervals = @()
 
 $WatchdogTimers = @()
 
-$ActiveMiners = @()
-$RunningMiners = @()
-$AllMinerPaths = @()
+[Miner[]]$ActiveMiners = @()
+<#legacy#>$RunningMiners = @()
+<#legacy#>$AllMinerPaths = @()
 
-$NewPools_JobsDurations = @()
+<#legacy#>$NewPools_JobsDurations = @()
 
 #Start the log
 Start-Transcript ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt"
@@ -212,11 +212,6 @@ $Config_Temp | Add-Member @{Wallets = @{BTC = "`$Wallet" } } -Force
 $Config_Temp | Add-Member @{VersionCompatibility = $VersionCompatibility } -Force
 if (-not (Test-Path $ConfigFile -PathType Leaf -ErrorAction Ignore)) { 
     Write-Log -Level Info -Message "No valid config file found. Creating new config file ($ConfigFile) using defaults. "
-    if (-not $CreateMinerInstancePerDeviceModel) { 
-        $Config_Temp.CreateMinerInstancePerDeviceModel = $true
-        Write-Log -Level Info -Message "For best profitability MPM will set 'CreateMinerInstancePerDeviceModel=true'. "
-    }
-    Write-Log -Level Info -Message "You can change settings directly in the config file - see the README for detailed instructions. "
     $Config_Temp | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile
 }
 Remove-Variable Config_Temp
@@ -640,7 +635,7 @@ while (-not $API.Stop) {
     $AllMiners = @(
         if (Test-Path "MinersLegacy" -PathType Container -ErrorAction Ignore) { 
             #Strip Model information from devices -> will create only one miner instance
-            if ($Config.CreateMinerInstancePerDeviceModel) { $DevicesTmp = $Devices } else { $DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object { $_.Model = "" } }
+            if (-not $Config.DisableDeviceDetection) { $DevicesTmp = $Devices } else { $DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object { $_.Model = "" } }
             Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp; JobName = "MinersLegacy" } | ForEach-Object { 
                 $_.Content | Add-Member Name $_.Name -PassThru -Force; $_.Content.Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($_.Content.Path); $AllMinerPaths += $_.Content.Path } | 
             Where-Object { (Compare-Object $Pools.PSObject.Properties.Name $_.HashRates.PSObject.Properties.Name | Where-Object SideIndicator -EQ "=>" | Measure-Object).Count -eq 0 } | 
