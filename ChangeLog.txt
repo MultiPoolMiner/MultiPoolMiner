@@ -9,7 +9,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.0.zip
 ## Changelog Version 3.5.0
 
 #### Core changes
-- Added config item '-IntervalMultiplier' per algorithm (see README); this was previously hardcoded in the mienr files
+- Added config item '-IntervalMultiplier' per algorithm (see README); this was previously hardcoded in the miner files
 - Disable pool pre-loading when CPU miners are running
 - Fixed DevicePciOrderMapping; index reordering was incorrect
 - Fixed executing miners of API type 'Wrapper' (will never show windows!)
