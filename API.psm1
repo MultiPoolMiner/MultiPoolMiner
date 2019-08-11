@@ -217,6 +217,10 @@
                         $Server.Stop()
                         Break
                     }
+                    "/unprofitablealgorithms" {
+                        $Data = $API.UnprofitableAlgorithms | ConvertTo-Json
+                        break
+                    }
                     "/version" {
                         $Data = $API.Version | ConvertTo-Json
                         break
@@ -233,12 +237,12 @@
 
                         # Check if there is a file with the requested path
                         $Filename = $BasePath + $Path
-                        if (Test-Path $Filename -PathType Leaf) {
+                        if (Test-Path $Filename -PathType Leaf -ErrorAction SilentlyContinue) {
                             # If the file is a powershell script, execute it and return the output. A $Parameters parameter is sent built from the query string
                             # Otherwise, just return the contents of the file
                             $File = Get-ChildItem $Filename
 
-                            If ($File.Extension -eq ".ps1") {
+                            if ($File.Extension -eq ".ps1") {
                                 $Data = & $File.FullName -Parameters $Parameters
                             }
                             else {
@@ -250,7 +254,7 @@
                                     $IncludeRegex = [regex]'<!-- *#include *file="(.*)" *-->'
                                     $IncludeRegex.Matches($Data) | Foreach-Object {
                                         $IncludeFile = $BasePath + '/' + $_.Groups[1].Value
-                                        If (Test-Path $IncludeFile -PathType Leaf) {
+                                        if (Test-Path $IncludeFile -PathType Leaf) {
                                             $IncludeData = Get-Content $IncludeFile -Raw
                                             $Data = $Data -Replace $_.Value, $IncludeData
                                         }
@@ -259,7 +263,7 @@
                             }
 
                             # Set content type based on file extension
-                            If ($MIMETypes.ContainsKey($File.Extension)) {
+                            if ($MIMETypes.ContainsKey($File.Extension)) {
                                 $ContentType = $MIMETypes[$File.Extension]
                             }
                             else {
@@ -277,7 +281,7 @@
 
                 # If $Data is null, the API will just return whatever data was in the previous request.  Instead, show an error
                 # This happens if the script just started and hasn't filled all the properties in yet.
-                If ($Data -eq $Null) { 
+                if ($Data -eq $Null) { 
                     $Data = @{'Error' = "API data not available"} | ConvertTo-Json
                 }
 
