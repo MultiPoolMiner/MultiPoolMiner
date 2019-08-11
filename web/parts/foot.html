@@ -18,6 +18,9 @@ $(function() {
 
 // set the values in the header
 $(function() {
+    $.ajax({url: '/miningcost', success: function(result) {
+        miningcost = result;
+    }});
     $.ajax({url: '/currentearning', success: function(result) {
         earning = result;
     }});

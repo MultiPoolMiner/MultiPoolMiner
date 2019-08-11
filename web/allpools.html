@@ -3,10 +3,8 @@
   <h1 id="title" data-navbaractive="navallpools" class="h2">All Pools</h1>
 </div>
 <div class="alert alert-info" role="alert">Shows all available pools for each algorithm</div>
-
-<table id="pools" class="table"
+<table id="pools"
   data-buttons-align="left"
-  data-toggle="table"
   data-url="/allpools"
   data-filter-control="true"
   data-filter-show-clear="true"
@@ -20,38 +18,53 @@
   data-icons="icons"
   data-detail-view="true"
   data-detail-formatter="detailFormatter"
->
-  <thead>
-    <tr>
-      <th data-field="Name" data-sortable="true" data-filter-control="select">Name</th>
-      <th data-field="Algorithm" data-sortable="true" data-filter-control="select">Algorithm</th>
-      <th data-field="CoinName" data-sortable="true" data-filter-control="select">CoinName</th>
-      <th data-field="Price" data-align="right" data-sortable="true" data-formatter="formatPrices">BTC/GH/Day</th>
-      <th data-field="StablePrice" data-align="right" data-sortable="true" data-formatter="formatPrices">BTC/GH/Day (Week)</th>
-      <th data-field="MarginOfError" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=2>MarginOfError</th>
-      <th data-field="Host" data-sortable="true" data-filter-control="input" data-filter-strict-search="false">Host</th>
-      <th data-field="Port" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-width=1>Port&nbsp</th>
-      <th data-field="Workers" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Workers</th>
-      <th data-field="Region" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Region</th>
-      <th data-field="SSL" data-sortable="true" data-width=4>SSL</th>
-      <th data-field="Fee" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
-      <th data-field="Updated" data-sortable="true" data-formatter="formatDate">Last Updated</th>
-    </tr>
-  </thead>
+  >
+  <div class="row">
+    <thead>
+      <tr>
+        <th data-field="Name" data-sortable="true" data-filter-control="select">Name</th>
+        <th data-field="Algorithm" data-sortable="true" data-filter-control="select">Algorithm</th>
+        <th data-field="CoinName" data-sortable="true" data-filter-control="select">CoinName</th>
+        <th data-field="Price" data-align="right" data-sortable="true" data-formatter="formatPrices">BTC/GH/Day</th>
+        <th data-field="StablePrice" data-align="right" data-sortable="true" data-formatter="formatPrices">BTC/GH/Day (Week)</th>
+        <th data-field="MarginOfError" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=2>MarginOfError</th>
+        <th data-field="Host" data-sortable="true" data-filter-control="input" data-filter-strict-search="false">Host</th>
+        <th data-field="Port" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-width=1>Port&nbsp</th>
+        <th data-field="Workers" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Workers</th>
+        <th data-field="Region" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Region</th>
+        <th data-field="SSL" data-sortable="true" data-width=4>SSL</th>
+        <th data-field="Fee" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
+        <th data-field="Updated" data-sortable="true" data-formatter="formatDate">Last Updated</th>
+      </tr>
+    </thead>
+  </div>
 </table>
+
+<!-- context menu -->
+<ul id="context-menu" class="dropdown-menu">
+  <li data-item="reset-data"><a class="dropdown-item" href="#">Reset data</a></li>
+</ul>
+
+<script>
+  $(function() {
+    $("#pools").bootstrapTable({
+      contextMenu: "#context-menu",
+      onContextMenuItem: function(row, $el) {
+        if($el.data("item") == "reset-data") {
+          $Command = "scripts/managestat.ps1?Type=Profit&Action=Remove&Minername=" + row.Name + "&Algorithms=" + row.Algorithm
+          $(".modal-body").load($Command, function() {
+            $(".modal-title").text(row.Name + ": " + row.Algorithm);
+            $("#myModal").modal({show:true});
+          });
+        }
+      }
+    });
+  });
+</script>
 
 <!-- End of page scripts -->
 <script type="text/javascript">
 
-  function formatPools(data) {
-    data = data[0];
-    var items = new Array();
-    $.each(Object.keys(data), function (index, item) {
-      items.push(data[item]);
-    });
-    return items;
-  }
-  
   function formatPrices(data) {
     return (data * 1000000000).toFixed(10);
   }

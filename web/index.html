@@ -3,10 +3,6 @@
   <h1 id="title" data-navbaractive="navdashboard" class="h2">Dashboard</h1>
 </div>
 
-<meta http-Equiv="Cache-Control" Content="no-cache">
-<meta http-Equiv="Pragma" Content="no-cache">
-<meta http-Equiv="Expires" Content="0"><meta http-equiv="refresh" content="10">
-
 <h3>Running Miners</h3>
 <table id="miners" class="table mb-4"
   data-toggle="table"
@@ -24,6 +20,7 @@
   data-detail-view="true"
   data-detail-formatter="detailFormatter"
   data-remember-order="true"
+  data-auto-refresh="true"
 >
   <thead>
     <tr>
@@ -129,6 +126,17 @@
     });
     return data;
   }
+
+  $(function() {
+    $('#miners').bootstrapTable({
+      contextMenu: '#context-menu',
+      onContextMenuItem: function(row, $el){
+        if($el.data("item") == "edit"){
+          alert(row.itemid);
+        }
+      }
+    });
+  });
   
   function formatDate(data) {
     return timeSince(new Date(data));
