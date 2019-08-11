@@ -16,7 +16,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.0.zip
 - Show shares (accepted / rejected / total) information in data sample info
 
 #### Miner changes
-- Disabled algorithms Mtp(NiceHash) on miners 'CryptoDredge' & 'TT-Miner'
+- Disabled algorithms Mtp(NiceHash) on miners 'CryptoDredge' & 'TT-Miner', other miners are faster
 - Disabled FireiceCryptonight-v2.10.7; moved to deprecated folder, other CN miners are faster
 - Disabled JCECryptonote-v0.33b18; moved to deprecated folder, other CN miners are faster
 - Disabled NsgminerNeoscrypt-v0.9.4; moved to deprecated folder, other Neoscrypt miners are faster
