@@ -18,62 +18,51 @@ $Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
+$Commands = [PSCustomObject[]]@(
+    #Unprofitable [PSCustomObject]@{Algorithm = "Cryptonight";           MinMemGB = 2; Command = " --variation 1"} #Original Cryptonight
+    #Unprofitable [PSCustomObject]@{Algorithm = "Cryptolight";           MinMemGB = 1; Command = " --variation 2"} #Original Cryptolight
+    #Unprofitable [PSCustomObject]@{Algorithm = "CryptonightV7";         MinMemGB = 2; Command = " --variation 3"} #Cryptonight V7 fork of April-2018
+    #Unprofitable [PSCustomObject]@{Algorithm = "CryptolightV7";         MinMemGB = 15; Command = " --variation 4"} #Cryptolight V7 fork of April-2018
+    [PSCustomObject]@{Algorithm = "CryptonightHeavy";      MinMemGB = 4; Command = " --variation 5"} #Cryptonight-Heavy
+    [PSCustomObject]@{Algorithm = "CryptonightLiteIpbc";   MinMemGB = 1; Command = " --variation 6"} #Cryptolight-IPBC
+    [PSCustomObject]@{Algorithm = "CryptonightXtl";        MinMemGB = 2; Command = " --variation 7"} #Cryptonight-XTL fork of May-2018
+    [PSCustomObject]@{Algorithm = "CryptonightXao";        MinMemGB = 2; Command = " --variation 8"} #Cryptonight-Alloy
+    [PSCustomObject]@{Algorithm = "CryptonightMarketCash"; MinMemGB = 2; Command = " --variation 9"} #Cryptonight-MKT
+    [PSCustomObject]@{Algorithm = "CryptonightRto";        MinMemGB = 2; Command = " --variation 10"} #Cryptonight-Arto
+    [PSCustomObject]@{Algorithm = "CryptonightFast";       MinMemGB = 2; Command = " --variation 11"} #Cryptonight-Fast MSR fork of June-2018
+    [PSCustomObject]@{Algorithm = "CryptonightHeavyHaven"; MinMemGB = 4; Command = " --variation 12"} #Cryptonight-Haven fork of June-2018
+    [PSCustomObject]@{Algorithm = "CryptonightHeavyTube";  MinMemGB = 4; Command = " --variation 13"} #Cryptonight-BitTube v2 of July-2018
+    [PSCustomObject]@{Algorithm = "CryptonightRed";        MinMemGB = 1; Command = " --variation 14"} #Cryptonight-Red
+    [PSCustomObject]@{Algorithm = "CryptonightV8";         MinMemGB = 2; Command = " --variation 15"} #Cryptonight V8 fork of October-2018
+    #[PSCustomObject]@{Algorithm = "_AUTO_";                MinMemGB = 2;   Command = " --variation 16"} #Pool-selected autoswitch, not supported by MPM
+    [PSCustomObject]@{Algorithm = "CryptonightDark";       MinMemGB = 1; Command = " --variation 17"} #Cryptonight-Dark
+    [PSCustomObject]@{Algorithm = "CryptonightSwap";       MinMemGB = 2; Command = " --variation 18"} #Cryptonight-Swap
+    [PSCustomObject]@{Algorithm = "CryptonightuPlexa";     MinMemGB = 2; Command = " --variation 19"} #Cryptonight-uPlexa
+    [PSCustomObject]@{Algorithm = "CryptonightTurtle";     MinMemGB = 2; Command = " --variation 20"} #Cryptonight-Turtle
+    [PSCustomObject]@{Algorithm = "CryptonightStellite";   MinMemGB = 2; Command = " --variation 21"} #Cryptonight-Stellite
+    [PSCustomObject]@{Algorithm = "CryptonightWaltzGraft"; MinMemGB = 2; Command = " --variation 22"} #Cryptonight-WaltzGraft
+)
 #Commands from config file take precedence
-if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
-else {
-    $Commands = [PSCustomObject[]]@(
-        #Unprofitable [PSCustomObject]@{Variation = 1;  Algorithm = "Cryptonight";           MinMemGB = 2; Params = ""} #Original Cryptonight
-        #Unprofitable [PSCustomObject]@{Variation = 2;  Algorithm = "Cryptolight";           MinMemGB = 1; Params = ""} #Original Cryptolight
-        #Unprofitable [PSCustomObject]@{Variation = 3;  Algorithm = "CryptonightV7";         MinMemGB = 2; Params = ""} #Cryptonight V7 fork of April-2018
-        #Unprofitable [PSCustomObject]@{Variation = 4;  Algorithm = "CryptolightV7";         MinMemGB = 15; Params = ""} #Cryptolight V7 fork of April-2018
-        [PSCustomObject]@{Variation = 5;  Algorithm = "CryptonightHeavy";      MinMemGB = 4; Params = ""} #Cryptonight-Heavy
-        [PSCustomObject]@{Variation = 6;  Algorithm = "CryptonightLiteIpbc";   MinMemGB = 1; Params = ""} #Cryptolight-IPBC
-        [PSCustomObject]@{Variation = 7;  Algorithm = "CryptonightXtl";        MinMemGB = 2; Params = ""} #Cryptonight-XTL fork of May-2018
-        [PSCustomObject]@{Variation = 8;  Algorithm = "CryptonightXao";        MinMemGB = 2; Params = ""} #Cryptonight-Alloy
-        [PSCustomObject]@{Variation = 9;  Algorithm = "CryptonightRto";        MinMemGB = 2; Params = ""} #Cryptonight-Arto
-        [PSCustomObject]@{Variation = 11; Algorithm = "CryptonightFast";       MinMemGB = 2; Params = ""} #Cryptonight-Fast MSR fork of June-2018
-        [PSCustomObject]@{Variation = 12; Algorithm = "CryptonightHeavyHaven"; MinMemGB = 4; Params = ""} #Cryptonight-Haven fork of June-2018
-        [PSCustomObject]@{Variation = 13; Algorithm = "CryptonightHeavyTube";  MinMemGB = 4; Params = ""} #Cryptonight-BitTube v2 of July-2018
-        [PSCustomObject]@{Variation = 14; Algorithm = "CryptonightRed";        MinMemGB = 1; Params = ""} #Cryptonight-Red
-        [PSCustomObject]@{Variation = 15; Algorithm = "CryptonightV8";         MinMemGB = 2; Params = ""} #Cryptonight V8 fork of October-2018
-        #[PSCustomObject]@{Variation = 16; Algorithm = "_AUTO_";                MinMemGB = 2;   Params = ""} #Pool-selected autoswitch, not supported by MPM
-        [PSCustomObject]@{Variation = 17; Algorithm = "CryptonightDark";       MinMemGB = 1; Params = ""} #Cryptonight-Dark
-        [PSCustomObject]@{Variation = 18; Algorithm = "CryptonightSwap";       MinMemGB = 2; Params = ""} #Cryptonight-Swap
-        [PSCustomObject]@{Variation = 19; Algorithm = "CryptonightuPlexa";     MinMemGB = 2; Params = ""} #Cryptonight-uPlexa
-        [PSCustomObject]@{Variation = 20; Algorithm = "CryptonightTurtle";     MinMemGB = 2; Params = ""} #Cryptonight-Turtle
-        [PSCustomObject]@{Variation = 21; Algorithm = "CryptonightStellite";   MinMemGB = 2; Params = ""} #Cryptonight-Stellite
-        [PSCustomObject]@{Variation = 22; Algorithm = "CryptonightWaltzGraft"; MinMemGB = 2; Params = ""} #Cryptonight-WaltzGraft
-    )
-}
+if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object {$_.Algorithm -ne $Algorithm}; $Commands += $_}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else  {$CommonParameters = " --no-warmup --low"} #Miner with low priority not to freeze your computer. Has a very small impact on performances. Recommended.
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+else  {$CommonCommands = "--stakjson --no-gpu --auto --no-warmup --low"} #Miner with low priority not to freeze your computer. Has a very small impact on performances. Recommended.
 
 $Devices = @($Devices | Where-Object Type -EQ "CPU")
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
     if ($Device.CpuFeatures -contains "(x64|aes){2}") {$Miner_Fee = 1.5} else {$Miner_Fee = 3}
     $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
+
     $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$Pools.$Algorithm_Norm.Host} | ForEach-Object {
-        $Fee = $_.Fee
         $MinMemGB = $_.MinMemGB
-        $Parameters = $_.Parameters
-        $Variation = $_.Variation
 
         if ($Miner_Device = @($Device | Where-Object {[math]::Round((Get-CIMInstance -Class Win32_ComputerSystem).TotalPhysicalMemory / 1GB) -ge $MinMemGB})) {
             $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
 
-            #Get Params for active miner devices
-            if ($Miner_Config.Parameters.$Algorithm_Norm) {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters.$Algorithm_Norm $Miner_Device.Type_Vendor_Index
-            }
-            elseif ($Miner_Config.Parameters."*") {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters."*" $Miner_Device.Type_Vendor_Index
-            }
-            else {
-                $Parameters = Get-ParameterPerDevice $Parameters $Miner_Device.Type_Vendor_Index
-            }
+            #Get commands for active miner devices
+            $Command = Get-CommandPerDevice -Command $_.Command -ExcludeParameters @("variation") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
             [PSCustomObject]@{
                 Name       = $Miner_Name
@@ -82,7 +71,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
-                Arguments  = ("--stakjson --no-gpu --auto --variation $Variation -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$(if ($Pools.$Algorithm_Norm.SSL) {" -ssl"})$(if ($Pools.$Algorithm_Norm.Name -eq "NiceHash") {" --nicehash"}) --mport $Miner_Port$Parameters$CommonParameters" -replace "\s+", " ").trim()
+                Arguments  = ("$Command$CommonCommands -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$(if ($Pools.$Algorithm_Norm.SSL) {" -ssl"})$(if ($Pools.$Algorithm_Norm.Name -like "NiceHash*") {" --nicehash"}) --mport $Miner_Port" -replace "\s+", " ").trim()
                 HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                 API        = "XmRig"
                 Port       = $Miner_Port

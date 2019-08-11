@@ -85,7 +85,7 @@ function Get-PrePostCommand {
     }
     catch {}
 
-    return ($Miner_Config."$($Event)Command")
+    return $Miner_Config."$($Event)Command"
 
 }
 
@@ -291,31 +291,34 @@ function Get-PowerUsage {
     $PowerUsage
 }
 
-function Get-ParameterPerDevice {
+function Get-CommandPerDevice {
 
-    # rewrites the command parameters
-    # if a parameter has multiple values, only the values for the available devices are returned
+    # filters the command to contain only parameter values for present devices
+    # if a parameter has multiple values, only the values for the available devices are included
     # parameters with a single value are valid for all devices and remain untouched
+    # excluded parameters are passed unmodified
 
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
-        [String]$Parameters,
+        [String]$Command,
+        [Parameter(Mandatory = $false)]
+        [Array]$ExcludeParameters,        
         [Parameter(Mandatory = $false)]
         [Int[]]$DeviceIDs
     )
 
-    $ParameterPerDevice = ""
+    $CommandPerDevice = ""
 
-    $Parameters -split "(?=\s+}--|\s+-| ,|^,)" | ForEach-Object {
+    " $($Command.TrimStart())" -split "(?=\s+[-]{1,2})" | ForEach-Object {
         $Token = $_
         $Prefix = $null
         $ParameterValueSeparator = $null
         $ValueSeparator = $null
         $Values = $null
 
-        if ($Token.TrimStart() -match "(?:^[-=]+)") {
+        if ($Token -match "(?:^\s[-=]+)") {
             # supported prefix characters are listed in brackets: [-=]+
 
             $Prefix = "$($Token -split $Matches[0] | Select-Object -Index 0)$($Matches[0])"
@@ -327,23 +330,22 @@ function Get-ParameterPerDevice {
                 $Parameter = $Token -split $ParameterValueSeparator | Select-Object -Index 0
                 $Values = $Token.Substring(("$Parameter$($ParameterValueSeparator)").length)
 
-                if ($Values -match "(?:[,; ]{1})") {
+                if ($ExcludeParameters -notcontains $Parameter -and $Values -match "(?:[,; ]{1})") {
                     # supported separators are listed in brackets: [,; ]{1}
                     $ValueSeparator = $Matches[0]
                     $RelevantValues = @()
-                    $DeviceIDs | Foreach-Object {
-                        if ($Values.Split($ValueSeparator) | Select-Object -Index $_) {$RelevantValues += ($Values.Split($ValueSeparator) | Select-Object -Index $_)}
-                        else {$RelevantValues += ""}
+                    $DeviceIDs | ForEach-Object {
+                        $RelevantValues += ($Values.Split($ValueSeparator) | Select-Object -Index $_)
                     }                    
-                    $ParameterPerDevice += "$Prefix$Parameter$ParameterValueSeparator$(($RelevantValues -join $ValueSeparator).TrimEnd($ValueSeparator))"
+                    $CommandPerDevice += "$Prefix$Parameter$ParameterValueSeparator$($RelevantValues -join $ValueSeparator)"
                 }
-                else {$ParameterPerDevice += "$Prefix$Parameter$ParameterValueSeparator$Values"}
+                else {$CommandPerDevice += "$Prefix$Parameter$ParameterValueSeparator$Values"}
             }
-            else {$ParameterPerDevice += "$Prefix$Token"}
+            else {$CommandPerDevice += "$Prefix$Token"}
         }
-        else {$ParameterPerDevice += $Token}
+        else {$CommandPerDevice += $Token}
     }
-    $ParameterPerDevice
+    $CommandPerDevice
 }
 
 function Write-Log {
@@ -969,7 +971,7 @@ function Get-Device {
         [Parameter(Mandatory = $false)]
         [String[]]$ExcludeName = @(),
         [Parameter(Mandatory = $false)]
-        [PSCustomObject]$Config = [PSCustomObject]@{},
+        [PSCustomObject]$DevicePciOrderMapping = [PSCustomObject]@{},
         [Parameter(Mandatory = $false)]
         [Switch]$Refresh = $false
     )
@@ -1005,7 +1007,7 @@ function Get-Device {
     # Try to get cached devices first to improve performance
     if ((Test-Path Variable:Script:CachedDevices) -and -not $Refresh) {
         $Devices = $CachedDevices
-        $Devices | Foreach-Object {
+        $Devices | ForEach-Object {
             $Device = $_
             if ((-not $Name) -or ($Name_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
                 if ((-not $ExcludeNameName) -or ($ExcludeName_Devices | Where-Object {($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -notlike ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name))})) {
@@ -1053,8 +1055,8 @@ function Get-Device {
                 }
 
                 #Optional custom device mapping where PciDeviceID order does not match OpenCL DeviceId order
-                if ($Config.DevicePciOrderMapping.(("{0}#{1:d2}" -f $_.Type, $Device.Type_Index).ToUpper())) {
-                    $Index_Difference = $Config.DevicePciOrderMapping.(("{0}#{1:d2}" -f $_.Type, $Device.Type_Index).ToUpper()) - $Device.Type_Index
+                if ($DevicePciOrderMapping.(("{0}#{1:d2}" -f $_.Type, $Device.Type_Index).ToUpper())) {
+                    $Index_Difference = $DevicePciOrderMapping.(("{0}#{1:d2}" -f $_.Type, $Device.Type_Index).ToUpper()) - $Device.Type_Index
                 }
                 else {
                     $Index_Difference = 0
@@ -1098,7 +1100,7 @@ function Get-Device {
     [array]$Devices = $Devices | Where-Object {$_.Type -ne "Cpu"}
 
     $CPUIndex = 0
-    Get-CimInstance -ClassName CIM_Processor | Foreach-Object {
+    Get-CimInstance -ClassName CIM_Processor | ForEach-Object {
         # Vendor and type the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
         $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
         $Device = [PSCustomObject]@{
@@ -1294,12 +1296,12 @@ class Miner {
         }
 
         if (-not $this.Process) {
-            if ($this.ShowMinerWindow) {
-                if ((Test-Path ".\CreateProcess.cs" -PathType Leaf) -and ($this.API -ne "Wrapper")) {
+            if ($this.ShowMinerWindow -and ($this.API -ne "Wrapper")) {
+                if (Test-Path ".\CreateProcess.cs" -PathType Leaf) {
                     $this.Process = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList $this.GetCommandLineParameters() -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object {if ($_ -like "CPU#*") {-2} else {-1}} | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
                 }
                 else {
-                    $EnvCmd = ($this.Environment | Foreach-Object {"```$env:$($_)"}) -join "; "
+                    $EnvCmd = ($this.Environment | Select-Object | ForEach-Object {"```$env:$($_)"}) -join "; "
                     $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command $EnvCmd```$Process = (Start-Process '$($this.Path)' '$($this.GetCommandLineParameters())' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
                 }
             }
@@ -1490,8 +1492,14 @@ class Miner {
 
         $Hashrates_Samples = @($this.Data | Where-Object {$_.HashRate.$Algorithm} | Sort-Object {$_.HashRate.$Algorithm}) #Do not use 0 valued samples
 
-        #strip lower 10% and upper 10% of all values for better hashrate stability
-        $Hashrates_Samples | Select-Object -Skip ([Int]($HashRates_Samples.Count * 0.1)) | Select-Object -SkipLast ([Int]($HashRates_Samples.Count * 0.1)) | ForEach-Object {
+        #During benchmarking strip some of the lowest and highest sample values
+        if ($Safe) {
+            if ($this.IntervalMultiplier -le 1) {$SkipSamples = [math]::Round($HashRates_Samples.Count * 0.1)}
+            else {$SkipSamples = [math]::Round($HashRates_Samples.Count * 0.2)}
+        }
+        else {$SkipSamples = 0}
+
+        $Hashrates_Samples | Select-Object -Skip $SkipSamples | Select-Object -SkipLast $SkipSamples | ForEach-Object {
             $Data_Devices = $_.Device
             if (-not $Data_Devices) {$Data_Devices = $HashRates_Devices}
 
@@ -1529,8 +1537,14 @@ class Miner {
 
         $PowerUsages_Samples = @($this.Data | Where-Object PowerUsage) #Do not use 0 valued samples
 
-        #strip lower 20% and upper 20% of all values for better value stability
-        $PowerUsages_Samples | Sort-Object PowerUsage | Select-Object -Skip ([Int]($PowerUsages_Samples.Count * 0.2)) | Select-Object -SkipLast ([Int]($PowerUsages_Samples.Count * 0.2)) | ForEach-Object {
+        #During power measuring strip some of the lowest and highest sample values
+        if ($Safe) {
+            if ($this.IntervalMultiplier -le 1) {$SkipSamples = [math]::Round($PowerUsages_Samples.Count * 0.2)}
+            else {$SkipSamples = [math]::Round($PowerUsages_Samples.Count * 0.3)}
+        }
+        else {$SkipSamples = 0}
+        
+        $PowerUsages_Samples | Sort-Object PowerUsage | Select-Object -Skip $SkipSamples | Select-Object -SkipLast $SkipSamples | ForEach-Object {
             $Data_Devices = $_.Device
             if (-not $Data_Devices) {$Data_Devices = $PowerUsages_Devices}
 

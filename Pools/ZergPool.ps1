@@ -132,7 +132,6 @@ $PoolNames | ForEach-Object {
             else {
                 $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
                 if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
-                if ($Algorithm_Norm -eq $Algorithm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
                 if ($Algorithm_Norm -match "Equihash1445|Equihash1927") {$CoinName = "ManagedByPool"}
 
                 $PoolHost       = "mine.zergpool.com"

@@ -28,28 +28,27 @@ if ($Devices.Vendor -contains "NVIDIA Corporation" -and $CUDAVersion -and [Syste
     $Devices = $Devices | Where-Object Vendor -NE "NVIDIA Corporation"
 }
 
+$Commands = [PSCustomObject[]]@(
+    [PSCustomObject]@{Algorithm = "tensority";           MinMemGB = 1; MinMemGBWin10 = 1;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a tensority"} #Tensority (BTM)
+# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash";               MinMemGB = 4; MinMemGBWin10 = 4; SecondaryIntensity = 0;  Fee = 0.65; Command = " -a ethash"} #Ethash
+# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash2gb";            MinMemGB = 2; MinMemGBWin10 = 2; SecondaryIntensity = 0;  Fee = 0.65; Command = " -a ethash"} #Ethash2GB
+# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash3gb";            MinMemGB = 3; MinMemGBWin10 = 3; SecondaryIntensity = 0;  Fee = 0.65; Command = " -a ethash"} #Ethash3GB
+    [PSCustomObject]@{Algorithm = "tensority_ethash";    MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 2;    Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash
+    [PSCustomObject]@{Algorithm = "tensority_ethash2gb"; MinMemGB = 3; MinMemGBWin10 = 2;  SecondaryIntensity = 17; Fee = 2;    Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash2GB
+    [PSCustomObject]@{Algorithm = "tensority_ethash3gb"; MinMemGB = 3; MinMemGBWin10 = 3;  SecondaryIntensity = 17; Fee = 2;    Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash3GB
+    [PSCustomObject]@{Algorithm = "cuckarood";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckarood"} #Cuckaroo29
+    [PSCustomObject]@{Algorithm = "cuckaroo";            MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckarood"} #Cuckarood29 (Grin29)
+    [PSCustomObject]@{Algorithm = "cuckaroo_swap";       MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckaroo_swap"} #Cuckaroo29s (Swap29)
+    [PSCustomObject]@{Algorithm = "cuckatoo";            MinMemGB = 8; MinMemGBWin10 = 10; SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckatoo"} #Cuckatoo31 (Grin31)
+    [PSCustomObject]@{Algorithm = "cuckoo_ae";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckoo_ae"} #Cuckoo29 (Aeternity)
+    [PSCustomObject]@{Algorithm = "progpow_sero";        MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a progpow_sero"} #Progpow92 (Sero)
+)
 #Commands from config file take precedence
-if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
-else {
-    $Commands = [PSCustomObject[]]@(
-        [PSCustomObject]@{Algorithm = "tensority";           MinMemGB = 1; MinMemGBWin10 = 1;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Tensority (BTM)
-# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash";               MinMemGB = 4; MinMemGBWin10 = 4; SecondaryIntensity = 0;  Fee = 0.65; Params = ""} #Ethash
-# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash2gb";            MinMemGB = 2; MinMemGBWin10 = 2; SecondaryIntensity = 0;  Fee = 0.65; Params = ""} #Ethash2GB
-# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash3gb";            MinMemGB = 3; MinMemGBWin10 = 3; SecondaryIntensity = 0;  Fee = 0.65; Params = ""} #Ethash3GB
-        [PSCustomObject]@{Algorithm = "tensority_ethash";    MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 2;    Params = ""} #Tensority (BTM) & Ethash
-        [PSCustomObject]@{Algorithm = "tensority_ethash2gb"; MinMemGB = 3; MinMemGBWin10 = 2;  SecondaryIntensity = 17; Fee = 2;    Params = ""} #Tensority (BTM) & Ethash2GB
-        [PSCustomObject]@{Algorithm = "tensority_ethash3gb"; MinMemGB = 3; MinMemGBWin10 = 3;  SecondaryIntensity = 17; Fee = 2;    Params = ""} #Tensority (BTM) & Ethash3GB
-        [PSCustomObject]@{Algorithm = "cuckarood";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckarood29 (Grin29)
-        [PSCustomObject]@{Algorithm = "cuckaroo_swap";       MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckaroo29s (Swap29)
-        [PSCustomObject]@{Algorithm = "cuckatoo";            MinMemGB = 8; MinMemGBWin10 = 10; SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckatoo31 (Grin31)
-        [PSCustomObject]@{Algorithm = "cuckoo_ae";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Cuckoo29 (Aeternity)
-        [PSCustomObject]@{Algorithm = "progpow_sero";        MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Params = ""} #Progpow92 (Sero)
-    )
-}
+if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object {$_.Algorithm -ne $Algorithm}; $Commands += $_}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = ""}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+else {$CommonCommands = ""}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
@@ -58,9 +57,8 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Commands | ForEach-Object {$Main_Algorithm_Norm = Get-Algorithm ($_.Algorithm -Split "_" | Select-Object -Index 0); $_} | Where-Object {$Pools.$Main_Algorithm_Norm.Host} | ForEach-Object {
         $Main_Algorithm = $_.Algorithm -split '_' | Select-Object -Index 0
         $Secondary_Algorithm = $_.Algorithm -split '_' | Select-Object -Index 1
-        $Algorithm = $_.Algorithm -replace "ethash(\dgb)", "ethash"
         $Fee = $_.Fee
-        $Parameters = $_.Parameters
+
         if (([System.Version]$PSVersionTable.BuildVersion -ge "10.0.0.0")) {
             $MinMemGB = $_.MinMemGBWin10
         }
@@ -69,16 +67,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         }
 
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
-            #Get parameters for active miner devices
-            if ($Miner_Config.Parameters.$Algorithm_Norm) {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters.$Algorithm_Norm $Miner_Device.Type_Vendor_Index
-            }
-            elseif ($Miner_Config.Parameters."*") {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters."*" $Miner_Device.Type_Vendor_Index
-            }
-            else {
-                $Parameters = Get-ParameterPerDevice $_.Parameters $Miner_Device.Type_Vendor_Index
-            }
+
+            #Get commands for active miner devices
+            $Command = Get-CommandPerDevice -Command $_.Command -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
             
             #define main algorithm protocol
             if ($Pools.$Main_Algorithm_Norm.Name = "Nicehash") {$Main_Protocol = "nicehash+tcp"}
@@ -115,20 +106,22 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 $WarmupTime = 30
             }
             
-            [PSCustomObject]@{
-                Name       = $Miner_Name
-                BaseName   = $Miner_BaseName
-                Version    = $Miner_Version
-                DeviceName = $Miner_Device.Name
-                Path       = $Path
-                HashSHA256 = $HashSHA256
-                Arguments  = ("--api 127.0.0.1:$($Miner_Port) -a $Algorithm -o $($Main_Protocol)://$($Pools.$Main_Algorithm_Norm.Host):$($Pools.$Main_Algorithm_Norm.Port) -u $($Pools.$Main_Algorithm_Norm.User):$($Pools.$Main_Algorithm_Norm.Pass)$Parameters$CommonParameters -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ',')" -replace "\s+", " ").trim()
-                HashRates  = $Miner_HashRates
-                API        = "NBMiner"
-                Port       = $Miner_Port
-                URI        = $Uri
-                Fees       = $Miner_Fees
-                WarmupTime = $WarmupTime #seconds
+            if ($null -eq $Secondary_Algorithm -or $Pools.$Secondary_Algorithm_Norm.Host) {
+                [PSCustomObject]@{
+                    Name       = $Miner_Name
+                    BaseName   = $Miner_BaseName
+                    Version    = $Miner_Version
+                    DeviceName = $Miner_Device.Name
+                    Path       = $Path
+                    HashSHA256 = $HashSHA256
+                    Arguments  = ("$Command$CommonCommands --api 127.0.0.1:$($Miner_Port) -o $($Main_Protocol)://$($Pools.$Main_Algorithm_Norm.Host):$($Pools.$Main_Algorithm_Norm.Port) -u $($Pools.$Main_Algorithm_Norm.User):$($Pools.$Main_Algorithm_Norm.Pass) -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ',')" -replace "\s+", " ").trim()
+                    HashRates  = $Miner_HashRates
+                    API        = "NBMiner"
+                    Port       = $Miner_Port
+                    URI        = $Uri
+                    Fees       = $Miner_Fees
+                    WarmupTime = $WarmupTime #seconds
+                }
             }
         }
     }

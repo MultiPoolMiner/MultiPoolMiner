@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 31/07/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 12/08/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -89,11 +89,6 @@ Additional base power usage (in Watt) for running the computer, monitor etc. reg
 MultiPoolMiner's update interval in seconds during benchmarks / power metering. This is a universal timer for running the entire script (downloading/processing APIs, calculation etc). It determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
 Note: This value correlates with *-MinHashRateSamples*. If you set *-MinHashRateSamples* too high, then MPM cannot get enough samples for reliable measurement (recommendation: 10 or more). In this case increase the benchmark interval length.
 
-**-CreateMinerInstancePerDeviceModel**
-All miner files can create separate instances for each card model. This increases profit.
-By default this feature is turned on. To disable add '-CreateMinerInstancePerDeviceModel:false' to your start batch file.
-*Note that this will trigger some benchmarking.*
-
 **-CoinName [Zcash, ZeroCoin etc.]**
 Limit mining to the listed coins only; this is also a per-pool setting (see Advanced Configuration). Use commas to separate multiple values.
 Note: Only the pools ending in ...Coins expose the coin name in their API.
@@ -120,6 +115,11 @@ Choose the relevant GPU(s) and/or CPU mining.  [CPU, GPU, GPU#02, AMD, NVIDIA, A
 **-DisableDevFeeMining**
 Disable miner developer fees (Note: not all miners support turning off their built in fees, others will reduce the hashrate).
 This is also a per-miner setting (see Advanced Configuration).
+
+**-DisableDeviceDetection**
+All miner by default create separate instances for each card model.
+To disable add *-DisableDeviceDetection* to your start batch file. This decreases profit.
+Note: Changing this parameter this will trigger some benchmarking.
 
 **-DisableEstimateCorrection**
 Some pools overestimate the projected profits.
@@ -176,6 +176,11 @@ Include this command to ignore the power costs when calculating profit. MPM will
 MultiPoolMiner's update interval in seconds. This is an universal timer for running the entire script (downloading/processing APIs, calculation etc). It also determines how long a benchmark is run for each miner file (miner/algorithm/coin). Default is 60.
 Note: This value correlates with *-MinHashRateSamples*. If you set *-MinHashRateSamples* too short, then MPM cannot get enough samples for reliable measurement (anything over 10 is fine). In this case increase the interval length.
 
+**-IntervalMultiplier**
+Interval multiplier per algorithm during benchmarking, if an algorithm is not listed the default of 1 is used.
+The default values are @{"EquihashR15053" = 2; "Mtp" = 2; "MtpNicehash" = 2; "ProgPow" = 2; "Rfv2" = 2; "X16r" = 5; "X16Rt" = 3; "X16RtGin" = 3; "X16RtVeil" = 3}
+Note: The default values can be overwritten by specifying other values in the config file (Advanced configuration via config file required, see below).
+
 **-MeasurePowerUsage**
 Include this command to to gather power usage per device. This is a pre-requisite to calculate power costs and effective earnings. 
 Note: This requires advanced configuration steps (see ConfigHWinfo64.pdf)
@@ -203,7 +208,7 @@ This is also a per-pool setting (see Advanced Configuration).
 MPM queries the pool balances every n minutes. Default is 15, minimum is 0 (=on every loop). MPM does this to minimize the requests sent to the pools. Pools usually do not update the balances in real time, so querying on each loop is unnecessary.
 Note: The balance overview is still shown on each loop.
     
-**-PoolName [ahashpool(coins), blazepool(coins), blockmasters(coins), hashrefinery(coins), miningpoolhub(coins), nicehash, nlpool(coins), phiphipool(coins), ravenminer, ravenminereu, yiimp, zpool(coins)]**
+**-PoolName [ahashpool(coins), blazepool(coins), blockmasters(coins), hashrefinery(coins), miningpoolhub(coins), nicehash(old), nlpool, phiphipool (deprecated), ravenminer, zergpool(coins), zpool(coins)]**
 The following pools are currently supported (in alphabetical order); use commas to separate multiple values:
 
 	- AHashPool / AHashPoolCoins https://www.ahashpool.com/
@@ -240,7 +245,7 @@ The following pools are currently supported (in alphabetical order); use commas 
 	  
 	  MiningPooHubCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below).
 
-	- Nicehash https://www.nicehash.com/
+	- Nicehash(old) https://www.nicehash.com / https://new.nicehash.com
 
 	  Payout in BTC (Bitcoin address must be provided using the *-Wallet* command) or BCH, ETX, LTC, XRP or AND ZEC (currency must be provided in config file (Advanced configuration via config file required, see below).
 
@@ -259,11 +264,7 @@ The following pools are currently supported (in alphabetical order); use commas 
 	  
 	- ZergPool http://zergpool.eu
 
-
-
 	  Payout in BTC (Bitcoin address must be provided using the *-Wallet* command), or any currency available in API (Advanced configuration via config file required, see below).
-
-
  
 	  ZergPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below).
 
@@ -301,7 +302,7 @@ By default, if there are several miners available to mine the same algo, only th
 Note: In benchmark mode ALL available miners wil be listed
 
 **-ShowAllPoolBalances**
-Include this command to display the balances of all pools (including those that are excluded with '-ExcludeMinerName') on the summary screen and in the web GUI. 
+Include this command to display the balances of all pools (including those that are excluded with *-ExcludeMinerName*) on the summary screen and in the web GUI. 
 
 **-ShowMinerWindow**
 Include this command to show the running miner windows (minimized).
@@ -416,7 +417,6 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
   "BenchmarkInterval": "$BenchmarkInterval",
   "CoinName": "$CoinName",
   "ConfigFile": "$ConfigFile",
-  "CreateMinerInstancePerDeviceModel": true,
   "Currency": "$Currency",
   "Dashboard": "$Dashboard",
   "Debug": "$Debug",
@@ -424,6 +424,7 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
   "DeviceName": "$DeviceName",
   "DevicePciOrderMapping": "$DevicePciOrderMapping",
   "DisableDevFeeMining": "$DisableDevFeeMining",
+  "DisableDeviceDetection": "$DisableDeviceDetection",
   "DisableEstimateCorrection": "$DisableEstimateCorrection",
   "DisableMinersWithDevFee": "$DisableMinersWithDevFee",
   "Donate": "$Donate",
@@ -442,6 +443,7 @@ Warning: The JSON file structure is very fragile - every comma counts, so be car
   "InformationAction": "$InformationAction",
   "InformationVariable": "$InformationVariable",
   "Interval": "$Interval",
+  "IntervalMultiplier": "$IntervalMultiplier",
   "MeasurePowerUsage": "$MeasurePowerUsage",
   "MinAccuracy": 0.5,
   "MinerName": "$MinerName",
@@ -731,12 +733,18 @@ The algorithm names must be entered as the miner uses it, do not use the normali
     "MinersLegacy": {
       "ClaymoreEthash": {
         "*": {
-        "SecondaryAlgoIntensities": {
-          "blake2s": [
-            45,
-            60,
-            75
-          ]
+          "SecondaryAlgoIntensities": {
+            "blake2s": [
+              45,
+              60,
+              75
+            ],
+            "pascal": [
+              30,
+              60,
+              90
+            ]
+          }
         },
         "v14.7": {
           "SecondaryAlgoIntensities": {
@@ -763,20 +771,20 @@ Note: All parameter values must be entered with a leading space (' ') character!
     "MinersLegacy": {
       "ClaymoreEthash": {
         "*": {
-        "CommonParameters": "",
-          "Parameters": {
+          "Commands": {
             "*": " --no-crashreport",
             "Ethash2gb": " -ethi 9",
             "Ethash2gbPascal-20": " -colors"
-          }
+          },
+          "CommonCommands": ""
         },
         "v14.7": {
-          "CommonParameters": "",
-          "Parameters": {
+          "Commands": {
             "*": " --no-crashreport",
             "Ethash2gb": " -ethi 9",
             "Ethash2gbPascal-20": " -colors"
-          }
+          },
+          "CommonCommands": ""
         }
       }
     }
@@ -784,12 +792,14 @@ Note: All parameter values must be entered with a leading space (' ') character!
 **If both, specific (e.g. miner version / algorithm name) and generic config ("\*") exist, then only the specific config is used. The generic config will be ignored entirely.**
 **Important: The miner config defined in the config file overrides all 'out-of-the-box' config that is defined in the miner definition file.**
 
-Parameters: These settings will be added to the miner command line for the selected miner algorithm.
-CommonParameters: These settings will be added to the miner command line for ALL miner algorithms.
-Parameters and CommonParameters are cumulative.
+Commands: These settings will be added to the miner command line for the selected miner algorithm.
+CommonCommands: These settings will be added to the miner command line for ALL miner algorithms.
+Commands and CommonCommands are cumulative.
 
-#### Add custom miner commands
-MPM stores all default miner commands (= what algos to mine) in the miner file. You can override these commands with your own by modifing the config file:
+Note: If you configure *Persistent miner configuration* and *Customize miner commands*, then the config data from *Persistent miner configuration* take precedence.
+
+#### Customize miner commands
+MPM stores all default miner commands (= what algos to mine and the commands to do so) in the miner file. You can override these commands with your own by modifing the config file.
 
 The miner name must be entered without the ending version number (e.g. for ClaymoreEthash-v14.7 remove -v14.7)
 The algorithm name must be entered in the normalized form as returned by Get-Algorithm.
@@ -798,7 +808,7 @@ Commands must match the data structure as found in the existing miner files. Not
     "MinersLegacy": {
       "ClaymoreEthash": {
         "*": {
-          "Commands": [
+          "CustomCommands": [
             {
               "MainAlgorithm": "Ethash2gb",
               "MinMemGB": 2,
@@ -813,10 +823,11 @@ Commands must match the data structure as found in the existing miner files. Not
               "SecondaryIntensity": 35,
               "Params": " -colors"
             }
-          ]
+          ],
+          "CommonCommands": " -dbg -1"
         },
         "v14.7": {
-          "Commands": [
+          "CustomCommands": [
             {
               "MainAlgorithm": "Ethash2gb",
               "MinMemGB": 2,
@@ -831,13 +842,16 @@ Commands must match the data structure as found in the existing miner files. Not
               "SecondaryIntensity": 35,
               "Params": " -colors"
             }
-          ]
+          ],
+          "CommonCommands": " -dbg -1"
         }
       }
     }
 "\*" stands for ANY version or ANY algorithm.
 **If both, specific (e.g. miner version / algorithm name) and generic config ("\*") exist, then only the specific config is used. The generic config will be ignored entirely.**
-**Important: The miner commands defined in the config file override all 'out-of-the-box' commands that are defined in the miner definition file.**
+**Important: The custom miner commands defined in the config file override ALL 'out-of-the-box' commands that are defined in the miner definition file. Ensure you include all algorithms and the needed commands in the 'CustomCommands'.**
+
+Note: If you configure *Persistent miner configuration* and *Customize miner commands*, then the config data from *Persistent miner configuration* take precedence.
 
 #### Pre- / post miner program execution
 MPM can execute any program/script/batch file on any of these events:
@@ -924,6 +938,24 @@ To ignore miner and pool fees (as older versions did) add '"IgnoreFees":  true' 
       "SwitchingPrevention":  "$SwitchingPrevention",
       "IgnoreFees":  true
     }
+
+#### Interval Multiplier
+
+Some algorithms produce very fluctuating hash rate numbers. In oder to get more stable values these algorithms require a longer benchmark period.
+To override the defaults add a section similar to this to the general section in the config file (these are the default values):
+
+    "IntervalMultiplier": {
+        "EquihashR15053": 2,
+        "Mtp": 2,
+        "MtpNicehash": 2,
+        "ProgPow": 2,
+        "Rfv2": 2,
+        "X16r": 5,
+        "X16Rt": 3,
+        "X16RtGin": 3,
+        "X16RtVeil": 3
+    } 
+Note: The custom config section in the config file replaces the defaults for ALL algorithms. Any algorithm not explicitly configured will be set to the default value of 1 (unless there is a hardcoded value in the miner file).
 
 #### PricePenaltyFactor
 

@@ -18,19 +18,17 @@ $Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
-#Commands from config file take precedence
-if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
-else {
-    $Commands = [PSCustomObject]@{
-        "X16r"  = " -g 2 -w 64 -X 64"
-        #"X16s"  = " -g 2 -w 64 -X 64" # AMD-SgminerKL_v1.0.9 is 25 % faster
-        #"Xevan" = " -g 2 -w 64 -X 64" # AMD-SgminerKL_v1.0.9 is faster
-    }
+$Commands = [PSCustomObject]@{
+    "X16r"  = " --kernel X16r -g 2 -w 64 -X 64"
+    #"X16s"  = " --kernel X16s -g 2 -w 64 -X 64" # AMD-SgminerKL_v1.0.9 is 25 % faster
+    #"Xevan" = " --kernel Xevan -g 2 -w 64 -X 64" # AMD-SgminerKL_v1.0.9 is faster
 }
+#Commands from config file take precedence
+if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = " $(if (-not $Config.ShowMinerWindow) {' --text-only'})"}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+else {$CommonCommands = " $(if (-not $Config.ShowMinerWindow) {' --text-only'})"}
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Advanced Micro Devices, Inc.")
 $Devices | Select-Object Model -Unique | ForEach-Object {
@@ -40,41 +38,27 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
 
-        #Get parameters for active miner devices
-        if ($Miner_Config.Parameters.$Algorithm_Norm) {
-            $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters.$Algorithm_Norm $Miner_Device.Type_Vendor_Index
-        }
-        elseif ($Miner_Config.Parameters."*") {
-            $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters."*" $Miner_Device.Type_Vendor_Index
-        }
-        else {
-            $Parameters = Get-ParameterPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
-        }
-
-        Switch ($Algorithm_Norm) {
-            "X16R"  {$IntervalMultiplier = 5}
-            default {$IntervalMultiplier = 1}
-        }
+        #Get commands for active miner devices
+        $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("algorithm", "k", "kernel") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         #Allow time to build binaries
         if (-not (Get-Stat "$($Miner_Name)_$($Algorithm_Norm)_HashRate")) {$WarmupTime = 90} else {$WarmupTime = 30}
 
         [PSCustomObject]@{
-            Name               = $Miner_Name
-            BaseName           = $Miner_BaseName
-            Version            = $Miner_Version
-            DeviceName         = $Miner_Device.Name
-            Path               = $Path
-            HashSHA256         = $HashSHA256
-            Arguments          = ("--kernel $_ --api-listen --api-port $Miner_Port --url $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$Parameters$CommonParameters --gpu-platform $($Miner_Device.PlatformId | Sort-Object -Unique) --device $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
-            HashRates          = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
-            API                = "Xgminer"
-            Port               = $Miner_Port
-            URI                = $Uri
-            Fees               = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
-            IntervalMultiplier = $IntervalMultiplier
-            Environment        = @("GPU_FORCE_64BIT_PTR=0")
-            WarmupTime         = $WarmupTime #seconds
+            Name        = $Miner_Name
+            BaseName    = $Miner_BaseName
+            Version     = $Miner_Version
+            DeviceName  = $Miner_Device.Name
+            Path        = $Path
+            HashSHA256  = $HashSHA256
+            Arguments   = ("$Command$CommonCommands --api-listen --api-port $Miner_Port --url $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass) --gpu-platform $($Miner_Device.PlatformId | Sort-Object -Unique) --device $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
+            HashRates   = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
+            API         = "Xgminer"
+            Port        = $Miner_Port
+            URI         = $Uri
+            Fees        = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
+            Environment = @("GPU_FORCE_64BIT_PTR=0")
+            WarmupTime  = $WarmupTime #seconds
         }
     }
 }

@@ -28,42 +28,30 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
     return
 }
 
+$Commands = [PSCustomObject[]]@(
+    [PSCustomObject]@{Algorithm = "ProgPow2gb";  MinMemGB = 2; Command = ""} #ProgPoW2gb
+    [PSCustomObject]@{Algorithm = "ProgPow3gb";  MinMemGB = 3; Command = ""} #ProgPoW3gb
+    [PSCustomObject]@{Algorithm = "ProgPow";     MinMemGB = 4; Command = ""} #ProgPoW
+)
 #Commands from config file take precedence
-if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
-else {
-    $Commands = [PSCustomObject[]]@(
-        [PSCustomObject]@{Algorithm = "progpow2gb";  MinMemGB = 2; Params = ""} #ProgPoW2gb
-        [PSCustomObject]@{Algorithm = "progpow3gb";  MinMemGB = 3; Params = ""} #ProgPoW3gb
-        [PSCustomObject]@{Algorithm = "progpow";     MinMemGB = 4; Params = ""} #ProgPoW
-    )
-}
+if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object {$_.Algorithm -ne $Algorithm}; $Commands += $_}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = ""}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+else {$CommonCommands = ""}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
 
     $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
-        $Algorithm = $_.Algorithm -replace "progpow(\dgb)", "progpow"
         $MinMemGB = $_.MinMemGB
-        $Parameters = $_.Parameters
 
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
             $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
 
-            #Get parameters for active miner devices
-            if ($Miner_Config.Parameters.$Algorithm_Norm) {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters.$Algorithm_Norm $Miner_Device.Type_Vendor_Index
-            }
-            elseif ($Miner_Config.Parameters."*") {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters."*" $Miner_Device.Type_Vendor_Index
-            }
-            else {
-                $Parameters = Get-ParameterPerDevice $_.Parameters $Miner_Device.Type_Vendor_Index
-            }
+            #Get commands for active miner devices
+            $Command = Get-CommandPerDevice -Command $_.Command -DeviceIDs $Miner_Device.Type_Vendor_Index
 
             [PSCustomObject]@{
                 Name       = $Miner_Name
@@ -72,7 +60,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
-                Arguments  = ("--api-port -$Miner_Port -U -P $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass)@$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)$Parameters$CommonParameters --cuda-devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')" -replace "\s+", " ").trim()
+                Arguments  = ("$Command$CommonCommands --api-port -$Miner_Port -U -P $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass)@$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --cuda-devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')" -replace "\s+", " ").trim()
                 HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                 API        = "Claymore"
                 Port       = $Miner_Port
