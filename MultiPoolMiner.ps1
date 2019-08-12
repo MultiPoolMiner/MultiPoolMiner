@@ -928,7 +928,7 @@ while (-not $API.Stop) {
                 Best_Comparison       = $false
                 New                   = $false
                 Intervals             = @()
-                Pool                  = [Array]$Miner.Pools.PSObject.Properties.Value.Name #temp fix, must use 'PSObject.Properties' to preserve order
+                PoolName                  = [Array]$Miner.Pools.PSObject.Properties.Value.Name #temp fix, must use 'PSObject.Properties' to preserve order
                 ShowMinerWindow       = $Miner.ShowMinerWindow
                 IntervalMultiplier    = $Miner.IntervalMultiplier
                 Environment           = $Miner.Environment
@@ -1058,7 +1058,7 @@ while (-not $API.Stop) {
             $Command = $ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PreStop"))
             if ($Command) { Start-PrePostCommand -Command $Command -Event "PreStop" }
 
-            Write-Log "Stopping miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Miner.Pool | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))"}) -join "; ")}). "
+            Write-Log "Stopping miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))"}) -join "; ")}). "
             $Miner.SetStatus("Idle")
             $Miner.StatusMessage = " stopped gracefully"
             if ($Miner.ProcessId -and -not ($ActiveMiners | Where-Object { $_.Best -and $_.API -EQ $Miner.API })) { Stop-Process -Id $Miner.ProcessId -Force -ErrorAction Ignore } #temp fix
@@ -1508,7 +1508,7 @@ while (-not $API.Stop) {
             #Pre miner failure exec
             $Command = $ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PreStop"))
             if ($Command) { Start-PrePostCommand -Command $Command -Event "PreStop" }
-            Write-Log "Stopping miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Miner.Pool | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))"}) -join "; ")}). "
+            Write-Log "Stopping miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))"}) -join "; ")}). "
             $Miner.SetStatus("Idle")
             $Miner.StatusMessage = " stopped gracefully"
             #Post miner stop exec

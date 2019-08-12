@@ -1334,7 +1334,7 @@ class Miner {
     hidden [Int64]$Activated = 0
     hidden [MinerStatus]$Status = [MinerStatus]::Idle
     $LogFile
-    $Pool
+    $PoolName
     hidden [Array]$Data = @()
     $ShowMinerWindow
     $IntervalMultiplier
