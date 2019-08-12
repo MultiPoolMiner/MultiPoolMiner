@@ -23,7 +23,6 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.0.zip
 - Enabled algorithm 'MtpNiceHash' on miner 'CcminerTrex' & 'TeamRedMiner'
 - Fixed Bminer-v15.7.6; algorithm 'cuckarood29' failed benchmarking
 - Fixed PhoenixminerEthash-v4.5c; enabled algorithm 'progpow', fixed double '-coin' parameter, fixed Ethash* protocol
-- Fixed TeamRed-v0.5.6; algorithm 'cuckatoo31' was broken
 - Removed CcminerTrexDedal-v0.11.0, replaced with CcminerTrex-v0.13.2
 - Removed SgminerLyra2z-v0.3; the only supported algorithm is unprofitable
 - Removed Zjazz-v1.2 & ZjazzX22i-v1.2; all supported algorithms are dead
@@ -34,7 +33,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.0.zip
 - Updated Gminer-v1.54
 - Updated FireiceCryptonight-v2.10.7
 - Updated Jayddee-v3.9.7
-- Updated TeamRed-v0.5.6; support for 'CryptoNightConceal' & 'Cuckarood29' algorithm
+- Updated TeamRed-v0.5.7; support for 'CryptoNightConceal' & 'Cuckarood29' algorithm
 - Updated TTMiner-v3.0.1
 - Updated WildRig-v0.19.1
 - Updated XmrigCryptonight-v2.14.5-AMD; fixed compatibility with recent AMD drivers (19.7.2)
