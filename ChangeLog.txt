@@ -6,7 +6,7 @@ Parameter '-CreateMinerInstancePerDeviceModel' has been changed to '-DisableDevi
 Download link:
 https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.0.zip
 
-## Changelog Version 3.5.0
+## Changelog Version 3.5.0a
 
 #### Core changes
 - Added config item '-IntervalMultiplier' per algorithm (see README); this was previously hardcoded in the miner files
@@ -23,6 +23,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.0.zip
 - Enabled algorithm 'MtpNiceHash' on miner 'CcminerTrex' & 'TeamRedMiner'
 - Fixed Bminer-v15.7.6; algorithm 'cuckarood29' failed benchmarking
 - Fixed PhoenixminerEthash-v4.5c; enabled algorithm 'progpow', fixed double '-coin' parameter, fixed Ethash* protocol
+- Fixed XmrigCryptonight-v2.14.5-AMD (version 3.5.0a)
 - Removed CcminerTrexDedal-v0.11.0, replaced with CcminerTrex-v0.13.2
 - Removed SgminerLyra2z-v0.3; the only supported algorithm is unprofitable
 - Removed Zjazz-v1.2 & ZjazzX22i-v1.2; all supported algorithms are dead
