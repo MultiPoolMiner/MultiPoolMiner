@@ -24,38 +24,38 @@ param(
     [Switch]$SSL = $false, 
     [Parameter(Mandatory = $false)]
     [Alias("Device", "Type")]
-    [Array]$DeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.
+    [String[]]$DeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.
     [Parameter(Mandatory = $false)]
-    [Array]$ExcludeDeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc. will not be used for mining
+    [String[]]$ExcludeDeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc. will not be used for mining
     [Parameter(Mandatory = $false)]
-    [Array]$Algorithm = @(), #i.e. Ethash, Equihash, CryptonightV7 etc.
+    [String[]]$Algorithm = @(), #i.e. Ethash, Equihash, CryptonightV7 etc.
     [Parameter(Mandatory = $false)]
-    [Array]$CoinName = @(), #i.e. Monero, Zcash etc.
+    [String[]]$CoinName = @(), #i.e. Monero, Zcash etc.
     [Parameter(Mandatory = $false)]
-    [Array]$MiningCurrency = @(), #i.e. LUX, XVG etc.
+    [String[]]$MiningCurrency = @(), #i.e. LUX, XVG etc.
     [Parameter(Mandatory = $false)]
     [Alias("Miner")]
-    [Array]$MinerName = @(), 
+    [String[]]$MinerName = @(), 
     [Parameter(Mandatory = $false)]
     [Alias("Pool")]
-    [Array]$PoolName = @(), 
+    [String[]]$PoolName = @(), 
     [Parameter(Mandatory = $false)]
-    [Array]$ExcludeAlgorithm = @(), #i.e. Ethash, Equihash, CryptonightV7 etc.
+    [String[]]$ExcludeAlgorithm = @(), #i.e. Ethash, Equihash, CryptonightV7 etc.
     [Parameter(Mandatory = $false)]
-    [Array]$ExcludeCoinName = @(), #i.e. Monero, Zcash etc.
+    [String[]]$ExcludeCoinName = @(), #i.e. Monero, Zcash etc.
     [Parameter(Mandatory = $false)]
-    [Array]$ExcludeMiningCurrency = @(), #i.e. LUX, XVG etc.
+    [String[]]$ExcludeMiningCurrency = @(), #i.e. LUX, XVG etc.
     [Parameter(Mandatory = $false)]
     [Alias("ExcludeMiner")]
-    [Array]$ExcludeMinerName = @(), 
+    [String[]]$ExcludeMinerName = @(), 
     [Parameter(Mandatory = $false)]
     [Alias("ExcludePool")]
-    [Array]$ExcludePoolName = @(), 
+    [String[]]$ExcludePoolName = @(), 
     [Parameter(Mandatory = $false)]
     [Alias("DisableDualMining")]
     [Switch]$SingleAlgoMining = $false, #disables all dual mining miners
     [Parameter(Mandatory = $false)]
-    [Array]$Currency = ("BTC", "USD"), #i.e. GBP, EUR, ZEC, ETH etc., the first currency listed will be used as base currency for profit calculations
+    [String[]]$Currency = ("BTC", "USD"), #i.e. GBP, EUR, ZEC, ETH etc., the first currency listed will be used as base currency for profit calculations
     [Parameter(Mandatory = $false)]
     [ValidateRange(10, 1440)]
     [Int]$Donate = 24, #Minutes per Day, Allowed values: 10 - 1440
@@ -163,10 +163,10 @@ catch {
     Write-Log "Failed to import module (ThreadJob) - using normal 'Start-Job' instead. "
 }
 
-$Algorithm = $Algorithm | ForEach-Object { @(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-' }
-$ExcludeAlgorithm = $ExcludeAlgorithm | ForEach-Object { @(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-' }
-$Region = $Region | ForEach-Object { Get-Region $_ }
-$Currency = $Currency | ForEach-Object { $_.ToUpper() }
+$Algorithm = [String[]]@($Algorithm | ForEach-Object { @(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-' } | Select-Object)
+$ExcludeAlgorithm = [String[]]@($ExcludeAlgorithm | ForEach-Object { @(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-' } | Select-Object)
+$Region = [String]@($Region | ForEach-Object { Get-Region $_ } | Select-Object -First 1)
+$Currency = [String[]]@($Currency | ForEach-Object { $_.ToUpper() } | Select-Object)
 
 $Timer = (Get-Date).ToUniversalTime()
 $StatEnd = $Timer
