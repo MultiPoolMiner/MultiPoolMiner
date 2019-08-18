@@ -13,7 +13,6 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.1.zip
 - Enabled CPU mining on FireiceCryptonight-v2.10.7, AMD and NVIDIA remain disabled (to enable edit the miner file)
 - Fixed XmrigCryptonight-v2.14.5-AMD (also fixed in MPM version 3.5.0a)
 - Removed 'Equihash1445' & 'Equihash1927' algorithms on  Ewbf2Equihash-v0.6, Gminer is faster
-- Updated BMiner-v15.8.2, support for 'EquihashR15053' (Beamhash2) algorithm
 - Updated Gminer-v1.55, support for 'EquihashR15053' (Beamhash2) algorithm
 - Updated lolMiner-v0.8.7, support for 'EquihashR15053' (Beamhash2) algorithm
 - Updated MiniZEquihash-v1.5p, support for 'EquihashR15053' (Beamhash2) algorithm
