@@ -1,7 +1,5 @@
 # MultiPoolMiner dev version
 
-** Parameter changes for version 3.5.1**
-
 Download link:
 https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.1.zip
 
