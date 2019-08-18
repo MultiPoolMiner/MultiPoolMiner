@@ -55,7 +55,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "cnsaber";     MinMemGB = 4; Fee = 1; Command = " -a cnsaber -i 5"} #CryptonightHeavyTube (BitTube), new in 0.9.2
     [PSCustomObject]@{Algorithm = "cnturtle";    MinMemGB = 2; Fee = 1; Command = " -a cnturtle -i 5"} #CryptonightTurtle, new in 0.17.0
     [PSCustomObject]@{Algorithm = "cnv8";        MinMemGB = 2; Fee = 1; Command = " -a cnv8 -i 5"} #CyptonightV8, new in 0.9.3
-    [PSCustomObject]@{Algorithm = "cuckaroo29";  MinMemGB = 6; Fee = 1; Command = " -a cuckaroo29 -i 5"} #Cuckaroo29, new in 0.17.0
+#    [PSCustomObject]@{Algorithm = "cuckaroo29";  MinMemGB = 6; Fee = 1; Command = " -a cuckaroo29 -i 5"} #Cuckaroo29, new in 0.17.0; reported API value too small
     [PSCustomObject]@{Algorithm = "hmq1725";     MinMemGB = 1; Fee = 1; Command = " -a hmq1725"} #HMQ1725, new in 0.10.0
     [PSCustomObject]@{Algorithm = "lyra2rev3";   MinMemGB = 1; Fee = 1; Command = " -a lyra2rev3"} #Lyra2REv3, new in 0.14.0 
     [PSCustomObject]@{Algorithm = "lyra2vc0ban"; MinMemGB = 1; Fee = 1; Command = " -a lyra2vc0ban"} #Lyra2vc0banHash, new in 0.13.0
