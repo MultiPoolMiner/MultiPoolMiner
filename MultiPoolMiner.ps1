@@ -87,7 +87,7 @@ param(
     [Switch]$IgnoreFees = $false, #if $true MPM will ignore miner and pool fees for its calculations (as older versions did)
     [Parameter(Mandatory = $false)]
     [ValidateRange(1, 999)]
-    [Int]$PoolBalancesUpdateInterval = 15, #MPM will update balances every n minutes to limit pool API requests (but never more than ONCE per loop). Allowed values 1 - 999 minutes
+    [Int]$PoolBalancesUpdateInterval = 15, #MPM will force update balances every n minutes to limit pool API requests (but never more than ONCE per loop). Allowed values 1 - 999 minutes
     [Parameter(Mandatory = $false)]
     [Switch]$DisableDeviceDetection = $false, #if true MPM won't create separate miner instances per device model. This will decrease profitability.
     [Parameter(Mandatory = $false)]
@@ -130,7 +130,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Int]$APIPort = 3999, #Port for the MPM API. The miner port range will start from $APIPort +1. Default: 3999,
     [Parameter(Mandatory = $false)]
-    [Switch]$ShowAllPoolBalances, #Include this command to display the balances of all pools (including those that are excluded with '-ExcludeMinerName') on the summary screen and in the web dashboard.
+    [Switch]$ShowAllPoolBalances, #Include this command to display the balances of all pools (including those that are excluded with '-ExcludePoolName') on the summary screen and in the web dashboard.
     [Parameter(Mandatory = $false)]
     [Switch]$Dashboard = $false, #If true launch dashboard
     [Parameter(Mandatory = $false)]
@@ -145,7 +145,7 @@ param(
 
 Clear-Host
 
-$Version = "3.5.0a"
+$Version = "3.5.1"
 $VersionCompatibility = "3.3.0"
 $Strikes = 3
 $SyncWindow = 5 #minutes
@@ -426,12 +426,6 @@ while (-not $API.Stop) {
         $API.Devices = $Devices
         Update-APIDeviceStatus $API $Devices
     }
-    if ($Devices.Count -eq 0) {
-        Write-Log -Level Warn "No mining devices found. "
-        if ($Downloader) {$Downloader | Receive-Job -ErrorAction SilentlyContinue}
-        while ((Get-Date).ToUniversalTime() -lt $StatEnd) {Start-Sleep 10}
-        continue
-    } 
 
     #Set master timer
     $StatStart = $StatEnd
@@ -481,7 +475,7 @@ while (-not $API.Stop) {
     $PowerPrice = [Double]0
     $PowerCostBTCperW = [Double]0
     $BasePowerCost = [Double]0
-    if ($Config.MeasurePowerUsage) {
+    if ($Devices.Count -and $Config.MeasurePowerUsage) {
         #HWiNFO64 verification
         $RegKey = "HKCU:\Software\HWiNFO64\VSB"
         $OldRegistryValue = $RegistryValue
@@ -548,12 +542,11 @@ while (-not $API.Stop) {
     }
 
     #TempFix: Gin and Veil are separate implementations of the same algorithm which are not compatible with all miners
-    $NewPools | Where-Object CoinName -match "GinCoin|Veil" | ForEach-Object {
+    $NewPools | Where-Object Algorithm -EQ "X16rt" | Where-Object CoinName -match "GinCoin|Veil" | ForEach-Object {
         $Pool = $_ | ConvertTo-Json | ConvertFrom-Json
         Switch ($_.CoinName) {
-            "GinCoin" {$Pool.Algorithm = "X16RtGin"; $NewPools += $Pool}
-            "Veil"    {$Pool.Algorithm = "X16RtVeil"; $NewPools += $Pool}
-            default   {}
+            "GinCoin" {$Pool.Algorithm = "X16RtGin";  if (-not ($NewPools | Where-Object {$_.Name -EQ $Pool.Name -and $_.Algorithm -EQ $Pool.Algorithm})) {$NewPools += $Pool}}
+            "Veil"    {$Pool.Algorithm = "X16RtVeil"; if (-not ($NewPools | Where-Object {$_.Name -EQ $Pool.Name -and $_.Algorithm -EQ $Pool.Algorithm})) {$NewPools += $Pool}}
         }
         Remove-Variable Pool
     }
@@ -934,7 +927,7 @@ while (-not $API.Stop) {
                 Best_Comparison       = $false
                 New                   = $false
                 Intervals             = @()
-                Pool                  = [Array]$Miner.Pools.PSObject.Properties.Value.Name #temp fix, must use 'PSObject.Properties' to preserve order
+                PoolName              = [Array]$Miner.Pools.PSObject.Properties.Value.Name #temp fix, must use 'PSObject.Properties' to preserve order
                 ShowMinerWindow       = $Miner.ShowMinerWindow
                 IntervalMultiplier    = $Miner.IntervalMultiplier
                 Environment           = $Miner.Environment
@@ -1090,6 +1083,12 @@ while (-not $API.Stop) {
             }
         }
     }
+    if ($Devices.Count -eq 0) {
+        Write-Log -Level Warn "No mining devices found. "
+        if ($Downloader) {$Downloader | Receive-Job -ErrorAction SilentlyContinue}
+        while ((Get-Date).ToUniversalTime() -lt $StatEnd) {Start-Sleep 10}
+        continue
+    } 
     if ($API) {$API.WatchdogTimers = $WatchdogTimers} #Give API access to WatchdogTimers information
     Start-Sleep $Config.Delay #Wait to prevent BSOD
 

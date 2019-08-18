@@ -8,6 +8,9 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.1.zip
 ## Changelog Version 3.5.1
 
 #### Core changes
+- Backported https://github.com/MultiPoolMiner/MultiPoolMiner/commit/e9c55d3d708b8ed1588ae00b8e017dfab481d2cd
+- Fixed errors "Invalid property identifier character: ਍. Path ''" (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2372#issuecomment-521487006)
+
 #### Miner changes
 - Enabled CPU mining on FireiceCryptonight-v2.10.7, AMD and NVIDIA remain disabled (to enable edit the miner file)
 - Fixed XmrigCryptonight-v2.14.5-AMD (also fixed in MPM version 3.5.0a)
@@ -23,6 +26,8 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.1.zip
 - Removed PhiPhiPool.ps1 (moved to 'Deprecated' folder)
 
 #### API changes
+- Fixed empty share count ([Shares Accepted: ; Rejected: ; Total: ])
+
 #### Web Interface changes
 #### Known issues
 - WildRig-v0.19.1: Some algorithms will fail on Radeon RX 5700 models (see https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2361)
