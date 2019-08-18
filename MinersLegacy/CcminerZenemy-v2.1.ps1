@@ -72,6 +72,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         Switch ($Algorithm_Norm) {
             "C11"    {$WarmupTime = 60}
+            "Xevan"  {$WarmupTime = 60}
             default  {$WarmupTime = 45}
         }
 
