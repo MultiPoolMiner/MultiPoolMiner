@@ -8,6 +8,7 @@
         "LitecoinZ":  "ZcashPoW"
     },
     "EquihashR15053":  {
+        "Grimm":  "GrimmPOW",
         "GrimmCoin":  "GrimmPOW"
     },
     "Equihash1927":  {
