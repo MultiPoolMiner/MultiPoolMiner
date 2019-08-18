@@ -200,7 +200,7 @@ if (Test-Path .\API.psm1 -PathType Leaf -ErrorAction Ignore) { Import-Module .\A
 #Initialize config file
 if (-not [IO.Path]::GetExtension($ConfigFile)) { $ConfigFile = "$($ConfigFile).txt" }
 $Config_Temp = [PSCustomObject]@{ }
-$Config_Parameters = @{ }
+[Hashtable]$Config_Parameters = @{ }
 $MyInvocation.MyCommand.Parameters.Keys | Sort-Object | ForEach-Object { 
     $Config_Parameters.$_ = Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue
     if ($Config_Parameters.$_ -is [Switch]) { $Config_Parameters.$_ = [Boolean]$Config_Parameters.$_ }
@@ -221,7 +221,7 @@ $Config = [PSCustomObject]@{ }
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
 $WalletDonate = ((@("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb") * 3) + (@("16Qf1mEk5x2WjJ1HhfnvPnqQEi2fvCeity") * 2) + (@("1GPSq8txFnyrYdXL8t6S94mYdF8cGqVQJF") * 2))[(Get-Random -Minimum 0 -Maximum ((3 + 2 + 2) - 1))]
 $UserNameDonate = ((@("aaronsace") * 3) + (@("grantemsley") * 2) + (@("uselessguru") * 2))[(Get-Random -Minimum 0 -Maximum ((3 + 2 + 2) - 1))]
-$WorkerNameDonate = "multipoolminer_donate_$($Version -replace '[\W]')"
+$WorkerNameDonate = "multipoolminer_donate_$Version" -replace '[\W]', '-'
 
 #Set process priority to BelowNormal to avoid hash rate drops on systems with weak CPUs
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
@@ -229,70 +229,51 @@ $WorkerNameDonate = "multipoolminer_donate_$($Version -replace '[\W]')"
 #HWiNFO64 ready? If HWiNFO64 is running it will recreate the reg key automatically
 if (Test-Path "HKCU:\Software\HWiNFO64\VSB") { Remove-Item -Path "HKCU:\Software\HWiNFO64\VSB" -Recurse -ErrorAction SilentlyContinue }
 
+if (Test-Path "APIs" -PathType Container -ErrorAction Ignore) { Get-ChildItem "APIs" -File | ForEach-Object { . $_.FullName } }
+
 while (-not $API.Stop) { 
-    #Reduce memory
-    [GC]::Collect()
-    $Error.Clear()
+    #Display downloader progress
+    if ($Downloader) { $Downloader | Receive-Job }
 
     #Load the configuration
     $OldConfig = $Config | ConvertTo-Json -Depth 10 | ConvertFrom-Json
     $Config = Get-ChildItemContent $ConfigFile -Parameters $Config_Parameters | Select-Object -ExpandProperty Content
     if ($Config -isnot [PSCustomObject]) { 
-        Write-Log -Level Error "Config file ($ConfigFile) is not a valid configuration file (JSON structure is broken). Cannot continue. "
-        Start-Sleep 10
-        continue
+        Write-Log -Level Warn "Config file ($ConfigFile) is corrupt. "
+        $Config = [PSCustomObject]@{ }
     }
-    elseif (-not $Config.VersionCompatibility -or [System.Version]$Config.VersionCompatibility -lt [System.Version]$VersionCompatibility) { 
-        if (-not $Config.VersionCompatibility) { $Config | Add-member VersionCompatibility "'unknown'" }
-        Write-Log -Level Error "Config file ($ConfigFile [Version $($Config.VersionCompatibility)]) is not a valid configuration file (min. required config file version is $VersionCompatibility). Cannot continue. "
-        Start-Sleep 10
-        continue
+    if ($Config.VersionCompatibility -and $VersionCompatibility -and [System.Version]$Config.VersionCompatibility -lt [System.Version]$VersionCompatibility) { 
+        Write-Log -Level Warn "Config file ($ConfigFile [Version $($Config.VersionCompatibility)]) is not a valid configuration file (min. required config file version is $VersionCompatibility). "
     }
-    if ($Config.Proxy) { $PSDefaultParameterValues["*:Proxy"] = $Config.Proxy }
-    else { $PSDefaultParameterValues.Remove("*:Proxy") }
+
+    #Repair the configuration
+    $Config | Add-Member $Config_Parameters -ErrorAction Ignore
+    $Config | Add-Member Wallets ([PSCustomObject]@{ }) -ErrorAction Ignore
+    if ($Wallet -and -not $Config.Wallets.BTC) { $Config.Wallets | Add-Member BTC $Config.Wallet -ErrorAction Ignore }
     if (-not $Config.MinerStatusKey -and $Config.Wallets.BTC) { $Config | Add-Member MinerStatusKey $Config.Wallets.BTC -Force } #for backward compatibility
-
-    #Config file may not contain an entry for all supported parameters, use value from command line, or if empty use default
-    $Config | Add-Member Miners ([PSCustomObject]@{ }) -ErrorAction SilentlyContinue
-    $Config | Add-Member MinersLegacy ([PSCustomObject]@{ }) -ErrorAction SilentlyContinue
-    $Config | Add-Member Pools ([PSCustomObject]@{ }) -ErrorAction SilentlyContinue
-    $Config | Add-Member Wallets ([PSCustomObject]@{ }) -ErrorAction SilentlyContinue
-
-    #Add variables that do not have an entry in config file
-    $Config_Parameters.Keys | Where-Object { $Config_Parameters.$_ } | Where-Object { $_ -notmatch "Username|Wallet" } | ForEach-Object { 
-        $Config | Add-Member $_ "$($Config_Parameters.$_)" -ErrorAction SilentlyContinue
-    }
-    if ($Wallet -and -not $Config.Wallets.BTC) { 
-        $Config.Wallets | Add-Member BTC $Wallet -Force
-    }
-
-    if (-not $Config.Wallets.BTC -and -not $Config.UserName) { 
-        Write-Log -Level Error "No wallet or username specified. Cannot continue. "
-        Start-Sleep 10
-        continue
-    }
-    (@(Get-ChildItem "Pools" -File -ErrorAction Ignore) + @(Get-ChildItem "Balances" -File -ErrorAction Ignore)) | Select-Object -Unique -ExpandProperty BaseName | ForEach-Object { 
+    $Config | Add-Member Pools ([PSCustomObject]@{ }) -ErrorAction Ignore
+    @(Get-ChildItem "Pools" -File -ErrorAction Ignore) + @(Get-ChildItem "Balances" -File -ErrorAction Ignore) | Select-Object -ExpandProperty BaseName -Unique | ForEach-Object { 
         $Config.Pools | Add-Member $_ ([PSCustomObject]@{ }) -ErrorAction Ignore
-        $Config.Pools.$_ | Add-Member DisableEstimateCorrection $Config.DisableEstimateCorrection -ErrorAction Ignore
-        $Config.Pools.$_ | Add-Member PricePenaltyFactor $Config.PricePenaltyFactor -ErrorAction Ignore
+        $Config.Pools.$_ | Add-Member User $Config.UserName -ErrorAction Ignore
         $Config.Pools.$_ | Add-Member Worker $Config.WorkerName -ErrorAction Ignore
-        if ($_ -like "MiningPoolHub*") { 
-            $Config.Pools.$_ | Add-Member API_ID $Config.API_ID -ErrorAction Ignore
-            $Config.Pools.$_ | Add-Member API_Key $Config.API_Key -ErrorAction Ignore
-            $Config.Pools.$_ | Add-Member User $Config.UserName -ErrorAction Ignore
-        }
-        else { 
-            $Config.Pools.$_ | Add-Member Wallets $Config.Wallets -ErrorAction Ignore
-        }
+        $Config.Pools.$_ | Add-Member Wallets $Config.Wallets -ErrorAction Ignore
+        $Config.Pools.$_ | Add-Member API_ID $Config.API_ID -ErrorAction Ignore
+        $Config.Pools.$_ | Add-Member API_Key $Config.API_Key -ErrorAction Ignore
+        $Config.Pools.$_ | Add-Member PricePenaltyFactor $Config.PricePenaltyFactor -ErrorAction Ignore
+        $Config.Pools.$_ | Add-Member DisableEstimateCorrection $Config.DisableEstimateCorrection -ErrorAction Ignore
     }
-    Get-ChildItem "Miners" -File -ErrorAction Ignore | Select-Object -ExpandProperty BaseName | ForEach-Object { 
-        $Config.Miners | Add-Member $_ ([PSCustomObject]@{ }) -ErrorAction Ignore
-    }
+    $Config | Add-Member Miners (Get-ChildItemContent "Miners") -ErrorAction Ignore
+    $Config | Add-Member MinersLegacy ([PSCustomObject]@{ }) -ErrorAction Ignore
     Get-ChildItem "MinersLegacy" -File -ErrorAction Ignore | Select-Object -ExpandProperty BaseName | ForEach-Object { 
         $Config.MinersLegacy | Add-Member ($_ -split '-' | Select-Object -Index 0) ([PSCustomObject]@{ }) -ErrorAction Ignore
     }
     $BackupConfig = $Config | ConvertTo-Json -Depth 10 | ConvertFrom-Json
-    #API check / stop
+
+    #Apply the configuration
+    $FirstCurrency = $($Config.Currency | Select-Object -Index 0)
+    if ($Config.Proxy) { $PSDefaultParameterValues["*:Proxy"] = $Config.Proxy }
+    else { $PSDefaultParameterValues.Remove("*:Proxy") }
+    #Needs clean-up
     if ($API.Port -and $Config.APIPort -ne $API.Port) { 
         #API port has changed, stop API and miners
         Write-Log -Level Info "Port for web dashboard and API has changed ($($API.Port) -> $($Config.APIPort)). $(if ($ActiveMiners | Where-Object Best) {'Stopping all runnig miners. '})"
@@ -312,7 +293,7 @@ while (-not $API.Stop) {
         $ReportStatusJob | Select-Object | Remove-Job -Force
         $ReportStatusJob = $null
     }
-    #API start
+    #Needs clean-up
     if ($Config.APIPort) { 
         if (-not $API.Port) { 
             $TCPClient = New-Object System.Net.Sockets.TCPClient
@@ -328,11 +309,6 @@ while (-not $API.Stop) {
                 Start-APIServer -Port $Config.APIPort
                 if ($API.Port) { 
                     Write-Log -Level Info "Web dashboard and API (version $($API.APIVersion)) running on http://localhost:$($API.Port). "
-                    $API.Version = [PSCustomObject]@{ 
-                        "Core" = $Version
-                        "API"  = $API.APIVersion
-                    }
-                    $API.Config = $Config #Give API access to the current running configuration
                     if ($Config.Dashboard) { Start-Process "http://localhost:$($Config.APIPort)/" } # Start web dashboard
                 }
                 else { 
@@ -344,44 +320,30 @@ while (-not $API.Stop) {
             Remove-Variable TCPClient
         }
     }
-
-    #Start monitoring service, requires running API
+    $API.Version = [PSCustomObject]@{"Core" = $Version; "API" = $API.APIVersion } #Give API access to the current version
+    $API.Config = $BackupConfig #Give API access to the current running configuration
     if ($API.Port -and $Config.MinerStatusKey -and $Config.ReportStatusInterval -and (-not $ReportStatusJob)) { 
-        $ReportStatusJob = Start-Job -Name "ReportStatus" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList "http://localhost:$($API.Port)" -FilePath .\ReportStatus.ps1
+        $ReportStatusJob = Start-Job -Name "ReportStatus" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList "http://localhost:$($API.Port)" -FilePath .\ReportStatus.ps1 #Start monitoring service (requires running API)
     }
 
-    #Prepare currency settings
-    $FirstCurrency = $($Config.Currency | Select-Object -Index 0)
-    #For backwards compatibility, set the MinerStatusKey to $Config.Wallets.BTC if it is not specified
-    if (-not $Config.MinerStatusKey -and $Config.Wallets.BTC) { $Config | Add-Member MinerStatusKey $Config.Wallets.BTC -Force }
-
-    #Unprofitable algorithms
-    if (Test-Path ".\UnprofitableAlgorithms.txt" -PathType Leaf -ErrorAction Ignore) { $UnprofitableAlgorithms = [Array](Get-Content ".\UnprofitableAlgorithms.txt" | ConvertFrom-Json -ErrorAction SilentlyContinue | Sort-Object -Unique) } else { $UnprofitableAlgorithms = @() }
+    #Load unprofitable algorithms
+    [String[]]$UnprofitableAlgorithms = @()
+    if (Test-Path ".\UnprofitableAlgorithms.txt" -PathType Leaf -ErrorAction Ignore) { [String[]]$UnprofitableAlgorithms = @(Get-Content ".\UnprofitableAlgorithms.txt" | ConvertFrom-Json -ErrorAction SilentlyContinue | Sort-Object -Unique) }
 
     #Activate or deactivate donation
     if ($Config.Donate -lt 10) { $Config.Donate = 10 }
     if ($Timer.AddDays(-1).AddMinutes(-1).AddSeconds(1) -ge $LastDonated) { $LastDonated = $Timer }
     if ($Timer.AddDays(-1).AddMinutes($Config.Donate) -ge $LastDonated) { 
-        if ($WalletDonate -and $UserNameDonate) { 
+        if ($WalletDonate -and $UserNameDonate -and $WorkerNameDonate) { 
             Write-Log "Donation run, mining to donation address for the next $(($LastDonated - ($Timer.AddDays(-1))).Minutes +1) minutes. Note: MPM will use ALL available pools. "
             $Config | Add-Member Pools ([PSCustomObject]@{ }) -Force
             Get-ChildItem "Pools" -File -ErrorAction Ignore | Select-Object -ExpandProperty BaseName | ForEach-Object { 
-                if ($_ -like "MiningPoolHub*") { 
-                    $Config.Pools | Add-Member $_ ([PSCustomObject]@{ 
-                            User               = $UserNameDonate
-                            Worker             = "Donate_$($Config.Workername)_$($Version -replace '[\W]')"
-                            PricePenaltyFactor = 1
-                        }
-                    ) -Force
-                }
-                else { 
-                    $Config.Pools | Add-Member $_ ([PSCustomObject]@{ 
-                            Worker             = "Donate_$($Config.Workername)_$($Version -replace '[\W]')"
-                            Wallets            = [PSCustomObject]@{BTC = $WalletDonate }
-                            PricePenaltyFactor = 1
-                        }
-                    ) -Force
-                }
+                $Config.Pools | Add-Member $_ ([PSCustomObject]@{ 
+                        User               = $UserNameDonate
+                        Worker             = $WorkerNameDonate
+                        Wallets            = [PSCustomObject]@{BTC = $WalletDonate }
+                        PricePenaltyFactor = 1
+                    }) -Force
             }
             $Config | Add-Member PoolName (@()) -Force
             $Config | Add-Member ExcludePoolName (@()) -Force
@@ -393,6 +355,7 @@ while (-not $API.Stop) {
     else { 
         Write-Log ("Mining for you. Donation run will start in {0:hh} hour(s) {0:mm} minute(s). " -f $($LastDonated.AddDays(1) - ($Timer.AddMinutes($Config.Donate))))
     }
+
     #Clear pool cache if the pool configuration has changed, force fresh pool load
     if ((($OldConfig.Pools | ConvertTo-Json -Compress -Depth 10) -ne ($Config.Pools | ConvertTo-Json -Compress -Depth 10)) -or ($OldConfig.PoolName -ne $Config.PoolName) -or ($OldConfig.ExcludePoolName -ne $Config.ExcludePoolName)) { 
         $AllPools = $null
@@ -405,7 +368,6 @@ while (-not $API.Stop) {
         $AllPools = $AllPools | Where-Object { $_.Name -in $PoolFileNames }
     }
 
-    if (Test-Path "APIs" -PathType Container -ErrorAction Ignore) { Get-ChildItem "APIs" -File | ForEach-Object { . $_.FullName } }
     #Load information about the devices
     if ($API -and -not $API.AllDevices) { 
         $API.AllDevices = Get-Device -Config $Config -Refresh:$true
@@ -1290,10 +1252,6 @@ while (-not $API.Stop) {
     }
 
 
-    #Reduce memory
-    Get-Job -State Completed | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue
-    [GC]::Collect()
-
     #Read hash rate info from miners as to not overload the APIs and display miner download status
     if ($Intervals.Count -eq 0 -or $MinersNeedingBenchmark -or $MinersNeedingPowerUsageMeasurement) { 
         #Enforce full benchmark interval time on first (benchmark) loop
@@ -1518,6 +1476,12 @@ while (-not $API.Stop) {
             if ($API) { $API.RunningMiners = $RunningMiners }
         }
     }
+
+    #Reduce memory
+    Get-Job -State Completed | Receive-Job -Wait -AutoRemoveJob
+    $Error.Clear()
+    [GC]::Collect()
+
     Write-Log "Starting next run. "
 }
 
