@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\miner.exe"
-$HashSHA256 = "F7E8FA99B2D745580D4A1E8CA1568C26EB12A82978349029E7E58546B767827A"
-$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.54/gminer_1_54_windows64.zip"
+$HashSHA256 = "B7F6E53C49B58A2FC2D4F84E9DA6CD36C48EC0DF4D35F8DD4F1E6C0B65646F9C"
+$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.55/gminer_1_55_windows64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5034735.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -19,8 +19,8 @@ $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{Algorithm = "BeamHash";       MinMemGB = 4.0; Vendor = @("NVIDIA");        Command = " --algo BeamHash"} #new in v1.51
-    [PSCustomObject]@{Algorithm = "BeamHash2";      MinMemGB = 4.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo BeamHash2"} #new in v1.51
+    [PSCustomObject]@{Algorithm = "EquihashR15050"; MinMemGB = 4.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo BeamHash"} #new in v1.51
+    [PSCustomObject]@{Algorithm = "EquihashR15053"; MinMemGB = 4.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo BeamHashII"} #new in v1.55
     [PSCustomObject]@{Algorithm = "Cuckaroo29";     MinMemGB = 4.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckaroo29"} #new in v1.19; Cuckaroo29 / Grin
     [PSCustomObject]@{Algorithm = "Cuckaroo29s";    MinMemGB = 4.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckaroo29s"} #new in v1.34; Cuckaroo29s / Swap
     [PSCustomObject]@{Algorithm = "Cuckatoo31";     MinMemGB = 7.4; Vendor = @("NVIDIA");        Command = " --algo cuckatoo31"} #new in v1.31; Cuckatoo31 / Grin
@@ -29,10 +29,9 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Equihash965";    MinMemGB = 0.8; Vendor = @("NVIDIA");        Command = " --algo equihash96_5"} #new in v1.13
     [PSCustomObject]@{Algorithm = "Equihash1254";   MinMemGB = 1.0; Vendor = @("NVIDIA");        Command = " --algo equihash125_4"} #new in v1.46; ZelCash
     [PSCustomObject]@{Algorithm = "Equihash1445";   MinMemGB = 1.8; Vendor = @("AMD", "NVIDIA"); Command = " --algo equihash144_5"}
-    [PSCustomObject]@{Algorithm = "EquihashR15053"; MinMemGB = 3.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo equihash150_5"} #new in v1.15
     [PSCustomObject]@{Algorithm = "Equihash1927";   MinMemGB = 2.8; Vendor = @("NVIDIA");        Command = " --algo equihash192_7"}
     [PSCustomObject]@{Algorithm = "Equihash2109";   MinMemGB = 1.0; Vendor = @("NVIDIA");        Command = " --algo equihash210_9"} #new in v1.09
-    [PSCustomObject]@{Algorithm = "Grimm";          MinMemGB = 1.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo vds"} #new in v1.54; Grimm
+    [PSCustomObject]@{Algorithm = "Grimm";          MinMemGB = 1.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo grimm"} #new in v1.54; Grimm
     [PSCustomObject]@{Algorithm = "vds";            MinMemGB = 1.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo vds"} #new in v1.43; Vds / V-Dimension
 )
 #Commands from config file take precedence
