@@ -1,12 +1,33 @@
 # MultiPoolMiner dev version
 
-** Parameter changes for version 3.5.0a**
-Parameter '-CreateMinerInstancePerDeviceModel' has been changed to '-DisableDeviceDetection' (see README).
+** Parameter changes for version 3.5.1**
 
 Download link:
-https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.0a.zip
+https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.1.zip
 
-## Changelog Version 3.5.0a
+## Changelog Version 3.5.1
+
+#### Core changes
+#### Miner changes
+- Enabled CPU mining on FireiceCryptonight-v2.10.7, AMD and NVIDIA remain disabled (to enable edit the miner file)
+- Fixed XmrigCryptonight-v2.14.5-AMD (also fixed in MPM version 3.5.0a)
+- Removed 'Equihash1445' & 'Equihash1927' algorithms on  Ewbf2Equihash-v0.6, Gminer is faster
+- Updated BMiner-v15.8.2, support for 'EquihashR15053' (Beamhash2) algorithm
+- Updated Gminer-v1.55, support for 'EquihashR15053' (Beamhash2) algorithm
+- Updated lolMiner-v0.8.7, support for 'EquihashR15053' (Beamhash2) algorithm
+- Updated MiniZEquihash-v1.5p, support for 'EquihashR15053' (Beamhash2) algorithm
+- Updated NBMiner-v24.4; support for 'Spic'
+
+#### Pool changes
+#### Balances changes
+- Removed PhiPhiPool.ps1 (moved to 'Deprecated' folder)
+
+#### API changes
+#### Web Interface changes
+#### Known issues
+- WildRig-v0.19.1: Some algorithms will fail on Radeon RX 5700 models (see https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2361)
+
+## Changelog Version 3.5.0(a)
 
 #### Core changes
 - Added config item '-IntervalMultiplier' per algorithm (see README); this was previously hardcoded in the miner files
