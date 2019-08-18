@@ -19,14 +19,12 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.1.zip
 - Updated MiniZEquihash-v1.5p, support for 'EquihashR15053' (Beamhash2) algorithm
 - Updated NBMiner-v24.4; support for 'Spic'
 
-#### Pool changes
 #### Balances changes
 - Removed PhiPhiPool.ps1 (moved to 'Deprecated' folder)
 
 #### API changes
 - Fixed empty share count ([Shares Accepted: ; Rejected: ; Total: ])
 
-#### Web Interface changes
 #### Known issues
 - WildRig-v0.19.1: Some algorithms will fail on Radeon RX 5700 models (see https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2361)
 
