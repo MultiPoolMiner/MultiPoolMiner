@@ -20,8 +20,8 @@ if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*
 
 $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Equihash965";  MinMemGB = 1.8; Command = " --algo 96_5"}
-    [PSCustomObject]@{Algorithm = "Equihash1445"; MinMemGB = 1.7; Command = " --algo 144_5"}
-    [PSCustomObject]@{Algorithm = "Equihash1927"; MinMemGB = 2.7; Command = " --algo 192_7"}
+    # [PSCustomObject]@{Algorithm = "Equihash1445"; MinMemGB = 1.7; Command = " --algo 144_5"} # Gminer 1.55 & MiniZ 1.5p is faster
+    # [PSCustomObject]@{Algorithm = "Equihash1927"; MinMemGB = 2.7; Command = " --algo 192_7"} # Gminer 1.55 & MiniZ 1.5p is faster
     [PSCustomObject]@{Algorithm = "Equihash2109"; MinMemGB = 1.3; Command = " --algo 210_9"}
 )
 #Commands from config file take precedence
