@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\nbminer.exe"
-$HashSHA256 = ""
-$Uri = "https://github.com/NebuTech/NBMiner/releases/download/v24.2/NBMiner_24.2_Win.zip"
+$HashSHA256 = "9FBFF20A0D90590F64498E2C3B04EC9D5CE42B53D9F54F99D45273E5FCDD081B"
+$Uri = "https://github.com/NebuTech/NBMiner/releases/download/v24.4/NBMiner_24.4_Win.zip"
 $ManualUri = "https://github.com/gangnamtestnet/progminer/releases"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -33,15 +33,15 @@ $Commands = [PSCustomObject[]]@(
 # ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash";               MinMemGB = 4; MinMemGBWin10 = 4; SecondaryIntensity = 0;  Fee = 0.65; Command = " -a ethash"} #Ethash
 # ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash2gb";            MinMemGB = 2; MinMemGBWin10 = 2; SecondaryIntensity = 0;  Fee = 0.65; Command = " -a ethash"} #Ethash2GB
 # ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash3gb";            MinMemGB = 3; MinMemGBWin10 = 3; SecondaryIntensity = 0;  Fee = 0.65; Command = " -a ethash"} #Ethash3GB
-    [PSCustomObject]@{Algorithm = "tensority_ethash";    MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 2;    Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash
-    [PSCustomObject]@{Algorithm = "tensority_ethash2gb"; MinMemGB = 3; MinMemGBWin10 = 2;  SecondaryIntensity = 17; Fee = 2;    Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash2GB
-    [PSCustomObject]@{Algorithm = "tensority_ethash3gb"; MinMemGB = 3; MinMemGBWin10 = 3;  SecondaryIntensity = 17; Fee = 2;    Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash3GB
+    [PSCustomObject]@{Algorithm = "tensority_ethash";    MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 3;    Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash
+    [PSCustomObject]@{Algorithm = "tensority_ethash2gb"; MinMemGB = 3; MinMemGBWin10 = 2;  SecondaryIntensity = 17; Fee = 3;    Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash2GB
+    [PSCustomObject]@{Algorithm = "tensority_ethash3gb"; MinMemGB = 3; MinMemGBWin10 = 3;  SecondaryIntensity = 17; Fee = 3;    Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash3GB
     [PSCustomObject]@{Algorithm = "cuckarood";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckarood"} #Cuckaroo29
-    [PSCustomObject]@{Algorithm = "cuckaroo";            MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckarood"} #Cuckarood29 (Grin29)
     [PSCustomObject]@{Algorithm = "cuckaroo_swap";       MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckaroo_swap"} #Cuckaroo29s (Swap29)
     [PSCustomObject]@{Algorithm = "cuckatoo";            MinMemGB = 8; MinMemGBWin10 = 10; SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckatoo"} #Cuckatoo31 (Grin31)
     [PSCustomObject]@{Algorithm = "cuckoo_ae";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckoo_ae"} #Cuckoo29 (Aeternity)
     [PSCustomObject]@{Algorithm = "progpow_sero";        MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a progpow_sero"} #Progpow92 (Sero)
+    [PSCustomObject]@{Algorithm = "sipc";                MinMemGB = 1; MinMemGBWin10 = 1;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a progpow_sero"} #sipc, new in 24.3
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object {$_.Algorithm -ne $Algorithm}; $Commands += $_}}
