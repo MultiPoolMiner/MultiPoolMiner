@@ -928,7 +928,7 @@ while (-not $API.Stop) {
                 Best_Comparison       = $false
                 New                   = $false
                 Intervals             = @()
-                PoolName                  = [Array]$Miner.Pools.PSObject.Properties.Value.Name #temp fix, must use 'PSObject.Properties' to preserve order
+                PoolName              = [Array]$Miner.Pools.PSObject.Properties.Value.Name #temp fix, must use 'PSObject.Properties' to preserve order
                 ShowMinerWindow       = $Miner.ShowMinerWindow
                 IntervalMultiplier    = $Miner.IntervalMultiplier
                 Environment           = $Miner.Environment
