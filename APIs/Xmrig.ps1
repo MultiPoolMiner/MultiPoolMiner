@@ -172,13 +172,15 @@ class XmRig : Miner {
 
         $HashRate = [PSCustomObject]@{}
         $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
+        $Shares_Accepted = [Int]0
+        $Shares_Rejected = [Int]0
 
         if ($this.AllowedBadShareRatio) {
             $Shares_Accepted = [Double]$Data.results.shares_good
             $Shares_Rejected = [Double]($Data.results.shares_total - $Data.results.shares_good)
             if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) {
                 $this.SetStatus("Failed")
-                $this.StatusMessage = " was stopped because of too many bad shares for algorithm $($HashRate_Name) (total: $($Shares_Accepted + $Shares_Rejected) / bad: $($Shares_Rejected) [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
+                $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (total: $($Shares_Accepted + $Shares_Rejected) / bad: $($Shares_Rejected) [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
                 return @($Request, $Data | ConvertTo-Json -Depth 10 -Compress)
             }
         }
@@ -194,6 +196,7 @@ class XmRig : Miner {
                 Raw        = $Data
                 HashRate   = $HashRate
                 PowerUsage = (Get-PowerUsage $this.DeviceName)
+                Shares     = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected))
                 Device     = @()
             }
         }
