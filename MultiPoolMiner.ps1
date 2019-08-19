@@ -356,35 +356,19 @@ while (-not $API.Stop) {
         Write-Log ("Mining for you. Donation run will start in {0:hh} hour(s) {0:mm} minute(s). " -f $($LastDonated.AddDays(1) - ($Timer.AddMinutes($Config.Donate))))
     }
 
-    #Clear pool cache if the pool configuration has changed, force fresh pool load
-    if ((($OldConfig.Pools | ConvertTo-Json -Compress -Depth 10) -ne ($Config.Pools | ConvertTo-Json -Compress -Depth 10)) -or ($OldConfig.PoolName -ne $Config.PoolName) -or ($OldConfig.ExcludePoolName -ne $Config.ExcludePoolName)) { 
-        $AllPools = $null
-        $NewPools_Jobs | Select-Object | Remove-Job -Force
-        $NewPools_Jobs = @()
-    }
-    else { 
-        #Check for removed poolfiles
-        $PoolFileNames = @(Get-ChildItem "Pools" -File | Select-Object BaseName)
-        $AllPools = $AllPools | Where-Object { $_.Name -in $PoolFileNames }
+    #Check if the configuration has changed
+    if (($OldConfig | ConvertTo-Json -Compress -Depth 10) -ne ($Config | ConvertTo-Json -Compress -Depth 10)) { 
+        $AllPools | Select-Object | ForEach-Object { $_.Price_Bias = 0 }
+        $AllDevices = @(Get-Device -Config $Config -Refresh | Select-Object)
+        if ($API) { $API.AllDevices = $AllDevices } #Give API access to the device information
     }
 
     #Load information about the devices
-    if ($API -and -not $API.AllDevices) { 
-        $API.AllDevices = Get-Device -Config $Config -Refresh:$true
-        #Need to refresh again to use only configured devices
-        $Devices = @(Get-Device -Name @($Config.DeviceName) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) -Refresh:$true)
-    }
-    else { 
-        $Devices = @(Get-Device -Name @($Config.DeviceName) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) -Refresh:([Boolean]((Compare-Object @($Config.DeviceName | Select-Object) @($OldConfig.DeviceName | Select-Object)) -or (Compare-Object @($Config.ExcludeDeviceName | Select-Object) @($OldConfig.ExcludeDeviceName | Select-Object)))) -Config $Config | Select-Object)
-    }
-    if ($API) { 
-        #Give API access to the device information
-        $API.Devices = $Devices
-        Update-APIDeviceStatus $API $Devices
-    }
+    $Devices = @(Get-Device -Name @($Config.DeviceName | Select-Object) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) | Select-Object)
+    if ($API) { $API.Devices = $Devices } #Give API access to the device information
+    if ($API) { Update-APIDeviceStatus $API $Devices } #To be removed
     if ($Devices.Count -eq 0) { 
         Write-Log -Level Warn "No mining devices found. "
-        if ($Downloader) { $Downloader | Receive-Job -ErrorAction SilentlyContinue }
         while ((Get-Date).ToUniversalTime() -lt $StatEnd) { Start-Sleep 10 }
         continue
     }
