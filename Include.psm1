@@ -34,6 +34,7 @@ catch {
     Add-Type -Path .\~CPUID.dll
 }
 
+#Function to be removed
 function Update-APIDeviceStatus { 
 
     #Update device status in API
