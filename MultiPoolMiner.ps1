@@ -358,7 +358,7 @@ while (-not $API.Stop) {
 
     #Check if the configuration has changed
     if (($OldConfig | ConvertTo-Json -Compress -Depth 10) -ne ($Config | ConvertTo-Json -Compress -Depth 10)) { 
-        $AllPools | Select-Object | ForEach-Object { $_.Price_Bias = 0 }
+        $AllPools | Select-Object | ForEach-Object { $_.Price = 0 }
         $AllDevices = @(Get-Device -Config $Config -Refresh | Select-Object)
         if ($API) { $API.AllDevices = $AllDevices } #Give API access to the device information
     }
