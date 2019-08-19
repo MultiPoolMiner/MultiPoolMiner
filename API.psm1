@@ -103,8 +103,12 @@
                         $Data = ConvertTo-Json @($API.BestMiners | Select-Object)
                         Break
                     }
-                    "/bestminers_comparison" {
-                        $Data = ConvertTo-Json @($API.BestMiners_Comparison | Select-Object)
+                    "/bestminers_combo" {
+                        $Data = ConvertTo-Json @($API.BestMiners_Combo | Select-Object)
+                        Break
+                    }
+                    "/bestminers_combo_comparison" {
+                        $Data = ConvertTo-Json @($API.BestMiners_Combo_Comparison | Select-Object)
                         Break
                     }
                     "/bestminers_combos" {
@@ -115,12 +119,8 @@
                         $Data = ConvertTo-Json @($API.BestMiners_Combos_Comparison | Select-Object)
                         Break
                     }
-                    "/bestminers_combo" {
-                        $Data = ConvertTo-Json @($API.BestMiners_Combo | Select-Object)
-                        Break
-                    }
-                    "/bestminers_combo_comparison" {
-                        $Data = ConvertTo-Json @($API.BestMiners_Combo_Comparison | Select-Object)
+                    "/bestminers_comparison" {
+                        $Data = ConvertTo-Json @($API.BestMiners_Comparison | Select-Object)
                         Break
                     }
                     "/btcratefirstcurrency" {
@@ -151,20 +151,20 @@
                         $Data = ConvertTo-Json @($API.ExchangeRates | Select-Object)
                         Break
                     }
-                    "/fastestminers" {
-                        $Data = ConvertTo-Json @($API.FastestMiners | Select-Object)
-                        Break
-                    }
                     "/failedminers" {
                         $Data = ConvertTo-Json @($API.FailedMiners | Select-Object)
                         Break
                     }
-                    "/miners" {
-                        $Data = ConvertTo-Json @($API.Miners | Select-Object)
+                    "/fastestminers" {
+                        $Data = ConvertTo-Json @($API.FastestMiners | Select-Object)
                         Break
                     }
                     "/intervals" {
                         $Data = ConvertTo-Json @($API.Intervals | Select-Object)
+                        Break
+                    }
+                    "/miners" {
+                        $Data = ConvertTo-Json @($API.Miners | Select-Object)
                         Break
                     }
                     "/minersneedingbenchmark" {
