@@ -374,8 +374,8 @@ while (-not $API.Stop) {
     }
 
     #Set master timer
-    $StatStart = $StatEnd
     $Timer = (Get-Date).ToUniversalTime()
+    $StatStart = $StatEnd
     $StatEnd = $Timer.AddSeconds($Config.Interval)
     $StatSpan = New-TimeSpan $StatStart $StatEnd
     $DecayExponent = [int](($Timer - $DecayStart).TotalSeconds / $DecayPeriod)
