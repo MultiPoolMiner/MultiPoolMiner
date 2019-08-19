@@ -429,30 +429,12 @@ function Set-Stat {
 
     $Updated = $Updated.ToUniversalTime()
 
-    $Path = "Stats\$($Name -split '_' | Select-Object -Last 1)"
+    $Path = "Stats\$Name.txt"
     $SmallestValue = 1E-20
 
-    try { 
-        $Stat = Get-Stat $Name
-        $Stat = [PSCustomObject]@{ 
-            Live                  = [Double]$Stat.Live
-            Minute                = [Double]$Stat.Minute
-            Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
-            Minute_5              = [Double]$Stat.Minute_5
-            Minute_5_Fluctuation  = [Double]$Stat.Minute_5_Fluctuation
-            Minute_10             = [Double]$Stat.Minute_10
-            Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
-            Hour                  = [Double]$Stat.Hour
-            Hour_Fluctuation      = [Double]$Stat.Hour_Fluctuation
-            Day                   = [Double]$Stat.Day
-            Day_Fluctuation       = [Double]$Stat.Day_Fluctuation
-            Week                  = [Double]$Stat.Week
-            Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
-            Duration              = [TimeSpan]$Stat.Duration
-            Updated               = [DateTime]$Stat.Updated
-            ToleranceExceeded     = [Int]$Stat.ToleranceExceeded
-        }
+    $Stat = Get-Stat $Name
 
+    if ($Stat) { 
         $ToleranceMin = $Value
         $ToleranceMax = $Value
 
@@ -463,99 +445,56 @@ function Set-Stat {
 
         if ($ChangeDetection -and [Decimal]$Value -eq [Decimal]$Stat.Live) { $Updated = $Stat.updated }
 
-        if (($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) -and ($Stat.ToleranceExceeded -lt 3) -and $ToleranceMin) { 
-            #Update immediately if stat value is 0
-            $Stat.ToleranceExceeded ++
-            if ($Name -match ".+_HashRate$") { 
-                Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($(($Value | ConvertTo-Hash) -replace '\s+', '')) is outside fault tolerance ($(($ToleranceMin | ConvertTo-Hash) -replace '\s+', ' ') to $(($ToleranceMax | ConvertTo-Hash) -replace '\s+', ' ')) [$($Stat.ToleranceExceeded) of 3 until enforced update]. "
-            }
-            else { 
-                Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($($Value.ToString("N2"))W) is outside fault tolerance ($($ToleranceMin.ToString("N2"))W to $($ToleranceMax.ToString("N2"))W) [$($Stat.ToleranceExceeded) of 3 until enforced update]. "
-            }
+        if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) { 
+            Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin) to $([Int]$ToleranceMax)). "
         }
         else { 
-            if ($Stat.ToleranceExceeded -ge 3 -or (-not $ToleranceMin)) { 
-                #Update immediately if stat value is 0
-                if ($ToleranceMin) { 
-                    if ($Name -match ".+_HashRate$") { 
-                        Write-Log -Level Warn "Stat file ($Name) was forcefully updated with value ($(($Value | ConvertTo-Hash) -replace '\s+', '')) because it was outside fault tolerance ($(($ToleranceMin | ConvertTo-Hash) -replace '\s+', ' ')) to $(($ToleranceMax | ConvertTo-Hash) -replace '\s+', ' ')) for $($Stat.ToleranceExceeded) times in a row. "
-                    }
-                    else { 
-                        Write-Log -Level Warn "Stat file ($Name) was forcefully updated with value ($($Value.ToString("N2"))W) because it was outside fault tolerance ($($ToleranceMin.ToString("N2"))W to $($ToleranceMax.ToString("N2"))W) for $($Stat.ToleranceExceeded) times in a row. "
-                    }
-                }
-                $Stat = [PSCustomObject]@{ 
-                    Live                  = $Value
-                    Minute                = $Value
-                    Minute_Fluctuation    = 0
-                    Minute_5              = $Value
-                    Minute_5_Fluctuation  = 0
-                    Minute_10             = $Value
-                    Minute_10_Fluctuation = 0
-                    Hour                  = $Value
-                    Hour_Fluctuation      = 0
-                    Day                   = $Value
-                    Day_Fluctuation       = 0
-                    Week                  = $Value
-                    Week_Fluctuation      = 0
-                    Duration              = $Stat.Duration + $Duration
-                    Updated               = $Updated
-                    ToleranceExceeded     = [Int]0
-                }
-            }
-            else { 
-                $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
-                $Span_Minute_5 = [Math]::Min(($Duration.TotalMinutes / 5) / [Math]::Min(($Stat.Duration.TotalMinutes / 5), 1), 1)
-                $Span_Minute_10 = [Math]::Min(($Duration.TotalMinutes / 10) / [Math]::Min(($Stat.Duration.TotalMinutes / 10), 1), 1)
-                $Span_Hour = [Math]::Min($Duration.TotalHours / [Math]::Min($Stat.Duration.TotalHours, 1), 1)
-                $Span_Day = [Math]::Min($Duration.TotalDays / [Math]::Min($Stat.Duration.TotalDays, 1), 1)
-                $Span_Week = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
+            $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
+            $Span_Minute_5 = [Math]::Min(($Duration.TotalMinutes / 5) / [Math]::Min(($Stat.Duration.TotalMinutes / 5), 1), 1)
+            $Span_Minute_10 = [Math]::Min(($Duration.TotalMinutes / 10) / [Math]::Min(($Stat.Duration.TotalMinutes / 10), 1), 1)
+            $Span_Hour = [Math]::Min($Duration.TotalHours / [Math]::Min($Stat.Duration.TotalHours, 1), 1)
+            $Span_Day = [Math]::Min($Duration.TotalDays / [Math]::Min($Stat.Duration.TotalDays, 1), 1)
+            $Span_Week = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
 
-                $Stat = [PSCustomObject]@{ 
-                    Live                  = $Value
-                    Minute                = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
-                    Minute_Fluctuation    = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
-                    Minute_5              = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
-                    Minute_5_Fluctuation  = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + ($Span_Minute_5 * ([Math]::Abs($Value - $Stat.Minute_5) / [Math]::Max([Math]::Abs($Stat.Minute_5), $SmallestValue)))
-                    Minute_10             = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
-                    Minute_10_Fluctuation = ((1 - $Span_Minute_10) * $Stat.Minute_10_Fluctuation) + ($Span_Minute_10 * ([Math]::Abs($Value - $Stat.Minute_10) / [Math]::Max([Math]::Abs($Stat.Minute_10), $SmallestValue)))
-                    Hour                  = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
-                    Hour_Fluctuation      = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + ($Span_Hour * ([Math]::Abs($Value - $Stat.Hour) / [Math]::Max([Math]::Abs($Stat.Hour), $SmallestValue)))
-                    Day                   = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
-                    Day_Fluctuation       = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + ($Span_Day * ([Math]::Abs($Value - $Stat.Day) / [Math]::Max([Math]::Abs($Stat.Day), $SmallestValue)))
-                    Week                  = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
-                    Week_Fluctuation      = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
-                    Duration              = $Stat.Duration + $Duration
-                    Updated               = $Updated
-                    ToleranceExceeded     = [Int]0
-                }
+            $Stat = [PSCustomObject]@{ 
+                Live                  = $Value
+                Minute                = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
+                Minute_Fluctuation    = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
+                Minute_5              = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
+                Minute_5_Fluctuation  = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + ($Span_Minute_5 * ([Math]::Abs($Value - $Stat.Minute_5) / [Math]::Max([Math]::Abs($Stat.Minute_5), $SmallestValue)))
+                Minute_10             = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
+                Minute_10_Fluctuation = ((1 - $Span_Minute_10) * $Stat.Minute_10_Fluctuation) + ($Span_Minute_10 * ([Math]::Abs($Value - $Stat.Minute_10) / [Math]::Max([Math]::Abs($Stat.Minute_10), $SmallestValue)))
+                Hour                  = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
+                Hour_Fluctuation      = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + ($Span_Hour * ([Math]::Abs($Value - $Stat.Hour) / [Math]::Max([Math]::Abs($Stat.Hour), $SmallestValue)))
+                Day                   = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
+                Day_Fluctuation       = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + ($Span_Day * ([Math]::Abs($Value - $Stat.Day) / [Math]::Max([Math]::Abs($Stat.Day), $SmallestValue)))
+                Week                  = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
+                Week_Fluctuation      = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
+                Duration              = $Stat.Duration + $Duration
+                Updated               = $Updated
             }
         }
     }
-    catch { 
-        if (Test-Path "$($Path)\$Name.txt" -PathType Leaf -ErrorAction SilentlyContinue) { Write-Log -Level Warn "Stat file ($Name) is corrupt and will be reset. " }
-
+    else { 
         $Stat = [PSCustomObject]@{ 
-            Live                  = $Value
-            Minute                = $Value
-            Minute_Fluctuation    = 0
-            Minute_5              = $Value
-            Minute_5_Fluctuation  = 0
-            Minute_10             = $Value
-            Minute_10_Fluctuation = 0
-            Hour                  = $Value
-            Hour_Fluctuation      = 0
-            Day                   = $Value
-            Day_Fluctuation       = 0
-            Week                  = $Value
-            Week_Fluctuation      = 0
-            Duration              = $Duration
-            Updated               = $Updated
-            ToleranceExceeded     = [Int]0
+            Name                  = [String]$Name
+            Live                  = [Double]$Value
+            Minute                = [Double]$Value
+            Minute_Fluctuation    = [Double]0
+            Minute_5              = [Double]$Value
+            Minute_5_Fluctuation  = [Double]0
+            Minute_10             = [Double]$Value
+            Minute_10_Fluctuation = [Double]0
+            Hour                  = [Double]$Value
+            Hour_Fluctuation      = [Double]0
+            Day                   = [Double]$Value
+            Day_Fluctuation       = [Double]0
+            Week                  = [Double]$Value
+            Week_Fluctuation      = [Double]0
+            Duration              = [TimeSpan]$Duration
+            Updated               = [DateTime]$Updated
         }
     }
-
-    if (-not (Test-Path "$Path" -PathType Container -ErrorAction SilentlyContinue)) { New-Item "Path" -ItemType "directory" -ErrorAction SilentlyContinue | Out-Null }
 
     [PSCustomObject]@{ 
         Live                  = [Decimal]$Stat.Live
@@ -573,8 +512,7 @@ function Set-Stat {
         Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
         Duration              = [String]$Stat.Duration
         Updated               = [DateTime]$Stat.Updated
-        ToleranceExceeded     = [Int]$Stat.ToleranceExceeded
-    } | ConvertTo-Json | Set-Content "$($Path)\$Name.txt" -ErrorAction SilentlyContinue
+    } | ConvertTo-Json | Set-Content $Path
 
     $Stat
 }
@@ -583,43 +521,53 @@ function Get-Stat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String]$Name, 
-        [Parameter(Mandatory = $false)]
-        [String[]]$Type
+        [String[]]$Name = (Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
-    if ($Name) { 
-        # Return single requested stat
-        $Path = "Stats\$($Name -split '_' | Select-Object -Last 1)"
-        if (-not (Test-Path $Path -PathType Container -ErrorAction SilentlyContinue)) { New-Item $Path -ItemType Directory -ErrorAction SilentlyContinue | Out-Null }
-        if (Test-Path "$($Path)\$Name.txt" -ErrorAction SilentlyContinue) { Get-ChildItem "$($Path)\$Name.txt" -File -ErrorAction SilentlyContinue | Get-Content | ConvertFrom-Json }
+    if (-not (Test-Path "Stats" -PathType Container)) { 
+        New-Item "Stats" -ItemType "directory" -Force | Out-Null
     }
-    else { 
-        # Return all stats
-        $Stats = [PSCustomObject]@{ }
-        if (-not $Type) { $Type = Get-ChildItem "Stats" -Directory -ErrorAction SilentlyContinue }
-        $Type | ForEach-Object { 
-            $Path = "Stats\$_"
-            if (-not (Test-Path $Path -PathType Container -ErrorAction SilentlyContinue)) { New-Item $Path -ItemType Directory -ErrorAction SilentlyContinue | Out-Null }
-            Get-ChildItem $Path -File | ForEach-Object { 
-                $BaseName = $_.BaseName
-                $FullName = $_.FullName
-                try { 
-                    $_ | Get-Content -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop | ForEach-Object { 
-                        $Stats | Add-Member $BaseName $_
+
+    if ($Global:Stats -isnot [PSCustomObject]) { 
+        $Global:Stats = [PSCustomObject]@{ }
+    }
+
+    Get-ChildItem -Path "Stats" -File | Where-Object { $Name -eq $_.BaseName -and ".txt" -eq $_.Extension } | ForEach-Object { 
+        $BaseName = $_.BaseName
+        $FullName = $_.FullName
+
+        if (-not $Global:Stats.$BaseName) { 
+            try { 
+                $Global:Stats | Add-Member @{ 
+                    $BaseName = $_ | Get-Content -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop | ForEach-Object { 
+                        [PSCustomObject]@{ 
+                            Name                  = [String]$BaseName
+                            Live                  = [Double]$_.Live
+                            Minute                = [Double]$_.Minute
+                            Minute_Fluctuation    = [Double]$_.Minute_Fluctuation
+                            Minute_5              = [Double]$_.Minute_5
+                            Minute_5_Fluctuation  = [Double]$_.Minute_5_Fluctuation
+                            Minute_10             = [Double]$_.Minute_10
+                            Minute_10_Fluctuation = [Double]$_.Minute_10_Fluctuation
+                            Hour                  = [Double]$_.Hour
+                            Hour_Fluctuation      = [Double]$_.Hour_FluctuationFFF
+                            Day                   = [Double]$_.Day
+                            Day_Fluctuation       = [Double]$_.Day_Fluctuation
+                            Week                  = [Double]$_.Week
+                            Week_Fluctuation      = [Double]$_.Week_Fluctuation
+                            Duration              = [TimeSpan]$_.Duration
+                            Updated               = [DateTime]$_.Updated
+                        }
                     }
-                }
-                catch { 
-                    #Remove broken stat file
-                    if (Test-Path $FullName -PathType Leaf -ErrorAction SilentlyContinue) { 
-                        Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
-                        Remove-Item -Path  $FullName -Force -Confirm:$false -ErrorAction SilentlyContinue
-                    }
-                }
+                } -Force
+            }
+            catch { 
+                Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
+                Remove-Item -Path  $FullName -Force -Confirm:$false -ErrorAction SilentlyContinue
             }
         }
 
-        Return $Stats
+        $Global:Stats.$BaseName
     }
 }
 
