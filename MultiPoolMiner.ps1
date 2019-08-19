@@ -392,12 +392,13 @@ while (-not $API.Stop) {
     #Set master timer
     $StatStart = $StatEnd
     $Timer = (Get-Date).ToUniversalTime()
-    $StatEnd = $StatStart.AddSeconds($Config.Interval)
+    $StatEnd = $Timer.AddSeconds($Config.Interval)
     $StatSpan = New-TimeSpan $StatStart $StatEnd
     $DecayExponent = [int](($Timer - $DecayStart).TotalSeconds / $DecayPeriod)
     $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
     $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
-    # Add to API
+
+    #Give API access to the timer information
     if ($API) { 
         $API.Timer = $Timer
         $API.StatStart = $StatStart
@@ -407,7 +408,6 @@ while (-not $API.Stop) {
         $API.WatchdogInterval = $WatchdogInterval
         $API.WatchdogReset = $WatchdogReset
     }
-
 
     #Load information about the pools
     if ((Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and (-not $NewPools_Jobs)) { 
