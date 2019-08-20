@@ -1,4 +1,4 @@
-﻿Function Start-APIServer {
+﻿function Start-APIServer {
     Param(
         [Parameter(Mandatory = $true)]
         [Int]$Port
@@ -97,6 +97,10 @@
                     }
                     "/balances" {
                         $Data = ConvertTo-Json @($API.Balances | Select-Object)
+                        Break
+                    }
+                    "/balances_jobs" {
+                        $Data = ConvertTo-Json @($API.Balances_Jobs | Select-Object)
                         Break
                     }
                     "/bestminers" {
