@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 12/08/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 20/08/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -62,6 +62,10 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 
 **-AllowedBadShareRatio**
 Allowed ratio of bad shares (total / bad) as reported by the miner. If the ratio exceeds the configured threshold then the miner will marked as failed. Allowed values: 0.00 - 1.00. Default of 0 disables this check
+
+**-API_Key**
+Required only if you are mining at MiningPoolHub. Adding this parameter / key pair allows MPM to gather the balances at the pool. 
+The API_Key can be found in the MiningPoolHub Account detail page.
 
 **-APIPort**
 Port for the MPM API and web GUI. The miner port range will start from APIPort +1. Default is 3999
@@ -253,7 +257,7 @@ The following pools are currently supported (in alphabetical order); use commas 
 
 	  Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), LTC or any currency available in API (Advanced configuration via config file required, see below).
 
-	- PhiPhiPool https://www.phi-phi-pool.com/
+	- PhiPhiPool https://www.phi-phi-pool.com/ (Deprecated)
 
 	  Note: PhiPhiPool no longer offers auto-conversion to BTC. Do NOT mine with a BTC address.
           A separate wallet address for each mined currency must be provided in config file (Advanced configuration via config file required, see below).
