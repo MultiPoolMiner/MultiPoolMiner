@@ -1,4 +1,4 @@
-using module .\Include.psm1
+﻿using module .\Include.psm1
 
 [CmdletBinding()]
 Param(
@@ -61,9 +61,9 @@ $Config = [PSCustomObject]@{
 }
 
 # Generate fake pools for each algorithm
-$Algorithms = (Get-Content "Algorithms.txt" | ConvertFrom-Json).PSObject.Properties.Value | Foreach-Object {$_.ToLower() } | Select-Object -Unique
+$Algorithms = (Get-Content "Algorithms.txt" | ConvertFrom-Json).PSObject.Properties.Value | ForEach-Object {$_.ToLower() } | Select-Object -Unique
 $Pools = [PSCustomObject]@{}
-$Algorithms | Foreach-Object {
+$Algorithms | ForEach-Object {
     $FakePool = [PSCustomObject]@{
         Algorithm = $_
         Info = ""
@@ -98,7 +98,7 @@ Write-Debug "$($Miners.Count) miners loaded (including duplicates)"
 $Miners = $Miners | Sort-Object -Property Path, HashSHA256 -Unique
 Write-Debug "$($Miners.Count) miners (excluding duplicates)"
 
-$Miners | Foreach-Object {
+$Miners | ForEach-Object {
     $Miner = $_
     if (-not $Miner.Type) {$Miner | Add-Member Type @(($Miner.Name -split "-" | Select-Object -Index 0) -split "_")}
     # Check if skipping this type of miner

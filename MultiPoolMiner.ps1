@@ -24,38 +24,38 @@ param(
     [Switch]$SSL = $false, 
     [Parameter(Mandatory = $false)]
     [Alias("Device", "Type")]
-    [Array]$DeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.
+    [String[]]$DeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.
     [Parameter(Mandatory = $false)]
-    [Array]$ExcludeDeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc. will not be used for mining
+    [String[]]$ExcludeDeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc. will not be used for mining
     [Parameter(Mandatory = $false)]
-    [Array]$Algorithm = @(), #i.e. Ethash, Equihash, CryptonightV7 etc.
+    [String[]]$Algorithm = @(), #i.e. Ethash, Equihash, CryptonightV7 etc.
     [Parameter(Mandatory = $false)]
-    [Array]$CoinName = @(), #i.e. Monero, Zcash etc.
+    [String[]]$CoinName = @(), #i.e. Monero, Zcash etc.
     [Parameter(Mandatory = $false)]
-    [Array]$MiningCurrency = @(), #i.e. LUX, XVG etc.
+    [String[]]$MiningCurrency = @(), #i.e. LUX, XVG etc.
     [Parameter(Mandatory = $false)]
     [Alias("Miner")]
-    [Array]$MinerName = @(), 
+    [String[]]$MinerName = @(), 
     [Parameter(Mandatory = $false)]
     [Alias("Pool")]
-    [Array]$PoolName = @(), 
+    [String[]]$PoolName = @(), 
     [Parameter(Mandatory = $false)]
-    [Array]$ExcludeAlgorithm = @(), #i.e. Ethash, Equihash, CryptonightV7 etc.
+    [String[]]$ExcludeAlgorithm = @(), #i.e. Ethash, Equihash, CryptonightV7 etc.
     [Parameter(Mandatory = $false)]
-    [Array]$ExcludeCoinName = @(), #i.e. Monero, Zcash etc.
+    [String[]]$ExcludeCoinName = @(), #i.e. Monero, Zcash etc.
     [Parameter(Mandatory = $false)]
-    [Array]$ExcludeMiningCurrency = @(), #i.e. LUX, XVG etc.
+    [String[]]$ExcludeMiningCurrency = @(), #i.e. LUX, XVG etc.
     [Parameter(Mandatory = $false)]
     [Alias("ExcludeMiner")]
-    [Array]$ExcludeMinerName = @(), 
+    [String[]]$ExcludeMinerName = @(), 
     [Parameter(Mandatory = $false)]
     [Alias("ExcludePool")]
-    [Array]$ExcludePoolName = @(), 
+    [String[]]$ExcludePoolName = @(), 
     [Parameter(Mandatory = $false)]
     [Alias("DisableDualMining")]
     [Switch]$SingleAlgoMining = $false, #disables all dual mining miners
     [Parameter(Mandatory = $false)]
-    [Array]$Currency = ("BTC", "USD"), #i.e. GBP, EUR, ZEC, ETH etc., the first currency listed will be used as base currency for profit calculations
+    [String[]]$Currency = ("BTC", "USD"), #i.e. GBP, EUR, ZEC, ETH etc., the first currency listed will be used as base currency for profit calculations
     [Parameter(Mandatory = $false)]
     [ValidateRange(10, 1440)]
     [Int]$Donate = 24, #Minutes per Day, Allowed values: 10 - 1440
@@ -145,7 +145,7 @@ param(
 
 Clear-Host
 
-$Version = "3.5.1"
+$Version = "3.5.2"
 $VersionCompatibility = "3.3.0"
 $Strikes = 3
 $SyncWindow = 5 #minutes
@@ -168,10 +168,10 @@ catch {
     Write-Log -Level Error "Failed to import module (ThreadJob) - using normal 'Start-Job' instead. "
 }
 
-$Algorithm = $Algorithm | ForEach-Object {@(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'}
-$ExcludeAlgorithm = $ExcludeAlgorithm | ForEach-Object {@(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'}
-$Region = $Region | ForEach-Object {Get-Region $_}
-$Currency = $Currency | ForEach-Object {$_.ToUpper()}
+$Algorithm = [String[]]@($Algorithm | ForEach-Object {@(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'} | Select-Object)
+$ExcludeAlgorithm = [String[]]@($ExcludeAlgorithm | ForEach-Object {@(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'} | Select-Object)
+$Region = [String]@($Region | ForEach-Object {Get-Region $_} | Select-Object -First 1)
+$Currency = [String[]]@($Currency | ForEach-Object {$_.ToUpper()} | Select-Object)
 
 $Timer = (Get-Date).ToUniversalTime()
 $StatEnd = $Timer
@@ -205,7 +205,7 @@ if (Test-Path .\API.psm1 -PathType Leaf -ErrorAction Ignore) {Import-Module .\AP
 #Initialize config file
 if (-not [IO.Path]::GetExtension($ConfigFile)) {$ConfigFile = "$($ConfigFile).txt"}
 $Config_Temp = [PSCustomObject]@{}
-$Config_Parameters = @{}
+[Hashtable]$Config_Parameters = @{}
 $MyInvocation.MyCommand.Parameters.Keys | Sort-Object | ForEach-Object {
     $Config_Parameters.$_ = Get-Variable $_ -ValueOnly -ErrorAction SilentlyContinue
     if ($Config_Parameters.$_ -is [Switch]) {$Config_Parameters.$_ = [Boolean]$Config_Parameters.$_}
@@ -226,7 +226,7 @@ $Config = [PSCustomObject]@{}
 $LastDonated = $Timer.AddDays(-1).AddHours(1)
 $WalletDonate = ((@("1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb") * 3) + (@("16Qf1mEk5x2WjJ1HhfnvPnqQEi2fvCeity") * 2) + (@("1GPSq8txFnyrYdXL8t6S94mYdF8cGqVQJF") * 2))[(Get-Random -Minimum 0 -Maximum ((3 + 2 + 2) - 1))]
 $UserNameDonate = ((@("aaronsace") * 3) + (@("grantemsley") * 2) + (@("uselessguru") * 2))[(Get-Random -Minimum 0 -Maximum ((3 + 2 + 2) - 1))]
-$WorkerNameDonate = "multipoolminer_donate_$($Version -replace '[\W]')"
+$WorkerNameDonate = "multipoolminer_donate_$Version" -replace '[\W]', '-'
 
 #Set process priority to BelowNormal to avoid hash rate drops on systems with weak CPUs
 (Get-Process -Id $PID).PriorityClass = "BelowNormal"
@@ -234,10 +234,11 @@ $WorkerNameDonate = "multipoolminer_donate_$($Version -replace '[\W]')"
 #HWiNFO64 ready? If HWiNFO64 is running it will recreate the reg key automatically
 if (Test-Path "HKCU:\Software\HWiNFO64\VSB") {Remove-Item -Path "HKCU:\Software\HWiNFO64\VSB" -Recurse -ErrorAction SilentlyContinue}
 
+if (Test-Path "APIs" -PathType Container -ErrorAction Ignore) {Get-ChildItem "APIs" -File | ForEach-Object {. $_.FullName}}
+
 while (-not $API.Stop) {
-    #Reduce memory
-    [GC]::Collect()
-    $Error.Clear()
+    #Display downloader progress
+    if ($Downloader) {$Downloader | Receive-Job}
 
     #Load the configuration
     $OldConfig = $Config | ConvertTo-Json -Depth 10 | ConvertFrom-Json
@@ -350,10 +351,10 @@ while (-not $API.Stop) {
         }
     }
 
-    #Start monitoring service, requires running API
-    if ($API.Port -and $Config.MinerStatusKey -and $Config.ReportStatusInterval -and (-not $ReportStatusJob)) {
-        $ReportStatusJob = Start-Job -Name "ReportStatus" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList "http://localhost:$($API.Port)" -FilePath .\ReportStatus.ps1
+    if ($API.Port -and $Config.MinerStatusKey -and $Config.ReportStatusInterval -and (-not $ReportStatusJob)) { 
+        $ReportStatusJob = Start-Job -Name "ReportStatus" -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -ArgumentList "http://localhost:$($API.Port)" -FilePath .\ReportStatus.ps1 #Start monitoring service (requires running API)
     }
+
 
     #Prepare currency settings
     $FirstCurrency = $($Config.Currency | Select-Object -Index 0)
@@ -368,25 +369,23 @@ while (-not $API.Stop) {
     if ($Config.Donate -lt 10) {$Config.Donate = 10}
     if ($Timer.AddDays(-1).AddMinutes(-1).AddSeconds(1) -ge $LastDonated) {$LastDonated = $Timer}
     if ($Timer.AddDays(-1).AddMinutes($Config.Donate) -ge $LastDonated) {
-        if ($WalletDonate -and $UserNameDonate) {
+        if ($WalletDonate -and $UserNameDonate -and $WorkerNameDonate) {
             Write-Log "Donation run, mining to donation address for the next $(($LastDonated - ($Timer.AddDays(-1))).Minutes +1) minutes. Note: MPM will use ALL available pools. "
             $Config | Add-Member Pools ([PSCustomObject]@{}) -Force
             Get-ChildItem "Pools" -File -ErrorAction Ignore | Select-Object -ExpandProperty BaseName | ForEach-Object {
                 if ($_ -like "MiningPoolHub*") {
                     $Config.Pools | Add-Member $_ ([PSCustomObject]@{
-                            User               = $UserNameDonate
-                            Worker             = "Donate_$($Config.Workername)_$($Version -replace '[\W]')"
                             PricePenaltyFactor = 1
-                        }
-                    ) -Force
+                            User               = $UserNameDonate
+                            Worker             = $WorkerNameDonate
+                        }) -Force
                 }
                 else {
                     $Config.Pools | Add-Member $_ ([PSCustomObject]@{
-                            Worker             = "Donate_$($Config.Workername)_$($Version -replace '[\W]')"
-                            Wallets            = [PSCustomObject]@{BTC = $WalletDonate}
                             PricePenaltyFactor = 1
-                        }
-                    ) -Force
+                            Wallets            = [PSCustomObject]@{BTC = $WalletDonate}
+                            Worker             = $WorkerNameDonate
+                        }) -Force
                 }
             }
             $Config | Add-Member PoolName (@()) -Force
@@ -399,6 +398,7 @@ while (-not $API.Stop) {
     else {
         Write-Log ("Mining for you. Donation run will start in {0:hh} hour(s) {0:mm} minute(s). " -f $($LastDonated.AddDays(1) - ($Timer.AddMinutes($Config.Donate))))
     }
+
     #Clear pool cache if the pool configuration has changed, force fresh pool load
     if ((($OldConfig.Pools | ConvertTo-Json -Compress -Depth 10) -ne ($Config.Pools | ConvertTo-Json -Compress -Depth 10)) -or ($OldConfig.PoolName -ne $Config.PoolName) -or ($OldConfig.ExcludePoolName -ne $Config.ExcludePoolName)) {
         $AllPools = $null
@@ -411,7 +411,6 @@ while (-not $API.Stop) {
         $AllPools = $AllPools | Where-Object {$_.Name -in $PoolFileNames}
     }
 
-    if (Test-Path "APIs" -PathType Container -ErrorAction Ignore) {Get-ChildItem "APIs" -File | ForEach-Object {. $_.FullName}}
     #Load information about the devices
     if ($API -and -not $API.AllDevices) {
         $API.AllDevices = Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Refresh:$true
@@ -428,14 +427,15 @@ while (-not $API.Stop) {
     }
 
     #Set master timer
-    $StatStart = $StatEnd
     $Timer = (Get-Date).ToUniversalTime()
-    $StatEnd = $StatStart.AddSeconds($Config.Interval)
+    $StatStart = $StatEnd
+    $StatEnd = $Timer.AddSeconds($Config.Interval)
     $StatSpan = New-TimeSpan $StatStart $StatEnd
     $DecayExponent = [int](($Timer - $DecayStart).TotalSeconds / $DecayPeriod)
     $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
     $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
-    # Add to API
+
+    #Give API access to the timer information
     if ($API) {
         $API.Timer = $Timer
         $API.StatStart = $StatStart
@@ -1516,7 +1516,7 @@ while (-not $API.Stop) {
             #Pre miner failure exec
             $Command = ($ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PreStop"))).Trim()
             if ($Command) {Start-PrePostCommand -Command $Command -Event "PreStop"}
-            Write-Log "Stopping miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Miner.Pool | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))"}) -join "; ")}). "
+            Write-Log "Stopping miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))"}) -join "; ")}). "
             $Miner.SetStatus("Idle")
             $Miner.StatusMessage = " stopped gracefully"
             #Post miner stop exec
@@ -1526,7 +1526,12 @@ while (-not $API.Stop) {
             if ($API) {$API.RunningMiners = $RunningMiners}
         }
     }
-    Write-Log "Starting next run. "
+
+     #Reduce memory
+     $Error.Clear()
+     [GC]::Collect()
+
+     Write-Log "Starting next run. "
 }
 
 Write-Log "Stopping MultiPoolMiner® v$Version © 2017-$((Get-Date).Year) MultiPoolMiner.io"

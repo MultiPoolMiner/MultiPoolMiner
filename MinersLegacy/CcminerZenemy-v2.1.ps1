@@ -46,7 +46,7 @@ $Commands = [PSCustomObject]@{
     "poly"       = " --algo=poly" #Polytimos
     "skunk"      = " --algo=skunk" #Skunk, new in 1.11
     "sonoa"      = " --algo=sonoa" #SONOA, new in 1.12
-    "timetravel" = " --algo=timetravel_" #Timetravel
+    "timetravel" = " --algo=timetravel" #Timetravel
     "tribus"     = " --algo=tribus" #Tribus, new in 1.10
     "x16r"       = " --algo=x16r --statsavg=50" #Raven, number of samples used to compute hashrate (default: 30) 
     "x16s"       = " --algo=x16s" #Pigeon
@@ -73,6 +73,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         Switch ($Algorithm_Norm) {
             "C11"    {$WarmupTime = 60}
             "Xevan"  {$WarmupTime = 60}
+            "X16R"   {$WarmupTime = 60}
             default  {$WarmupTime = 45}
         }
 

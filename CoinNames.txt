@@ -1,4 +1,4 @@
-{
+﻿{
     "01":  "01Coin",
     "Aion":  "Aion",
     "Aither":  "AitherCore",
@@ -37,6 +37,7 @@
     "Globalboosty":  "GlobalboostY",
     "Globaltoken":  "GlobalToken",
     "Grandmaster":  "GrandmasterCoin",
+    "Grimm":  "GrimmCoin",
     "Groestl":  "GroestlCoin",
     "Gulden":  "GuldenCoin",
     "Gun":  "GunCoin",

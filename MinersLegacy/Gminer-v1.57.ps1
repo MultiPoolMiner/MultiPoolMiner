@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\miner.exe"
-$HashSHA256 = "B7F6E53C49B58A2FC2D4F84E9DA6CD36C48EC0DF4D35F8DD4F1E6C0B65646F9C"
-$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.55/gminer_1_55_windows64.zip"
+$HashSHA256 = "C38D676A51A67D68A42E581756DA5DF4FC5D9854CC3F93F422A19A4836123894"
+$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.57/gminer_1_57_windows64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5034735.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0

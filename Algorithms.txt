@@ -1,4 +1,4 @@
-{
+﻿{
     "aeon":  "CryptonightLiteV7",
     "aion":  "Equihash2109",
     "aeternity":  "Cuckoo29",
@@ -19,9 +19,12 @@
     "astralhash":  "GltAstralHash",
     "bcd":  "BCD",
     "beam":  "EquihashR15053",
+    "beam2":  "EquihashR15053",
     "beam-I":  "EquihashR15050",
+    "beam-II":  "EquihashR15053",
     "beamhash":  "EquihashR15053",
     "beamhash2":  "EquihashR15053",
+    "beamv2":  "EquihashR15053",
     "bitcash":  "BitCash",
     "bitcoinair":  "BitcoinAir",
     "bitcoincore":  "BitcoinCore",

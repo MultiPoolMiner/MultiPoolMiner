@@ -1,7 +1,34 @@
 # MultiPoolMiner dev version
 
 Download link:
-https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.1.zip
+https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.2.zip
+
+## Changelog Version 3.5.2
+
+#### Core changes
+- Backported https://github.com/MultiPoolMiner/MultiPoolMiner/commit/d13e26380346cdd563a7b87c2fcde8277a6e81cd
+- Backported https://github.com/MultiPoolMiner/MultiPoolMiner/commit/30b97082155805143a25cd0f61cc60a3972f287d
+- Backported https://github.com/MultiPoolMiner/MultiPoolMiner/commit/47d03c63d449db0be37b483644eb7eef574515ed
+- Backported https://github.com/MultiPoolMiner/MultiPoolMiner/commit/956dc169ffe5d16724ddac7501d73fd6a86376f6
+- Fixed encoding for all .ps1 / .psm1 & .txt files to 'UTF-8 with BOM'
+
+#### Miner changes
+- Fixed JCECryptonote-v0.33q; Parameter error, invalid integer value 5--stakjson for argument --variation (https://github.com/MultiPoolMiner/MultiPoolMiner/issues/2375#issuecomment-522341213)
+- Changed CcminerNevermore-v0.5; disabled 'Neoscrypt' algorithm, CcminerKlausT-v8.25 is faster
+- Changed CcminerSuprMiner-v2.0.7; disabled 'Neoscrypt' algorithm, CcminerKlausT-v8.25 is faster
+- Changed CcminerTpruvot-v2.3.1; disabled 'Neoscrypt' algorithm, CcminerKlausT-v8.25 is faster
+- Updated Bminer-v15.8.3
+- Updated Gminer-v1.57
+- Updated TTMiner-v3.0.3
+
+#### Pool changes
+#### Balances changes
+#### API changes
+#### Web Interface changes
+- Fixed 'Dashboard' -> 'Running Miners' column 'Pool'
+
+#### Known issues (at least on my rig)
+- Bminer-v15.8.3 fails to mine BeamV2 (https://bitcointalk.org/index.php?topic=2519271.msg52211890#msg52211890)
 
 ## Changelog Version 3.5.1
 
