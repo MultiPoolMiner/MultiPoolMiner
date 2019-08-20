@@ -1328,7 +1328,7 @@ while (-not $API.Stop) {
                 break
             }
 
-            #Preload pool information
+            #Preload pool information - code to be removed
             if ((-not $NewPools_Jobs) -and (Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and ((($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds) -le $($NewPools_JobsDurations | Measure-Object -Average).Average)) { 
                 if ($PoolsRequest = @(Get-ChildItem "Pools" -File | Where-Object { $Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName } | Where-Object { $Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName } | Sort-Object BaseName)) { 
                     $Config | Add-Member "PoolList" @($PoolsRequest.BaseName) -Force
@@ -1461,7 +1461,7 @@ while (-not $API.Stop) {
     }
 
     #Reduce memory
-    Get-Job -State Completed | Receive-Job -Wait -AutoRemoveJob
+    #Get-Job -State Completed | Receive-Job -Wait -AutoRemoveJob
     $Error.Clear()
     [GC]::Collect()
 
