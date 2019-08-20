@@ -6,9 +6,9 @@ param(
 )
 
 $PoolFileName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-$PoolRegions = "us"
-$PoolAPIStatusUri = "http://pool.hashrefinery.com/api/status"
-$PoolAPICurrenciesUri = "http://pool.hashrefinery.com/api/currencies"
+$PoolRegions = "eu", "us"
+$PoolAPIStatusUri = "http://blockmasters.co/api/status"
+$PoolAPICurrenciesUri = "http://blockmasters.co/api/currencies"
 $RetryCount = 3
 $RetryDelay = 2
 
@@ -23,15 +23,10 @@ $PoolNames | ForEach-Object {
     if ($PoolFileName -eq $NameCoins -and $PoolNames.Count -eq 2) {return}
 
     # Guaranteed payout currencies
-    $Payout_Currencies = @("BTC") | Where-Object {$Config.Pools.$PoolName.Wallets.$_}
+    $Payout_Currencies = @("BTC", "DOGE", "LTC") | Where-Object {$Config.Pools.$PoolName.Wallets.$_}
     if (-not $Payout_Currencies) {
         Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
         break
-    }
-
-    if (-not $Payout_Currencies) {
-        Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
-        return
     }
 
     while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -gt 0) {
@@ -60,10 +55,16 @@ $PoolNames | ForEach-Object {
         break
     }
 
+    $Payout_Currencies = (@($Payout_Currencies) + @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object {$Config.Pools.$PoolName.Wallets.$_} | Sort-Object -Unique
+    if (-not $Payout_Currencies) {
+        Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
+        break
+    }
+
     if ($PoolName -eq ($PoolName -replace "Coins")) {
         $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APIStatusResponse.$_.hashrate -gt 0} | ForEach-Object {
 
-            $PoolHost       = "hashrefinery.com"
+            $PoolHost       = "blockmasters.co"
             $Port           = $APIStatusResponse.$_.port
             $Algorithm      = $APIStatusResponse.$_.name
             $CoinName       = Get-CoinName $(if ($APIStatusResponse.$_.coins -eq 1) {$APICurrenciesResponse.$($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesResponse.$_.algo -eq $Algorithm}).Name})
@@ -95,7 +96,7 @@ $PoolNames | ForEach-Object {
                         StablePrice        = $Stat.Week
                         MarginOfError      = $Stat.Week_Fluctuation
                         Protocol           = "stratum+tcp"
-                        Host               = "$Algorithm.$Region.$PoolHost"
+                        Host               = "$(if ($Region -eq "eu") {"eu."})$PoolHost"
                         Port               = $Port
                         User               = $Config.Pools.$PoolName.Wallets.$_
                         Pass               = "$($Config.Pools.$PoolName.Worker),c=$_"
@@ -119,21 +120,19 @@ $PoolNames | ForEach-Object {
             # Not all algorithms are always exposed in API
             if ($APIStatusResponse.$Algorithm) {
 
-                $APICurrenciesResponse.$_ | Add-Member Symbol $_ -ErrorAction SilentlyContinue
-
                 $CoinName       = Get-CoinName $APICurrenciesResponse.$_.name
                 $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
                 if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
 
-                $PoolHost       = "mine.ahashpool.com"
+                $PoolHost       = "blockmasters.co"
                 $Port           = $APICurrenciesResponse.$_.port
-                $MiningCurrency = $APICurrenciesResponse.$_.symbol
+                $MiningCurrency = $_ -split "-" | Select-Object -Index 0
                 $Workers        = $APICurrenciesResponse.$_.workers
                 $Fee            = $APIStatusResponse.$Algorithm.Fees / 100
 
-                $Divisor = 1000000000000 * [Double]$APIStatusResponse.$Algorithm.mbtc_mh_factor
+                $Divisor = 1000000000 * [Double]$APIStatusResponse.$Algorithm.mbtc_mh_factor
 
-                $Stat = Set-Stat -Name "$($PoolName)_$($CoinName)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
+                $Stat = Set-Stat -Name "$($PoolName)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
                 $Stat = Set-Stat -Name "$($PoolName)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
                 try {
@@ -154,7 +153,7 @@ $PoolNames | ForEach-Object {
                             StablePrice        = $Stat.Week
                             MarginOfError      = $Stat.Week_Fluctuation
                             Protocol           = "stratum+tcp"
-                            Host               = "$Algorithm.$PoolHost"
+                            Host               = "$(if ($Region -eq "eu") {"eu."})$PoolHost"
                             Port               = $Port
                             User               = $Config.Pools.$PoolName.Wallets.$_
                             Pass               = "$($Config.Pools.$PoolName.Worker),c=$_"
