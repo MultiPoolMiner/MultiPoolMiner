@@ -28,55 +28,53 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
     return
 }
 
-#Commands from config file take precedence
-if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
-else {
-    $Commands = [PSCustomObject]@{
-        #GPU - profitable 16/05/2018
-        #Intensities and parameters tested by nemosminer on 10603gb to 1080ti
-        "c11"          = " -i 21" #X11evo; fix for default intensity
-        "hsr"          = "" #HSR, HShare
-        "keccak"       = " -m 2 -i 29" #Keccak; fix for default intensity, difficulty x M
-        "keccakc"      = " -i 29" #Keccakc; fix for default intensity
-        "lyra2v2"      = "" #lyra2v2
-        #"neoscrypt"   = " -i 15.5" #NeoScrypt; fix for default intensity, about 50% slower then Excavator or JustAMinerNeoScrypt 
-        "poly"         = "" #Poly
-        "skein"        = "" #Skein
-        "skein2"       = "" #skein2
-        "veltor"       = " -i 23" #Veltor; fix for default intensity
-        "whirlcoin"    = "" #WhirlCoin
-        "whirlpool"    = "" #Whirlpool
-        "x11evo"       = " -i 21" #X11evo; fix for default intensity
-        "x17"          = " -i 20" #x17; fix for default intensity
+$Commands = [PSCustomObject]@{
+    #GPU - profitable 16/05/2018
+    #Intensities and parameters tested by nemosminer on 10603gb to 1080ti
+    "C11"          = " -a c11 -i 22.1" #X11evo; fix for default intensity
+    "Hsr"          = " -a hsr" #HSR, HShare
+    "Keccak"       = " -a keccac -m 2 -i 29" #Keccak; fix for default intensity, difficulty x M
+    "KeccakC"      = " -a keccakc -i 29" #Keccakc; fix for default intensity
+    "Lyra2v2"      = " -a lyra2v2" #lyra2v2
+    #"Neoscrypt"   = " -a neoscrypt -i 15.5" #NeoScrypt, CcminerKlausT-v8.25 is faster
+    "Polytimos"    = " -a poly -i 21" #Poly
+    "Skein"        = " -a skein" #Skein
+    "Skein2"       = " -a skein2 -i 31" #skein2
+    "Veltor"       = " -a veltor -i 23" #Veltor; fix for default intensity
+    "Whirlcoin"    = " -a whirlcoin" #WhirlCoin
+    "Whirlpool"    = " -a whirlpool" #Whirlpool
+    "X11evo"       = " -a x11evo -i 21" #X11evo; fix for default intensity
+    "X17"          = " -a x17 -i 22.1" #x17; fix for default intensity
 
-        # ASIC - never profitable 11/08/2018
-        #"blake2s"     = "" #Blake2s
-        #"blake"       = "" #blake
-        #"blakecoin"   = "" #Blakecoin
-        #"cryptolight" = "" #cryptolight
-        #"cryptonight" = "" #CryptoNight
-        #"decred"      = "" #Decred
-        #"lbry"        = "" #Lbry
-        #"lyra2"       = "" #Lyra2
-        #"myr-gr"      = "" #MyriadGroestl
-        #"nist5"       = "" #Nist5
-        #"quark"       = "" #Quark
-        #"qubit"       = "" #Qubit
-        #"scrypt"      = "" #Scrypt
-        #"scrypt:N"    = "" #scrypt:N
-        #"sha256d"     = "" #sha256d
-        #"sia"         = "" #SiaCoin
-        #"sib"         = "" #Sib
-        #"x11"         = "" #X11
-        #"x13"         = "" #x13
-        #"x14"         = "" #x14
-        #"x15"         = "" #x15
-    }
+    # ASIC - never profitable 11/08/2018
+    #"Blake2s"     = " -a blake2s" #Blake2s
+    #"Blake"       = " -a blake" #blake
+    #"Blakecoin"   = " -a blakecoin" #Blakecoin
+    #"Cryptolight" = " -a cryptonight" #cryptolight
+    #"Cryptonight" = " -a cryptolight" #CryptoNight
+    #"Decred"      = " -a decred" #Decred
+    #"Lbry"        = " -a lbry" #Lbry
+    #"Lyra2"       = " -a lyra2" #Lyra2
+    #"Myr-gr"      = " -a myr-gr" #MyriadGroestl
+    #"Nist5"       = " -a nist5" #Nist5
+    #"Quark"       = " -a quark" #Quark
+    #"Qubit"       = " -a qubit" #Qubit
+    #"Scrypt"      = " -a scrypt" #Scrypt
+    #"Scrypt:N"    = " -a scrypt:n" #scrypt:N
+    #"Sha256d"     = " -a sha256d" #sha256d
+    #"Sia"         = " -a sia" #SiaCoin
+    #"Sib"         = " -a sib" #Sib
+    #"X11"         = " -a x11" #X11
+    #"X13"         = " -a x13" #x13
+    #"X14"         = " -a x14" #x14
+    #"X15"         = " -a x15" #x15
 }
+#Commands from config file take precedence
+if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = " --cuda-schedule 2 -N 1"}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+else {$CommonCommands = " --cuda-schedule 2 -N 1"}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
@@ -85,15 +83,12 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
 
-        #Get parameters for active miner devices
-        if ($Miner_Config.Parameters.$Algorithm_Norm) {
-            $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters.$Algorithm_Norm $Miner_Device.Type_Vendor_Index
-        }
-        elseif ($Miner_Config.Parameters."*") {
-            $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters."*" $Miner_Device.Type_Vendor_Index
-        }
-        else {
-            $Parameters = Get-ParameterPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
+        #Get commands for active miner devices
+        $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
+
+        Switch ($Algorithm_Norm) {
+            "C11"   {$WarmupTime = 60}
+            default {$WarmupTime = 30}
         }
 
         [PSCustomObject]@{
@@ -103,7 +98,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             DeviceName = $Miner_Device.Name
             Path       = $Path
             HashSHA256 = $HashSHA256
-            Arguments  = ("-a $_ -b 127.0.0.1:$($Miner_Port) -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$Parameters$CommonParameters -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ',')" -replace "\s+", " ").trim()
+            Arguments  = ("$Command$CommonCommands -b 127.0.0.1:$($Miner_Port) -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ',')" -replace "\s+", " ").trim()
             HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
             API        = "Ccminer"
             Port       = $Miner_Port

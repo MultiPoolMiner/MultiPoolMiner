@@ -18,33 +18,31 @@ $Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
+$Commands = [PSCustomObject[]]@(
+    [PSCustomObject]@{Algorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "";        Command = ""} #Ethash2gb
+    [PSCustomObject]@{Algorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "blake2s"; Command = ""} #Ethash2gb/Blake2s
+    [PSCustomObject]@{Algorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "decred";  Command = ""} #Ethash2GB/Decred
+    [PSCustomObject]@{Algorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "keccak";  Command = ""} #Ethash2GB/Keccak
+    [PSCustomObject]@{Algorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "lbry";    Command = ""} #Ethash2GB/Lbry
+    [PSCustomObject]@{Algorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "pascal";  Command = ""} #Ethash2GB/Pascal
+    [PSCustomObject]@{Algorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "sia";     Command = ""} #Ethash2GB/Sia
+    [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "";        Command = ""} #Ethash3GB
+    [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "blake2s"; Command = ""} #Ethash3GB/Blake2s
+    [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "decred";  Command = ""} #Ethash3GB/Decred
+    [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "keccak";  Command = ""} #Ethash3GB/Keccak
+    [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "lbry";    Command = ""} #Ethash3GB/Lbry
+    [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "pascal";  Command = ""} #Ethash3GB/Pascal
+    [PSCustomObject]@{Algorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "sia";     Command = ""} #Ethash3GB/Sia
+    [PSCustomObject]@{Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "";        Command = ""} #Ethash
+    [PSCustomObject]@{Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "blake2s"; Command = ""} #Ethash/Blake2s
+    [PSCustomObject]@{Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "decred";  Command = ""} #Ethash/Decred
+    [PSCustomObject]@{Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "keccak";  Command = ""} #Ethash/Keccak
+    [PSCustomObject]@{Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "lbry";    Command = ""} #Ethash/Lbry
+    [PSCustomObject]@{Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "pascal";  Command = ""} #Ethash/Pascal
+    [PSCustomObject]@{Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "sia";     Command = ""} #Ethash/Sia
+)
 #Commands from config file take precedence
-if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
-else {
-    $Commands = [PSCustomObject[]]@(
-        [PSCustomObject]@{MainAlgorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "";        Params = ""} #Ethash2gb
-        [PSCustomObject]@{MainAlgorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "blake2s"; Params = ""} #Ethash2gb/Blake2s
-        [PSCustomObject]@{MainAlgorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "decred";  Params = ""} #Ethash2GB/Decred
-        [PSCustomObject]@{MainAlgorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "keccak";  Params = ""} #Ethash2GB/Keccak
-        [PSCustomObject]@{MainAlgorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "lbry";    Params = ""} #Ethash2GB/Lbry
-        [PSCustomObject]@{MainAlgorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "pascal";  Params = ""} #Ethash2GB/Pascal
-        [PSCustomObject]@{MainAlgorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "sia";     Params = ""} #Ethash2GB/Sia
-        [PSCustomObject]@{MainAlgorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "";        Params = ""} #Ethash3GB
-        [PSCustomObject]@{MainAlgorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "blake2s"; Params = ""} #Ethash3GB/Blake2s
-        [PSCustomObject]@{MainAlgorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "decred";  Params = ""} #Ethash3GB/Decred
-        [PSCustomObject]@{MainAlgorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "keccak";  Params = ""} #Ethash3GB/Keccak
-        [PSCustomObject]@{MainAlgorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "lbry";    Params = ""} #Ethash3GB/Lbry
-        [PSCustomObject]@{MainAlgorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "pascal";  Params = ""} #Ethash3GB/Pascal
-        [PSCustomObject]@{MainAlgorithm = "ethash3gb"; MinMemGB = 3; SecondaryAlgorithm = "sia";     Params = ""} #Ethash3GB/Sia
-        [PSCustomObject]@{MainAlgorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "";        Params = ""} #Ethash
-        [PSCustomObject]@{MainAlgorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "blake2s"; Params = ""} #Ethash/Blake2s
-        [PSCustomObject]@{MainAlgorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "decred";  Params = ""} #Ethash/Decred
-        [PSCustomObject]@{MainAlgorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "keccak";  Params = ""} #Ethash/Keccak
-        [PSCustomObject]@{MainAlgorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "lbry";    Params = ""} #Ethash/Lbry
-        [PSCustomObject]@{MainAlgorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "pascal";  Params = ""} #Ethash/Pascal
-        [PSCustomObject]@{MainAlgorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "sia";     Params = ""} #Ethash/Sia
-    )
-}
+if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object {$_.Algorithm -ne $Algorithm}; $Commands += $_}}
 
 $SecondaryAlgoIntensities = [PSCustomObject]@{
     "blake2s" = @(40, 60, 80)
@@ -75,16 +73,16 @@ $Commands | ForEach-Object {
 }
 
 #CommonCommandsAll from config file take precedence
-if ($Miner_Config.CommonParameters) {$CommonParametersAll = $Miner_Config.CommonParametersAll}
-else {$CommonParametersAll = " -dbg -1 -strap 1"}
+if ($Miner_Config.CommonCommands) {$CommonCommandsAll = $Miner_Config.CommonCommandsAll}
+else {$CommonCommandsAll = " -dbg -1 -strap 1"}
 
 #CommonCommandsNvidia from config file take precedence
-if ($Miner_Config.CommonParametersNvidia) {$CommonParametersNvidia = $Miner_Config.CommonParametersNvidia}
-else {$CommonParametersNvidia = " -platform 2"}
+if ($Miner_Config.CommonCommandsNvidia) {$CommonCommandsNvidia = $Miner_Config.CommonCommandsNvidia}
+else {$CommonCommandsNvidia = " -platform 2"}
 
 #CommonCommandsAmd from config file take precedence
-if ($Miner_Config.CommonParametersAmd) {$CommonCommmandAmd = $Miner_Config.CommonParametersAmd}
-else {$CommonParametersAmd = " -platform 1 -y 1 -rxboost 1"}
+if ($Miner_Config.CommonCommandsAmd) {$CommonCommmandAmd = $Miner_Config.CommonCommandsAmd}
+else {$CommonCommandsAmd = " -platform 1 -y 1 -rxboost 1"}
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU")
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
@@ -92,42 +90,40 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
 
     switch ($_.Vendor) {
-        "Advanced Micro Devices, Inc." {$CommonParameters = $CommonParametersAmd + $CommonParametersAll}
-        "NVIDIA Corporation" {$CommonParameters = $CommonParametersNvidia + $CommonParametersAll}
-        Default {$CommonParameters = $CommonParametersAll}
+        "Advanced Micro Devices, Inc." {$CommonCommands = $CommonCommandsAmd + $CommonCommandsAll}
+        "NVIDIA Corporation" {$CommonCommands = $CommonCommandsNvidia + $CommonCommandsAll}
+        Default {$CommonCommands = $CommonCommandsAll}
     }
 
     #Remove -strap parameter, not all card models support it
     if ($Device.Model_Norm -notmatch "^GTX10.*|^Baffin.*|^Ellesmere.*|^Polaris.*|^Vega.*|^gfx900.*") {
-        $CommonParameters = $CommonParameters -replace " -strap [\d,]{1,}"
+        $CommonCommands = $CommonCommands -replace " -strap [\d,]{1,}"
     }
     
-    $Commands | ForEach-Object {$Main_Algorithm_Norm = Get-Algorithm $_.MainAlgorithm; $_} | Where-Object {$Pools.$Main_Algorithm_Norm.Host} | ForEach-Object {
-        $Main_Algorithm = $_.MainAlgorithm
+    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$Pools.$Algorithm_Norm.Host} | ForEach-Object {
         $MinMemGB = $_.MinMemGB
-        $Parameters = $_.Parameters
 
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
             #Get parameters for active miner devices
-            if ($Miner_Config.Parameters.$Main_Algorithm_Norm) {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters.$($Main_Algorithm_Norm) $Miner_Device.Type_Vendor_Index
+            if ($Miner_Config.Parameters.$Algorithm_Norm) {
+                $Parameters = Get-CommandPerDevice $Miner_Config.Parameters.$($Algorithm_Norm) $Miner_Device.Type_Vendor_Index
                 if ($Miner_Config.Parameters.$Secondary_Algorithm_Norm -and $Secondary_Algorithm_Norm -and $_.SecondaryAlgoIntensity -gt 0) {
-                    $Parameters += Get-ParameterPerDevice $Miner_Config.Parameters.$($Secondary_Algorithm_Norm) $Miner_Device.Type_Vendor_Index
+                    $Parameters += Get-CommandPerDevice $Miner_Config.Parameters.$($Secondary_Algorithm_Norm) $Miner_Device.Type_Vendor_Index
                 }
             }
             elseif ($Miner_Config.Parameters."*") {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters."*" $Miner_Device.Type_Vendor_Index
+                $Parameters = Get-CommandPerDevice $Miner_Config.Parameters."*" $Miner_Device.Type_Vendor_Index
             }
             else {
-                $Parameters = Get-ParameterPerDevice $Parameters $Miner_Device.Type_Vendor_Index
+                $Parameters = Get-CommandPerDevice $Parameters $Miner_Device.Type_Vendor_Index
             }
 
             if ($null -ne $_.SecondaryAlgoIntensity) {
                 $Secondary_Algorithm = $_.SecondaryAlgorithm
                 $Secondary_Algorithm_Norm = Get-Algorithm $Secondary_Algorithm
 
-                $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) + @("$Main_Algorithm_Norm$($Secondary_Algorithm_Norm -replace 'Nicehash'<#temp fix#>)") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
-                $Miner_HashRates = [PSCustomObject]@{$Main_Algorithm_Norm = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week; $Secondary_Algorithm_Norm = $Stats."$($Miner_Name)_$($Secondary_Algorithm_Norm)_HashRate".Week}
+                $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) + @("$Algorithm_Norm$($Secondary_Algorithm_Norm -replace 'Nicehash'<#temp fix#>)") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
+                $Miner_HashRates = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week; $Secondary_Algorithm_Norm = $Stats."$($Miner_Name)_$($Secondary_Algorithm_Norm)_HashRate".Week}
 
                 switch ($_.Secondary_Algorithm_Norm) {
                     "Decred"      {$Secondary_Algorithm = "dcr"}
@@ -137,26 +133,26 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 }
                 $Arguments_Secondary = " -dcoin $Secondary_Algorithm -dpool $($Pools.$Secondary_Algorithm_Norm.Host):$($Pools.$Secondary_Algorithm_Norm.Port) -dwal $($Pools.$Secondary_Algorithm_Norm.User) -dpsw $($Pools.$Secondary_Algorithm_Norm.Pass)$(if($_.SecondaryAlgoIntensity -ge 0){" -dcri $($_.SecondaryAlgoIntensity)"})"
                 if ($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -gt 3GB}) {
-                    $Miner_Fees = [PSCustomObject]@{$Main_Algorithm_Norm = 1 / 100; $Secondary_Algorithm_Norm = 0 / 100}
+                    $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 1 / 100; $Secondary_Algorithm_Norm = 0 / 100}
                 }
                 else {
-                    $Miner_Fees = [PSCustomObject]@{$Main_Algorithm_Norm = 0 / 100; $Secondary_Algorithm_Norm = 0 / 100}
+                    $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 0 / 100; $Secondary_Algorithm_Norm = 0 / 100}
                 }
             }
             else {
                 $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
-                $Miner_HashRates = [PSCustomObject]@{$Main_Algorithm_Norm = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week}
+                $Miner_HashRates = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                 $Arguments_Secondary = ""
 
                 if ($Miner_Device | Where-Object {$_.OpenCL.GlobalMemsize -gt 3GB}) {
-                    $Miner_Fees = [PSCustomObject]@{$Main_Algorithm_Norm = 1 / 100}
+                    $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 1 / 100}
                 }
                 else {
-                    $Miner_Fees = [PSCustomObject]@{$Main_Algorithm_Norm = 0 / 100}
+                    $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 0 / 100}
                 }
             }
             #Avoid DAG switching
-            switch ($Main_Algorithm_Norm) {
+            switch ($Algorithm_Norm) {
                 "Ethash" {$Allcoins = " -allcoins etc"}
                 default  {$Allcoins = " -allcoins 1"}
             }
@@ -165,30 +161,35 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             if ($null -eq $Miner_Config) {$Miner_Config = [PSCustomObject]@{DisableDevFeeMining = $Config.DisableDevFeeMining}}
             if ($Miner_Config.DisableDevFeeMining) {
                 $NoFee = " -nofee 1"
-                $Miner_Fees = [PSCustomObject]@{$Main_Algorithm_Norm = 0 / 100}
+                $Miner_Fees = [PSCustomObject]@{$Algorithm_Norm = 0 / 100}
             }
             else {$NoFee = ""}
 
+            #Get commands for active miner devices
+            $Command = Get-CommandPerDevice -Command $_.Command -DeviceIDs $Miner_Device.Type_Vendor_Index
+
             #Remove -strap parameter for Nvidia 1080(Ti) and Titan cards, OhGoAnETHlargementPill is not compatible
             if ($Device.Model -match "GeForce GTX 1080|GeForce GTX 1080 Ti|Nvidia TITAN.*" -and (Get-CIMInstance CIM_Process | Where-Object Processname -like "OhGodAnETHlargementPill*")) {
-                $CommonParameters = $CommonParameters -replace " -strap [\d,]{1,}"
+                $CommonCommands = $CommonCommands -replace " -strap [\d,]{1,}"
             }
 
-            [PSCustomObject]@{
-                Name               = $Miner_Name
-                BaseName           = $Miner_BaseName
-                Version            = $Miner_Version
-                DeviceName         = $Miner_Device.Name
-                Path               = $Path
-                HashSHA256         = $HashSHA256
-                Arguments          = ("-mport -$Miner_Port -epool $($Pools.$Main_Algorithm_Norm.Host):$($Pools.$Main_Algorithm_Norm.Port) -ewal $($Pools.$Main_Algorithm_Norm.User) -epsw $($Pools.$Main_Algorithm_Norm.Pass) -allpools 1$Allcoins -esm 3$Arguments_Secondary$Parameters$CommonParameters$NoFee -di $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.PCIBus_Type_Vendor_Index}) -join '')" -replace "\s+", " ").trim()
-                HashRates          = $Miner_HashRates
-                API                = "Claymore"
-                Port               = $Miner_Port
-                URI                = $Uri
-                Fees               = $Miner_Fees
-                IntervalMultiplier = $IntervalMultiplier
-                WarmupTime         = 45 #seconds
+            if ($null -eq $_.SecondaryAlgoIntensity -or $Pools.$Secondary_Algorithm_Norm.Host) {
+                [PSCustomObject]@{
+                    Name               = $Miner_Name
+                    BaseName           = $Miner_BaseName
+                    Version            = $Miner_Version
+                    DeviceName         = $Miner_Device.Name
+                    Path               = $Path
+                    HashSHA256         = $HashSHA256
+                    Arguments          = ("$Command$CommonCommands -mport -$Miner_Port -epool $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -ewal $($Pools.$Algorithm_Norm.User) -epsw $($Pools.$Algorithm_Norm.Pass) -allpools 1$Allcoins -esm 3$Arguments_Secondary$NoFee -di $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.PCIBus_Type_Vendor_Index}) -join '')" -replace "\s+", " ").trim()
+                    HashRates          = $Miner_HashRates
+                    API                = "Claymore"
+                    Port               = $Miner_Port
+                    URI                = $Uri
+                    Fees               = $Miner_Fees
+                    IntervalMultiplier = $IntervalMultiplier
+                    WarmupTime         = 45 #seconds
+                }
             }
         }
     }

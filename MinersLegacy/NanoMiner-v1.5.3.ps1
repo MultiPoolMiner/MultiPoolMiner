@@ -28,52 +28,41 @@ if ($Devices.Vendor -contains "NVIDIA Corporation" -and $CUDAVersion -and [Syste
     $Devices = $Devices | Where-Object Vendor -NE "NVIDIA Corporation"
 }
 
+$Commands = [PSCustomObject[]]@(
+    [PSCustomObject]@{Algorithm = "Ethash2gb";               AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #Ethash2GB
+    [PSCustomObject]@{Algorithm = "Ethash3gb";               AmdMinMemGB = 3; NvidiaMinMemGB = 3; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #Ethash3GB
+    [PSCustomObject]@{Algorithm = "Ethash";                  AmdMinMemGB = 4; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #Ethash
+    [PSCustomObject]@{Algorithm = "Ubqhash";                 AmdMinMemGB = 4; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #Ubqhash
+    [PSCustomObject]@{Algorithm = "CryptoNightV5";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightV5
+    [PSCustomObject]@{Algorithm = "CryptoNightV6";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightV6
+    [PSCustomObject]@{Algorithm = "CryptoNightV7";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightV7
+    [PSCustomObject]@{Algorithm = "CryptoNightV8";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightV8
+    [PSCustomObject]@{Algorithm = "CryptoNightReverseWaltz"; AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightRwzV8
+    [PSCustomObject]@{Algorithm = "Cuckaroo29";              AmdMinMemGB = 6; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 2; Command = ""} #Cuckaroo29
+    [PSCustomObject]@{Algorithm = "Cuckarood29";             AmdMinMemGB = 6; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 2; Command = ""} #Cuckarood29, new with 1.5.0
+    [PSCustomObject]@{Algorithm = "RandomHash";              AmdMinMemGB = 0; NvidiaMinMemGB = 0; Vendor = @("CPU");           Fee = 2; Command = ""} #RandomHash, CPU only
+)
 #Commands from config file take precedence
-if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
-else {
-    $Commands = [PSCustomObject[]]@(
-        [PSCustomObject]@{Algorithm = "Ethash2gb";               AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #Ethash2GB
-        [PSCustomObject]@{Algorithm = "Ethash3gb";               AmdMinMemGB = 3; NvidiaMinMemGB = 3; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #Ethash3GB
-        [PSCustomObject]@{Algorithm = "Ethash";                  AmdMinMemGB = 4; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #Ethash
-        [PSCustomObject]@{Algorithm = "Ubqhash";                 AmdMinMemGB = 4; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #Ubqhash
-        [PSCustomObject]@{Algorithm = "CryptoNightV5";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightV5
-        [PSCustomObject]@{Algorithm = "CryptoNightV6";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightV6
-        [PSCustomObject]@{Algorithm = "CryptoNightV7";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightV7
-        [PSCustomObject]@{Algorithm = "CryptoNightV8";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightV8
-        [PSCustomObject]@{Algorithm = "CryptoNightReverseWaltz"; AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Params = ""} #CryptonightRwzV8
-        [PSCustomObject]@{Algorithm = "Cuckaroo29";              AmdMinMemGB = 6; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 2; Params = ""} #Cuckaroo29
-        [PSCustomObject]@{Algorithm = "Cuckarood29";             AmdMinMemGB = 6; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 2; Params = ""} #Cuckarood29, new with 1.5.0
-        [PSCustomObject]@{Algorithm = "RandomHash";              AmdMinMemGB = 0; NvidiaMinMemGB = 0; Vendor = @("CPU");           Fee = 2; Params = ""} #RandomHash, CPU only
-    )
-}
+if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object {$_.Algorithm -ne $Algorithm}; $Commands += $_}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = ""}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
+else {$CommonCommands = ""}
 
-$Devices | Select-Object Model -Unique | ForEach-Object {
-    $Device = @($Devices | Where-Object Model -EQ $_.Model)
+$Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
+    $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
 
     $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$_.Vendor -contains ($Device.Vendor_ShortName | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Algorithm = $_.Algorithm -replace "ethash(\dgb)", "Ethash"
         $Fee = $_.Fee
         $MinMemGB = $_."$($Device.Vendor_ShortName | Select-Object -Unique)MinMemGB"
-        $Parameters = $_.Parameters
 
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
             $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
 
-            #Get parameters for active miner devices
-            if ($Miner_Config.Parameters.$Algorithm_Norm) {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters.$Algorithm_Norm $Miner_Device.Type_Index
-            }
-            elseif ($Miner_Config.Parameters."*") {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters."*" $Miner_Device.Type_Index
-            }
-            else {
-                $Parameters = Get-ParameterPerDevice $_.Parameters $Miner_Device.Type_Index
-            }
+            #Get commands for active miner devices
+            $Command = Get-CommandPerDevice -Command $_.Command -DeviceIDs $Miner_Device.Type_Vendor_Index
 
             $ConfigFileName = "$((@("Config") + @($Algorithm_Norm) + @(($Miner_Device.Model_Norm | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm($(($Miner_Device | Sort-Object Name | Where-Object Model_Norm -eq $Model_Norm).Name -join ';'))"} | Select-Object) -join '-') + @($Algorithm_Norm) + @($Miner_Port) + @($Pools.$Algorithm_Norm.User) + @($Pools.$Algorithm_Norm.Pass)| Select-Object) -join '-').ini"
             $Arguments = [PSCustomObject]@{
@@ -100,7 +89,7 @@ devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.PCIBus_Type_Index)}) -
 pool1=$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)
 wallet=$($Pools.$Algorithm_Norm.User)"
                 }
-                Commands = "$ConfigFileName$Parameters$CommonParameters"
+                Commands = "$ConfigFileName$Command$CommonCommands"
             }
 
             [PSCustomObject]@{
@@ -116,7 +105,7 @@ wallet=$($Pools.$Algorithm_Norm.User)"
                 Port       = $Miner_Port
                 URI        = $Uri
                 Fees       = [PSCustomObject]@{$Algorithm_Norm = $Fee / 100}
-                WarmupTime = 60 #seconds
+                WarmupTime = 90 #seconds
             }
         }
     }

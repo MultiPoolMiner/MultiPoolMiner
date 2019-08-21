@@ -18,33 +18,31 @@ $Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
-#Commands from config file take precedence
-if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
-else {
-    $Commands = [PSCustomObject]@{
-        #"blake2s"  = "" #Blake2s - Beaten by ccminerSib by 150%
-        "blakecoin" = "" #Blakecoin
-        "c11"       = "" #C11
-        "keccak"    = "" #Keccak
-        "lyra2v2"   = "" #Lyra2RE2
-        "neoscrypt" = "" #NeoScrypt
-        "skein"     = "" #Skein
-        "x17"       = "" #X17
-        
-        # ASIC - never profitable 24/06/2018
-        #"decred"   = "" #Decred
-        #"groestl"  = "" #Groestl
-        #"myr-gr"   = "" #MyriadGroestl
-        #"nist5"    = "" #Nist5
-        #"qubit"    = "" #qubit
-        #"quark"    = "" #Quark
-        #"sib"      = "" #Sib
-    }
+$Commands = [PSCustomObject]@{
+    #"blake2s"  = " -a blake2s" #Blake2s - Beaten by ccminerSib by 150%
+    "blakecoin" = " -a blakecoin" #Blakecoin
+    "c11"       = " -a c11" #C11
+    "keccak"    = " -a keccak" #Keccak
+    "lyra2v2"   = " -a lyra2v2" #Lyra2RE2
+    "neoscrypt" = " -a neoscrypt" #NeoScrypt
+    "skein"     = " -a skein" #Skein
+    "x17"       = " -a x17" #X17
+    
+    # ASIC - never profitable 24/06/2018
+    #"decred"   = " -a decred" #Decred
+    #"groestl"  = " -a groestl" #Groestl
+    #"myr-gr"   = " -a myr-gr" #MyriadGroestl
+    #"nist5"    = " -a nist5" #Nist5
+    #"qubit"    = " -a qubit" #qubit
+    #"quark"    = " -a quark" #Quark
+    #"sib"      = " -a sib" #Sib
 }
+#Commands from config file take precedence
+if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = ""}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+else {$CommonCommands = ""}
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
 $Devices | Select-Object Model -Unique | ForEach-Object {
@@ -54,15 +52,12 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
 
-        #Get parameters for active miner devices
-        if ($Miner_Config.Parameters.$Algorithm_Norm) {
-            $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters.$Algorithm_Norm $Miner_Device.Type_Vendor_Index
-        }
-        elseif ($Miner_Config.Parameters."*") {
-            $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters."*" $Miner_Device.Type_Vendor_Index
-        }
-        else {
-            $Parameters = Get-ParameterPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
+        #Get commands for active miner devices
+        $Command = Get-CommandPerDevice -Command $Commands.$_ -DeviceIDs $Miner_Device.Type_Vendor_Index
+
+        Switch ($Algorithm_Norm) {
+            "C11"   {$WarmupTime = 60}
+            default {$WarmupTime = 30}
         }
 
         [PSCustomObject]@{
@@ -72,11 +67,12 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             DeviceName = $Miner_Device.Name
             Path       = $Path
             HashSHA256 = $HashSHA256
-            Arguments  = ("-a $_ -b 127.0.0.1:$($Miner_Port) -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass)$Parameters$CommonParameters -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ',')" -replace "\s+", " ").trim()
+            Arguments  = ("$Command$CommonCommands -b 127.0.0.1:$($Miner_Port) -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ',')" -replace "\s+", " ").trim()
             HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
             API        = "Ccminer"
             Port       = $Miner_Port
             URI        = $Uri
+            WarmupTime = $WarmupTime
         }
     }
 }

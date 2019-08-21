@@ -18,30 +18,28 @@ $Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
-#Commands from config file take precedence
-if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
-else {
-    $Commands = [PSCustomObject[]]@(
-        [PSCustomObject]@{Algorithm = "CryptonightV7";        AlgoNumber =  1; MinMemGB = 2; Params = ""} #CryptonightV7
-        [PSCustomObject]@{Algorithm = "CryptonightHeavy";     AlgoNumber =  2; MinMemGB = 4; Params = ""} #CryptonightHeavy
-        [PSCustomObject]@{Algorithm = "CryptonightLite";      AlgoNumber =  3; MinMemGB = 1; Params = ""} #CryptonightLite
-        [PSCustomObject]@{Algorithm = "CryptonightLiteV7";    AlgoNumber =  4; MinMemGB = 1; Params = ""} #CryptonightLiteV7
-        [PSCustomObject]@{Algorithm = "CryptonightHeavyTube"; AlgoNumber =  5; MinMemGB = 4; Params = ""} #CryptonightHeavyTube
-        [PSCustomObject]@{Algorithm = "CryptonightXtl";       AlgoNumber =  6; MinMemGB = 2; Params = ""} #CryptonightXtl
-        [PSCustomObject]@{Algorithm = "CryptonightHeavyXhv";  AlgoNumber =  7; MinMemGB = 4; Params = ""} #CryptonightHeavyXhv
-        [PSCustomObject]@{Algorithm = "CryptonightFast";      AlgoNumber =  8; MinMemGB = 2; Params = ""} #CryptonightFast
-        [PSCustomObject]@{Algorithm = "CryptonightRto";       AlgoNumber =  9; MinMemGB = 2; Params = ""} #CryptonightFest (not to be confused with CryptonightFast), new with 1.50
-        [PSCustomObject]@{Algorithm = "CryptonightV8";        AlgoNumber = 10; MinMemGB = 2; Params = ""} #CryptonightV8, new with 1.50
-        [PSCustomObject]@{Algorithm = "CryptonightXfh";       AlgoNumber = 11; MinMemGB = 2; Params = ""} #CryptoNightXfh, new with 1.65
+$Commands = [PSCustomObject[]]@(
+    [PSCustomObject]@{Algorithm = "CryptonightV7";        MinMemGB = 2; Command = " -a 1"} #CryptonightV7
+    [PSCustomObject]@{Algorithm = "CryptonightHeavy";     MinMemGB = 4; Command = " -a 2"} #CryptonightHeavy
+    [PSCustomObject]@{Algorithm = "CryptonightLite";      MinMemGB = 1; Command = " -a 3"} #CryptonightLite
+    [PSCustomObject]@{Algorithm = "CryptonightLiteV7";    MinMemGB = 1; Command = " -a 4"} #CryptonightLiteV7
+    [PSCustomObject]@{Algorithm = "CryptonightHeavyTube"; MinMemGB = 4; Command = " -a 5"} #CryptonightHeavyTube
+    [PSCustomObject]@{Algorithm = "CryptonightXtl";       MinMemGB = 2; Command = " -a 6"} #CryptonightXtl
+    [PSCustomObject]@{Algorithm = "CryptonightHeavyXhv";  MinMemGB = 4; Command = " -a 7"} #CryptonightHeavyXhv
+    [PSCustomObject]@{Algorithm = "CryptonightFast";      MinMemGB = 2; Command = " -a 8"} #CryptonightFast
+    [PSCustomObject]@{Algorithm = "CryptonightRto";       MinMemGB = 2; Command = " -a 9"} #CryptonightFest (not to be confused with CryptonightFast), new with 1.50
+    [PSCustomObject]@{Algorithm = "CryptonightV8";        MinMemGB = 2; Command = " -a 10"} #CryptonightV8, new with 1.50
+    [PSCustomObject]@{Algorithm = "CryptonightXfh";       MinMemGB = 2; Command = " -a 11"} #CryptoNightXfh, new with 1.65
 
-        # ASIC only (09/07/2018)
-        #[PSCustomObject]@{Algorithm_Norm = "Cryptonight";          AlgoNumber = 0; MinMemGB = 2; Commands = ""} #Cryptonight
-    )
-}
+    # ASIC only (09/07/2018)
+    #[PSCustomObject]@{Algorithm_Norm = "Cryptonight";          AlgoNumber = 0; MinMemGB = 2; Commands = ""} #Cryptonight
+)
+#Commands from config file take precedence
+if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object {$_.Algorithm -ne $Algorithm}; $Commands += $_}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = " --fastjobswitch --intensity -1"}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+else {$CommonCommands = " --fastjobswitch --intensity -1"}
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Advanced Micro Devices, Inc.")
 $Devices | Select-Object Model -Unique | ForEach-Object {
@@ -50,21 +48,12 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
     $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp"} | ForEach-Object {
         $MinMemGB = $_.MinMemGB
-        $Parameters = $_.Parameters
 
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB -and $_.Model_Norm -match "^Baffin.*|^Ellesmere.*|^Polaris.*|^Vega.*|^gfx900.*"})) {
             $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
 
-            #Get parameters for active miner devices
-            if ($Miner_Config.Parameters.$Algorithm_Norm) {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters.$Algorithm_Norm $Miner_Device.Type_Vendor_Index
-            }
-            elseif ($Miner_Config.Parameters."*") {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters."*" $Miner_Device.Type_Vendor_Index
-            }
-            else {
-                $Parameters = Get-ParameterPerDevice $Parameters $Miner_Device.Type_Vendor_Index
-            }
+            #Get commands for active miner devices
+            $Command = Get-CommandPerDevice -Command $_.Command -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
             [PSCustomObject]@{
                 Name       = $Miner_Name
@@ -73,7 +62,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
-                Arguments  = ("--remoteaccess --remoteport $($Miner_Port) -a $($_.AlgoNumber) -S $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) --opencl $($Miner_Device | Select-Object -First 1 -ExpandProperty PlatformId) $(if ($Pools.$Algorithm_Norm.Name -ne "NiceHash") {" --nonicehash"}) -G $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')$Parameters$CommonParameters" -replace "\s+", " ").trim()
+                Arguments  = ("$Command$CommonCommands --remoteaccess --remoteport $($Miner_Port) -S $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) --opencl $($Miner_Device | Select-Object -First 1 -ExpandProperty PlatformId) $(if ($Pools.$Algorithm_Norm.Name -ne "NiceHash") {" --nonicehash"}) -G $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Index}) -join ',')" -replace "\s+", " ").trim()
                 HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                 API        = "Cast"
                 Port       = $Miner_Port

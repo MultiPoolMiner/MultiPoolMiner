@@ -1,10 +1,10 @@
 ﻿<html>
   <body>
-    <h1>MultiPoolMiner API (version 0.95)</h1>
+    <h1>MultiPoolMiner API (version 0.96)</h1>
     
-    API data is available at http://localhost:3999/&lt;resource&gt;
+    API data is available at http://localhost:[API port]/&lt;resource&gt;
 
-    The default MPM API port is 3999. It can be changed via parameter '-APIPort nnnn'
+    The default MPM API port is 3999. It can be changed with parameter '-APIPort nnnn' (see README)
 
     <h2>File and Scripts</h2>
     <p>Anything other than the resources listed below will be looked for in the web directory and sent if it exists.</p>
@@ -67,7 +67,7 @@
     <a href="http://localhost:3999/bestminers_combo_comparison">/bestminers_combo_comparison</a>
     <p>Returns bestminers_combo_comparison information.</p>
 
-    <h3>Balances_Jobs</h3>
+    <h3>Balances Jobs</h3>
     <a href="http://localhost:3999/balances_jobs">/balances_jobs</a>
     <p>Returns pool balances jobs information.</p>
 
@@ -75,12 +75,12 @@
     <a href="http://localhost:3999/btcratefirstcurrency">/btcratefirstcurrency</a>
     <p>Returns the BTC exchange rate for the first configured currency.</p>
 
-    <h3>Currentearning</h3>
-    <a href="http://localhost:3999/currentearning">/config</a>
+    <h3>Current Earning</h3>
+    <a href="http://localhost:3999/currentearning">/currentearning</a>
     <p>Shows the cumulated earnings of all miners</p>
 
-    <h3>Currentprofit</h3>
-    <a href="http://localhost:3999/currentprofit">/config</a>
+    <h3>Current Profit</h3>
+    <a href="http://localhost:3999/currentprofit">/currentprofit</a>
     <p>Shows the cumulated profit (earning - power cost) of all miners</p>
 
     <h3>Config</h3>
@@ -154,6 +154,10 @@
     <h3>Stop</h3>
     <a href="http://localhost:3999/stop">/stop</a>
     <p>Tells the script to stop running.</p>
+    
+    <h3>Unprofitable Algorithms</h3>
+    <a href="http://localhost:3999/unprofitablealgorithms">/unprofitablealgorithms</a>
+    <p>Returns the list of unprofitable algorithms.</p>
     
     <h3>Version</h3>
     <a href="http://localhost:3999/version">/version</a>

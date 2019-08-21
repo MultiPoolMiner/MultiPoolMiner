@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\MiniZ.exe"
-$HashSHA256 = "3591C6F6101A59DA571209C7F00047EF8BF0BD538576E0FAAC4F123EB53C602F"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.4o_cuda10_win-x64.zip"
+$HashSHA256 = "E5EDBB54A1C4B52776A6D6879AD0859FF6B6B8FEC43121D2488CDF2322EA29CC"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.5p_cuda10_win-x64.zip"
 $ManualUri = "https://miniz.ch/download"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -28,50 +28,41 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
     return
 }
 
+$Commands = [PSCustomObject[]]@(
+    [PSCustomObject]@{Algorithm = "Equihash965";    MinMemGB = 2.0; Command = " --par=96,5"}
+    [PSCustomObject]@{Algorithm = "Equihash1254";   MinMemGB = 3.0; Command = " --par=125,4"}
+    [PSCustomObject]@{Algorithm = "Equihash1445";   MinMemGB = 2.0; Command = " --par=144,5"}
+    [PSCustomObject]@{Algorithm = "EquihashR15050"; MinMemGB = 2.0; Command = " --par=150,5"}
+    [PSCustomObject]@{Algorithm = "EquihashR15053"; MinMemGB = 2.0; Command = " --par=150,5"}
+    [PSCustomObject]@{Algorithm = "Equihash1927";   MinMemGB = 3.0; Command = " --par=192,7"}
+)
 #Commands from config file take precedence
-if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
-else {
-    $Commands = [PSCustomObject[]]@(
-        [PSCustomObject]@{Algorithm = "Equihash96,5";  MinMemGB = 2.0; Params = ""}
-        [PSCustomObject]@{Algorithm = "Equihash125,4"; MinMemGB = 3.0; Params = ""}
-        [PSCustomObject]@{Algorithm = "Equihash144,5"; MinMemGB = 2.0; Params = ""}
-        [PSCustomObject]@{Algorithm = "Equihash150,5"; MinMemGB = 2.0; Params = ""}
-        [PSCustomObject]@{Algorithm = "Equihash192,7"; MinMemGB = 3.0; Params = ""}
-    )
-}
+if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object {$_.Algorithm -ne $Algorithm}; $Commands += $_}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = " --latency --show-shares --all-shares --show-pers"}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+else {$CommonCommands = " --latency --show-shares --all-shares --show-pers --shares-detail --smart-pers --oc2"}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
 
     $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm ($_.Algorithm -replace ","); $_} | Where-Object {$Pools.$Algorithm_Norm.Host} | ForEach-Object {
-        $Algorithm = $_.Algorithm -replace "Equihash"
         $MinMemGB = $_.MinMemGB
-        $Parameters = $_.Parameters
+        $Pers = ""
 
         if ($Miner_Device = @($Device | Where-Object {$([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
             $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
 
-            #Get parameters for active miner devices
-            if ($Miner_Config.Parameters.$Algorithm_Norm) {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters.$Algorithm_Norm $Miner_Device.Type_Vendor_Index
+            #Get commands for active miner devices
+            $Command = Get-CommandPerDevice -Command $_.Command -ExcludeParameters @("par") -DeviceIDs $Miner_Device.Type_Vendor_Index
+            
+            Switch ($Algorithm_Norm) {
+                "Equihash1445"   {$Pers = Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default "auto"}
+                "EquihashR15053" {$Pers = Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName}
+                "Equihash1927"   {$Pers = Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default "auto"}
             }
-            elseif ($Miner_Config.Parameters."*") {
-                $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters."*" $Miner_Device.Type_Vendor_Index
-            }
-            else {
-                $Parameters = Get-ParameterPerDevice $_.Parameters $Miner_Device.Type_Vendor_Index
-            }
-
-            if ($Algorithm_Norm -match "Equihash1445|Equihash1927") {
-                #define --pers for quihash1445 & Equihash1927
-                $AlgoPers = " --pers $(Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default 'auto')"
-            }
-            else {$AlgoPers = ""}
+            if ($Pers) {$Pers = " --pers $Pers"} else {$Pers = ""}
 
             [PSCustomObject]@{
                 Name       = $Miner_Name
@@ -80,7 +71,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
-                Arguments  = ("--par=$Algorithm$AlgoPers --telemetry 0.0.0.0:$($Miner_Port) --server $(if ($Pools.$Algorithm_Norm.SSL) {"ssl://"})$($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass)$Parameters$CommonParameters$NoFee --cuda-devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')" -replace "\s+", " ").trim()
+                Arguments  = ("$Command$CommonCommands$Pers --telemetry=0.0.0.0:$($Miner_Port) --server=$(if ($Pools.$Algorithm_Norm.SSL) {"ssl://"})$($Pools.$Algorithm_Norm.Host) --port=$($Pools.$Algorithm_Norm.Port) --user=$($Pools.$Algorithm_Norm.User) --pass=$($Pools.$Algorithm_Norm.Pass)$NoFee --cuda-devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')" -replace "\s+", " ").trim()
                 HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                 API        = "MiniZ"
                 Port       = $Miner_Port

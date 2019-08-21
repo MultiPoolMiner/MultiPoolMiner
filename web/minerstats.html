@@ -11,6 +11,8 @@
     <div class="card-body">
       <p>Clear the stats for miners that have a benchmarked hashrate of 0H/s.</p>
       <p>These miners may have failed to benchmark properly, clearing their stats allows them to try benchmarking again. You should watch closely for failed miners after doing this. </p>
+      <a href="#" id="showzerohashrateminers" class="btn btn-info">Show 0H/s miner stats</a>
+      <p></p>
       <a href="#" id="resetzerohashrateminers" class="btn btn-primary">Reset 0H/s miner stats</a>
     </div>
   </div>
@@ -21,7 +23,21 @@
     <div class="card-body">
       <p>Clear the stats for miners that have a measured power usage of 0W.</p>
       <p>These miners may have failed to measure power usage properly, clearing their recorded value allows them to try measuring again. </p>
+      <a href="#" id="showzeropowerusageminers" class="btn btn-info">Show 0W power usage data</a>
+      <p></p>
       <a href="#" id="resetzeropowerusageminers" class="btn btn-primary">Reset 0W power usage data</a>
+    </div>
+  </div>
+  <div class="card m-2">
+    <div class="card-header">
+      <h5>Re-enable disabled miners</h5>
+    </div>
+    <div class="card-body">
+      <p>Re-enable the miners that have been disabled manually.</p>
+      <p>These miners have been disabled by the user. This will force benchmarking and power usage measurement for the re-enabled miners. </p>
+      <a href="#" id="showdisabledminers" class="btn btn-info">Show disabled miners</a>
+      <p></p>
+      <a href="#" id="enablediabledminers" class="btn btn-primary">Re-enable disabled miners</a>
     </div>
   </div>
   <div class="card m-2 bg-info">
@@ -59,40 +75,67 @@
 
 <!-- End of page scripts -->
 <script>
-$('#resetallbenchmarks').on('click',function(){
-    $('.modal-body').load('scripts/resetallbenchmarks.ps1',function(){
-        $('.modal-title').text('Reset All Benchmarks');
-        $('#myModal').modal({show:true});
-    });
-});
+  $("#showzerohashrateminers").on("click",function() {
+      $(".modal-body").load("scripts/managestat.ps1?Action=Get&Type=HashRate&Value=0&Unit=H/s", function() {
+          $(".modal-title").text("Show 0H/s Miners");
+          $("#myModal").modal({show:true});
+      });
+  });
 
-$('#resetzerohashrateminers').on('click',function(){
-    $('.modal-body').load('scripts/resetzerohashrateminers.ps1',function(){
-        $('.modal-title').text('Reset 0H/s Miners');
-        $('#myModal').modal({show:true});
-    });
-});
+  $("#resetzerohashrateminers").on("click",function() {
+      $(".modal-body").load("scripts/managestat.ps1?Action=Remove&Type=HashRate&Value=0&Unit=H/s", function() {
+          $(".modal-title").text("Reset 0H/s Miners");
+          $("#myModal").modal({show:true});
+      });
+  });
 
-$('#resetallpowerusage').on('click',function(){
-    $('.modal-body').load('scripts/resetallpowerusage.ps1',function(){
-        $('.modal-title').text('Reset All Power Usage');
-        $('#myModal').modal({show:true});
-    });
-});
+  $("#showzeropowerusageminers").on("click",function() {
+      $(".modal-body").load("scripts/managestat.ps1?Action=Get&Type=PowerUsage&Value=0&Unit=W", function() {
+          $(".modal-title").text("Show 0W Power Usage Miners");
+          $("#myModal").modal({show:true});
+      });
+  });
 
-$('#resetzeropowerusageminers').on('click',function(){
-    $('.modal-body').load('scripts/resetzeropowerusageminers.ps1',function(){
-        $('.modal-title').text('Reset 0W Power Usage');
-        $('#myModal').modal({show:true});
-    });
-});
+  $("#resetzeropowerusageminers").on("click",function() {
+      $(".modal-body").load("scripts/managestat.ps1?Action=Remove&Type=PowerUsage&Value=0&Unit=H/s", function() {
+          $(".modal-title").text("Reset 0W Power Usage");
+          $("#myModal").modal({show:true});
+      });
+  });
 
-$('#resetallprofit').on('click',function(){
-    $('.modal-body').load('scripts/resetallprofit.ps1',function(){
-        $('.modal-title').text('Reset All Profit Data');
-        $('#myModal').modal({show:true});
-    });
-});
+  $("#showdisabledminers").on("click",function() {
+      $(".modal-body").load("scripts/managestat.ps1?Action=Get&Type=Hashrate&Value=-1&Unit=H/s", function() {
+          $(".modal-title").text("Show Disabled miners");
+          $("#myModal").modal({show:true});
+      });
+  });
 
+  $("#enablediabledminers").on("click",function() {
+      $(".modal-body").load("scripts/managestat.ps1?Action=Remove&Type=Hashrate&Value=-1&Unit=H/s", function() {
+          $(".modal-title").text("Re-enabled miners");
+          $("#myModal").modal({show:true});
+      });
+  });
+
+  $("#resetallprofit").on("click",function() {
+      $(".modal-body").load("scripts/managestat.ps1?Action=Remove&Type=Profit", function() {
+          $(".modal-title").text("Reset All Profit Data");
+          $("#myModal").modal({show:true});
+      });
+  });
+
+  $("#resetallbenchmarks").on("click",function() {
+      $(".modal-body").load("scripts/managestat.ps1?Action=Remove&Type=HashRate", function() {
+          $(".modal-title").text("Reset All Benchmarks");
+          $("#myModal").modal({show:true});
+      });
+  });
+
+  $("#resetallpowerusage").on("click",function() {
+      $(".modal-body").load("scripts/managestat.ps1?Action=Remove&Type=PowerUsage", function() {
+          $(".modal-title").text("Reset All Power Usage");
+          $("#myModal").modal({show:true});
+      });
+  });
 </script>
 <!--#include file="/parts/foot.html" -->

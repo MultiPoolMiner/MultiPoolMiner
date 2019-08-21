@@ -34,7 +34,7 @@ function timeSince(date) {
 function formatHashRateValue(value) {
   var sizes = ['H/s','KH/s','MH/s','GH/s','TH/s'];
   if (isNaN(value)) return '-';
-  if (value == 0) return '-failed-';
+  if (value == "0.0") return '-';
   if (value > 0 && value <= 1) return value.toFixed(2) + ' H/s';
   var i = Math.floor(Math.log(value) / Math.log(1000));
   if (value >= 1) return parseFloat((value / Math.pow(1000, i)).toFixed(2)) + ' ' + sizes[i];

@@ -7,6 +7,10 @@
         "Snowgem":  "sngemPoW",
         "LitecoinZ":  "ZcashPoW"
     },
+    "EquihashR15053":  {
+        "Grimm":  "GrimmPOW",
+        "GrimmCoin":  "GrimmPOW"
+    },
     "Equihash1927":  {
         "ManagedByPool":  "auto",
         "Safecoin":  "Safecoin",

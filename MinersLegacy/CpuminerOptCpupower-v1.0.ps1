@@ -26,17 +26,15 @@ elseif ($Devices.CpuFeatures -match "aes")  {$Miner_Path = ".\Bin\$($Name)\cpumi
 elseif ($Devices.CpuFeatures -match "sse2") {$Miner_Path = ".\Bin\$($Name)\cpuminer-Sse2.exe"}
 else {$Miner_Path = ".\Bin\$($Name)\cpuminer.exe"}
 
-#Commands from config file take precedence
-if ($Miner_Config.Commands) {$Commands = $Miner_Config.Commands}
-else {
-    $Commands = [PSCustomObject]@{
-        "cpupower" = "" #CPUchain coin
-    }
+$Commands = [PSCustomObject]@{
+    "cpupower" = " -a cpupower" #CPUchain coin
 }
+#Commands from config file take precedence
+if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonParameters) {$CommonParameters = $Miner_Config.CommonParameters = $Miner_Config.CommonParameters}
-else {$CommonParameters = ""}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+else {$CommonCommands = ""}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
@@ -45,16 +43,8 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
         $Miner_Name = (@($Name -replace "_", "$(($Miner_Path -split "\\" | Select-Object -Last 1) -replace "cpuminer" -replace ".exe" -replace "-")_") + @(($Devices.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) -join '-') | Select-Object) -join '-'
 
-        #Get parameters for active miner devices
-        if ($Miner_Config.Parameters.$Algorithm_Norm) {
-            $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters.$Algorithm_Norm $Miner_Device.Type_Vendor_Index
-        }
-        elseif ($Miner_Config.Parameters."*") {
-            $Parameters = Get-ParameterPerDevice $Miner_Config.Parameters."*" $Miner_Device.Type_Vendor_Index
-        }
-        else {
-            $Parameters = Get-ParameterPerDevice $Commands.$_ $Miner_Device.Type_Vendor_Index
-        }
+        #Get commands for active miner devices
+        $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         [PSCustomObject]@{
             Name       = $Miner_Name
@@ -63,7 +53,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             DeviceName = $Devices.Name
             Path       = $Miner_Path
             HashSHA256 = $HashSHA256
-            Arguments  = ("-a $_ -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) -b $Miner_Port$Parameters$CommonParameters" -replace "\s+", " ").trim()
+            Arguments  = ("$Command$CommonCommands -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) -b $Miner_Port" -replace "\s+", " ").trim()
             HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
             API        = "Ccminer"
             Port       = $Miner_Port
