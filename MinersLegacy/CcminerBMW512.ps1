@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "7962745B0E110F16CD0DE2527143E4E7A6F37860BDE3910431CC850E079F2268"
-$Uri = "https://github.com/Minerx117/ccminer-bmw512/releases/download/v2.2.5/ccminerbmw.7z"
+$HashSHA256 = "6E9B037C01A1B09DA010FFFFF14779DA31E3EB73379763C60ECC0B337895D23A"
+$Uri = "https://github.com/Minerx117/ccminer-bmw512/releases/download/v2.2.5-x86/ccminerbmw512x86.7z"
 $ManualUri = "https://github.com/pallas1/ccminer-bmw512"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -20,9 +20,9 @@ if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
 
-# Miner requires CUDA 10.0.00 or higher
+# Miner requires CUDA 9.1 or higher
 $CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
-$RequiredCUDAVersion = "10.0.00"
+$RequiredCUDAVersion = "9.2.00"
 if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) {
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
     return
