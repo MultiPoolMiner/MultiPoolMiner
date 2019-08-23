@@ -1,7 +1,30 @@
 # MultiPoolMiner dev version
 
 Download link:
-https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.2.zip
+https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.3.zip
+
+## Changelog Version 3.5.3
+
+#### Core changes
+- Fixed paramters '-DeviceName' and '-ExcludeDeviceName'
+- Replaced Get-Stat with 50% faster version
+
+#### Miner changes
+- Fixed all miners; $CommonCommands was broken
+- Fixed CcminerKlausT-v8.25; lowered intensity for 'Neoscrypt' algorithm
+- Fixed MiniZEquihash-v1.5p; removed 'EquihashR15050' algorithm
+- Updated Gminer-v1.59; added $CommonCommands
+- Updated TTMiner-v3.0.4
+
+#### Pool changes
+-Fixed double-scanning pools caused by poolfile rename to *-Algo / *-Coin
+
+#### Balances changes
+#### API changes
+#### Web Interface changes
+
+#### Known issues (at least on my rig)
+- Bminer-v15.8.3 fails to mine BeamV2 (https://bitcointalk.org/index.php?topic=2519271.msg52211890#msg52211890)
 
 ## Changelog Version 3.5.2
 
