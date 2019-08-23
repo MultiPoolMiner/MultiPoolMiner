@@ -76,7 +76,7 @@ if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType Not
 
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
 else {$CommonCommands = ""}
 
 $Devices = $Devices | Where-Object Type -EQ "CPU" | Where-Object {(-not $_.CpuFeatures) -or ($_.CpuFeatures -contains "avx2")}

@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\miner.exe"
-$HashSHA256 = "C38D676A51A67D68A42E581756DA5DF4FC5D9854CC3F93F422A19A4836123894"
-$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.57/gminer_1_57_windows64.zip"
+$HashSHA256 = "57CE8D2B894C656AFA6ADDDA77FAC54F1E1699E488FE2004FABF13B3CB72363A"
+$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.59/gminer_1_59_windows64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5034735.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -19,8 +19,7 @@ $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{Algorithm = "EquihashR15050"; MinMemGB = 4.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo BeamHash"} #new in v1.51
-    [PSCustomObject]@{Algorithm = "EquihashR15053"; MinMemGB = 4.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo BeamHashII"} #new in v1.55
+    [PSCustomObject]@{Algorithm = "EquihashR15053"; MinMemGB = 4.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo BeamHashII --OC1"} #new in v1.55
     [PSCustomObject]@{Algorithm = "Cuckaroo29";     MinMemGB = 4.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckaroo29"} #new in v1.19; Cuckaroo29 / Grin
     [PSCustomObject]@{Algorithm = "Cuckaroo29s";    MinMemGB = 4.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckaroo29s"} #new in v1.34; Cuckaroo29s / Swap
     [PSCustomObject]@{Algorithm = "Cuckatoo31";     MinMemGB = 7.4; Vendor = @("NVIDIA");        Command = " --algo cuckatoo31"} #new in v1.31; Cuckatoo31 / Grin
@@ -36,6 +35,10 @@ $Commands = [PSCustomObject[]]@(
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object {$_.Algorithm -ne $Algorithm}; $Commands += $_}}
+
+#CommonCommands from config file take precedence
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
+else {$CommonCommands = ""}
 
 $Devices = $Devices | Where-Object Type -EQ "GPU"
 $Devices | Select-Object Type, Model -Unique | ForEach-Object {
