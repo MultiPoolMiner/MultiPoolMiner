@@ -10,6 +10,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.3.zip
 - Replaced Get-Stat with 50% faster version
 
 #### Miner changes
+- Changed CcminerBMW512-v2.2.5; use faster x86 variant
 - Fixed all miners; $CommonCommands was broken
 - Fixed CcminerKlausT-v8.25; lowered intensity for 'Neoscrypt' algorithm
 - Fixed MiniZEquihash-v1.5p; removed 'EquihashR15050' algorithm
