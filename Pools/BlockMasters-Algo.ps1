@@ -12,15 +12,16 @@ $PoolAPICurrenciesUri = "http://blockmasters.co/api/currencies"
 $RetryCount = 3
 $RetryDelay = 2
 
-$Name = $PoolFileName -replace "Coins"
-$NameCoins = "$($Name)Coins"
-$PoolNames = @(@($Name, $NameCoins) | Where-Object {((Test-Path "Pools\$_.ps1" -PathType Leaf -ErrorAction SilentlyContinue) -and (-not $Config.PoolName -or $Config.PoolName -contains $_ -and $Config.ExcludePoolName -notcontains $_))})
+$PoolName = $PoolFileName -split "-" | Select-Object -First 1
+$PoolNameAlgo = "$($PoolName)-Algo"
+$PoolNameCoin = "$($PoolName)-Coin"
+$PoolNames = @(@($PoolNameAlgo, $PoolNameCoin) | Where-Object {((Test-Path "Pools\$_.ps1" -PathType Leaf -ErrorAction SilentlyContinue) -and (-not $Config.PoolName -or $Config.PoolName -contains $_ -and $Config.ExcludePoolName -notcontains $_))})
 
 $PoolNames | ForEach-Object {
     $PoolName = $_
 
-    #*Coins quit immediately if both files (Coins and Non-Coins) exist in pool dir. One pool file works for both kinds.
-    if ($PoolFileName -eq $NameCoins -and $PoolNames.Count -eq 2) {return}
+    #*-Coin quits immediately if both files (*-Coin and *-Algo) exist in pool dir. One pool file works for both kinds.
+    if ($PoolNames.Count -eq 2 -and $PoolFileName -contains $PoolNameCoin) {Exit}
 
     # Guaranteed payout currencies
     $Payout_Currencies = @("BTC", "DOGE", "LTC") | Where-Object {$Config.Pools.$PoolName.Wallets.$_}
@@ -61,7 +62,7 @@ $PoolNames | ForEach-Object {
         break
     }
 
-    if ($PoolName -eq ($PoolName -replace "Coins")) {
+    if ($PoolFileName -eq $PoolNameAlgo) {
         $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APIStatusResponse.$_.hashrate -gt 0} | ForEach-Object {
 
             $PoolHost       = "blockmasters.co"
@@ -112,7 +113,7 @@ $PoolNames | ForEach-Object {
         }
     }
 
-    if ($PoolName -eq "$($PoolName -replace "Coins")Coins") {
+    if ($PoolFileName -eq $PoolNameCoin) {
         $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesResponse.$_.hashrate -gt 0} | ForEach-Object {
 
             $Algorithm = $APICurrenciesResponse.$_.algo
