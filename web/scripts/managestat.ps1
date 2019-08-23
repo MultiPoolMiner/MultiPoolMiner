@@ -19,7 +19,7 @@ Switch ($Parameters.Action) {
         }
         elseif ($Null -ne $Parameters.Value) {
             #Get stat files with given value
-            $Files = Get-ChildItem "Stats\$($Parameters.Type)" | ForEach-Object {
+            $Files = Get-ChildItem "Stats" -Filter "*_$($Parameters.Type).txt" | ForEach-Object {
                 $FileName = $_.FullName
                 $Stats = Get-Content $Filename | ConvertFrom-Json
                 if ($Stats.Minute -eq $Parameters.Value) {
@@ -43,7 +43,7 @@ Switch ($Parameters.Action) {
         if ($Null -ne $Parameters.Value) {
             @($Parameters.Algorithms -split ",") | ForEach-Object {
                 $Stat = "$($Parameters.MinerName)_$($_)_$($Parameters.Type)"
-                Remove-Item "Stats\$($Parameters.Type)\$($Stat).txt" -Force -ErrorAction SilentlyContinue
+                Remove-Item "Stats\$($Stat).txt" -Force -ErrorAction SilentlyContinue
                 Set-Stat -Name $Stat -Value $Parameters.Value -Duration ([TimeSpan]0)
                 $Text += "`n$($Stat).txt"
                 $Count++
@@ -67,7 +67,7 @@ Switch ($Parameters.Action) {
         }
         elseif ($Null -ne $Parameters.Value) {
             #Remove stat files with given value
-            $Files = Get-ChildItem "Stats\$($Parameters.Type)" | ForEach-Object {
+            $Files = Get-ChildItem "Stats" -Filter "*_$($Parameters.Type).txt" | ForEach-Object {
                 $FileName = $_.FullName
                 $Stats = Get-Content $Filename | ConvertFrom-Json
                 if ($Stats.Minute -eq $Parameters.Value) {
@@ -86,7 +86,7 @@ Switch ($Parameters.Action) {
         }
         else {
             #Remove all stat files of type $Parameters.Type
-            $Files = Get-ChildItem "Stats\$($Parameters.Type)"
+            $Files = Get-ChildItem "Stats" -Filter "*_$($Parameters.Type).txt"
             $Count = $Files.Count
             $Files | ForEach-Object {
                 Remove-Item $_.FullName -Force -ErrorAction SilentlyContinue
