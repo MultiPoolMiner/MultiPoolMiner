@@ -20,6 +20,9 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.3.zip
 #### Pool changes
 -Fixed double-scanning pools caused by poolfile rename to *-Algo / *-Coin
 
+#### Web Interface changes
+- Fixed stat management (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/8e6fd3acba279c99ed1d7bce1ed14073e9c37822)
+
 #### Known issues (at least on my rig)
 - Bminer-v15.8.3 fails to mine BeamV2 (https://bitcointalk.org/index.php?topic=2519271.msg52211890#msg52211890)
 
