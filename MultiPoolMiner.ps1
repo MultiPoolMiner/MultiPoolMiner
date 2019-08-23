@@ -145,7 +145,7 @@ param(
 
 Clear-Host
 
-$Version = "3.5.2"
+$Version = "3.5.3"
 $VersionCompatibility = "3.3.0"
 $Strikes = 3
 $SyncWindow = 5 #minutes
@@ -365,10 +365,12 @@ while (-not $API.Stop) {
         $AllPools | Select-Object | ForEach-Object { $_.Price = 0 }
         $AllDevices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Refresh | Select-Object)
         if ($API) { $API.AllDevices = $AllDevices } #Give API access to the device information
+        #Load information about the devices, refresh might be required because $AllDevices is cached
+        $Devices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Name @($Config.DeviceName) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) -Refresh:([Boolean]((Compare-Object @($Config.DeviceName | Select-Object) @($OldConfig.DeviceName | Select-Object)) -or (Compare-Object @($Config.ExcludeDeviceName | Select-Object) @($OldConfig.ExcludeDeviceName | Select-Object)))) | Select-Object)
     }
-
-    #Load information about the devices
-    $Devices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Name @($Config.DeviceName | Select-Object) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) | Select-Object)
+    else {
+        $Devices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Name @($Config.DeviceName | Select-Object) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) | Select-Object)
+    }
     if ($API) { $API.Devices = $Devices } #Give API access to the device information
     if ($API) { Update-APIDeviceStatus $API $Devices } #To be removed
     if ($Devices.Count -eq 0) { 
