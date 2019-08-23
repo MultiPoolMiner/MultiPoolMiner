@@ -7,6 +7,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.3.zip
 
 #### Core changes
 - Fixed parameters '-DeviceName' and '-ExcludeDeviceName'
+- Fixed start files to match pool renames
 - Replaced Get-Stat with 50% faster version
 
 #### Miner changes

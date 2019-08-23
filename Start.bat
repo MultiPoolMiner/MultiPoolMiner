@@ -11,7 +11,7 @@ if not "%GPU_MAX_ALLOC_PERCENT%"=="100" (setx GPU_MAX_ALLOC_PERCENT 100) > nul
 if not "%GPU_SINGLE_ALLOC_PERCENT%"=="100" (setx GPU_SINGLE_ALLOC_PERCENT 100) > nul
 if not "%CUDA_DEVICE_ORDER%"=="PCI_BUS_ID" (setx CUDA_DEVICE_ORDER PCI_BUS_ID) > nul
 
-set "command=& .\multipoolminer.ps1 -Wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -UserName aaronsace -WorkerName multipoolminer -Region europe -Currency btc,usd,eur -DeviceName amd,nvidia,cpu -PoolName miningpoolhub-coin,zpool-algo,nicehash -Algorithm blake2s,cuckaroo39,cuckatoo31,cryptonightR,cryptonightV8,cryptonightheavy,decrednicehash,ethash,ethash2gb,ethash3gb,equihash,equihash1445,equihash1505,keccak,lbry,lyra2re3,mtp,mtpnicehash,neoscrypt,pascal,sib,skein,skunk,sonoa,timetravel10,x16r,x16rt,x16s,x17,x22i -Donate 24 -Watchdog -MinerStatusURL https://multipoolminer.io/monitor/miner.php -SwitchingPrevention 2"
+set "command=& .\multipoolminer.ps1 -Wallet 1Q24z7gHPDbedkaWDTFqhMF8g7iHMehsCb -UserName aaronsace -WorkerName multipoolminer -Region europe -Currency btc,usd,eur -DeviceName amd,nvidia,cpu -PoolName miningpoolhub-coin,zpool-algo,nicehash -Algorithm blake2s,cuckarood29,cuckatoo31,cryptonightR,cryptonightV8,cryptonightheavy,decrednicehash,ethash,ethash2gb,ethash3gb,equihash,equihash1445,equihashr15053,keccak,lbry,lyra2re3,mtp,mtpnicehash,neoscrypt,pascal,sib,skein,skunk,sonoa,timetravel10,x16r,x16rt,x16s,x17,x22i -Donate 24 -Watchdog -MinerStatusURL https://multipoolminer.io/monitor/miner.php -SwitchingPrevention 2"
 
 if exist "~*.dll" del "~*.dll" > nul 2>&1
 
