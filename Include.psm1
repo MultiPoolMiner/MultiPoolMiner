@@ -523,53 +523,63 @@ function Get-Stat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = (Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+        [String[]]$Name = @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
-    if (-not (Test-Path "Stats" -PathType Container)) { 
-        New-Item "Stats" -ItemType "directory" -Force | Out-Null
-    }
+    $Name | Sort-Object -Unique | ForEach-Object { 
+        $Stat_Name = $_
+        if (-not $Global:Stats.$Stat_Name) { 
+            if ($Global:Stats -isnot [PSCustomObject]) { 
+                $Global:Stats = [PSCustomObject]@{ }
+            }
 
-    if ($Global:Stats -isnot [PSCustomObject]) { 
-        $Global:Stats = [PSCustomObject]@{ }
-    }
-
-    Get-ChildItem -Path "Stats" -File | Where-Object { $Name -eq $_.BaseName -and ".txt" -eq $_.Extension } | ForEach-Object { 
-        $BaseName = $_.BaseName
-        $FullName = $_.FullName
-
-        if (-not $Global:Stats.$BaseName) { 
             try { 
+                $Stat = Get-Content "Stats\$Stat_Name.txt" -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
                 $Global:Stats | Add-Member @{ 
-                    $BaseName = $_ | Get-Content -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop | ForEach-Object { 
-                        [PSCustomObject]@{ 
-                            Name                  = [String]$BaseName
-                            Live                  = [Double]$_.Live
-                            Minute                = [Double]$_.Minute
-                            Minute_Fluctuation    = [Double]$_.Minute_Fluctuation
-                            Minute_5              = [Double]$_.Minute_5
-                            Minute_5_Fluctuation  = [Double]$_.Minute_5_Fluctuation
-                            Minute_10             = [Double]$_.Minute_10
-                            Minute_10_Fluctuation = [Double]$_.Minute_10_Fluctuation
-                            Hour                  = [Double]$_.Hour
-                            Hour_Fluctuation      = [Double]$_.Hour_FluctuationFFF
-                            Day                   = [Double]$_.Day
-                            Day_Fluctuation       = [Double]$_.Day_Fluctuation
-                            Week                  = [Double]$_.Week
-                            Week_Fluctuation      = [Double]$_.Week_Fluctuation
-                            Duration              = [TimeSpan]$_.Duration
-                            Updated               = [DateTime]$_.Updated
-                        }
+                    $Stat_Name = [PSCustomObject]@{ 
+                        Name                  = [String]$Stat_Name
+                        Live                  = [Double]$Stat.Live
+                        Minute                = [Double]$Stat.Minute
+                        Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
+                        Minute_5              = [Double]$Stat.Minute_5
+                        Minute_5_Fluctuation  = [Double]$Stat.Minute_5_Fluctuation
+                        Minute_10             = [Double]$Stat.Minute_10
+                        Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
+                        Hour                  = [Double]$Stat.Hour
+                        Hour_Fluctuation      = [Double]$Stat.Hour_FluctuationFFF
+                        Day                   = [Double]$Stat.Day
+                        Day_Fluctuation       = [Double]$Stat.Day_Fluctuation
+                        Week                  = [Double]$Stat.Week
+                        Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
+                        Duration              = [TimeSpan]$Stat.Duration
+                        Updated               = [DateTime]$Stat.Updated
                     }
                 } -Force
             }
             catch { 
-                Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
-                Remove-Item -Path  $FullName -Force -Confirm:$false -ErrorAction SilentlyContinue
+                Write-Log -Level Warn "Stat file ($Stat_Name) is corrupt and will be reset. "
+                Remove-Stat $Stat_Name
+
+                if (-not (Test-Path "Stats" -PathType Container)) { 
+                    New-Item "Stats" -ItemType "directory" -Force | Out-Null
+                }
             }
         }
 
-        $Global:Stats.$BaseName
+        $Global:Stats.$Stat_Name
+    }
+}
+
+function Remove-Stat { 
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [String[]]$Name = @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+    )
+
+    $Name | Sort-Object -Unique | ForEach-Object { 
+        if ($Global:Stats.$_) { $Global:Stats.$_ = $null }
+        Remove-Item -Path  "Stats\$_.txt" -Force -Confirm:$false -ErrorAction SilentlyContinue
     }
 }
 
