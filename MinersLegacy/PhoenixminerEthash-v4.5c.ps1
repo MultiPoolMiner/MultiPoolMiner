@@ -154,7 +154,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $Miner_HashRates = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                 $Arguments_Primary += " -gt 0" #Enable auto-tuning
                 
-                $WarmupTime = 30
+                $WarmupTime = 45
                 $Miner_Fees = [PSCustomObject]@{"$Algorithm_Norm" = 0.65 / 100}
 
                 #TurboKernels
