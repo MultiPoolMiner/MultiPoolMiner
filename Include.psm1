@@ -557,7 +557,9 @@ function Get-Stat {
                 } -Force
             }
             catch { 
-                Write-Log -Level Warn "Stat file ($Stat_Name) is corrupt and will be reset. "
+                if (Test-Path "Stats\$Stat_Name.txt") {
+                    Write-Log -Level Warn "Stat file ($Stat_Name) is corrupt and will be reset. "
+                }
                 Remove-Stat $Stat_Name
 
                 if (-not (Test-Path "Stats" -PathType Container)) { 
