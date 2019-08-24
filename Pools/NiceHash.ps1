@@ -60,8 +60,9 @@ $APIResponse.miningAlgorithms | Where-Object {$_.paying -gt 0} <# algos paying 0
     $Algorithm_Norm = Get-Algorithm $Algorithm
     $CoinName = ""
     
-    if ($Algorithm -eq "Beam")   {$Algorithm_Norm = "EquihashR15050"} #temp fix
-    if ($Algorithm -eq "Decred") {$Algorithm_Norm = "DecredNiceHash"} #temp fix
+    if ($Algorithm_Norm -eq "Decred") {$Algorithm_Norm = "DecredNiceHash"} #temp fix
+    if ($Algorithm_Norm -eq "Mtp")    {$Algorithm_Norm = "MtpNiceHash"} #temp fix
+    if ($Algorithm_Norm -eq "Sia")    {$Algorithm_Norm = "SiaNiceHash"} #temp fix
 
     $Divisor = 100000000
 
@@ -71,7 +72,7 @@ $APIResponse.miningAlgorithms | Where-Object {$_.paying -gt 0} <# algos paying 0
         $Region = $_
         $Region_Norm = Get-Region $Region
         
-        $Payout_Currencies | ForEach-Object {
+        $Payout_Currencies | Where-Object {$Region -ne "eu" -and $Algorithm_Norm -ne "CryptoNightV7"<#Temp fix, No CryptonightV7 orders in Europe#>} | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $Algorithm_Norm
                 CoinName      = $CoinName
