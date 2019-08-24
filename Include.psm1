@@ -535,7 +535,7 @@ function Get-Stat {
             }
 
             try { 
-                $Stat = Get-Content "Stats\$Stat_Name.txt" -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+                $Stat = Get-Content "Stats\$Stat_Name.txt" -ErrorAction SilentlyContinue | ConvertFrom-Json -ErrorAction Stop
                 $Global:Stats | Add-Member @{ 
                     $Stat_Name = [PSCustomObject]@{ 
                         Name                  = [String]$Stat_Name
