@@ -399,7 +399,7 @@ while (-not $API.Stop) {
 
     #Load information about the pools
     if ((Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and (-not $NewPools_Jobs)) { 
-        if ($PoolsRequest = @(Get-ChildItem "Pools" -File | Where-Object { $Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName } | Where-Object { $Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName } | Sort-Object BaseName)) { 
+        if ($PoolsRequest = @(Get-ChildItem "Pools" -File -ErrorAction Ignore | Where-Object { $Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName } | Where-Object { $Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName } | Sort-Object BaseName)) { 
             Write-Log "Loading pool information ($(@($PoolsRequest.BaseName) -join '; ')) - this may take a minute or two. "
             $NewPools_Jobs = @(
                 $PoolsRequest | ForEach-Object { 
@@ -475,7 +475,7 @@ while (-not $API.Stop) {
 
     #Update the pool balances every n minute to minimize web requests or when currency or pool settings have changed; pools usually do not update the balances in real time
     if (Test-Path "Balances" -PathType Container -ErrorAction Ignore) { 
-        if ($BalancesRequest = @(Get-ChildItem "Balances" -File | Where-Object { $Config.ShowAllPoolBalances -or ($BackupConfig.Pools.$($_.BaseName) -and @($BackupConfig.ExcludePoolName -replace "Coins") -inotcontains $_.BaseName) } | Where-Object { $Config.ShowAllPoolBalances -or ($BackupConfig.PoolName.Count -eq 0 -or @($BackupConfig.PoolName -replace "Coins") -contains $_.BaseName) } | Where-Object { $PoolName = $_.BaseName; ($Balances | Where-Object { $_.Pool -eq $PoolName } | Sort-Object Pool -Unique | Sort-Object "LastUpdated").LastUpdated -lt (Get-Date).ToUniversalTime().AddMinutes(-$Config.PoolBalancesUpdateInterval) })) { 
+        if ($BalancesRequest = @(Get-ChildItem "Balances" -File | Where-Object { $Config.ShowAllPoolBalances -or ($BackupConfig.Pools.$($_.BaseName) -and @($BackupConfig.ExcludePoolName -replace "-Coin" -replace "-Algo") -inotcontains $_.BaseName) } | Where-Object { $Config.ShowAllPoolBalances -or ($BackupConfig.PoolName.Count -eq 0 -or @($BackupConfig.PoolName -replace "-Coin" -replace "-Algo") -contains $_.BaseName) } | Where-Object { $PoolName = $_.BaseName; ($Balances | Where-Object { $_.Pool -eq $PoolName } | Sort-Object Pool -Unique | Sort-Object "LastUpdated").LastUpdated -lt (Get-Date).ToUniversalTime().AddMinutes(-$Config.PoolBalancesUpdateInterval) })) { 
             Write-Log "Loading balances information ($($BalancesRequest.BaseName -join '; ')). "
             $Balances_Jobs = @(
                 $BalancesRequest | ForEach-Object { 
@@ -1335,7 +1335,7 @@ while (-not $API.Stop) {
         if ((-not $NewPools_Jobs) -and (Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and ((($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds) -le $($NewPools_JobsDurations | Measure-Object -Average).Average)) { 
             if (-not ($RunningMiners | Where-Object { $_.GetStatus() -eq "Running" } | Where-Object { $_.DeviceName -like "CPU#*" })) {
                 #no pre-loading when cpu miners are running
-                if ($PoolsRequest = @(Get-ChildItem "Pools" -File | Where-Object { $Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName } | Where-Object { $Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName } | Sort-Object BaseName)) { 
+                if ($PoolsRequest = @(Get-ChildItem "Pools" -File -ErrorAction Ignore | Where-Object { $Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName } | Where-Object { $Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName } | Sort-Object BaseName)) { 
                     Write-Log "Pre-Loading pool information ($(@($PoolsRequest.BaseName) -join '; ')). "
                     $NewPools_Jobs = @(
                         $PoolsRequest | ForEach-Object { 
