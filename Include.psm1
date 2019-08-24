@@ -519,53 +519,71 @@ function Set-Stat {
     $Stat
 }
 
-function Get-Stat {
+function Get-Stat { 
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String]$Name
+        [String[]]$Name = @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
-    if ($Global:Stats -isnot [PSCustomObject]) { 
-        $Global:Stats = [PSCustomObject]@{ }
-    }
+    $Name | Sort-Object -Unique | ForEach-Object { 
+        $Stat_Name = $_
+        if (-not $Global:Stats.$Stat_Name) { 
+            if ($Global:Stats -isnot [PSCustomObject]) { 
+                $Global:Stats = [PSCustomObject]@{ }
+            }
 
-    if ($Global:Stats.$Name) { return $Global:Stats.$Name }
-
-    if ($Name) {
-        # Return single requested stat
-        if (Test-Path "Stats\$Name.txt" -ErrorAction SilentlyContinue) { 
             try { 
-                $Global:Stats | Add-Member $Name (Get-Content "Stats\$Name.txt" -ErrorAction SilentlyContinue | ConvertFrom-Json) -Force
+                $Stat = Get-Content "Stats\$Stat_Name.txt" -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+                $Global:Stats | Add-Member @{ 
+                    $Stat_Name = [PSCustomObject]@{ 
+                        Name                  = [String]$Stat_Name
+                        Live                  = [Double]$Stat.Live
+                        Minute                = [Double]$Stat.Minute
+                        Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
+                        Minute_5              = [Double]$Stat.Minute_5
+                        Minute_5_Fluctuation  = [Double]$Stat.Minute_5_Fluctuation
+                        Minute_10             = [Double]$Stat.Minute_10
+                        Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
+                        Hour                  = [Double]$Stat.Hour
+                        Hour_Fluctuation      = [Double]$Stat.Hour_FluctuationFFF
+                        Day                   = [Double]$Stat.Day
+                        Day_Fluctuation       = [Double]$Stat.Day_Fluctuation
+                        Week                  = [Double]$Stat.Week
+                        Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
+                        Duration              = [TimeSpan]$Stat.Duration
+                        Updated               = [DateTime]$Stat.Updated
+                    }
+                } -Force
             }
             catch { 
-                #Remove broken stat file
-                Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
-                Remove-Item -Path $_.FullName -Force -Confirm:$false -ErrorAction SilentlyContinue
-            }
-            $Global:Stats.$Name
-        }
-    }
-    else {
-        # Return all stats
-        Get-ChildItem "Stats" -File -ErrorAction SilentlyContinue | ForEach-Object { 
-            $BaseName = $_.BaseName
-            if (-not $Global:Stats.$BaseName) { 
-                try { 
-                    $Global:Stats | Add-Member $BaseName (Get-Content $_.FullName -ErrorAction Stop | ConvertFrom-Json)
+                if (Test-Path "Stats\$Stat_Name.txt") {
+                    Write-Log -Level Warn "Stat file ($Stat_Name) is corrupt and will be reset. "
                 }
-                catch { 
-                    #Remove broken stat file
-                    Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
-                    Remove-Item -Path $_.FullName -Force -Confirm:$false -ErrorAction SilentlyContinue
-                }
+                Remove-Stat $Stat_Name
 
-                $Global:Stats.$BaseName
+                if (-not (Test-Path "Stats" -PathType Container)) { 
+                    New-Item "Stats" -ItemType "directory" -Force | Out-Null
+                }
             }
         }
+
+        $Global:Stats.$Stat_Name
     }
 }
 
+function Remove-Stat { 
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [String[]]$Name = @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+    )
+
+    $Name | Sort-Object -Unique | ForEach-Object { 
+        if ($Global:Stats.$_) { $Global:Stats.$_ = $null }
+        Remove-Item -Path  "Stats\$_.txt" -Force -Confirm:$false -ErrorAction SilentlyContinue
+    }
+}
 
 function Get-ChildItemContent { 
     [CmdletBinding()]
