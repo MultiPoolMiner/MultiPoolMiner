@@ -62,7 +62,8 @@ $PoolNames | ForEach-Object {
         break
     }
 
-    if ($PoolFileName -eq $PoolNameAlgo) {
+    if ($PoolName -eq $PoolNameAlgo) {
+        Write-Log -Level Verbose "Processing pool data ($PoolName). "
         $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APIStatusResponse.$_.hashrate -gt 0} | ForEach-Object {
 
             $PoolHost       = "mine.blazepool.com"
@@ -113,7 +114,8 @@ $PoolNames | ForEach-Object {
         }
     }
 
-    if ($PoolFileName -eq $PoolNameCoin) {
+    if ($PoolName -eq $PoolNameCoin) {
+        Write-Log -Level Verbose "Processing pool data ($PoolName). "        
         $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesResponse.$_.hashrate -gt 0} | ForEach-Object {
 
             $Algorithm = $APICurrenciesResponse.$_.algo

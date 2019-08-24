@@ -19,7 +19,6 @@ $PoolNames = @(@($PoolNameAlgo, $PoolNameCoin) | Where-Object {((Test-Path "Pool
 
 $PoolNames | ForEach-Object {
     $PoolName = $_
-
     #*-Coin quits immediately if both files (*-Coin and *-Algo) exist in pool dir. One pool file works for both kinds.
     if ($PoolNames.Count -eq 2 -and $PoolFileName -contains $PoolNameCoin) {Exit}
 
@@ -61,7 +60,8 @@ $PoolNames | ForEach-Object {
         break
     }
 
-    if ($PoolFileName -eq $PoolNameAlgo) {
+    if ($PoolName -eq $PoolNameAlgo) {
+        Write-Log -Level Verbose "Processing pool data ($PoolName). "
         $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APIStatusResponse.$_.hashrate -gt 0} | ForEach-Object {
 
             $PoolHost       = "mine.zpool.ca"
@@ -112,7 +112,8 @@ $PoolNames | ForEach-Object {
         }
     }
 
-    if ($PoolFileName -eq $PoolNameCoin) {
+    if ($PoolName -eq $PoolNameCoin) {
+        Write-Log -Level Verbose "Processing pool data ($PoolName). "
         $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesResponse.$_.hashrate -gt 0} | ForEach-Object {
         
             $Algorithm = $APICurrenciesResponse.$_.algo
