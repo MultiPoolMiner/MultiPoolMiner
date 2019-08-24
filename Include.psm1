@@ -533,6 +533,14 @@ function Get-Stat {
                 $Global:Stats = [PSCustomObject]@{ }
             }
 
+            #Reduce number of errors
+            if (-not (Test-Path "Stats\$Stat_Name.txt")) { 
+                if (-not (Test-Path "Stats" -PathType Container)) { 
+                    New-Item "Stats" -ItemType "directory" -Force | Out-Null
+                }
+                return
+            }
+
             try { 
                 $Stat = Get-Content "Stats\$Stat_Name.txt" -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
                 $Global:Stats | Add-Member @{ 
@@ -559,10 +567,6 @@ function Get-Stat {
             catch { 
                 Write-Log -Level Warn "Stat file ($Stat_Name) is corrupt and will be reset. "
                 Remove-Stat $Stat_Name
-
-                if (-not (Test-Path "Stats" -PathType Container)) { 
-                    New-Item "Stats" -ItemType "directory" -Force | Out-Null
-                }
             }
         }
 
