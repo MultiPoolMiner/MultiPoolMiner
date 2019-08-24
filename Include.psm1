@@ -499,7 +499,6 @@ function Set-Stat {
     }
 
     [PSCustomObject]@{ 
-        Name                  = [String]$Name
         Live                  = [Decimal]$Stat.Live
         Minute                = [Decimal]$Stat.Minute
         Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
