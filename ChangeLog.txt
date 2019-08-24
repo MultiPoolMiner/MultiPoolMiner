@@ -16,6 +16,7 @@ https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.3.zip
 - Fixed CcminerKlausT-v8.25; lowered intensity for 'Neoscrypt' algorithm
 - Fixed MiniZEquihash-v1.5p; removed 'EquihashR15050' algorithm
 - Updated Gminer-v1.59; added $CommonCommands
+- Updated lolMiner-v0.8.8; removed 'old Beam' algorithm
 - Updated TTMiner-v3.0.4
 
 #### Pool changes
