@@ -5,12 +5,12 @@ param(
     [PSCustomObject]$Config
 )
 
-$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 #Pool currenctly allows payout in BTC only
-$Payout_Currencies = @("BTC") | Where-Object {$Config.Pools.$Name.Wallets.$_}
+$Payout_Currencies = @("BTC") | Where-Object {$Config.Pools.$PoolName.Wallets.$_}
 if (-not $Payout_Currencies) {
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+    Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
 }
 
@@ -33,25 +33,26 @@ while (-not ($APIResponse) -and $RetryCount -gt 0) {
 }
 
 if (-not $APIResponse) {
-    Write-Log -Level Warn "Pool API ($Name) has failed. "
+    Write-Log -Level Warn "Pool API ($PoolName) has failed. "
     return
 }
 if (-not $APIResponseAlgoDetails) {
-    Write-Log -Level Warn "Pool API ($Name) has failed. "
+    Write-Log -Level Warn "Pool API ($PoolName) has failed. "
     return
 }
 
 if ($APIResponse.miningAlgorithms.count -le 1) {
-    Write-Log -Level Warn "Pool API ($Name) returned nothing. "
+    Write-Log -Level Warn "Pool API ($PoolName) returned nothing. "
     return
 }
 if ($APIResponseAlgoDetails.miningAlgorithms.count -le 1) {
-    Write-Log -Level Warn "Pool API ($Name) returned nothing. "
+    Write-Log -Level Warn "Pool API ($PoolName) returned nothing. "
     return
 }
 
-if ($Config.Pools.$Name.IsInternalWallet) {$Fee = 0.01} else {$Fee = 0.03}
+if ($Config.Pools.$PoolName.IsInternalWallet) {$Fee = 0.01} else {$Fee = 0.03}
 
+Write-Log -Level Verbose "Processing pool data ($PoolName). "
 $APIResponse.miningAlgorithms | ForEach-Object {$Algorithm = $_.Algorithm; $_ | Add-Member -force @{algodetails = $APIResponseAlgoDetails.miningAlgorithms | Where-Object {$_.Algorithm -eq $Algorithm}}}
 $APIResponse.miningAlgorithms | Where-Object {$_.paying -gt 0} <# algos paying 0 fail stratum #> | ForEach-Object {
 
@@ -66,7 +67,7 @@ $APIResponse.miningAlgorithms | Where-Object {$_.paying -gt 0} <# algos paying 0
 
     $Divisor = 100000000
 
-    $Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor) -Duration $StatSpan -ChangeDetection $true
+    $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
     $PoolRegions | ForEach-Object {
         $Region = $_
@@ -82,7 +83,7 @@ $APIResponse.miningAlgorithms | Where-Object {$_.paying -gt 0} <# algos paying 0
                 Protocol      = "stratum+tcp"
                 Host          = "$Algorithm.$Region$PoolHost"
                 Port          = $Port
-                User          = "$($Config.Pools.$Name.Wallets.$_).$($Config.Pools.$Name.Worker)"
+                User          = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
                 Pass          = "x"
                 Region        = $Region_Norm
                 SSL           = $false
@@ -99,7 +100,7 @@ $APIResponse.miningAlgorithms | Where-Object {$_.paying -gt 0} <# algos paying 0
                 Protocol      = "stratum+ssl"
                 Host          = "$Algorithm.$Region$PoolHost"
                 Port          = $Port
-                User          = "$($Config.Pools.$Name.Wallets.$_).$($Config.Pools.$Name.Worker)"
+                User          = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
                 Pass          = "x"
                 Region        = $Region_Norm
                 SSL           = $true

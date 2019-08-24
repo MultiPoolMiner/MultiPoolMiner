@@ -5,10 +5,10 @@ param(
     [PSCustomObject]$Config
 )
 
-$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-if (-not ($Config.Pools.$Name.Wallets | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) -ne "BTC") {
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+if (-not ($Config.Pools.$PoolName.Wallets | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) -ne "BTC") {
+    Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
 }
 
@@ -30,27 +30,28 @@ while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -g
 }
 
 if (-not ($APIStatusResponse -and $APICurrenciesResponse)) {
-    Write-Log -Level Warn "Pool API ($Name) has failed. "
+    Write-Log -Level Warn "Pool API ($PoolName) has failed. "
     return
 }
 
 if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
-    Write-Log -Level Warn "Pool API ($Name) [StatusUri] returned nothing. "
+    Write-Log -Level Warn "Pool API ($PoolName) [StatusUri] returned nothing. "
     return
 }
 
 if (($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
-    Write-Log -Level Warn "Pool API ($Name) [CurrenciesUri] returned nothing. "
+    Write-Log -Level Warn "Pool API ($PoolName) [CurrenciesUri] returned nothing. "
     return
 }
 
 #Pool does not do auto conversion to BTC
-$Payout_Currencies = @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Where-Object {$Config.Pools.$Name.Wallets.$_} | Sort-Object -Unique
+$Payout_Currencies = @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Where-Object {$Config.Pools.$PoolName.Wallets.$_} | Sort-Object -Unique
 if (-not $Payout_Currencies) {
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+    Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
 }
 
+Write-Log -Level Verbose "Processing pool data ($PoolName). "
 $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesResponse.$_.hashrate -gt 0} | ForEach-Object {
  
     $Algorithm = $APICurrenciesResponse.$_.algo
@@ -71,7 +72,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
 
         $Divisor = 1000000000 * [Double]$APIStatusResponse.$Algorithm.mbtc_mh_factor
 
-        $Stat = Set-Stat -Name "$($Name)_$($CoinName)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
+        $Stat = Set-Stat -Name "$($PoolName)_$($CoinName)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
         try {
             $EstimateCorrection = ($APIStatusResponse.$Algorithm.actual_last24h / 1000) / $APIStatusResponse.$Algorithm.estimate_last24h
@@ -91,7 +92,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
                 Protocol           = "stratum+tcp"
                 Host               = "$Region.$PoolHost"
                 Port               = $Port
-                User               = $Config.Pools.$Name.Wallets.$MiningCurrency
+                User               = $Config.Pools.$PoolName.Wallets.$MiningCurrency
                 Pass               = "c=$MiningCurrency"
                 Region             = $Region_Norm
                 SSL                = $false

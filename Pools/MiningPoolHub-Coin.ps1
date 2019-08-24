@@ -5,10 +5,10 @@ param(
     [PSCustomObject]$Config
 )
 
-$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-if (-not $Config.Pools.$Name.User) {
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no username specified. "
+if (-not $Config.Pools.$PoolName.User) {
+    Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no username specified. "
     return
 }
 
@@ -28,15 +28,16 @@ while (-not ($APIResponse.return) -and $RetryCount -gt 0) {
 }
 
 if (-not $APIResponse) {
-    Write-Log -Level Warn "Pool API ($Name) has failed. "
+    Write-Log -Level Warn "Pool API ($PoolName) has failed. "
     return
 }
 
 if ($APIResponse.return.count -le 1) {
-    Write-Log -Level Warn "Pool API ($Name) returned nothing. "
+    Write-Log -Level Warn "Pool API ($PoolName) returned nothing. "
     return
 }
 
+Write-Log -Level Verbose "Processing pool data ($PoolName). "
 $APIResponse.return | ForEach-Object {
 
     $CoinName       = $_.coin_name
@@ -54,7 +55,7 @@ $APIResponse.return | ForEach-Object {
 
     $Divisor = 1000000000
 
-    $Stat = Set-Stat -Name "$($Name)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$_.profit / $Divisor) -Duration $StatSpan -ChangeDetection $true
+    $Stat = Set-Stat -Name "$($PoolName)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$_.profit / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
     if ($PoolHosts.Count -gt 1) {$Regions = $PoolRegions} else {$Regions = $Config.Region} #Do not create multiple pool objects if there is only one host
 
@@ -71,7 +72,7 @@ $APIResponse.return | ForEach-Object {
             Protocol      = "stratum+tcp"
             Host          = $PoolHosts | Sort-Object -Descending {$_ -ilike "$Region*"} | Select-Object -First 1
             Port          = $Port
-            User          = "$($Config.Pools.$Name.User).$($Config.Pools.$Name.Worker)"
+            User          = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
             Pass          = "x"
             Region        = $Region_Norm
             SSL           = $false
@@ -87,7 +88,7 @@ $APIResponse.return | ForEach-Object {
             Protocol      = "stratum+ssl"
             Host          = $PoolHosts | Sort-Object -Descending {$_ -ilike "$Region*"} | Select-Object -First 1
             Port          = $Port
-            User          = "$($Config.Pools.$Name.User).$($Config.Pools.$Name.Worker)"
+            User          = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
             Pass          = "x"
             Region        = $Region_Norm
             SSL           = $true

@@ -5,16 +5,16 @@ param(
     [PSCustomObject]$Config
 )
 
-$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 #Pool currenctly allows payout in BTC only
-$Payout_Currencies = @("BTC") | Where-Object {$Config.Pools.$Name.Wallets.$_}
+$Payout_Currencies = @("BTC") | Where-Object {$Config.Pools.$PoolName.Wallets.$_}
 
 $PoolRegions = "eu", "usa", "hk", "jp", "in", "br"
 $PoolAPIUri = "http://api.nicehash.com/api?method=simplemultialgo.info"
 
 if (-not $Payout_Currencies) {
-    Write-Log -Level Verbose "No wallet address for Pool ($Name) specified. Cannot mine on pool. "
+    Write-Log -Level Verbose "No wallet address for Pool ($PoolName) specified. Cannot mine on pool. "
     return
 }
 
@@ -31,17 +31,18 @@ while (-not ($APIRequest) -and $RetryCount -gt 0) {
 }
 
 if (-not $APIRequest) {
-    Write-Log -Level Warn "Pool API ($Name) has failed. "
+    Write-Log -Level Warn "Pool API ($PoolName) has failed. "
     return
 }
 
 if ($APIRequest.result.simplemultialgo.count -le 1) {
-    Write-Log -Level Warn "Pool API ($Name) returned nothing. "
+    Write-Log -Level Warn "Pool API ($PoolName) returned nothing. "
     return
 }
 
-if ($Config.Pools.$Name.IsInternalWallet) {$Fee = 0.01} else {$Fee = 0.03}
+if ($Config.Pools.$PoolName.IsInternalWallet) {$Fee = 0.01} else {$Fee = 0.03}
 
+Write-Log -Level Verbose "Processing pool data ($PoolName). "
 $APIRequest.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos paying 0 fail stratum #> | ForEach-Object {
 
     $PoolHost = "nicehash.com"
@@ -57,7 +58,7 @@ $APIRequest.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos pay
 
     $Divisor = 1000000000
 
-    $Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor) -Duration $StatSpan -ChangeDetection $true
+    $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$_.paying / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
     $PoolRegions | ForEach-Object {
         $Region = $_
@@ -73,7 +74,7 @@ $APIRequest.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos pay
                 Protocol      = "stratum+tcp"
                 Host          = "$Algorithm.$Region.$PoolHost"
                 Port          = $Port
-                User          = "$($Config.Pools.$Name.Wallets.$_).$($Config.Pools.$Name.Worker)"
+                User          = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
                 Pass          = "x"
                 Region        = $Region_Norm
                 SSL           = $false
@@ -91,7 +92,7 @@ $APIRequest.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos pay
                     Protocol      = "stratum+ssl"
                     Host          = "$Algorithm.$Region.$PoolHost"
                     Port          = $Port + 30000
-                    User          = "$($Config.Pools.$Name.Wallets.$_).$($Config.Pools.$Name.Worker)"
+                    User          = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
                     Pass          = "x"
                     Region        = $Region_Norm
                     SSL           = $true

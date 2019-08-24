@@ -5,12 +5,12 @@ param(
     [PSCustomObject]$Config
 )
 
-$Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 # Guaranteed payout currencies
-$Payout_Currencies = @("RVN") | Where-Object {$Config.Pools.$Name.Wallets.$_}
+$Payout_Currencies = @("RVN") | Where-Object {$Config.Pools.$PoolName.Wallets.$_}
 if (-not $Payout_Currencies) {
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+    Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
 }
 
@@ -18,7 +18,7 @@ $PoolRegions = "eu", "us"
 $PoolAPIStatusUri = "https://ravenminer.com/api/status"
 
 if (-not $Payout_Currencies) {
-    Write-Log -Level Verbose "Cannot mine on pool ($Name) - no wallet address specified. "
+    Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
 }
 
@@ -35,15 +35,16 @@ while (-not ($APIStatusResponse) -and $RetryCount -gt 0) {
 }
 
 if (-not $APIStatusResponse) {
-    Write-Log -Level Warn "Pool API ($Name) has failed. "
+    Write-Log -Level Warn "Pool API ($PoolName) has failed. "
     return
 }
 
 if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -ne 1) {
-    Write-Log -Level Warn "Pool API ($Name) [StatusUri] returned invalid data. "
+    Write-Log -Level Warn "Pool API ($PoolName) [StatusUri] returned invalid data. "
     return
 }
 
+Write-Log -Level Verbose "Processing pool data ($PoolName). "
 $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APIStatusResponse.$_.hashrate -gt 0} | ForEach-Object {
 
     $PoolHost       = "ravenminer.com"
@@ -54,8 +55,8 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
     $Fee            = $APIStatusResponse.$_.Fees / 100
     $Divisor        = 1000000000
 
-    if ((Get-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
-    else {$Stat = Set-Stat -Name "$($Name)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
+    if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
+    else {$Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
     
     try {
         $EstimateCorrection = ($APIStatusResponse.$_.actual_last24h / 1000) / $APIStatusResponse.$_.estimate_last24h
@@ -76,8 +77,8 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
                 Protocol           = "stratum+tcp"
                 Host               = "$Region.$PoolHost"
                 Port               = $Port
-                User               = $Config.Pools.$Name.Wallets.$_
-                Pass               = "ID=$($Config.Pools.$Name.Worker),c=$_"
+                User               = $Config.Pools.$PoolName.Wallets.$_
+                Pass               = "ID=$($Config.Pools.$PoolName.Worker),c=$_"
                 Region             = $Region_Norm
                 SSL                = $false
                 Updated            = $Stat.Updated
