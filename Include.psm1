@@ -519,53 +519,59 @@ function Set-Stat {
     $Stat
 }
 
-function Get-Stat {
+function Get-Stat { 
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String]$Name
+        [String[]]$Name = (Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
+
+    if (-not (Test-Path "Stats" -PathType Container)) { 
+        New-Item "Stats" -ItemType "directory" -Force | Out-Null
+    }
 
     if ($Global:Stats -isnot [PSCustomObject]) { 
         $Global:Stats = [PSCustomObject]@{ }
     }
 
-    if ($Global:Stats.$Name) { return $Global:Stats.$Name }
+    Get-ChildItem -Path "Stats" -File | Where-Object { $Name -eq $_.BaseName -and ".txt" -eq $_.Extension } | ForEach-Object { 
+        $BaseName = $_.BaseName
+        $FullName = $_.FullName
 
-    if ($Name) {
-        # Return single requested stat
-        if (Test-Path "Stats\$Name.txt" -ErrorAction SilentlyContinue) { 
+        if (-not $Global:Stats.$BaseName) { 
             try { 
-                $Global:Stats | Add-Member $Name (Get-Content "Stats\$Name.txt" -ErrorAction SilentlyContinue | ConvertFrom-Json) -Force
+                $Global:Stats | Add-Member @{ 
+                    $BaseName = $_ | Get-Content -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop | ForEach-Object { 
+                        [PSCustomObject]@{ 
+                            Name                  = [String]$BaseName
+                            Live                  = [Double]$_.Live
+                            Minute                = [Double]$_.Minute
+                            Minute_Fluctuation    = [Double]$_.Minute_Fluctuation
+                            Minute_5              = [Double]$_.Minute_5
+                            Minute_5_Fluctuation  = [Double]$_.Minute_5_Fluctuation
+                            Minute_10             = [Double]$_.Minute_10
+                            Minute_10_Fluctuation = [Double]$_.Minute_10_Fluctuation
+                            Hour                  = [Double]$_.Hour
+                            Hour_Fluctuation      = [Double]$_.Hour_FluctuationFFF
+                            Day                   = [Double]$_.Day
+                            Day_Fluctuation       = [Double]$_.Day_Fluctuation
+                            Week                  = [Double]$_.Week
+                            Week_Fluctuation      = [Double]$_.Week_Fluctuation
+                            Duration              = [TimeSpan]$_.Duration
+                            Updated               = [DateTime]$_.Updated
+                        }
+                    }
+                } -Force
             }
             catch { 
-                #Remove broken stat file
                 Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
-                Remove-Item -Path $_.FullName -Force -Confirm:$false -ErrorAction SilentlyContinue
+                Remove-Item -Path  $FullName -Force -Confirm:$false -ErrorAction SilentlyContinue
             }
-            $Global:Stats.$Name
         }
-    }
-    else {
-        # Return all stats
-        Get-ChildItem "Stats" -File -ErrorAction SilentlyContinue | ForEach-Object { 
-            $BaseName = $_.BaseName
-            if (-not $Global:Stats.$BaseName) { 
-                try { 
-                    $Global:Stats | Add-Member $BaseName (Get-Content $_.FullName -ErrorAction Stop | ConvertFrom-Json)
-                }
-                catch { 
-                    #Remove broken stat file
-                    Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
-                    Remove-Item -Path $_.FullName -Force -Confirm:$false -ErrorAction SilentlyContinue
-                }
 
-                $Global:Stats.$BaseName
-            }
-        }
+        $Global:Stats.$BaseName
     }
 }
-
 
 function Get-ChildItemContent { 
     [CmdletBinding()]
