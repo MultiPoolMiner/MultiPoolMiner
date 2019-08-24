@@ -365,10 +365,10 @@ while (-not $API.Stop) {
         $AllPools | Select-Object | ForEach-Object { $_.Price = 0 }
         $AllDevices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Refresh | Select-Object)
         if ($API) { $API.AllDevices = $AllDevices } #Give API access to the device information
-        #Load information about the devices, refresh might be required because $AllDevices is cached
-        $Devices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Name @($Config.DeviceName) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) -Refresh)
     }
 
+    #Load information about the devices
+    $Devices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Name @($Config.DeviceName | Select-Object) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) | Select-Object)
     if ($API) { $API.Devices = $Devices } #Give API access to the device information
     if ($API) { Update-APIDeviceStatus $API $Devices } #To be removed
     if ($Devices.Count -eq 0) { 

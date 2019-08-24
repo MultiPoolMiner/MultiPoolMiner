@@ -936,7 +936,7 @@ function Get-Device {
         [Parameter(Mandatory = $false)]
         [String[]]$ExcludeName = @(), 
         [Parameter(Mandatory = $false)]
-        [PSCustomObject]$DevicePciOrderMapping = [PSCustomObject]@{ }, 
+        [String[]]$DevicePciOrderMapping = @(), 
         [Parameter(Mandatory = $false)]
         [Switch]$Refresh = $false
     )
@@ -969,130 +969,106 @@ function Get-Device {
         }
     }
 
-    # Try to get cached devices first to improve performance
-    if ((Test-Path Variable:Script:CachedDevices) -and -not $Refresh) { 
-        $Devices = $CachedDevices
-        $Devices | ForEach-Object { 
-            $Device = $_
-            if ((-not $Name) -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-                if ((-not $ExcludeNameName) -or ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -notlike ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-                    $Device
-                }
-            }
-        }
-        return
-    }
+    if ($Global:Devices -isnot [Array] -or $Refresh) { 
+        $Global:Devices = [Array]$Devices = @()
+        $PlatformId = 0
+        $Index = 0
+        $PlatformId_Index = @{ }
+        $Type_PlatformId_Index = @{ }
+        $Vendor_Index = @{ }
+        $Type_Vendor_Index = @{ }
+        $Type_Index = @{ }
 
-    $Devices = @()
-    $PlatformId = 0
-    $Index = 0
-    $PlatformId_Index = @{ }
-    $Type_PlatformId_Index = @{ }
-    $Vendor_Index = @{ }
-    $Type_Vendor_Index = @{ }
-    $Type_Index = @{ }
-
-    try { 
-        [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object { 
-            #Fix for deviceID enumeration with main screen connected to onboard HD Graphics, allow Intel as valid GPU miner platform ID, but filter out all Intel entries
-            [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | Where-Object Vendor -ne "Intel(R) Corporation" | ForEach-Object { 
-                $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
-                $Device = [PSCustomObject]@{ 
-                    Index                 = [Int]$Index
-                    PlatformId            = [Int]$PlatformId
-                    PlatformId_Index      = [Int]$PlatformId_Index."$($PlatformId)"
-                    Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
-                    Vendor                = [String]$Device_OpenCL.Vendor
-                    Vendor_ShortName      = $(Switch ([String]$Device_OpenCL.Vendor) { 
-                            "Advanced Micro Devices, Inc." { "AMD" }
-                            "Intel(R) Corporation" { "INTEL" }
-                            "NVIDIA Corporation" { "NVIDIA" }
-                            default { [String]$Device_OpenCL.Vendor }
-                        }
-                    )
-                    Vendor_Index          = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
-                    Type_Vendor_Index     = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
-                    Type                  = [String]$Device_OpenCL.Type
-                    Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
-                    OpenCL                = $Device_OpenCL
-                    Model                 = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
-                    Model_Norm            = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
-                }
-
-                #Optional custom device mapping where PciDeviceID order does not match OpenCL DeviceId order
-                if ($DevicePciOrderMapping.(("{0}#{1:d2}" -f $_.Type, $Device.Type_Index).ToUpper())) { 
-                    $Index_Difference = $DevicePciOrderMapping.(("{0}#{1:d2}" -f $_.Type, $Device.Type_Index).ToUpper()) - $Device.Type_Index
-                }
-                else { 
-                    $Index_Difference = 0
-                }
-                $Device | Add-Member PCIBus_Index ([Int]($Device.Index + $Index_Difference))
-                $Device | Add-Member PCIBus_Type_Index ([Int]($Device.Type_Index + $Index_Difference))
-                $Device | Add-Member PCIBus_Type_PlatformId_Index ([Int]($Device.Type_PlatformId_Index + $Index_Difference))
-                $Device | Add-Member PCIBus_Type_Vendor_Index ([Int]($Device.Type_Vendor_Index + $Index_Difference))
-                $Device | Add-Member PCIBus_Vendor_Index  ([Int]($Device.Vendor_Index + $Index_Difference))
-
-                if ((-not $Name) -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-                    if ((-not $ExcludeName) -or (-not ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) }))) { 
-                        $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+        try { 
+            [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object { 
+                #Fix for deviceID enumeration with main screen connected to onboard HD Graphics, allow Intel as valid GPU miner platform ID, but filter out all Intel entries
+                [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | Where-Object Vendor -ne "Intel(R) Corporation" | ForEach-Object { 
+                    $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
+                    $Device = [PSCustomObject]@{ 
+                        Index                 = [Int]$Index
+                        PlatformId            = [Int]$PlatformId
+                        PlatformId_Index      = [Int]$PlatformId_Index."$($PlatformId)"
+                        Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
+                        Vendor                = [String]$Device_OpenCL.Vendor
+                        Vendor_ShortName      = $(Switch ([String]$Device_OpenCL.Vendor) { 
+                                "Advanced Micro Devices, Inc." { "AMD" }
+                                "Intel(R) Corporation" { "INTEL" }
+                                "NVIDIA Corporation" { "NVIDIA" }
+                                default { [String]$Device_OpenCL.Vendor }
+                            }
+                        )
+                        Vendor_Index          = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
+                        Type_Vendor_Index     = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
+                        Type                  = [String]$Device_OpenCL.Type
+                        Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
+                        OpenCL                = $Device_OpenCL
+                        Model                 = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
+                        Model_Norm            = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
+                        PCIBus                = [Int]$Device_OpenCL.VendorId #temp fix - need to implement these OpenCL extensions in 'Device.cs': CL_DEVICE_TOPOLOGY_AMD (unknown), CL_DEVICE_PCI_BUS_ID_NV (0x4008), CL_DEVICE_PCI_SLOT_ID_NV (0x4009)
                     }
+
+                    $Global:Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+
+                    if (-not $Type_PlatformId_Index."$($Device_OpenCL.Type)") { 
+                        $Type_PlatformId_Index."$($Device_OpenCL.Type)" = @{ }
+                    }
+                    if (-not $Type_Vendor_Index."$($Device_OpenCL.Type)") { 
+                        $Type_Vendor_Index."$($Device_OpenCL.Type)" = @{ }
+                    }
+
+                    $Index++
+                    $PlatformId_Index."$($PlatformId)"++
+                    $Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"++
+                    $Vendor_Index."$($Device_OpenCL.Vendor)"++
+                    $Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"++
+                    $Type_Index."$($Device_OpenCL.Type)"++
                 }
 
-                if (-not $Type_PlatformId_Index."$($Device_OpenCL.Type)") { 
-                    $Type_PlatformId_Index."$($Device_OpenCL.Type)" = @{ }
-                }
-                if (-not $Type_Vendor_Index."$($Device_OpenCL.Type)") { 
-                    $Type_Vendor_Index."$($Device_OpenCL.Type)" = @{ }
-                }
-
-                $Index++
-                $PlatformId_Index."$($PlatformId)"++
-                $Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"++
-                $Vendor_Index."$($Device_OpenCL.Vendor)"++
-                $Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"++
-                $Type_Index."$($Device_OpenCL.Type)"++
+                $PlatformId++
             }
+        }
+        catch { 
+            Write-Log -Level Warn "OpenCL device detection has failed. "
+        }
 
-            $PlatformId++
+        # CPU detection in OpenCL does not work well, sometimes not being included, sometimes being included twice for each processor - remove any CPUs from the OpenCL devices and generate more accurate ones
+        # Remove them instead of not generating them in the first place, because skipping them would affect the indexes
+        [Array]$Global:Devices = $Global:Devices | Where-Object { $_.Type -ne "Cpu" }
+
+        $CPUIndex = 0
+        Get-CimInstance -ClassName CIM_Processor | ForEach-Object { 
+            # Vendor and type the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
+            $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
+            $Device = [PSCustomObject]@{ 
+                Index             = [Int]$Index
+                Vendor            = $CPUInfo.Manufacturer
+                Vendor_ShortName  = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") { "INTEL" } else { "AMD" })
+                Type_Vendor_Index = $CPUIndex
+                Type              = "Cpu"
+                Type_Index        = $CPUIndex
+                CIM               = $CPUInfo
+                Model             = $CPUInfo.Name
+                Model_Norm        = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
+            }
+            #Read CPU features
+            $Device | Add-member CpuFeatures ((Get-CpuId).Features | Sort-Object)
+
+            $Global:Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+
+            $CPUIndex++
+            $Index++
         }
     }
-    catch { 
-        Write-Log -Level Warn "OpenCL device detection has failed. "
-    }
 
-    # CPU detection in OpenCL does not work well, sometimes not being included, sometimes being included twice for each processor - remove any CPUs from the OpenCL devices and generate more accurate ones
-    # Remove them instead of not generating them in the first place, because skipping them would affect the indexes
-    [array]$Devices = $Devices | Where-Object { $_.Type -ne "Cpu" }
-
-    $CPUIndex = 0
-    Get-CimInstance -ClassName CIM_Processor | ForEach-Object { 
-        # Vendor and type the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
-        $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
-        $Device = [PSCustomObject]@{ 
-            Index             = [Int]$Index
-            Vendor            = $CPUInfo.Manufacturer
-            Vendor_ShortName  = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") { "INTEL" } else { "AMD" })
-            Type_Vendor_Index = $CPUIndex
-            Type              = "Cpu"
-            Type_Index        = $CPUIndex
-            CIM               = $CPUInfo
-            Model             = $CPUInfo.Name
-            Model_Norm        = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
-        }
-        #Read CPU features
-        $Device | Add-member CpuFeatures ((Get-CpuId).Features | Sort-Object)
-
+    $Global:Devices | ForEach-Object { 
+        $Device = $_ | ConvertTo-Json | ConvertFrom-Json
         if ((-not $Name) -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-            if ((-not $ExcludeName) -or (-not ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) }))) { 
-                $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+            if ((-not $ExcludeName) -or ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -notlike ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
+                if ($DevicePciOrderMapping) { $Device.PCIBus = $DevicePciOrderMapping.IndexOf($Device.Name) } #JSON conversion required because of this line
+                $Device
             }
         }
-
-        $CPUIndex++
-        $Index++
     }
-    $Script:CachedDevices = $Devices
-    $Devices
 }
 
 function Get-Algorithm { 
