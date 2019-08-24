@@ -366,11 +366,9 @@ while (-not $API.Stop) {
         $AllDevices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Refresh | Select-Object)
         if ($API) { $API.AllDevices = $AllDevices } #Give API access to the device information
         #Load information about the devices, refresh might be required because $AllDevices is cached
-        $Devices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Name @($Config.DeviceName) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) -Refresh:([Boolean]((Compare-Object @($Config.DeviceName | Select-Object) @($OldConfig.DeviceName | Select-Object)) -or (Compare-Object @($Config.ExcludeDeviceName | Select-Object) @($OldConfig.ExcludeDeviceName | Select-Object)))) | Select-Object)
+        $Devices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Name @($Config.DeviceName) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) -Refresh)
     }
-    else {
-        $Devices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Name @($Config.DeviceName | Select-Object) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) | Select-Object)
-    }
+
     if ($API) { $API.Devices = $Devices } #Give API access to the device information
     if ($API) { Update-APIDeviceStatus $API $Devices } #To be removed
     if ($Devices.Count -eq 0) { 
@@ -402,8 +400,7 @@ while (-not $API.Stop) {
     #Load information about the pools
     if ((Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and (-not $NewPools_Jobs)) { 
         if ($PoolsRequest = @(Get-ChildItem "Pools" -File | Where-Object { $Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName } | Where-Object { $Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName } | Sort-Object BaseName)) { 
-            $Config | Add-Member "PoolList" @($PoolsRequest.BaseName) -Force
-            Write-Log "Loading pool information ($($Config.PoolList -join '; ')) - this may take a minute or two. "
+            Write-Log "Loading pool information ($(@($PoolsRequest.BaseName) -join '; ')) - this may take a minute or two. "
             $NewPools_Jobs = @(
                 $PoolsRequest | ForEach-Object { 
                     $Pool_Name = $_.BaseName
@@ -513,7 +510,6 @@ while (-not $API.Stop) {
     #since mining is probably still working.  Then it filters out any algorithms that aren't being used.
     if (($Config | ConvertTo-Json -Compress -Depth 10) -ne ($OldConfig | ConvertTo-Json -Compress -Depth 10)) { $AllPools = $null }
     $OldestAcceptedPoolData = (Get-Date).ToUniversalTime().AddHours( -24) # Allow only pools which were updated within the last 24hrs
-
 
     $AllPools = @(@($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object { $AllPools | Where-Object Name -EQ $_ }) | 
         Where-Object { $_.MarginOfError -le (1 - $Config.MinAccuracy) } | 
@@ -1340,8 +1336,7 @@ while (-not $API.Stop) {
             if (-not ($RunningMiners | Where-Object { $_.GetStatus() -eq "Running" } | Where-Object { $_.DeviceName -like "CPU#*" })) {
                 #no pre-loading when cpu miners are running
                 if ($PoolsRequest = @(Get-ChildItem "Pools" -File | Where-Object { $Config.Pools.$($_.BaseName) -and $Config.ExcludePoolName -inotcontains $_.BaseName } | Where-Object { $Config.PoolName.Count -eq 0 -or $Config.PoolName -contains $_.BaseName } | Sort-Object BaseName)) { 
-                    $Config | Add-Member "PoolList" @($PoolsRequest.BaseName) -Force
-                    Write-Log "Pre-Loading pool information ($($Config.PoolList -join '; ')). "
+                    Write-Log "Pre-Loading pool information ($(@($PoolsRequest.BaseName) -join '; ')). "
                     $NewPools_Jobs = @(
                         $PoolsRequest | ForEach-Object { 
                             $Pool_Name = $_.BaseName
