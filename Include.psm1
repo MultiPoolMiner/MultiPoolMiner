@@ -1064,7 +1064,7 @@ function Get-Device {
         $Device = $_ | ConvertTo-Json | ConvertFrom-Json
         if ((-not $Name) -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
             if ((-not $ExcludeName) -or ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -notlike ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-                if ($DevicePciOrderMapping) { $Device.PCIBus = $DevicePciOrderMapping.IndexOf($Device.Name) } #JSON conversion required because of this line
+                if ($Device.Type -ne "Cpu" -and $DevicePciOrderMapping) { $Device.PCIBus = $DevicePciOrderMapping.IndexOf($Device.Name) } #JSON conversion required because of this line
                 $Device
             }
         }
