@@ -46,8 +46,11 @@ class BMiner : Miner {
         $Shares_Rejected = [Int]0
 
         $Data.devices | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Data.devices.$_.solvers | ForEach-Object {$_.Algorithm}} | Select-Object -Unique | ForEach-Object {
+
             $Algorithm = $_
-            $HashRate_Name = Get-Algorithm $Algorithm
+            $HashRate_Name = [String]($this.Algorithm -like (Get-Algorithm $Algorithm))
+            if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -like "$(Get-Algorithm $Algorithm)*")} #temp fix
+
             $HashRate_Value = [Double]0
 
             if ($this.AllowedBadShareRatio) {
