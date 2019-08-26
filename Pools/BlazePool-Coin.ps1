@@ -8,7 +8,7 @@ param(
 $PoolFileName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $PoolRegions = "us"
 $PoolAPIStatusUri = "http://api.blazepool.com/status"
-$PoolAPICurrenciesUri = "http://api.blazepool.com/api/currencies"
+$PoolAPICurrenciesUri = "http://api.blazepool.com/currencies"
 $RetryCount = 3
 $RetryDelay = 2
 
