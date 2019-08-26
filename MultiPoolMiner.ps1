@@ -830,7 +830,6 @@ while (-not $API.Stop) {
             (Compare-Object $_.Algorithm ($Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name) | Measure-Object).Count -eq 0
         }
         if ($ActiveMiner) { 
-            $ActiveMiner.DeviceName = $Miner.DeviceName
             $ActiveMiner.Earning = $Miner.Earning
             $ActiveMiner.Earning_Comparison = $Miner.Earning_Comparison
             $ActiveMiner.Earning_MarginOfError = $Miner.Earning_MarginOfError
@@ -874,11 +873,10 @@ while (-not $API.Stop) {
                 Best_Comparison       = $false
                 New                   = $false
                 Intervals             = @()
-                PoolName              = [Array]$Miner.Pools.PSObject.Properties.Value.Name #temp fix, must use 'PSObject.Properties' to preserve order
+                PoolName              = $Miner.Pools.PSObject.Properties.Value.Name #temp fix, must use 'PSObject.Properties' to preserve order
                 ShowMinerWindow       = $Miner.ShowMinerWindow
                 IntervalMultiplier    = $Miner.IntervalMultiplier
                 Environment           = $Miner.Environment
-                DeviceId              = [Array]($Miner | ForEach-Object { (Get-Device $_.DeviceName).Type_Vendor_Index }) #Add DeviceID, required for power readouts
                 PowerCost             = $Miner.PowerCost
                 PowerUsage            = $Miner.PowerUsage
                 WarmupTime            = $Miner.WarmupTime
@@ -1088,11 +1086,11 @@ while (-not $API.Stop) {
             }
         }
         if ($Miner.Speed -contains $null) { 
-            Write-Log -Level Warn "Benchmarking miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Pools.$_.Name)"}) -join "; ")})$(if ($Miner.IntervalMultiplier -gt 1) {" requires extended benchmark duration (Benchmarking interval $($_.Intervals.Count + 1)/$($_.IntervalMultiplier))"}) [Attempt $($_.GetActivateCount()) of max. $Strikes]. "
+            Write-Log -Level Warn "Benchmarking miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))"}) -join "; ")})$(if ($Miner.IntervalMultiplier -gt 1) {" requires extended benchmark duration (Benchmarking interval $($_.Intervals.Count + 1)/$($_.IntervalMultiplier))"}) [Attempt $($_.GetActivateCount()) of max. $Strikes]. "
         }
         else { 
             if ($Config.MeasurePowerUsage -and $Miner.Algorithm | Where-Object { -not (Get-Stat -Name "$($Miner.Name)$(if (@($Miner.Algorithm).Count -eq 1) {"_$($Miner.Algorithm)"})_PowerUsage") }) { 
-                Write-Log -Level Warn "Measuring power usage for miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Pools.$_.Name)"}) -join "; ")}). "
+                Write-Log -Level Warn "Measuring power usage for miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))"}) -join "; ")}). "
             }
         }
         if ($API) { $API.WatchdogTimers = $WatchdogTimers } #Give API access to WatchdogTimers information
