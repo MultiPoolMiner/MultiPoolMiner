@@ -73,7 +73,7 @@ $APIResponse.miningAlgorithms | Where-Object {$_.paying -gt 0} <# algos paying 0
         $Region = $_
         $Region_Norm = Get-Region $Region
         
-        $Payout_Currencies | Where-Object {$Region -ne "eu" -and $Algorithm_Norm -ne "CryptoNightV7"<#Temp fix, No CryptonightV7 orders in Europe#>} | ForEach-Object {
+        $Payout_Currencies | Where-Object {-not ($Region -eq "eu" -and $Algorithm_Norm -eq "CryptoNightV7"<#Temp fix, No CryptonightV7 orders in Europe#>)} | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $Algorithm_Norm
                 CoinName      = $CoinName
