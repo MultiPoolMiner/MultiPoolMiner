@@ -1,4 +1,4 @@
-using module ..\Include.psm1
+﻿using module ..\Include.psm1
 
 class SRBMiner : Miner {
     [String]GetCommandLineParameters() {
