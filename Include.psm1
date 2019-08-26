@@ -1254,8 +1254,8 @@ class Miner {
     hidden [DateTime]$BeginTime = 0
     hidden [DateTime]$EndTime = 0
     [string[]]$Algorithm = @()
-    $DeviceName
-    [Array]$DeviceId
+    [String[]]$DeviceName = @()
+    [PSCustomObject[]]$Device = @()
     $Earning
     $Earning_Comparison
     $Earning_MarginOfError
@@ -1275,7 +1275,7 @@ class Miner {
     hidden [Int64]$Activated = 0
     hidden [MinerStatus]$Status = [MinerStatus]::Idle
     $LogFile
-    $PoolName
+    [String[]]$PoolName = @()
     hidden [Array]$Data = @()
     $ShowMinerWindow
     $IntervalMultiplier
