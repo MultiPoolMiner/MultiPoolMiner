@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\TT-Miner.exe"
-$HashSHA256 = "ED5D1B85256581DBC4B040C119E23CADB86710C95DB0E124550AD0D164734809"
-$Uri = "https://tradeproject.de/download/Miner/TT-Miner-3.0.3.zip"
+$HashSHA256 = "C9EEF74B3EDC10C3A32709824C069D4307CCAC6D2F602EBF50229A3FD3F8788D"
+$Uri = "https://tradeproject.de/download/Miner/TT-Miner-3.0.5.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5025783.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -48,7 +48,7 @@ $Commands = [PSCustomObject[]]@(
 if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object {$_.Algorithm -ne $Algorithm}; $Commands += $_}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
 else {$CommonCommands = " -RH -luck -ccd"}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
