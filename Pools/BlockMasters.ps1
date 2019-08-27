@@ -14,6 +14,8 @@ $RetryDelay = 2
 
 $Wallets = $Config.Pools.$PoolFileName.Wallets #to be removed
 $Worker = $Config.Pools.$PoolFileName.Worker #to be removed
+$PasswordSuffix = $Config.Pools.$PoolFileName.PasswordSuffix #to be removed
+
 
 # Guaranteed payout currencies
 $Payout_Currencies = @("BTC", "DOGE", "LTC") | Where-Object { $Wallets.$_ }
@@ -91,7 +93,7 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
                 Host               = "$(if ($Region -eq "eu") {"eu."})$PoolHost"
                 Port               = $Port
                 User               = $Wallets.$_
-                Pass               = "ID=$Worker,c=$_"
+                Pass               = "ID=$Worker,c=$_,mc=$MiningCurrency$($PasswordSuffix.Algorithm."*")$($PasswordSuffix.Algorithm.$Algorithm_Norm)$($PasswordSuffix.CoinName."*")$($PasswordSuffix.CoinName.$CoinName)"
                 Region             = $Region_Norm
                 SSL                = $false
                 Updated            = $Stat.Updated
@@ -124,7 +126,6 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
         $Divisor = 1000000000 <#check#> * [Double]$APIStatusResponse.$Algorithm.mbtc_mh_factor
 
         $Stat = Set-Stat -Name "$($PoolFileName)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
-        $Stat = Set-Stat -Name "$($PoolFileName)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
         try {
             $EstimateCorrection = ($APIStatusResponse.$Algorithm.actual_last24h / 1000) / $APIStatusResponse.$Algorithm.estimate_last24h
@@ -147,7 +148,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
                     Host               = "$(if ($Region -eq "eu") {"eu."})$PoolHost"
                     Port               = $Port
                     User               = $Wallets.$_
-                    Pass               = "ID=$Worker,c=$_"
+                    Pass               = "ID=$Worker,c=$_,mc=$MiningCurrency$($PasswordSuffix.Algorithm."*")$($PasswordSuffix.Algorithm.$Algorithm_Norm)$($PasswordSuffix.CoinName."*")$($PasswordSuffix.CoinName.$CoinName)"
                     Region             = $Region_Norm
                     SSL                = $false
                     Updated            = $Stat.Updated
