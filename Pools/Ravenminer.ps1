@@ -2,13 +2,13 @@
 
 param(
     [TimeSpan]$StatSpan,
-    [PSCustomObject]$Config
+    [PSCustomObject]$Config #to be removed
 )
 
 $PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 # Guaranteed payout currencies
-$Payout_Currencies = @("RVN") | Where-Object {$Config.Pools.$PoolName.Wallets.$_}
+$Payout_Currencies = @("RVN") | Where-Object { $Config.Pools.$PoolName.Wallets.$_ }
 if (-not $Payout_Currencies) {
     Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
@@ -45,28 +45,28 @@ if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignor
 }
 
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
-$APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APIStatusResponse.$_.hashrate -gt 0} | ForEach-Object {
+$APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APIStatusResponse.$_.hashrate -gt 0 } | ForEach-Object {
 
-    $PoolHost       = "ravenminer.com"
-    $Port           = $APIStatusResponse.$_.port
-    $Algorithm      = $APIStatusResponse.$_.name
+    $PoolHost = "ravenminer.com"
+    $Port = $APIStatusResponse.$_.port
+    $Algorithm = $APIStatusResponse.$_.name
     $Algorithm_Norm = Get-Algorithm $Algorithm
-    $Workers        = $APIStatusResponse.$_.workers
-    $Fee            = $APIStatusResponse.$_.Fees / 100
-    $Divisor        = 1000000000
+    $Workers = $APIStatusResponse.$_.workers
+    $Fee = $APIStatusResponse.$_.Fees / 100
+    $Divisor = 1000000000
 
-    if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
-    else {$Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
-    
+    if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1) }
+    else { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true }
+
     try {
         $EstimateCorrection = ($APIStatusResponse.$_.actual_last24h / 1000) / $APIStatusResponse.$_.estimate_last24h
     }
-    catch {}
+    catch { }
 
     $PoolRegions | ForEach-Object {
         $Region = $_
         $Region_Norm = Get-Region $Region
-        
+
         $Payout_Currencies | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm          = $Algorithm_Norm

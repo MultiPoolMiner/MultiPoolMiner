@@ -2,13 +2,13 @@
 
 param(
     [TimeSpan]$StatSpan,
-    [PSCustomObject]$Config
+    [PSCustomObject]$Config #to be removed
 )
 
 $PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 # Guaranteed payout currencies
-$Payout_Currencies = @("BTC", "LTC") | Where-Object {$Config.Pools.$PoolName.Wallets.$_}
+$Payout_Currencies = @("BTC", "LTC") | Where-Object { $Config.Pools.$PoolName.Wallets.$_ }
 if (-not $Payout_Currencies) {
     Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
@@ -22,12 +22,12 @@ $RetryCount = 3
 $RetryDelay = 2
 while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -gt 0) {
     try {
-        if (-not $APIStatusResponse) {$APIStatusResponse = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
-        if (-not $APICurrenciesResponse) {$APICurrenciesResponse  = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APIStatusResponse) { $APIStatusResponse = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
+        if (-not $APICurrenciesResponse) { $APICurrenciesResponse = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
     catch {
         Start-Sleep -Seconds $RetryDelay
-        $RetryCount--        
+        $RetryCount--
     }
 }
 
@@ -46,24 +46,24 @@ if (($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction I
     return
 }
 
-$Payout_Currencies = (@($Payout_Currencies) + @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object {$Config.Pools.$PoolName.Wallets.$_} | Sort-Object -Unique
+$Payout_Currencies = (@($Payout_Currencies) + @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object { $Config.Pools.$PoolName.Wallets.$_ } | Sort-Object -Unique
 if (-not $Payout_Currencies) {
     Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
 }
 
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
-$APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APIStatusResponse.$_.hashrate -GT 0} | ForEach-Object {
+$APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APIStatusResponse.$_.hashrate -GT 0 } | ForEach-Object {
 
-    $PoolHost       = "mine.nlpool.nl"
-    $Port           = $APIStatusResponse.$_.port
-    $Algorithm      = $APIStatusResponse.$_.name
-    $CoinName       = Get-CoinName $(if ($APIStatusResponse.$_.coins -eq 1) {$APICurrenciesResponse.$($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object {$APICurrenciesResponse.$_.algo -eq $Algorithm}).Name})
+    $PoolHost = "mine.nlpool.nl"
+    $Port = $APIStatusResponse.$_.port
+    $Algorithm = $APIStatusResponse.$_.name
+    $CoinName = Get-CoinName $(if ($APIStatusResponse.$_.coins -eq 1) { $APICurrenciesResponse.$($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.algo -eq $Algorithm }).Name })
     $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
-    if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
-    if ($Algorithm_Norm -match "Equihash1445|Equihash1927") {$CoinName = "ManagedByPool"}
-    $Workers        = $APIStatusResponse.$_.workers
-    $Fee            = $APIStatusResponse.$_.Fees / 100
+    if (-not $Algorithm_Norm) { $Algorithm_Norm = Get-Algorithm $Algorithm }
+    if ($Algorithm_Norm -match "Equihash1445|Equihash1927") { $CoinName = "ManagedByPool" }
+    $Workers = $APIStatusResponse.$_.workers
+    $Fee = $APIStatusResponse.$_.Fees / 100
 
     $Divisor = 1000000 * [Double]$APIStatusResponse.$_.mbtc_mh_factor
 
@@ -71,13 +71,13 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
     #     "Yescrypt" {$Divisor *= 100} #temp fix
     # }
 
-    if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) {$Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1)}
-    else {$Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true}
+    if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1) }
+    else { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true }
 
     try {
         $EstimateCorrection = ($APIStatusResponse.$_.actual_last24h / 1000) / $APIStatusResponse.$_.estimate_last24h
     }
-    catch {}
+    catch { }
 
     $PoolRegions | ForEach-Object {
         $Region = $_

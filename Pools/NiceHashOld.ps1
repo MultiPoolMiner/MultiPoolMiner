@@ -2,13 +2,13 @@
 
 param(
     [TimeSpan]$StatSpan,
-    [PSCustomObject]$Config
+    [PSCustomObject]$Config #to be removed
 )
 
 $PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 #Pool currenctly allows payout in BTC only
-$Payout_Currencies = @("BTC") | Where-Object {$Config.Pools.$PoolName.Wallets.$_}
+$Payout_Currencies = @("BTC") | Where-Object { $Config.Pools.$PoolName.Wallets.$_ }
 
 $PoolRegions = "eu", "usa", "hk", "jp", "in", "br"
 $PoolAPIUri = "http://api.nicehash.com/api?method=simplemultialgo.info"
@@ -22,11 +22,11 @@ $RetryCount = 3
 $RetryDelay = 2
 while (-not ($APIRequest) -and $RetryCount -gt 0) {
     try {
-        if (-not $APIRequest) {$APIRequest = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APIRequest) { $APIRequest = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
     catch {
         Start-Sleep -Seconds $RetryDelay
-        $RetryCount--        
+        $RetryCount--
     }
 }
 
@@ -40,21 +40,21 @@ if ($APIRequest.result.simplemultialgo.count -le 1) {
     return
 }
 
-if ($Config.Pools.$PoolName.IsInternalWallet) {$Fee = 0.01} else {$Fee = 0.03}
+if ($Config.Pools.$PoolName.IsInternalWallet) { $Fee = 0.01 } else { $Fee = 0.03 }
 
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
-$APIRequest.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos paying 0 fail stratum #> | ForEach-Object {
+$APIRequest.result.simplemultialgo | Where-Object { $_.paying -gt 0 } <# algos paying 0 fail stratum #> | ForEach-Object {
 
     $PoolHost = "nicehash.com"
     $Port = $_.port
     $Algorithm = $_.name
     $Algorithm_Norm = Get-Algorithm $Algorithm
     $CoinName = ""
-    
-    if ($Algorithm -eq "Beam")   {$Algorithm_Norm = "EquihashR15050"} #temp fix
-    if ($Algorithm -eq "Decred") {$Algorithm_Norm = "DecredNiceHash"} #temp fix
-    if ($Algorithm -eq "Mtp")    {$Algorithm_Norm = "MtpNiceHash"} #temp fix
-    if ($Algorithm -eq "Sia")    {$Algorithm_Norm = "SiaNiceHash"} #temp fix
+
+    if ($Algorithm -eq "Beam") { $Algorithm_Norm = "EquihashR15050" } #temp fix
+    if ($Algorithm -eq "Decred") { $Algorithm_Norm = "DecredNiceHash" } #temp fix
+    if ($Algorithm -eq "Mtp") { $Algorithm_Norm = "MtpNiceHash" } #temp fix
+    if ($Algorithm -eq "Sia") { $Algorithm_Norm = "SiaNiceHash" } #temp fix
 
     $Divisor = 1000000000
 
@@ -63,8 +63,8 @@ $APIRequest.result.simplemultialgo | Where-Object {$_.paying -gt 0} <# algos pay
     $PoolRegions | ForEach-Object {
         $Region = $_
         $Region_Norm = Get-Region $Region
-        
-        $Payout_Currencies | Where-Object {-not ($Region -eq "eu" -and $Algorithm_Norm -eq "CryptoNightV7"<#Temp fix, No CryptonightV7 orders in Europe#>)} | ForEach-Object {
+
+        $Payout_Currencies | Where-Object { -not ($Region -eq "eu" -and $Algorithm_Norm -eq "CryptoNightV7"<#Temp fix, No CryptonightV7 orders in Europe#>) } | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $Algorithm_Norm
                 CoinName      = $CoinName

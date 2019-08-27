@@ -2,13 +2,13 @@
 
 param(
     [TimeSpan]$StatSpan,
-    [PSCustomObject]$Config
+    [PSCustomObject]$Config #to be removed
 )
 
 $PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 #Pool currenctly allows payout in BTC only
-$Payout_Currencies = @("BTC") | Where-Object {$Config.Pools.$PoolName.Wallets.$_}
+$Payout_Currencies = @("BTC") | Where-Object { $Config.Pools.$PoolName.Wallets.$_ }
 if (-not $Payout_Currencies) {
     Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
@@ -23,12 +23,16 @@ $RetryCount = 3
 $RetryDelay = 2
 while (-not ($APIResponse) -and $RetryCount -gt 0) {
     try {
-        if (-not $APIResponse) {$APIResponse = Invoke-RestMethod $PoolAPIUri -TimeoutSec 3 -UseBasicParsing -Headers @{"Cache-Control" = "no-cache"}}
-        if (-not $APIResponseAlgoDetails) {$APIResponseAlgoDetails = Invoke-RestMethod $PoolAPIAlgodetailsUri -TimeoutSec 3 -UseBasicParsing -Headers @{"Cache-Control" = "no-cache"}}
+        if (-not $APIResponse) {
+            $APIResponse = Invoke-RestMethod $PoolAPIUri -TimeoutSec 3 -UseBasicParsing -Headers @{"Cache-Control" = "no-cache" }
+        }
+        if (-not $APIResponseAlgoDetails) {
+            $APIResponseAlgoDetails = Invoke-RestMethod $PoolAPIAlgodetailsUri -TimeoutSec 3 -UseBasicParsing -Headers @{"Cache-Control" = "no-cache" }
+        }
     }
     catch {
         Start-Sleep -Seconds $RetryDelay
-        $RetryCount--        
+        $RetryCount--
     }
 }
 
@@ -50,21 +54,21 @@ if ($APIResponseAlgoDetails.miningAlgorithms.count -le 1) {
     return
 }
 
-if ($Config.Pools.$PoolName.IsInternalWallet) {$Fee = 0.01} else {$Fee = 0.03}
+if ($Config.Pools.$PoolName.IsInternalWallet) { $Fee = 0.01 } else { $Fee = 0.03 }
 
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
-$APIResponse.miningAlgorithms | ForEach-Object {$Algorithm = $_.Algorithm; $_ | Add-Member -force @{algodetails = $APIResponseAlgoDetails.miningAlgorithms | Where-Object {$_.Algorithm -eq $Algorithm}}}
-$APIResponse.miningAlgorithms | Where-Object {$_.paying -gt 0} <# algos paying 0 fail stratum #> | ForEach-Object {
+$APIResponse.miningAlgorithms | ForEach-Object { $Algorithm = $_.Algorithm; $_ | Add-Member -force @{algodetails = $APIResponseAlgoDetails.miningAlgorithms | Where-Object { $_.Algorithm -eq $Algorithm } } }
+$APIResponse.miningAlgorithms | Where-Object { $_.paying -gt 0 } <# algos paying 0 fail stratum #> | ForEach-Object {
 
     $Port = $_.algodetails.port
     $Algorithm = $_.algorithm.ToLower()
     $Algorithm_Norm = Get-Algorithm $Algorithm
     $CoinName = ""
-    
-    if ($Algorithm -eq "Beam")   {$Algorithm_Norm = "EquihashR15050"} #temp fix
-    if ($Algorithm -eq "Decred") {$Algorithm_Norm = "DecredNiceHash"} #temp fix
-    if ($Algorithm -eq "Mtp")    {$Algorithm_Norm = "MtpNiceHash"} #temp fix
-    if ($Algorithm -eq "Sia")    {$Algorithm_Norm = "SiaNiceHash"} #temp fix
+
+    if ($Algorithm -eq "Beam") { $Algorithm_Norm = "EquihashR15050" } #temp fix
+    if ($Algorithm -eq "Decred") { $Algorithm_Norm = "DecredNiceHash" } #temp fix
+    if ($Algorithm -eq "Mtp") { $Algorithm_Norm = "MtpNiceHash" } #temp fix
+    if ($Algorithm -eq "Sia") { $Algorithm_Norm = "SiaNiceHash" } #temp fix
 
     $Divisor = 100000000
 
@@ -73,8 +77,8 @@ $APIResponse.miningAlgorithms | Where-Object {$_.paying -gt 0} <# algos paying 0
     $PoolRegions | ForEach-Object {
         $Region = $_
         $Region_Norm = Get-Region $Region
-        
-        $Payout_Currencies | Where-Object {-not ($Region -eq "eu" -and $Algorithm_Norm -eq "CryptoNightV7"<#Temp fix, No CryptonightV7 orders in Europe#>)} | ForEach-Object {
+
+        $Payout_Currencies | Where-Object { -not ($Region -eq "eu" -and $Algorithm_Norm -eq "CryptoNightV7"<#Temp fix, No CryptonightV7 orders in Europe#>) } | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $Algorithm_Norm
                 CoinName      = $CoinName

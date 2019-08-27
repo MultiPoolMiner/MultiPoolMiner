@@ -2,7 +2,7 @@
 
 param(
     [TimeSpan]$StatSpan,
-    [PSCustomObject]$Config
+    [PSCustomObject]$Config #to be removed
 )
 
 $PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
@@ -12,18 +12,18 @@ if (-not $Config.Pools.$PoolName.User) {
     return
 }
 
-$PoolAPIUri= "http://miningpoolhub.com/index.php?page=api&action=getminingandprofitsstatistics&$(Get-Date -Format "yyyy-MM-dd_HH-mm")"
+$PoolAPIUri = "http://miningpoolhub.com/index.php?page=api&action=getminingandprofitsstatistics&$(Get-Date -Format "yyyy-MM-dd_HH-mm")"
 $PoolRegions = "europe", "us-east", "asia"
 
 $RetryCount = 3
 $RetryDelay = 2
 while (-not ($APIResponse.return) -and $RetryCount -gt 0) {
     try {
-        if (-not $APIResponse.return) {$APIResponse = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop}
+        if (-not $APIResponse.return) { $APIResponse = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
     catch {
         Start-Sleep -Seconds $RetryDelay
-        $RetryCount--        
+        $RetryCount--
     }
 }
 
@@ -40,24 +40,24 @@ if ($APIResponse.return.count -le 1) {
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
 $APIResponse.return | ForEach-Object {
 
-    $CoinName       = $_.coin_name
-    $_.algo -split "-" | ForEach-Object {$CoinName = $CoinName -replace "-$($_)", ""}
-    $CoinName       = Get-CoinName $CoinName
+    $CoinName = $_.coin_name
+    $_.algo -split "-" | ForEach-Object { $CoinName = $CoinName -replace "-$($_)", "" }
+    $CoinName = Get-CoinName $CoinName
 
-    $PoolHosts      = @($_.host_list.split(";"))
-    if ($CoinName -eq "MaxCoin" ) {$PoolHosts = @("hub.miningpoolhub.com")} #temp Fix
-    $Port           = $_.port
-    $Algorithm      = $_.algo
+    $PoolHosts = @($_.host_list.split(";"))
+    if ($CoinName -eq "MaxCoin" ) { $PoolHosts = @("hub.miningpoolhub.com") } #temp Fix
+    $Port = $_.port
+    $Algorithm = $_.algo
     $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
-    if (-not $Algorithm_Norm) {$Algorithm_Norm = Get-Algorithm $Algorithm}
+    if (-not $Algorithm_Norm) { $Algorithm_Norm = Get-Algorithm $Algorithm }
 
-    if ($Algorithm_Norm -eq "Sia") {$Algorithm_Norm = "SiaClaymore"} #temp fix
+    if ($Algorithm_Norm -eq "Sia") { $Algorithm_Norm = "SiaClaymore" } #temp fix
 
     $Divisor = 1000000000
 
     $Stat = Set-Stat -Name "$($PoolName)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$_.profit / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
-    if ($PoolHosts.Count -gt 1) {$Regions = $PoolRegions} else {$Regions = $Config.Region} #Do not create multiple pool objects if there is only one host
+    if ($PoolHosts.Count -gt 1) { $Regions = $PoolRegions } else { $Regions = $Config.Region } #Do not create multiple pool objects if there is only one host
 
     $PoolRegions | ForEach-Object {
         $Region = $_
@@ -70,7 +70,7 @@ $APIResponse.return | ForEach-Object {
             StablePrice   = $Stat.Week
             MarginOfError = $Stat.Week_Fluctuation
             Protocol      = "stratum+tcp"
-            Host          = $PoolHosts | Sort-Object -Descending {$_ -ilike "$Region*"} | Select-Object -First 1
+            Host          = $PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1
             Port          = $Port
             User          = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
             Pass          = "x"
@@ -86,7 +86,7 @@ $APIResponse.return | ForEach-Object {
             StablePrice   = $Stat.Week
             MarginOfError = $Stat.Week_Fluctuation
             Protocol      = "stratum+ssl"
-            Host          = $PoolHosts | Sort-Object -Descending {$_ -ilike "$Region*"} | Select-Object -First 1
+            Host          = $PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1
             Port          = $Port
             User          = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
             Pass          = "x"
