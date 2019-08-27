@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\lolminer.exe"
-$HashSHA256 = "C0C1ECAC955255DE6A5C67D3B27F70A360B1D60B00B1AD3C9DFE86AEAC52A696"
-$Uri = "https://github.com/Lolliedieb/lolMiner-releases/releases/download/0.8.7/lolMiner_v087_Win64.zip"
+$HashSHA256 = "4B6916F159A10759CE15C9097F7EBD48FA07BE152B01451135BFA83BB2D1C794"
+$Uri = "https://github.com/Lolliedieb/lolMiner-releases/releases/download/0.8.8/lolMiner_v088_Win64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4724735.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -24,8 +24,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Equihash2109";    MinMemGB = 1.0;  Vendor = @("AMD", "NVIDIA"); Command = " --coin AOIN"} # new with 0.6 alpha 3
     [PSCustomObject]@{Algorithm = "Equihash965";     MinMemGB = 1.35; Vendor = @("AMD" <#, "NVIDIA"#>); Command = " --coin MNX"} # Ewbf2Equihash-v0.6 is faster on NVIDIA
     [PSCustomObject]@{Algorithm = "EquihashR12540";  MinMemGB = 3.00; Vendor = @("AMD" <#, "NVIDIA"#>); Command = " --coin ZEL"} # MiniZEquihash-v1.5p is faster on NVIDIA
-    [PSCustomObject]@{Algorithm = "EquihashR150530"; MinMemGB = 2.75; Vendor = @("AMD", "NVIDIA"); Command = " --coin BEAM-I"}
-    [PSCustomObject]@{Algorithm = "EquihashR150503"; MinMemGB = 2.75; Vendor = @("AMD", "NVIDIA"); Command = " --coin BEAM-II"}
+    [PSCustomObject]@{Algorithm = "EquihashR150503"; MinMemGB = 2.75; Vendor = @("AMD", "NVIDIA"); Command = " --coin BEAM"}
     [PSCustomObject]@{Algorithm = "Cuckarood29";     MinMemGB = 4.0;  Vendor = @("AMD", "NVIDIA"); Command = " --coin GRIN-AD29"} # new with 0.8
     [PSCustomObject]@{Algorithm = "Cuckatoo31";      MinMemGB = 4.0;  Vendor = @("AMD", "NVIDIA"); Command = " --coin GRIN-AT31"} # new with 0.8
 )
