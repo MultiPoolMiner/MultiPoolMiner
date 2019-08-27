@@ -40,7 +40,7 @@ $Commands = [PSCustomObject]@{
     "luffa"         = " -a luffa" #Luffa
     "lyra2v2"       = " -a lyra2v2" #Lyra2RE2
     "lyra2v3"       = " -a lyra2v3 --intensity 24" #Lyra2RE3, new in 8.23
-    "neoscrypt"     = " -a neoscrypt --intensity 17.2" #NeoScrypt
+    "neoscrypt"     = " -a neoscrypt --intensity 17.1" #NeoScrypt
     "penta"         = " -a penta" #Pentablake
     "s3"            = " -a s3" #S3
     "skein"         = " -a skein" #Skein
@@ -72,7 +72,7 @@ $Commands = [PSCustomObject]@{
 if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
 else {$CommonCommands = ""}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
