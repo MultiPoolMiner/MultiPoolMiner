@@ -125,7 +125,6 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
         $Divisor = 1000000 <#check#> * [Double]$APIStatusResponse.$Algorithm.mbtc_mh_factor
 
         $Stat = Set-Stat -Name "$($PoolFileName)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
-        $Stat = Set-Stat -Name "$($PoolFileName)_$($CoinName)-$($Algorithm_Norm)_Profit" -Value ([Double]$APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
         try {
             $EstimateCorrection = ($APIStatusResponse.$Algorithm.actual_last24h / 1000) / $APIStatusResponse.$Algorithm.estimate_last24h
