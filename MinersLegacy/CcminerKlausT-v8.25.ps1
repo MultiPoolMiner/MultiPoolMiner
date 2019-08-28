@@ -38,7 +38,7 @@ $Commands = [PSCustomObject]@{
     "jackpot"       = " -a jackpot" #Jackpot
     "keccak"        = " -a keccak" #Keccak
     "luffa"         = " -a luffa" #Luffa
-    "lyra2v2"       = " -a lyra2v2" #Lyra2RE2
+    # "lyra2v2"       = " -a lyra2v2" #Lyra2RE2; CcminerAlexis-v1.5 is faster
     "lyra2v3"       = " -a lyra2v3 --intensity 24" #Lyra2RE3, new in 8.23
     "neoscrypt"     = " -a neoscrypt --intensity 17.1" #NeoScrypt
     "penta"         = " -a penta" #Pentablake
@@ -46,7 +46,7 @@ $Commands = [PSCustomObject]@{
     "skein"         = " -a skein" #Skein
     "whirlpool"     = " -a whirl" #Whirlpool
     "whirlpoolx"    = " -a whirlpoolx" #whirlpoolx
-    # "x17"           = " -a x17" #X17 Verge, NVIDIA-CcminerAlexis_v1.5 is faster
+    # "x17"           = " -a x17" #X17 Verge, NVIDIA-CcminerAlexis-v1.5 is faster
     #"yescrypt"      = " -a yescrypt" #yescrypt
 
     # ASIC - never profitable 25/11/2018
