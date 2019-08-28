@@ -979,6 +979,13 @@ function Get-Device {
         $Type_Vendor_Index = @{ }
         $Type_Index = @{ }
 
+        $Slot = 0
+        $PlatformId_Slot = @{ }
+        $Type_PlatformId_Slot = @{ }
+        $Vendor_Slot = @{ }
+        $Type_Vendor_Slot = @{ }
+        $Type_Slot = @{ }
+
         try { 
             [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object { 
                 #Fix for deviceID enumeration with main screen connected to onboard HD Graphics, allow Intel as valid GPU miner platform ID, but filter out all Intel entries
@@ -1007,7 +1014,7 @@ function Get-Device {
                         PCIBus                = [Int]$Device_OpenCL.VendorId #temp fix - need to implement these OpenCL extensions in 'Device.cs': CL_DEVICE_TOPOLOGY_AMD (unknown), CL_DEVICE_PCI_BUS_ID_NV (0x4008), CL_DEVICE_PCI_SLOT_ID_NV (0x4009)
                     }
 
-                    $Global:Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+                    $Global:Devices += $Device
 
                     if (-not $Type_PlatformId_Index."$($Device_OpenCL.Type)") { 
                         $Type_PlatformId_Index."$($Device_OpenCL.Type)" = @{ }
@@ -1025,6 +1032,33 @@ function Get-Device {
                 }
 
                 $PlatformId++
+            }
+
+            $Global:Devices | Sort-Object PCIBus | ForEach-Object { 
+                $_ | Add-Member @{ 
+                    Slot                 = [Int]$Slot
+                    PlatformId_Slot      = [Int]$PlatformId_Slot.($_.PlatformId)
+                    Type_PlatformId_Slot = [Int]$Type_PlatformId_Slot.($_.Type).($_.PlatformId)
+                    Vendor_Slot          = [Int]$Vendor_Slot.($_.Vendor)
+                    Type_Vendor_Slot     = [Int]$Type_Vendor_Slot.($_.Type).($_.Vendor)
+                    Type_Slot            = [Int]$Type_Slot.($_.Type)
+                }
+
+                $_ | Add-Member Name ("{0}#{1:d2}" -f $_.Type, $_.Type_Slot).ToUpper()
+
+                if (-not $Type_PlatformId_Slot.($_.Type)) { 
+                    $Type_PlatformId_Slot.($_.Type) = @{ }
+                }
+                if (-not $Type_Vendor_Slot.($_.Type)) { 
+                    $Type_Vendor_Slot.($_.Type) = @{ }
+                }
+
+                $Slot++
+                $PlatformId_Slot.($_.PlatformId)++
+                $Type_PlatformId_Slot.($_.Type).($_.PlatformId)++
+                $Vendor_Slot.($_.Vendor)++
+                $Type_Vendor_Slot.($_.Type).($_.Vendor)++
+                $Type_Slot.($_.Type)++
             }
         }
         catch { 
