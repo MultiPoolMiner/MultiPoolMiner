@@ -1094,14 +1094,56 @@ function Get-Device {
         }
     }
 
-    $Global:Devices | ForEach-Object { 
-        $Device = $_ | ConvertTo-Json | ConvertFrom-Json
-        if (-not $Name -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-            if (-not $ExcludeName -or -not ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-                if ($Device.Type -ne "Cpu" -and $DevicePciOrderMapping) { $Device.PCIBus = $DevicePciOrderMapping.IndexOf($Device.Name) } #JSON conversion required because of this line
-                $Device
+    if (-not $DevicePciOrderMapping) { 
+        $Global:Devices | ForEach-Object { 
+            $Device = $_
+            if (-not $Name -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
+                if (-not $ExcludeName -or -not ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
+                    $Device
+                }
             }
         }
+    }
+    else { 
+        $Slot = 0
+        $PlatformId_Slot = @{ }
+        $Type_PlatformId_Slot = @{ }
+        $Vendor_Slot = @{ }
+        $Type_Vendor_Slot = @{ }
+        $Type_Slot = @{ }
+
+        $Global:Devices | Sort-Object { $DevicePciOrderMapping.IndexOf($_.Name) -lt 0 }, { $DevicePciOrderMapping.IndexOf($_.Name) } | ForEach-Object { 
+            $Device = $_ | ConvertTo-Json | ConvertFrom-Json
+
+            if ($Device.Type -ne "CPU") { 
+                $Device.Slot = [Int]$Slot
+                $Device.PlatformId_Slot = [Int]$PlatformId_Slot.("$($Device.PlatformId)")
+                $Device.Type_PlatformId_Slot = [Int]$Type_PlatformId_Slot.("$($Device.Type)").("$($Device.PlatformId)")
+                $Device.Vendor_Slot = [Int]$Vendor_Slot.("$($Device.Vendor)")
+                $Device.Type_Vendor_Slot = [Int]$Type_Vendor_Slot.("$($Device.Type)").("$($Device.Vendor)")
+                $Device.Type_Slot = [Int]$Type_Slot.("$($Device.Type)")
+            }
+
+            if (-not $Type_PlatformId_Slot.("$($Device.Type)")) { 
+                $Type_PlatformId_Slot.("$($Device.Type)") = @{ }
+            }
+            if (-not $Type_Vendor_Slot.("$($Device.Type)")) { 
+                $Type_Vendor_Slot.("$($Device.Type)") = @{ }
+            }
+
+            $Slot++
+            $PlatformId_Slot.("$($Device.PlatformId)")++
+            $Type_PlatformId_Slot.("$($Device.Type)").("$($Device.PlatformId)")++
+            $Vendor_Slot.("$($Device.Vendor)")++
+            $Type_Vendor_Slot.("$($Device.Type)").("$($Device.Vendor)")++
+            $Type_Slot.("$($Device.Type)")++
+
+            if (-not $Name -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
+                if (-not $ExcludeName -or -not ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
+                    $Device
+                }
+            }
+        } | Sort-Object Index
     }
 }
 
