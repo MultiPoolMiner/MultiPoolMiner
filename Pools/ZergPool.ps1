@@ -55,7 +55,7 @@ if (-not $Payout_Currencies) {
     return
 }
 
-Write-Log -Level Verbose "Processing pool data ($PoolFileName). "
+Write-Log -Level Verbose "Processing pool data ($($PoolFileName)-Algo). "
 $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APIStatusResponse.$_.hashrate -gt 0 } | Where-Object { $APIStatusResponse.$_.mbtc_mh_factor -gt 0 } | ForEach-Object {
     $PoolHost = "mine.zergpool.com"
     $Port = $APIStatusResponse.$_.port
@@ -110,7 +110,7 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
     }
 }
 
-Write-Log -Level Verbose "Processing pool data ($PoolFileName). "
+Write-Log -Level Verbose "Processing pool data ($($PoolFileName)-Coin). "
 $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.hashrate -gt 0 } | ForEach-Object {
     $APICurrenciesResponse.$_ | Add-Member Symbol $_ -ErrorAction Ignore
 
