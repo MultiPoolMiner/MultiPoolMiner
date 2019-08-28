@@ -44,7 +44,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
 
-    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm ("cryptonight$($_.Algorithm)"); $_} | Where-Object {$Pools.$Algorithm_Norm.Host} | ForEach-Object {
+    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$Pools.$Algorithm_Norm.Host} | ForEach-Object {
         $MinMemGB = $_.MinMemGB
         
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
