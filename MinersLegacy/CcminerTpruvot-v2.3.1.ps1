@@ -35,7 +35,6 @@ $Commands = [PSCustomObject]@{
     "bitcore"       = " -a bitcore" #Timetravel10 and Bitcore are technically the same
     "blake2b"       = " -a blake2b" # new with 2.3.1
     "bmw"           = " -a bmw" #BMW
-    "cryptolight"   = " -a cryptolight" #CryptonightLite
     "c11/flax"      = " -a c11/flax" #C11
     "deep"          = " -a deep" #Deep
     "dmd-gr"        = " -a deep" #DMDGR
@@ -80,10 +79,11 @@ $Commands = [PSCustomObject]@{
     #"x17"          = " -a x17" #x17
     "zr5"           = " -a zr5" #zr5
 
-    # ASIC - never profitable 06/08/2019
+    # ASIC - never profitable 28/08/2019
     #"blake"        = " -a blake" #blake
     #"blakecoin"    = " -a blakecoin" #Blakecoin
     #"blake2s"      = " -a blake2s" #Blake2s
+    #"cryptolight"  = " -a cryptolight" #CryptonightLite
     #"cryptonight"  = " -a cryptonight" #Cryptonight
     #"groestl"      = " -a groestl" #Groestl
     #"lbry"         = " -a lbry" #Lbry
