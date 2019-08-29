@@ -35,7 +35,7 @@ class Fireice : Miner {
                     if (-not (Test-Path $PlatformThreadsConfigFile -PathType Leaf)) {
                         if (Test-Path "$(Split-Path $this.Path)\ThreadsConfig-$($Platform)-$($this.Algorithm[0])-*.txt" -PathType Leaf) {
                             #Remove old config files, thread info is no longer valid
-                            Write-Log -Level Warn "Hardware change detected. Deleting existing configuration files for miner ($($this.Name) {$($this.Algorithm[0] -replace 'NiceHash')@$($this.Pool[0])}). "
+                            Write-Log -Level Warn "Hardware change detected. Deleting existing configuration files for miner ($($this.Name) {$($this.Algorithm[0] -replace 'NiceHash')@$($this.PoolName[0])}). "
                             Remove-Item "$(Split-Path $this.Path)\ThreadsConfig-$($Platform)-$($this.Algorithm[0])-*.txt" -Force -ErrorAction SilentlyContinue
                         }
                         #Temporarily start miner with empty thread conf file. The miner will then create a hw config file with default threads info for all platform hardware
@@ -92,7 +92,7 @@ class Fireice : Miner {
                 }
             }
             catch {
-                Write-Log -Level Error "Creating miner config files failed ($($this.Name) {$($this.Algorithm[0] -replace 'NiceHash')@$($this.Pool[0])}) [Error: '$($Error[0])']. "
+                Write-Log -Level Error "Creating miner config files failed ($($this.Name) {$($this.Algorithm[0] -replace 'NiceHash')@$($this.PoolName[0])}) [Error: '$($Error[0])']. "
                 return
             }
         }
