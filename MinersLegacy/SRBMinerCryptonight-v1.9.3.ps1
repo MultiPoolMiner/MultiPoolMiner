@@ -88,7 +88,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                     Content  = [PSCustomObject]@{
                         cryptonight_type = $Algorithm
                         double_threads = $DoubleThreads
-                        gpu_conf = @($Miner_Device.PCIBus_Type_PlatformId_Index | ForEach-Object {
+                        gpu_conf = @($Miner_Device.Type_PlatformId_Slot | ForEach-Object {
                             [PSCustomObject]@{
                                 "id"        = $_  
                                 "intensity" = $(if ($Intensity | Select-Object -Index $_ -ErrorAction SilentlyContinue) {$Intensity | Select-Object -Index $_} else {0})

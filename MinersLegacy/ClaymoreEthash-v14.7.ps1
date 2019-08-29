@@ -181,7 +181,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                     DeviceName         = $Miner_Device.Name
                     Path               = $Path
                     HashSHA256         = $HashSHA256
-                    Arguments          = ("$Command$CommonCommands -mport -$Miner_Port -epool $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -ewal $($Pools.$Algorithm_Norm.User) -epsw $($Pools.$Algorithm_Norm.Pass) -allpools 1$Allcoins -esm 3$Arguments_Secondary$NoFee -di $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.PCIBus_Type_Vendor_Index}) -join '')" -replace "\s+", " ").trim()
+                    Arguments          = ("$Command$CommonCommands -mport -$Miner_Port -epool $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -ewal $($Pools.$Algorithm_Norm.User) -epsw $($Pools.$Algorithm_Norm.Pass) -allpools 1$Allcoins -esm 3$Arguments_Secondary$NoFee -di $(($Miner_Device | ForEach-Object {'{0:x}' -f $_.Type_Vendor_Slot}) -join '')" -replace "\s+", " ").trim()
                     HashRates          = $Miner_HashRates
                     API                = "Claymore"
                     Port               = $Miner_Port

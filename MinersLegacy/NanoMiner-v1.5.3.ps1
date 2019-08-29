@@ -85,7 +85,7 @@ watchdog=false
 webPort=$($Miner_Port)
 
 [$($Algorithm)]
-devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.PCIBus_Type_Index)}) -join ',')
+devices=$(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Slot)}) -join ',')
 pool1=$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)
 wallet=$($Pools.$Algorithm_Norm.User)"
                 }
