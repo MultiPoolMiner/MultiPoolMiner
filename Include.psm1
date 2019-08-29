@@ -516,8 +516,6 @@ function Set-Stat {
         Updated               = [DateTime]$Stat.Updated
     } | ConvertTo-Json | Set-Content $Path
 
-    $Global:Stats.$Name = $Stat
-
     $Stat
 }
 
