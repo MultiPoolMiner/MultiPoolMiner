@@ -571,7 +571,12 @@ function Get-Stat {
                 Remove-Stat $Stat_Name
             }
         }
+    }
 
+    if ($Name.Count -gt 1) {
+        $Global:Stats
+    }
+    else {
         $Global:Stats.$Stat_Name
     }
 }
