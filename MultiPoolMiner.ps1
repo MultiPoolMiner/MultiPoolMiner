@@ -569,7 +569,6 @@ while (-not $API.Stop) {
 
     #Load the stats, to improve performance only read PowerUsage stats when required
     Write-Log "Loading saved statistics. "
-    $Stats = Get-Stat
     if ($API) { $API.Stats = $Stats } #Give API access to the current stats
 
     #Load information about the miners
