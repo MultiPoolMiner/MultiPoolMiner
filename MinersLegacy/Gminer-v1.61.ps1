@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\miner.exe"
-$HashSHA256 = "57CE8D2B894C656AFA6ADDDA77FAC54F1E1699E488FE2004FABF13B3CB72363A"
-$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.59/gminer_1_59_windows64.zip"
+$HashSHA256 = "90F95E6AD36EEBA363D0F80844ACCDDEEBB350FB2706A11ECE91C63EB71443A2"
+$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.61/gminer_1_61_windows64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5034735.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -26,7 +26,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Cuckarood29";    MinMemGB = 1.0; Vendor = @("NVIDIA");        Command = " --algo grin29"} #new in v1.51
     [PSCustomObject]@{Algorithm = "Cuckoo29";       MinMemGB = 4.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckoo29"} #new in v1.24; Cuckoo29 / Aeternity
     [PSCustomObject]@{Algorithm = "Equihash965";    MinMemGB = 0.8; Vendor = @("NVIDIA");        Command = " --algo equihash96_5"} #new in v1.13
-    [PSCustomObject]@{Algorithm = "Equihash1254";   MinMemGB = 1.0; Vendor = @("NVIDIA");        Command = " --algo equihash125_4"} #new in v1.46; ZelCash
+    [PSCustomObject]@{Algorithm = "Equihash1254";   MinMemGB = 1.0; Vendor = @("AMD", "NVIDIA"); Command = " --algo equihash125_4"} #new in v1.46; ZelCash
     [PSCustomObject]@{Algorithm = "Equihash1445";   MinMemGB = 1.8; Vendor = @("AMD", "NVIDIA"); Command = " --algo equihash144_5"}
     [PSCustomObject]@{Algorithm = "Equihash1927";   MinMemGB = 2.8; Vendor = @("NVIDIA");        Command = " --algo equihash192_7"}
     [PSCustomObject]@{Algorithm = "Equihash2109";   MinMemGB = 1.0; Vendor = @("NVIDIA");        Command = " --algo equihash210_9"} #new in v1.09
@@ -49,7 +49,7 @@ $Devices | Select-Object Type, Model -Unique | ForEach-Object {
         $MinMemGB = $_.MinMemGB
         
         #Windows 10 requires 1 GB extra
-        if ($_.Algorithm -match "cuckaroo29|cuckaroo29s|cuckoo" -and ([System.Version]$PSVersionTable.BuildVersion -ge "10.0.0.0")) {$MinMemGB += 1}
+        if ($_.Algorithm -match "cuckaroo29|cuckarood29|cuckaroo29s|cuckoo" -and ([System.Version]$PSVersionTable.BuildVersion -ge "10.0.0.0")) {$MinMemGB += 1}
 
         if ($Miner_Device = @($Device | Where-Object {([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
             $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
@@ -57,28 +57,26 @@ $Devices | Select-Object Type, Model -Unique | ForEach-Object {
             #Get commands for active miner devices
             $Command = Get-CommandPerDevice -Command $_.Command -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
-            if ($Algorithm_Norm -match "Equihash1445|Equihash1927") {
-                #define --pers for Equihash1445 & Equihash1927
-                $AlgoPers = " --pers $(Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default 'auto')"
+            Switch ($Algorithm_Norm) {
+                "Equihash1445"   {$Pers = " --pers $(Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default "auto")"}
+                "Equihash1927"   {$Pers = " --pers $(Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default "auto")"}
+                Default          {$Pers = ""}
             }
-            else {$AlgoPers = ""}
 
-            if ($Algorithm_Norm -notmatch "Equihash1445|Equihash1972" -or $AlgoPers) {
-                [PSCustomObject]@{
-                    Name               = $Miner_Name
-                    BaseName           = $Miner_BaseName
-                    Version            = $Miner_Version
-                    DeviceName         = $Miner_Device.Name
-                    Path               = $Path
-                    HashSHA256         = $HashSHA256
-                    Arguments          = ("$Command$CommonCommands$AlgoPers --api $($Miner_Port)$(if ($Pools.$Algorithm_Norm.SSL) {" --ssl --ssl_verification 0"}) --server $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass) --devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Slot)}) -join ' ')" -replace "\s+", " ").trim()
-                    HashRates          = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
-                    API                = "Gminer"
-                    Port               = $Miner_Port
-                    URI                = $Uri
-                    Fees               = [PSCustomObject]@{$Algorithm_Norm = 2 / 100}
-                    WarmupTime         = 45 #seconds
-                }
+            [PSCustomObject]@{
+                Name               = $Miner_Name
+                BaseName           = $Miner_BaseName
+                Version            = $Miner_Version
+                DeviceName         = $Miner_Device.Name
+                Path               = $Path
+                HashSHA256         = $HashSHA256
+                Arguments          = ("$Command$CommonCommands$Pers --api $($Miner_Port)$(if ($Pools.$Algorithm_Norm.SSL) {" --ssl --ssl_verification 0"}) --server $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass) --devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Slot)}) -join ' ')" -replace "\s+", " ").trim()
+                HashRates          = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
+                API                = "Gminer"
+                Port               = $Miner_Port
+                URI                = $Uri
+                Fees               = [PSCustomObject]@{$Algorithm_Norm = 2 / 100}
+                WarmupTime         = 45 #seconds
             }
         }
     }
