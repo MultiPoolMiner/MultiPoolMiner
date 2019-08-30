@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\EthDcrMiner64.exe"
-$HashSHA256 = "640D067A458117274E4FF64F269082E9CE62AB9D5AC4D60ED177ED97801B4649"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethdcrminer64/ClaymoreDual_v14.7.zip"
+$HashSHA256 = "2F028F580A628EF3D1D398E238E0EC7B0C0EC8AA89BB88706C4B19BF6E548FB4"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethdcrminer64/ClaymoreDual_v15.0.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=1433925.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
