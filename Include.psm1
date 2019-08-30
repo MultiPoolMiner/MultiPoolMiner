@@ -1013,7 +1013,7 @@ function Get-Device {
                         OpenCL                = $Device_OpenCL
                         Model                 = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
                         Model_Norm            = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
-                        PCIBus                = [Int]$Device_OpenCL.VendorId #temp fix - need to implement these OpenCL extensions in 'Device.cs': CL_DEVICE_TOPOLOGY_AMD (unknown), CL_DEVICE_PCI_BUS_ID_NV (0x4008), CL_DEVICE_PCI_SLOT_ID_NV (0x4009)
+                        PCIBus                = [Int]$Device_OpenCL.VendorId #temp fix - need to implement these OpenCL extensions in 'Device.cs': CL_DEVICE_TOPOLOGY_AMD (0x4037), CL_DEVICE_PCI_BUS_ID_NV (0x4008), CL_DEVICE_PCI_SLOT_ID_NV (0x4009)
                     }
 
                     $Global:Devices += $Device
