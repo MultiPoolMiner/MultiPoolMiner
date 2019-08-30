@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\MiniZ.exe"
-$HashSHA256 = "C06E8D7E1D43F3B43182F03C79BA2DC430F6CDD53C49DA7A0C355D2A21668C9D"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.5q2_cuda10_win-x64-1.zip"
+$HashSHA256 = "9A7A18E23B4283C8E8C17CDFCB99C2D754117E09BC18D2D842C273A7F910ED9B"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.5q3_cuda10_win-x64.zip"
 $ManualUri = "https://miniz.ch/download"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -41,7 +41,6 @@ if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
-else {$CommonCommands = " --latency --show-shares --all-shares --show-pers --shares-detail --smart-pers --oc2"}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
