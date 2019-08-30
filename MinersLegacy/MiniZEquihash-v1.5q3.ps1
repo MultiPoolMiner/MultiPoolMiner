@@ -41,6 +41,7 @@ if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
+else {$CommonCommands = " --latency --show-shares --all-shares --show-pers --shares-detail --smart-pers --oc2 --pci-order"}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
