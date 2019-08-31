@@ -1016,7 +1016,7 @@ function Get-Device {
                         PCIBus                = [Int]$Device_OpenCL.PCIBus
                     }
 
-                    $Global:Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+                    $Global:Devices += $Device
 
                     if (-not $Type_PlatformId_Index."$($Device_OpenCL.Type)") { 
                         $Type_PlatformId_Index."$($Device_OpenCL.Type)" = @{ }
@@ -1024,7 +1024,6 @@ function Get-Device {
                     if (-not $Type_Vendor_Index."$($Device_OpenCL.Type)") { 
                         $Type_Vendor_Index."$($Device_OpenCL.Type)" = @{ }
                     }
-
 
                     $Index++
                     $PlatformId_Index."$($PlatformId)"++
@@ -1046,6 +1045,8 @@ function Get-Device {
                     Type_Vendor_Slot     = [Int]$Type_Vendor_Slot.($_.Type).($_.Vendor)
                     Type_Slot            = [Int]$Type_Slot.($_.Type)
                 }
+
+                $_ | Add-Member Name ("{0}#{1:d2}" -f $_.Type, $_.Type_Slot).ToUpper()
 
                 if (-not $Type_PlatformId_Slot.($_.Type)) { 
                     $Type_PlatformId_Slot.($_.Type) = @{ }
