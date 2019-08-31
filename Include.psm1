@@ -525,7 +525,7 @@ function Get-Stat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = @($Global:Stats.Name) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+        [String[]]$Name = @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
     $Name | Sort-Object -Unique | ForEach-Object { 
@@ -539,40 +539,39 @@ function Get-Stat {
             if (-not (Test-Path "Stats\$Stat_Name.txt")) { 
                 if (-not (Test-Path "Stats" -PathType Container)) { 
                     New-Item "Stats" -ItemType "directory" -Force | Out-Null
-                    return
                 }
+                return
+            }
+
+            try { 
+                $Stat = Get-Content "Stats\$Stat_Name.txt" -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+                $Global:Stats | Add-Member @{ 
+                    $Stat_Name = [PSCustomObject]@{ 
+                        Name                  = [String]$Stat_Name
+                        Live                  = [Double]$Stat.Live
+                        Minute                = [Double]$Stat.Minute
+                        Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
+                        Minute_5              = [Double]$Stat.Minute_5
+                        Minute_5_Fluctuation  = [Double]$Stat.Minute_5_Fluctuation
+                        Minute_10             = [Double]$Stat.Minute_10
+                        Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
+                        Hour                  = [Double]$Stat.Hour
+                        Hour_Fluctuation      = [Double]$Stat.Hour_FluctuationFFF
+                        Day                   = [Double]$Stat.Day
+                        Day_Fluctuation       = [Double]$Stat.Day_Fluctuation
+                        Week                  = [Double]$Stat.Week
+                        Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
+                        Duration              = [TimeSpan]$Stat.Duration
+                        Updated               = [DateTime]$Stat.Updated
+                    }
+                } -Force
+            }
+            catch { 
+                Write-Log -Level Warn "Stat file ($Stat_Name) is corrupt and will be reset. "
                 Remove-Stat $Stat_Name
             }
-            else {
-                try { 
-                    $Stat = Get-Content "Stats\$Stat_Name.txt" -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-                    $Global:Stats | Add-Member @{ 
-                        $Stat_Name = [PSCustomObject]@{ 
-                            Name                  = [String]$Stat_Name
-                            Live                  = [Double]$Stat.Live
-                            Minute                = [Double]$Stat.Minute
-                            Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
-                            Minute_5              = [Double]$Stat.Minute_5
-                            Minute_5_Fluctuation  = [Double]$Stat.Minute_5_Fluctuation
-                            Minute_10             = [Double]$Stat.Minute_10
-                            Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
-                            Hour                  = [Double]$Stat.Hour
-                            Hour_Fluctuation      = [Double]$Stat.Hour_FluctuationFFF
-                            Day                   = [Double]$Stat.Day
-                            Day_Fluctuation       = [Double]$Stat.Day_Fluctuation
-                            Week                  = [Double]$Stat.Week
-                            Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
-                            Duration              = [TimeSpan]$Stat.Duration
-                            Updated               = [DateTime]$Stat.Updated
-                        }
-                    } -Force
-                }
-                catch { 
-                    Write-Log -Level Warn "Stat file ($Stat_Name) is corrupt and will be reset. "
-                    Remove-Stat $Stat_Name
-                }
-            }
         }
+
         $Global:Stats.$Stat_Name
     }
 }
