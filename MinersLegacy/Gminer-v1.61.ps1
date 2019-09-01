@@ -70,7 +70,7 @@ $Devices | Select-Object Type, Model -Unique | ForEach-Object {
                 DeviceName         = $Miner_Device.Name
                 Path               = $Path
                 HashSHA256         = $HashSHA256
-                Arguments          = ("$Command$CommonCommands$Pers --api $($Miner_Port)$(if ($Pools.$Algorithm_Norm.SSL) {" --ssl --ssl_verification 0"}) --server $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass) --devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Slot)}) -join ' ')" -replace "\s+", " ").trim()
+                Arguments          = ("$Command$CommonCommands$Pers --api $($Miner_Port)$(if ($Pools.$Algorithm_Norm.SSL) {" --ssl --ssl_verification 0"}) --server $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.Pass) --devices $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.PCIBus_Type_Index)}) -join ' ')" -replace "\s+", " ").trim()
                 HashRates          = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                 API                = "Gminer"
                 Port               = $Miner_Port
