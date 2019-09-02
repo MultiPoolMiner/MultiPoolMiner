@@ -9,9 +9,9 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "EF54D9CC26C7B2A5C153B67DE48896E368F4CCC0A3F38AA14FB55E71828D7360"
-$Uri = "https://github.com/nemosminer/ccminerAlexis78/releases/download/Alexis78-v1.5/ccminerAlexis78v1.5.7z"
-$ManualUri = "https://github.com/nemosminer/ccminerAlexis78"
+$HashSHA256 = "2AF71F44A75BBB54863CE186280BE021DEB9FD2A531B801BAFA7AB8667857FEC"
+$Uri = "https://github.com/Minerx117/ccmineralexis78/releases/download/v1.5.1/ccminerAlexis78cuda75x64.7z"
+$ManualUri = "https://github.com/Minerx117/ccmineralexis78"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
 $Miner_Version = $Name -split '-' | Select-Object -Index 1
@@ -20,24 +20,14 @@ if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
 
-# Miner requires CUDA 10.1.00
-$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
-$RequiredCUDAVersion = "10.1.00"
-if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) {
-    Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
-    return
-}
-
 $Commands = [PSCustomObject]@{
     #GPU - profitable 16/05/2018
     #Intensities and parameters tested by nemosminer on 10603gb to 1080ti
     "C11"          = " -a c11 -i 22.1" #X11evo; fix for default intensity
-    "Hsr"          = " -a hsr" #HSR, HShare
     "Keccak"       = " -a keccak -m 2 -i 29" #Keccak; fix for default intensity, difficulty x M
     "KeccakC"      = " -a keccakc -i 29" #Keccakc; fix for default intensity
     "Lyra2v2"      = " -a lyra2v2" #lyra2v2
     #"Neoscrypt"   = " -a neoscrypt -i 15.5" #NeoScrypt, CcminerKlausT-v8.25 is faster
-    "Polytimos"    = " -a poly -i 21" #Poly
     "Skein"        = " -a skein" #Skein
     "Skein2"       = " -a skein2 -i 31" #skein2
     "Veltor"       = " -a veltor -i 23" #Veltor; fix for default intensity
