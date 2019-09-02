@@ -1066,7 +1066,7 @@ while (-not $API.Stop) {
             Remove-Variable Command
 
             #Add watchdog timer
-            if ($Config.Watchdog -and $Miner.Profit -ne $null) { 
+            if ($Config.Watchdog -and $Miner.Earning -ne $null) { 
                 $Miner.Algorithm | ForEach-Object { 
                     $Miner_Algorithm = $_
                     $WatchdogTimer = $WatchdogTimers | Where-Object { $_.MinerName -eq $Miner.Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm }
