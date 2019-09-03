@@ -525,9 +525,13 @@ function Get-Stat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = @($Global:Stats.Name | Select-Object) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+        [String[]]$Name = (Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
+    if ($Name.Count -gt 1) {
+        $Global:Stats | Get-Member -MemberType NoteProperty -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name | Where-Object {$_ -notin $Name} | ForEach-Object {$Global:Stats.PSObject.Properties.Remove($_)}
+    }
+    
     $Name | Sort-Object -Unique | ForEach-Object { 
         $Stat_Name = $_
         if (-not $Global:Stats.$Stat_Name) { 
@@ -580,7 +584,7 @@ function Remove-Stat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = @($Global:Stats.Name | Select-Object) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+        [String[]]$Name = @(if ($Global:Stats) {$Global:Stats | Get-Member -MemberType NoteProperty | Select-Object | Select-Object -ExpandProperty Name}) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
     $Name | Sort-Object -Unique | ForEach-Object { 
