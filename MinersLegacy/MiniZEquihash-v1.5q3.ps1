@@ -2,6 +2,10 @@
 
 param(
     [PSCustomObject]$Pools,
+    using module ..\Include.psm1
+
+param(
+    [PSCustomObject]$Pools,
     [PSCustomObject]$Stats,
     [PSCustomObject]$Config,
     [PSCustomObject[]]$Devices
@@ -9,8 +13,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\MiniZ.exe"
-$HashSHA256 = "9A7A18E23B4283C8E8C17CDFCB99C2D754117E09BC18D2D842C273A7F910ED9B"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.5q3_cuda10_win-x64.zip"
+$HashSHA256 = "343BF97F3F5081DAE83A7E4DD7D8959F5FD3FE7A4BEB7B4392BB46219D5E767D"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.5q4_cuda10_win-x64.zip"
 $ManualUri = "https://miniz.ch/download"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
