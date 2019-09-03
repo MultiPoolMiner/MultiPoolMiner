@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\miner.exe"
-$HashSHA256 = "90F95E6AD36EEBA363D0F80844ACCDDEEBB350FB2706A11ECE91C63EB71443A2"
-$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.61/gminer_1_61_windows64.zip"
+$HashSHA256 = "00E314AF1E2C0F5427C7948E767B156095780587213963DFFE2C021D7C7FA9AA"
+$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.62/gminer_1_62_windows64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5034735.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
