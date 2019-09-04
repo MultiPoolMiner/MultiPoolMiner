@@ -4,6 +4,7 @@
         "Anon":  "AnonyPoW",
         "Bitcoingold":  "BgoldPoW",
         "Bitcoinz":  "BitcoinZ",
+        "Bithereum":  "BethdPoW",
         "Snowgem":  "sngemPoW",
         "LitecoinZ":  "ZcashPoW"
     },
@@ -13,7 +14,10 @@
     },
     "Equihash1927":  {
         "ManagedByPool":  "auto",
+	"Arrow":  "ArrowPoW",
+        "Genesis":  "GENX_PoW",
         "Safecoin":  "Safecoin",
+        "Vidulum":   "EquivPoW",
         "Zero":  "ZERO_PoW",
         "Zerocoin":  "ZERO_PoW"
     },
