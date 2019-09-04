@@ -303,36 +303,32 @@ function Get-CommandPerDevice {
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
-        [String]$Command, 
+        [String]$Command = "", 
         [Parameter(Mandatory = $false)]
-        [Array]$ExcludeParameters, 
+        [String[]]$ExcludeParameters = "", 
         [Parameter(Mandatory = $false)]
         [Int[]]$DeviceIDs
     )
 
     $CommandPerDevice = ""
 
-    " $($Command.TrimStart())" -split "(?=\s+[-]{1,2})" | ForEach-Object { 
+    " $($Command.TrimStart().TrimEnd())" -split "(?=\s+[-]{1,2})" | ForEach-Object { 
         $Token = $_
-        $Prefix = $null
-        $ParameterValueSeparator = $null
-        $ValueSeparator = $null
-        $Values = $null
+        $Prefix = ""
+        $ParameterValueSeparator = ""
+        $ValueSeparator = ""
+        $Values = ""
 
-        if ($Token -match "(?:^\s[-=]+)") { 
-            # supported prefix characters are listed in brackets: [-=]+
-
+        if ($Token -match "(?:^\s[-=]+)" <#supported prefix characters are listed in brackets [-=]#>) { 
             $Prefix = "$($Token -split $Matches[0] | Select-Object -Index 0)$($Matches[0])"
             $Token = $Token -split $Matches[0] | Select-Object -Last 1
 
-            if ($Token -match "(?:[ =]+)") { 
-                # supported separators are listed in brackets: [ =]+
+            if ($Token -match "(?:[ =]+)" <#supported separators are listed in brackets [ =]#>) { 
                 $ParameterValueSeparator = $Matches[0]
                 $Parameter = $Token -split $ParameterValueSeparator | Select-Object -Index 0
                 $Values = $Token.Substring(("$Parameter$($ParameterValueSeparator)").length)
 
-                if ($ExcludeParameters -notcontains $Parameter -and $Values -match "(?:[,; ]{1})") { 
-                    # supported separators are listed in brackets: [,; ]{1}
+                if ($Parameter -notin $ExcludeParameters -and $Values -match "(?:[,; ]{1})" <#supported separators are listed in brackets [,; ]#>) { 
                     $ValueSeparator = $Matches[0]
                     $RelevantValues = @()
                     $DeviceIDs | ForEach-Object { 
