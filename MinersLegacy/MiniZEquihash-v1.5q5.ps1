@@ -32,7 +32,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Equihash965";    MinMemGB = 2.0; Command = " --par=96,5"}
     [PSCustomObject]@{Algorithm = "Equihash1254";   MinMemGB = 3.0; Command = " --par=125,4"}
     [PSCustomObject]@{Algorithm = "Equihash1445";   MinMemGB = 2.0; Command = " --par=144,5"}
-    [PSCustomObject]@{Algorithm = "EquihashR15050"; MinMemGB = 2.0; Command = " --par=150,5"}
+#    [PSCustomObject]@{Algorithm = "EquihashR15050"; MinMemGB = 2.0; Command = " --par=150,5"} #Bad shares
     [PSCustomObject]@{Algorithm = "EquihashR15053"; MinMemGB = 2.0; Command = " --par=150,5,3"}
     [PSCustomObject]@{Algorithm = "Equihash1927";   MinMemGB = 3.0; Command = " --par=192,7"}
 )
