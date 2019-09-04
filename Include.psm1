@@ -584,7 +584,7 @@ function Remove-Stat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = @($Global:Stats | Get-Member -MemberType NoteProperty -ErrorAction SilentlyIgnore | Select-Object | Select-Object -ExpandProperty Name) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+        [String[]]$Name = @($Global:Stats | Get-Member -MemberType NoteProperty -ErrorAction SilentlyContinue | Select-Object | Select-Object -ExpandProperty Name) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
     $Name | Sort-Object -Unique | ForEach-Object { 
