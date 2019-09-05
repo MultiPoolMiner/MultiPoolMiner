@@ -37,7 +37,7 @@ else {
 
 $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "aeon";        MinMemGB = 1; Fee = 1; Command = " --algo aeon"} #Aeon, new in 0.9 (CryptoNight-Lite algorithm)
-    [PSCustomObject]@{Algorithm = "aeternity";   MinMemGB = 3; Fee = 1; Command = " --algo aeternity --intensity 5"} #Cuckoo29, new in 0.17.0
+#    [PSCustomObject]@{Algorithm = "aeternity";   MinMemGB = 3; Fee = 1; Command = " --algo aeternity --intensity 5"} #Cuckoo29, new in 0.17.0, reported API value too small
     [PSCustomObject]@{Algorithm = "allium";      MinMemGB = 1; Fee = 1; Command = " --algo allium"} #Allium
     [PSCustomObject]@{Algorithm = "argon2d250";  MinMemGB = 1; Fee = 1; Command = " --algo argon2d250"} #Argon2CRDS, new in 19.1
     [PSCustomObject]@{Algorithm = "argon2d4096"; MinMemGB = 1; Fee = 1; Command = " --algo argon2d4096"} #Argon2UIS, new in 19.1
