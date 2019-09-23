@@ -67,6 +67,13 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
 
     $Divisor = 1000000 * [Double]$APIStatusResponse.$_.mbtc_mh_factor
 
+    switch ($Algorithm_Norm) { #Temp fix
+        "EquihashR12540" { $Divisor *= 2 } #temp fix
+        "Equihash1445"   { $Divisor *= 2 } #temp fix
+        "Equihash1927"   { $Divisor *= 2 } #temp fix
+        "Verushash"      { $Divisor *= 2 } #temp fix
+    }
+
     if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1) }
     else { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ([Double]$APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true }
 
