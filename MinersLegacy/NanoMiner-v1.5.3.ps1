@@ -33,11 +33,11 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Ethash3gb";               AmdMinMemGB = 3; NvidiaMinMemGB = 3; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #Ethash3GB
     [PSCustomObject]@{Algorithm = "Ethash";                  AmdMinMemGB = 4; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #Ethash
     [PSCustomObject]@{Algorithm = "Ubqhash";                 AmdMinMemGB = 4; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #Ubqhash
-    [PSCustomObject]@{Algorithm = "CryptoNightV5";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightV5
-    [PSCustomObject]@{Algorithm = "CryptoNightV6";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightV6
-    [PSCustomObject]@{Algorithm = "CryptoNightV7";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightV7
-    [PSCustomObject]@{Algorithm = "CryptoNightV8";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightV8
-    [PSCustomObject]@{Algorithm = "CryptoNightReverseWaltz"; AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightRwzV8
+    [PSCustomObject]@{Algorithm = "CryptoNight";             AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #Cryptonight
+    [PSCustomObject]@{Algorithm = "CryptoNightR";            AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightR
+    [PSCustomObject]@{Algorithm = "CryptoNightV7";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightV1
+    [PSCustomObject]@{Algorithm = "CryptoNightV8";           AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightV2
+    [PSCustomObject]@{Algorithm = "CryptoNightReverseWaltz"; AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = ""} #CryptonightRwz
     [PSCustomObject]@{Algorithm = "Cuckaroo29";              AmdMinMemGB = 6; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 2; Command = ""} #Cuckaroo29
     [PSCustomObject]@{Algorithm = "Cuckarood29";             AmdMinMemGB = 6; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 2; Command = ""} #Cuckarood29, new with 1.5.0
     [PSCustomObject]@{Algorithm = "RandomHash";              AmdMinMemGB = 0; NvidiaMinMemGB = 0; Vendor = @("CPU");           Fee = 2; Command = ""} #RandomHash, CPU only
