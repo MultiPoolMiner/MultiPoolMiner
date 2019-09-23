@@ -4,7 +4,7 @@ param(
     [PSCustomObject]$Parameters
 )
 
-$Parameters.Algorithms = $Parameters.Algorithms -replace ",undefined$"
+if ($Parameters.Algorithms) {$Parameters.Algorithms = $Parameters.Algorithms -replace ",undefined$"}
 
 $Count = [Int]0
 $Text = ""
