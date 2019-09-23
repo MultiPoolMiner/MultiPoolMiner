@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "5AF37C17B41980D6BDD254C86FE97F5D04A53D293FD886C52D6220774052F270"
-$Uri = "https://github.com/zcoinofficial/ccminer/releases/download/1.2.0/ccminer.exe"
+$HashSHA256 = "E39BD5E725599E44E4E0F92F4D9688179EEEAA6C0C1917F2AA0F547EFFB30F25"
+$Uri = "https://github.com/zcoinofficial/ccminer/releases/download/1.2.2/ccminer.exe"
 $ManualUri = "https://github.com/zcoinofficial/ccminer/releases"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -29,13 +29,13 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
 }
 
 $Commands = [PSCustomObject]@{
-    "Mtp" = " -a mtp -i 21"
+    "Mtp" = " -a mtp -i 21 -R 1"
 }
 #Commands from config file take precedence
 if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
 else {$CommonCommands = ""}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
