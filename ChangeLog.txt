@@ -1,32 +1,41 @@
 # MultiPoolMiner dev version
 
-Download link:
-https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.3.zip
-
 ## Changelog Version 3.5.3
 
 #### Core changes
+- Changed bestpool sorting; reduce miner switching when benchmarking
 - Fixed parameters '-DeviceName' and '-ExcludeDeviceName'
-- Fixed start files to match pool renames
-- Replaced Get-Stat with 50% faster version
 
 #### Miner changes
+- Changed CcminerKlausT-v8.25; disabled 'Lyra2V2' algorithm, CcminerAlexis-v1.5 is 10%faster
+- Changed BMiner-v15.8.5; disabled 'Equihash' algorithm, DSTMEquihash-v0.6.2 is 15% faster
 - Changed CcminerBMW512-v2.2.5; use faster x86 variant
 - Fixed all miners; $CommonCommands was broken
 - Fixed CcminerKlausT-v8.25; lowered intensity for 'Neoscrypt' algorithm
-- Fixed MiniZEquihash-v1.5p; removed 'EquihashR15050' algorithm
-- Updated Gminer-v1.59; added $CommonCommands
+- Updated BMiner-v15.8.6; disabled dual mining with 'Blake2s' algorithm (rejected shares), improve the performance of automatic tuning of dual mining parameters
+- Updated CcminerAlexis-v1.5.1; better compatibility with 'skein' algorithm, dropped 'Hsr' and 'Poly' support 
+- Updated CcminerMTP-v1.2.0.01.1ps1
+- Updated ClaymoreDual_v15.0
+- Updated Gminer-v1.62; added $CommonCommands, enabled 'Equihash1254' algorithm for AMD
 - Updated lolMiner-v0.8.8; removed 'old Beam' algorithm
-- Updated TTMiner-v3.0.4
+- Updated MiniZEquihash-v1.5q5
+- Updated TTMiner-v3.0.5
 
 #### Pool changes
--Fixed double-scanning pools caused by poolfile rename to *-Algo / *-Coin
+- Fixed BlazePool[-Algo/-Coin]; corrected API url
+- Fixed Nicehash[Old]; CryptonightV7 does not work in Europe
+
+#### Balances changes
+#### API changes
+- Fixed Bminer; recording hashrate for Ethash2GB/3GB was broken (regression from version 3.5.1)
+- Fixed FireIce; (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/e9c55d3d708b8ed1588ae00b8e017dfab481d2cd)
 
 #### Web Interface changes
+- Added Currency column to pool pages
 - Fixed stat management (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/8e6fd3acba279c99ed1d7bce1ed14073e9c37822)
 
 #### Known issues (at least on my rig)
-- Bminer-v15.8.3 fails to mine BeamV2 (https://bitcointalk.org/index.php?topic=2519271.msg52211890#msg52211890)
+- Bminer-v15.8.4 fails to mine BeamV2 (https://bitcointalk.org/index.php?topic=2519271.msg52211890#msg52211890)
 
 ## Changelog Version 3.5.2
 
