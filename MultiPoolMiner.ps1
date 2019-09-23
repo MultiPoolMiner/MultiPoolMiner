@@ -421,8 +421,6 @@ while (-not $API.Stop) {
 
     #Power cost preparations
     $PowerPrice = [Double]0
-    $PowerCostBTCperW = [Double]0
-    $BasePowerCost = [Double]0
     if ($Devices.Count -and $Config.MeasurePowerUsage) { 
         #HWiNFO64 verification
         $RegKey = "HKCU:\Software\HWiNFO64\VSB"
@@ -446,7 +444,7 @@ while (-not $API.Stop) {
                     }
                 }
                 if ($Devices.Name | Where-Object { $Hashtable.$_ -eq $null }) { 
-                    Write-Log -Level Warn "HWiNFO64 sensor naming is invalid [missing sensor for $(($Devices.Name | Where-Object {$Hashtable.$_ -eq $null}) -join ', ')] - disabling power usage calculations. "
+                    Write-Log -Level Warn "HWiNFO64 sensor naming is invalid [missing sensor config for $(($Devices.Name | Where-Object {$Hashtable.$_ -eq $null}) -join ', ')] - disabling power usage calculations. "
                     $Config.MeasurePowerUsage = $false
                 }
                 Remove-Variable Device
@@ -602,6 +600,7 @@ while (-not $API.Stop) {
 
     #Retrieve collected balance data
     if ($Balances_Jobs) { 
+        if ($Balances_Jobs | Where-Object State -NE "Completed") { Write-Log "Waiting for balances information. " }
         $Balances = @(($Balances + @($Balances_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Content | Sort-Object Name)) | Sort-Object LastUpdated | Sort-Object "Name" -Unique | Where-Object Total -GT 0)
         Remove-Variable Balances_Jobs
         if ($API) { $API.Balances_Jobs = $null }
@@ -638,7 +637,7 @@ while (-not $API.Stop) {
         $API.Rates = $Rates #Give API access to the exchange rates
     }
 
-    #Power price
+    #Power price and cost
     if ($Config.PowerPrices | Sort-Object | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) { 
         if ($null -eq $Config.PowerPrices."00:00") { 
             #00:00h power price is the same as the last price of the day
@@ -646,10 +645,14 @@ while (-not $API.Stop) {
         }
         $PowerPrice = [Double]($Config.PowerPrices.($Config.PowerPrices | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Sort-Object | Where-Object { $_ -lt (Get-Date -Format HH:mm).ToString() } | Select-Object -Last 1))
     }
+    $PowerCostBTCperW = [Double]0
+    $BasePowerCost = [Double]0
     if ($Rates.BTC.$FirstCurrency) { 
         if ($API) { $API.BTCRateFirstCurrency = $Rates.BTC.$FirstCurrency }
-        $PowerCostBTCperW = [Double](1 / 1000 * 24 * $PowerPrice / $Rates.BTC.$FirstCurrency)
-        $BasePowerCost = [Double]($Config.BasePowerUsage / 1000 * 24 * $PowerPrice / $Rates.BTC.$FirstCurrency)
+        if ($Config.MeasurePowerUsage) {
+            $PowerCostBTCperW = [Double](1 / 1000 * 24 * $PowerPrice / $Rates.BTC.$FirstCurrency)
+            $BasePowerCost = [Double]($Config.BasePowerUsage / 1000 * 24 * $PowerPrice / $Rates.BTC.$FirstCurrency)
+        }
     }
 
     if ($AllMiners) { Write-Log "Calculating earning$(if ($PowerPrice) {" and profit"}) for each miner$(if ($PowerPrice) {" (power cost $($FirstCurrency) $PowerPrice/kW⋅h)"}). " }
@@ -825,6 +828,7 @@ while (-not $API.Stop) {
             $_.API -eq $Miner.API -and 
             $_.Port -eq $Miner.Port -and 
             $_.ShowMinerWindow -eq $Miner.ShowMinerWindow -and 
+            $_.IntervalMultiplier -eq $Miner.IntervalMultiplier -and 
             $_.AllowedBadShareRatio -eq $Miner.AllowedBadShareRatio -and 
             (Compare-Object $_.Algorithm ($Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name) | Measure-Object).Count -eq 0
         }
