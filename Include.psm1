@@ -662,8 +662,6 @@ function Get-ChildItemContent {
     else { $Job | Receive-Job -Wait -AutoRemoveJob }
 }
 
-
-
 filter ConvertTo-Hash { 
     [CmdletBinding()]
     $Hash = $_
