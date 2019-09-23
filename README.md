@@ -7,7 +7,7 @@
 
 ###### Licensed under the GNU General Public License v3.0 - Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.md is based on README.txt - updated on 24/08/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.md is based on README.txt - updated on 29/08/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 
 
@@ -68,7 +68,7 @@ Required only if you are mining at MiningPoolHub. Adding this parameter / key pa
 The API_Key can be found in the MiningPoolHub Account detail page.
 
 **-APIPort**
-Port for the MPM API and web GUI. The miner port range will start from APIPort +1. Default is 3999
+Port for the MPM API and web GUI. The miner port range will start from APIPort +1. Default is 3999. 0 disables the API.
 
 **-Algorithm**
 Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms. Use commas to separate multiple values.
@@ -637,13 +637,13 @@ E.g. To use MiningPoolHub mining endpoints in regions 'Asia' and 'US' ONLY:
     }
 Note: The values for 'Regions' must match the definitions in 'Regions.txt'.
 
-#### ZergPool[-Algo / -Coin] Solo/Party mining
+#### Blockmasters &  ZergPool(Coins) Solo/Party mining
 
 Check the pools web page for more information first!
-For ZergPool(Coins) solo or party mining edit the config file as follows:   
+For Blockmasters & ZergPool(Coins) solo or party mining edit the config file like this:   
 
     "Pools": {
-      "ZergPool-Algo": {
+      "Blockmasters-Algo": {
         "PasswordSuffix": {
           "Algorithm": {
             "*": "",
