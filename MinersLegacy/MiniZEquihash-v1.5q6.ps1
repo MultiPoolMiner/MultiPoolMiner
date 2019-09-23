@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\MiniZ.exe"
-$HashSHA256 = "9A7A18E23B4283C8E8C17CDFCB99C2D754117E09BC18D2D842C273A7F910ED9B"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.5q3_cuda10_win-x64.zip"
+$HashSHA256 = "F13605C533763667292721DD2E601FB9A17496406E54EBC5CA7D95108832FA65"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.5q6_cuda10_win-x64.zip"
 $ManualUri = "https://miniz.ch/download"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -32,7 +32,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Equihash965";    MinMemGB = 2.0; Command = " --par=96,5"}
     [PSCustomObject]@{Algorithm = "Equihash1254";   MinMemGB = 3.0; Command = " --par=125,4"}
     [PSCustomObject]@{Algorithm = "Equihash1445";   MinMemGB = 2.0; Command = " --par=144,5"}
-    [PSCustomObject]@{Algorithm = "EquihashR15050"; MinMemGB = 2.0; Command = " --par=150,5"}
+#    [PSCustomObject]@{Algorithm = "EquihashR15050"; MinMemGB = 2.0; Command = " --par=150,5"} #Bad shares
     [PSCustomObject]@{Algorithm = "EquihashR15053"; MinMemGB = 2.0; Command = " --par=150,5,3"}
     [PSCustomObject]@{Algorithm = "Equihash1927";   MinMemGB = 3.0; Command = " --par=192,7"}
 )
