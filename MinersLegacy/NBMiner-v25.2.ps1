@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\nbminer.exe"
-$HashSHA256 = "9FBFF20A0D90590F64498E2C3B04EC9D5CE42B53D9F54F99D45273E5FCDD081B"
-$Uri = "https://github.com/NebuTech/NBMiner/releases/download/v24.4/NBMiner_24.4_Win.zip"
+$HashSHA256 = "47D674DBC4B40BEB7B1A5B2AB13CAA0DBF6F14C0538A3975F31A674485BEBC9C"
+$Uri = "https://github.com/NebuTech/NBMiner/releases/download/v25.2/NBMiner_25.2_Win.zip"
 $ManualUri = "https://github.com/gangnamtestnet/progminer/releases"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -18,7 +18,7 @@ $Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
-$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
+$Devices = $Devices | Where-Object Type -EQ "GPU"
 
 # Miner requires CUDA 9.1.00 or higher
 $CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
@@ -29,19 +29,23 @@ if ($Devices.Vendor -contains "NVIDIA Corporation" -and $CUDAVersion -and [Syste
 }
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{Algorithm = "tensority";           MinMemGB = 1; MinMemGBWin10 = 1;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a tensority"} #Tensority (BTM)
-# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash";               MinMemGB = 4; MinMemGBWin10 = 4; SecondaryIntensity = 0;  Fee = 0.65; Command = " -a ethash"} #Ethash
-# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash2gb";            MinMemGB = 2; MinMemGBWin10 = 2; SecondaryIntensity = 0;  Fee = 0.65; Command = " -a ethash"} #Ethash2GB
-# ClaymoreDual & Phoenix are approx 10% faster           [PSCustomObject]@{Algorithm = "ethash3gb";            MinMemGB = 3; MinMemGBWin10 = 3; SecondaryIntensity = 0;  Fee = 0.65; Command = " -a ethash"} #Ethash3GB
-    [PSCustomObject]@{Algorithm = "tensority_ethash";    MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 3;    Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash
-    [PSCustomObject]@{Algorithm = "tensority_ethash2gb"; MinMemGB = 3; MinMemGBWin10 = 2;  SecondaryIntensity = 17; Fee = 3;    Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash2GB
-    [PSCustomObject]@{Algorithm = "tensority_ethash3gb"; MinMemGB = 3; MinMemGBWin10 = 3;  SecondaryIntensity = 17; Fee = 3;    Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash3GB
-    [PSCustomObject]@{Algorithm = "cuckarood";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckarood"} #Cuckaroo29
-    [PSCustomObject]@{Algorithm = "cuckaroo_swap";       MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckaroo_swap"} #Cuckaroo29s (Swap29)
-    [PSCustomObject]@{Algorithm = "cuckatoo";            MinMemGB = 8; MinMemGBWin10 = 10; SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckatoo"} #Cuckatoo31 (Grin31)
-    [PSCustomObject]@{Algorithm = "cuckoo_ae";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a cuckoo_ae"} #Cuckoo29 (Aeternity)
-    [PSCustomObject]@{Algorithm = "progpow_sero";        MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a progpow_sero"} #Progpow92 (Sero)
-    [PSCustomObject]@{Algorithm = "sipc";                MinMemGB = 1; MinMemGBWin10 = 1;  SecondaryIntensity = 0;  Fee = 2;    Command = " -a progpow_sero"} #sipc, new in 24.3
+#    [PSCustomObject]@{Algorithm = "ethash";               MinMemGB = 4; MinMemGBWin10 = 4; SecondaryIntensity = 0;  Fee = 0.65; Vendor = @("NVIDIA");     Command = " -a ethash"} #Ethash; ClaymoreDual & Phoenix are approx 10% faster          
+#    [PSCustomObject]@{Algorithm = "ethash2gb";            MinMemGB = 2; MinMemGBWin10 = 2; SecondaryIntensity = 0;  Fee = 0.65; Vendor = @("NVIDIA");     Command = " -a ethash"} #Ethash2GB; ClaymoreDual & Phoenix are approx 10% faster          
+#    [PSCustomObject]@{Algorithm = "ethash3gb";            MinMemGB = 3; MinMemGBWin10 = 3; SecondaryIntensity = 0;  Fee = 0.65; Vendor = @("NVIDIA");     Command = " -a ethash"} #Ethash3GB; ClaymoreDual & Phoenix are approx 10% faster          
+    [PSCustomObject]@{Algorithm = "cuckarood";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2; Vendor = @("NVIDIA");        Command = " -a cuckarood"} #Cuckarood29
+    [PSCustomObject]@{Algorithm = "cuckaroo_swap";       MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2; Vendor = @("NVIDIA");        Command = " -a cuckaroo_swap"} #Cuckaroo29s (Swap29)
+    [PSCustomObject]@{Algorithm = "cuckatoo";            MinMemGB = 8; MinMemGBWin10 = 10; SecondaryIntensity = 0;  Fee = 2; Vendor = @("NVIDIA");        Command = " -a cuckatoo"} #Cuckatoo31 (Grin31)
+    [PSCustomObject]@{Algorithm = "cuckoo_ae";           MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2; Vendor = @("NVIDIA");        Command = " -a cuckoo_ae"} #Cuckoo29 (Aeternity)
+    [PSCustomObject]@{Algorithm = "eaglesong";           MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 2; Vendor = @("AMD", "NVIDIA"); Command = " -a eaglesong"} #Eaglesong (CBK), new in 25.0
+    [PSCustomObject]@{Algorithm = "eaglesong_ethash";    MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 3; Vendor = @("NVIDIA");        Command = " -a eaglesong_ethash"} #Eaglesong (CBK) & Ethash, new in 25.0
+    [PSCustomObject]@{Algorithm = "eaglesong_ethash2gb"; MinMemGB = 2; MinMemGBWin10 = 2;  SecondaryIntensity = 17; Fee = 3; Vendor = @("NVIDIA");        Command = " -a eaglesong_ethash"} #Eaglesong (CBK) & Ethash2GB, new in 25.0
+    [PSCustomObject]@{Algorithm = "eaglesong_ethash3gb"; MinMemGB = 3; MinMemGBWin10 = 3;  SecondaryIntensity = 17; Fee = 3; Vendor = @("NVIDIA");        Command = " -a eaglesong_ethash"} #Eaglesong (CBK) & Ethash3GB, new in 25.0
+    [PSCustomObject]@{Algorithm = "progpow_sero";        MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2; Vendor = @("NVIDIA");        Command = " -a progpow_sero"} #Progpow92 (Sero)
+    [PSCustomObject]@{Algorithm = "sipc";                MinMemGB = 1; MinMemGBWin10 = 1;  SecondaryIntensity = 0;  Fee = 2; Vendor = @("NVIDIA");        Command = " -a progpow_sero"} #sipc, new in 24.3
+    [PSCustomObject]@{Algorithm = "tensority";           MinMemGB = 1; MinMemGBWin10 = 1;  SecondaryIntensity = 0;  Fee = 2; Vendor = @("NVIDIA");        Command = " -a tensority"} #Tensority (BTM)
+    [PSCustomObject]@{Algorithm = "tensority_ethash";    MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 3; Vendor = @("NVIDIA");        Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash
+    [PSCustomObject]@{Algorithm = "tensority_ethash2gb"; MinMemGB = 2; MinMemGBWin10 = 2;  SecondaryIntensity = 17; Fee = 3; Vendor = @("NVIDIA");        Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash2GB
+    [PSCustomObject]@{Algorithm = "tensority_ethash3gb"; MinMemGB = 3; MinMemGBWin10 = 3;  SecondaryIntensity = 17; Fee = 3; Vendor = @("NVIDIA");        Command = " -a tensority_ethash"} #Tensority (BTM) & Ethash3GB
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object {$_.Algorithm -ne $Algorithm}; $Commands += $_}}
@@ -50,11 +54,11 @@ if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm
 if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
 else {$CommonCommands = ""}
 
-$Devices | Select-Object Model -Unique | ForEach-Object {
-    $Device = @($Devices | Where-Object Model -EQ $_.Model)
+$Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
+    $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
 
-    $Commands | ForEach-Object {$Main_Algorithm_Norm = Get-Algorithm ($_.Algorithm -Split "_" | Select-Object -Index 0); $_} | Where-Object {$Pools.$Main_Algorithm_Norm.Host} | ForEach-Object {
+    $Commands | ForEach-Object {$Main_Algorithm_Norm = Get-Algorithm ($_.Algorithm -Split "_" | Select-Object -Index 0); $_} | Where-Object {$_.Vendor -contains ($Device.Vendor_ShortName | Select-Object -Unique) -and $Pools.$Main_Algorithm_Norm.Host} | ForEach-Object {
         $Main_Algorithm = $_.Algorithm -split '_' | Select-Object -Index 0
         $Secondary_Algorithm = $_.Algorithm -split '_' | Select-Object -Index 1
         $Fee = $_.Fee
