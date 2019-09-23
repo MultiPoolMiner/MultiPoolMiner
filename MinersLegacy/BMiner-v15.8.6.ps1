@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\BMiner.exe"
-$HashSHA256 = "3A394F7520735847F82D71AB617564F0B5E8370551B5B115B7AF3AAC3BDBC824"
-$Uri = "https://www.bminercontent.com/releases/bminer-lite-v15.8.5-d2c3d7c-amd64.zip"
+$HashSHA256 = "A0F8D35E02D6FFDFC8B558F42A5C2A8604611A88A7B7350127B360233B8CE3C6"
+$Uri = "https://www.bminercontent.com/releases/bminer-lite-v15.8.6-5f20661-amd64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=2519271.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -42,9 +42,9 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "ethash2gb";      Protocol = "ethstratum";   SecondaryAlgorithm = "blake14r";  ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = ""} #Ethash2GB & Blake14r dual mining
     [PSCustomObject]@{Algorithm = "ethash3gb";      Protocol = "ethstratum";   SecondaryAlgorithm = "blake14r";  ; MinMemGB = 3; Vendor = @("NVIDIA"); Command = ""} #Ethash3GB & Blake14r dual mining
     [PSCustomObject]@{Algorithm = "ethash";         Protocol = "ethstratum";   SecondaryAlgorithm = "blake14r";  ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = ""} #Ethash & Blake14r dual mining
-    [PSCustomObject]@{Algorithm = "ethash2gb";      Protocol = "ethstratum";   SecondaryAlgorithm = "blake2s";   ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = ""} #Ethash2GB & Blake2s dual mining
-    [PSCustomObject]@{Algorithm = "ethash3gb";      Protocol = "ethstratum";   SecondaryAlgorithm = "blake2s";   ; MinMemGB = 3; Vendor = @("NVIDIA"); Command = ""} #Ethash3GB & Blake2s dual mining
-    [PSCustomObject]@{Algorithm = "ethash";         Protocol = "ethstratum";   SecondaryAlgorithm = "blake2s";   ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = ""} #Ethash & Blake2s dual mining
+    # [PSCustomObject]@{Algorithm = "ethash2gb";      Protocol = "ethstratum";   SecondaryAlgorithm = "blake2s";   ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = ""} #Ethash2GB & Blake2s dual mining; rejected shares
+    # [PSCustomObject]@{Algorithm = "ethash3gb";      Protocol = "ethstratum";   SecondaryAlgorithm = "blake2s";   ; MinMemGB = 3; Vendor = @("NVIDIA"); Command = ""} #Ethash3GB & Blake2s dual mining; rejected shares
+    # [PSCustomObject]@{Algorithm = "ethash";         Protocol = "ethstratum";   SecondaryAlgorithm = "blake2s";   ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = ""} #Ethash & Blake2s dual mining; rejected shares
     [PSCustomObject]@{Algorithm = "ethash2gb";      Protocol = "ethstratum";   SecondaryAlgorithm = "tensority"; ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = ""} #Ethash2GB & Bytom dual mining
     [PSCustomObject]@{Algorithm = "ethash3gb";      Protocol = "ethstratum";   SecondaryAlgorithm = "tensority"; ; MinMemGB = 3; Vendor = @("NVIDIA"); Command = ""} #Ethash3GB & Bytom dual mining
     [PSCustomObject]@{Algorithm = "ethash";         Protocol = "ethstratum";   SecondaryAlgorithm = "tensority"; ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = ""} #Ethash & Bytom dual mining
