@@ -171,6 +171,7 @@
     "equihash2109":  "Equihash2109",
     "equihash96":  "Equihash965",
     "equihashbtg":  "Equihash1445",
+    "equihashzcl":  "Equihash1927",
     "espers":  "HMQ1725",
     "eth":  "Ethash",
     "ethash2gb":  "Ethash2GB",
