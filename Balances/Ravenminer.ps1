@@ -35,6 +35,7 @@ if (($APIResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Me
     return
 }
 
+Write-Log -Level Verbose "Processing balances information ($Name). "
 [PSCustomObject]@{
     Name        = "$($Name) ($($APIResponse.currency))"
     Pool        = $Name

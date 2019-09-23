@@ -40,6 +40,7 @@ if ($Payout_Currencies) {
     return
 }
 
+Write-Log -Level Verbose "Processing balances information ($Name). "
 $Payout_Currencies | ForEach-Object {
     $Payout_Currency = $_
     $APIResponse = ""        
