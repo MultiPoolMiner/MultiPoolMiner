@@ -421,6 +421,8 @@ while (-not $API.Stop) {
 
     #Power cost preparations
     $PowerPrice = [Double]0
+    $PowerCostBTCperW = [Double]0
+    $BasePowerCost = [Double]0
     if ($Devices.Count -and $Config.MeasurePowerUsage) { 
         #HWiNFO64 verification
         $RegKey = "HKCU:\Software\HWiNFO64\VSB"
@@ -637,7 +639,7 @@ while (-not $API.Stop) {
         $API.Rates = $Rates #Give API access to the exchange rates
     }
 
-    #Power price and cost
+    #Power price
     if ($Config.PowerPrices | Sort-Object | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) { 
         if ($null -eq $Config.PowerPrices."00:00") { 
             #00:00h power price is the same as the last price of the day
@@ -645,11 +647,9 @@ while (-not $API.Stop) {
         }
         $PowerPrice = [Double]($Config.PowerPrices.($Config.PowerPrices | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Sort-Object | Where-Object { $_ -lt (Get-Date -Format HH:mm).ToString() } | Select-Object -Last 1))
     }
-    $PowerCostBTCperW = [Double]0
-    $BasePowerCost = [Double]0
     if ($Rates.BTC.$FirstCurrency) { 
         if ($API) { $API.BTCRateFirstCurrency = $Rates.BTC.$FirstCurrency }
-        if ($Config.MeasurePowerUsage) {
+        if ($Config.MeasurePowerUsage -and $PowerPrice) {
             $PowerCostBTCperW = [Double](1 / 1000 * 24 * $PowerPrice / $Rates.BTC.$FirstCurrency)
             $BasePowerCost = [Double]($Config.BasePowerUsage / 1000 * 24 * $PowerPrice / $Rates.BTC.$FirstCurrency)
         }
