@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\t-rex.exe"
-$HashSHA256 = "6330CA4871D5A1C45DAF0205CB769096B6C07AA275AD43E347578737C5F35AAD"
-$Uri = "https://github.com/trexminer/T-Rex/releases/download/0.13.2/t-rex-0.13.2-win-cuda10.0.zip"
+$HashSHA256 = "8481F8DB9F7CA2F2A1828337A13CFF2BFD680A5A78CC68565F7B65D339042272"
+$Uri = "https://github.com/trexminer/T-Rex/releases/download/0.14.4/t-rex-0.14.4-win-cuda10.0.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4432704.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -26,7 +26,7 @@ $Commands = [PSCustomObject]@{
     "C11"         = " -a c11 -i 26" #C11
     "Dedal"       = " -a dedal -i 23" #Defal, re-added in 0.13.0
     "Geek"        = " -a geek -i 23" #Geek, new in 0.8.0
-    # "HMQ1725"     = " -a hmq1725" #Hmq1725, new in 0.6.4; NVIDIA-CryptoDredge_v0.20.2 is faster
+    # "HMQ1725"     = " -a hmq1725" #Hmq1725, new in 0.6.4; NVIDIA-CryptoDredge_v0.21.0 is faster
     "Honeycomb"   = " -a honeycomb -i 26" #Honeycomb, new in 12.0
     "JeongHash"   = " -a jeonghash -i 23" #GltJeongHash, new in 0.8.6
     "Lyra2Z"      = " -a lyra2z" #Lyra2z
@@ -42,9 +42,10 @@ $Commands = [PSCustomObject]@{
     "Sonoa"       = " -a sonoa -i 25" #Sonoa, new in 0.6.1
     "Timetravel"  = " -a timetravel -i 25" #Timetravel
     "Tribus"      = " -a tribus -i 26" #Tribus
-    "X16r"        = " -a x16r -i 26" #X16r
+    "X16r"        = " -a x16r -i 25" #X16r
     "X16rt"       = " -a x16rt -i 26" #X16rt, new in 0.9.1
-    "X16s"        = " -a x16s -i 26" #X16s
+    "X16rv2"      = " -a x16rv2" #X16rv2, new in 0.14.4
+    "X16s"        = " -a x16s -i 24" #X16s
     "X17"         = " -a x17 -i 26" #X17
     "X21s"        = " -a x21s -i 23" #X21s, new in 0.8.3
     "X22i"        = " -a x22i -i 23" #X22i, new in 0.7.2
@@ -54,7 +55,7 @@ $Commands = [PSCustomObject]@{
 if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
 else {$CommonCommands = " --no-watchdog"}
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
