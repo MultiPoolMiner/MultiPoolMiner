@@ -16,8 +16,11 @@
     # Setup runspace to launch the API webserver in a separate thread
     $newRunspace = [runspacefactory]::CreateRunspace()
     $newRunspace.Open()
-    $newRunspace.SessionStateProxy.SetVariable("API", $API)
-    $newRunspace.SessionStateProxy.Path.SetLocation($(pwd)) | Out-Null
+
+    Get-Variable -Scope Global | ForEach-Object {
+        try {$newRunspace.SessionStateProxy.SetVariable($_.Name, $_.Value)}
+        catch {}
+    }
 
     $apiserver = [PowerShell]::Create().AddScript(
         {
@@ -52,14 +55,14 @@
                 $Path = $Request.Url.LocalPath
 
                 # Parse any parameters in the URL - $Request.Url.Query looks like "+ ?a=b&c=d&message=Hello%20world"
-                $Parameters = [PSCustomObject]@{}
+                $Parameters = @{}
                 $Request.Url.Query -Replace "\?", "" -Split '&' | Foreach-Object {
                     $key, $value = $_ -Split '='
                     # Decode any url escaped characters in the key and value
                     $key = [URI]::UnescapeDataString($key)
                     $value = [URI]::UnescapeDataString($value)
                     if ($key -and $value) {
-                        $Parameters | Add-Member $key $value
+                        $Parameters.$key = $value
                     }
                 }
 
