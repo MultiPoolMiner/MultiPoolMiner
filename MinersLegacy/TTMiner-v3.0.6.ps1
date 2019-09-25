@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\TT-Miner.exe"
-$HashSHA256 = "C9EEF74B3EDC10C3A32709824C069D4307CCAC6D2F602EBF50229A3FD3F8788D"
-$Uri = "https://tradeproject.de/download/Miner/TT-Miner-3.0.5.zip"
+$HashSHA256 = "75554A8D3B115ED106BD7EE952E4776E815A99A86F97B44B2497EBE37EDA5810"
+$Uri = "https://tradeproject.de/download/Miner/TT-Miner-3.0.6.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5025783.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -49,7 +49,7 @@ if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
-else {$CommonCommands = " -RH -luck -ccd"}
+else {$CommonCommands = " -RH -luck"}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
@@ -64,12 +64,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             #Get commands for active miner devices
             $Command = Get-CommandPerDevice -Command $_.Command -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
-            if ($Algorithm_Norm -eq "Progpow92") {
-                #define --coin for Progpow92
-                $CoinPers = "$(Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default '')"
-                if ($CoinPers) {$CoinPers = " --coin $CoinPers"}
-            }                
-
             [PSCustomObject]@{
                 Name       = $Miner_Name
                 BaseName   = $Miner_BaseName
@@ -77,7 +71,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
-                Arguments  = ("$command$CommonCommands --api-bind 127.0.0.1:$($Miner_Port)$CoinPers -P $($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass)@$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)$($Commands.$_)$CommonCommands -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')" -replace "\s+", " ").trim()
+                Arguments  = ("$command$CommonCommands --api-bind 127.0.0.1:$($Miner_Port) -P $($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass)@$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)$($Commands.$_)$CommonCommands -d $(($Miner_Device | ForEach-Object {'{0:x}' -f ($_.Type_Vendor_Index)}) -join ' ')" -replace "\s+", " ").trim()
                 HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
                 API        = "Claymore"
                 Port       = $Miner_Port
