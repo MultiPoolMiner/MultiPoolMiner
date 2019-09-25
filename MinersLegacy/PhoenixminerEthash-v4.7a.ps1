@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\PhoenixMiner.exe"
-$HashSHA256 = "4244F27AD5B2D5021080F6B3F651B8994DCB71E1E0F7890C22E77BE665B738F6"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/phoenixminer/PhoenixMiner_4.6c_Windows.zip"
+$HashSHA256 = "7F3BB937105E836EFC82CECE1433E683594228F5AB9405792477CE75E09A88F8"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/phoenixminer/PhoenixMiner_4.7a_Windows.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4129696.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -67,7 +67,7 @@ $Commands | ForEach-Object {
 
 #CommonCommandsAll from config file take precedence
 if ($Miner_Config.CommonCommandsAll) {$CommonCommandsAll = $Miner_Config.CommonCommandsAll}
-else {$CommonCommandsAll = " -log 0 -wdog 0 -mclock 0"}
+else {$CommonCommandsAll = " -log 0 -wdog 0 -mclock 0 -rvram -1 -eres 0"}
 
 #CommonCommandsNvidia from config file take precedence
 if ($Miner_Config.CommonCommandsNvidia) {$CommonCommandsNvidia = $Miner_Config.CommonCommandsNvidia}
