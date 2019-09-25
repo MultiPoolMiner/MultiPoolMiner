@@ -16,8 +16,11 @@
     # Setup runspace to launch the API webserver in a separate thread
     $newRunspace = [runspacefactory]::CreateRunspace()
     $newRunspace.Open()
-    $newRunspace.SessionStateProxy.SetVariable("API", $API)
-    $newRunspace.SessionStateProxy.Path.SetLocation($(pwd)) | Out-Null
+
+    Get-Variable -Scope Global | ForEach-Object {
+        try {$newRunspace.SessionStateProxy.SetVariable($_.Name, $_.Value)}
+        catch {}
+    }
 
     $apiserver = [PowerShell]::Create().AddScript(
         {
