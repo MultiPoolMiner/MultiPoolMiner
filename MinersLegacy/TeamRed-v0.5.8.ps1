@@ -38,6 +38,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Mtp";                Fee = 2.5; MinMemGB = 4.0; Command = " --algo=mtp"} #MTP (Zcoin), new in 0.5.3
     [PSCustomObject]@{Algorithm = "MtpNicehash";        Fee = 2.5; MinMemGB = 4.0; Command = " --algo=mtp"} #MTP (Zcoin), new in 0.5.3
     [PSCustomObject]@{Algorithm = "Phi2";               Fee = 3;   MinMemGB = 2.0; Command = " --algo=phi2"} #Phi2, new in 0.3.5
+    [PSCustomObject]@{Algorithm = "Phi2-Lux";           Fee = 3;   MinMemGB = 2.0; Command = " --algo=phi2"} #Phi2-Lux, new in 0.3.5
     [PSCustomObject]@{Algorithm = "X16r";               Fee = 2.5; MinMemGB = 4.0; Command = " --algo=x16r"} #X16r, new in 0.5.0
     [PSCustomObject]@{Algorithm = "X16s";               Fee = 2.5; MinMemGB = 2.0; Command = " --algo=x16s"} #X16r, new in 0.5.0
     [PSCustomObject]@{Algorithm = "X16rt";              Fee = 2.5; MinMemGB = 2.0; Command = " --algo=x16rt "} #X16Rt new in 0.5.0
