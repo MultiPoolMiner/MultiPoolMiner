@@ -56,6 +56,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "CryptonightV8";      MinMemGB = 2; Fee = 1; Command = " --algo cnv8"} #CryptonightV1, new in 0.9.3
 #    [PSCustomObject]@{Algorithm = "Cuckood29";          MinMemGB = 3; Fee = 1; Command = " --algo aeternity"} #Cuckood29, new in 0.17.0, reported API value too small
 #    [PSCustomObject]@{Algorithm = "cuckaroo29";         MinMemGB = 6; Fee = 1; Command = " --algo Cuckarood29 --intensity 5"} #Cuckaroo29, new in 0.17.0; old Grin algo, reported API value too small
+    [PSCustomObject]@{Algorithm = "Dedal";              MinMemGB = 1; Fee = 1; Command = " --algo dedal --intensity 8"} #Dedal
     [PSCustomObject]@{Algorithm = "Hmq1725";            MinMemGB = 1; Fee = 1; Command = " --algo hmq1725"} #HMQ1725, new in 0.10.0
     [PSCustomObject]@{Algorithm = "Lyra2RE3";           MinMemGB = 1; Fee = 1; Command = " --algo lyra2rev3"} #Lyra2REv3, new in 0.14.0 
     [PSCustomObject]@{Algorithm = "Lyra2vc0ban";        MinMemGB = 1; Fee = 1; Command = " --algo lyra2vc0ban"} #Lyra2vc0banHash, new in 0.13.0
@@ -64,7 +65,8 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Mtp";                MinMemGB = 5; Fee = 2; Command = " --algo mtp"} #MTP, new with 0.15.0; CcminerTrex-v0.12.2b is 10% faster
     [PSCustomObject]@{Algorithm = "MtpNicehash";        MinMemGB = 5; Fee = 2; Command = " --algo mtp"} #MTP, new with 0.15.0; CcminerTrex-v0.12.2b is 10% faster
     [PSCustomObject]@{Algorithm = "Neoscrypt";          MinMemGB = 1; Fee = 1; Command = " --algo neoscrypt --intensity 7"} #NeoScrypt
-    [PSCustomObject]@{Algorithm = "Phi2";               MinMemGB = 1; Fee = 1; Command = " --algo phi2"} #PHI2
+    [PSCustomObject]@{Algorithm = "Phi2";               MinMemGB = 1; Fee = 1; Command = " --algo phi2 --intensity 8"} #PHI2
+    [PSCustomObject]@{Algorithm = "Phi2-Lux";           MinMemGB = 1; Fee = 1; Command = " --algo phi2 --intensity 8"} #PHI2-Lux
     [PSCustomObject]@{Algorithm = "Pipe" ;              MinMemGB = 1; Fee = 1; Command = " --algo pipe"} #Pipe, new in 12.0
     [PSCustomObject]@{Algorithm = "Skunk";              MinMemGB = 1; Fee = 1; Command = " --algo skunk"} #Skunk
     [PSCustomObject]@{Algorithm = "Tribus" ;            MinMemGB = 1; Fee = 1; Command = " --algo tribus"} #Tribus, new with 0.8
