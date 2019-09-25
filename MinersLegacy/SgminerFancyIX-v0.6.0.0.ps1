@@ -18,16 +18,17 @@ $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
 $Commands = [PSCustomObject]@{
-    "allium"      = " --kernel allium --gpu-threads 1 --worksize 256 --intensity 20"
-    "argon2d"     = " --kernel argon2d --gpu-threads 2 --worksize 64"
-    "ethash"      = " --kernel ethash --worksize 64 --xintensity 1024"
-    "lyra2v3"     = " --kernel lyra2v3 --gpu-threads 1 --worksize 256 --intensity 24"
-    "lyra2z"      = " --kernel lyra2z --gpu-threads 1 --worksize 256 --intensity 23"
-    "lyra2zz"     = " --kernel lyra2zz --gpu-threads 1 --worksize 256 --intensity 23"
-    #"mtp"         = " --kernel mtp --intensity 18 -p 0,strict,verbose,d=700"; SgminerMTP is faster
-    "phi2"        = " --kernel phi2 --gpu-threads 1 --worksize 256 --intensity 23"
-    "x22i"        = " --kernel x22i --gpu-threads 2 --worksize 256 --intensity 23"
-    "x25x"        = " --kernel x25x --gpu-threads 4 --worksize 256 --intensity 22"
+    "Allium"      = " --kernel allium --gpu-threads 1 --worksize 256 --intensity 20"
+    "Argon2d"     = " --kernel argon2d --gpu-threads 2 --worksize 64"
+    "Ethash"      = " --kernel ethash --worksize 64 --xintensity 1024"
+    "Lyra2v3"     = " --kernel lyra2v3 --gpu-threads 1 --worksize 256 --intensity 24"
+    "Lyra2z"      = " --kernel lyra2z --gpu-threads 1 --worksize 256 --intensity 23"
+    "Lyra2zz"     = " --kernel lyra2zz --gpu-threads 1 --worksize 256 --intensity 23"
+    #"Mtp"         = " --kernel mtp --intensity 18 -p 0,strict,verbose,d=700"; SgminerMTP is faster
+    "Phi2"        = " --kernel phi2 --gpu-threads 1 --worksize 256 --intensity 23"
+    "Phi2-Lux"    = " --kernel phi2 --gpu-threads 1 --worksize 256 --intensity 23" # Phi2-Lux
+    "X22i"        = " --kernel x22i --gpu-threads 2 --worksize 256 --intensity 23"
+    "X25x"        = " --kernel x25x --gpu-threads 4 --worksize 256 --intensity 22"
 }
 #Commands from config file take precedence
 if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force}}
