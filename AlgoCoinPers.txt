@@ -23,8 +23,5 @@
     },
     "Progpow92":  {
         "ManagedByPool":  "auto",
-        "SuperSero":  "sero",
-        "Hora":  "hora"
     }
 }
-
