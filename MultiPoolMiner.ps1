@@ -296,31 +296,29 @@ while (-not $API.Stop) {
         $ReportStatusJob = $null
     }
     #Needs clean-up
-    if ($Config.APIPort) { 
-        if (-not $API.Port) { 
-            $TCPClient = New-Object System.Net.Sockets.TCPClient
-            $AsyncResult = $TCPClient.BeginConnect("localhost", $Config.APIPort, $null, $null)
-            if ($AsyncResult.AsyncWaitHandle.WaitOne(100)) { 
-                Write-Log -Level Error "Error starting web dashboard and API on port $($Config.APIPort). Port is in use. "
-                try { $Null = $TCPClient.EndConnect($AsyncResult) }
-                catch { }
+    if ($Config.APIPort -and (-not $API.Port)) { 
+        $TCPClient = New-Object System.Net.Sockets.TCPClient
+        $AsyncResult = $TCPClient.BeginConnect("localhost", $Config.APIPort, $null, $null)
+        if ($AsyncResult.AsyncWaitHandle.WaitOne(100)) { 
+            Write-Log -Level Error "Error starting web dashboard and API on port $($Config.APIPort). Port is in use. "
+            try { $Null = $TCPClient.EndConnect($AsyncResult) }
+            catch { }
+        }
+        else { 
+            #Start API server
+            if ($API) { Remove-Variable API }
+            Start-APIServer -Port $Config.APIPort
+            if ($API.Port) { 
+                Write-Log -Level Info "Web dashboard and API (version $($API.APIVersion)) running on http://localhost:$($API.Port). "
+                if ($Config.Dashboard) { Start-Process "http://localhost:$($Config.APIPort)/" } # Start web dashboard
             }
             else { 
-                #Start API server
-                if ($API) { Remove-Variable API }
-                Start-APIServer -Port $Config.APIPort
-                if ($API.Port) { 
-                    Write-Log -Level Info "Web dashboard and API (version $($API.APIVersion)) running on http://localhost:$($API.Port). "
-                    if ($Config.Dashboard) { Start-Process "http://localhost:$($Config.APIPort)/" } # Start web dashboard
-                }
-                else { 
-                    Write-Log -Level Error "Error starting web dashboard and API on port $($Config.APIPort). "
-                    $API = @{ }
-                }
+                Write-Log -Level Error "Error starting web dashboard and API on port $($Config.APIPort). "
+                $API = @{ }
             }
-            Remove-Variable AsyncResult
-            Remove-Variable TCPClient
         }
+        Remove-Variable AsyncResult
+        Remove-Variable TCPClient
     }
     if ($API) { 
         $API.Version = [PSCustomObject]@{"Core" = $Version; "API" = $API.APIVersion } #Give API access to the current version
@@ -364,8 +362,8 @@ while (-not $API.Stop) {
     if (($OldConfig | ConvertTo-Json -Compress -Depth 10) -ne ($Config | ConvertTo-Json -Compress -Depth 10)) { 
         $AllPools | Select-Object | ForEach-Object { $_.Price = 0 }
         $AllDevices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Refresh | Select-Object)
-        if ($API) { $API.AllDevices = $AllDevices } #Give API access to the device information
     }
+    if ($API) { $API.AllDevices = $AllDevices } #Give API access to the device information
 
     #Load information about the devices
     $Devices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Name @($Config.DeviceName | Select-Object) -ExcludeName @($Config.ExcludeDeviceName | Select-Object) | Select-Object)
@@ -953,8 +951,8 @@ while (-not $API.Stop) {
             }
         }
     )
-    $BestMiners_Combo = @($BestMiners_Combos | Sort-Object -Descending { ($_.Combination | Where-Object Profit -EQ $null | Measure-Object).Count }, { ($_.Combination | Measure-Object Profit_Bias -Sum).Sum }, { ($_.Combination | Where-Object Profit -NE 0 | Measure-Object).Count } | Select-Object -First 1 | Select-Object -ExpandProperty Combination)
-    $BestMiners_Combo_Comparison = @($BestMiners_Combos_Comparison | Sort-Object -Descending { ($_.Combination | Where-Object Profit -EQ $null | Measure-Object).Count }, { ($_.Combination | Measure-Object Profit_Comparison -Sum).Sum }, { ($_.Combination | Where-Object Profit -NE 0 | Measure-Object).Count } | Select-Object -First 1 | Select-Object -ExpandProperty Combination)
+    $BestMiners_Combo = @($BestMiners_Combos | Sort-Object -Descending { ($_.Combination | Where-Object Earning -EQ $null | Measure-Object).Count }, { ($_.Combination | Measure-Object Earning_Bias -Sum).Sum }, { ($_.Combination | Where-Object Earning -NE 0 | Measure-Object).Count } | Select-Object -First 1 | Select-Object -ExpandProperty Combination)
+    $BestMiners_Combo_Comparison = @($BestMiners_Combos_Comparison | Sort-Object -Descending { ($_.Combination | Where-Object Earning -EQ $null | Measure-Object).Count }, { ($_.Combination | Measure-Object Earning_Comparison -Sum).Sum }, { ($_.Combination | Where-Object Earning -NE 0 | Measure-Object).Count } | Select-Object -First 1 | Select-Object -ExpandProperty Combination)
 
     if ($ActiveMiners.Count -eq 1) { 
         $BestMiners_Combo_Comparison = $BestMiners_Combo = @($ActiveMiners)
@@ -981,8 +979,6 @@ while (-not $API.Stop) {
         $BestMiners_Combo | ForEach-Object { $_.Best = $true }
         $BestMiners_Combo_Comparison | ForEach-Object { $_.Best_Comparison = $true }
     }
-    Remove-Variable BestMiners_Combo
-    Remove-Variable BestMiners_Combo_Comparison
     Remove-Variable Miner_Device_Combo
     Remove-Variable Miners_Device_Combos
     Remove-Variable BestMiners
@@ -1166,32 +1162,37 @@ while (-not $API.Stop) {
     ) | Out-Host
 
     #Display profit comparison
-    if (-not ($BestMiners_Combo | Where-Object Profit -EQ $null) -and $Downloader.State -eq "Running") { $Downloader | Wait-Job -Timeout 10 | Out-Null }
-    if (-not ($BestMiners_Combo | Where-Object Profit -EQ $null) -and $Downloader.State -ne "Running") { 
+    if (-not ($BestMiners_Combo | Where-Object Earning -EQ $null) -and $Downloader.State -eq "Running") { $Downloader | Wait-Job -Timeout 10 | Out-Null }
+    if (-not ($BestMiners_Combo | Where-Object Earning -EQ $null) -and $Downloader.State -ne "Running") { 
         $MinerComparisons =
         [PSCustomObject]@{"Miner" = "MultiPoolMiner" }, 
         [PSCustomObject]@{"Miner" = $BestMiners_Combo_Comparison | ForEach-Object { "$($_.Name)-$($_.Algorithm -join '/')" } }
 
-        $BestMiners_Combo_Stat = Set-Stat -Name "Profit" -Value ($BestMiners_Combo | Measure-Object Profit -Sum).Sum -Duration $StatSpan
+        $BestMiners_Combo_Stat = Set-Stat -Name "Earning" -Value ($BestMiners_Combo | Measure-Object Earning -Sum).Sum -Duration $StatSpan
 
-        $MinerComparisons_Profit = $BestMiners_Combo_Stat.Week, ($BestMiners_Combo_Comparison | Measure-Object Profit_Comparison -Sum).Sum
+        $MinerComparisons_Earning = $BestMiners_Combo_Stat.Week, ($BestMiners_Combo_Comparison | Measure-Object Earning_Comparison -Sum).Sum
 
-        $MinerComparisons_MarginOfError = $BestMiners_Combo_Stat.Week_Fluctuation, ($BestMiners_Combo_Comparison | ForEach-Object { $_.Profit_MarginOfError * (& { if ($MinerComparisons_Profit[1]) { $_.Profit_Comparison / $MinerComparisons_Profit[1] }else { 1 } }) } | Measure-Object -Sum).Sum
+        $MinerComparisons_MarginOfError = $BestMiners_Combo_Stat.Week_Fluctuation, ($BestMiners_Combo_Comparison | ForEach-Object { $_.Earning_MarginOfError * (& { if ($MinerComparisons_Earning[1]) { $_.Earning_Comparison / $MinerComparisons_Earning[1] }else { 1 } }) } | Measure-Object -Sum).Sum
 
         $Config.Currency | Where-Object { $Rates.BTC.$_ } | ForEach-Object { 
-            $MinerComparisons[0] | Add-Member $_.ToUpper() ("{0:N5} $([Char]0x00B1){1:P0} ({2:N5}-{3:N5})" -f ($MinerComparisons_Profit[0] * $Rates.BTC.$_), $MinerComparisons_MarginOfError[0], (($MinerComparisons_Profit[0] * $Rates.BTC.$_) / (1 + $MinerComparisons_MarginOfError[0])), (($MinerComparisons_Profit[0] * $Rates.BTC.$_) * (1 + $MinerComparisons_MarginOfError[0])))
-            $MinerComparisons[1] | Add-Member $_.ToUpper() ("{0:N5} $([Char]0x00B1){1:P0} ({2:N5}-{3:N5})" -f ($MinerComparisons_Profit[1] * $Rates.BTC.$_), $MinerComparisons_MarginOfError[1], (($MinerComparisons_Profit[1] * $Rates.BTC.$_) / (1 + $MinerComparisons_MarginOfError[1])), (($MinerComparisons_Profit[1] * $Rates.BTC.$_) * (1 + $MinerComparisons_MarginOfError[1])))
+            $MinerComparisons[0] | Add-Member $_.ToUpper() ("{0:N5} $([Char]0x00B1){1:P0} ({2:N5}-{3:N5})" -f ($MinerComparisons_Earning[0] * $Rates.BTC.$_), $MinerComparisons_MarginOfError[0], (($MinerComparisons_Earning[0] * $Rates.BTC.$_) / (1 + $MinerComparisons_MarginOfError[0])), (($MinerComparisons_Earning[0] * $Rates.BTC.$_) * (1 + $MinerComparisons_MarginOfError[0])))
+            $MinerComparisons[1] | Add-Member $_.ToUpper() ("{0:N5} $([Char]0x00B1){1:P0} ({2:N5}-{3:N5})" -f ($MinerComparisons_Earning[1] * $Rates.BTC.$_), $MinerComparisons_MarginOfError[1], (($MinerComparisons_Earning[1] * $Rates.BTC.$_) / (1 + $MinerComparisons_MarginOfError[1])), (($MinerComparisons_Earning[1] * $Rates.BTC.$_) * (1 + $MinerComparisons_MarginOfError[1])))
         }
 
-        if ([Math]::Round(($MinerComparisons_Profit[0] - $MinerComparisons_Profit[1]) / $MinerComparisons_Profit[1], 2) -gt 0) { 
-            $MinerComparisons_Range = ($MinerComparisons_MarginOfError | Measure-Object -Average | Select-Object -ExpandProperty Average), (($MinerComparisons_Profit[0] - $MinerComparisons_Profit[1]) / $MinerComparisons_Profit[1]) | Measure-Object -Minimum | Select-Object -ExpandProperty Minimum
-            Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is between $([Math]::Round((((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])-$MinerComparisons_Range)*100)))% and $([Math]::Round((((($MinerComparisons_Profit[0]-$MinerComparisons_Profit[1])/$MinerComparisons_Profit[1])+$MinerComparisons_Range)*100)))% more profitable than the fastest miner: "
+        if ([Math]::Round(($MinerComparisons_Earning[0] - $MinerComparisons_Earning[1]) / $MinerComparisons_Earning[1], 2) -gt 0) { 
+            $MinerComparisons_Range = ($MinerComparisons_MarginOfError | Measure-Object -Average | Select-Object -ExpandProperty Average), (($MinerComparisons_Earning[0] - $MinerComparisons_Earning[1]) / $MinerComparisons_Earning[1]) | Measure-Object -Minimum | Select-Object -ExpandProperty Minimum
+            Write-Host -BackgroundColor Yellow -ForegroundColor Black "MultiPoolMiner is between $([Math]::Round((((($MinerComparisons_Earning[0]-$MinerComparisons_Earning[1])/$MinerComparisons_Earning[1])-$MinerComparisons_Range)*100)))% and $([Math]::Round((((($MinerComparisons_Earning[0]-$MinerComparisons_Earning[1])/$MinerComparisons_Earning[1])+$MinerComparisons_Range)*100)))% more profitable than the fastest miner: "
+            Remove-Variable MinerComparisons_Range
         }
 
         $MinerComparisons | Out-Host
+        Remove-Variable MinerComparisons_MarginOfError
+        Remove-Variable MinerComparisons_Earning
+        Remove-Variable BestMiners_Combo_Stat
         Remove-Variable MinerComparisons
     }
-
+    Remove-Variable BestMiners_Combo
+    Remove-Variable BestMiners_Combo_Comparison
 
     #Display pool balances
     if ($Balances) { 
