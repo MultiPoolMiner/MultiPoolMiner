@@ -29,9 +29,9 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
 }
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{Algorithm = "ETHASH2gb";   MinMemGB = 2; Command = " -A ETHASH"} #Ethash2GB
-    [PSCustomObject]@{Algorithm = "ETHASH3gb";   MinMemGB = 3; Command = " -A ETHASH"} #Ethash3GB
-    [PSCustomObject]@{Algorithm = "ETHASH";      MinMemGB = 4; Command = " -A ETHASH"} #Ethash
+#    [PSCustomObject]@{Algorithm = "ETHASH2gb";   MinMemGB = 2; Command = " -A ETHASH"} #Ethash2GB, PhoenixMiner & ClaymoreDual miner are faster
+#    [PSCustomObject]@{Algorithm = "ETHASH3gb";   MinMemGB = 3; Command = " -A ETHASH"} #Ethash3GB, PhoenixMiner & ClaymoreDual miner are faster
+#    [PSCustomObject]@{Algorithm = "ETHASH";      MinMemGB = 4; Command = " -A ETHASH"} #Ethash, PhoenixMiner & ClaymoreDual miner are faster
     [PSCustomObject]@{Algorithm = "LYRA2V3";     MinMemGB = 2; Command = " -A LYRA2V3"} #LYRA2V3
 #        [PSCustomObject]@{Algorithm = "MTP";         MinMemGB = 6; Command = " -A MTP"} #MTP, CcminerTrex-v0.12.2b is 20% faster
 #        [PSCustomObject]@{Algorithm = "MTPNICEHASH"; MinMemGB = 6; Command = " -A MTP"} #MTP; TempFix: NiceHash only, CcminerTrex-v0.12.2b is 20% faster
