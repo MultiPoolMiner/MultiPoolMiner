@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\teamredminer.exe"
-$HashSHA256 = "FD62F3AD4CED2A1F88006B95E91E5B44FB6385B6F5EEA5AE5E59FCE2F3388442"
-$Uri = "https://github.com/todxx/teamredminer/releases/download/0.5.8/teamredminer-v0.5.8-win.zip"
+$HashSHA256 = "652E42705B6747A0B32B3AD1706ACEC00B5C5CC7C12F2627F0018D969A46AB98"
+$Uri = "https://github.com/todxx/teamredminer/releases/download/0.5.9/teamredminer-v0.5.9-win.zip"
 $ManualUri = "https://github.com/todxx/teamredminer"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -40,6 +40,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{Algorithm = "Phi2";               Fee = 3;   MinMemGB = 2.0; Command = " --algo=phi2"} #Phi2, new in 0.3.5
     [PSCustomObject]@{Algorithm = "Phi2-Lux";           Fee = 3;   MinMemGB = 2.0; Command = " --algo=phi2"} #Phi2-Lux, new in 0.3.5
     [PSCustomObject]@{Algorithm = "X16r";               Fee = 2.5; MinMemGB = 4.0; Command = " --algo=x16r"} #X16r, new in 0.5.0
+    [PSCustomObject]@{Algorithm = "X16rv2";             Fee = 2.5; MinMemGB = 4.0; Command = " --algo=x16rv2"} #X16rv2, new in 0.5.9
     [PSCustomObject]@{Algorithm = "X16s";               Fee = 2.5; MinMemGB = 2.0; Command = " --algo=x16s"} #X16r, new in 0.5.0
     [PSCustomObject]@{Algorithm = "X16rt";              Fee = 2.5; MinMemGB = 2.0; Command = " --algo=x16rt "} #X16Rt new in 0.5.0
 )
