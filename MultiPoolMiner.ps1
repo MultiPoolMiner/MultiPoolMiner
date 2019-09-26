@@ -330,7 +330,7 @@ while (-not $API.Stop) {
 
     #Load unprofitable algorithms
     [String[]]$UnprofitableAlgorithms = @()
-    if (Test-Path ".\UnprofitableAlgorithms.txt" -PathType Leaf -ErrorAction Ignore) { [String[]]$UnprofitableAlgorithms = @(Get-Content ".\UnprofitableAlgorithms.txt" | ConvertFrom-Json -ErrorAction SilentlyContinue | Sort-Object -Unique) }
+    if (Test-Path ".\UnprofitableAlgorithms.txt" -PathType Leaf -ErrorAction Ignore) { [String[]]$UnprofitableAlgorithms = Get-Content ".\UnprofitableAlgorithms.txt" | ConvertFrom-Json -ErrorAction SilentlyContinue | Sort-Object -Unique }
 
     #Activate or deactivate donation
     if ($Config.Donate -lt 10) { $Config.Donate = 10 }
