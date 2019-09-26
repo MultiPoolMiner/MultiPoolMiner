@@ -1,10 +1,11 @@
-# MultiPoolMiner dev version
+﻿# MultiPoolMiner dev version
 
 ## Changelog Version 3.5.3
 
 #### Core changes
 - Changed bestpool sorting; reduce miner switching when benchmarking
 - Fixed parameters '-DeviceName' and '-ExcludeDeviceName'
+- Fixed profitability comparison info when profit is negative
 
 #### Miner changes
 - Changed CcminerKlausT-v8.25; disabled 'Lyra2V2' algorithm, CcminerAlexis-v1.5 is 10%faster
@@ -13,13 +14,18 @@
 - Fixed all miners; $CommonCommands was broken
 - Fixed CcminerKlausT-v8.25; lowered intensity for 'Neoscrypt' algorithm
 - Updated BMiner-v15.8.6; disabled dual mining with 'Blake2s' algorithm (rejected shares), improve the performance of automatic tuning of dual mining parameters
-- Updated CcminerAlexis-v1.5.1; better compatibility with 'skein' algorithm, dropped 'Hsr' and 'Poly' support 
-- Updated CcminerMTP-v1.2.0.01.1ps1
+- Updated CcminerAlexis-v1.5.1; better compatibility with 'Skein' algorithm, dropped 'Hsr', 'KeccakC' & 'Poly' support 
+- Updated CcminerMTP-v1.2.2.ps1
+- Updated CcminerTrex-v0.14.4; support for 'X16rv2' algorithm
+- Updated CcminerZenemy-v2.2; support for 'X16rv2' algorithm
 - Updated ClaymoreDual_v15.0
-- Updated Gminer-v1.62; added $CommonCommands, enabled 'Equihash1254' algorithm for AMD
+- Updated Gminer-v1.66; added $CommonCommands, enabled 'Equihash1254' algorithm for AMD
 - Updated lolMiner-v0.8.8; removed 'old Beam' algorithm
-- Updated MiniZEquihash-v1.5q5
-- Updated TTMiner-v3.0.5
+- Updated MiniZEquihash-v1.5q6
+- Updated NBMiner-v25.2; added 'Eaglesong' algorithm (VBK)
+- Updated PhoenixminerEthash-v4.7a
+- Updated TeamRed-v0.5.9; support for 'X16rv2' algorithm
+- Updated TTMiner-v3.0.8
 
 #### Pool changes
 - Fixed BlazePool[-Algo/-Coin]; corrected API url
