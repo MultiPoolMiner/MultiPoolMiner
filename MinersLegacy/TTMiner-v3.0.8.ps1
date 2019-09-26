@@ -33,9 +33,9 @@ $Commands = [PSCustomObject[]]@(
 #    [PSCustomObject]@{Algorithm = "ETHASH3gb";   MinMemGB = 3; Command = " -A ETHASH"} #Ethash3GB, PhoenixMiner & ClaymoreDual miner are faster
 #    [PSCustomObject]@{Algorithm = "ETHASH";      MinMemGB = 4; Command = " -A ETHASH"} #Ethash, PhoenixMiner & ClaymoreDual miner are faster
     [PSCustomObject]@{Algorithm = "LYRA2V3";     MinMemGB = 2; Command = " -A LYRA2V3"} #LYRA2V3
-#        [PSCustomObject]@{Algorithm = "MTP";         MinMemGB = 6; Command = " -A MTP"} #MTP, CcminerTrex-v0.12.2b is 20% faster
-#        [PSCustomObject]@{Algorithm = "MTPNICEHASH"; MinMemGB = 6; Command = " -A MTP"} #MTP; TempFix: NiceHash only, CcminerTrex-v0.12.2b is 20% faster
-#        [PSCustomObject]@{Algorithm = "MYRGR";       MinMemGB = 2; Command = " -A MYRGR"} #Myriad-Groestl, never profitable
+#    [PSCustomObject]@{Algorithm = "MTP";         MinMemGB = 6; Command = " -A MTP"} #MTP, CcminerTrex-v0.12.2b is 20% faster
+#    [PSCustomObject]@{Algorithm = "MTPNICEHASH"; MinMemGB = 6; Command = " -A MTP"} #MTP; TempFix: NiceHash only, CcminerTrex-v0.12.2b is 20% faster
+#    [PSCustomObject]@{Algorithm = "MYRGR";       MinMemGB = 2; Command = " -A MYRGR"} #Myriad-Groestl, never profitable
     [PSCustomObject]@{Algorithm = "UBQHASH";     MinMemGB = 2; Command = " -A UBQHASH"} #Ubqhash
     [PSCustomObject]@{Algorithm = "PROGPOW2gb";  MinMemGB = 2; Command = " -A PROGPOW"} #ProgPoW2gb
     [PSCustomObject]@{Algorithm = "PROGPOW3gb";  MinMemGB = 3; Command = " -A PROGPOW"} #ProgPoW3gb
