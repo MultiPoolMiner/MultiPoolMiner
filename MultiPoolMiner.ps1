@@ -307,6 +307,7 @@ while (-not $API.Stop) {
         else { 
             #Start API server
             if ($API) { Remove-Variable API }
+            $Global:Stats = [PSCustomObject]@{ } #temp fix
             Start-APIServer -Port $Config.APIPort
             if ($API.Port) { 
                 Write-Log -Level Info "Web dashboard and API (version $($API.APIVersion)) running on http://localhost:$($API.Port). "
