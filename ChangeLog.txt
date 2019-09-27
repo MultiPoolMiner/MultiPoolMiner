@@ -4,15 +4,19 @@
 
 #### Core changes
 - Changed bestpool sorting; reduce miner switching when benchmarking
+- Fixed broken UnprofitableAlgorithm list (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/202a7b56f8a6f2ebff0c6fad01864cec0d86a7d5)
 - Fixed parameters '-DeviceName' and '-ExcludeDeviceName'
 - Fixed profitability comparison info when profit is negative
+- Added 'Equihash', 'Honeycomb', 'Skunk' & 'Tribus' algorithms to UnprofitableAlgorithms.txt
 
 #### Miner changes
 - Changed CcminerKlausT-v8.25; disabled 'Lyra2V2' algorithm, CcminerAlexis-v1.5 is 10%faster
-- Changed BMiner-v15.8.5; disabled 'Equihash' algorithm, DSTMEquihash-v0.6.2 is 15% faster
+- Changed BMiner-v15.8.6; disabled 'Equihash' algorithm, DSTMEquihash-v0.6.2 is 15% faster
 - Changed CcminerBMW512-v2.2.5; use faster x86 variant
 - Fixed all miners; $CommonCommands was broken
 - Fixed CcminerKlausT-v8.25; lowered intensity for 'Neoscrypt' algorithm
+- Removed EDSTMEquihash-v0.6.2 (moved to 'Deprecated' folder); Equihash is no longer profitable
+- Removed EwbfEquihash-v0.3.4b (moved to 'Deprecated' folder); Equihash is no longer profitable
 - Updated BMiner-v15.8.6; disabled dual mining with 'Blake2s' algorithm (rejected shares), improve the performance of automatic tuning of dual mining parameters
 - Updated CcminerAlexis-v1.5.1; better compatibility with 'Skein' algorithm, dropped 'Hsr', 'KeccakC' & 'Poly' support 
 - Updated CcminerMTP-v1.2.2.ps1
@@ -25,7 +29,7 @@
 - Updated NBMiner-v25.2; added 'Eaglesong' algorithm (VBK)
 - Updated PhoenixminerEthash-v4.7a
 - Updated TeamRed-v0.5.9; support for 'X16rv2' algorithm
-- Updated TTMiner-v3.0.8
+- Updated TTMiner-v3.0.9
 
 #### Pool changes
 - Fixed BlazePool[-Algo/-Coin]; corrected API url
@@ -41,7 +45,7 @@
 - Fixed stat management (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/8e6fd3acba279c99ed1d7bce1ed14073e9c37822)
 
 #### Known issues (at least on my rig)
-- Bminer-v15.8.4 fails to mine BeamV2 (https://bitcointalk.org/index.php?topic=2519271.msg52211890#msg52211890)
+- Bminer-v15.8.6 fails to mine BeamV2 (https://bitcointalk.org/index.php?topic=2519271.msg52211890#msg52211890)
 
 ## Changelog Version 3.5.2
 
