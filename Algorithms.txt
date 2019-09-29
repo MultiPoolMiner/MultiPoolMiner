@@ -209,6 +209,7 @@
     "lyra2re":  "Lyra2RE",
     "lyra2re2":  "Lyra2RE2",
     "lyra2rev2":  "Lyra2RE2",
+    "lyra2re3":  "Lyra2RE3",
     "lyra2rev3":  "Lyra2RE3",
     "lyra2v2":  "Lyra2RE2",
     "lyra2v3":  "Lyra2RE3",
