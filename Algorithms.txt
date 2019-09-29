@@ -285,7 +285,7 @@
     "vergelyra2v2":  "Lyra2RE2",
     "vergex17":  "X17",
     "veriblock":  "vBlake",
-    "vertcoin":  "Lyra2RE2",
+    "vertcoin":  "Lyra2RE3",
     "vit":  "Vitalium",
     "whirlpoolx":  "WhirlpoolX",
     "x11gost":  "Sib",
