@@ -47,8 +47,7 @@ $APIResponse.return | ForEach-Object {
     $PoolHosts = @($_.all_host_list.split(";"))
     $Port = $_.algo_switch_port
     $Algorithm = $_.algo
-    $Algorithm_Norm = Get-AlgorithmFromCoinName $CoinName
-    if (-not $Algorithm_Norm) { $Algorithm_Norm = Get-Algorithm $Algorithm }
+    $Algorithm_Norm = Get-Algorithm $Algorithm
 
     if ($Algorithm_Norm -eq "Sia") { $Algorithm_Norm = "SiaClaymore" } #temp fix
 
