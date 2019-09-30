@@ -9,7 +9,7 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $HashSHA256 = ""
-$Uri = "https://github.com/JayDDee/cpuminer-opt/releases/download/v3.9.7/cpuminer-opt-3.9.7-windows.zip"
+$Uri = "https://github.com/JayDDee/cpuminer-opt/releases/download/v3.9.8/cpuminer-opt-3.9.8-windows.zip"
 $ManualUri = "https://github.com/JayDDee/cpuminer-opt"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -122,7 +122,7 @@ $Commands = [PSCustomObject]@{
 if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
 else {$CommonCommands = ""}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
