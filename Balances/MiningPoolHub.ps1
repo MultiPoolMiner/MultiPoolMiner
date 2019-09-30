@@ -34,7 +34,7 @@ if (($APIResponse.getuserallbalances.data | Get-Member -MemberType NoteProperty 
 }
 
 Write-Log -Level Verbose "Processing balances information ($Name). "
-$APIResponse.getuserallbalances.data | ForEach-Object {
+$APIResponse.getuserallbalances.data | Where-Object coin | ForEach-Object {
     $Currency = ""
     $RetryCount = 3
     $RetryDelay = 2
@@ -53,7 +53,7 @@ $APIResponse.getuserallbalances.data | ForEach-Object {
     }
     else {
         [PSCustomObject]@{
-        Name        = "$($Name) ($($Currency))"
+            Name        = "$($Name) ($($Currency))"
             Pool        = $Name
             Currency    = $Currency
             Balance     = $_.confirmed
