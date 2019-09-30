@@ -22,6 +22,6 @@
         "Zerocoin":  "ZERO_PoW"
     },
     "Progpow92":  {
-        "ManagedByPool":  "auto",
+        "ManagedByPool":  "auto"
     }
 }
