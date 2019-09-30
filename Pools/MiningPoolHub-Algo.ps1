@@ -40,9 +40,8 @@ if ($APIResponse.return.count -le 1) {
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
 $APIResponse.return | ForEach-Object {
 
-    $CoinName = $_.current_mining_coin
-    $_.algo -split "-" | ForEach-Object { $CoinName = $CoinName -replace "-$($_)", "" }
-    $CoinName = Get-CoinName $CoinName
+    $CoinName = Get-CoinName $_.current_mining_coin
+    $MiningCurrency = $_.current_mining_coin_symbol
 
     $PoolHosts = @($_.all_host_list.split(";"))
     $Port = $_.algo_switch_port
@@ -62,36 +61,38 @@ $APIResponse.return | ForEach-Object {
         $Region_Norm = Get-Region ($Region -replace "^us-east$", "us")
 
         [PSCustomObject]@{
-            Algorithm     = $Algorithm_Norm
-            CoinName      = $CoinName
-            Price         = $Stat.Live
-            StablePrice   = $Stat.Week
-            MarginOfError = $Stat.Week_Fluctuation
-            Protocol      = "stratum+tcp"
-            Host          = $PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1
-            Port          = $Port
-            User          = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
-            Pass          = "x"
-            Region        = $Region_Norm
-            SSL           = $false
-            Updated       = $Stat.Updated
-            Fee           = 0.9 / 100
+            Algorithm      = $Algorithm_Norm
+            CoinName       = $CoinName
+            MiningCurrency = $MiningCurrency
+            Price          = $Stat.Live
+            StablePrice    = $Stat.Week
+            MarginOfError  = $Stat.Week_Fluctuation
+            Protocol       = "stratum+tcp"
+            Host           = $PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1
+            Port           = $Port
+            User           = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
+            Pass           = "x"
+            Region         = $Region_Norm
+            SSL            = $false
+            Updated        = $Stat.Updated
+            Fee            = 0.9 / 100
         }
         [PSCustomObject]@{
-            Algorithm     = $Algorithm_Norm
-            CoinName      = $CoinName
-            Price         = $Stat.Live
-            StablePrice   = $Stat.Week
-            MarginOfError = $Stat.Week_Fluctuation
-            Protocol      = "stratum+ssl"
-            Host          = $PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1
-            Port          = $Port
-            User          = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
-            Pass          = "x"
-            Region        = $Region_Norm
-            SSL           = $true
-            Updated       = $Stat.Updated
-            Fee           = 0.9 / 100
+            Algorithm      = $Algorithm_Norm
+            CoinName       = $CoinName
+            MiningCurrency = $MiningCurrency
+            Price          = $Stat.Live
+            StablePrice    = $Stat.Week
+            MarginOfError  = $Stat.Week_Fluctuation
+            Protocol       = "stratum+ssl"
+            Host           = $PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1
+            Port           = $Port
+            User           = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
+            Pass           = "x"
+            Region         = $Region_Norm
+            SSL            = $true
+            Updated        = $Stat.Updated
+            Fee            = 0.9 / 100
         }
     }
 }
