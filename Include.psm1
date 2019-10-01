@@ -521,7 +521,7 @@ function Get-Stat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = @($Global:Stats.Name | Select-Object) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+        [String[]]$Name = (Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
     $Name | Sort-Object -Unique | ForEach-Object { 
@@ -580,7 +580,7 @@ function Remove-Stat {
     )
 
     $Name | Sort-Object -Unique | ForEach-Object { 
-        if ($Global:Stats.$_) { $Global:Stats.$_ = $null }
+        if ($Global:Stats.$_) { $Global:Stats.PSObject.Properties.Remove($_) }
         Remove-Item -Path  "Stats\$_.txt" -Force -Confirm:$false -ErrorAction SilentlyContinue
     }
 }
