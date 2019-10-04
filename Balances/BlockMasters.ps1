@@ -7,50 +7,51 @@ param(
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 # Guaranteed payout currencies
-$Payout_Currencies = @("BTC", "LTC", "DASH") | Where-Object {$Wallets.$_}
-if (-not $Payout_Currencies) {
+$Payout_Currencies = @("BTC", "LTC", "DASH") | Where-Object { $Wallets.$_ }
+if (-not $Payout_Currencies) { 
     Write-Log -Level Verbose "Cannot get balance on pool ($Name) - no wallet address specified. "
     return
 }
 
 $RetryCount = 3
 $RetryDelay = 2
-while (-not ($APIResponse) -and $RetryCount -gt 0) {
-    try {
+while (-not ($APIResponse) -and $RetryCount -gt 0) { 
+    try { 
         $APIResponse = Invoke-RestMethod "http://blockmasters.co/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
-    }
-    catch {
+     }
+    catch { } 
+    if (-not $APIResponse) {  
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
-    }
-    $RetryCount--
-}
+        $RetryCount--
+    } 
+} 
 
-if (-not $APIResponse) {
+if (-not $APIResponse) { 
     Write-Log -Level Warn "Pool Balance API ($Name) has failed. "
     return
 }
 
-if (($APIResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
+if (($APIResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) { 
     Write-Log -Level Warn "Pool Balance API ($Name) returned nothing. "
     return
 }
 
-$Payout_Currencies = (@($Payout_Currencies) + @($APIResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object {$Wallets.$_} | Sort-Object -Unique
-if (-not $Payout_Currencies) {
+$Payout_Currencies = (@($Payout_Currencies) + @($APIResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object { $Wallets.$_ } | Sort-Object -Unique
+if (-not $Payout_Currencies) { 
     Write-Log -Level Verbose "Cannot get balance on pool ($Name) - no wallet address specified. "
     return
 }
 
 Write-Log -Level Verbose "Processing balances information ($Name). "
-$Payout_Currencies | ForEach-Object {
+$Payout_Currencies | ForEach-Object { 
     $Payout_Currency = $_
-    try {
+    try { 
         $APIResponse = Invoke-RestMethod "http://blockmasters.co/api/wallet?address=$($Wallets.$Payout_Currency)" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
-        if (($APIResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) {
+        if (($APIResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) { 
             Write-Log -Level Warn "Pool Balance API ($Name) for $Payout_Currency returned nothing. "
         }
-        else {
-            [PSCustomObject]@{
+        else { 
+            [PSCustomObject]@{ 
                 Name        = "$($Name) ($($APIResponse.currency))"
                 Pool        = $Name
                 Currency    = $APIResponse.currency
@@ -61,7 +62,7 @@ $Payout_Currencies | ForEach-Object {
             }
         }
     }
-    catch {
+    catch { 
         Write-Log -Level Warn "Pool Balance API ($Name) has failed. "
     }
 }
