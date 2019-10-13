@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\PhoenixMiner.exe"
-$HashSHA256 = "1d3844cf67d147098467e9a7bac34f3ddfc1293e633dc0e3f45bfa586ece302d"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/phoenixminer/PhoenixMiner_4.7b_Windows.zip"
+$HashSHA256 = "10C895B3BF06A72FAEB096857200BA5D93A363AF02A8BCF8CB0ADE08900C8E67"
+$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/phoenixminer/PhoenixMiner_4.7c_Windows.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4129696.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
