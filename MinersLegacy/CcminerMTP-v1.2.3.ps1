@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "E39BD5E725599E44E4E0F92F4D9688179EEEAA6C0C1917F2AA0F547EFFB30F25"
-$Uri = "https://github.com/zcoinofficial/ccminer/releases/download/1.2.2/ccminer.exe"
+$HashSHA256 = "2FDD055D339154FA7C49FD7AC66EA7C0FFD50033DBECCFCB665C5404B79C4BD1"
+$Uri = "https://github.com/zcoinofficial/ccminer/releases/download/1.2.3/ccminer.exe"
 $ManualUri = "https://github.com/zcoinofficial/ccminer/releases"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
