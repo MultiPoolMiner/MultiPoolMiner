@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\TT-Miner.exe"
-$HashSHA256 = "1E3E4951A581215B697D61223C91DE36CEE04A832D2A78625F246892DBD0F000"
-$Uri = "https://tradeproject.de/download/Miner/TT-Miner-3.0.9.zip"
+$HashSHA256 = "9D92D8659FA86F8FBBB0C96AD59C745EA31591DBAAC7209EBF011406EC4A00A7"
+$Uri = "https://tradeproject.de/download/Miner/TT-Miner-3.0.10.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5025783.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -32,7 +32,7 @@ $Commands = [PSCustomObject[]]@(
 #    [PSCustomObject]@{Algorithm = "ETHASH2gb";   MinMemGB = 2; Command = " -A ETHASH"} #Ethash2GB, PhoenixMiner & ClaymoreDual miner are faster
 #    [PSCustomObject]@{Algorithm = "ETHASH3gb";   MinMemGB = 3; Command = " -A ETHASH"} #Ethash3GB, PhoenixMiner & ClaymoreDual miner are faster
 #    [PSCustomObject]@{Algorithm = "ETHASH";      MinMemGB = 4; Command = " -A ETHASH"} #Ethash, PhoenixMiner & ClaymoreDual miner are faster
-    [PSCustomObject]@{Algorithm = "LYRA2V3";     MinMemGB = 2; Command = " -A LYRA2V3"} #LYRA2V3
+#    [PSCustomObject]@{Algorithm = "LYRA2V3";     MinMemGB = 2; Command = " -A LYRA2V3"} #LYRA2V3, CryptoDredge-v0.21.0 is faster
 #    [PSCustomObject]@{Algorithm = "MTP";         MinMemGB = 6; Command = " -A MTP"} #MTP, CcminerTrex-v0.12.2b is 20% faster
 #    [PSCustomObject]@{Algorithm = "MTPNICEHASH"; MinMemGB = 6; Command = " -A MTP"} #MTP; TempFix: NiceHash only, CcminerTrex-v0.12.2b is 20% faster
 #    [PSCustomObject]@{Algorithm = "MYRGR";       MinMemGB = 2; Command = " -A MYRGR"} #Myriad-Groestl, never profitable
