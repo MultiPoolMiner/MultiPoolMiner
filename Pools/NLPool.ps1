@@ -25,7 +25,8 @@ while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -g
         if (-not $APIStatusResponse) { $APIStatusResponse = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
         if (-not $APICurrenciesResponse) { $APICurrenciesResponse = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
-    catch {
+    catch { }
+    if (-not ($APIStatusResponse -and $APICurrenciesResponse)) { 
         Start-Sleep -Seconds $RetryDelay
         $RetryCount--
     }

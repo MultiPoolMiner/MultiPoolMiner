@@ -21,7 +21,8 @@ while (-not ($APIResponse.return) -and $RetryCount -gt 0) {
     try {
         if (-not $APIResponse.return) { $APIResponse = Invoke-RestMethod $PoolAPIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
-    catch {
+    catch { }
+    if (-not $APIResponse.return) { 
         Start-Sleep -Seconds $RetryDelay
         $RetryCount--
     }
@@ -40,13 +41,11 @@ if ($APIResponse.return.count -le 1) {
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
 $APIResponse.return | ForEach-Object {
 
-    $CoinName = Get-CoinName $_.current_mining_coin
-    $MiningCurrency = $_.current_mining_coin_symbol
+    $PoolEntry = $_
+    $CoinName = Get-CoinName $PoolEntry.current_mining_coin
 
-    $PoolHosts = @($_.all_host_list.split(";"))
-    $Port = $_.algo_switch_port
-    $Algorithm = $_.algo
-    $Algorithm_Norm = Get-Algorithm $Algorithm
+    $PoolHosts = @($PoolEntry.all_host_list.split(";"))
+    $Algorithm_Norm = Get-Algorithm $PoolEntry.algo
 
     if ($Algorithm_Norm -eq "Sia") { $Algorithm_Norm = "SiaClaymore" } #temp fix
 
@@ -56,20 +55,20 @@ $APIResponse.return | ForEach-Object {
 
     if ($PoolHosts.Count -gt 1) { $Regions = $PoolRegions } else { $Regions = $Config.Region } #Do not create multiple pool objects if there is only one host
 
-    $PoolRegions | ForEach-Object {
+    $Regions | ForEach-Object {
         $Region = $_
         $Region_Norm = Get-Region ($Region -replace "^us-east$", "us")
 
         [PSCustomObject]@{
             Algorithm      = $Algorithm_Norm
             CoinName       = $CoinName
-            MiningCurrency = $MiningCurrency
+            MiningCurrency = $PoolEntry.current_mining_coin_symbol
             Price          = $Stat.Live
             StablePrice    = $Stat.Week
             MarginOfError  = $Stat.Week_Fluctuation
             Protocol       = "stratum+tcp"
             Host           = $PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1
-            Port           = $Port
+            Port           = $PoolEntry.algo_switch_port
             User           = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
             Pass           = "x"
             Region         = $Region_Norm
@@ -80,13 +79,13 @@ $APIResponse.return | ForEach-Object {
         [PSCustomObject]@{
             Algorithm      = $Algorithm_Norm
             CoinName       = $CoinName
-            MiningCurrency = $MiningCurrency
+            MiningCurrency = $PoolEntry.current_mining_coin_symbol
             Price          = $Stat.Live
             StablePrice    = $Stat.Week
             MarginOfError  = $Stat.Week_Fluctuation
             Protocol       = "stratum+ssl"
             Host           = $PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1
-            Port           = $Port
+            Port           = $PoolEntry.algo_switch_port
             User           = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
             Pass           = "x"
             Region         = $Region_Norm

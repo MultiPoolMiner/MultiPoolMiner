@@ -17,17 +17,18 @@ $Worker = $Config.Pools.$PoolFileName.Worker #to be removed
 
 # Guaranteed payout currencies
 $Payout_Currencies = @("BTC") | Where-Object { $Wallets.$_ }
-#if (-not $Payout_Currencies) {
-#    Write-Log -Level Verbose "Cannot mine on pool ($PoolFileName) - no wallet address specified. "
-#    return
-#}
+if (-not $Payout_Currencies) {
+    Write-Log -Level Verbose "Cannot mine on pool ($PoolFileName) - no wallet address specified. "
+    return
+}
 
 while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -gt 0) {
     try {
         if (-not $APIStatusResponse) { $APIStatusResponse = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
         if (-not $APICurrenciesResponse) { $APICurrenciesResponse = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
-    catch {
+    catch { }
+    if (-not ($APIStatusResponse -and $APICurrenciesResponse)) { 
         Start-Sleep -Seconds $RetryDelay
         $RetryCount--
     }

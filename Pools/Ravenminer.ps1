@@ -28,10 +28,11 @@ while (-not ($APIStatusResponse) -and $RetryCount -gt 0) {
     try {
         $APIStatusResponse = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
     }
-    catch {
+    catch { }
+    if (-not $APIStatusResponse) { 
         Start-Sleep -Seconds $RetryDelay
+        $RetryCount--
     }
-    $RetryCount--
 }
 
 if (-not $APIStatusResponse) {
