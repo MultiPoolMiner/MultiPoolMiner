@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\wildrig.exe"
-$HashSHA256 = "F352C883861F960C764E5FFCCA0C01B7460CF788C6F5F2422051E2301DDD2BB7"
-$Uri = "https://github.com/andru-kun/wildrig-multi/releases/download/0.19.1/wildrig-multi-windows-0.19.1-preview.7z"
+$HashSHA256 = "3A23A297C5EB95FEBB44B0E89CB1929AFB69AF0D35D4FCDE737558D35A66DB66"
+$Uri = "https://github.com/andru-kun/wildrig-multi/releases/download/0.19.3/wildrig-multi-windows-0.19.3-beta.7z"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5023676.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -54,6 +54,7 @@ $Commands = [PSCustomObject]@{
     "wildkeccak"     = " --algo=wildkeccak"
     "x16r"           = " --algo=x16r"
     "x16rt"          = " --algo=x16rt"
+    "x16rv2"         = " --algo=x16r" # new in 0.19.2
     "x16s"           = " --algo=x16s"
     "x17"            = " --algo=x17"
     "x18"            = " --algo=x18"
