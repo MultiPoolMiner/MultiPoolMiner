@@ -28,6 +28,7 @@
     "beamhash":  "EquihashR15053",
     "beamhash2":  "EquihashR15053",
     "beamv2":  "EquihashR15053",
+    "bfc":  "CuckooBFC",
     "bitcash":  "BitCash",
     "bitcoinair":  "BitcoinAir",
     "bitcoincore":  "BitcoinCore",
