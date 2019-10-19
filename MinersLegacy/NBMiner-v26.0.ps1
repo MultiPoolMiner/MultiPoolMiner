@@ -58,7 +58,7 @@ else { $CommonCommands = "" }
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
+    $Miner_Port = [Int]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
 
     $Commands | ForEach-Object { $Main_Algorithm_Norm = Get-Algorithm ($_.Algorithm -Split ";" | Select-Object -Index 0); $_ } | Where-Object { $_.Vendor -contains ($Device.Vendor_ShortName | Select-Object -Unique) -and $Pools.$Main_Algorithm_Norm.Host } | ForEach-Object { 
         $Main_Algorithm = $_.Algorithm -split ';' | Select-Object -Index 0
@@ -74,7 +74,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             $Command = Get-CommandPerDevice -Command $_.Command -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
             
             #define main algorithm protocol
-            if ($Pools.$Main_Algorithm_Norm.Name = "Nicehash") { $Main_Protocol = "nicehash+tcp" }
+            if ($Pools.$Main_Algorithm_Norm.Name -eq "Nicehash") { $Main_Protocol = "nicehash+tcp" }
             else { 
                 $Main_Protocol = "stratum+tcp"
                 if ($Pools.$Main_Algorithm_Norm.SSL) { $Main_Protocol = "stratum+ssl" }
