@@ -54,7 +54,7 @@ $Commands = [PSCustomObject]@{
     "wildkeccak"     = " --algo=wildkeccak"
     "x16r"           = " --algo=x16r"
     "x16rt"          = " --algo=x16rt"
-    "x16rv2"         = " --algo=x16r" # new in 0.19.2
+    "x16rv2"         = " --algo=x16rv2" # new in 0.19.2
     "x16s"           = " --algo=x16s"
     "x17"            = " --algo=x17"
     "x18"            = " --algo=x18"
