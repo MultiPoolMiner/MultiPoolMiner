@@ -25,7 +25,6 @@ $Commands = [PSCustomObject]@{
     #Intensities and parameters tested by nemosminer on 10603gb to 1080ti
     "C11"          = " -a c11 -i 22.1" #X11evo; fix for default intensity
     "Keccak"       = " -a keccak -m 2 -i 29" #Keccak; fix for default intensity, difficulty x M
-    "KeccakC"      = " -a keccakc -i 29" #Keccakc; fix for default intensity
     "Lyra2v2"      = " -a lyra2v2" #lyra2v2
     #"Neoscrypt"   = " -a neoscrypt -i 15.5" #NeoScrypt, CcminerKlausT-v8.25 is faster
     "Skein"        = " -a skein" #Skein
