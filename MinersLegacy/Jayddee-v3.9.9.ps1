@@ -9,7 +9,7 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $HashSHA256 = ""
-$Uri = "https://github.com/JayDDee/cpuminer-opt/releases/download/v3.9.7/cpuminer-opt-3.9.7-windows.zip"
+$Uri = "https://github.com/JayDDee/cpuminer-opt/releases/download/v3.9.9/cpuminer-opt-3.9.9-windows.zip"
 $ManualUri = "https://github.com/JayDDee/cpuminer-opt"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -37,12 +37,14 @@ $Commands = [PSCustomObject]@{
     "lyra2z330"     = " -a lyra2z330" #Lyra2z330
     "m7m"           = " -a m7m" #m7m
     "x12"           = " -a x12" #x12
+    "phi2"          = " -a phi2" #phi2
     "yespower"      = " -a yespower" #Yespower
     "yespowerr16"   = " -a yespowerr16" #YespowerR16
     "yescrypt"      = " -a yescrypt" #Yescrypt
     "yescryptr16"   = " -a yescryptr16" #YescryptR16
     "x16rtgincoin"  = " -a x16rt" #X16rt, new in 3.9.6
     "x16rtveil"     = " -a x16rt-veil" #X16rt-veil, new in 3.9.6
+    "x16rv2"        = " -a x16rv2" #X16rt-veil, new in 3.9.8
     "x13bcd"        = " -a x13bcd" #X13bcd, new in 3.9.6
     "x21s"          = " -a x21s" #X212, new in 3.9.6
     ### MAYBE PROFITABLE ALGORITHMS - NOT MINEABLE IN SUPPORTED POOLS AS OF 30/03/20198
@@ -122,7 +124,7 @@ $Commands = [PSCustomObject]@{
 if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
 else {$CommonCommands = ""}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
