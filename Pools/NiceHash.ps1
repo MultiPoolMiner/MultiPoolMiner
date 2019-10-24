@@ -15,7 +15,7 @@ if (-not $Payout_Currencies) {
 }
 
 $PoolRegions = "eu", "jp", "usa"
-$PoolHost = "-new.nicehash.com"
+$PoolHost = "nicehash.com"
 $PoolAPIUri = "https://api2.nicehash.com/main/api/v2/public/simplemultialgo/info/"
 $PoolAPIAlgodetailsUri = "https://api2.nicehash.com/main/api/v2/mining/algorithms/"
 
@@ -78,7 +78,7 @@ $APIResponse.miningAlgorithms | Where-Object { $_.paying -gt 0 } <# algos paying
         $Region = $_
         $Region_Norm = Get-Region $Region
 
-        $Payout_Currencies | Where-Object { -not ($Region -eq "eu" -and $Algorithm_Norm -eq "CryptoNightV7"<#Temp fix, No CryptonightV7 orders in Europe#>) } | ForEach-Object {
+        $Payout_Currencies | ForEach-Object {
             [PSCustomObject]@{
                 Algorithm     = $Algorithm_Norm
                 CoinName      = $CoinName
@@ -86,7 +86,7 @@ $APIResponse.miningAlgorithms | Where-Object { $_.paying -gt 0 } <# algos paying
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+tcp"
-                Host          = "$Algorithm.$Region$PoolHost"
+                Host          = "$Algorithm.$Region.$PoolHost"
                 Port          = $Port
                 User          = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
                 Pass          = "x"
@@ -103,7 +103,7 @@ $APIResponse.miningAlgorithms | Where-Object { $_.paying -gt 0 } <# algos paying
                 StablePrice   = $Stat.Week
                 MarginOfError = $Stat.Week_Fluctuation
                 Protocol      = "stratum+ssl"
-                Host          = "$Algorithm.$Region$PoolHost"
+                Host          = "$Algorithm.$Region.$PoolHost"
                 Port          = $Port
                 User          = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
                 Pass          = "x"
