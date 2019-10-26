@@ -5,8 +5,8 @@
     )
 
     # Create a global synchronized hashtable that all threads can access to pass data between the main script and API
-    $Global:API = [hashtable]::Synchronized(@{})
-    $API.APIVersion = 0.96
+    $Global:API = [hashtable]::Synchronized(@{ })
+    $API.APIVersion = 0.98
 
     # Setup flags for controlling script execution
     $API.Stop = $false
@@ -166,6 +166,14 @@
                         $Data = ConvertTo-Json @($API.FastestMiners | Select-Object)
                         Break
                     }
+                    "/filteredminers" {
+                        $Data = ConvertTo-Json @($API.FilteredMiners | Select-Object)
+                        Break
+                    }
+                    "/inactiveminers" {
+                        $Data = ConvertTo-Json @($API.InactiveMiners | Select-Object)
+                        Break
+                    }
                     "/intervals" {
                         $Data = ConvertTo-Json @($API.Intervals | Select-Object)
                         Break
@@ -236,6 +244,18 @@
                         $Data = ConvertTo-Json @($API.WatchdogTimers | Select-Object)
                         Break
                     }
+                    "/functions/stat/get" {
+                        $Data = Get-Stat @Parameters | ConvertTo-Json
+                        Break
+                    }
+                    "/functions/stat/remove" {
+                        $Data = Remove-Stat @Parameters | ConvertTo-Json
+                        Break
+                    }
+                    "/functions/stat/set" {
+                        $Data = Set-Stat @Parameters | ConvertTo-Json
+                        Break
+                    }
                     default {
                         # Set index page
                         if ($Path -eq "/") {
@@ -289,7 +309,7 @@
                 # If $Data is null, the API will just return whatever data was in the previous request.  Instead, show an error
                 # This happens if the script just started and hasn't filled all the properties in yet.
                 if ($Data -eq $Null) { 
-                    $Data = @{'Error' = "API data not available"} | ConvertTo-Json
+                    $Data = @{ "Error" = "API data not available" } | ConvertTo-Json
                 }
 
                 # Send the response
@@ -309,5 +329,4 @@
 
     $apiserver.Runspace = $newRunspace
     $API.apihandle = $apiserver.BeginInvoke()
-#    $API.APIServer = $apiserver
 }
