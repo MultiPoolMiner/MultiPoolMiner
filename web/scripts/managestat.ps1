@@ -42,6 +42,7 @@ Switch ($Parameters.Action) {
         if ($Null -ne $Parameters.Value) {
             @($Parameters.Algorithms -split ",") | ForEach-Object {
                 $StatName = "$($Parameters.MinerName)_$($_)_$($Parameters.Type)"
+                Remove-Stat -Name $StatName
                 Set-Stat -Name $StatName -Value $Parameters.Value -Duration ([TimeSpan]0)
                 $Text += "`n$($StatName).txt"
                 $Count++

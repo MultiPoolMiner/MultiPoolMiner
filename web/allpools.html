@@ -18,6 +18,9 @@
   data-icons="icons"
   data-detail-view="true"
   data-detail-formatter="detailFormatter"
+  #data-pagination="true"
+  #data-page-list="[10, 25, 50, 100, all]"
+  #data-unique-id="Identifier"
   >
   <div class="row">
     <thead>
@@ -25,7 +28,7 @@
         <th data-field="Name" data-sortable="true" data-filter-control="select">Name</th>
         <th data-field="Algorithm" data-sortable="true" data-filter-control="select">Algorithm</th>
         <th data-field="CoinName" data-sortable="true" data-filter-control="select">CoinName</th>
-        <th data-field="MiningCurrency" data-sortable="true" data-filter-control="select">Currency</th>        
+        <th data-field="CurrencySymbol" data-sortable="true" data-filter-control="select">Currency</th>
         <th data-field="Price" data-align="right" data-sortable="true" data-formatter="formatPrices">BTC/GH/Day</th>
         <th data-field="StablePrice" data-align="right" data-sortable="true" data-formatter="formatPrices">BTC/GH/Day (Week)</th>
         <th data-field="MarginOfError" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=2>MarginOfError</th>
@@ -48,14 +51,30 @@
 
 <script>
   $(function() {
-    $("#pools").bootstrapTable({
+    var $table = $('#pools')
+    $table.bootstrapTable({
       contextMenu: "#context-menu",
       onContextMenuItem: function(row, $el) {
-        if($el.data("item") == "reset-data") {
-          $Command = "scripts/managestat.ps1?Type=Profit&Action=Remove&Minername=" + row.Name + "&Algorithms=" + row.Algorithm
-          $(".modal-body").load($Command, function() {
-            $(".modal-title").text(row.Name + ": " + row.Algorithm);
+        if ($el.data("item") == "reset-data") {
+          Command = "scripts/managestat.ps1?Type=Profit&Action=Remove&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.Algorithm)
+          $(".modal-body").load(Command, function() {
+            $(".modal-title").text(row.Name + ": " + row.Algorithm + "(" + row.Identifier + ")");
             $("#myModal").modal({show:true});
+            $table.bootstrapTable("updateCellupdateCellByUniqueId", {
+              id: row.Identifier,
+              field: "Price",
+              value: NaN
+            });
+            $table.bootstrapTable("updateCellupdateCellByUniqueId", {
+              id: row.Identifier,
+              field: "StablePrice",
+              value: NaN
+            });
+            $table.bootstrapTable("updateCellupdateCellByUniqueId", {
+              id: row.Identifier,
+              field: "MarginOfError",
+              value: NaN
+            })
           });
         }
       }
@@ -66,8 +85,9 @@
 <!-- End of page scripts -->
 <script type="text/javascript">
 
-  function formatPrices(data) {
-    return (data * 1000000000).toFixed(10);
+  function formatPrices(value) {
+    if (isNaN(value)) return '-';
+    return (value * 1000000000).toFixed(10);
   }
 
   function formatDate(data) {
