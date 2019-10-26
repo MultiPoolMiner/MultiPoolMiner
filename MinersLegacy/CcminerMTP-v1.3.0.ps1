@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "2FDD055D339154FA7C49FD7AC66EA7C0FFD50033DBECCFCB665C5404B79C4BD1"
-$Uri = "https://github.com/zcoinofficial/ccminer/releases/download/1.2.3/ccminer.exe"
+$HashSHA256 = "3AEF4FE7DDD330B9DFE173810FF92B67935EAD7F5D00018FBFE7767AD085E69D"
+$Uri = "https://github.com/zcoinofficial/ccminer/releases/download/1.3.0/ccminer.exe"
 $ManualUri = "https://github.com/zcoinofficial/ccminer/releases"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -36,7 +36,7 @@ if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType No
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonCommands) { $CommonCommands = $Miner_Config.CommonCommands }
-else { $CommonCommands = "" }
+else { $CommonCommands = " --no-donation" }
 
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
