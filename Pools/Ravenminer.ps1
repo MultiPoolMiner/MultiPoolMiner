@@ -40,8 +40,8 @@ if (-not $APIStatusResponse) {
     return
 }
 
-if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -ne 1) {
-    Write-Log -Level Warn "Pool API ($PoolName) [StatusUri] returned invalid data. "
+if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+    Write-Log -Level Warn "Pool API ($PoolName) [StatusUri] returned nothing. "
     return
 }
 
