@@ -36,7 +36,7 @@ $Commands = [PSCustomObject]@{
     "Hex"        = " --algo=hex" #Hex
     "Phi"        = " --algo=phi" #PHI
     "Phi2"       = " --algo=phi2 --intensity=24" #Phi2
-    "Phi2-Lux"   = " --algo=phi2 --intensity=24" #Phi2-Lux
+    #"Phi2-Lux"   = " --algo=phi2 --intensity=24" #Phi2-Lux, no reported hashrate withing reasonable time
     "Polytimos"  = " --algo=poly" #Polytimos
     "Skunk"      = " --algo=skunk" #Skunk, new in 1.11
     "Sonoa"      = " --algo=sonoa --intensity 26" #SONOA, new in 1.12
