@@ -555,17 +555,11 @@ function Set-Stat {
     $Stat
 }
 
-function Get-AllStat {
-    [String[]]$Name = (Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
-    $Global:Stats | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $_ -notin $Name } | ForEach-Object { $Global:Stats.PSObject.Properties.Remove($_) }
-    $Name
-}
-
 function Get-Stat { 
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = (Get-AllStat)
+        [String[]]$Name = (Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
     $Name | Sort-Object -Unique | ForEach-Object { 
