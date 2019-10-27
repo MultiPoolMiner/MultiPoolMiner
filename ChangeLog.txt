@@ -6,34 +6,41 @@
 - Changed bestpool sorting; reduce miner switching when benchmarking
 - Fixed broken UnprofitableAlgorithm list (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/202a7b56f8a6f2ebff0c6fad01864cec0d86a7d5)
 - Fixed parameters '-DeviceName' and '-ExcludeDeviceName'
+- Fixed pool balances, ensure MPM will always use latest data
 - Fixed profitability comparison info when profit is negative
 - Added 'Equihash', 'Honeycomb', 'Skunk' & 'Tribus' algorithms to UnprofitableAlgorithms.txt
 
 #### Miner changes
 - Changed CcminerKlausT-v8.25; disabled 'Lyra2V2' algorithm, CcminerAlexis-v1.5 is 10%faster
-- Changed BMiner-v15.8.6; disabled 'Equihash' algorithm, DSTMEquihash-v0.6.2 is 15% faster
+- Changed BMiner-v15.8.7; disabled 'Equihash' algorithm, DSTMEquihash-v0.6.2 is 15% faster
 - Changed CcminerBMW512-v2.2.5; use faster x86 variant
 - Fixed all miners; $CommonCommands was broken
 - Fixed CcminerKlausT-v8.25; lowered intensity for 'Neoscrypt' algorithm
 - Removed EDSTMEquihash-v0.6.2 (moved to 'Deprecated' folder); Equihash is no longer profitable
 - Removed EwbfEquihash-v0.3.4b (moved to 'Deprecated' folder); Equihash is no longer profitable
-- Updated BMiner-v15.8.6; disabled dual mining with 'Blake2s' algorithm (rejected shares), improve the performance of automatic tuning of dual mining parameters
+- Updated BMiner-v15.8.7; disabled dual mining with 'Blake2s' algorithm (rejected shares), improve the performance of automatic tuning of dual mining parameters
 - Updated CcminerAlexis-v1.5.1; better compatibility with 'Skein' algorithm, dropped 'Hsr', 'KeccakC' & 'Poly' support 
-- Updated CcminerMTP-v1.2.2.ps1
-- Updated CcminerTrex-v0.14.4; support for 'X16rv2' algorithm
-- Updated CcminerZenemy-v2.2; support for 'X16rv2' algorithm
+- Updated CcminerMTP-v1.2.3.ps1
+- Updated CcminerTrex-v0.14.6; added support for 'X16rv2' algorithm
+- Updated CcminerZenemy-v2.3; added support for 'X16rv2' algorithm
 - Updated ClaymoreDual_v15.0
-- Updated Gminer-v1.66; added $CommonCommands, enabled 'Equihash1254' algorithm for AMD
+- Updated CryptoDredge-v0.22.0; support for 'X16rv2' algorithm
+- Updated Gminer-v1.69; added $CommonCommands, enabled 'Equihash1254' algorithm for AMD, support for 'CuckooBFC' (AMD & NVIDIA)
+- Updated Jayddee-v3.9.9; added support for 'X16rv2' algorithm
 - Updated lolMiner-v0.8.8; removed 'old Beam' algorithm
-- Updated MiniZEquihash-v1.5q6
-- Updated NBMiner-v25.2; added 'Eaglesong' algorithm (VBK)
-- Updated PhoenixminerEthash-v4.7a
-- Updated TeamRed-v0.5.9; support for 'X16rv2' algorithm
-- Updated TTMiner-v3.0.9
+- Updated MiniZEquihash-v1.5r
+- Updated NanoMiner_v1.6.1; added support for 'RandomHash' (CPU only), 'RandomHash2' (AMD & CPU) & 'RandomHash2' algorithms, disabled 'Ethash*' algorithms, other Ethash miners are faster
+- Updated NBMiner-v26.0; added support for 'Eaglesong' algorithm (VBK)
+- Updated PhoenixminerEthash-v4.7c
+- Updated TeamRed-v0.5.9; added support for 'X16rv2' algorithm
+- Updated TTMiner-v3.0.10
+- Updated Wildrig-v0.19.3; added support for 'X16rv2' algorithm
 
 #### Pool changes
 - Fixed BlazePool[-Algo/-Coin]; corrected API url
 - Fixed Nicehash[Old]; CryptonightV7 does not work in Europe
+- Fixed ZergPool; DOGE is now a guaranteed payout currency
+- Removed HashRefinery (Pool is shutting down)
 
 #### Balances changes
 #### API changes
