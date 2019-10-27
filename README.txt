@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 29/08/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 26/10/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -107,7 +107,7 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 
 -CoinName [Zcash, ZeroCoin etc.]
 	Limit mining to the listed coins only; this is also a per-pool setting (see Advanced Configuration). Use commas to separate multiple values.
-	Note: Only the pools ending in ...-Coin expose the coin names in their API.
+	Note: Only the pools ending in ...-Coin expose all coin names in their API. Check the web dashboard / pools to see which pools expose which values.
 
 -ConfigFile [Path\ConfigFile.txt]
 	The default config file name is '.\Config.txt'
@@ -116,8 +116,12 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 
 -Currency [BTC, USD, EUR, GBP, ETH ...]
 	Choose the default currency or currencies your profit stats will be shown in. Use commas to separate multiple values.
-	Important: MultiPoolMiner will use the first currency in the list as main currency. All profit / earning numbers will be displayed in the main currency.
-    Note: Instead af BTC you can also use mBTC (= BTC / 1000).
+	Important: MultiPoolMiner will use the first currency in the list as main currency. All profit / earning numbers will be displayed in the main (=first in the list) currency.
+	Note: Instead af BTC you can also use mBTC (= BTC / 1000).
+
+-CurrencySymbol [BTC, LTC, ZEC etc.]
+	Limit mining to the listed currency only; this is also a per-pool setting (see Advanced Configuration). Use commas to separate multiple values.
+	Note: Only the pools ending in ...-Coin expose all currency symbols in their API. Check the web dashboard / pools to see which pools expose which values.
 
 -Dashboard
 	Launch web dashboard after MPM start.
@@ -156,7 +160,7 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 -ExcludeCoinName [Zcash, ZeroCoin etc.]
 	Similar to the '-CoinName' command but it is used to exclude selected coins from being mined. Use commas to separate multiple values.
 	This is also a per-pool setting (see Advanced Configuration).
-	Note: Only the pools ending in ...-Coin expose the coin names in their API.
+	Note: Only the pools ending in ...-Coin expose all coin names in their API. Check the web dashboard / pools to see which pools expose which values.
 
 -ExcludeDeviceName
 	Similar to the '-DeviceName' command but it is used to exclude unwanted devices for mining. [CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.]. Use commas to separate multiple values.
@@ -425,6 +429,7 @@ Sample content of 'Config.txt'
   "CoinName": "$CoinName",
   "ConfigFile": "$ConfigFile",
   "Currency": "$Currency",
+  "CurrencySymbol": "$CurrencySymbol",
   "Dashboard": "$Dashboard",
   "Debug": "$Debug",
   "Delay": "$Delay",
@@ -438,10 +443,10 @@ Sample content of 'Config.txt'
   "ErrorAction": "$ErrorAction",
   "ErrorVariable": "$ErrorVariable",
   "ExcludeAlgorithm": "$ExcludeAlgorithm",
+  "ExcludeCurrencySymbol": "$ExcludeCurrencySymbol",
   "ExcludeCoinName": "$ExcludeCoinName",
   "ExcludeDeviceName": "$ExcludeDeviceName",
   "ExcludeMinerName": "$ExcludeMinerName",
-  "ExcludeMiningCurrency": "$ExcludeMiningCurrency",
   "ExcludePoolName": "$ExcludePoolName",
   "HashRateSamplesPerInterval": "$HashRateSamplesPerInterval",
   "HWiNFO64_SensorMapping": "$HWiNFO64_SensorMapping",
@@ -457,7 +462,7 @@ Sample content of 'Config.txt'
   "MinerStatusKey": "$MinerStatusKey",
   "MinerStatusUrl": "$MinerStatusUrl",
   "MinHashRateSamples": "$MinHashRateSamples",
-  "MiningCurrency": "$MiningCurrency",
+  "Currency": "$Currency",
   "MinWorker": "$MinWorker",
   "OutBuffer": "$OutBuffer",
   "OutVariable": "$OutVariable",
@@ -493,12 +498,12 @@ Sample content of 'Config.txt'
   "VersionCompatibility": "3.3.0"
 }
 
-
 There is a section for Pools, Miners and a general section
 
 Advanced configuration for Pools
 
 Settings for each configured pool are stored in its own subsection. These settings are only valid for the named pool.
+
 
 CoinName per pool [Zcash, ZeroCoin etc.]
 
@@ -515,6 +520,21 @@ E.g. To mine only Zcash & ZeroCoin at Zpool:
 Note: Only the pools ending in ...-Coin expose the coin name in their API.
 
 
+CurrencySymbol per pool [DGB, LTC, ZEC etc.]
+
+Only mine the selected currencies at the specified pool.
+
+E.g. To mine only LTC & ZEC at Zpool:
+
+    "Zpool-Coin": {
+      "CurrencySymbol":  [
+        "LTC",
+        "ZEC"
+      ]
+    }
+Note: Only the pools ending in ...-Coin expose all currency symbols in their API. Check the web dashboard / pools to see which pools expose which values.
+
+
 DisableEstimateCorrection per pool
 
 Some pools overestimate the projected profits. By default MPM will reduce the projected algo price by a correction factor (actual_last24h / estimate_last24h) to counter pool the overestimated prices.
@@ -523,7 +543,8 @@ E.g. To disable this at Zpool:
     "Zpool-Algo": {
       "DisableEstimateCorrection":  false
     }
-    
+
+
 ExcludeAlgorithm per pool
 
 Do not use the configured algorithms for mining at the specified pool.
@@ -551,6 +572,21 @@ E.g. To NOT mine Zcash & ZeroCoin at Zpool:
       ]
     }
 Note: Only the pools ending in ...-Coin expose the coin name in their API.
+
+
+ExcludeCurrencySymbol per pool [DGB, LTC, ZEC etc.]
+
+Exclude selected currency symbol from being mined at the specified pool.
+
+E.g. To NOT mine DGB & LTC at Zpool:
+
+    "Zpool-Coin": {
+      "ExcludeCurrencySymbol":  [
+        "DGB",
+        "LTC"
+      ]
+    }
+Note: Only the pools ending in ...-Coin expose all currency symbols in their API. Check the web dashboard / pools to see which pools expose which values.
 
 
 ExcludeRegion per pool
@@ -687,6 +723,7 @@ Advanced configuration for Miners
 
 Settings for each configured miner are stored in its own subsection. These settings are only valid for the named miner.
 
+
 ExcludeAlgorithm per miner
 
 E.g. To exclude the Ethash3gb algorithm from any version of the ClaymoreEthash miner:
@@ -701,11 +738,11 @@ E.g. To exclude the Ethash3gb algorithm from any version of the ClaymoreEthash m
       }
     }
 
-E.g. To exclude the Ethash2gb or Blake2s algorithms from ClaymoreEthash-v14.7 miner:
+E.g. To exclude the Ethash2gb or Blake2s algorithms from ClaymoreEthash-v15.0 miner:
 
     "MinersLegacy": {
       "ClaymoreEthash": {
-        "v14.7": {
+        "v15.0": {
           "ExcludeAlgorithm": [
             "Blake2s",
             "Ethash2gb"
@@ -732,11 +769,11 @@ E.g. To disable the dev fee mining from any version of the ClaymoreEthash miner:
       }
     }
 
-E.g. To disable the dev fee mining from ClaymoreEthash-v14.7 miner:
+E.g. To disable the dev fee mining from ClaymoreEthash-v15.0 miner:
 
     "MinersLegacy": {
       "ClaymoreEthash": {
-        "v14.7": {
+        "v15.0": {
           "DisableDevFeeMining":  true
         }
       }
@@ -749,7 +786,7 @@ Secondary algorithm intensities (dual algo miners only)
 
 The mining intensities for secondary algorithms can be configured in the config file.
 
-The miner name must be entered without the ending version number (e.g. for ClaymoreEthash-v14.7 remove -v14.7)
+The miner name must be entered without the ending version number (e.g. for ClaymoreEthash-v15.0 remove -v15.0)
 The algorithm names must be entered as the miner uses it, do not use the normalized algorithm name as returned by Get-Algorithm.
 
     "MinersLegacy": {
@@ -768,7 +805,7 @@ The algorithm names must be entered as the miner uses it, do not use the normali
             ]
           }
         },
-        "v14.7": {
+        "v15.0": {
           "SecondaryAlgoIntensities": {
             "decred": [
               25,
@@ -788,7 +825,7 @@ Customize miner commands
 
 MPM stores all default miner commands (= what algos to mine and the commands to do so) in the miner file. You can override these commands with your own by modifing the config file.
 
-The miner name must be entered without the ending version number (e.g. for ClaymoreEthash-v14.7 remove -v14.7)
+The miner name must be entered without the ending version number (e.g. for ClaymoreEthash-v15.0 remove -v15.0)
 The algorithm name must be entered in the normalized form as returned by Get-Algorithm.
 Commands must match the data structure as found in the existing miner files. Note: Not all miners use the same parameters.
 
@@ -813,7 +850,7 @@ Commands must match the data structure as found in the existing miner files. Not
           ],
           "CommonCommands": " -dbg -1"
         },
-        "v14.7": {
+        "v15.0": {
           "AllCommands": [
             {
               "MainAlgorithm": "Ethash2gb",
@@ -872,7 +909,7 @@ Modify the config file to define the program and its parameters. E.g.
         }
       },
       "CryptoDredge": {
-        "v0.21.0": {
+        "v0.22.0": {
           "PreStartCommand": "'C:\\Program Files (x86)\\MSI Afterburner\\MSIAfterburner.exe' -Profile2",
           "PostStartCommand": ""
           "PreStopCommand": "_ the command put here would be run before CryptoDredge-v0.20.2 miner gets stopped",
@@ -896,7 +933,7 @@ Advanced general configuration
 
 Settings in this section affect the overall behaviour of MPM and will take precedence over command line parameters.
 
-DevicePciOrderMapping
+DevicePciOrderMapping (deprecated)
 
 Some miners (currently Claymore*, Gminer, lolMinerEquihash, Nanominer, SRBMinerCryptonight & Wildrig) enumerate the GPU devices based on the PCI deviceID.
 All other miners use the device order as returned by the OpenCL API.
