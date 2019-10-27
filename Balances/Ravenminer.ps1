@@ -5,6 +5,7 @@ param(
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$Url = "https://www.ravenminer.com/?address="
 
 # Guaranteed payout currencies
 $Payout_Currencies = @("RVN") | Where-Object { $Wallets.$_ }
@@ -45,4 +46,5 @@ Write-Log -Level Verbose "Processing balances information ($Name). "
     Pending     = $APIResponse.unsold
     Total       = $APIResponse.unpaid
     LastUpdated = (Get-Date).ToUniversalTime()
+    Url         = "$($Url)$($Wallets.RVN)"
 }

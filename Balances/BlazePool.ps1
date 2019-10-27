@@ -5,6 +5,7 @@ param(
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$Url = "http://blazepool.com/wallet.html?"
 
 # Guaranteed payout currencies
 $Payout_Currencies = @("BTC") | Where-Object { $Wallets.$_ }
@@ -45,4 +46,5 @@ Write-Log -Level Verbose "Processing balances information ($Name). "
     Pending     = $APIResponse.unsold
     Total       = $APIResponse.total_unpaid
     LastUpdated = (Get-Date).ToUniversalTime()
+    Url         = "$($Url)BTC=$($Wallets.BTC)"
 }

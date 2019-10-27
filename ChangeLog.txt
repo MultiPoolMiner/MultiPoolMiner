@@ -50,6 +50,7 @@
 - Removed HashRefinery (Pool is shutting down)
 
 #### Balances changes
+- Added 'Url' property
 - Removed HashRefinery (Pool is shutting down)
 
 #### API changes
@@ -62,6 +63,7 @@
 - Added Currency column to pool pages
 - Added separate pages for 'Inactive Miners' and 'Filtered Miners'
 - Added context menu to 'Inactive Miners'
+- Added links to balances boxes to take you directly to the pool web page
 - Fixed stat management (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/8e6fd3acba279c99ed1d7bce1ed14073e9c37822)
 
 ## Changelog Version 3.5.2

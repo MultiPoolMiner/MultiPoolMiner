@@ -5,6 +5,7 @@ param(
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$Url = "https://www.nicehash.com/my/miner/"
 
 # Guaranteed payout currencies
 $Payout_Currencies = @("BTC") | Where-Object { $Wallets.$_ }
@@ -48,6 +49,7 @@ else {
             Total       = $Sum
             LastUpdated = (Get-Date).ToUniversalTime()
             NextPayout  = [datetime]$APIResponse.NextPayoutTimestamp
+            Url         = "$($Url)$($Wallets.BTC)"
         }
     }
 }

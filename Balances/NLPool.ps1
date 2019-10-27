@@ -5,6 +5,7 @@ param(
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$Url = "https://www.nlpool.nl/?address="
 
 # Guaranteed payout currencies
 $Payout_Currencies = @("BTC", "LTC") | Where-Object { $Wallets.$_ }
@@ -59,6 +60,7 @@ $Payout_Currencies | ForEach-Object {
                 Pending     = $APIResponse.unsold
                 Total       = $APIResponse.unpaid
                 LastUpdated = (Get-Date).ToUniversalTime()
+                Url         = "$($Url)$($Wallets.$_)"
             }
         }
     }
