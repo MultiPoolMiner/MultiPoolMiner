@@ -101,7 +101,7 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
                 Host               = "$(if ($Region -eq "eu") { "eu." })$PoolHost"
                 Port               = $Port
                 User               = [String]$Wallets.$_
-                Pass               = "ID=$Worker,c=$_,mc=$CurrencySymbol$($PasswordSuffix.Algorithm."*")$($PasswordSuffix.Algorithm.$Algorithm_Norm)$($PasswordSuffix.CoinName."*")$($PasswordSuffix.CoinName.$CoinName)"
+                Pass               = "ID=$Worker,c=$_,$($PasswordSuffix.Algorithm."*")$($PasswordSuffix.Algorithm.$Algorithm_Norm)$($PasswordSuffix.CoinName."*")$($PasswordSuffix.CoinName.$CoinName)"
                 Region             = $Region_Norm
                 SSL                = $false
                 Updated            = $Stat.Updated
