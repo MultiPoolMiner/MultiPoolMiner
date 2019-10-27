@@ -67,11 +67,11 @@ $Commands | ForEach-Object {
 
 #CommonCommandsAll from config file take precedence
 if ($Miner_Config.CommonCommandsAll) { $CommonCommandsAll = $Miner_Config.CommonCommandsAll }
-else { $CommonCommandsAll = " -log 0 -wdog 0 -mclock 0 -rvram -1 -eres 0" }
+else { $CommonCommandsAll = " -log 0 -wdog 0 -mclock 0 -eres 1 -mi 13 -leaveoc" }
 
 #CommonCommandsNvidia from config file take precedence
 if ($Miner_Config.CommonCommandsNvidia) { $CommonCommandsNvidia = $Miner_Config.CommonCommandsNvidia }
-else { $CommonCommandsNvidia = " -mi 14 -nvidia" }
+else { $CommonCommandsNvidia = " -nvidia -nvdo 1" }
 
 #CommonCommandsAmd from config file take precedence
 if ($Miner_Config.CommonCommandsAmd) { $CommonCommmandAmd = $Miner_Config.CommonCommandsAmd }
@@ -80,7 +80,7 @@ else { $CommonCommandsAmd = " -amd" }
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object { $UnsupportedDriverVersions -notcontains $_.OpenCL.DriverVersion })
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
 
     switch ($_.Vendor) { 
         "Advanced Micro Devices, Inc." { $CommonCommands = $CommonCommandsAmd + $CommonCommandsAll }
