@@ -30,7 +30,7 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
 
 $Commands = [PSCustomObject]@{ 
     "Mtp" = " -a mtp-classic -i 21 -R 1"
-    "MtpTrc" = " -a mtp-trc -i 21 -R 1"
+    "MtpTcr" = " -a mtp-tcr -i 21 -R 1"
 }
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force } }
