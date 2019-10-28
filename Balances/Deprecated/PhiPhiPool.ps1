@@ -5,6 +5,7 @@ param(
 )
 
 $Name = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
+$Url = "phi-phi-pool.com/?address="
 
 if (-not ($Wallets | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) -ne "BTC") { 
     Write-Log -Level Verbose "Cannot get balance on pool ($Name) - no wallet address specified. "
@@ -70,6 +71,7 @@ $Payout_Currencies | ForEach-Object {
             Pending     = $APIResponse.unsold
             Total       = $APIResponse.unpaid
             LastUpdated = (Get-Date).ToUniversalTime()
+            Url         = "$($Url)$($Wallets.$_)"
         }
     }
 }
