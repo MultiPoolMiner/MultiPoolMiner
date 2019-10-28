@@ -40,7 +40,7 @@
 - Updated SgminerMTP-v0.1.3
 - Updated TeamRed-v0.5.9; added support for 'X16rv2' algorithm
 - Updated TTMiner-v3.0.10
-- Updated Wildrig-v0.20.; added support for 'MTP', 'MTP-TCR' & 'X16rv2' algorithms
+- Updated Wildrig-v0.20.0.2; added support for 'MTP', 'MTP-TCR' & 'X16rv2' algorithms
 
 #### Pool changes
 - Changed property 'MiningCurrency' to 'CurrencySymbol'
