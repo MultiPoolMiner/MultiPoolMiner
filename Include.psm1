@@ -521,7 +521,7 @@ function Get-Stat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = (Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+        [String[]]$Name = @($Global:Stats.Name | Select-Object) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
     $Name | Sort-Object -Unique | ForEach-Object { 
