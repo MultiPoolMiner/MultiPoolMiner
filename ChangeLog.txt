@@ -30,7 +30,7 @@
 - Updated CcminerZenemy-v2.3; added support for 'X16rv2' algorithm
 - Updated ClaymoreDual_v15.0
 - Updated CryptoDredge-v0.22.0; support for 'X16rv2' algorithm
-- Updated Gminer-v1.69; added $CommonCommands, enabled 'Equihash1254' algorithm for AMD, support for 'CuckooBFC' (AMD & NVIDIA)
+- Updated Gminer-v1.70; added $CommonCommands, enabled 'Equihash1254' algorithm for AMD, support for 'CuckooBFC' (AMD & NVIDIA)
 - Updated Jayddee-v3.9.9.1; added support for 'X16rv2' algorithm
 - Updated lolMiner-v0.8.8; removed 'old Beam' algorithm
 - Updated MiniZEquihash-v1.5r
