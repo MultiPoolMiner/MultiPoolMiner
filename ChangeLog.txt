@@ -15,7 +15,7 @@
 - Parameter 'DevicePciOrderMapping' is deprecated. Please report back if automatic device selection is not working for you.
 
 #### Miner changes
-- Added CcminerMtpTc-v1.2.4; support for 'Mtp-Trc' (TecraCoin) algorithm
+- Added CcminerMtpTc-v1.2.5; support for 'Mtp-Trc' (TecraCoin) algorithm
 - Changed CcminerKlausT-v8.25; disabled 'Lyra2V2' algorithm, CcminerAlexis-v1.5 is 10%faster
 - Changed BMiner-v15.8.7; disabled 'Equihash' algorithm, DSTMEquihash-v0.6.2 is 15% faster
 - Changed CcminerBMW512-v2.2.5; use faster x86 variant
@@ -25,7 +25,7 @@
 - Removed EwbfEquihash-v0.3.4b (moved to 'Deprecated' folder); Equihash is no longer profitable
 - Updated BMiner-v15.8.7; disabled dual mining with 'Blake2s' algorithm (rejected shares), improve the performance of automatic tuning of dual mining parameters
 - Updated CcminerAlexis-v1.5.1; better compatibility with 'Skein' algorithm, dropped 'Hsr', 'KeccakC' & 'Poly' support 
-- Updated CcminerMTP-v1.3.0.ps1
+- Updated CcminerMTP-v1.3.1.ps1
 - Updated CcminerTrex-v0.14.6; added support for 'X16rv2' algorithm
 - Updated CcminerZenemy-v2.3; added support for 'X16rv2' algorithm
 - Updated ClaymoreDual_v15.0
