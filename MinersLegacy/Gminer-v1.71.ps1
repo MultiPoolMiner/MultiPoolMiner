@@ -9,30 +9,29 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\miner.exe"
-$HashSHA256 = "7A4D40E7459D1F118E88AB32A6F984997862778BCDF11D155C3D9A8C15572762"
-$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.70/gminer_1_70_windows64.zip"
+$HashSHA256 = ""
+$Uri = "https://github.com/develsoftware/GMinerRelease/releases/download/1.71/gminer_1_71_windows64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5034735.0"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{ Algorithm = "EquihashR15053"; MinMemGB = 4.0; Fee = 2; Vendor = @("AMD", "NVIDIA"); Command = " --algo BeamHashII --OC1" } #new in v1.55
-    [PSCustomObject]@{ Algorithm = "Cuckaroo29";     MinMemGB = 4.0; Fee = 2; Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckaroo29" } #new in v1.19; Cuckaroo29 / Grin
-    [PSCustomObject]@{ Algorithm = "Cuckaroo29s";    MinMemGB = 4.0; Fee = 2; Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckaroo29s" } #new in v1.34; Cuckaroo29s / Swap
-    [PSCustomObject]@{ Algorithm = "Cuckatoo31";     MinMemGB = 7.4; Fee = 2; Vendor = @("NVIDIA");        Command = " --algo cuckatoo31" } #new in v1.31; Cuckatoo31 / Grin
-    [PSCustomObject]@{ Algorithm = "Cuckarood29";    MinMemGB = 1.0; Fee = 2; Vendor = @("NVIDIA");        Command = " --algo grin29" } #new in v1.51
-    [PSCustomObject]@{ Algorithm = "Cuckoo29";       MinMemGB = 4.0; Fee = 2; Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckoo29" } #new in v1.24; Cuckoo29 / Aeternity
-    [PSCustomObject]@{ Algorithm = "CuckooBFC";      MinMemGB = 1.0; Fee = 3; Vendor = @("AMD", "NVIDIA"); Command = " --algo bfc" } #new in v1.69; CuckooBFC
-    [PSCustomObject]@{ Algorithm = "Equihash965";    MinMemGB = 0.8; Fee = 2; Vendor = @("NVIDIA");        Command = " --algo equihash96_5" } #new in v1.13
-    [PSCustomObject]@{ Algorithm = "Equihash1254";   MinMemGB = 1.0; Fee = 2; Vendor = @("AMD", "NVIDIA"); Command = " --algo equihash125_4" } #new in v1.46; ZelCash
-    [PSCustomObject]@{ Algorithm = "Equihash1445";   MinMemGB = 1.8; Fee = 2; Vendor = @("AMD", "NVIDIA"); Command = " --algo equihash144_5" }
-    [PSCustomObject]@{ Algorithm = "Equihash1927";   MinMemGB = 2.8; Fee = 2; Vendor = @("NVIDIA");        Command = " --algo equihash192_7" }
-    [PSCustomObject]@{ Algorithm = "Equihash2109";   MinMemGB = 1.0; Fee = 2; Vendor = @("NVIDIA");        Command = " --algo equihash210_9" } #new in v1.09
-    [PSCustomObject]@{ Algorithm = "Grimm";          MinMemGB = 1.0; Fee = 2; Vendor = @("AMD", "NVIDIA"); Command = " --algo grimm" } #new in v1.54; Grimm
-    [PSCustomObject]@{ Algorithm = "vds";            MinMemGB = 1.0; Fee = 2; Vendor = @("AMD", "NVIDIA"); Command = " --algo vds" } #new in v1.43; Vds / V-Dimension
+    [PSCustomObject]@{ Algorithm = "BFC";            MinMemGB = 4.0; Fee = 3;    Vendor = @("AMD", "NVIDIA"); Command = " --algo bfc" } #new in v1.69
+    [PSCustomObject]@{ Algorithm = "Cuckaroo29";     MinMemGB = 4.0; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckaroo29" } #new in v1.19; Cuckaroo29 / Grin
+    [PSCustomObject]@{ Algorithm = "Cuckaroo29s";    MinMemGB = 4.0; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckaroo29s" } #new in v1.34; Cuckaroo29s / Swap
+    [PSCustomObject]@{ Algorithm = "Cuckatoo31";     MinMemGB = 7.4; Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo cuckatoo31" } #new in v1.31; Cuckatoo31 / Grin
+    [PSCustomObject]@{ Algorithm = "Cuckarood29";    MinMemGB = 1.0; Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo grin29" } #new in v1.51
+    [PSCustomObject]@{ Algorithm = "Cuckoo29";       MinMemGB = 4.0; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckoo29" } #new in v1.24; Cuckoo29 / Aeternity
+    [PSCustomObject]@{ Algorithm = "CuckooBFC";      MinMemGB = 1.0; Fee = 3;    Vendor = @("AMD", "NVIDIA"); Command = " --algo bfc" } #new in v1.69; CuckooBFC
+    [PSCustomObject]@{ Algorithm = "Equihash965";    MinMemGB = 0.8; Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo equihash96_5" } #new in v1.13
+    [PSCustomObject]@{ Algorithm = "Equihash1254";   MinMemGB = 1.0; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo equihash125_4" } #new in v1.46; ZelCash
+    [PSCustomObject]@{ Algorithm = "Equihash1445";   MinMemGB = 1.8; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo equihash144_5" }
+    [PSCustomObject]@{ Algorithm = "Equihash1927";   MinMemGB = 2.8; Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo equihash192_7" }
+    [PSCustomObject]@{ Algorithm = "Equihash2109";   MinMemGB = 1.0; Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo equihash210_9" } #new in v1.09
+    [PSCustomObject]@{ Algorithm = "EquihashR15053"; MinMemGB = 4.0; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo BeamHashII --OC1" } #new in v1.55
+    [PSCustomObject]@{ Algorithm = "Ethash";         MinMemGB = 4.0; Fee = 0.65; Vendor = @("NVIDIA");        Command = " --algo ethash" } #new in v1.71, Coins ETC & ETH only
+    [PSCustomObject]@{ Algorithm = "Grimm";          MinMemGB = 1.0; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo grimm" } #new in v1.54; Grimm
+    [PSCustomObject]@{ Algorithm = "vds";            MinMemGB = 1.0; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo vds" } #new in v1.43; Vds / V-Dimension
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
@@ -44,9 +43,9 @@ else { $CommonCommands = " --watchdog 0" }
 $Devices = $Devices | Where-Object Type -EQ "GPU"
 $Devices | Select-Object Type, Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Type -EQ $_.Type | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
 
-    $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $_.Vendor -contains ($Device.Vendor_ShortName | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Host } | ForEach-Object { 
+    $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $_.Vendor -contains ($Device.Vendor_ShortName | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Host -and ($Algorithm_Norm -ne "Ethash" -or $Pools.$Algorithm_Norm.CurrencySymbol -match "ETH|ETC") } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
         
         #Windows 10 requires 1 GB extra
@@ -63,7 +62,7 @@ $Devices | Select-Object Type, Model -Unique | ForEach-Object {
                 "Equihash1927"   { $Pers = " --pers $(Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default "auto")" }
                 Default          { $Pers = "" }
             }
-
+            
             [PSCustomObject]@{ 
                 Name               = $Miner_Name
                 BaseName           = $Miner_BaseName
