@@ -127,6 +127,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
     if ($APIStatusResponse.$Algorithm.mbtc_mh_factor -gt 0) { 
         $PoolHost = "mine.zergpool.com"
         $Port = [Int]$APICurrenciesResponse.$_.port
+        $Algorithm = [String]$APICurrenciesResponse.$_.algo
         $CoinName = Get-CoinName $APICurrenciesResponse.$_.name
         $CurrencySymbol = "$(($APICurrenciesResponse.$_.symbol | Select-Object -Index 0) -split '-' | Select-Object -Index 0)"
         $Algorithm_Norm = Get-AlgorithmFromCurrencySymbol $CurrencySymbol
@@ -134,7 +135,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
         $Workers = [Int]$APICurrenciesResponse.$_.workers
         $Fee = [Decimal]($APIStatusResponse.$Algorithm.Fees / 100)
 
-        $Divisor = 1000000 <#check#> * [Double]$APIStatusResponse.$Algorithm.mbtc_mh_factor
+        $Divisor = 1000000000 <#check#> * [Double]$APICurrenciesResponse.$_.mbtc_mh_factor
 
         $Stat = Set-Stat -Name "$($PoolName)_$($CurrencySymbol)-$($Algorithm_Norm)_Profit" -Value ($APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
