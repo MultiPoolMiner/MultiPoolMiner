@@ -1160,20 +1160,19 @@ function Get-Algorithm {
     else { $Algorithm }
 }
 
-function Get-AlgorithmFromCoinName { 
+function Get-AlgorithmFromCurrencySymbol { 
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String]$CoinName = ""
+        [String]$CurrencySymbol = ""
     )
 
-    if (-not (Test-Path Variable:Script:Algorithms -ErrorAction SilentlyContinue)) { 
-        $Script:Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
+    if (-not (Test-Path Variable:Script:EthashDAGsize -ErrorAction SilentlyContinue)) { 
+        $Script:EthashDAGsize = Get-Content "EthashDAGsize.txt" | ConvertFrom-Json
     }
-    if ($Script:Algorithms.$CoinName) { $Script:Algorithms.$CoinName }
+    if ($Script:EthashDAGsize.$CurrencySymbol) { $Script:EthashDAGsize.$CurrencySymbol }
     else { $null }
 }
-
 
 function Get-CoinName { 
     [CmdletBinding()]
@@ -1303,7 +1302,7 @@ class Pool {
 
     #[Int]$Workers
     #[Double]$EstimateCorrection
-    #[String]$MiningCurrency
+    #[String]$CurrencySymbol
 }
 
 enum MinerStatus { 
