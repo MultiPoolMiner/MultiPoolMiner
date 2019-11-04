@@ -455,7 +455,7 @@ function Set-Stat {
         $ToleranceMin = $Value
         $ToleranceMax = $Value
 
-        if ($FaultDetection -and $Stat.Week_Fluctuation) { 
+        if ($FaultDetection) { 
             $ToleranceMin = $Stat.Week * (1 - [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
             $ToleranceMax = $Stat.Week * (1 + [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
         }
