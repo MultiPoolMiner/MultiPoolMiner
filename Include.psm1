@@ -88,6 +88,7 @@ function Get-PrePostCommand {
 
     #Get Pre / Post miner exec commands
 
+
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
@@ -455,95 +456,58 @@ function Set-Stat {
         $ToleranceMin = $Value
         $ToleranceMax = $Value
 
-        if ($FaultDetection -and $Stat.Week_Fluctuation) { 
+        if ($FaultDetection) { 
             $ToleranceMin = $Stat.Week * (1 - [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
             $ToleranceMax = $Stat.Week * (1 + [Math]::Min([Math]::Max($Stat.Week_Fluctuation * 2, 0.1), 0.9))
         }
 
-        if ($ChangeDetection -and [Decimal]$Value -eq [Decimal]$Stat.Live) { $Updated = $Stat.Updated }
+        if ($ChangeDetection -and [Decimal]$Value -eq [Decimal]$Stat.Live) { $Updated = $Stat.updated }
 
-        if (($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) -and ($Stat.ToleranceExceeded -lt 2) -and $ToleranceMin) { #Update immediately if stat value is 0
-            $Stat.ToleranceExceeded ++
-            if ($Name -match ".+_HashRate$") {
-                Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($(($Value | ConvertTo-Hash) -replace '\s+', '')) is outside fault tolerance ($(($ToleranceMin | ConvertTo-Hash) -replace '\s+', ' ') to $(($ToleranceMax | ConvertTo-Hash) -replace '\s+', ' ')) [$($Stat.ToleranceExceeded) of 3 until enforced update]. "
-            }
-            else {
-                Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($($Value.ToString("N2"))W) is outside fault tolerance ($($ToleranceMin.ToString("N2"))W to $($ToleranceMax.ToString("N2"))W) [$($Stat.ToleranceExceeded) of 3 until enforced update]. "
-            }
+        if ($Value -lt $ToleranceMin -or $Value -gt $ToleranceMax) { 
+            Write-Log -Level Warn "Stat file ($Name) was not updated because the value ($([Decimal]$Value)) is outside fault tolerance ($([Int]$ToleranceMin) to $([Int]$ToleranceMax)). "
         }
         else { 
-            if ($Stat.ToleranceExceeded -ge 2 -or (-not $Value)) { #Update immediately if stat value is 0
-                if ($Value) {
-                    $Stat.ToleranceExceeded ++
-                    if ($Name -match ".+_HashRate$") {
-                        Write-Log -Level Warn "Stat file ($Name) was forcefully updated with value ($(($Value | ConvertTo-Hash) -replace '\s+', '')) because it was outside fault tolerance ($(($ToleranceMin | ConvertTo-Hash) -replace '\s+', ' ')) to $(($ToleranceMax | ConvertTo-Hash) -replace '\s+', ' ')) for $($Stat.ToleranceExceeded) times in a row. "
-                    }
-                    else {
-                        Write-Log -Level Warn "Stat file ($Name) was forcefully updated with value ($($Value.ToString("N2"))W) because it was outside fault tolerance ($($ToleranceMin.ToString("N2"))W to $($ToleranceMax.ToString("N2"))W) for $($Stat.ToleranceExceeded) times in a row. "
-                    }
-                }
-                $Stat = [PSCustomObject]@{
-                    Live                  = $Value
-                    Minute                = $Value
-                    Minute_Fluctuation    = 0
-                    Minute_5              = $Value
-                    Minute_5_Fluctuation  = 0
-                    Minute_10             = $Value
-                    Minute_10_Fluctuation = 0
-                    Hour                  = $Value
-                    Hour_Fluctuation      = 0
-                    Day                   = $Value
-                    Day_Fluctuation       = 0
-                    Week                  = $Value
-                    Week_Fluctuation      = 0
-                    Duration              = [TimeSpan]$Stat.Duration + $Duration
-                    Updated               = $Updated
-                    ToleranceExceeded     = [Int]0
-                }
-            }
-            else {
-                $Span_Minute    = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
-                $Span_Minute_5  = [Math]::Min(($Duration.TotalMinutes / 5) / [Math]::Min(($Stat.Duration.TotalMinutes / 5), 1), 1)
-                $Span_Minute_10 = [Math]::Min(($Duration.TotalMinutes / 10) / [Math]::Min(($Stat.Duration.TotalMinutes / 10), 1), 1)
-                $Span_Hour      = [Math]::Min($Duration.TotalHours / [Math]::Min($Stat.Duration.TotalHours, 1), 1)
-                $Span_Day       = [Math]::Min($Duration.TotalDays / [Math]::Min($Stat.Duration.TotalDays, 1), 1)
-                $Span_Week      = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
+            $Span_Minute = [Math]::Min($Duration.TotalMinutes / [Math]::Min($Stat.Duration.TotalMinutes, 1), 1)
+            $Span_Minute_5 = [Math]::Min(($Duration.TotalMinutes / 5) / [Math]::Min(($Stat.Duration.TotalMinutes / 5), 1), 1)
+            $Span_Minute_10 = [Math]::Min(($Duration.TotalMinutes / 10) / [Math]::Min(($Stat.Duration.TotalMinutes / 10), 1), 1)
+            $Span_Hour = [Math]::Min($Duration.TotalHours / [Math]::Min($Stat.Duration.TotalHours, 1), 1)
+            $Span_Day = [Math]::Min($Duration.TotalDays / [Math]::Min($Stat.Duration.TotalDays, 1), 1)
+            $Span_Week = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
 
-                $Stat = [PSCustomObject]@{
-                    Live                  = $Value
-                    Minute                = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
-                    Minute_Fluctuation    = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
-                    Minute_5              = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
-                    Minute_5_Fluctuation  = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + ($Span_Minute_5 * ([Math]::Abs($Value - $Stat.Minute_5) / [Math]::Max([Math]::Abs($Stat.Minute_5), $SmallestValue)))
-                    Minute_10             = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
-                    Minute_10_Fluctuation = ((1 - $Span_Minute_10) * $Stat.Minute_10_Fluctuation) + ($Span_Minute_10 * ([Math]::Abs($Value - $Stat.Minute_10) / [Math]::Max([Math]::Abs($Stat.Minute_10), $SmallestValue)))
-                    Hour                  = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
-                    Hour_Fluctuation      = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + ($Span_Hour * ([Math]::Abs($Value - $Stat.Hour) / [Math]::Max([Math]::Abs($Stat.Hour), $SmallestValue)))
-                    Day                   = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
-                    Day_Fluctuation       = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + ($Span_Day * ([Math]::Abs($Value - $Stat.Day) / [Math]::Max([Math]::Abs($Stat.Day), $SmallestValue)))
-                    Week                  = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
-                    Week_Fluctuation      = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
-                    Duration              = $Stat.Duration + $Duration
-                    Updated               = $Updated
-                    ToleranceExceeded     = [Int]0
-                }
+            $Stat = [PSCustomObject]@{ 
+                Live                  = $Value
+                Minute                = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
+                Minute_Fluctuation    = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
+                Minute_5              = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
+                Minute_5_Fluctuation  = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + ($Span_Minute_5 * ([Math]::Abs($Value - $Stat.Minute_5) / [Math]::Max([Math]::Abs($Stat.Minute_5), $SmallestValue)))
+                Minute_10             = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
+                Minute_10_Fluctuation = ((1 - $Span_Minute_10) * $Stat.Minute_10_Fluctuation) + ($Span_Minute_10 * ([Math]::Abs($Value - $Stat.Minute_10) / [Math]::Max([Math]::Abs($Stat.Minute_10), $SmallestValue)))
+                Hour                  = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
+                Hour_Fluctuation      = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + ($Span_Hour * ([Math]::Abs($Value - $Stat.Hour) / [Math]::Max([Math]::Abs($Stat.Hour), $SmallestValue)))
+                Day                   = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
+                Day_Fluctuation       = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + ($Span_Day * ([Math]::Abs($Value - $Stat.Day) / [Math]::Max([Math]::Abs($Stat.Day), $SmallestValue)))
+                Week                  = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
+                Week_Fluctuation      = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
+                Duration              = $Stat.Duration + $Duration
+                Updated               = $Updated
             }
         }
     }
     else { 
         $Stat = [PSCustomObject]@{ 
-            Live                  = [Decimal]$Value
-            Minute                = [Decimal]$Value
+            Name                  = [String]$Name
+            Live                  = [Double]$Value
+            Minute                = [Double]$Value
             Minute_Fluctuation    = [Double]0
-            Minute_5              = [Decimal]$Value
+            Minute_5              = [Double]$Value
             Minute_5_Fluctuation  = [Double]0
-            Minute_10             = [Decimal]$Value
+            Minute_10             = [Double]$Value
             Minute_10_Fluctuation = [Double]0
-            Hour                  = [Decimal]$Value
+            Hour                  = [Double]$Value
             Hour_Fluctuation      = [Double]0
-            Day                   = [Decimal]$Value
+            Day                   = [Double]$Value
             Day_Fluctuation       = [Double]0
-            Week                  = [Decimal]$Value
+            Week                  = [Double]$Value
             Week_Fluctuation      = [Double]0
             Duration              = [TimeSpan]$Duration
             Updated               = [DateTime]$Updated
@@ -573,17 +537,11 @@ function Set-Stat {
     $Stat
 }
 
-function Get-AllStat {
-    [String[]]$Name = (Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
-    $Global:Stats | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $_ -notin $Name } | ForEach-Object { $Global:Stats.PSObject.Properties.Remove($_) }
-    $Name
-}
-
 function Get-Stat { 
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = (Get-AllStat)
+        [String[]]$Name = @($Global:Stats.Name | Select-Object) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
     $Name | Sort-Object -Unique | ForEach-Object { 
@@ -605,6 +563,7 @@ function Get-Stat {
                 $Stat = Get-Content "Stats\$Stat_Name.txt" -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
                 $Global:Stats | Add-Member @{ 
                     $Stat_Name = [PSCustomObject]@{ 
+                        Name                  = [String]$Stat_Name
                         Live                  = [Double]$Stat.Live
                         Minute                = [Double]$Stat.Minute
                         Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
@@ -620,7 +579,6 @@ function Get-Stat {
                         Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
                         Duration              = [TimeSpan]$Stat.Duration
                         Updated               = [DateTime]$Stat.Updated
-                        ToleranceExceeded     = [UInt16]0
                     }
                 } -Force
             }
@@ -655,11 +613,8 @@ function Get-ChildItemContent {
         [Parameter(Mandatory = $false)]
         [Hashtable]$Parameters = @{ }, 
         [Parameter(Mandatory = $false)]
-        [Switch]$Threaded = $false,
-        [Parameter(Mandatory = $false)]
-        [String]$Priority
+        [Switch]$Threaded = $false
     )
-
     if ($Parameters.JobName) { $JobName = $Parameters.JobName } else { $JobName = "JobName" }
 
     $Job = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -Name $JobName -ScriptBlock { 
@@ -667,12 +622,10 @@ function Get-ChildItemContent {
             [Parameter(Mandatory = $true)]
             [String]$Path, 
             [Parameter(Mandatory = $false)]
-            [Hashtable]$Parameters = @{ },
-            [Parameter(Mandatory = $false)]
-            [String]$Priority
+            [Hashtable]$Parameters = @{ }
         )
 
-        if ($Priority) { ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass = $Priority }
+        if (-not (Get-Module -Name "ThreadJob")) { ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass = 'BelowNormal' }
 
         function Invoke-ExpressionRecursive ($Expression) { 
             if ($Expression -is [String]) { 
@@ -719,7 +672,7 @@ function Get-ChildItemContent {
                 }
             }
         }
-    } -ArgumentList $Path, $Parameters, $Priority
+    } -ArgumentList $Path, $Parameters
 
     if ($Threaded) { $Job }
     else { $Job | Receive-Job -Wait -AutoRemoveJob }
@@ -728,14 +681,15 @@ function Get-ChildItemContent {
 filter ConvertTo-Hash { 
     [CmdletBinding()]
     $Hash = $_
-    switch ([math]::Abs([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1))))) { 
+    switch ([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1)))) { 
+        $null { "0  H" }
+        "-Infinity" { "0  H" }
         0 { "{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0)) }
         1 { "{0:n2} KH" -f ($Hash / [Math]::Pow(1000, 1)) }
         2 { "{0:n2} MH" -f ($Hash / [Math]::Pow(1000, 2)) }
         3 { "{0:n2} GH" -f ($Hash / [Math]::Pow(1000, 3)) }
         4 { "{0:n2} TH" -f ($Hash / [Math]::Pow(1000, 4)) }
-        5 { "{0:n2} PH" -f ($Hash / [Math]::Pow(1000, 4)) }
-        Default { "0  H" }
+        Default { "{0:N2} PH" -f ($Hash / [Math]::Pow(1000, 5)) }
     }
 }
 
@@ -998,7 +952,7 @@ function Get-Device {
         [Parameter(Mandatory = $false)]
         [String[]]$ExcludeName = @(), 
         [Parameter(Mandatory = $false)]
-        [PSCustomObject]$DevicePciOrderMapping = [PSCustomObject]@{},
+        [String[]]$DevicePciOrderMapping = @(), 
         [Parameter(Mandatory = $false)]
         [Switch]$Refresh = $false
     )
@@ -1041,6 +995,13 @@ function Get-Device {
         $Type_Vendor_Index = @{ }
         $Type_Index = @{ }
 
+        $Slot = 0
+        $PlatformId_Slot = @{ }
+        $Type_PlatformId_Slot = @{ }
+        $Vendor_Slot = @{ }
+        $Type_Vendor_Slot = @{ }
+        $Type_Slot = @{ }
+
         try { 
             [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object { 
                 #Fix for deviceID enumeration with main screen connected to onboard HD Graphics, allow Intel as valid GPU miner platform ID, but filter out all Intel entries
@@ -1069,7 +1030,7 @@ function Get-Device {
                         PCIBus                = [Int]$Device_OpenCL.PCIBus
                     }
 
-                    $Global:Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+                    $Global:Devices += $Device
 
                     if (-not $Type_PlatformId_Index."$($Device_OpenCL.Type)") { 
                         $Type_PlatformId_Index."$($Device_OpenCL.Type)" = @{ }
@@ -1088,29 +1049,36 @@ function Get-Device {
 
                 $PlatformId++
             }
+
+            $Global:Devices | Sort-Object PCIBus | ForEach-Object { 
+                $_ | Add-Member @{ 
+                    Slot                 = [Int]$Slot
+                    PlatformId_Slot      = [Int]$PlatformId_Slot.($_.PlatformId)
+                    Type_PlatformId_Slot = [Int]$Type_PlatformId_Slot.($_.Type).($_.PlatformId)
+                    Vendor_Slot          = [Int]$Vendor_Slot.($_.Vendor)
+                    Type_Vendor_Slot     = [Int]$Type_Vendor_Slot.($_.Type).($_.Vendor)
+                    Type_Slot            = [Int]$Type_Slot.($_.Type)
+                }
+
+                $_ | Add-Member Name ("{0}#{1:d2}" -f $_.Type, $_.Type_Slot).ToUpper()
+
+                if (-not $Type_PlatformId_Slot.($_.Type)) { 
+                    $Type_PlatformId_Slot.($_.Type) = @{ }
+                }
+                if (-not $Type_Vendor_Slot.($_.Type)) { 
+                    $Type_Vendor_Slot.($_.Type) = @{ }
+                }
+
+                $Slot++
+                $PlatformId_Slot.($_.PlatformId)++
+                $Type_PlatformId_Slot.($_.Type).($_.PlatformId)++
+                $Vendor_Slot.($_.Vendor)++
+                $Type_Vendor_Slot.($_.Type).($_.Vendor)++
+                $Type_Slot.($_.Type)++
+            }
         }
         catch { 
             Write-Log -Level Warn "OpenCL device detection has failed. "
-        }
-
-        #Optional custom device mapping where PciDeviceID order does not match OpenCL DeviceId order
-        $Index = 0
-        $Global:Devices | Sort-Object PCIBus | ForEach-Object {
-            if ($DevicePciOrderMapping.$($_.Name)) { 
-                $Index_Difference = $DevicePciOrderMapping.$($_.Name).ToUpper() - $_.Type_Index
-            }
-            else { 
-                $Index_Difference = $Index - $_.Type_Index
-            }
-            $_ | Add-Member @{
-                PlatformId_Slot      = [Int]($_.PlatformId_Index + $Index_Difference)
-                Type_Slot            = [Int]($_.Type_Index + $Index_Difference)
-                Type_Vendor_Slot     = [Int]($_.Type_Vendor_Index + $Index_Difference)
-                Type_PlatformId_Slot = [Int]($_.Type_PlatformId_Index + $Index_Difference)
-                Slot                 = [Int]($_.Index + $Index_Difference)
-                Vendor_Slot          = [Int]($_.Vendor_Index + $Index_Difference)
-            }
-            $Index++
         }
 
         # CPU detection in OpenCL does not work well, sometimes not being included, sometimes being included twice for each processor - remove any CPUs from the OpenCL devices and generate more accurate ones
@@ -1138,16 +1106,60 @@ function Get-Device {
             $Global:Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
 
             $CPUIndex++
+            $Index++
         }
     }
 
-    $Global:Devices | ForEach-Object { 
-        $Device = $_
-        if (-not $Name -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-            if (-not $ExcludeName -or -not ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-                $Device
+    if (-not $DevicePciOrderMapping) { 
+        $Global:Devices | ForEach-Object { 
+            $Device = $_
+            if (-not $Name -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
+                if (-not $ExcludeName -or -not ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
+                    $Device
+                }
             }
         }
+    }
+    else { 
+        $Slot = 0
+        $PlatformId_Slot = @{ }
+        $Type_PlatformId_Slot = @{ }
+        $Vendor_Slot = @{ }
+        $Type_Vendor_Slot = @{ }
+        $Type_Slot = @{ }
+
+        $Global:Devices | Sort-Object { $DevicePciOrderMapping.IndexOf($_.Name) -lt 0 }, { $DevicePciOrderMapping.IndexOf($_.Name) } | ForEach-Object { 
+            $Device = $_ | ConvertTo-Json | ConvertFrom-Json
+
+            if ($Device.Type -ne "CPU") { 
+                $Device.Slot = [Int]$Slot
+                $Device.PlatformId_Slot = [Int]$PlatformId_Slot.("$($Device.PlatformId)")
+                $Device.Type_PlatformId_Slot = [Int]$Type_PlatformId_Slot.("$($Device.Type)").("$($Device.PlatformId)")
+                $Device.Vendor_Slot = [Int]$Vendor_Slot.("$($Device.Vendor)")
+                $Device.Type_Vendor_Slot = [Int]$Type_Vendor_Slot.("$($Device.Type)").("$($Device.Vendor)")
+                $Device.Type_Slot = [Int]$Type_Slot.("$($Device.Type)")
+            }
+
+            if (-not $Type_PlatformId_Slot.("$($Device.Type)")) { 
+                $Type_PlatformId_Slot.("$($Device.Type)") = @{ }
+            }
+            if (-not $Type_Vendor_Slot.("$($Device.Type)")) { 
+                $Type_Vendor_Slot.("$($Device.Type)") = @{ }
+            }
+
+            $Slot++
+            $PlatformId_Slot.("$($Device.PlatformId)")++
+            $Type_PlatformId_Slot.("$($Device.Type)").("$($Device.PlatformId)")++
+            $Vendor_Slot.("$($Device.Vendor)")++
+            $Type_Vendor_Slot.("$($Device.Type)").("$($Device.Vendor)")++
+            $Type_Slot.("$($Device.Type)")++
+
+            if (-not $Name -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
+                if (-not $ExcludeName -or -not ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
+                    $Device
+                }
+            }
+        } | Sort-Object Index
     }
 }
 
