@@ -1,4 +1,4 @@
-﻿function Start-APIServer {
+﻿function Start-APIServer { 
     Param(
         [Parameter(Mandatory = $true)]
         [Int]$Port
@@ -17,19 +17,19 @@
     $newRunspace = [runspacefactory]::CreateRunspace()
     $newRunspace.Open()
 
-    Get-Variable -Scope Global | ForEach-Object {
-        try {$newRunspace.SessionStateProxy.SetVariable($_.Name, $_.Value)}
-        catch {}
+    Get-Variable -Scope Global | ForEach-Object { 
+        try { $newRunspace.SessionStateProxy.SetVariable($_.Name, $_.Value) }
+        catch { }
     }
 
     $apiserver = [PowerShell]::Create().AddScript(
-        {
+        { 
             # Set the starting directory
             Set-Location (Split-Path $MyInvocation.MyCommand.Path)
             $BasePath = "$PWD\web"
 
             # List of possible mime types for files
-            $MIMETypes = @{
+            $MIMETypes = @{ 
                 ".js"   = "application/x-javascript"
                 ".html" = "text/html"
                 ".htm"  = "text/html"
@@ -46,7 +46,7 @@
             $Server.Prefixes.Add("http://localhost:$($API.Port)/")
             $Server.Start()
 
-            While ($Server.IsListening) {
+            While ($Server.IsListening) { 
                 $Context = $Server.GetContext()
                 $Request = $Context.Request
                 $URL = $Request.Url.OriginalString
@@ -55,13 +55,13 @@
                 $Path = $Request.Url.LocalPath
 
                 # Parse any parameters in the URL - $Request.Url.Query looks like "+ ?a=b&c=d&message=Hello%20world"
-                $Parameters = @{}
-                $Request.Url.Query -Replace "\?", "" -Split '&' | Foreach-Object {
+                $Parameters = @{ }
+                $Request.Url.Query -Replace "\?", "" -Split '&' | Foreach-Object { 
                     $key, $value = $_ -Split '='
                     # Decode any url escaped characters in the key and value
                     $key = [URI]::UnescapeDataString($key)
                     $value = [URI]::UnescapeDataString($value)
-                    if ($key -and $value) {
+                    if ($key -and $value) { 
                         $Parameters.$key = $value
                     }
                 }
@@ -73,215 +73,221 @@
                 $Data = ""
 
                 # Set the proper content type, status code and data for each resource
-                Switch ($Path) {
-                    "/activeminers" {
+                Switch ($Path) { 
+                    "/activeminers" { 
                         $Data = ConvertTo-Json @($API.ActiveMiners | Select-Object)
                         break
                     }
-                    "/algorithms" {
+                    "/algorithms" { 
                         $Data = ConvertTo-Json @($API.AllPools.Algorithm | Sort-Object -Unique)
                         Break
                     }
-                    "/alldevices" {
+                    "/alldevices" { 
                         $Data = ConvertTo-Json @($API.AllDevices | Select-Object)
                         Break
                     }
-                    "/allminers" {
+                    "/allminers" { 
                         $Data = ConvertTo-Json @($API.AllMiners | Select-Object)
                         Break
                     }
-                    "/allpools" {
+                    "/allpools" { 
                         $Data = ConvertTo-Json @($API.AllPools | Select-Object)
                         Break
                     }
-                    "/apiversion" {
+                    "/apiversion" { 
                         $Data = $API.APIVersion | ConvertTo-Json
                         break
                     }
-                    "/balances" {
+                    "/balances" { 
                         $Data = ConvertTo-Json @($API.Balances | Select-Object)
                         Break
                     }
-                    "/balances_jobs" {
+                    "/balances_jobs" { 
                         $Data = ConvertTo-Json @($API.Balances_Jobs | Select-Object)
                         Break
                     }
-                    "/bestminers" {
+                    "/bestminers" { 
                         $Data = ConvertTo-Json @($API.BestMiners | Select-Object)
                         Break
                     }
-                    "/bestminers_combo" {
+                    "/bestminers_combo" { 
                         $Data = ConvertTo-Json @($API.BestMiners_Combo | Select-Object)
                         Break
                     }
-                    "/bestminers_combo_comparison" {
+                    "/bestminers_combo_comparison" { 
                         $Data = ConvertTo-Json @($API.BestMiners_Combo_Comparison | Select-Object)
                         Break
                     }
-                    "/bestminers_combos" {
+                    "/bestminers_combos" { 
                         $Data = ConvertTo-Json @($API.BestMiners_Combos | Select-Object)
                         Break
                     }
-                    "/bestminers_combos_comparison" {
+                    "/bestminers_combos_comparison" { 
                         $Data = ConvertTo-Json @($API.BestMiners_Combos_Comparison | Select-Object)
                         Break
                     }
-                    "/bestminers_comparison" {
+                    "/bestminers_comparison" { 
                         $Data = ConvertTo-Json @($API.BestMiners_Comparison | Select-Object)
                         Break
                     }
-                    "/btcratefirstcurrency" {
+                    "/btcratefirstcurrency" { 
                         $Data = ConvertTo-Json @($API.BTCRateFirstCurrency | Select-Object)
                         Break
                     }
-                    "/config" {
+                    "/config" { 
                         $Data = $API.Config | ConvertTo-Json -Depth 10
                         Break
                     }
-                    "/currentearning" {
+                    "/currentearning" { 
                         $Data = ConvertTo-Json @($API.CurrentEarning | Select-Object)
                         Break
                     }
-                    "/currentprofit" {
+                    "/currentprofit" { 
                         $Data = ConvertTo-Json @($API.CurrentProfit | Select-Object)
                         Break
                     }
-                    "/debug" {
+                    "/debug" { 
                         $Data = $API | ConvertTo-Json -Depth 20
                         Break
                     }
-                    "/devices" {
+                    "/devices" { 
                         $Data = ConvertTo-Json @($API.Devices | Select-Object)
                         Break
                     }
-                    "/exchangerates" {
+                    "/exchangerates" { 
                         $Data = ConvertTo-Json @($API.ExchangeRates | Select-Object)
                         Break
                     }
-                    "/failedminers" {
+                    "/failedminers" { 
                         $Data = ConvertTo-Json @($API.FailedMiners | Select-Object)
                         Break
                     }
-                    "/fastestminers" {
+                    "/fastestminers" { 
                         $Data = ConvertTo-Json @($API.FastestMiners | Select-Object)
                         Break
                     }
-                    "/filteredminers" {
+                    "/filteredminers" { 
                         $Data = ConvertTo-Json @($API.FilteredMiners | Select-Object)
                         Break
                     }
-                    "/inactiveminers" {
+                    "/inactiveminers" { 
                         $Data = ConvertTo-Json @($API.InactiveMiners | Select-Object)
                         Break
                     }
-                    "/intervals" {
+                    "/intervals" { 
                         $Data = ConvertTo-Json @($API.Intervals | Select-Object)
                         Break
                     }
-                    "/miners" {
+                    "/miners" { 
                         $Data = ConvertTo-Json @($API.Miners | Select-Object)
                         Break
                     }
-                    "/minersneedingbenchmark" {
+                    "/minersneedingbenchmark" { 
                         $Data = ConvertTo-Json @($API.MinersNeedingBenchmark | Select-Object)
                         Break
                     }
-                    "/miningcost" {
+                    "/miningcost" { 
                         $Data = ConvertTo-Json @($API.MiningCost | Select-Object)
                         Break
                     }
-                    "/miningearning" {
+                    "/miningearning" { 
                         $Data = ConvertTo-Json @($API.MiningEarning | Select-Object)
                         Break
                     }
-                    "/miningprofit" {
+                    "/miningprofit" { 
                         $Data = ConvertTo-Json @($API.MiningProfit | Select-Object)
                         Break
                     }
-                    "/newpools" {
+                    "/newpools" { 
                         $Data = ConvertTo-Json @($API.NewPools | Select-Object)
                         Break
                     }
-                    "/newpools_jobs" {
+                    "/newpools_jobs" { 
                         $Data = ConvertTo-Json @($API.NewPools_Jobs | Select-Object)
                         Break
                     }
-                    "/pools" {
+                    "/pools" { 
                         $Data = ConvertTo-Json @($API.Pools | Select-Object)
                         Break
                     }
-                    "/rates" {
+                    "/rates" { 
                         $Data = ConvertTo-Json @($API.Rates | Select-Object)
                         Break
                     }
-                    "/runningminers" {
+                    "/runningminers" { 
                         $Data = ConvertTo-Json @($API.RunningMiners | Select-Object)
                         Break
                     }
-                    "/stats" {
+                    "/stats" { 
                         $Data = ConvertTo-Json @($API.Stats | Select-Object)
                         Break
                     }
-                    "/stop" {
+                    "/stop" { 
                         $API.Stop = $true
                         $Data = "Stopping"
                         break
                     }
-                    "/stopapi" {
+                    "/stopapi" { 
                         $Data = "Stopping"
                         $Server.Stop()
                         Break
                     }
-                    "/unprofitablealgorithms" {
+                    "/unprofitablealgorithms" { 
                         $Data = $API.UnprofitableAlgorithms | ConvertTo-Json
                         break
                     }
-                    "/version" {
+                    "/version" { 
                         $Data = $API.Version | ConvertTo-Json
                         break
                     }
-                    "/watchdogtimers" {
+                    "/watchdogtimers" { 
                         $Data = ConvertTo-Json @($API.WatchdogTimers | Select-Object)
                         Break
                     }
-                    "/functions/stat/get" {
+                    "/watchdogtimersreset" { 
+                        $API.WatchdogTimersReset = $true
+                        $API.WatchDogTimers = $null
+                        $Data = $API.WatchdogTimersReset | ConvertTo-Json
+                        Break
+                    }
+                    "/functions/stat/get" { 
                         $Data = Get-Stat @Parameters | ConvertTo-Json
                         Break
                     }
-                    "/functions/stat/remove" {
+                    "/functions/stat/remove" { 
                         $Data = Remove-Stat @Parameters | ConvertTo-Json
                         Break
                     }
-                    "/functions/stat/set" {
+                    "/functions/stat/set" { 
                         $Data = Set-Stat @Parameters | ConvertTo-Json
                         Break
                     }
-                    default {
+                    default { 
                         # Set index page
-                        if ($Path -eq "/") {
+                        if ($Path -eq "/") { 
                             $Path = "/index.html"
                         }
 
                         # Check if there is a file with the requested path
                         $Filename = $BasePath + $Path
-                        if (Test-Path $Filename -PathType Leaf -ErrorAction SilentlyContinue) {
+                        if (Test-Path $Filename -PathType Leaf -ErrorAction SilentlyContinue) { 
                             # If the file is a powershell script, execute it and return the output. A $Parameters parameter is sent built from the query string
                             # Otherwise, just return the contents of the file
                             $File = Get-ChildItem $Filename
 
-                            if ($File.Extension -eq ".ps1") {
+                            if ($File.Extension -eq ".ps1") { 
                                 $Data = & $File.FullName -Parameters $Parameters
                             }
-                            else {
+                            else { 
                                 $Data = Get-Content $Filename -Raw
 
                                 # Process server side includes for html files
                                 # Includes are in the traditional '<!-- #include file="/path/filename.html" -->' format used by many web servers
-                                if ($File.Extension -eq ".html") {
+                                if ($File.Extension -eq ".html") { 
                                     $IncludeRegex = [regex]'<!-- *#include *file="(.*)" *-->'
-                                    $IncludeRegex.Matches($Data) | Foreach-Object {
+                                    $IncludeRegex.Matches($Data) | Foreach-Object { 
                                         $IncludeFile = $BasePath + '/' + $_.Groups[1].Value
-                                        if (Test-Path $IncludeFile -PathType Leaf) {
+                                        if (Test-Path $IncludeFile -PathType Leaf) { 
                                             $IncludeData = Get-Content $IncludeFile -Raw
                                             $Data = $Data -Replace $_.Value, $IncludeData
                                         }
@@ -290,15 +296,15 @@
                             }
 
                             # Set content type based on file extension
-                            if ($MIMETypes.ContainsKey($File.Extension)) {
+                            if ($MIMETypes.ContainsKey($File.Extension)) { 
                                 $ContentType = $MIMETypes[$File.Extension]
                             }
-                            else {
+                            else { 
                                 # If it's an unrecognized file type, prompt for download
                                 $ContentType = "application/octet-stream"
                             }
                         }
-                        else {
+                        else { 
                             $StatusCode = 404
                             $ContentType = "text/html"
                             $Data = "URI '$Path' is not a valid resource."
@@ -308,8 +314,8 @@
 
                 # If $Data is null, the API will just return whatever data was in the previous request.  Instead, show an error
                 # This happens if the script just started and hasn't filled all the properties in yet.
-                if ($Data -eq $Null) { 
-                    $Data = @{ "Error" = "API data not available" } | ConvertTo-Json
+                if ($Data -eq $Null) {  
+                    $Data = @{  "Error" = "API data not available"  } | ConvertTo-Json
                 }
 
                 # Send the response
