@@ -866,7 +866,7 @@ while (-not $API.Stop) {
         $ActiveMiner = $ActiveMiners | Where-Object { 
             $_.Name -eq $Miner.Name -and 
             $_.Path -eq $Miner.Path -and 
-            $_.Arguments -eq $Miner.Arguments -and 
+            ($_.Arguments -eq $Miner.Arguments -or ($_.New -and $_.Speed -contains $null <#Keep benchmarking miners to prevent switching#>)) -and 
             $_.API -eq $Miner.API -and 
             $_.Port -eq $Miner.Port -and 
             $_.ShowMinerWindow -eq $Miner.ShowMinerWindow -and 
@@ -1379,22 +1379,19 @@ while (-not $API.Stop) {
 
         #Preload pool information - code to be removed
         if ((-not $NewPools_Jobs) -and (Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and ((($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds) -le $($NewPools_JobsDurations | Measure-Object -Average).Average)) { 
-            if (-not ($RunningMiners | Where-Object { $_.GetStatus() -eq "Running" } | Where-Object { $_.DeviceName -like "CPU#*" })) { 
-                #no pre-loading when cpu miners are running
-                if ($PoolsRequest = @(Get-ChildItem "Pools" -File -ErrorAction Ignore | Where-Object { $Config.Pools.$($_.BaseName) } | Where-Object { -not $Config.ExcludePoolName -or -not (Compare-Object @($Config.ExcludePoolName | Select-Object) @($_.BaseName | Select-Object) -IncludeEqual -ExcludeDifferent) } | Where-Object { -not $Config.PoolName -or (Compare-Object @($Config.PoolName | Foreach-Object { ($_ -split "-" | Select-Object -First ($_.BaseName -split "-").Length) -join "-" } | Select-Object) @($(for ($i = ($_.BaseName -split "-").Length; $i -ge 1; $i--) { ($_.BaseName -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | Sort-Object BaseName)) { 
-                    Write-Log "Pre-Loading pool information ($(@($PoolsRequest.BaseName) -join '; ')). "
-                    $NewPools_Jobs = @(
-                        $PoolsRequest | ForEach-Object { 
-                            $Pool_Name = $_.BaseName
-                            $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)" }
-                            $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object { $Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name) }
-                            Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded
-                        } | Select-Object
-                    )
-                    if ($API) { $API.NewPools_Jobs = $NewPools_Jobs } #Give API access to pool jobs information
-                }
-                Remove-Variable PoolsRequest
+            if ($PoolsRequest = @(Get-ChildItem "Pools" -File -ErrorAction Ignore | Where-Object { $Config.Pools.$($_.BaseName) } | Where-Object { -not $Config.ExcludePoolName -or -not (Compare-Object @($Config.ExcludePoolName | Select-Object) @($_.BaseName | Select-Object) -IncludeEqual -ExcludeDifferent) } | Where-Object { -not $Config.PoolName -or (Compare-Object @($Config.PoolName | Foreach-Object { ($_ -split "-" | Select-Object -First ($_.BaseName -split "-").Length) -join "-" } | Select-Object) @($(for ($i = ($_.BaseName -split "-").Length; $i -ge 1; $i--) { ($_.BaseName -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | Sort-Object BaseName)) { 
+                Write-Log "Pre-Loading pool information ($(@($PoolsRequest.BaseName) -join '; ')). "
+                $NewPools_Jobs = @(
+                    $PoolsRequest | ForEach-Object { 
+                        $Pool_Name = $_.BaseName
+                        $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)" }
+                        $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object { $Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name) }
+                        Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded
+                    } | Select-Object
+                )
+                if ($API) { $API.NewPools_Jobs = $NewPools_Jobs } #Give API access to pool jobs information
             }
+            Remove-Variable PoolsRequest
         }
         $PollDuration = ($StatEnd - $PollStart).TotalSeconds / $Config.HashRateSamplesPerInterval
         $ExpectedHashRateSamples = [math]::Round(((((Get-Date).ToUniversalTime() - $PollStart).TotalSeconds) + $PollDuration) / $PollDuration)
@@ -1499,7 +1496,7 @@ while (-not $API.Stop) {
             #Pre miner failure exec
             $Command = ($ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PreStop"))).Trim()
             if ($Command) { Start-PrePostCommand -Command $Command -Event "PreStop" }
-            Write-Log "Stopping miner ($($Miner.Name) { $(($Miner.Algorithm | ForEach-Object {"$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))" }) -join "; ")}). "
+            Write-Log "Stopping miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))" }) -join "; ")}). "
             $Miner.SetStatus("Idle")
             $Miner.StatusMessage = " stopped gracefully"
             #Post miner stop exec
