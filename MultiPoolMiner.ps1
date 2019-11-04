@@ -157,13 +157,7 @@ Import-Module NetSecurity -ErrorAction Ignore
 Import-Module Defender -ErrorAction Ignore
 Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1" -ErrorAction Ignore
 Import-Module "$env:Windir\System32\WindowsPowerShell\v1.0\Modules\Defender\Defender.psd1" -ErrorAction Ignore
-try { 
-    Import-Module ThreadJob -ErrorAction Stop
-    Set-Alias Start-Job Start-ThreadJob
-}
-catch { 
-    Write-Log "Failed to import module (ThreadJob) - using normal 'Start-Job' instead. "
-}
+if (Get-Command "Start-ThreadJob" -ErrorAction SilentlyContinue) { Set-Alias Start-Job Start-ThreadJob }
 
 $Algorithm = [String[]]@($Algorithm | ForEach-Object { @(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-' } | Select-Object)
 $ExcludeAlgorithm = [String[]]@($ExcludeAlgorithm | ForEach-Object { @(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-' } | Select-Object)
@@ -361,7 +355,7 @@ while (-not $API.Stop) {
 
     #Check if the configuration has changed
     if (($OldConfig | ConvertTo-Json -Compress -Depth 10) -ne ($Config | ConvertTo-Json -Compress -Depth 10)) { 
-        Write-Log -Level Info "Config change detected. "
+        if ($AllDevices) { Write-Log -Level Info "Config change detected. " }
         $AllPools | Select-Object | ForEach-Object { $_.Price = 0 }
         $AllDevices = @(Get-Device -DevicePciOrderMapping $Config.DevicePciOrderMapping -Refresh | Select-Object)
     }
@@ -386,6 +380,10 @@ while (-not $API.Stop) {
     $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
     $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
 
+    if ($API.WatchdogTimersReset) {
+        $WatchdogTimers = @()
+        $API.WatchdogTimersReset = $false
+    }
     #Give API access to the timer information
     if ($API) { 
         $API.Timer = $Timer
@@ -406,7 +404,7 @@ while (-not $API.Stop) {
                     $Pool_Name = $_.BaseName
                     $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)" }
                     $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object { $Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name) }
-                    Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded
+                    Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" })
                 } | Select-Object
             )
             if ($API) { $API.NewPools_Jobs = $NewPools_Jobs } #Give API access to pool jobs information
@@ -428,7 +426,7 @@ while (-not $API.Stop) {
                     $Balances_Name = $_.BaseName
                     $Balances_Parameters = @{JobName = "Balance_$($Balances_Name)" }
                     $BackupConfig.Pools.$Balances_Name | Get-Member -MemberType NoteProperty | ForEach-Object { $Balances_Parameters.($_.Name) = $BackupConfig.Pools.$Balances_Name.($_.Name) } # Use BackupConfig to not query donation balances
-                    Get-ChildItemContent "Balances\$($_.Name)" -Parameters $Balances_Parameters -Threaded
+                    Get-ChildItemContent "Balances\$($_.Name)" -Parameters $Balances_Parameters -Threaded -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" })
                 } | Select-Object
             )
             if ($API) { $API.Balances_Jobs = $Balances_Jobs } #Give API access to balances jobs information
@@ -587,7 +585,7 @@ while (-not $API.Stop) {
         if (Test-Path "MinersLegacy" -PathType Container -ErrorAction Ignore) { 
             #Strip Model information from devices -> will create only one miner instance
             if ($Config.DisableDeviceDetection) { $DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object { $_.Model = "" } } else { $DevicesTmp = $Devices }
-            Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp; JobName = "MinersLegacy" } | ForEach-Object { 
+            Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp; JobName = "MinersLegacy" } -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" }) | ForEach-Object { 
                 $_.Content | Add-Member Name $_.Name -PassThru -Force
                 $_.Content | Add-Member Fees @($null) -ErrorAction SilentlyContinue
                 $AllMinerPaths += ($_.Content.Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($_.Content.Path))
@@ -1121,6 +1119,7 @@ while (-not $API.Stop) {
                             MinerName = $Miner.Name
                             PoolName  = $Pools.$Miner_Algorithm.Name
                             Algorithm = $Miner_Algorithm
+                            Device    = "{$($Miner.DeviceName -Join "; ")}"
                             Kicked    = $Timer
                         }
                     }
