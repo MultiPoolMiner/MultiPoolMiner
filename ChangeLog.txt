@@ -15,12 +15,14 @@
 - Parameter 'DevicePciOrderMapping' is deprecated. Please report back if automatic device selection is not working for you.
 
 #### Miner changes
-- Added CcminerMtpTc-v1.2.5; support for 'Mtp-Trc' (TecraCoin) algorithm
+- Added CcminerMtpTrc-v1.2.5; support for 'Mtp-Trc' (TecraCoin) algorithm
+- Added SRBMinerMulti-v0.1.4
 - Changed CcminerKlausT-v8.25; disabled 'Lyra2V2' algorithm, CcminerAlexis-v1.5 is 10%faster
 - Changed BMiner-v15.8.7; disabled 'Equihash' algorithm, DSTMEquihash-v0.6.2 is 15% faster
 - Changed CcminerBMW512-v2.2.5; use faster x86 variant
 - Fixed all miners; $CommonCommands was broken
 - Fixed CcminerKlausT-v8.25; lowered intensity for 'Neoscrypt' algorithm
+- Removed CpuminerOptCpupower-v1.0 (moved to 'Deprecated' folder); SRBminer-Multi 2x is faster
 - Removed EDSTMEquihash-v0.6.2 (moved to 'Deprecated' folder); Equihash is no longer profitable
 - Removed EwbfEquihash-v0.3.4b (moved to 'Deprecated' folder); Equihash is no longer profitable
 - Updated BMiner-v15.8.7; disabled dual mining with 'Blake2s' algorithm (rejected shares), improve the performance of automatic tuning of dual mining parameters
@@ -30,7 +32,7 @@
 - Updated CcminerZenemy-v2.3; added support for 'X16rv2' algorithm
 - Updated ClaymoreDual_v15.0
 - Updated CryptoDredge-v0.22.0; support for 'X16rv2' algorithm
-- Updated Gminer-v1.70; added $CommonCommands, enabled 'Equihash1254' algorithm for AMD, support for 'CuckooBFC' (AMD & NVIDIA)
+- Updated Gminer-v1.71; added $CommonCommands, enabled 'Equihash1254' algorithm for AMD, support for 'CuckooBFC' (AMD & NVIDIA)
 - Updated Jayddee-v3.9.9.1; added support for 'X16rv2' algorithm
 - Updated lolMiner-v0.8.8; removed 'old Beam' algorithm
 - Updated MiniZEquihash-v1.5r
@@ -55,13 +57,13 @@
 
 #### API changes
 - Changed version to 0.98
-- Added 'filteredminers' & 'inactiveminers'
+- Added 'filteredminers', 'inactiveminers' & 'watchdogtimersreset'
 - Fixed Bminer; recording hashrate for Ethash2GB/3GB was broken (regression from version 3.5.1)
 - Fixed FireIce; (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/e9c55d3d708b8ed1588ae00b8e017dfab481d2cd)
 
 #### Web Interface changes
 - Added Currency column to pool pages
-- Added separate pages for 'Inactive Miners' and 'Filtered Miners'
+- Added pages for 'Inactive Miners', 'Filtered Miners' & 'Watchdog Timers'
 - Added context menu to 'Inactive Miners'
 - Added links to balances boxes to take you directly to the pool web page
 - Fixed stat management (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/8e6fd3acba279c99ed1d7bce1ed14073e9c37822)
