@@ -34,6 +34,26 @@ catch {
     Add-Type -Path .\~CPUID.dll
 }
 
+function Get-MinerConfig {
+
+    #Read miner config
+
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]$Name, 
+        [Parameter(Mandatory = $true)]
+        [PSCustomObject]$Config
+    )
+
+    $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+    $Miner_Version = $Name -split '-' | Select-Object -Index 1
+    $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
+    if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+
+    return $Miner_Config
+}
+
 #Function to be removed
 function Update-APIDeviceStatus { 
 
