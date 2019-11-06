@@ -959,7 +959,7 @@ while (-not $API.Stop) {
     $SmallestEarningComparison = ([Double][Math]::Abs(($ActiveMiners | Sort-Object Earning_Comparison | Select-Object -First 1).Earning_Comparison)) * 2
     $SmallestProfitBias = ([Double][Math]::Abs(($ActiveMiners | Sort-Object Profit_Bias | Select-Object -First 1).Profit_Bias)) * 2
     $SmallestProfitComparison = ([Double][Math]::Abs(($ActiveMiners | Sort-Object Profit_Comparison | Select-Object -First 1).Profit_Comparison)) * 2
-    $ActiveMiners | ForEach-Object { $_.Earning_Bias += $SmallestEarningBias; $_.Earning_Comparison += $SmallestEarningComparison; $_.Profit_Bias += $SmallestProfitBias; $_.Profit_Comparison += $SmallestProfitComparison }
+    $ActiveMiners | Where-Object { $null -ne $_.Earning_Bias } | ForEach-Object { $_.Earning_Bias += $SmallestEarningBias; $_.Earning_Comparison += $SmallestEarningComparison; $_.Profit_Bias += $SmallestProfitBias; $_.Profit_Comparison += $SmallestProfitComparison }
 
     #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
     if ($Config.IgnorePowerCost) { 
@@ -1029,7 +1029,7 @@ while (-not $API.Stop) {
     Remove-Variable BestMiners_Comparison
 
     #Hack part 2: reverse temporarily forced positive earnings & profits
-    $ActiveMiners | ForEach-Object { $_.Earning_Bias -= $SmallestEarningBias; $_.Earning_Comparison -= $SmallestEarningComparison; $_.Profit_Bias -= $SmallestProfitBias; $_.Profit_Comparison -= $SmallestProfitComparison }
+    $ActiveMiners | Where-Object { $null -ne $_.Earning_Bias } | ForEach-Object { $_.Earning_Bias -= $SmallestEarningBias; $_.Earning_Comparison -= $SmallestEarningComparison; $_.Profit_Bias -= $SmallestProfitBias; $_.Profit_Comparison -= $SmallestProfitComparison }
     Remove-Variable SmallestEarningBias
     Remove-Variable SmallestEarningComparison
     Remove-Variable SmallestProfitBias
@@ -1453,18 +1453,19 @@ while (-not $API.Stop) {
         $Miner.Data = @($Miner.Data | Select-Object -Last (50 * $Miner.IntervalMultiplier))
 
         if ($Miner.New) { $Miner.New = [Boolean]($Miner.Algorithm | Where-Object { -not (Get-Stat -Name "$($Miner_Name)_$($_)_HashRate") }) }
-
         if ($Miner.New) { $Miner.Benchmarked++ }
 
-        if ($Miner.GetStatus() -eq "Running" -or $Miner.New) { 
-            #Read power usage from miner data
+        #Read power usage from miner data
+        if ($Config.MeasurePowerUsage -and $Miner.GetStatus() -eq "Running" -or -not (Get-Stat -Name "$($Miner_Name)_$($_)_HashRate")) { 
             $Miner_PowerUsage = [Double]($Miner.GetPowerUsage(-not (Get-Stat -Name "$($Miner_Name)$(if (@($Miner.Algorithm).Count -eq 1) { "_$($Miner.Algorithm)" })_PowerUsage") -and $Miner.Intervals.Count -lt $Miner.IntervalMultiplier))
             if ($Miner_PowerUsage -or $Miner.Intervals.Count -ge ($Miner.IntervalMultiplier + $Strikes) -or $Miner.GetActivateCount() -ge $Strikes) { 
                 Write-Log -Level Verbose "Saving power usage ($($Miner_Name)$(if (@($Miner.Algorithm).Count -eq 1) { "_$($Miner.Algorithm)" })_PowerUsage: $($Miner_PowerUsage.ToString("N2"))W)$(if  (-not (Get-Stat -Name "$($Miner_Name)$(if (@($Miner.Algorithm).Count -eq 1) { "_$($Miner.Algorithm)" })_PowerUsage")) { " [Power measurement done]" })"
                 $Stat = Set-Stat -Name  "$($Miner_Name)$(if (@($Miner.Algorithm).Count -eq 1) { "_$($Miner.Algorithm)" })_PowerUsage" -Value $Miner_PowerUsage -Duration ([Long]($Miner.Intervals | Measure-Object Ticks -Sum).Sum) -FaultDetection ($Miner.IntervalMultiplier -le 1)
             }
+        }
 
-            #Read miner speed from miner data
+        #Read miner speed from miner data
+        if ($Miner.GetStatus() -eq "Running" -or $Miner.New) { 
             $Miner.Algorithm | ForEach-Object { 
                 $Miner_Algorithm = $_
                 $Miner_Speed = [Double]($Miner.GetHashRate($Miner_Algorithm, ($Miner.New -and $Miner.Benchmarked -lt $Miner.IntervalMultiplier)))
