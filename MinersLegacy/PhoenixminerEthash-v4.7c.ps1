@@ -13,10 +13,7 @@ $HashSHA256 = "10C895B3BF06A72FAEB096857200BA5D93A363AF02A8BCF8CB0ADE08900C8E67"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/phoenixminer/PhoenixMiner_4.7c_Windows.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4129696.0"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $UnsupportedDriverVersions = @()
 $CUDAVersion = ($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation" | Select-Object -Unique).OpenCL.Platform.Version -replace ".*CUDA "
@@ -49,7 +46,7 @@ $SecondaryAlgoIntensities = [PSCustomObject]@{
 #Intensities from config file take precedence
 $Miner_Config.SecondaryAlgoIntensities.PSObject.Properties.Name | Select-Object | ForEach-Object { 
     $SecondaryAlgoIntensities | Add-Member $_ $Miner_Config.SecondaryAlgoIntensities.$_ -Force
- }
+}
 
 $Commands | ForEach-Object { 
     if ($_.SecondaryAlgorithm) { 
@@ -77,6 +74,8 @@ else { $CommonCommandsNvidia = " -nvidia -nvdo 1" }
 if ($Miner_Config.CommonCommandsAmd) { $CommonCommmandAmd = $Miner_Config.CommonCommandsAmd }
 else { $CommonCommandsAmd = " -amd" }
 
+$DonateCoins = [String[]]("akroma", "ath", "aura", "b2g", "bci", "clo", "dbix", "ella", "egem", "esn", "etc", "etcc", "eth", "etho", "etp", "exp", "gen", "mix", "moac", "music", "nuko", "pgc", "pirl", "qkc", "reosc", "ubq", "vic", "whale", "yoc")
+
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object { $UnsupportedDriverVersions -notcontains $_.OpenCL.DriverVersion })
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
@@ -96,42 +95,8 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         
         if ($Miner_Device = @($Device | Where-Object { ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB })) { 
             if ($_.Coin) { $Coin = $_.Coin }
-            else { 
-                switch ($Pools.$Algorithm_Norm.CoinName) { #Ethash coin to use for devfee to avoid switching DAGs
-                    "Akroma"          { $Coin = " -coin akroma" }
-                    "Atheios"         { $Coin = " -coin ath" } 
-                    "Aura"            { $Coin = " -coin aura" }
-                    "Bitcoin2Gen"     { $Coin = " -coin b2g" }
-                    "BitcoinInterest" { $Coin = " -coin bci" }
-                    "Callisto"        { $Coin = " -coin clo" }
-                    "DubaiCoin"       { $Coin = " -coin dbix" }
-                    "Ellaism"         { $Coin = " -coin ella" }
-                    "Ether1"          { $Coin = " -coin etho" } 
-                    "EtherCC"         { $Coin = " -coin etcc" } 
-                    "EtherGem"        { $Coin = " -coin egem" }
-                    "Ethersocial"     { $Coin = " -coin esn" }
-                    "EtherZero"       { $Coin = " -coin etz" }
-                    "Ethereum"        { $Coin = " -coin eth" }
-                    "EthereumClassic" { $Coin = " -coin etc" }
-                    "Expanse"         { $Coin = " -coin exp" }
-                    "Genom"           { $Coin = " -coin gen" }
-                    "HotelbyteCoin"   { $Coin = " -coin hbc" }
-                    "Metaverse"       { $Coin = " -coin etp" }
-                    "Mix"             { $Coin = " -coin mix" } 
-                    "Moac"            { $Coin = " -coin moac" }
-                    "Musicoin"        { $Coin = " -coin music" }
-                    "Nekonium"        { $Coin = " -coin nuko" }
-                    "Pegascoin"       { $Coin = " -coin pgc" }
-                    "Progpow"         { $Coin = " -coin bci" }
-                    "Pirl"            { $Coin = " -coin pirl" } 
-                    "Reosc"           { $Coin = " -coin reosc" } 
-                    "Ubiq"            { $Coin = " -coin ubq" }
-                    "Victorium"       { $Coin = " -coin vic" }
-                    "WhaleCoin"       { $Coin = " -coin whale" }
-                    "Yocoin"          { $Coin = " -coin yoc" }
-                    default           { $Coin = " -coin auto" }
-                }
-            }
+            elseif ($Pools.$Algorithm_Norm.CurrencySymbol -in $DonateCoins) { $Coin = " -coin $($Pools.$Algorithm_Norm.CurrencySymbol)" }
+            else { $Coin = " -coin auto" }
 
             #Get commands for active miner devices
             $Command = Get-CommandPerDevice -Command $_.Command -DeviceIDs $Miner_Device.Type_Vendor_Index
@@ -172,7 +137,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                     DeviceName         = $Miner_Device.Name
                     Path               = $Path
                     HashSHA256         = $HashSHA256
-                    Arguments          = ("$Command$CommonCommands$Coin -mport -$Miner_Port$(if(($Pools.$Algorithm_Norm.Name -like "NiceHash*" -or $Pools.$Algorithm_Norm.Name -like "MiningPoolHub*") -and $Algorithm_Norm -like "Ethash*") { " -proto 4" }) -pool $(if ($Pools.$Algorithm_Norm.SSL) { "ssl://" })$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -wal $($Pools.$Algorithm_Norm.User) -pass $($Pools.$Algorithm_Norm.Pass)$Arguments_Primary$Arguments_Secondary$TurboKernel -gpus $(($Miner_Device | ForEach-Object { '{0:x}' -f ($_.Type_PlatformId_Slot + 1) }) -join ',')" -replace "\s+", " ").trim()
+                    Arguments          = ("$Command$CommonCommands$($Coin.ToLower()) -mport -$Miner_Port$(if(($Pools.$Algorithm_Norm.Name -like "NiceHash*" -or $Pools.$Algorithm_Norm.Name -like "MiningPoolHub*") -and $Algorithm_Norm -like "Ethash*") { " -proto 4" }) -pool $(if ($Pools.$Algorithm_Norm.SSL) { "ssl://" })$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -wal $($Pools.$Algorithm_Norm.User) -pass $($Pools.$Algorithm_Norm.Pass)$Arguments_Primary$Arguments_Secondary$TurboKernel -gpus $(($Miner_Device | ForEach-Object { '{0:x}' -f ($_.Type_PlatformId_Slot + 1) }) -join ',')" -replace "\s+", " ").trim()
                     HashRates          = $Miner_HashRates
                     API                = "Claymore"
                     Port               = $Miner_Port
