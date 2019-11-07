@@ -613,8 +613,14 @@ function Get-ChildItemContent {
         [Parameter(Mandatory = $false)]
         [Hashtable]$Parameters = @{ }, 
         [Parameter(Mandatory = $false)]
-        [Switch]$Threaded = $false
+        [Switch]$Threaded = $false,
+        [Parameter(Mandatory = $false)]
+        [String]$Priority
     )
+
+    $DefaultPriority = ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass
+    if ($Priority) { ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass = $Priority }
+
     if ($Parameters.JobName) { $JobName = $Parameters.JobName } else { $JobName = "JobName" }
 
     $Job = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -Name $JobName -ScriptBlock { 
@@ -622,10 +628,12 @@ function Get-ChildItemContent {
             [Parameter(Mandatory = $true)]
             [String]$Path, 
             [Parameter(Mandatory = $false)]
-            [Hashtable]$Parameters = @{ }
+            [Hashtable]$Parameters = @{ },
+            [Parameter(Mandatory = $false)]
+            [String]$Priority
         )
 
-        if (-not (Get-Module -Name "ThreadJob")) { ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass = 'BelowNormal' }
+        if ($Priority) { ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass = $Priority }
 
         function Invoke-ExpressionRecursive ($Expression) { 
             if ($Expression -is [String]) { 
@@ -672,10 +680,12 @@ function Get-ChildItemContent {
                 }
             }
         }
-    } -ArgumentList $Path, $Parameters
+    } -ArgumentList $Path, $Parameters, $Priority
 
     if ($Threaded) { $Job }
     else { $Job | Receive-Job -Wait -AutoRemoveJob }
+
+    ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass = $DefaultPriority
 }
 
 filter ConvertTo-Hash { 
