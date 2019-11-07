@@ -1377,21 +1377,24 @@ while (-not $API.Stop) {
             break
         }
 
-        #Preload pool information - code to be removed
-        if ((-not $NewPools_Jobs) -and (Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and ((($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds) -le $($NewPools_JobsDurations | Measure-Object -Average).Average)) { 
-            if ($PoolsRequest = @(Get-ChildItem "Pools" -File -ErrorAction Ignore | Where-Object { $Config.Pools.$($_.BaseName) } | Where-Object { -not $Config.ExcludePoolName -or -not (Compare-Object @($Config.ExcludePoolName | Select-Object) @($_.BaseName | Select-Object) -IncludeEqual -ExcludeDifferent) } | Where-Object { -not $Config.PoolName -or (Compare-Object @($Config.PoolName | Foreach-Object { ($_ -split "-" | Select-Object -First ($_.BaseName -split "-").Length) -join "-" } | Select-Object) @($(for ($i = ($_.BaseName -split "-").Length; $i -ge 1; $i--) { ($_.BaseName -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | Sort-Object BaseName)) { 
-                Write-Log "Pre-Loading pool information ($(@($PoolsRequest.BaseName) -join '; ')). "
-                $NewPools_Jobs = @(
-                    $PoolsRequest | ForEach-Object { 
-                        $Pool_Name = $_.BaseName
-                        $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)" }
-                        $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object { $Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name) }
-                        Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded
-                    } | Select-Object
-                )
-                if ($API) { $API.NewPools_Jobs = $NewPools_Jobs } #Give API access to pool jobs information
+        #No pre-loading when benchmarking CPU miners
+        if (-not ($RunningMiners | Where-Object { $Miner_Name = $_.Name; $_.DeviceName -like "CPU#*" -and ($_.Algorithm | Where-Object { -not (Get-Stat -Name "$($Miner_Name)_$($_)_HashRate") }) })) {
+            #Preload pool information - code to be removed
+            if ((-not $NewPools_Jobs) -and (Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and ((($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds) -le $($NewPools_JobsDurations | Measure-Object -Average).Average)) { 
+                if ($PoolsRequest = @(Get-ChildItem "Pools" -File -ErrorAction Ignore | Where-Object { $Config.Pools.$($_.BaseName) } | Where-Object { -not $Config.ExcludePoolName -or -not (Compare-Object @($Config.ExcludePoolName | Select-Object) @($_.BaseName | Select-Object) -IncludeEqual -ExcludeDifferent) } | Where-Object { -not $Config.PoolName -or (Compare-Object @($Config.PoolName | Foreach-Object { ($_ -split "-" | Select-Object -First ($_.BaseName -split "-").Length) -join "-" } | Select-Object) @($(for ($i = ($_.BaseName -split "-").Length; $i -ge 1; $i--) { ($_.BaseName -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | Sort-Object BaseName)) { 
+                    Write-Log "Pre-Loading pool information ($(@($PoolsRequest.BaseName) -join '; ')). "
+                    $NewPools_Jobs = @(
+                        $PoolsRequest | ForEach-Object { 
+                            $Pool_Name = $_.BaseName
+                            $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)" }
+                            $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object { $Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name) }
+                            Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" })
+                        } | Select-Object
+                    )
+                    if ($API) { $API.NewPools_Jobs = $NewPools_Jobs } #Give API access to pool jobs information
+                }
+                Remove-Variable PoolsRequest
             }
-            Remove-Variable PoolsRequest
         }
         $PollDuration = ($StatEnd - $PollStart).TotalSeconds / $Config.HashRateSamplesPerInterval
         $ExpectedHashRateSamples = [math]::Round(((((Get-Date).ToUniversalTime() - $PollStart).TotalSeconds) + $PollDuration) / $PollDuration)
