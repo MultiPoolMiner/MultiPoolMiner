@@ -1012,33 +1012,54 @@ function Get-Device {
         $Type_Vendor_Slot = @{ }
         $Type_Slot = @{ }
 
+        #Get OpenCL data
         try { 
             [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object { 
                 #Fix for deviceID enumeration with main screen connected to onboard HD Graphics, allow Intel as valid GPU miner platform ID, but filter out all Intel entries
                 [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | Where-Object Vendor -ne "Intel(R) Corporation" | ForEach-Object { 
                     $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
+                    
+                    #Add normalised values
                     $Device = [PSCustomObject]@{ 
-                        Index                 = [Int]$Index
-                        PlatformId            = [Int]$PlatformId
-                        PlatformId_Index      = [Int]$PlatformId_Index."$($PlatformId)"
-                        Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
-                        Vendor      = $(Switch ([String]$Device_OpenCL.Vendor) { 
-                                "Advanced Micro Devices, Inc." { "AMD" }
-                                "Intel(R) Corporation" { "INTEL" }
-                                "NVIDIA Corporation" { "NVIDIA" }
-                                default { [String]$Device_OpenCL.Vendor }
+                        #ID     = $null
+                        #Name   = $null
+                        Model  = ($Device_OpenCL.Name -replace '[^A-Z0-9]'), "$([UInt64](([UInt64]$Device_OpenCL.GlobalMemSize)/1GB))GB" -join '-'
+                        Type   = $(
+                            switch -Regex ([String]$Device_OpenCL.Type) { 
+                                "CPU" { "CPU" }
+                                "GPU" { "GPU" }
+                                default { [String]$Device_OpenCL.Type -replace '[^A-Z0-9]' }
                             }
                         )
-                        Vendor_Index          = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
-                        Type_Vendor_Index     = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
-                        Type                  = [String]$Device_OpenCL.Type
-                        Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
-                        OpenCL                = $Device_OpenCL
-                        Model            = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
-                        PCIBus                = [Int]$Device_OpenCL.PCIBus
+                        Bus    = [Int]$Device_OpenCL.PCIBus
+                        Vendor = $(
+                            switch -Regex ([String]$Device_OpenCL.Vendor) { 
+                                "Advanced Micro Devices" { "AMD" }
+                                "Intel" { "INTEL" }
+                                "NVIDIA" { "NVIDIA" }
+                                default { [String]$Device_OpenCL.Vendor -replace '[^A-Z0-9]' }
+                            }
+                        )
+                        #Slot   = $null
                     }
 
-                    $Global:Devices += $Device
+                    #Add OpenCL specific data
+                    $Device | Add-Member @{ 
+                        PlatformId            = [Int]$PlatformId
+                        Index                 = [Int]$Index
+                        PlatformId_Index      = [Int]$PlatformId_Index."$($PlatformId)"
+                        Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
+                        Vendor_Index          = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
+                        Type_Vendor_Index     = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
+                        Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
+                    }
+
+                    #Add raw data
+                    $Device | Add-Member @{ 
+                        OpenCL = $Device_OpenCL
+                    }
+
+                    if ($Device.Type -ne "CPU") { $Global:Devices += $Device }
 
                     if (-not $Type_PlatformId_Index."$($Device_OpenCL.Type)") { 
                         $Type_PlatformId_Index."$($Device_OpenCL.Type)" = @{ }
@@ -1058,7 +1079,7 @@ function Get-Device {
                 $PlatformId++
             }
 
-            $Global:Devices | Sort-Object PCIBus | ForEach-Object { 
+            $Global:Devices | Sort-Object Bus | ForEach-Object { 
                 $_ | Add-Member @{ 
                     Slot                 = [Int]$Slot
                     PlatformId_Slot      = [Int]$PlatformId_Slot.($_.PlatformId)
@@ -1089,22 +1110,18 @@ function Get-Device {
             Write-Log -Level Warn "OpenCL device detection has failed. "
         }
 
-        # CPU detection in OpenCL does not work well, sometimes not being included, sometimes being included twice for each processor - remove any CPUs from the OpenCL devices and generate more accurate ones
-        # Remove them instead of not generating them in the first place, because skipping them would affect the indexes
-        [Array]$Global:Devices = $Global:Devices | Where-Object { $_.Type -ne "Cpu" }
-
         $CPUIndex = 0
         Get-CimInstance -ClassName CIM_Processor | ForEach-Object { 
             # Vendor and type the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
             $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
             $Device = [PSCustomObject]@{ 
                 Index             = [Int]$Index
-                Vendor  = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") { "INTEL" } else { "AMD" })
+                Vendor            = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") { "INTEL" } else { "AMD" })
                 Type_Vendor_Index = $CPUIndex
                 Type              = "Cpu"
                 Type_Index        = $CPUIndex
                 CIM               = $CPUInfo
-                Model        = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
+                Model             = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
             }
             #Read CPU features
             $Device | Add-member CpuFeatures ((Get-CpuId).Features | Sort-Object)
