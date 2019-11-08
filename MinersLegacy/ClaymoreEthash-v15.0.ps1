@@ -90,13 +90,13 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
 
     switch ($_.Vendor) { 
-        "Advanced Micro Devices, Inc." { $CommonCommands = $CommonCommandsAmd + $CommonCommandsAll }
-        "NVIDIA Corporation" { $CommonCommands = $CommonCommandsNvidia + $CommonCommandsAll }
+        "AMD" { $CommonCommands = $CommonCommandsAmd + $CommonCommandsAll }
+        "NVIDIA" { $CommonCommands = $CommonCommandsNvidia + $CommonCommandsAll }
         Default { $CommonCommands = $CommonCommandsAll }
     }
 
     #Remove -strap parameter, not all card models support it
-    if ($Device.Model_Norm -notmatch "^GTX10.*|^Baffin.*|^Ellesmere.*|^Polaris.*|^Vega.*|^gfx900.*") { 
+    if ($Device.Model -notmatch "^GTX10.*|^Baffin.*|^Ellesmere.*|^Polaris.*|^Vega.*|^gfx900.*") { 
         $CommonCommands = $CommonCommands -replace " -strap [\d,]{1,}"
     }
     
@@ -122,7 +122,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $Secondary_Algorithm = $_.SecondaryAlgorithm
                 $Secondary_Algorithm_Norm = Get-Algorithm $Secondary_Algorithm
 
-                $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object { $Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm" }) + @("$Algorithm_Norm$($Secondary_Algorithm_Norm -replace 'Nicehash'<#temp fix#>)") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) + @("$Algorithm_Norm$($Secondary_Algorithm_Norm -replace 'Nicehash'<#temp fix#>)") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week; $Secondary_Algorithm_Norm = $Stats."$($Miner_Name)_$($Secondary_Algorithm_Norm)_HashRate".Week }
 
                 switch ($_.Secondary_Algorithm_Norm) { 
@@ -140,7 +140,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 }
             }
             else { 
-                $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object { $Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm" }) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
                 $Arguments_Secondary = ""
 

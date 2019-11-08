@@ -3,7 +3,7 @@
                 "Index":  "*",
                 "PlatformId":  "*",
                 "Type_PlatformId_Index":  "*",
-                "Vendor":  "Advanced Micro Devices, Inc.",
+                "Vendor":  "AMD",
                 "Type_Vendor_Index":  "{1}",
                 "Type":  "GPU",
                 "Type_Index":  "*"
@@ -39,7 +39,7 @@
                   "Index":  "*",
                   "PlatformId":  "*",
                   "Type_PlatformId_Index":  "*",
-                  "Vendor":  "Intel(R) Corporation",
+                  "Vendor":  "INTEL",
                   "Type_Vendor_Index":  "{1}",
                   "Type":  "GPU",
                   "Type_Index":  "*"
@@ -48,7 +48,7 @@
                    "Index":  "*",
                    "PlatformId":  "*",
                    "Type_PlatformId_Index":  "*",
-                   "Vendor":  "NVIDIA Corporation",
+                   "Vendor":  "NVIDIA",
                    "Type_Vendor_Index":  "{1}",
                    "Type":  "GPU",
                    "Type_Index":  "*"

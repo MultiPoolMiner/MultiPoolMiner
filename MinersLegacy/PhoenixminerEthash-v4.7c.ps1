@@ -16,8 +16,8 @@ $ManualUri = "https://bitcointalk.org/index.php?topic=4129696.0"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $UnsupportedDriverVersions = @()
-$CUDAVersion = ($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation" | Select-Object -Unique).OpenCL.Platform.Version -replace ".*CUDA "
-$AMDVersion  = ($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Advanced Micro Devices, Inc." | Select-Object -Unique).OpenCL.DriverVersion
+$CUDAVersion = ($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA" | Select-Object -Unique).OpenCL.Platform.Version -replace ".*CUDA "
+$AMDVersion  = ($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "AMD" | Select-Object -Unique).OpenCL.DriverVersion
 
 if ($UnsupportedDriverVersions -contains $AMDVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) does not support the installed AMD driver version $($AMDVersion). Please use a different AMD driver version. "
@@ -82,8 +82,8 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
 
     switch ($_.Vendor) { 
-        "Advanced Micro Devices, Inc." { $CommonCommands = $CommonCommandsAmd + $CommonCommandsAll }
-        "NVIDIA Corporation" { $CommonCommands = $CommonCommandsNvidia + $CommonCommandsAll }
+        "AMD" { $CommonCommands = $CommonCommandsAmd + $CommonCommandsAll }
+        "NVIDIA" { $CommonCommands = $CommonCommandsNvidia + $CommonCommandsAll }
         Default { $CommonCommands = $CommonCommandsAll }
     }
 
@@ -105,7 +105,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $Secondary_Algorithm = $_.SecondaryAlgorithm
                 $Secondary_Algorithm_Norm = Get-Algorithm $Secondary_Algorithm
 
-                $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object { $Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm" }) + @("$Algorithm_Norm$($Secondary_Algorithm_Norm -replace 'Nicehash'<#temp fix#>)") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) + @("$Algorithm_Norm$($Secondary_Algorithm_Norm -replace 'Nicehash'<#temp fix#>)") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week; $Secondary_Algorithm_Norm = $Stats."$($Miner_Name)_$($Secondary_Algorithm_Norm)_HashRate".Week }
 
                 $Arguments_Secondary += " -dcoin $Secondary_Algorithm -dpool $(if ($Pools.$Secondary_Algorithm_Norm.SSL) { "ssl://" })$($Pools.$Secondary_Algorithm_Norm.Host):$($Pools.$Secondary_Algorithm_Norm.Port) -dwal $($Pools.$Secondary_Algorithm_Norm.User) -dpass $($Pools.$Secondary_Algorithm_Norm.Pass)$(if($_.SecondaryAlgoIntensity -ge 0){ " -sci $($_.SecondaryAlgoIntensity)" })"
@@ -115,7 +115,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $WarmupTime = 60
             }
             else { 
-                $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object { $Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm" }) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
                 $Arguments_Primary += " -gt 0" #Enable auto-tuning
                 
@@ -123,7 +123,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $Miner_Fees = [PSCustomObject]@{ "$Algorithm_Norm" = 0.65 / 100 }
 
                 #TurboKernels
-                if ($Miner_Device.Vendor -eq "Advanced Micro Devices, Inc." -and ([math]::Round((10 * ($Miner_Device.OpenCL | Measure-Object GlobalMemSize -Minimum).Minimum / 1GB), 0) / 10) -ge (2 * $MinMemGB)) { 
+                if ($Miner_Device.Vendor -eq "AMD" -and ([math]::Round((10 * ($Miner_Device.OpenCL | Measure-Object GlobalMemSize -Minimum).Minimum / 1GB), 0) / 10) -ge (2 * $MinMemGB)) { 
                     # faster AMD "turbo" kernels require twice as much VRAM
                     $TurboKernel = " -clkernel 3"
                 }

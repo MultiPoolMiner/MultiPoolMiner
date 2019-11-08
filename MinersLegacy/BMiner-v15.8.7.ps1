@@ -21,11 +21,11 @@ if (-not $Miner_Config){ $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*
 $Devices = $Devices | Where-Object Type -EQ "GPU"
 
 # Miner requires CUDA 9.2.00 or higher
-$CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+$CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
 $RequiredCUDAVersion = "9.2.00"
-if ($Devices.Vendor -contains "NVIDIA Corporation" -and $CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion){ 
+if ($Devices.Vendor -contains "NVIDIA" -and $CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion){ 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
-    $Devices = $Devices | Where-Object Vendor -NE "NVIDIA Corporation"
+    $Devices = $Devices | Where-Object Vendor -NE "NVIDIA"
 }
 
 $Commands = [PSCustomObject[]]@(
@@ -89,7 +89,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object{
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
 
-    $Commands | ForEach-Object{ $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object{ $_.Vendor -contains ($Device.Vendor_ShortName | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Host } | ForEach-Object{ 
+    $Commands | ForEach-Object{ $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object{ $_.Vendor -contains ($Device.Vendor | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Host } | ForEach-Object{ 
         $Arguments_Secondary = ""
         $IntervalMultiplier = 1
         $MinMemGB = $_.MinMemGB
@@ -101,7 +101,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object{
         #Cuckatoo31 on windows 10 requires 3.5 GB extra
         if ($Algorithm -eq "Cuckatoo31" -and ([System.Version]$PSVersionTable.BuildVersion -ge "10.0.0.0")){ $MinMemGB += 3.5 }
 
-        if ($Miner_Device = @($Device | Where-Object{ $Vendor -contains $_.Vendor_ShortName -and ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB })){ 
+        if ($Miner_Device = @($Device | Where-Object{ $Vendor -contains $_.Vendor -and ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB })){ 
 
             #Get commands for active miner devices
             $Command = Get-CommandPerDevice -Command $_.Command -DeviceIDs $Miner_Device.Type_Vendor_Index
@@ -116,7 +116,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object{
                 $Secondary_Algorithm = $_.SecondaryAlgorithm
                 $Secondary_Algorithm_Norm = Get-Algorithm $Secondary_Algorithm
 
-                $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object{ $Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm" }) + @("$Algorithm_Norm$Secondary_Algorithm_Norm") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object{ $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) + @("$Algorithm_Norm$Secondary_Algorithm_Norm") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week; $Secondary_Algorithm_Norm = $Stats."$($Miner_Name)_$($Secondary_Algorithm_Norm)_HashRate".Week }
 
                 $Arguments_Secondary = " -uri2 $($Secondary_Algorithm)$(if ($Pools.$Secondary_Algorithm_Norm.SSL){ '+ssl' })://$([System.Web.HttpUtility]::UrlEncode($Pools.$Secondary_Algorithm_Norm.User)):$([System.Web.HttpUtility]::UrlEncode($Pools.$Secondary_Algorithm_Norm.Pass))@$($Pools.$Secondary_Algorithm_Norm.Host):$($Pools.$Secondary_Algorithm_Norm.Port)$(if($_.SecondaryAlgoIntensity -ge 0){ " -dual-intensity $($_.SecondaryAlgoIntensity)" })"
@@ -126,7 +126,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object{
                 $WarmupTime = 120
             }
             else{ 
-                $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object{ $Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm" }) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object{ $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
                 $WarmupTime = 120
 
@@ -153,7 +153,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object{
                     DeviceName         = $Miner_Device.Name
                     Path               = $Path
                     HashSHA256         = $HashSHA256
-                    Arguments          = ("$Command$CommonCommands -api 127.0.0.1:$($Miner_Port)$AlgoPers -uri $($Protocol)://$([System.Web.HttpUtility]::UrlEncode($Pools.$Algorithm_Norm.User)):$([System.Web.HttpUtility]::UrlEncode($Pools.$Algorithm_Norm.Pass))@$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)$Arguments_Secondary$NoFee -devices $(if ($Miner_Device.Vendor -EQ "Advanced Micro Devices, Inc."){ "amd:" })$(($Miner_Device | ForEach-Object{ '{0:x}' -f $_.Type_Vendor_Index }) -join ',')" -replace "\s+", " ").trim()
+                    Arguments          = ("$Command$CommonCommands -api 127.0.0.1:$($Miner_Port)$AlgoPers -uri $($Protocol)://$([System.Web.HttpUtility]::UrlEncode($Pools.$Algorithm_Norm.User)):$([System.Web.HttpUtility]::UrlEncode($Pools.$Algorithm_Norm.Pass))@$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)$Arguments_Secondary$NoFee -devices $(if ($Miner_Device.Vendor -EQ "AMD"){ "amd:" })$(($Miner_Device | ForEach-Object{ '{0:x}' -f $_.Type_Vendor_Index }) -join ',')" -replace "\s+", " ").trim()
                     HashRates          = $Miner_HashRates
                     API                = "Bminer"
                     Port               = $Miner_Port

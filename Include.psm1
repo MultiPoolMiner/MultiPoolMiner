@@ -1022,8 +1022,7 @@ function Get-Device {
                         PlatformId            = [Int]$PlatformId
                         PlatformId_Index      = [Int]$PlatformId_Index."$($PlatformId)"
                         Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
-                        Vendor                = [String]$Device_OpenCL.Vendor
-                        Vendor_ShortName      = $(Switch ([String]$Device_OpenCL.Vendor) { 
+                        Vendor      = $(Switch ([String]$Device_OpenCL.Vendor) { 
                                 "Advanced Micro Devices, Inc." { "AMD" }
                                 "Intel(R) Corporation" { "INTEL" }
                                 "NVIDIA Corporation" { "NVIDIA" }
@@ -1035,8 +1034,7 @@ function Get-Device {
                         Type                  = [String]$Device_OpenCL.Type
                         Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
                         OpenCL                = $Device_OpenCL
-                        Model                 = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
-                        Model_Norm            = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
+                        Model            = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
                         PCIBus                = [Int]$Device_OpenCL.PCIBus
                     }
 
@@ -1101,14 +1099,12 @@ function Get-Device {
             $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
             $Device = [PSCustomObject]@{ 
                 Index             = [Int]$Index
-                Vendor            = $CPUInfo.Manufacturer
-                Vendor_ShortName  = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") { "INTEL" } else { "AMD" })
+                Vendor  = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") { "INTEL" } else { "AMD" })
                 Type_Vendor_Index = $CPUIndex
                 Type              = "Cpu"
                 Type_Index        = $CPUIndex
                 CIM               = $CPUInfo
-                Model             = $CPUInfo.Name
-                Model_Norm        = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
+                Model        = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
             }
             #Read CPU features
             $Device | Add-member CpuFeatures ((Get-CpuId).Features | Sort-Object)
