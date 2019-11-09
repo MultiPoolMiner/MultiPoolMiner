@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 26/10/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 10/11/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -434,7 +434,6 @@ Sample content of 'Config.txt'
   "Debug": "$Debug",
   "Delay": "$Delay",
   "DeviceName": "$DeviceName",
-  "DevicePciOrderMapping": "$DevicePciOrderMapping",
   "DisableDevFeeMining": "$DisableDevFeeMining",
   "DisableDeviceDetection": "$DisableDeviceDetection",
   "DisableEstimateCorrection": "$DisableEstimateCorrection",
@@ -932,28 +931,6 @@ You can also use any MPM internal variables or simple powershell code like this:
 Advanced general configuration
 
 Settings in this section affect the overall behaviour of MPM and will take precedence over command line parameters.
-
-DevicePciOrderMapping (deprecated)
-
-Some miners (currently Claymore*, Gminer, lolMinerEquihash, Nanominer, SRBMinerCryptonight & Wildrig) enumerate the GPU devices based on the PCI deviceID.
-All other miners use the device order as returned by the OpenCL API.
-The result of the two ordering methods can be different and will lead to invalid device selections where the affected miners will not mine on the correct device.
-
-To override the PCI deviceID mapping create a section in the config file similar to this:
-
-    {
-      "DevicePciOrderMapping": {
-        "GPU#00": "0",
-        "GPU#01": "1",
-        "GPU#02": "3",
-        "GPU#03": "2"
-      }
-    }
-Note: In most cases there is no need for this extra mapping and all miners will operate just fine. This mapping only applies to miners using the PCI deviceID for the device enumeration. 
-More info can be found here:
-https://github.com/nanopool/nanominer/issues/30
-https://github.com/develsoftware/GMinerRelease/issues/18
-
 
 Ignore pool and miner fees
 
