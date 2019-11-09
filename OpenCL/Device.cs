@@ -105,6 +105,8 @@ namespace OpenCl
         private const uint CL_DEVICE_PCI_SLOT_ID_NV =                         0x4009;
         private const uint CL_DEVICE_TOPOLOGY_AMD =                           0x4037;
 
+        private const uint CL_DEVICE_BOARD_NAME_AMD =                         0x4038;
+
         internal Device(IntPtr handle) : base(handle) { }
 
         // Device attributes
@@ -323,7 +325,30 @@ namespace OpenCl
 
         public string Name
         {
-            get { return Cl.GetInfoString(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_NAME); }
+            get {
+                try {
+                    string Name_AMD = Cl.GetInfoString(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_BOARD_NAME_AMD);
+
+                    return Name_AMD;
+                }
+                catch (OpenClException) {
+                }
+
+                try {
+                    string Vendor = Cl.GetInfoString(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_VENDOR);
+
+                    if(Vendor == "NVIDIA Corporation") {
+                        string Name = Cl.GetInfoString(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_NAME);
+                        string Name_NV = "NVIDIA" + Name;
+
+                        return Name_NV;
+                    }
+                }
+                catch (OpenClException) {
+                }
+
+                return Cl.GetInfoString(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_NAME);
+            }
         }
 
         public string ClVersion
