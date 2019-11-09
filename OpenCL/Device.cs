@@ -339,7 +339,7 @@ namespace OpenCl
 
                     if(Vendor == "NVIDIA Corporation") {
                         string Name = Cl.GetInfoString(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_NAME);
-                        string Name_NV = "NVIDIA" + Name;
+                        string Name_NV = "NVIDIA" + " " + Name;
 
                         return Name_NV;
                     }
