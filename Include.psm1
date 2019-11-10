@@ -993,20 +993,23 @@ function Get-Device {
     if ($Global:Devices -isnot [Array] -or $Refresh) { 
         $Global:Devices = [Array]$Devices = @()
 
-        $PlatformId = 0
-        $Index = 0
-        $PlatformId_Index = @{ }
-        $Type_PlatformId_Index = @{ }
-        $Vendor_Index = @{ }
-        $Type_Vendor_Index = @{ }
-        $Type_Index = @{ }
+        $Id = 0
+        $Type_Id = @{ }
+        $Vendor_Id = @{ }
+        $Type_Vendor_Id = @{ }
 
         $Slot = 0
-        #$PlatformId_Slot = @{ }
-        #$Type_PlatformId_Slot = @{ }
+        $Type_Slot = @{ }
         $Vendor_Slot = @{ }
         $Type_Vendor_Slot = @{ }
-        $Type_Slot = @{ }
+
+        $Index = 0
+        $Type_Index = @{ }
+        $Vendor_Index = @{ }
+        $Type_Vendor_Index = @{ }
+        $PlatformId = 0
+        $PlatformId_Index = @{ }
+        $Type_PlatformId_Index = @{ }
 
         #Get WDDM data
         try { 
@@ -1015,8 +1018,7 @@ function Get-Device {
 
                 #Add normalised values
                 $Global:Devices += $Device = [PSCustomObject]@{ 
-                    #ID     = $null
-                    #Name   = "$($Device_CIM.DeviceID -replace '[^A-Z]')#$('{0:D2}' -f [Int]($Device_CIM.DeviceID -replace '[^0-9]'))"
+                    Name   = $null
                     Model  = $Device_CIM.Name
                     Type   = "CPU"
                     Bus    = $null
@@ -1029,10 +1031,26 @@ function Get-Device {
                         }
                     )
                     Memory = $null
-                    #Slot   = $null
                 }
 
+                $Device | Add-Member @{ 
+                    Id             = [Int]$Id
+                    Type_Id        = [Int]$Type_Id.($Device.Type)
+                    Vendor_Id      = [Int]$Vendor_Id.($Device.Vendor)
+                    Type_Vendor_Id = [Int]$Type_Vendor_Id.($Device.Type).($Device.Vendor)
+                }
+
+                $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
                 $Device.Model = (($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor) -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
+
+                if (-not $Type_Vendor_Id.($Device.Type)) { 
+                    $Type_Vendor_Id.($Device.Type) = @{ }
+                }
+
+                $Id++
+                $Vendor_Id.($Device.Vendor)++
+                $Type_Vendor_Id.($Device.Type).($Device.Vendor)++
+                $Type_Id.($Device.Type)++
 
                 #Read CPU features
                 $Device | Add-member CpuFeatures ((Get-CpuId).Features | Sort-Object)
@@ -1054,8 +1072,7 @@ function Get-Device {
 
                 #Add normalised values
                 $Global:Devices += $Device = [PSCustomObject]@{ 
-                    #ID     = $Device_CIM.PNPDeviceID
-                    #Name   = "$($Device_CIM.DeviceID -replace '[^A-Z]' -replace 'VideoController','GPU')#$('{0:D2}' -f ([Int]($Device_CIM.DeviceID -replace '[^0-9]')-1))"
+                    Name   = $null
                     Model  = $Device_CIM.Name
                     Type   = "GPU"
                     Bus    = if ($Device_PNP.DEVPKEY_Device_BusNumber -is [Int64]) { $Device_PNP.DEVPKEY_Device_BusNumber }
@@ -1068,10 +1085,26 @@ function Get-Device {
                         }
                     )
                     Memory = [Math]::Max(([UInt64]$Device_CIM.AdapterRAM), ([uInt64]$Device_Reg.'HardwareInformation.qwMemorySize'))
-                    #Slot   = $null
                 }
 
+                $Device | Add-Member @{ 
+                    Id             = [Int]$Id
+                    Type_Id        = [Int]$Type_Id.($Device.Type)
+                    Vendor_Id      = [Int]$Vendor_Id.($Device.Vendor)
+                    Type_Vendor_Id = [Int]$Type_Vendor_Id.($Device.Type).($Device.Vendor)
+                }
+
+                $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
                 $Device.Model = ((($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
+
+                if (-not $Type_Vendor_Id.($Device.Type)) { 
+                    $Type_Vendor_Id.($Device.Type) = @{ }
+                }
+
+                $Id++
+                $Vendor_Id.($Device.Vendor)++
+                $Type_Vendor_Id.($Device.Type).($Device.Vendor)++
+                $Type_Id.($Device.Type)++
 
                 #Add raw data
                 $Device | Add-Member @{ 
@@ -1093,8 +1126,7 @@ function Get-Device {
 
                     #Add normalised values
                     $Device = [PSCustomObject]@{ 
-                        #ID     = $null
-                        #Name   = $null
+                        Name   = $null
                         Model  = $Device_OpenCL.Name
                         Type   = $(
                             switch -Regex ([String]$Device_OpenCL.Type) { 
@@ -1113,9 +1145,16 @@ function Get-Device {
                             }
                         )
                         Memory = [UInt64]$Device_OpenCL.GlobalMemSize
-                        #Slot   = $null
                     }
 
+                    $Device | Add-Member @{ 
+                        Id             = [Int]$Id
+                        Type_Id        = [Int]$Type_Id.($Device.Type)
+                        Vendor_Id      = [Int]$Vendor_Id.($Device.Vendor)
+                        Type_Vendor_Id = [Int]$Type_Vendor_Id.($Device.Type).($Device.Vendor)
+                    }
+
+                    $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
                     $Device.Model = ((($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
 
                     if ($Global:Devices | Where-Object Type -EQ $Device.Type | Where-Object Bus -EQ $Device.Bus) { 
@@ -1123,17 +1162,26 @@ function Get-Device {
                     }
                     elseif ($Device.Type -eq "GPU" -and ($Device.Vendor -eq "AMD" -or $Device.Vendor -eq "NVIDIA")) { 
                         $Global:Devices += $Device
+
+                        if (-not $Type_Vendor_Id.($Device.Type)) { 
+                            $Type_Vendor_Id.($Device.Type) = @{ }
+                        }
+        
+                        $Id++
+                        $Vendor_Id.($Device.Vendor)++
+                        $Type_Vendor_Id.($Device.Type).($Device.Vendor)++
+                        $Type_Id.($Device.Type)++
                     }
 
                     #Add OpenCL specific data
                     $Device | Add-Member @{ 
-                        PlatformId            = [Int]$PlatformId
                         Index                 = [Int]$Index
-                        PlatformId_Index      = [Int]$PlatformId_Index."$($PlatformId)"
-                        Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
-                        Vendor_Index          = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
-                        Type_Vendor_Index     = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
-                        Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
+                        Type_Index            = [Int]$Type_Index.($Device.Type)
+                        Vendor_Index          = [Int]$Vendor_Index.($Device.Vendor)
+                        Type_Vendor_Index     = [Int]$Type_Vendor_Index.($Device.Type).($Device.Vendor)
+                        PlatformId            = [Int]$PlatformId
+                        PlatformId_Index      = [Int]$PlatformId_Index.($PlatformId)
+                        Type_PlatformId_Index = [Int]$Type_PlatformId_Index.($Device.Type).($PlatformId)
                     }
 
                     #Add raw data
@@ -1141,19 +1189,19 @@ function Get-Device {
                         OpenCL = $Device_OpenCL
                     }
 
-                    if (-not $Type_PlatformId_Index."$($Device_OpenCL.Type)") { 
-                        $Type_PlatformId_Index."$($Device_OpenCL.Type)" = @{ }
+                    if (-not $Type_Vendor_Index.($Device.Type)) { 
+                        $Type_Vendor_Index.($Device.Type) = @{ }
                     }
-                    if (-not $Type_Vendor_Index."$($Device_OpenCL.Type)") { 
-                        $Type_Vendor_Index."$($Device_OpenCL.Type)" = @{ }
+                    if (-not $Type_PlatformId_Index.($Device.Type)) { 
+                        $Type_PlatformId_Index.($Device.Type) = @{ }
                     }
 
                     $Index++
-                    $PlatformId_Index."$($PlatformId)"++
-                    $Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"++
-                    $Vendor_Index."$($Device_OpenCL.Vendor)"++
-                    $Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"++
-                    $Type_Index."$($Device_OpenCL.Type)"++
+                    $Type_Index.($Device.Type)++
+                    $Vendor_Index.($Device.Vendor)++
+                    $Type_Vendor_Index.($Device.Type).($Device.Vendor)++
+                    $PlatformId_Index.($PlatformId)++
+                    $Type_PlatformId_Index.($Device.Type).($PlatformId)++
                 }
 
                 $PlatformId++
@@ -1161,29 +1209,20 @@ function Get-Device {
 
             $Global:Devices | Sort-Object Bus | ForEach-Object { 
                 $_ | Add-Member @{ 
-                    Slot                 = [Int]$Slot
-                    #PlatformId_Slot      = [Int]$PlatformId_Slot.($_.PlatformId)
-                    #Type_PlatformId_Slot = [Int]$Type_PlatformId_Slot.($_.Type).($_.PlatformId)
-                    Vendor_Slot          = [Int]$Vendor_Slot.($_.Vendor)
-                    Type_Vendor_Slot     = [Int]$Type_Vendor_Slot.($_.Type).($_.Vendor)
-                    Type_Slot            = [Int]$Type_Slot.($_.Type)
+                    Slot             = [Int]$Slot
+                    Type_Slot        = [Int]$Type_Slot.($_.Type)
+                    Vendor_Slot      = [Int]$Vendor_Slot.($_.Vendor)
+                    Type_Vendor_Slot = [Int]$Type_Vendor_Slot.($_.Type).($_.Vendor)
                 }
 
-                $_ | Add-Member Name ("{0}#{1:d2}" -f $_.Type, $_.Type_Slot).ToUpper()
-
-                #if (-not $Type_PlatformId_Slot.($_.Type)) { 
-                    #$Type_PlatformId_Slot.($_.Type) = @{ }
-                #}
                 if (-not $Type_Vendor_Slot.($_.Type)) { 
                     $Type_Vendor_Slot.($_.Type) = @{ }
                 }
 
                 $Slot++
-                #$PlatformId_Slot.($_.PlatformId)++
-                #$Type_PlatformId_Slot.($_.Type).($_.PlatformId)++
+                $Type_Slot.($_.Type)++
                 $Vendor_Slot.($_.Vendor)++
                 $Type_Vendor_Slot.($_.Type).($_.Vendor)++
-                $Type_Slot.($_.Type)++
             }
         }
         catch { 
