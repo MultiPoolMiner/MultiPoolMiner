@@ -69,13 +69,13 @@ function Update-APIDeviceStatus {
 
     $API.AllDevices | ForEach-Object { 
         if ($Devices.Name -contains $_.Name) { 
-            if ($Miner = $API.FailedMiners | Where-Object DeviceName -contains $_.Name) { $_ | Add-Member Status "Failed ($(($Miner.Name -Split '-' | Select-Object -First 2) -Join '-') [$($Miner.Algorithm -join '; ')])" -Force }
+            if ($Miner = $API.FailedMiners | Where-Object DeviceName -contains $_.Name) { $_ | Add-Member Status "Failed ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force }
             elseif ($Miner = $API.RunningMiners | Where-Object DeviceName -contains $_.Name) { 
                 if ($Miner.Speed -contains $null) { 
-                    $_ | Add-Member Status "Benchmarking ($(($Miner.Name -Split '-' | Select-Object -First 2) -Join '-') [$($Miner.Algorithm -join '; ')])" -Force
+                    $_ | Add-Member Status "Benchmarking ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force
                 }
                 else { 
-                    $_ | Add-Member Status "Running ($(($Miner.Name -Split '-' | Select-Object -First 2) -Join '-') [$($Miner.Algorithm -join '; ')])" -Force
+                    $_ | Add-Member Status "Running ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force
                 }
             }
             else { $_ | Add-Member Status "Idle" -Force }
@@ -87,6 +87,7 @@ function Update-APIDeviceStatus {
 function Get-PrePostCommand { 
 
     #Get Pre / Post miner exec commands
+
 
     [CmdletBinding()]
     param(
@@ -562,6 +563,7 @@ function Get-Stat {
                 $Stat = Get-Content "Stats\$Stat_Name.txt" -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
                 $Global:Stats | Add-Member @{ 
                     $Stat_Name = [PSCustomObject]@{ 
+                        Name                  = [String]$Stat_Name
                         Live                  = [Double]$Stat.Live
                         Minute                = [Double]$Stat.Minute
                         Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
@@ -689,14 +691,15 @@ function Get-ChildItemContent {
 filter ConvertTo-Hash { 
     [CmdletBinding()]
     $Hash = $_
-    switch ([math]::Abs([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1))))) { 
+    switch ([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1)))) { 
+        $null { "0  H" }
+        "-Infinity" { "0  H" }
         0 { "{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0)) }
         1 { "{0:n2} KH" -f ($Hash / [Math]::Pow(1000, 1)) }
         2 { "{0:n2} MH" -f ($Hash / [Math]::Pow(1000, 2)) }
         3 { "{0:n2} GH" -f ($Hash / [Math]::Pow(1000, 3)) }
         4 { "{0:n2} TH" -f ($Hash / [Math]::Pow(1000, 4)) }
-        5 { "{0:n2} PH" -f ($Hash / [Math]::Pow(1000, 4)) }
-        Default { "0  H" }
+        Default { "{0:N2} PH" -f ($Hash / [Math]::Pow(1000, 5)) }
     }
 }
 
