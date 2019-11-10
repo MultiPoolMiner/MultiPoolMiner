@@ -1017,7 +1017,7 @@ function Get-Device {
                 $Global:Devices += $Device = [PSCustomObject]@{ 
                     #ID     = $null
                     #Name   = "$($Device_CIM.DeviceID -replace '[^A-Z]')#$('{0:D2}' -f [Int]($Device_CIM.DeviceID -replace '[^0-9]'))"
-                    Model  = $Device_CIM.Name -replace '[^A-Z0-9]'
+                    Model  = $Device_CIM.Name
                     Type   = "CPU"
                     Bus    = $null
                     Vendor = $(
@@ -1025,11 +1025,14 @@ function Get-Device {
                             "Advanced Micro Devices" { "AMD" }
                             "Intel" { "INTEL" }
                             "NVIDIA" { "NVIDIA" }
-                            default { $Device_CIM.Manufacturer -replace '[^A-Z0-9]' }
+                            default { $Device_CIM.Manufacturer -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                         }
                     )
+                    Memory = $null
                     #Slot   = $null
                 }
+
+                $Device.Model = (($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor) -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
 
                 #Read CPU features
                 $Device | Add-member CpuFeatures ((Get-CpuId).Features | Sort-Object)
@@ -1053,7 +1056,7 @@ function Get-Device {
                 $Global:Devices += $Device = [PSCustomObject]@{ 
                     #ID     = $Device_CIM.PNPDeviceID
                     #Name   = "$($Device_CIM.DeviceID -replace '[^A-Z]' -replace 'VideoController','GPU')#$('{0:D2}' -f ([Int]($Device_CIM.DeviceID -replace '[^0-9]')-1))"
-                    Model  = ($Device_CIM.Name -replace '[^A-Z0-9]'), "$([UInt64](([Math]::Max(([UInt64]$Device_CIM.AdapterRAM), ([uInt64]$Device_Reg.'HardwareInformation.qwMemorySize')))/1GB))GB" -join '-'
+                    Model  = $Device_CIM.Name
                     Type   = "GPU"
                     Bus    = if ($Device_PNP.DEVPKEY_Device_BusNumber -is [Int64]) { $Device_PNP.DEVPKEY_Device_BusNumber }
                     Vendor = $(
@@ -1061,11 +1064,14 @@ function Get-Device {
                             "Advanced Micro Devices" { "AMD" }
                             "Intel" { "INTEL" }
                             "NVIDIA" { "NVIDIA" }
-                            default { $Device_CIM.AdapterCompatibility -replace '[^A-Z0-9]' }
+                            default { $Device_CIM.AdapterCompatibility -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                         }
                     )
+                    Memory = [Math]::Max(([UInt64]$Device_CIM.AdapterRAM), ([uInt64]$Device_Reg.'HardwareInformation.qwMemorySize'))
                     #Slot   = $null
                 }
+
+                $Device.Model = ((($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
 
                 #Add raw data
                 $Device | Add-Member @{ 
@@ -1089,12 +1095,12 @@ function Get-Device {
                     $Device = [PSCustomObject]@{ 
                         #ID     = $null
                         #Name   = $null
-                        Model  = ($Device_OpenCL.Name -replace '[^A-Z0-9]'), "$([UInt64](([UInt64]$Device_OpenCL.GlobalMemSize)/1GB))GB" -join '-'
+                        Model  = $Device_OpenCL.Name
                         Type   = $(
                             switch -Regex ([String]$Device_OpenCL.Type) { 
                                 "CPU" { "CPU" }
                                 "GPU" { "GPU" }
-                                default { [String]$Device_OpenCL.Type -replace '[^A-Z0-9]' }
+                                default { [String]$Device_OpenCL.Type -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                             }
                         )
                         Bus    = if ($Device_OpenCL.PCIBus -is [Int64]) { $Device_OpenCL.PCIBus }
@@ -1103,11 +1109,14 @@ function Get-Device {
                                 "Advanced Micro Devices" { "AMD" }
                                 "Intel" { "INTEL" }
                                 "NVIDIA" { "NVIDIA" }
-                                default { [String]$Device_OpenCL.Vendor -replace '[^A-Z0-9]' }
+                                default { [String]$Device_OpenCL.Vendor -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                             }
                         )
+                        Memory = [UInt64]$Device_OpenCL.GlobalMemSize
                         #Slot   = $null
                     }
+
+                    $Device.Model = ((($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
 
                     if ($Global:Devices | Where-Object Type -EQ $Device.Type | Where-Object Bus -EQ $Device.Bus) { 
                         $Device = $Global:Devices | Where-Object Type -EQ $Device.Type | Where-Object Bus -EQ $Device.Bus
