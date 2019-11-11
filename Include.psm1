@@ -475,6 +475,7 @@ function Set-Stat {
             $Span_Week = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
 
             $Stat = [PSCustomObject]@{ 
+                Name                  = $Name
                 Live                  = $Value
                 Minute                = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
                 Minute_Fluctuation    = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
