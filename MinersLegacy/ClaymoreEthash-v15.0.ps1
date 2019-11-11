@@ -13,10 +13,7 @@ $HashSHA256 = "2F028F580A628EF3D1D398E238E0EC7B0C0EC8AA89BB88706C4B19BF6E548FB4"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/ethdcrminer64/ClaymoreDual_v15.0.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=1433925.0"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "ethash2gb"; MinMemGB = 2; SecondaryAlgorithm = "";        Command = "" } #Ethash2gb
@@ -169,15 +166,13 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             $Command = Get-CommandPerDevice -Command $_.Command -DeviceIDs $Miner_Device.Type_Vendor_Index
 
             #Remove -strap parameter for Nvidia 1080(Ti) and Titan cards, OhGoAnETHlargementPill is not compatible
-            if ($Device.Model -match "GeForce GTX 1080|GeForce GTX 1080 Ti|Nvidia TITAN.*" -and (Get-CIMInstance CIM_Process | Where-Object Processname -like "OhGodAnETHlargementPill*")) { 
+            if ($Device.Model -match "GTX1080.*|Nvidia TITAN.*" -and (Get-CIMInstance CIM_Process | Where-Object Processname -like "OhGodAnETHlargementPill*")) { 
                 $CommonCommands = $CommonCommands -replace " -strap [\d,]{1,}"
             }
 
             if ($null -eq $_.SecondaryAlgoIntensity -or $Pools.$Secondary_Algorithm_Norm.Host) { 
                 [PSCustomObject]@{ 
                     Name               = $Miner_Name
-                    BaseName           = $Miner_BaseName
-                    Version            = $Miner_Version
                     DeviceName         = $Miner_Device.Name
                     Path               = $Path
                     HashSHA256         = $HashSHA256
