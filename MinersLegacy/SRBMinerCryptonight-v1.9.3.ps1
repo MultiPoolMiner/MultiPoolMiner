@@ -25,7 +25,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "conceal";     MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightConceal, new in 1.7.9
     [PSCustomObject]@{ Algorithm = "fast2";       MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightFast2
     [PSCustomObject]@{ Algorithm = "gpu";         MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightRwzV8
-    [PSCustomObject]@{ Algorithm = "graft";       MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightGpu
+    [PSCustomObject]@{ Algorithm = "graft";       MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightV2
     [PSCustomObject]@{ Algorithm = "haven";       MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightHeavyHaven
     [PSCustomObject]@{ Algorithm = "hospital";    MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightV1
     [PSCustomObject]@{ Algorithm = "hycon";       MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightV1, new in 1.7.3
@@ -85,7 +85,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                     Content  = [PSCustomObject]@{ 
                         cryptonight_type = $Algorithm
                         double_threads = $DoubleThreads
-                        gpu_conf = @($Miner_Device.Type_PlatformId_Slot | ForEach-Object { 
+                        gpu_conf = @($Miner_Device.Vendor_Slot | ForEach-Object { 
                             [PSCustomObject]@{ 
                                 "id"        = $_  
                                 "intensity" = $(if ($Intensity | Select-Object -Index $_ -ErrorAction SilentlyContinue) { $Intensity | Select-Object -Index $_ } else { 0 })
@@ -116,8 +116,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                         
             [PSCustomObject]@{ 
                 Name       = $Miner_Name
-                BaseName   = $Miner_BaseName
-                Version    = $Miner_Version
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
