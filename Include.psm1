@@ -691,7 +691,7 @@ function Get-ChildItemContent {
 filter ConvertTo-Hash { 
     [CmdletBinding()]
     $Hash = $_
-    switch ([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1)))) { 
+    switch ([Math]::Truncate([Math]::Log([Math]::Abs($Hash), [Math]::Pow(1000, 1)))) { 
         $null { "0  H" }
         "-Infinity" { "0  H" }
         0 { "{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0)) }
