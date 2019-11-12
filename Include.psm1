@@ -69,13 +69,13 @@ function Update-APIDeviceStatus {
 
     $API.AllDevices | ForEach-Object { 
         if ($Devices.Name -contains $_.Name) { 
-            if ($Miner = $API.FailedMiners | Where-Object DeviceName -contains $_.Name) { $_ | Add-Member Status "Failed ($(($Miner.Name -Split '-' | Select-Object -First 2) -join '-') [$($Miner.Algorithm -join '; ')])" -Force }
+            if ($Miner = $API.FailedMiners | Where-Object DeviceName -contains $_.Name) { $_ | Add-Member Status "Failed ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force }
             elseif ($Miner = $API.RunningMiners | Where-Object DeviceName -contains $_.Name) { 
                 if ($Miner.Speed -contains $null) { 
-                    $_ | Add-Member Status "Benchmarking ($(($Miner.Name -Split '-' | Select-Object -First 2) -join '-') [$($Miner.Algorithm -join '; ')])" -Force
+                    $_ | Add-Member Status "Benchmarking ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force
                 }
                 else { 
-                    $_ | Add-Member Status "Running ($(($Miner.Name -Split '-' | Select-Object -First 2) -join '-') [$($Miner.Algorithm -join '; ')])" -Force
+                    $_ | Add-Member Status "Running ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force
                 }
             }
             else { $_ | Add-Member Status "Idle" -Force }
@@ -87,6 +87,7 @@ function Update-APIDeviceStatus {
 function Get-PrePostCommand { 
 
     #Get Pre / Post miner exec commands
+
 
     [CmdletBinding()]
     param(
@@ -563,6 +564,7 @@ function Get-Stat {
                 $Stat = Get-Content "Stats\$Stat_Name.txt" -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
                 $Global:Stats | Add-Member @{ 
                     $Stat_Name = [PSCustomObject]@{ 
+                        Name                  = [String]$Stat_Name
                         Live                  = [Double]$Stat.Live
                         Minute                = [Double]$Stat.Minute
                         Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
@@ -688,9 +690,18 @@ function Get-ChildItemContent {
 }
 
 filter ConvertTo-Hash { 
-    $Units = " kMGTPEZY" # k(ilo) in small letters, see https://en.wikipedia.org/wiki/Metric_prefix
-    $Base1000 = [math]::Abs([math]::truncate([math]::log($_, [Math]::Pow(1000, 1))))
-    "{0:n2}  $($Units[$Base1000])H" -f ($_ / [Math]::Pow(1000, $Base1000))
+    [CmdletBinding()]
+    $Hash = $_
+    switch ([Math]::Truncate([Math]::Log([Math]::Abs($Hash), [Math]::Pow(1000, 1)))) { 
+        $null { "0  H" }
+        "-Infinity" { "0  H" }
+        0 { "{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0)) }
+        1 { "{0:n2} KH" -f ($Hash / [Math]::Pow(1000, 1)) }
+        2 { "{0:n2} MH" -f ($Hash / [Math]::Pow(1000, 2)) }
+        3 { "{0:n2} GH" -f ($Hash / [Math]::Pow(1000, 3)) }
+        4 { "{0:n2} TH" -f ($Hash / [Math]::Pow(1000, 4)) }
+        Default { "{0:N2} PH" -f ($Hash / [Math]::Pow(1000, 5)) }
+    }
 }
 
 function ConvertTo-LocalCurrency { 
@@ -1020,7 +1031,7 @@ function Get-Device {
                             "Advanced Micro Devices" { "AMD" }
                             "Intel" { "INTEL" }
                             "NVIDIA" { "NVIDIA" }
-                            default { $Device_CIM.Manufacturer -replace '\(R\)|\(TM\)|\(C\)|Series' -replace '[^A-Z0-9]' }
+                            default { $Device_CIM.Manufacturer -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                         }
                     )
                     Memory = $null
@@ -1034,7 +1045,7 @@ function Get-Device {
                 }
 
                 $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
-                $Device.Model = (($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor) -join ' ' -replace '\(R\)|\(TM\)|\(C\)|Series' -replace '[^A-Z0-9]'
+                $Device.Model = (($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor) -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
 
                 if (-not $Type_Vendor_Id.($Device.Type)) { 
                     $Type_Vendor_Id.($Device.Type) = @{ }
@@ -1074,7 +1085,7 @@ function Get-Device {
                             "Advanced Micro Devices" { "AMD" }
                             "Intel" { "INTEL" }
                             "NVIDIA" { "NVIDIA" }
-                            default { $Device_CIM.AdapterCompatibility -replace '\(R\)|\(TM\)|\(C\)|Series' -replace '[^A-Z0-9]' }
+                            default { $Device_CIM.AdapterCompatibility -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                         }
                     )
                     Memory = [Math]::Max(([UInt64]$Device_CIM.AdapterRAM), ([uInt64]$Device_Reg.'HardwareInformation.qwMemorySize'))
@@ -1088,7 +1099,7 @@ function Get-Device {
                 }
 
                 $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
-                $Device.Model = ((($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)|Series' -replace '[^A-Z0-9]'
+                $Device.Model = ((($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
 
                 if (-not $Type_Vendor_Id.($Device.Type)) { 
                     $Type_Vendor_Id.($Device.Type) = @{ }
@@ -1125,7 +1136,7 @@ function Get-Device {
                             switch -Regex ([String]$Device_OpenCL.Type) { 
                                 "CPU" { "CPU" }
                                 "GPU" { "GPU" }
-                                default { [String]$Device_OpenCL.Type -replace '\(R\)|\(TM\)|\(C\)|Series' -replace '[^A-Z0-9]' }
+                                default { [String]$Device_OpenCL.Type -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                             }
                         )
                         Bus    = if ($Device_OpenCL.PCIBus -is [Int64]) { $Device_OpenCL.PCIBus }
@@ -1134,7 +1145,7 @@ function Get-Device {
                                 "Advanced Micro Devices" { "AMD" }
                                 "Intel" { "INTEL" }
                                 "NVIDIA" { "NVIDIA" }
-                                default { [String]$Device_OpenCL.Vendor -replace '\(R\)|\(TM\)|\(C\)|Series' -replace '[^A-Z0-9]' }
+                                default { [String]$Device_OpenCL.Vendor -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                             }
                         )
                         Memory = [UInt64]$Device_OpenCL.GlobalMemSize
