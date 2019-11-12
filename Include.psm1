@@ -1039,7 +1039,7 @@ function Get-Device {
                 }
 
                 $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
-                $Device.Model = (($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor) -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
+                $Device.Model = (($Device.Model -split ' ' -replace 'Processor','CPU' -replace 'Graphics','GPU') -notmatch $Device.Type -notmatch $Device.Vendor) -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
 
                 if (-not $Type_Vendor_Id.($Device.Type)) { 
                     $Type_Vendor_Id.($Device.Type) = @{ }
@@ -1094,7 +1094,7 @@ function Get-Device {
                 }
 
                 $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
-                $Device.Model = ((($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
+                $Device.Model = ((($Device.Model -split ' ' -replace 'Processor','CPU' -replace 'Graphics','GPU') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
 
                 if (-not $Type_Vendor_Id.($Device.Type)) { 
                     $Type_Vendor_Id.($Device.Type) = @{ }
@@ -1155,7 +1155,7 @@ function Get-Device {
                     }
 
                     $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
-                    $Device.Model = ((($Device.Model -split ' ') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
+                    $Device.Model = ((($Device.Model -split ' ' -replace 'Processor','CPU' -replace 'Graphics','GPU') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
 
                     if ($Global:Devices | Where-Object Type -EQ $Device.Type | Where-Object Bus -EQ $Device.Bus) { 
                         $Device = $Global:Devices | Where-Object Type -EQ $Device.Type | Where-Object Bus -EQ $Device.Bus
