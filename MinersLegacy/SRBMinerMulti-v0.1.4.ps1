@@ -49,7 +49,7 @@ else { $CommonCommands = "" }
 $Devices = $Devices | Where-Object { $_.Type -EQ "CPU" -or $_.Vendor -EQ "AMD" }
 $Devices | Select-Object Model, Type, Vendor  -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Model -EQ $_.Model| Where-Object Type -EQ $_.Type | Where-Object Vendor -EQ $_.Vendor)
-    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $Pools.$Algorithm_Norm.Host -and (($Device.Type | Select-Object -Unique) -in $_.Vendor -or ($Device.Vendor | Select-Object -Unique) -in $_.Vendor) } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB

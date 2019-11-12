@@ -115,7 +115,7 @@ else {$CommonCommands = ""}
 $Devices = $Devices | Where-Object Type -EQ "CPU"
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Devices | Select-Object -First 1 -ExpandProperty Index) + 1
+    $Miner_Port = $Config.APIPort + ($Devices | Select-Object -First 1 -ExpandProperty Id) + 1
 
     $Paths = @()
     if ($Miner_Device.CpuFeatures -match "avx")               {$Paths += ".\Bin\$($Name)\cpuminer-Avx.exe"}

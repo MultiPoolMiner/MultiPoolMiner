@@ -79,7 +79,7 @@ $DonateCoins = [String[]]("akroma", "ath", "aura", "b2g", "bci", "clo", "dbix", 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object { $UnsupportedDriverVersions -notcontains $_.OpenCL.DriverVersion })
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
-    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     switch ($_.Vendor) { 
         "AMD" { $CommonCommands = $CommonCommandsAmd + $CommonCommandsAll }
