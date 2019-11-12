@@ -69,13 +69,13 @@ function Update-APIDeviceStatus {
 
     $API.AllDevices | ForEach-Object { 
         if ($Devices.Name -contains $_.Name) { 
-            if ($Miner = $API.FailedMiners | Where-Object DeviceName -contains $_.Name) { $_ | Add-Member Status "Failed ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force }
+            if ($Miner = $API.FailedMiners | Where-Object DeviceName -contains $_.Name) { $_ | Add-Member Status "Failed ($(($Miner.Name -Split '-' | Select-Object -First 2) -join '-') [$($Miner.Algorithm -join '; ')])" -Force }
             elseif ($Miner = $API.RunningMiners | Where-Object DeviceName -contains $_.Name) { 
                 if ($Miner.Speed -contains $null) { 
-                    $_ | Add-Member Status "Benchmarking ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force
+                    $_ | Add-Member Status "Benchmarking ($(($Miner.Name -Split '-' | Select-Object -First 2) -join '-') [$($Miner.Algorithm -join '; ')])" -Force
                 }
                 else { 
-                    $_ | Add-Member Status "Running ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force
+                    $_ | Add-Member Status "Running ($(($Miner.Name -Split '-' | Select-Object -First 2) -join '-') [$($Miner.Algorithm -join '; ')])" -Force
                 }
             }
             else { $_ | Add-Member Status "Idle" -Force }
