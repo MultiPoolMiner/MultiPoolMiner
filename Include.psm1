@@ -1024,6 +1024,7 @@ function Get-Device {
                             "Advanced Micro Devices" { "AMD" }
                             "Intel" { "INTEL" }
                             "NVIDIA" { "NVIDIA" }
+                            "AMD" { "AMD" }
                             default { $Device_CIM.Manufacturer -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                         }
                     )
@@ -1078,6 +1079,7 @@ function Get-Device {
                             "Advanced Micro Devices" { "AMD" }
                             "Intel" { "INTEL" }
                             "NVIDIA" { "NVIDIA" }
+                            "AMD" { "AMD" }
                             default { $Device_CIM.AdapterCompatibility -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                         }
                     )
@@ -1138,6 +1140,7 @@ function Get-Device {
                                 "Advanced Micro Devices" { "AMD" }
                                 "Intel" { "INTEL" }
                                 "NVIDIA" { "NVIDIA" }
+                                "AMD" { "AMD" }
                                 default { [String]$Device_OpenCL.Vendor -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                             }
                         )
