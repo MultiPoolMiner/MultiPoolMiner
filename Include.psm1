@@ -691,17 +691,10 @@ function Get-ChildItemContent {
 
 filter ConvertTo-Hash { 
     [CmdletBinding()]
-    $Hash = $_
-    switch ([Math]::Truncate([Math]::Log([Math]::Abs($Hash), [Math]::Pow(1000, 1)))) { 
-        $null { "0  H" }
-        "-Infinity" { "0  H" }
-        0 { "{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0)) }
-        1 { "{0:n2} KH" -f ($Hash / [Math]::Pow(1000, 1)) }
-        2 { "{0:n2} MH" -f ($Hash / [Math]::Pow(1000, 2)) }
-        3 { "{0:n2} GH" -f ($Hash / [Math]::Pow(1000, 3)) }
-        4 { "{0:n2} TH" -f ($Hash / [Math]::Pow(1000, 4)) }
-        Default { "{0:N2} PH" -f ($Hash / [Math]::Pow(1000, 5)) }
-    }
+    $Units = " kMGTPEZY" #k(ilo) in small letters, see https://en.wikipedia.org/wiki/Metric_prefix
+    $Base1000 = [Math]::Truncate([Math]::Log([Math]::Abs($_), [Math]::Pow(1000, 1)))
+    $Base1000 = [Math]::Max([Double]0, [Math]::Min($Base1000, $Units.Length - 1))
+    "{0:n2} $($Units[$Base1000])H" -f ($_ / [Math]::Pow(1000, $Base1000))
 }
 
 function ConvertTo-LocalCurrency { 
