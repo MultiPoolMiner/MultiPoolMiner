@@ -690,7 +690,7 @@ function Get-ChildItemContent {
 filter ConvertTo-Hash { 
     $Units = " kMGTPEZY" # k(ilo) in small letters, see https://en.wikipedia.org/wiki/Metric_prefix
     $Base1000 = [math]::Abs([math]::truncate([math]::log($_, [Math]::Pow(1000, 1))))
-    "{0:n2} $($Units[$Base1000])H" -f ($_ / [Math]::Pow(1000, $Base1000))
+    "{0:n2}  $($Units[$Base1000])H" -f ($_ / [Math]::Pow(1000, $Base1000))
 }
 
 function ConvertTo-LocalCurrency { 
