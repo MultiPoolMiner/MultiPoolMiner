@@ -46,8 +46,11 @@ class BMiner : Miner {
         $Shares_Rejected = [Int]0
 
         $Data.devices | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Data.devices.$_.solvers | ForEach-Object {$_.Algorithm}} | Select-Object -Unique | ForEach-Object {
+
             $Algorithm = $_
-            $HashRate_Name = Get-Algorithm $Algorithm
+            $HashRate_Name = [String]($this.Algorithm -like (Get-Algorithm $Algorithm))
+            if (-not $HashRate_Name) {$HashRate_Name = [String]($this.Algorithm -like "$(Get-Algorithm $Algorithm)*")} #temp fix
+
             $HashRate_Value = [Double]0
 
             if ($this.AllowedBadShareRatio) {
@@ -55,7 +58,7 @@ class BMiner : Miner {
                 $Shares_Rejected = [Int64]$Data.stratums.$Algorithm.rejected_shares
                 if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) {
                     $this.SetStatus("Failed")
-                    $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (total: $($Shares_Accepted + $Shares_Rejected) / bad: $($Shares_Rejected) [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
+                    $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (total: $($Shares_Accepted + $Shares_Rejected) / bad: $Shares_Rejected [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
                     return @($Request, $Data | ConvertTo-Json -Depth 10 -Compress)
                 }
             }

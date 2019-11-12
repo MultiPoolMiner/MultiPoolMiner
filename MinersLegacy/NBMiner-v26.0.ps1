@@ -22,11 +22,11 @@ if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."
 $Devices = $Devices | Where-Object Type -EQ "GPU"
 
 # Miner requires CUDA 9.1.00 or higher
-$CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+$CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
 $RequiredCUDAVersion = "9.1.00"
-if ($Devices.Vendor -contains "NVIDIA Corporation" -and $CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
+if ($Devices.Vendor -contains "NVIDIA" -and $CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
-    $Devices = $Devices | Where-Object Vendor -NE "NVIDIA Corporation"
+    $Devices = $Devices | Where-Object Vendor -NE "NVIDIA"
 }
 
 $Commands = [PSCustomObject[]]@(
@@ -58,9 +58,9 @@ else { $CommonCommands = "" }
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
-    $Miner_Port = [Int]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
+    $Miner_Port = [Int]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
-    $Commands | ForEach-Object { $Main_Algorithm_Norm = Get-Algorithm ($_.Algorithm -Split ";" | Select-Object -Index 0); $_ } | Where-Object { $_.Vendor -contains ($Device.Vendor_ShortName | Select-Object -Unique) -and $Pools.$Main_Algorithm_Norm.Host } | ForEach-Object { 
+    $Commands | ForEach-Object { $Main_Algorithm_Norm = Get-Algorithm ($_.Algorithm -Split ";" | Select-Object -Index 0); $_ } | Where-Object { $_.Vendor -contains ($Device.Vendor | Select-Object -Unique) -and $Pools.$Main_Algorithm_Norm.Host } | ForEach-Object { 
         $Main_Algorithm = $_.Algorithm -split ';' | Select-Object -Index 0
         $Secondary_Algorithm = $_.Algorithm -split ';' | Select-Object -Index 1
         $Fee = $_.Fee
@@ -82,11 +82,11 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             }
 
             #Tensority: higher fee on Touring cards
-            if ($Main_Algorithm_Norm -eq "Tensority" -and $Miner_Device.Model_Norm -match "^GTX16.+|^RTX20.+") { $Fee = 3 }
+            if ($Main_Algorithm_Norm -eq "Tensority" -and $Miner_Device.Model -match "^GTX16.+|^RTX20.+") { $Fee = 3 }
             
             if ($Secondary_Algorithm) { 
                 $Secondary_Algorithm_Norm = Get-Algorithm $Secondary_Algorithm
-                $Miner_Name = (@($Name) + @(($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object { $Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm" }) -join '-') + @("$Main_Algorithm_Norm$($Secondary_Algorithm_Norm -replace 'Nicehash'<#temp fix#>)") + @("$(if ($_.SecondaryIntensity -ge 0) { $_.SecondaryIntensity })") | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @(($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) -join '-') + @("$Main_Algorithm_Norm$($Secondary_Algorithm_Norm -replace 'Nicehash'<#temp fix#>)") + @("$(if ($_.SecondaryIntensity -ge 0) { $_.SecondaryIntensity })") | Select-Object) -join '-'
 
                 #define secondary algorithm protocol
                 $Secondary_Protocol = "stratum+tcp"
@@ -100,7 +100,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $WarmupTime = 45
             }
             else { 
-                $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object { $Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm" }) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
 
                 $Miner_HashRates = [PSCustomObject]@{ $Main_Algorithm_Norm = $Stats."$($Miner_Name)_$($Main_Algorithm_Norm)_HashRate".Week }
                 $Miner_Fees = [PSCustomObject]@{ $Main_Algorithm_Norm = $Fee / 100 }

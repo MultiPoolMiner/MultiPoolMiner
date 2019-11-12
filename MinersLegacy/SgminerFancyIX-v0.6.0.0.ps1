@@ -18,31 +18,32 @@ $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
 $Commands = [PSCustomObject]@{
-    "allium"      = " --kernel allium --gpu-threads 1 --worksize 256 --intensity 20"
-    "argon2d"     = " --kernel argon2d --gpu-threads 2 --worksize 64"
-    "ethash"      = " --kernel ethash --worksize 64 --xintensity 1024"
-    "lyra2v3"     = " --kernel lyra2v3 --gpu-threads 1 --worksize 256 --intensity 24"
-    "lyra2z"      = " --kernel lyra2z --gpu-threads 1 --worksize 256 --intensity 23"
-    "lyra2zz"     = " --kernel lyra2zz --gpu-threads 1 --worksize 256 --intensity 23"
-    #"mtp"         = " --kernel mtp --intensity 18 -p 0,strict,verbose,d=700"; SgminerMTP is faster
-    "phi2"        = " --kernel phi2 --gpu-threads 1 --worksize 256 --intensity 23"
-    "x22i"        = " --kernel x22i --gpu-threads 2 --worksize 256 --intensity 23"
-    "x25x"        = " --kernel x25x --gpu-threads 4 --worksize 256 --intensity 22"
+    "Allium"      = " --kernel allium --gpu-threads 1 --worksize 256 --intensity 20"
+    "Argon2d"     = " --kernel argon2d --gpu-threads 2 --worksize 64"
+    "Ethash"      = " --kernel ethash --worksize 64 --xintensity 1024"
+    "Lyra2v3"     = " --kernel lyra2v3 --gpu-threads 1 --worksize 256 --intensity 24"
+    "Lyra2z"      = " --kernel lyra2z --gpu-threads 1 --worksize 256 --intensity 23"
+    "Lyra2zz"     = " --kernel lyra2zz --gpu-threads 1 --worksize 256 --intensity 23"
+    #"Mtp"         = " --kernel mtp --intensity 18 -p 0,strict,verbose,d=700"; SgminerMTP is faster
+    "Phi2"        = " --kernel phi2 --gpu-threads 1 --worksize 256 --intensity 23"
+    "Phi2-Lux"    = " --kernel phi2 --gpu-threads 1 --worksize 256 --intensity 23" # Phi2-Lux
+    "X22i"        = " --kernel x22i --gpu-threads 2 --worksize 256 --intensity 23"
+    "X25x"        = " --kernel x25x --gpu-threads 4 --worksize 256 --intensity 22"
 }
 #Commands from config file take precedence
 if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force}}
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
+if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
 else {$CommonCommands = " $(if (-not $Config.ShowMinerWindow) {' --text-only'})"}
 
-$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Advanced Micro Devices, Inc.")
+$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "AMD")
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 1
+    $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1
 
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
-        $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
+        $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object {$Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model"}) | Select-Object) -join '-'
 
         #Get commands for active miner devices
         $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("algorithm", "k", "kernel") -DeviceIDs $Miner_Device.Type_Vendor_Index

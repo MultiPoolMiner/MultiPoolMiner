@@ -1,0 +1,73 @@
+﻿<!--#include file="/parts/head.html" -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 id="title" data-navbaractive="navwatchdog" class="h2">Watchdog Timers</h1>
+</div>
+<div class="alert alert-info" role="alert">Shows all watchdog timers. </div>
+
+<div class="d-flex align-items-center">
+    <div class="m-2">
+        <a href="#" id="resetwatchdog" class="btn btn-primary">Reset Watchdog Timers</a>
+    </div>
+</div>
+
+<table id="watchdog" class="table"
+       data-toggle="table"
+       data-url="/watchdogtimers"
+       data-response-handler="formatWatchdogTimers"
+       data-filter-control="true"
+       data-filter-show-clear="true"
+       data-sort-order="asc"
+       data-sort-name="tMinerName"
+       data-cache="false"
+       data-show-columns="true"
+       data-show-toggle="true"
+       data-show-refresh="true"
+       data-show-footer="false"
+       data-icons-prefix="fa"
+       data-icons="icons"
+       data-detail-view="true"
+       data-detail-formatter="detailFormatter">
+    <thead>
+        <tr>
+            <th data-field="MinerName" data-sortable="true" data-filter-control="select">Name</th>
+            <th data-field="Algorithm" data-sortable="true" data-filter-control="select">Algorithm</th>
+            <th data-field="Device" data-sortable="true" data-filter-control="select">Device</th>
+            <th data-field="PoolName" data-sortable="true" data-filter-control="select">Pool</th>
+            <th data-field="tKicked" data-sortable="true">Timer</th>
+        </tr>
+    </thead>
+</table>
+
+<!-- End of page scripts -->
+<script type="text/javascript">
+    $(function () {
+        $("#resetwatchdog").click(function () {
+            $.ajax({
+                url: '/watchdogtimersreset', success: function (result) {
+                    $('.modal-body').text('All watchdog timers will be reset on next loop. ');
+                    $('#myModal').modal({ show: true });
+                    $('#watchdog').bootstrapTable('removeAll');
+                }
+            })
+        });
+    });
+    function formatWatchdogTimers(data) {
+        // This function can alter the returned data before building the table, formatting it in a way
+        // that is easier to display and manipulate in a table
+        $.each(data, function (index, item) {
+            item.tMinerName = item.MinerName.replace(/-.+$/, '')
+            var diff = (new Date).getTime() - (new Date(item.Kicked)).getTime()
+            var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            diff -= days * (1000 * 60 * 60 * 24);
+            var hours = Math.floor(diff / (1000 * 60 * 60));
+            diff -= hours * (1000 * 60 * 60);
+            var mins = Math.floor(diff / (1000 * 60));
+            diff -= mins * (1000 * 60);
+            var seconds = Math.floor(diff / (1000));
+            diff -= seconds * (1000);
+            item.tKicked = (days? days+"d ":'') + (hours<10? '0':'') + hours + ':' + (mins<10? '0':'') + mins + ':' + (seconds<10? '0':'') + seconds
+        });
+        return data;
+    }
+</script>
+<!--#include file="/parts/foot.html" --> 

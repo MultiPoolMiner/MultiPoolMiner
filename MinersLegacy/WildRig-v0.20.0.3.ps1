@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\wildrig.exe"
-$HashSHA256 = "3A23A297C5EB95FEBB44B0E89CB1929AFB69AF0D35D4FCDE737558D35A66DB66"
-$Uri = "https://github.com/andru-kun/wildrig-multi/releases/download/0.19.3/wildrig-multi-windows-0.19.3-beta.7z"
+$HashSHA256 = "A39DA51F82D41E1B5523112BA6AB074E98E5FFD4092375CA64531A04BBB7E285"
+$Uri = "https://github.com/andru-kun/wildrig-multi/releases/download/0.20.0/wildrig-multi-windows-0.20.0.3.7z"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5023676.0"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
@@ -19,51 +19,53 @@ $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
 
 $Commands = [PSCustomObject]@{ 
-    "aergo"          = " --algo=aergo"
-    "bcd"            = " --algo=bcd"
+    "Aergo"          = " --algo=aergo"
+    "Bcd"            = " --algo=bcd"
     # "bitcore"      = " --algo=bitcore"; Same as Timetravel10
-    "blake2b-btcc"   = " --algo=blake2b-btcc" # new in 0.17.5 preview 8
-    "blake2b-glt"    = " --algo=blake2b-glt" # new in 0.17.5 preview 8
-    "bmw512"         = " --algo=bmw512" # new in 0.15.4 preview 8
-    "c11"            = " --algo=c11"
-    "dedal"          = " --algo=dedal"
-    "exosis"         = " --algo=exosis"
-    "geek"           = " --algo=geek"
-    "glt-astralhash" = " --algo=glt-astralhash"
-    "glt-globalhash" = " --algo=glt-globalhash" # new in 0.18.0
-    "glt-jeonghash"  = " --algo=glt-jeonghash"
-    "glt-padihash"   = " --algo=glt-padihash"
-    "glt-pawelhash"  = " --algo=glt-pawelhash"
-    "hex"            = " --algo=hex"
-    "hmq1725"        = " --algo=hmq1725"
-    "honeycomb"      = " --algo=honeycomb" # new in 0.16.0
-    "lyra2v3"        = " --algo=lyra2v3"
-    "lyra2vc0ban"    = " --algo=lyra2vc0ban"
-    "phi"            = " --algo=phi"
-    "polytimos"      = " --algo=polytimos"
-    "rainforest"     = " --algo=rainforest"
-    "renesis"        = " --algo=renesis"
-    "sha256q"        = " --algo=sha256q"
-    "sha256t"        = " --algo=sha256t"
-    "skein2"         = " --algo=skein2" # new in 0.17.6
+    "Blake2b-Btcc"   = " --algo=blake2b-btcc" # new in 0.17.5 preview 8
+    "blake2b-Glt"    = " --algo=blake2b-glt" # new in 0.17.5 preview 8
+    "Bmw512"         = " --algo=bmw512" # new in 0.15.4 preview 8
+    "C11"            = " --algo=c11"
+    "Dedal"          = " --algo=dedal"
+    "Exosis"         = " --algo=exosis"
+    "Geek"           = " --algo=geek"
+    "Glt-Astralhash" = " --algo=glt-astralhash"
+    "Glt-Globalhash" = " --algo=glt-globalhash" # new in 0.18.0
+    "Glt-Jeonghash"  = " --algo=glt-jeonghash"
+    "Glt-Padihash"   = " --algo=glt-padihash"
+    "Glt-Pawelhash"  = " --algo=glt-pawelhash"
+    "Hex"            = " --algo=hex"
+    "Hmq1725"        = " --algo=hmq1725"
+    "Honeycomb"      = " --algo=honeycomb" # new in 0.16.0
+    "Lyra2v3"        = " --algo=lyra2v3"
+    "Lyra2vc0ban"    = " --algo=lyra2vc0ban"
+    "Mtp"            = " --algo=mtp" # new in 0.20.0
+    "MtpTcr"         = " --algo=mtp-tcr" # new in 0.20.0
+    "Phi"            = " --algo=phi"
+    "Polytimos"      = " --algo=polytimos"
+    "Rainforest"     = " --algo=rainforest"
+    "Renesis"        = " --algo=renesis"
+    "Sha256q"        = " --algo=sha256q"
+    "Sha256t"        = " --algo=sha256t"
+    "Skein2"         = " --algo=skein2" # new in 0.17.6
     #"skunk"          = " --algo=skunkhash" #Unprofitable
-    "sonoa"          = " --algo=sonoa"
-    "timetravel"     = " --algo=timetravel"
-    "timetravel10"   = " --algo=timetravel10"
-    "tribus"         = " --algo=tribus"
-    "wildkeccak"     = " --algo=wildkeccak"
-    "x16r"           = " --algo=x16r"
-    "x16rt"          = " --algo=x16rt"
-    "x16rv2"         = " --algo=x16rv2" # new in 0.19.2
-    "x16s"           = " --algo=x16s"
-    "x17"            = " --algo=x17"
-    "x18"            = " --algo=x18"
-    "x20r"           = " --algo=x20r"
-    "x21s"           = " --algo=x21s"
-    "x22i"           = " --algo=x22i"
-    "x25x"           = " --algo=x25x" # new in 0.17.0
-    "xevan"          = " --algo=xevan"
- }
+    "Sonoa"          = " --algo=sonoa"
+    "Timetravel"     = " --algo=timetravel"
+    "Timetravel10"   = " --algo=timetravel10"
+    "Tribus"         = " --algo=tribus"
+    "Wildkeccak"     = " --algo=wildkeccak"
+    "X16r"           = " --algo=x16r"
+    "X16rt"          = " --algo=x16rt"
+    "X16rv2"         = " --algo=x16rv2" # new in 0.19.2
+    "X16s"           = " --algo=x16s"
+    "X17"            = " --algo=x17"
+    "X18"            = " --algo=x18"
+    "X20r"           = " --algo=x20r"
+    "X21s"           = " --algo=x21s"
+    "X22i"           = " --algo=x22i"
+    "X25x"           = " --algo=x25x" # new in 0.17.0
+    "Xevan"          = " --algo=xevan"
+}
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force } }
 
@@ -71,13 +73,13 @@ if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType No
 if ($Miner_Config.CommonCommands) { $CommonCommands = $Miner_Config.CommonCommands }
 else { $CommonCommands = " --opencl-threads auto --opencl-launch auto --multiple-instance --no-adl" }
 
-$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "Advanced Micro Devices, Inc.")
+$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "AMD")
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = [UInt16]($Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 1)
+    $Miner_Port = [UInt16]($Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
-        $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object { $Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm" }) | Select-Object) -join '-'
+        $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
 
         #Get commands for active miner devices
         $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
@@ -96,7 +98,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         Switch ($Algorithm_Norm) { 
             "C11"   { $WarmupTime = 60 }
             default { $WarmupTime = $(if (@($Device | Where-Object { $_.Type -eq "CPU" -or ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge 2 })) { 30 } else { 60 }) }
-         }
+        }
 
         [PSCustomObject]@{ 
             Name       = $Miner_Name
@@ -105,7 +107,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             DeviceName = $Miner_Device.Name
             Path       = $Path
             HashSHA256 = $HashSHA256
-            Arguments  = ("$Command$CommonCommands --api-port=$Miner_Port --url=$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user=$($Pools.$Algorithm_Norm.User) --pass=$($Pools.$Algorithm_Norm.Pass) --opencl-platform=$($Miner_Device.PlatformId | Sort-Object -Unique) --opencl-devices=$(($Miner_Device | ForEach-Object { '{0:x}' -f $_.PCIBus_Type_Vendor_Index }) -join ',')" -replace "\s+", " ").trim()
+            Arguments  = ("$Command$CommonCommands --api-port=$Miner_Port --url=$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user=$($Pools.$Algorithm_Norm.User) --pass=$($Pools.$Algorithm_Norm.Pass) --opencl-platform=$($Miner_Device.PlatformId | Sort-Object -Unique) --opencl-devices=$(($Miner_Device | ForEach-Object { '{0:x}' -f $_.Type_Vendor_Slot }) -join ',')" -replace "\s+", " ").trim()
             HashRates  = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
             API        = "XmRig"
             Port       = $Miner_Port

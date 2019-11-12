@@ -1,65 +1,69 @@
 ﻿{
     "amd":  {
-                "Index":  "*",
-                "PlatformId":  "*",
-                "Type_PlatformId_Index":  "*",
-                "Vendor":  "Advanced Micro Devices, Inc.",
-                "Type_Vendor_Index":  "{1}",
                 "Type":  "GPU",
-                "Type_Index":  "*"
+                "Vendor":  "AMD",
+                "Id":  "*",
+                "Type_Id":  "*",
+                "Vendor_Id":  "*",
+                "Type_Vendor_Id":  "{1}"
             },
     "cpu":  {
-                "Index":  "*",
-                "PlatformId":  "*",
-                "Type_PlatformId_Index":  "*",
-                "Vendor":  "*",
-                "Type_Vendor_Index":  "*",
                 "Type":  "CPU",
-                "Type_Index":  "{1}"
+                "Vendor":  "*",
+                "Id":  "*",
+                "Type_Id":  "{1}",
+                "Vendor_Id":  "*",
+                "Type_Vendor_Id":  "*"
             },
     "device":  {
-                   "Index":  "{1}",
-                   "PlatformId":  "*",
-                   "Type_PlatformId_Index":  "*",
-                   "Vendor":  "*",
-                   "Type_Vendor_Index":  "*",
                    "Type":  "*",
-                   "Type_Index":  "*"
+                   "Vendor":  "*",
+                   "Id":  "{1}",
+                   "Type_Id":  "*",
+                   "Vendor_Id":  "*",
+                   "Type_Vendor_Id":  "*"
                },
     "gpu":  {
-                "Index":  "*",
-                "PlatformId":  "*",
-                "Type_PlatformId_Index":  "*",
-                "Vendor":  "*",
-                "Type_Vendor_Index":  "*",
                 "Type":  "GPU",
-                "Type_Index":  "{1}"
+                "Vendor":  "*",
+                "Id":  "*",
+                "Type_Id":  "{1}",
+                "Vendor_Id":  "*",
+                "Type_Vendor_Id":  "*"
             },
     "intel":  {
-                  "Index":  "*",
-                  "PlatformId":  "*",
-                  "Type_PlatformId_Index":  "*",
-                  "Vendor":  "Intel(R) Corporation",
-                  "Type_Vendor_Index":  "{1}",
                   "Type":  "GPU",
-                  "Type_Index":  "*"
+                  "Vendor":  "INTEL",
+                  "Id":  "*",
+                  "Type_Id":  "*",
+                  "Vendor_Id":  "*",
+                  "Type_Vendor_Id":  "{1}"
               },
     "nvidia":  {
-                   "Index":  "*",
-                   "PlatformId":  "*",
-                   "Type_PlatformId_Index":  "*",
-                   "Vendor":  "NVIDIA Corporation",
-                   "Type_Vendor_Index":  "{1}",
                    "Type":  "GPU",
-                   "Type_Index":  "*"
+                   "Vendor":  "NVIDIA",
+                   "Id":  "*",
+                   "Type_Id":  "*",
+                   "Vendor_Id":  "*",
+                   "Type_Vendor_Id":  "{1}"
                },
     "opencl":  {
-                   "Index":  "*",
-                   "PlatformId":  "{1}",
-                   "Type_PlatformId_Index":  "{2}",
+                   "Type":  "GPU",
                    "Vendor":  "*",
+                   "Index":  "*",
+                   "Type_Index":  "*",
+                   "Vendor_Index":  "*",
                    "Type_Vendor_Index":  "*",
-                   "Type":  "*",
-                   "Type_Index":  "*"
-               }
+                   "PlatformId":  "{1}",
+                   "PlatformId_Index":  "*",
+                   "Type_PlatformId_Index":  "{2}"
+               },
+    "slot":  {
+                 "Type":  "GPU",
+                 "Vendor":  "*",
+                 "Slot":  "*",
+                 "Type_Slot":  "{1}",
+                 "Vendor_Slot":  "*",
+                 "Type_Vendor_Slot":  "*"
+             }
 }

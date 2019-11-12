@@ -1,0 +1,114 @@
+<!--#include file="/parts/head.html" -->
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+  <h1 id="title" class="h2"data-navbaractive="navinactiveminers">Inactive Miners</h1>
+</div>
+<div class="alert alert-info" role="alert">Shows all inactive miners. These are either disabled or failed benchmarking.</div>
+
+<table id="miners"
+  data-buttons-align="left"
+  data-url="/inactiveminers"
+  data-response-handler="formatMiners"
+  data-filter-control="true"
+  data-filter-show-clear="true"
+  data-sort-order="asc"
+  data-sort-name="Name"
+  data-cache="false"
+  data-show-columns="true"
+  data-show-toggle="true"
+  data-show-refresh="true"
+  data-icons-prefix="fa"
+  data-icons="icons"
+  data-detail-view="true"
+  data-detail-formatter="detailFormatter"
+  #data-pagination="true"
+  #data-page-list="[10, 25, 50, 100, all]"
+  >
+  <div class="row">
+    <thead>
+      <tr>
+        <th data-field="Name" data-sortable="true" data-filter-control="input" data-filter-strict-search="false">Name</th>
+        <th data-field="Reason" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Reason</th>
+        <th data-field="tDevices" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Devices</th>
+        <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Primary Algorithm</th>
+        <th data-field="tPrimaryFee" data-align="right" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
+        <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Secondary Algorithm</th>
+        <th data-field="tSecondaryFee" data-align="right" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
+      </tr>
+    </thead>
+  </div>  
+</table>
+
+<!-- context menu -->
+<ul id="context-menu" class="dropdown-menu">
+    <li data-item="enable"><a class="dropdown-item" href="#">Enable miner / algo combo</a></li>
+    <li data-item="disable"><a class="dropdown-item" href="#">Disable miner / algo combo</a></li>
+    <li data-item="failed"><a class="dropdown-item" href="#">Mark miner / algo combo as failed</a></li>
+</ul>
+
+<script>
+  $(function() {
+    var $table = $('#miners')
+    $("#miners").bootstrapTable({
+      contextMenu: "#context-menu",
+      onContextMenuItem: function(row, $el) {
+        if ($el.data("item") == "enable") {
+          Command = "scripts/managestat.ps1?DataSet=InactiveMiners&Type=HashRate&Action=Remove&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.tPrimaryAlgorithm) + "," + encodeURIComponent(row.tSecondaryAlgorithm)
+          $(".modal-body").load(Command, function() {
+            $(".modal-title").text(row.Name);
+            $("#myModal").modal({show:true});
+            $table.bootstrapTable("updateCell", {
+              index: row.Index,
+              field: "Reason",
+              value: "Enabled"
+            })
+          });
+        }
+        if ($el.data("item") == "disable") {
+          Command = "scripts/managestat.ps1?DataSet=InactiveMiners&Type=Hashrate&Action=Set&Value=-1&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.tPrimaryAlgorithm) + "," + encodeURIComponent(row.tSecondaryAlgorithm)
+          $(".modal-body").load(Command, function() {
+            $(".modal-title").text(row.Name);
+            $("#myModal").modal({show:true});
+            $table.bootstrapTable("updateCell", {
+              index: row.Index,
+              field: "Reason",
+              value: "Disabled"
+            })
+          });
+        }
+        if ($el.data("item") == "failed") {
+          Command = "scripts/managestat.ps1?DataSet=InactiveMiners&Type=Hashrate&Action=Set&Value=0&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.tPrimaryAlgorithm) + "," + encodeURIComponent(row.tSecondaryAlgorithm)
+          $(".modal-body").load(Command, function() {
+            $(".modal-title").text(row.Name);
+            $("#myModal").modal({show:true});
+          });
+        }
+      }
+    });
+  });
+</script>
+
+<!-- Start of page scripts -->
+<script type="text/javascript">
+  function formatMiners(data) {
+    // This function can alter the returned data before building the table, formatting it in a way
+    // that is easier to display and manipulate in a table
+    $.each(data, function(index, item) {
+      item.Index = index;
+
+      // Format the device(s)
+      item.tDevices = item.DeviceName.toString();
+ 
+      // Format the algorithms & fees
+      var algorithms = Object.keys(item.HashRates);
+      item.tPrimaryAlgorithm = algorithms[0];
+      item.tSecondaryAlgorithm = algorithms[1];
+
+      var fees = Object.values(item.Fees);
+      item.tPrimaryFee = fees[0];
+      item.tSecondaryFee = fees[1];
+    });
+    return data;
+  }
+</script>
+<!-- End of page scripts -->
+<!--#include file="/parts/foot.html" -->

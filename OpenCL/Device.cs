@@ -101,9 +101,42 @@ namespace OpenCl
         private const uint CL_DEVICE_MAX_NUM_SUB_GROUPS =                     0x105C;
         private const uint CL_DEVICE_SUB_GROUP_INDEPENDENT_FORWARD_PROGRESS = 0x105D;
 
+        private const uint CL_DEVICE_PCI_BUS_ID_NV =                          0x4008;
+        private const uint CL_DEVICE_PCI_SLOT_ID_NV =                         0x4009;
+        private const uint CL_DEVICE_TOPOLOGY_AMD =                           0x4037;
+
+        private const uint CL_DEVICE_BOARD_NAME_AMD =                         0x4038;
+
         internal Device(IntPtr handle) : base(handle) { }
 
         // Device attributes
+
+        public int PCIBus
+        {
+            get {
+                try {
+                    //byte structure
+                    //int type; byte[17] unused; byte bus; byte device; byte function; 
+                    byte[] PCIBus_AMD = Cl.GetInfoArray<byte>(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_TOPOLOGY_AMD);
+
+                    if (PCIBus_AMD != null && PCIBus_AMD.Length == 24 && PCIBus_AMD[0] == 1) {
+                        return PCIBus_AMD[21];
+                    }
+                }
+                catch (OpenClException) {
+                }
+
+                try {
+                    int PCIBus_NV = Cl.GetInfo<int>(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_PCI_BUS_ID_NV);
+
+                    return PCIBus_NV;
+                }
+                catch (OpenClException) {
+                }
+
+                return -1;
+            }
+        }
 
         public uint AddressBits
         {
@@ -292,7 +325,30 @@ namespace OpenCl
 
         public string Name
         {
-            get { return Cl.GetInfoString(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_NAME); }
+            get {
+                try {
+                    string Name_AMD = Cl.GetInfoString(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_BOARD_NAME_AMD);
+
+                    return Name_AMD;
+                }
+                catch (OpenClException) {
+                }
+
+                try {
+                    string Vendor = Cl.GetInfoString(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_VENDOR);
+
+                    if(Vendor == "NVIDIA Corporation") {
+                        string Name = Cl.GetInfoString(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_NAME);
+                        string Name_NV = "NVIDIA" + " " + Name;
+
+                        return Name_NV;
+                    }
+                }
+                catch (OpenClException) {
+                }
+
+                return Cl.GetInfoString(NativeMethods.clGetDeviceInfo, this.handle, CL_DEVICE_NAME);
+            }
         }
 
         public string ClVersion

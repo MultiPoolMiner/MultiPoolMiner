@@ -34,6 +34,26 @@ catch {
     Add-Type -Path .\~CPUID.dll
 }
 
+function Get-MinerConfig {
+
+    #Read miner config
+
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [String]$Name, 
+        [Parameter(Mandatory = $true)]
+        [PSCustomObject]$Config
+    )
+
+    $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+    $Miner_Version = $Name -split '-' | Select-Object -Index 1
+    $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
+    if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+
+    return $Miner_Config
+}
+
 #Function to be removed
 function Update-APIDeviceStatus { 
 
@@ -49,13 +69,13 @@ function Update-APIDeviceStatus {
 
     $API.AllDevices | ForEach-Object { 
         if ($Devices.Name -contains $_.Name) { 
-            if ($Miner = $API.FailedMiners | Where-Object DeviceName -contains $_.Name) { $_ | Add-Member Status "Failed ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force }
+            if ($Miner = $API.FailedMiners | Where-Object DeviceName -contains $_.Name) { $_ | Add-Member Status "Failed ($(($Miner.Name -Split '-' | Select-Object -First 2) -join '-') [$($Miner.Algorithm -join '; ')])" -Force }
             elseif ($Miner = $API.RunningMiners | Where-Object DeviceName -contains $_.Name) { 
                 if ($Miner.Speed -contains $null) { 
-                    $_ | Add-Member Status "Benchmarking ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force
+                    $_ | Add-Member Status "Benchmarking ($(($Miner.Name -Split '-' | Select-Object -First 2) -join '-') [$($Miner.Algorithm -join '; ')])" -Force
                 }
                 else { 
-                    $_ | Add-Member Status "Running ($(($Miner.BaseName, $Miner.Version | Select-Object) -join '_') [$($Miner.Algorithm -join '; ')])" -Force
+                    $_ | Add-Member Status "Running ($(($Miner.Name -Split '-' | Select-Object -First 2) -join '-') [$($Miner.Algorithm -join '; ')])" -Force
                 }
             }
             else { $_ | Add-Member Status "Idle" -Force }
@@ -303,36 +323,32 @@ function Get-CommandPerDevice {
     param(
         [Parameter(Mandatory = $true)]
         [AllowEmptyString()]
-        [String]$Command, 
+        [String]$Command = "", 
         [Parameter(Mandatory = $false)]
-        [Array]$ExcludeParameters, 
+        [String[]]$ExcludeParameters = "", 
         [Parameter(Mandatory = $false)]
         [Int[]]$DeviceIDs
     )
 
     $CommandPerDevice = ""
 
-    " $($Command.TrimStart())" -split "(?=\s+[-]{1,2})" | ForEach-Object { 
+    " $($Command.TrimStart().TrimEnd())" -split "(?=\s+[-]{1,2})" | ForEach-Object { 
         $Token = $_
-        $Prefix = $null
-        $ParameterValueSeparator = $null
-        $ValueSeparator = $null
-        $Values = $null
+        $Prefix = ""
+        $ParameterValueSeparator = ""
+        $ValueSeparator = ""
+        $Values = ""
 
-        if ($Token -match "(?:^\s[-=]+)") { 
-            # supported prefix characters are listed in brackets: [-=]+
-
+        if ($Token -match "(?:^\s[-=]+)" <#supported prefix characters are listed in brackets [-=]#>) { 
             $Prefix = "$($Token -split $Matches[0] | Select-Object -Index 0)$($Matches[0])"
             $Token = $Token -split $Matches[0] | Select-Object -Last 1
 
-            if ($Token -match "(?:[ =]+)") { 
-                # supported separators are listed in brackets: [ =]+
+            if ($Token -match "(?:[ =]+)" <#supported separators are listed in brackets [ =]#>) { 
                 $ParameterValueSeparator = $Matches[0]
                 $Parameter = $Token -split $ParameterValueSeparator | Select-Object -Index 0
                 $Values = $Token.Substring(("$Parameter$($ParameterValueSeparator)").length)
 
-                if ($ExcludeParameters -notcontains $Parameter -and $Values -match "(?:[,; ]{1})") { 
-                    # supported separators are listed in brackets: [,; ]{1}
+                if ($Parameter -notin $ExcludeParameters -and $Values -match "(?:[,; ]{1})" <#supported separators are listed in brackets [,; ]#>) { 
                     $ValueSeparator = $Matches[0]
                     $RelevantValues = @()
                     $DeviceIDs | ForEach-Object { 
@@ -459,6 +475,7 @@ function Set-Stat {
             $Span_Week = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
 
             $Stat = [PSCustomObject]@{ 
+                Name                  = $Name
                 Live                  = $Value
                 Minute                = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
                 Minute_Fluctuation    = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
@@ -516,6 +533,8 @@ function Set-Stat {
         Updated               = [DateTime]$Stat.Updated
     } | ConvertTo-Json | Set-Content $Path
 
+    $Global:Stats | Add-Member $Name $Stat -Force
+
     $Stat
 }
 
@@ -523,53 +542,67 @@ function Get-Stat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = (Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+        [String[]]$Name = @($Global:Stats.Name | Select-Object) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
-    if (-not (Test-Path "Stats" -PathType Container)) { 
-        New-Item "Stats" -ItemType "directory" -Force | Out-Null
-    }
+    $Name | Sort-Object -Unique | ForEach-Object { 
+        $Stat_Name = $_
+        if (-not $Global:Stats.$Stat_Name) { 
+            if ($Global:Stats -isnot [PSCustomObject]) { 
+                $Global:Stats = [PSCustomObject]@{ }
+            }
 
-    if ($Global:Stats -isnot [PSCustomObject]) { 
-        $Global:Stats = [PSCustomObject]@{ }
-    }
+            #Reduce number of errors
+            if (-not (Test-Path "Stats\$Stat_Name.txt")) { 
+                if (-not (Test-Path "Stats" -PathType Container)) { 
+                    New-Item "Stats" -ItemType "directory" -Force | Out-Null
+                }
+                return
+            }
 
-    Get-ChildItem -Path "Stats" -File | Where-Object { $Name -eq $_.BaseName -and ".txt" -eq $_.Extension } | ForEach-Object { 
-        $BaseName = $_.BaseName
-        $FullName = $_.FullName
-
-        if (-not $Global:Stats.$BaseName) { 
             try { 
+                $Stat = Get-Content "Stats\$Stat_Name.txt" -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
                 $Global:Stats | Add-Member @{ 
-                    $BaseName = $_ | Get-Content -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop | ForEach-Object { 
-                        [PSCustomObject]@{ 
-                            Name                  = [String]$BaseName
-                            Live                  = [Double]$_.Live
-                            Minute                = [Double]$_.Minute
-                            Minute_Fluctuation    = [Double]$_.Minute_Fluctuation
-                            Minute_5              = [Double]$_.Minute_5
-                            Minute_5_Fluctuation  = [Double]$_.Minute_5_Fluctuation
-                            Minute_10             = [Double]$_.Minute_10
-                            Minute_10_Fluctuation = [Double]$_.Minute_10_Fluctuation
-                            Hour                  = [Double]$_.Hour
-                            Hour_Fluctuation      = [Double]$_.Hour_FluctuationFFF
-                            Day                   = [Double]$_.Day
-                            Day_Fluctuation       = [Double]$_.Day_Fluctuation
-                            Week                  = [Double]$_.Week
-                            Week_Fluctuation      = [Double]$_.Week_Fluctuation
-                            Duration              = [TimeSpan]$_.Duration
-                            Updated               = [DateTime]$_.Updated
-                        }
+                    $Stat_Name = [PSCustomObject]@{ 
+                        Name                  = [String]$Stat_Name
+                        Live                  = [Double]$Stat.Live
+                        Minute                = [Double]$Stat.Minute
+                        Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
+                        Minute_5              = [Double]$Stat.Minute_5
+                        Minute_5_Fluctuation  = [Double]$Stat.Minute_5_Fluctuation
+                        Minute_10             = [Double]$Stat.Minute_10
+                        Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
+                        Hour                  = [Double]$Stat.Hour
+                        Hour_Fluctuation      = [Double]$Stat.Hour_FluctuationFFF
+                        Day                   = [Double]$Stat.Day
+                        Day_Fluctuation       = [Double]$Stat.Day_Fluctuation
+                        Week                  = [Double]$Stat.Week
+                        Week_Fluctuation      = [Double]$Stat.Week_Fluctuation
+                        Duration              = [TimeSpan]$Stat.Duration
+                        Updated               = [DateTime]$Stat.Updated
                     }
                 } -Force
             }
             catch { 
-                Write-Log -Level Warn "Stat file ($BaseName) is corrupt and will be reset. "
-                Remove-Item -Path  $FullName -Force -Confirm:$false -ErrorAction SilentlyContinue
+                Write-Log -Level Warn "Stat file ($Stat_Name) is corrupt and will be reset. "
+                Remove-Stat $Stat_Name
             }
         }
 
-        $Global:Stats.$BaseName
+        $Global:Stats.$Stat_Name
+    }
+}
+
+function Remove-Stat { 
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $false)]
+        [String[]]$Name = @($Global:Stats.Name | Select-Object) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+    )
+
+    $Name | Sort-Object -Unique | ForEach-Object { 
+        if ($Global:Stats.$_) { $Global:Stats.PSObject.Properties.Remove($_) }
+        Remove-Item -Path  "Stats\$_.txt" -Force -Confirm:$false -ErrorAction SilentlyContinue
     }
 }
 
@@ -581,8 +614,14 @@ function Get-ChildItemContent {
         [Parameter(Mandatory = $false)]
         [Hashtable]$Parameters = @{ }, 
         [Parameter(Mandatory = $false)]
-        [Switch]$Threaded = $false
+        [Switch]$Threaded = $false,
+        [Parameter(Mandatory = $false)]
+        [String]$Priority
     )
+
+    $DefaultPriority = ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass
+    if ($Priority) { ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass = $Priority }
+
     if ($Parameters.JobName) { $JobName = $Parameters.JobName } else { $JobName = "JobName" }
 
     $Job = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -Name $JobName -ScriptBlock { 
@@ -590,10 +629,12 @@ function Get-ChildItemContent {
             [Parameter(Mandatory = $true)]
             [String]$Path, 
             [Parameter(Mandatory = $false)]
-            [Hashtable]$Parameters = @{ }
+            [Hashtable]$Parameters = @{ },
+            [Parameter(Mandatory = $false)]
+            [String]$Priority
         )
 
-        if (-not (Get-Module -Name "ThreadJob")) { ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass = 'BelowNormal' }
+        if ($Priority) { ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass = $Priority }
 
         function Invoke-ExpressionRecursive ($Expression) { 
             if ($Expression -is [String]) { 
@@ -640,27 +681,20 @@ function Get-ChildItemContent {
                 }
             }
         }
-    } -ArgumentList $Path, $Parameters
+    } -ArgumentList $Path, $Parameters, $Priority
 
     if ($Threaded) { $Job }
     else { $Job | Receive-Job -Wait -AutoRemoveJob }
+
+    ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass = $DefaultPriority
 }
-
-
 
 filter ConvertTo-Hash { 
     [CmdletBinding()]
-    $Hash = $_
-    switch ([math]::truncate([math]::log($Hash, [Math]::Pow(1000, 1)))) { 
-        $null { "0  H" }
-        "-Infinity" { "0  H" }
-        0 { "{0:n2}  H" -f ($Hash / [Math]::Pow(1000, 0)) }
-        1 { "{0:n2} KH" -f ($Hash / [Math]::Pow(1000, 1)) }
-        2 { "{0:n2} MH" -f ($Hash / [Math]::Pow(1000, 2)) }
-        3 { "{0:n2} GH" -f ($Hash / [Math]::Pow(1000, 3)) }
-        4 { "{0:n2} TH" -f ($Hash / [Math]::Pow(1000, 4)) }
-        Default { "{0:N2} PH" -f ($Hash / [Math]::Pow(1000, 5)) }
-    }
+    $Units = " kMGTPEZY" #k(ilo) in small letters, see https://en.wikipedia.org/wiki/Metric_prefix
+    $Base1000 = [Math]::Truncate([Math]::Log([Math]::Abs($_), [Math]::Pow(1000, 1)))
+    $Base1000 = [Math]::Max([Double]0, [Math]::Min($Base1000, $Units.Length - 1))
+    "{0:n2} $($Units[$Base1000])H" -f ($_ / [Math]::Pow(1000, $Base1000))
 }
 
 function ConvertTo-LocalCurrency { 
@@ -922,8 +956,6 @@ function Get-Device {
         [Parameter(Mandatory = $false)]
         [String[]]$ExcludeName = @(), 
         [Parameter(Mandatory = $false)]
-        [PSCustomObject]$DevicePciOrderMapping = [PSCustomObject]@{ }, 
-        [Parameter(Mandatory = $false)]
         [Switch]$Refresh = $false
     )
 
@@ -955,130 +987,257 @@ function Get-Device {
         }
     }
 
-    # Try to get cached devices first to improve performance
-    if ((Test-Path Variable:Script:CachedDevices) -and -not $Refresh) { 
-        $Devices = $CachedDevices
-        $Devices | ForEach-Object { 
-            $Device = $_
-            if ((-not $Name) -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-                if ((-not $ExcludeNameName) -or ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -notlike ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-                    $Device
-                }
-            }
-        }
-        return
-    }
+    if ($Global:Devices -isnot [Array] -or $Refresh) { 
+        $Global:Devices = [Array]$Devices = @()
 
-    $Devices = @()
-    $PlatformId = 0
-    $Index = 0
-    $PlatformId_Index = @{ }
-    $Type_PlatformId_Index = @{ }
-    $Vendor_Index = @{ }
-    $Type_Vendor_Index = @{ }
-    $Type_Index = @{ }
+        $Id = 0
+        $Type_Id = @{ }
+        $Vendor_Id = @{ }
+        $Type_Vendor_Id = @{ }
 
-    try { 
-        [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object { 
-            #Fix for deviceID enumeration with main screen connected to onboard HD Graphics, allow Intel as valid GPU miner platform ID, but filter out all Intel entries
-            [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | Where-Object Vendor -ne "Intel(R) Corporation" | ForEach-Object { 
-                $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
-                $Device = [PSCustomObject]@{ 
-                    Index                 = [Int]$Index
-                    PlatformId            = [Int]$PlatformId
-                    PlatformId_Index      = [Int]$PlatformId_Index."$($PlatformId)"
-                    Type_PlatformId_Index = [Int]$Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"
-                    Vendor                = [String]$Device_OpenCL.Vendor
-                    Vendor_ShortName      = $(Switch ([String]$Device_OpenCL.Vendor) { 
-                            "Advanced Micro Devices, Inc." { "AMD" }
-                            "Intel(R) Corporation" { "INTEL" }
-                            "NVIDIA Corporation" { "NVIDIA" }
-                            default { [String]$Device_OpenCL.Vendor }
+        $Slot = 0
+        $Type_Slot = @{ }
+        $Vendor_Slot = @{ }
+        $Type_Vendor_Slot = @{ }
+
+        $Index = 0
+        $Type_Index = @{ }
+        $Vendor_Index = @{ }
+        $Type_Vendor_Index = @{ }
+        $PlatformId = 0
+        $PlatformId_Index = @{ }
+        $Type_PlatformId_Index = @{ }
+
+        #Get WDDM data
+        try { 
+            Get-CimInstance CIM_Processor | ForEach-Object { 
+                $Device_CIM = $_ | ConvertTo-Json | ConvertFrom-Json
+
+                #Add normalised values
+                $Global:Devices += $Device = [PSCustomObject]@{ 
+                    Name   = $null
+                    Model  = $Device_CIM.Name
+                    Type   = "CPU"
+                    Bus    = $null
+                    Vendor = $(
+                        switch -Regex ($Device_CIM.Manufacturer) { 
+                            "Advanced Micro Devices" { "AMD" }
+                            "Intel" { "INTEL" }
+                            "NVIDIA" { "NVIDIA" }
+                            "AMD" { "AMD" }
+                            default { $Device_CIM.Manufacturer -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                         }
                     )
-                    Vendor_Index          = [Int]$Vendor_Index."$($Device_OpenCL.Vendor)"
-                    Type_Vendor_Index     = [Int]$Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"
-                    Type                  = [String]$Device_OpenCL.Type
-                    Type_Index            = [Int]$Type_Index."$($Device_OpenCL.Type)"
-                    OpenCL                = $Device_OpenCL
-                    Model                 = "$($Device_OpenCL.Name)$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
-                    Model_Norm            = "$($Device_OpenCL.Name -replace '[^A-Z0-9]' -replace 'GeForce')$(if ($Device_OpenCL.Vendor -eq "Advanced Micro Devices, Inc.") {"$([math]::Round((4 * $Device_OpenCL.GlobalMemSize / 1GB), 0) / 4)GB"})"
+                    Memory = $null
                 }
 
-                #Optional custom device mapping where PciDeviceID order does not match OpenCL DeviceId order
-                if ($DevicePciOrderMapping.(("{0}#{1:d2}" -f $_.Type, $Device.Type_Index).ToUpper())) { 
-                    $Index_Difference = $DevicePciOrderMapping.(("{0}#{1:d2}" -f $_.Type, $Device.Type_Index).ToUpper()) - $Device.Type_Index
+                $Device | Add-Member @{ 
+                    Id             = [Int]$Id
+                    Type_Id        = [Int]$Type_Id.($Device.Type)
+                    Vendor_Id      = [Int]$Vendor_Id.($Device.Vendor)
+                    Type_Vendor_Id = [Int]$Type_Vendor_Id.($Device.Type).($Device.Vendor)
                 }
-                else { 
-                    $Index_Difference = 0
-                }
-                $Device | Add-Member PCIBus_Index ([Int]($Device.Index + $Index_Difference))
-                $Device | Add-Member PCIBus_Type_Index ([Int]($Device.Type_Index + $Index_Difference))
-                $Device | Add-Member PCIBus_Type_PlatformId_Index ([Int]($Device.Type_PlatformId_Index + $Index_Difference))
-                $Device | Add-Member PCIBus_Type_Vendor_Index ([Int]($Device.Type_Vendor_Index + $Index_Difference))
-                $Device | Add-Member PCIBus_Vendor_Index  ([Int]($Device.Vendor_Index + $Index_Difference))
 
-                if ((-not $Name) -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-                    if ((-not $ExcludeName) -or (-not ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) }))) { 
-                        $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+                $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
+                $Device.Model = (($Device.Model -split ' ' -replace 'Processor','CPU' -replace 'Graphics','GPU') -notmatch $Device.Type -notmatch $Device.Vendor) -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
+
+                if (-not $Type_Vendor_Id.($Device.Type)) { 
+                    $Type_Vendor_Id.($Device.Type) = @{ }
+                }
+
+                $Id++
+                $Vendor_Id.($Device.Vendor)++
+                $Type_Vendor_Id.($Device.Type).($Device.Vendor)++
+                $Type_Id.($Device.Type)++
+
+                #Read CPU features
+                $Device | Add-member CpuFeatures ((Get-CpuId).Features | Sort-Object)
+
+                #Add raw data
+                $Device | Add-Member @{ 
+                    CIM = $Device_CIM
+                }
+            }
+
+            Get-CimInstance CIM_VideoController | ForEach-Object { 
+                $Device_CIM = $_ | ConvertTo-Json | ConvertFrom-Json
+
+                $Device_PNP = [PSCustomObject]@{ }
+                Get-PnpDevice $Device_CIM.PNPDeviceID | Get-PnpDeviceProperty | ForEach-Object { $Device_PNP | Add-Member $_.KeyName $_.Data }
+                $Device_PNP = $Device_PNP | ConvertTo-Json | ConvertFrom-Json
+
+                $Device_Reg = Get-ItemProperty "Registry::HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\$($Device_PNP.DEVPKEY_Device_Driver)" | ConvertTo-Json | ConvertFrom-Json
+
+                #Add normalised values
+                $Global:Devices += $Device = [PSCustomObject]@{ 
+                    Name   = $null
+                    Model  = $Device_CIM.Name
+                    Type   = "GPU"
+                    Bus    = if ($Device_PNP.DEVPKEY_Device_BusNumber -is [Int64]) { $Device_PNP.DEVPKEY_Device_BusNumber }
+                    Vendor = $(
+                        switch -Regex ([String]$Device_CIM.AdapterCompatibility) { 
+                            "Advanced Micro Devices" { "AMD" }
+                            "Intel" { "INTEL" }
+                            "NVIDIA" { "NVIDIA" }
+                            "AMD" { "AMD" }
+                            default { $Device_CIM.AdapterCompatibility -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
+                        }
+                    )
+                    Memory = [Math]::Max(([UInt64]$Device_CIM.AdapterRAM), ([uInt64]$Device_Reg.'HardwareInformation.qwMemorySize'))
+                }
+
+                $Device | Add-Member @{ 
+                    Id             = [Int]$Id
+                    Type_Id        = [Int]$Type_Id.($Device.Type)
+                    Vendor_Id      = [Int]$Vendor_Id.($Device.Vendor)
+                    Type_Vendor_Id = [Int]$Type_Vendor_Id.($Device.Type).($Device.Vendor)
+                }
+
+                $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
+                $Device.Model = ((($Device.Model -split ' ' -replace 'Processor','CPU' -replace 'Graphics','GPU') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
+
+                if (-not $Type_Vendor_Id.($Device.Type)) { 
+                    $Type_Vendor_Id.($Device.Type) = @{ }
+                }
+
+                $Id++
+                $Vendor_Id.($Device.Vendor)++
+                $Type_Vendor_Id.($Device.Type).($Device.Vendor)++
+                $Type_Id.($Device.Type)++
+
+                #Add raw data
+                $Device | Add-Member @{ 
+                    CIM = $Device_CIM
+                    PNP = $Device_PNP
+                    Reg = $Device_Reg
+                }
+            }
+        }
+        catch { 
+            Write-Log -Level Warn "WDDM device detection has failed. "
+        }
+
+        #Get OpenCL data
+        try { 
+            [OpenCl.Platform]::GetPlatformIDs() | ForEach-Object { 
+                [OpenCl.Device]::GetDeviceIDs($_, [OpenCl.DeviceType]::All) | ForEach-Object { 
+                    $Device_OpenCL = $_ | ConvertTo-Json | ConvertFrom-Json
+
+                    #Add normalised values
+                    $Device = [PSCustomObject]@{ 
+                        Name   = $null
+                        Model  = $Device_OpenCL.Name
+                        Type   = $(
+                            switch -Regex ([String]$Device_OpenCL.Type) { 
+                                "CPU" { "CPU" }
+                                "GPU" { "GPU" }
+                                default { [String]$Device_OpenCL.Type -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
+                            }
+                        )
+                        Bus    = if ($Device_OpenCL.PCIBus -is [Int64]) { $Device_OpenCL.PCIBus }
+                        Vendor = $(
+                            switch -Regex ([String]$Device_OpenCL.Vendor) { 
+                                "Advanced Micro Devices" { "AMD" }
+                                "Intel" { "INTEL" }
+                                "NVIDIA" { "NVIDIA" }
+                                "AMD" { "AMD" }
+                                default { [String]$Device_OpenCL.Vendor -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
+                            }
+                        )
+                        Memory = [UInt64]$Device_OpenCL.GlobalMemSize
                     }
+
+                    $Device | Add-Member @{ 
+                        Id             = [Int]$Id
+                        Type_Id        = [Int]$Type_Id.($Device.Type)
+                        Vendor_Id      = [Int]$Vendor_Id.($Device.Vendor)
+                        Type_Vendor_Id = [Int]$Type_Vendor_Id.($Device.Type).($Device.Vendor)
+                    }
+
+                    $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
+                    $Device.Model = ((($Device.Model -split ' ' -replace 'Processor','CPU' -replace 'Graphics','GPU') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
+
+                    if ($Global:Devices | Where-Object Type -EQ $Device.Type | Where-Object Bus -EQ $Device.Bus) { 
+                        $Device = $Global:Devices | Where-Object Type -EQ $Device.Type | Where-Object Bus -EQ $Device.Bus
+                    }
+                    elseif ($Device.Type -eq "GPU" -and ($Device.Vendor -eq "AMD" -or $Device.Vendor -eq "NVIDIA")) { 
+                        $Global:Devices += $Device
+
+                        if (-not $Type_Vendor_Id.($Device.Type)) { 
+                            $Type_Vendor_Id.($Device.Type) = @{ }
+                        }
+        
+                        $Id++
+                        $Vendor_Id.($Device.Vendor)++
+                        $Type_Vendor_Id.($Device.Type).($Device.Vendor)++
+                        $Type_Id.($Device.Type)++
+                    }
+
+                    #Add OpenCL specific data
+                    $Device | Add-Member @{ 
+                        Index                 = [Int]$Index
+                        Type_Index            = [Int]$Type_Index.($Device.Type)
+                        Vendor_Index          = [Int]$Vendor_Index.($Device.Vendor)
+                        Type_Vendor_Index     = [Int]$Type_Vendor_Index.($Device.Type).($Device.Vendor)
+                        PlatformId            = [Int]$PlatformId
+                        PlatformId_Index      = [Int]$PlatformId_Index.($PlatformId)
+                        Type_PlatformId_Index = [Int]$Type_PlatformId_Index.($Device.Type).($PlatformId)
+                    }
+
+                    #Add raw data
+                    $Device | Add-Member @{ 
+                        OpenCL = $Device_OpenCL
+                    }
+
+                    if (-not $Type_Vendor_Index.($Device.Type)) { 
+                        $Type_Vendor_Index.($Device.Type) = @{ }
+                    }
+                    if (-not $Type_PlatformId_Index.($Device.Type)) { 
+                        $Type_PlatformId_Index.($Device.Type) = @{ }
+                    }
+
+                    $Index++
+                    $Type_Index.($Device.Type)++
+                    $Vendor_Index.($Device.Vendor)++
+                    $Type_Vendor_Index.($Device.Type).($Device.Vendor)++
+                    $PlatformId_Index.($PlatformId)++
+                    $Type_PlatformId_Index.($Device.Type).($PlatformId)++
                 }
 
-                if (-not $Type_PlatformId_Index."$($Device_OpenCL.Type)") { 
-                    $Type_PlatformId_Index."$($Device_OpenCL.Type)" = @{ }
-                }
-                if (-not $Type_Vendor_Index."$($Device_OpenCL.Type)") { 
-                    $Type_Vendor_Index."$($Device_OpenCL.Type)" = @{ }
-                }
-
-                $Index++
-                $PlatformId_Index."$($PlatformId)"++
-                $Type_PlatformId_Index."$($Device_OpenCL.Type)"."$($PlatformId)"++
-                $Vendor_Index."$($Device_OpenCL.Vendor)"++
-                $Type_Vendor_Index."$($Device_OpenCL.Type)"."$($Device_OpenCL.Vendor)"++
-                $Type_Index."$($Device_OpenCL.Type)"++
+                $PlatformId++
             }
 
-            $PlatformId++
-        }
-    }
-    catch { 
-        Write-Log -Level Warn "OpenCL device detection has failed. "
-    }
+            $Global:Devices | Sort-Object Bus | ForEach-Object { 
+                $_ | Add-Member @{ 
+                    Slot             = [Int]$Slot
+                    Type_Slot        = [Int]$Type_Slot.($_.Type)
+                    Vendor_Slot      = [Int]$Vendor_Slot.($_.Vendor)
+                    Type_Vendor_Slot = [Int]$Type_Vendor_Slot.($_.Type).($_.Vendor)
+                }
 
-    # CPU detection in OpenCL does not work well, sometimes not being included, sometimes being included twice for each processor - remove any CPUs from the OpenCL devices and generate more accurate ones
-    # Remove them instead of not generating them in the first place, because skipping them would affect the indexes
-    [array]$Devices = $Devices | Where-Object { $_.Type -ne "Cpu" }
+                if (-not $Type_Vendor_Slot.($_.Type)) { 
+                    $Type_Vendor_Slot.($_.Type) = @{ }
+                }
 
-    $CPUIndex = 0
-    Get-CimInstance -ClassName CIM_Processor | ForEach-Object { 
-        # Vendor and type the same for all CPUs, so there is no need to actually track the extra indexes.  Include them only for compatibility.
-        $CPUInfo = $_ | ConvertTo-Json | ConvertFrom-Json
-        $Device = [PSCustomObject]@{ 
-            Index             = [Int]$Index
-            Vendor            = $CPUInfo.Manufacturer
-            Vendor_ShortName  = $(if ($CPUInfo.Manufacturer -eq "GenuineIntel") { "INTEL" } else { "AMD" })
-            Type_Vendor_Index = $CPUIndex
-            Type              = "Cpu"
-            Type_Index        = $CPUIndex
-            CIM               = $CPUInfo
-            Model             = $CPUInfo.Name
-            Model_Norm        = "$($CPUInfo.Manufacturer)$($CPUInfo.NumberOfCores)CoreCPU"
-        }
-        #Read CPU features
-        $Device | Add-member CpuFeatures ((Get-CpuId).Features | Sort-Object)
-
-        if ((-not $Name) -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
-            if ((-not $ExcludeName) -or (-not ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) }))) { 
-                $Devices += $Device | Add-Member Name ("{0}#{1:d2}" -f $Device.Type, $Device.Type_Index).ToUpper() -PassThru
+                $Slot++
+                $Type_Slot.($_.Type)++
+                $Vendor_Slot.($_.Vendor)++
+                $Type_Vendor_Slot.($_.Type).($_.Vendor)++
             }
         }
-
-        $CPUIndex++
-        $Index++
+        catch { 
+            Write-Log -Level Warn "OpenCL device detection has failed. "
+        }
     }
-    $Script:CachedDevices = $Devices
-    $Devices
+
+    $Global:Devices | ForEach-Object { 
+        $Device = $_
+        if (-not $Name -or ($Name_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
+            if (-not $ExcludeName -or -not ($ExcludeName_Devices | Where-Object { ($Device | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) -like ($_ | Select-Object ($_ | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) })) { 
+                $Device
+            }
+        }
+    }
 }
 
 function Get-Algorithm { 
@@ -1098,20 +1257,19 @@ function Get-Algorithm {
     else { $Algorithm }
 }
 
-function Get-AlgorithmFromCoinName { 
+function Get-AlgorithmFromCurrencySymbol { 
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String]$CoinName = ""
+        [String]$CurrencySymbol = ""
     )
 
-    if (-not (Test-Path Variable:Script:Algorithms -ErrorAction SilentlyContinue)) { 
-        $Script:Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
+    if (-not (Test-Path Variable:Script:EthashDAGsize -ErrorAction SilentlyContinue)) { 
+        $Script:EthashDAGsize = Get-Content "EthashDAGsize.txt" | ConvertFrom-Json
     }
-    if ($Script:Algorithms.$CoinName) { $Script:Algorithms.$CoinName }
+    if ($Script:EthashDAGsize.$CurrencySymbol) { $Script:EthashDAGsize.$CurrencySymbol }
     else { $null }
 }
-
 
 function Get-CoinName { 
     [CmdletBinding()]
@@ -1241,7 +1399,7 @@ class Pool {
 
     #[Int]$Workers
     #[Double]$EstimateCorrection
-    #[String]$MiningCurrency
+    #[String]$CurrencySymbol
 }
 
 enum MinerStatus { 
@@ -1264,8 +1422,8 @@ class Miner {
     hidden [DateTime]$BeginTime = 0
     hidden [DateTime]$EndTime = 0
     [string[]]$Algorithm = @()
-    $DeviceName
-    [Array]$DeviceId
+    [String[]]$DeviceName = @()
+    [PSCustomObject[]]$Device = @()
     $Earning
     $Earning_Comparison
     $Earning_MarginOfError
@@ -1285,7 +1443,7 @@ class Miner {
     hidden [Int64]$Activated = 0
     hidden [MinerStatus]$Status = [MinerStatus]::Idle
     $LogFile
-    $PoolName
+    [String[]]$PoolName = @()
     hidden [Array]$Data = @()
     $ShowMinerWindow
     $IntervalMultiplier

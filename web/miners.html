@@ -1,8 +1,8 @@
 <!--#include file="/parts/head.html" -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-  <h1 id="title" class="h2"data-navbaractive="navallminers">Miners</h1>
+  <h1 id="title" class="h2"data-navbaractive="navminers">Miners</h1>
 </div>
-<p>Shows all available miners for each algorithm</p>
+<div class="alert alert-info" role="alert">Shows all available miners for each algorithm</div>
 
 <table id="miners"
   data-buttons-align="left"
@@ -55,30 +55,35 @@
     $("#miners").bootstrapTable({
       contextMenu: "#context-menu",
       onContextMenuItem: function(row, $el) {
-        if($el.data("item") == "re-benchmark") {
-          $Command = "scripts/managestat.ps1?Type=HashRate&Action=Remove&Minername=" + row.Name + "&Algorithms=" + row.tPrimaryAlgorithm + "," + row.tSecondaryAlgorithm
-          $(".modal-body").load($Command, function() {
+        if ($el.data("item") == "re-benchmark") {
+          Command = "scripts/managestat.ps1?Type=HashRate&Action=Remove&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.tPrimaryAlgorithm) + "," + encodeURIComponent(row.tSecondaryAlgorithm)
+          $(".modal-body").load(Command, function() {
             $(".modal-title").text(row.Name);
             $("#myModal").modal({show:true});
           });
         }
-        if($el.data("item") == "re-measure") {
-          $Command = "scripts/managestat.ps1?Type=PowerUsage&Action=Remove&Minername=" + row.Name + "&Algorithms=" + row.tPrimaryAlgorithm + "," + row.tSecondaryAlgorithm
-          $(".modal-body").load($Command, function() {
+        if ($el.data("item") == "re-measure") {
+          Command = "scripts/managestat.ps1?Type=PowerUsage&Action=Remove&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.tPrimaryAlgorithm) + "," + encodeURIComponent(row.tSecondaryAlgorithm)
+          $(".modal-body").load(Command, function() {
             $(".modal-title").text(row.Name);
             $("#myModal").modal({show:true});
           });
         }
-        if($el.data("item") == "disable") {
-          $Command = "scripts/managestat.ps1?Type=Hashrate&Action=Set&Value=-1&Minername=" + row.Name + "&Algorithms=" + row.tPrimaryAlgorithm + "," + row.tSecondaryAlgorithm
-          $(".modal-body").load($Command, function() {
+        if ($el.data("item") == "disable") {
+          Command = "scripts/managestat.ps1?Type=Hashrate&Action=Set&Value=-1&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.tPrimaryAlgorithm) + "," + encodeURIComponent(row.tSecondaryAlgorithm)
+          $(".modal-body").load(Command, function() {
             $(".modal-title").text(row.Name);
             $("#myModal").modal({show:true});
+            $table.bootstrapTable("updateCell", {
+              index: row.index,
+              field: "Status",
+              value: "Disabled"
+            })
           });
         }
-        if($el.data("item") == "failed") {
-          $Command = "scripts/managestat.ps1?Type=Hashrate&Action=Set&Value=0&Minername=" + row.Name + "&Algorithms=" + row.tPrimaryAlgorithm + "," + row.tSecondaryAlgorithm
-          $(".modal-body").load($Command, function() {
+        if ($el.data("item") == "failed") {
+          Command = "scripts/managestat.ps1?Type=Hashrate&Action=Set&Value=0&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.tPrimaryAlgorithm) + "," + encodeURIComponent(row.tSecondaryAlgorithm)
+          $(".modal-body").load(Command, function() {
             $(".modal-title").text(row.Name);
             $("#myModal").modal({show:true});
           });
@@ -94,6 +99,8 @@
     // This function can alter the returned data before building the table, formatting it in a way
     // that is easier to display and manipulate in a table
     $.each(data, function(index, item) {
+      item.index = index;
+
       // Format the device(s)
       item.tDevices = item.DeviceName.toString();
 

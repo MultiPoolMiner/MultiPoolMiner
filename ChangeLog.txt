@@ -1,7 +1,73 @@
-# MultiPoolMiner dev version
+﻿# MultiPoolMiner dev version
 
-Download link:
-https://github.com/MultiPoolMiner/MultiPoolMiner/archive/3.5.2.zip
+## Changelog Version 3.5.3
+
+#### Core changes
+- Added 'Equihash', 'Honeycomb', 'Skunk' & 'Tribus' algorithms to UnprofitableAlgorithms.txt
+- Added auto-correction features for stats if stat is outside fault tolerance for 3 times in a row
+- Changed bestpool sorting; reduce miner switching when benchmarking
+- Changed 'MiningCurrency' to 'CurrencySymbol' (same as in ticker symbol); Note: this may also require changes to customizations made in config file (e.g. 'ExcludeMiningCurrency' -> 'ExcludeCurrencySymbol')
+- Changed number of listed miner-algo combinations in normal mode. MPM will only list miners that are at least half as profitable as the best earning miner (per device group).
+- Fixed broken UnprofitableAlgorithm list (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/202a7b56f8a6f2ebff0c6fad01864cec0d86a7d5)
+- Fixed issue where power measurement could go on forever
+- Fixed parameters '-DeviceName' and '-ExcludeDeviceName'
+- Fixed pool balances, ensure MPM will always use latest data
+- Fixed profitability comparison info when profit is negative
+- Removed 'DevicePciOrderMapping'. Please report back if automatic device selection is not working for you.
+
+#### Miner changes
+- Added CcminerMtpTrc-v1.2.5; support for 'Mtp-Trc' (TecraCoin) algorithm
+- Added SRBMinerMulti-v0.1.4
+- Changed CcminerKlausT-v8.25; disabled 'Lyra2V2' algorithm, CcminerAlexis-v1.5 is 10%faster
+- Changed BMiner-v15.8.7; disabled 'Equihash' algorithm, DSTMEquihash-v0.6.2 is 15% faster
+- Changed CcminerBMW512-v2.2.5; use faster x86 variant
+- Fixed all miners; $CommonCommands was broken
+- Fixed CcminerKlausT-v8.25; lowered intensity for 'Neoscrypt' algorithm
+- Removed CpuminerOptCpupower-v1.0 (moved to 'Deprecated' folder); SRBminer-Multi 2x is faster
+- Removed EDSTMEquihash-v0.6.2 (moved to 'Deprecated' folder); Equihash is no longer profitable
+- Removed EwbfEquihash-v0.3.4b (moved to 'Deprecated' folder); Equihash is no longer profitable
+- Updated BMiner-v15.8.7; disabled dual mining with 'Blake2s' algorithm (rejected shares), improve the performance of automatic tuning of dual mining parameters
+- Updated CcminerAlexis-v1.5.1; better compatibility with 'Skein' algorithm, dropped 'Hsr', 'KeccakC' & 'Poly' support 
+- Updated CcminerMTP-v1.3.1.ps1
+- Updated CcminerTrex-v0.14.6; added support for 'X16rv2' algorithm
+- Updated CcminerZenemy-v2.3; added support for 'X16rv2' algorithm
+- Updated ClaymoreDual_v15.0
+- Updated CryptoDredge-v0.22.0; support for 'X16rv2' algorithm
+- Updated Gminer-v1.73; added $CommonCommands, enabled 'Equihash1254' algorithm for AMD, support for 'CuckooBFC' & 'Eaglesong' (AMD & NVIDIA)
+- Updated Jayddee-v3.9.9.1; added support for 'X16rv2' algorithm
+- Updated lolMiner-v0.8.8; removed 'old Beam' algorithm
+- Updated MiniZEquihash-v1.5r
+- Updated NanoMiner_v1.6.1; added support for 'RandomHash' (CPU only), 'RandomHash2' (AMD & CPU) & 'RandomHash2' algorithms, disabled 'Ethash*' algorithms, other Ethash miners are faster
+- Updated NBMiner-v26.0; added support for 'Eaglesong' algorithm (VBK)
+- Updated PhoenixminerEthash-v4.7c
+- Updated SgminerMTP-v0.1.3
+- Updated TeamRed-v0.5.9; added support for 'X16rv2' algorithm
+- Updated TTMiner-v3.0.10
+- Updated Wildrig-v0.20.1; added support for 'MTP', 'MTP-TCR' & 'X16rv2' algorithms
+
+#### Pool changes
+- Changed property 'MiningCurrency' to 'CurrencySymbol'
+- Fixed BlazePool[-Algo/-Coin]; corrected API url
+- Fixed Nicehash[Old]; CryptonightV7 does not work in Europe
+- Fixed ZergPool; DOGE is now a guaranteed payout currency
+- Removed HashRefinery (Pool is shutting down)
+
+#### Balances changes
+- Added 'Url' property
+- Removed HashRefinery (Pool is shutting down)
+
+#### API changes
+- Changed version to 0.98
+- Added 'filteredminers', 'inactiveminers' & 'watchdogtimersreset'
+- Fixed Bminer; recording hashrate for Ethash2GB/3GB was broken (regression from version 3.5.1)
+- Fixed FireIce; (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/e9c55d3d708b8ed1588ae00b8e017dfab481d2cd)
+
+#### Web Interface changes
+- Added Currency column to pool pages
+- Added pages for 'Inactive Miners', 'Filtered Miners' & 'Watchdog Timers'
+- Added context menu to 'Inactive Miners'
+- Added links to balances boxes to take you directly to the pool web page
+- Fixed stat management (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/8e6fd3acba279c99ed1d7bce1ed14073e9c37822)
 
 ## Changelog Version 3.5.2
 

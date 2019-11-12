@@ -19,7 +19,7 @@ $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
 # Miner requires CUDA 9.0.00 or higher
-$CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA Corporation").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+$CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
 $RequiredCUDAVersion = "9.0.00"
 if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) {
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
@@ -61,20 +61,20 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Devices_Platform = @($Devices | Where-Object Vendor -EQ $_.Vendor)
     $Device = @($Devices_Platform | Where-Object Model -EQ $_.Model)
     
-    $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1
+    $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1
 
-    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$_.Vendor -contains ($Device.Vendor_ShortName | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Host} | ForEach-Object {
+    $Commands | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_.Algorithm; $_} | Where-Object {$_.Vendor -contains ($Device.Vendor | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Host} | ForEach-Object {
         $MinMemGB = $_.MinMemGB
 
         if ($Miner_Device = @($Device | Where-Object {$_.Type -eq "CPU" -or ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
-            $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
+            $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object {$Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model"}) | Select-Object) -join '-'
             $Currency = if ($Coins -icontains $Pools.$Algorithm_Norm.CoinName) {$Pools.$Algorithm_Norm.CoinName} else {$_.Algorithm}
             
             if ($Miner_Device.Type -eq "CPU") {
                 $Platform = "CPU"
                 $NoPlatform = " --noAMD --noNVIDIA"
             }
-            elseif ($Miner_Device.Vendor -eq "NVIDIA Corporation") {
+            elseif ($Miner_Device.Vendor -eq "NVIDIA") {
                 $Platform = "NVIDIA"
                 $NoPlatform = " --noCPU --noAMD"
             }
@@ -86,9 +86,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             #Get commands for active miner devices
             $Command = Get-CommandPerDevice -Command $_.Command -DeviceIDs $Miner_Device.Type_Vendor_Index
 
-            $ConfigFileName = "$((@("Config") + @($Platform) + @(($Miner_Device.Model_Norm | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm($(($Miner_Device | Sort-Object Name | Where-Object Model_Norm -eq $Model_Norm).Name -join ';'))"} | Select-Object) -join '-') + @($Miner_Port) | Select-Object) -join '-').txt"
-            $MinerThreadsConfigFile = "$((@("ThreadsConfig") + @($Platform) + @($Algorithm_Norm) + @(($Miner_Device.Model_Norm | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm($(($Miner_Device | Sort-Object Name | Where-Object Model_Norm -eq $Model_Norm).Name -join ';'))"} | Select-Object) -join '-') | Select-Object) -join '-').txt"
-            $PlatformThreadsConfigFile = "$((@("HwConfig") + @($Platform) + @($Algorithm_Norm) + @(($Devices_Platform.Model_Norm | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model_Norm = $_; "$(@($Devices_Platform | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm($(($Devices_Platform | Sort-Object Name | Where-Object Model_Norm -eq $Model_Norm).Name -join ';'))"} | Select-Object) -join '-') | Select-Object) -join '-').txt"
+            $ConfigFileName = "$((@("Config") + @($Platform) + @(($Miner_Device.Model | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model($(($Miner_Device | Sort-Object Name | Where-Object Model -eq $Model).Name -join ';'))"} | Select-Object) -join '-') + @($Miner_Port) | Select-Object) -join '-').txt"
+            $MinerThreadsConfigFile = "$((@("ThreadsConfig") + @($Platform) + @($Algorithm_Norm) + @(($Miner_Device.Model | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model($(($Miner_Device | Sort-Object Name | Where-Object Model -eq $Model).Name -join ';'))"} | Select-Object) -join '-') | Select-Object) -join '-').txt"
+            $PlatformThreadsConfigFile = "$((@("HwConfig") + @($Platform) + @($Algorithm_Norm) + @(($Devices_Platform.Model | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model = $_; "$(@($Devices_Platform | Where-Object Model -eq $Model).Count)x$Model($(($Devices_Platform | Sort-Object Name | Where-Object Model -eq $Model).Name -join ';'))"} | Select-Object) -join '-') | Select-Object) -join '-').txt"
             $PoolFileName = "$((@("PoolConf") + @($Pools.$Algorithm_Norm.Name) + @($Algorithm_Norm) + @($Pools.$Algorithm_Norm.User) + @($Pools.$Algorithm_Norm.Pass) | Select-Object) -join '-').txt"
 
             $Parameters = [PSCustomObject]@{

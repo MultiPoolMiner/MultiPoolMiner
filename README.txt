@@ -17,7 +17,7 @@ TWITTER: @multipoolminer
 Licensed under the GNU General Public License v3.0
 Permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights. https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/LICENSE
 
-README.txt - updated on 20/08/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
+README.txt - updated on 10/11/2019 (dd/mm/yyyy) - latest version can be found here: https://github.com/MultiPoolMiner/MultiPoolMiner/blob/master/README.txt
 
 ====================================================================
 
@@ -84,7 +84,7 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 	The API_Key can be found in the MiningPoolHub Account detail page.
 
 -APIPort
-	Port for the MPM API and web GUI. The miner port range will start from APIPort +1. Default is 3999
+	Port for the MPM API and web GUI. The miner port range will start from APIPort +1. Default is 3999. 0 disables the API.
 
 -Algorithm
 	Supported algorithms sorted by pool can be found at https://multipoolminer.io/algorithms. Use commas to separate multiple values.
@@ -107,7 +107,7 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 
 -CoinName [Zcash, ZeroCoin etc.]
 	Limit mining to the listed coins only; this is also a per-pool setting (see Advanced Configuration). Use commas to separate multiple values.
-	Note: Only the pools ending in ...Coins expose the coin name in their API.
+	Note: Only the pools ending in ...-Coin expose all coin names in their API. Check the web dashboard / pools to see which pools expose which values.
 
 -ConfigFile [Path\ConfigFile.txt]
 	The default config file name is '.\Config.txt'
@@ -116,8 +116,12 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 
 -Currency [BTC, USD, EUR, GBP, ETH ...]
 	Choose the default currency or currencies your profit stats will be shown in. Use commas to separate multiple values.
-	Important: MultiPoolMiner will use the first currency in the list as main currency. All profit / earning numbers will be displayed in the main currency.
-    Note: Instead af BTC you can also use mBTC (= BTC / 1000).
+	Important: MultiPoolMiner will use the first currency in the list as main currency. All profit / earning numbers will be displayed in the main (=first in the list) currency.
+	Note: Instead af BTC you can also use mBTC (= BTC / 1000).
+
+-CurrencySymbol [BTC, LTC, ZEC etc.]
+	Limit mining to the listed currency only; this is also a per-pool setting (see Advanced Configuration). Use commas to separate multiple values.
+	Note: Only the pools ending in ...-Coin expose all currency symbols in their API. Check the web dashboard / pools to see which pools expose which values.
 
 -Dashboard
 	Launch web dashboard after MPM start.
@@ -156,7 +160,7 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 -ExcludeCoinName [Zcash, ZeroCoin etc.]
 	Similar to the '-CoinName' command but it is used to exclude selected coins from being mined. Use commas to separate multiple values.
 	This is also a per-pool setting (see Advanced Configuration).
-	Note: Only the pools ending in ...Coins expose the coin name in their API.
+	Note: Only the pools ending in ...-Coin expose all coin names in their API. Check the web dashboard / pools to see which pools expose which values.
 
 -ExcludeDeviceName
 	Similar to the '-DeviceName' command but it is used to exclude unwanted devices for mining. [CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.]. Use commas to separate multiple values.
@@ -224,39 +228,39 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
 	MPM queries the pool balances every n minutes. Default is 15, minimum is 0 (=on every loop). MPM does this to minimize the requests sent to the pools. Pools usually do not update the balances in real time, so querying on each loop is unnecessary.
 	Note: The balance overview is still shown on each loop.
     
--Poolname [ahashpool(coins), blazepool(coins), blockmasters(coins), hashrefinery(coins), miningpoolhub(coins), nicehash(old), nlpool(coins), phiphipool (deprecated), ravenminer, zergpool(coins), zpool(coins)]
+-Poolname [ahashpool[-algo / -coin], blazepool[-algo / -coin], blockmasters[-algo / -coin], hashrefinery[-algo / -coin], miningpoolhub[-algo / -coin], nicehash(old), nlpool[-algo / -coin], phiphipool (deprecated), ravenminer, zergpool[-algo / -coin], zpool[-algo / -coin]]
 	The following pools are currently supported (in alphabetical order); use commas to separate multiple values:
 
-    ## AHashPool / AHashPoolCoins
+    ## AHashPool-Algo / AHashPool-Coin
       WebSite: https://www.ahashpool.com/ 
       Payout in BTC (Bitcoin address must be provided using the '-Wallet' command)
-      AHashPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below).
+      AHashPool-Coin allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below).
 
-    ## BlazePool / BlazePoolCoins
+    ## BlazePool-Algo / BlazePool-Coin
       WebSite: http://www.blazepool.com/ 
       Payout in BTC (Bitcoin address must be provided using the '-Wallet' command)
-      BlazePoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below).
+      BlazePool-Coin allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below).
 
-    ## BlockMasters / BlockMastersCoins
+    ## BlockMasters-Algo / BlockMasters-Coin
       WebSite: http://www.blockmasters.co/
       Payout in BTC (Bitcoin address must be provided using the '-Wallet' command), or any currency available in API (Advanced configuration via config file required, see below).
-      BlockMastersCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below).
+      BlockMasters-Coin allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below).
 
-    ## HashRefinery / HashRefineryCoins
+    ## HashRefinery-Algo / HashRefinery-Coin
       WebSite: http://pool.hashrefinery.com
       Payout in BTC (Bitcoin address must be provided using the '-Wallet' command)
-      HashRefineryCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below).
+      HashRefinery-Coin allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config. file required, see below).
 
-    ## MiningPoolHub / MiningPooHubCoins
+    ## MiningPoolHub-Algo / MiningPooHub-Coin
       WebSite: https://miningpoolhub.com/ 
-      - 'miningpoolhub' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm
-      - 'miningpoolhubcoins' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). 
+      - 'miningpoolhub-algo' parameter uses the 17xxx ports therefore allows the pool to decide on which coin is mined of a specific algorithm
+      - 'miningpoolhub-coin' allows for MultiPoolMiner to calculate and determine what is mined from all of the available coins (20xxx ports). 
       Usage of the 'miningpoolhub' parameter is recommended as the pool have internal rules against switching before a block is found therefore prevents its users losing shares submitted due to early switching. A registered account is required when mining on MiningPoolHub (username must be provided using the -username command, see below).
       Payout in BTC (Bitcoin address must be provided using the -wallet command, see below), or any currency available in API (Advanced configuration via config file required, see below).
-      MiningPooHubCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below).
+      MiningPooHub-Coin allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below).
 
     ## Nicehash(old) 
-      WebSite: https://www.nicehash.com / https://new.nicehash.com
+      WebSite: https://www.nicehash.com / https://old.nicehash.com
       Payout in BTC (Bitcoin address must be provided using the *-Wallet* command) or BCH, ETX, LTC, XRP or AND ZEC (currency must be provided in config file (Advanced configuration via config file required, see below).
 
     ## NLPool
@@ -272,15 +276,15 @@ Listed in alphabetical order. Note: For basic operation not all parameters must 
       WebSite: https://ravenminer.com
       Payout in RVN. A separate RVN wallet address must be provided in config file (Advanced configuration via config file required, see below).
 
-    ##ZergPool
+    ##ZergPool-Algo / ZergPool-Coin
       WebSite: http://zergpool.eu
       Payout in BTC (Bitcoin address must be provided using the *-Wallet* command), or any currency available in API (Advanced configuration via config file required, see below).
-       ZergPoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below).
+       ZergPool-Coin allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below).
 
-    ##Zpool
+    ##Zpool-Algo / Zpool-Coin
       WebSite: http://www.zpool.ca/
       Payout in BTC (Bitcoin address must be provided using the '-Wallet' command), or any currency available in API (Advanced configuration via config file required, see below).
-      ZpoolCoins allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below)
+      Zpool-Coin allows mining selected coins only, e.g mine only ZClassic (Advanced configuration via config file required, see below)
 
       IMPORTANT: For the list of default configured pools consult 'start.bat.' This does not rule out other pools to be included. Selecting multiple pools is allowed and will be used on a failover basis OR if first specified pool does not support that algorithm/coin. See the '-Algorithm' command for further details and example.*
 
@@ -425,11 +429,11 @@ Sample content of 'Config.txt'
   "CoinName": "$CoinName",
   "ConfigFile": "$ConfigFile",
   "Currency": "$Currency",
+  "CurrencySymbol": "$CurrencySymbol",
   "Dashboard": "$Dashboard",
   "Debug": "$Debug",
   "Delay": "$Delay",
   "DeviceName": "$DeviceName",
-  "DevicePciOrderMapping": "$DevicePciOrderMapping",
   "DisableDevFeeMining": "$DisableDevFeeMining",
   "DisableDeviceDetection": "$DisableDeviceDetection",
   "DisableEstimateCorrection": "$DisableEstimateCorrection",
@@ -438,10 +442,10 @@ Sample content of 'Config.txt'
   "ErrorAction": "$ErrorAction",
   "ErrorVariable": "$ErrorVariable",
   "ExcludeAlgorithm": "$ExcludeAlgorithm",
+  "ExcludeCurrencySymbol": "$ExcludeCurrencySymbol",
   "ExcludeCoinName": "$ExcludeCoinName",
   "ExcludeDeviceName": "$ExcludeDeviceName",
   "ExcludeMinerName": "$ExcludeMinerName",
-  "ExcludeMiningCurrency": "$ExcludeMiningCurrency",
   "ExcludePoolName": "$ExcludePoolName",
   "HashRateSamplesPerInterval": "$HashRateSamplesPerInterval",
   "HWiNFO64_SensorMapping": "$HWiNFO64_SensorMapping",
@@ -457,7 +461,7 @@ Sample content of 'Config.txt'
   "MinerStatusKey": "$MinerStatusKey",
   "MinerStatusUrl": "$MinerStatusUrl",
   "MinHashRateSamples": "$MinHashRateSamples",
-  "MiningCurrency": "$MiningCurrency",
+  "Currency": "$Currency",
   "MinWorker": "$MinWorker",
   "OutBuffer": "$OutBuffer",
   "OutVariable": "$OutVariable",
@@ -493,12 +497,12 @@ Sample content of 'Config.txt'
   "VersionCompatibility": "3.3.0"
 }
 
-
 There is a section for Pools, Miners and a general section
 
 Advanced configuration for Pools
 
 Settings for each configured pool are stored in its own subsection. These settings are only valid for the named pool.
+
 
 CoinName per pool [Zcash, ZeroCoin etc.]
 
@@ -506,13 +510,28 @@ Only mine the selected coins at the specified pool.
 
 E.g. To mine only Zcash & ZeroCoin at Zpool:
 
-    "ZpoolCoins": {
+    "Zpool-Coin": {
       "CoinName":  [
         "Zcash",
         "ZeroCoin"
       ]
     }
-Note: Only the pools ending in ...Coins expose the coin name in their API.
+Note: Only the pools ending in ...-Coin expose the coin name in their API.
+
+
+CurrencySymbol per pool [DGB, LTC, ZEC etc.]
+
+Only mine the selected currencies at the specified pool.
+
+E.g. To mine only LTC & ZEC at Zpool:
+
+    "Zpool-Coin": {
+      "CurrencySymbol":  [
+        "LTC",
+        "ZEC"
+      ]
+    }
+Note: Only the pools ending in ...-Coin expose all currency symbols in their API. Check the web dashboard / pools to see which pools expose which values.
 
 
 DisableEstimateCorrection per pool
@@ -520,17 +539,18 @@ DisableEstimateCorrection per pool
 Some pools overestimate the projected profits. By default MPM will reduce the projected algo price by a correction factor (actual_last24h / estimate_last24h) to counter pool the overestimated prices.
 E.g. To disable this at Zpool:
 
-    "Zpool": {
+    "Zpool-Algo": {
       "DisableEstimateCorrection":  false
     }
-    
+
+
 ExcludeAlgorithm per pool
 
 Do not use the configured algorithms for mining at the specified pool.
 
 E.g. To NOT mine Equihash and Ethash2gb at Zpool:
 
-    "ZpoolCoins": {
+    "Zpool-Coin": {
       "ExcludeAlgorithm":  [
         "Equihash",
         "Ethash2gb"
@@ -544,13 +564,28 @@ Exclude selected coins from being mined at the specified pool.
 
 E.g. To NOT mine Zcash & ZeroCoin at Zpool:
 
-    "ZpoolCoins": {
+    "Zpool-Coin": {
       "ExcludeCoinName":  [
         "Zcash",
         "ZeroCoin"
       ]
     }
-Note: Only the pools ending in ...Coins expose the coin name in their API.
+Note: Only the pools ending in ...-Coin expose the coin name in their API.
+
+
+ExcludeCurrencySymbol per pool [DGB, LTC, ZEC etc.]
+
+Exclude selected currency symbol from being mined at the specified pool.
+
+E.g. To NOT mine DGB & LTC at Zpool:
+
+    "Zpool-Coin": {
+      "ExcludeCurrencySymbol":  [
+        "DGB",
+        "LTC"
+      ]
+    }
+Note: Only the pools ending in ...-Coin expose all currency symbols in their API. Check the web dashboard / pools to see which pools expose which values.
 
 
 ExcludeRegion per pool
@@ -559,7 +594,7 @@ Do not use the pool endpoints in select regions. This may be useful when a pool 
 
 E.g. To NOT use the MiningPoolHub mining endpoints in region 'Europe':
 
-    "MiningPoolHub": {
+    "MiningPoolHub-Algo": {
       "ExcludeRegion":  [
         "Europe"
       ]
@@ -575,7 +610,7 @@ Important: The general '-MinWorker' value is always applied. Only algorithms mat
 
 E.g. To ignore 'Ethash*' & 'Equihash1445' algorithms at MiningPoolHub if there are less than 10 workers set MinWorker like this:
 
-    "MiningPoolHub": {
+    "MiningPoolHub-Algo": {
       "MinWorker":  {
         "Ethash*":  10,
         "Equihash1445":  10
@@ -604,7 +639,7 @@ If a pool allows payout in another currency than BTC you can set the currency yo
 By default MPM will add ALL currencies configured by $Wallet as possible payout currencies for the pool.
 
 For each pool you can statically add a section similar to this to your config file:
-    "Zpool": {
+    "Zpool-Algo": {
       "Wallets":  {
         "BTC": "$Wallet"
       },
@@ -616,7 +651,7 @@ The payout currency is defined by this line:
 
 E.g. to change the payout currency for Zpool to LiteCoin replace the line for BTC with "LTC": "<YOUR_LITECOIN_ADDRESS>", (of course you need to insert a real LTC address)
 
-    "Zpool": {
+    "Zpool-Algo": {
       "Wallets":  {
         "LTC": "<YOUR_LITECOIN_ADDRESS>"
       },
@@ -630,7 +665,7 @@ PricePenaltyFactor per pool
 If you feel that a pool is exaggerating its estimations then set a penalty factor to lower projected projected calculations.
 E.g. You feel that Zpool is exaggerating its estimations by 10% - Set PricePenaltyFactor to 0.9:
 
-    "Zpool": {
+    "Zpool-Algo": {
       "PricePenaltyFactor":  0.9
     }
 Note: This is also a general parameter (see -PricePenaltyFactor). If both parameters - general and pool - are present, then the pool parameter takes precedence.
@@ -642,7 +677,7 @@ Only use pool endpoints is selected regions. This may be useful when a pool has 
 
 E.g. To use MiningPoolHub mining endpoints in regions 'Asia' and 'US' ONLY:
 
-    "MiningPoolHub": {
+    "MiningPoolHub-Algo": {
       "Region":  [
         "Asia",
         "US"
@@ -651,13 +686,13 @@ E.g. To use MiningPoolHub mining endpoints in regions 'Asia' and 'US' ONLY:
 Note: The values for 'Regions' must match the definitions in 'Regions.txt'.
 
 
-ZergPool(Coins) Solo/Party mining
+Blockmasters &  ZergPool(Coins) Solo/Party mining
 
 Check the pools web page for more information first!
-For ZergPool(Coins) solo or party mining edit the config file as follows:   
+For Blockmasters & ZergPool(Coins) solo or party mining edit the config file like this:   
 
     "Pools": {
-      "ZergPool": {
+      "Blockmasters-Algo": {
         "PasswordSuffix": {
           "Algorithm": {
             "*": "",
@@ -665,7 +700,7 @@ For ZergPool(Coins) solo or party mining edit the config file as follows:
           }
         }
       },
-      "ZergPoolCoins": {
+      "ZergPool-Coin": {
         "PasswordSuffix": {
           "Algorithm": {
             "*": "",
@@ -687,6 +722,7 @@ Advanced configuration for Miners
 
 Settings for each configured miner are stored in its own subsection. These settings are only valid for the named miner.
 
+
 ExcludeAlgorithm per miner
 
 E.g. To exclude the Ethash3gb algorithm from any version of the ClaymoreEthash miner:
@@ -701,11 +737,11 @@ E.g. To exclude the Ethash3gb algorithm from any version of the ClaymoreEthash m
       }
     }
 
-E.g. To exclude the Ethash2gb or Blake2s algorithms from ClaymoreEthash-v14.7 miner:
+E.g. To exclude the Ethash2gb or Blake2s algorithms from ClaymoreEthash-v15.0 miner:
 
     "MinersLegacy": {
       "ClaymoreEthash": {
-        "v14.7": {
+        "v15.0": {
           "ExcludeAlgorithm": [
             "Blake2s",
             "Ethash2gb"
@@ -732,11 +768,11 @@ E.g. To disable the dev fee mining from any version of the ClaymoreEthash miner:
       }
     }
 
-E.g. To disable the dev fee mining from ClaymoreEthash-v14.7 miner:
+E.g. To disable the dev fee mining from ClaymoreEthash-v15.0 miner:
 
     "MinersLegacy": {
       "ClaymoreEthash": {
-        "v14.7": {
+        "v15.0": {
           "DisableDevFeeMining":  true
         }
       }
@@ -749,7 +785,7 @@ Secondary algorithm intensities (dual algo miners only)
 
 The mining intensities for secondary algorithms can be configured in the config file.
 
-The miner name must be entered without the ending version number (e.g. for ClaymoreEthash-v14.7 remove -v14.7)
+The miner name must be entered without the ending version number (e.g. for ClaymoreEthash-v15.0 remove -v15.0)
 The algorithm names must be entered as the miner uses it, do not use the normalized algorithm name as returned by Get-Algorithm.
 
     "MinersLegacy": {
@@ -768,7 +804,7 @@ The algorithm names must be entered as the miner uses it, do not use the normali
             ]
           }
         },
-        "v14.7": {
+        "v15.0": {
           "SecondaryAlgoIntensities": {
             "decred": [
               25,
@@ -788,7 +824,7 @@ Customize miner commands
 
 MPM stores all default miner commands (= what algos to mine and the commands to do so) in the miner file. You can override these commands with your own by modifing the config file.
 
-The miner name must be entered without the ending version number (e.g. for ClaymoreEthash-v14.7 remove -v14.7)
+The miner name must be entered without the ending version number (e.g. for ClaymoreEthash-v15.0 remove -v15.0)
 The algorithm name must be entered in the normalized form as returned by Get-Algorithm.
 Commands must match the data structure as found in the existing miner files. Note: Not all miners use the same parameters.
 
@@ -813,7 +849,7 @@ Commands must match the data structure as found in the existing miner files. Not
           ],
           "CommonCommands": " -dbg -1"
         },
-        "v14.7": {
+        "v15.0": {
           "AllCommands": [
             {
               "MainAlgorithm": "Ethash2gb",
@@ -872,7 +908,7 @@ Modify the config file to define the program and its parameters. E.g.
         }
       },
       "CryptoDredge": {
-        "v0.20.2": {
+        "v0.22.0": {
           "PreStartCommand": "'C:\\Program Files (x86)\\MSI Afterburner\\MSIAfterburner.exe' -Profile2",
           "PostStartCommand": ""
           "PreStopCommand": "_ the command put here would be run before CryptoDredge-v0.20.2 miner gets stopped",
@@ -895,28 +931,6 @@ You can also use any MPM internal variables or simple powershell code like this:
 Advanced general configuration
 
 Settings in this section affect the overall behaviour of MPM and will take precedence over command line parameters.
-
-DevicePciOrderMapping
-
-Some miners (currently Claymore*, Gminer, lolMinerEquihash, Nanominer, SRBMinerCryptonight & Wildrig) enumerate the GPU devices based on the PCI deviceID.
-All other miners use the device order as returned by the OpenCL API.
-The result of the two ordering methods can be different and will lead to invalid device selections where the affected miners will not mine on the correct device.
-
-To override the PCI deviceID mapping create a section in the config file similar to this:
-
-    {
-      "DevicePciOrderMapping": {
-        "GPU#00": "0",
-        "GPU#01": "1",
-        "GPU#02": "3",
-        "GPU#03": "2"
-      }
-    }
-Note: In most cases there is no need for this extra mapping and all miners will operate just fine. This mapping only applies to miners using the PCI deviceID for the device enumeration. 
-More info can be found here:
-https://github.com/nanopool/nanominer/issues/30
-https://github.com/develsoftware/GMinerRelease/issues/18
-
 
 Ignore pool and miner fees
 

@@ -20,12 +20,12 @@
   data-detail-view="true"
   data-detail-formatter="detailFormatter"
   data-remember-order="true"
-  data-auto-refresh="true"
+  data-auto-refresh="false"
 >
   <thead>
     <tr>
       <th data-field="Name" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Name</th>
-      <th data-field="Pool" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Pool</th>
+      <th data-field="PoolName" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Pool</th>
       <th data-field="tDevices" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Devices</th>
       <th data-field="Profit" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit</th>
       <th data-field="Earning" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning</th>
@@ -47,7 +47,7 @@
 <script id="poolbalance_template" type="text/x-handlebars-template">
   <div class="mb-2 card {{#if total}}text-white bg-primary {{else}}text-dark bg-light{{/if}}" style="min-width: {{#if total}}100%{{else}}200px{{/if}}";>
     <div class="card-header text-center">
-      <h5>{{name}}</h5>
+      <h5>{{#if total}}{{name}}{{else}}<a href="{{url}}" target="_blank">{{name}}</a>{{/if}}</h5>
       {{lastupdated}}
     </div>
     <div class="card-body text-center">
@@ -77,7 +77,7 @@
         $.each(result, function(index, item) {
           if (!(footer.test(item.Name))) {
             var currencies = Object.keys(rates[item.Currency]);
-            var data = {name: item.Name, lastupdated: formatDate(item.LastUpdated), balances: {}};
+            var data = {name: item.Name, lastupdated: formatDate(item.LastUpdated), url: item.Url, balances: {}};
             $.each(currencies, function(cindex, currency) {
               data["balances"][currency] = (item.Total * rates[item.Currency][currency]).toFixed(10);
               if (!(data_total["balances"][currency])) {data_total["balances"][currency] = 0}

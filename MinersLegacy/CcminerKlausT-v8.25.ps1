@@ -18,7 +18,7 @@ $Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
 
-$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA Corporation")
+$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA")
 
 # Miner requires CUDA 10.0.00
 $CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
@@ -39,8 +39,8 @@ $Commands = [PSCustomObject]@{
     "keccak"        = " -a keccak" #Keccak
     "luffa"         = " -a luffa" #Luffa
     # "lyra2v2"       = " -a lyra2v2" #Lyra2RE2; CcminerAlexis-v1.5 is faster
-    "lyra2v3"       = " -a lyra2v3 --intensity 24" #Lyra2RE3, new in 8.23
-    "neoscrypt"     = " -a neoscrypt --intensity 17" #NeoScrypt
+    "lyra2v3"       = " -a lyra2v3 --intensity 21" #Lyra2RE3, new in 8.23
+    "neoscrypt"     = " -a neoscrypt --intensity 16" #Neoscrypt
     "penta"         = " -a penta" #Pentablake
     "s3"            = " -a s3" #S3
     "skein"         = " -a skein" #Skein
@@ -77,10 +77,10 @@ else {$CommonCommands = ""}
 
 $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 1
+    $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1
         
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
-        $Miner_Name = (@($Name) + @($Miner_Device.Model_Norm | Sort-Object -unique | ForEach-Object {$Model_Norm = $_; "$(@($Miner_Device | Where-Object Model_Norm -eq $Model_Norm).Count)x$Model_Norm"}) | Select-Object) -join '-'
+        $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object {$Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model"}) | Select-Object) -join '-'
 
         #Get commands for active miner devices
         $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
