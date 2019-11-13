@@ -13,10 +13,7 @@ $HashSHA256 = "9D92D8659FA86F8FBBB0C96AD59C745EA31591DBAAC7209EBF011406EC4A00A7"
 $Uri = "https://tradeproject.de/download/Miner/TT-Miner-3.0.10.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5025783.0"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA")
 
@@ -53,7 +50,7 @@ else { $CommonCommands = " -RH -luck" }
 
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
@@ -65,18 +62,16 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             $Command = Get-CommandPerDevice -Command $_.Command -ExcludeParameters @("A", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
             [PSCustomObject]@{ 
-                Name       = $Miner_Name
-                BaseName   = $Miner_BaseName
-                Version    = $Miner_Version
-                DeviceName = $Miner_Device.Name
-                Path       = $Path
-                HashSHA256 = $HashSHA256
-                Arguments  = ("$command$CommonCommands --api-bind 127.0.0.1:$($Miner_Port) -P $($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass)@$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)$($Commands.$_)$CommonCommands -d $(($Miner_Device | ForEach-Object { '{0:x}' -f ($_.Type_Vendor_Index) }) -join ' ')" -replace "\s+", " ").trim()
-                HashRates  = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
-                API        = "Claymore"
-                Port       = $Miner_Port
-                URI        = $Uri
-                Fees       = [PSCustomObject]@{ $Algorithm_Norm = 1 / 100 }
+                Name             = $Miner_Name
+                DeviceName       = $Miner_Device.Name
+                Path             = $Path
+                HashSHA256       = $HashSHA256
+                Arguments        = ("$command$CommonCommands --api-bind 127.0.0.1:$($Miner_Port) -P $($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass)@$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)$($Commands.$_)$CommonCommands -d $(($Miner_Device | ForEach-Object { '{0:x}' -f ($_.Type_Vendor_Index) }) -join ' ')" -replace "\s+", " ").trim()
+                HashRates        = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
+                API              = "Claymore"
+                Port             = $Miner_Port
+                URI              = $Uri
+                Fees             = [PSCustomObject]@{ $Algorithm_Norm = 1 / 100 }
                 PrerequisitePath = "$env:SystemRoot\System32\VCRUNTIME140_1.dll"
                 PrerequisiteURI  = "https://aka.ms/vs/16/release/vc_redist.x64.exe"
             }

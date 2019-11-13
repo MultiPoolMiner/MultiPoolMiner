@@ -13,10 +13,7 @@ $HashSHA256 = "CBE3F0349E28E7844257E91FB5A93D138B0BD78277D57224ED8ED61D5B8D30D5"
 $Uri = "https://github.com/zcoinofficial/sgminer/releases/download/0.1.3/sgminer.zip"
 $ManualUri = "https://github.com/zcoinofficial/sgminer"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject]@{ 
     "mtp" = " --kernel mtp --intensity 18 -p 0,strict,verbose,d=700" #MTP
@@ -41,8 +38,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         [PSCustomObject]@{ 
             Name              = $Miner_Name
-            BaseName          = $Miner_BaseName
-            Version           = $Miner_Version
             DeviceName        = $Miner_Device.Name
             Path              = $Path
             HashSHA256        = $HashSHA256

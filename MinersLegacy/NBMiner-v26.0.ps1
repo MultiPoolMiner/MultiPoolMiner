@@ -13,11 +13,7 @@ $HashSHA256 = "4AD3EBBA6F0DBB76186003CCB900B6CB313BF572ECC8DFEB4B637A9949DC7818"
 $Uri = "https://github.com/NebuTech/NBMiner/releases/download/v26.0/NBMiner_26.0_Win.zip"
 $ManualUri = "https://github.com/gangnamtestnet/progminer/releases"
 
-
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = $Devices | Where-Object Type -EQ "GPU"
 
@@ -58,7 +54,7 @@ else { $CommonCommands = "" }
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
-    $Miner_Port = [Int]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     $Commands | ForEach-Object { $Main_Algorithm_Norm = Get-Algorithm ($_.Algorithm -Split ";" | Select-Object -Index 0); $_ } | Where-Object { $_.Vendor -contains ($Device.Vendor | Select-Object -Unique) -and $Pools.$Main_Algorithm_Norm.Host } | ForEach-Object { 
         $Main_Algorithm = $_.Algorithm -split ';' | Select-Object -Index 0
@@ -111,8 +107,6 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             if ($null -eq $Secondary_Algorithm -or $Pools.$Secondary_Algorithm_Norm.Host) { 
                 [PSCustomObject]@{ 
                     Name       = $Miner_Name
-                    BaseName   = $Miner_BaseName
-                    Version    = $Miner_Version
                     DeviceName = $Miner_Device.Name
                     Path       = $Path
                     HashSHA256 = $HashSHA256

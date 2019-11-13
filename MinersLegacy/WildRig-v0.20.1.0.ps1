@@ -9,14 +9,11 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\wildrig.exe"
-$HashSHA256 = "A39DA51F82D41E1B5523112BA6AB074E98E5FFD4092375CA64531A04BBB7E285"
-$Uri = "https://github.com/andru-kun/wildrig-multi/releases/download/0.20.0/wildrig-multi-windows-0.20.0.3.7z"
+$HashSHA256 = "88E89D555155D8C0705BEB29B2361F399B322833B6BB9795B58ECAAA28F2E57D"
+$Uri = "https://github.com/andru-kun/wildrig-multi/releases/download/0.20.1/wildrig-multi-windows-0.20.1.7z"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5023676.0"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject]@{ 
     "Aergo"          = " --algo=aergo"
@@ -71,12 +68,12 @@ if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType No
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonCommands) { $CommonCommands = $Miner_Config.CommonCommands }
-else { $CommonCommands = " --opencl-threads auto --opencl-launch auto --multiple-instance --no-adl" }
+else { $CommonCommands = " --multiple-instance --no-adl --watchdog" }
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "AMD")
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = [UInt16]($Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1)
+    $Miner_Port = [UInt16]($Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Index) + 1)
 
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
@@ -86,12 +83,18 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         #Optionally disable dev fee mining, cannot be done for Honeycomb or Wildkeccak algorithm
         if ($null -eq $Miner_Config) { $Miner_Config = [PSCustomObject]@{ DisableDevFeeMining = $Config.DisableDevFeeMining } }
-        if ($Algorithm_Norm -notmatch "Honeycomb|Wildkeccak" -and $Miner_Config.DisableDevFeeMining) { 
-            $NoFee = "--donate-level 0"
-            $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = 0 }
+        if ($Miner_Config.DisableDevFeeMining) {
+            if ($Algorithm_Norm -match "Honeycomb|MtpTcr") { 
+                $Fee = " --donate-level 1"
+                $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = 1 / 100 }
+            }
+            else { 
+                $Fee = " --donate-level 0"
+                $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = 0 }
+            }
         }
         else { 
-            $NoFee = ""
+            $Fee = ""
             $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = 2 / 100 }
         }
 
@@ -102,12 +105,10 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         [PSCustomObject]@{ 
             Name       = $Miner_Name
-            BaseName   = $Miner_BaseName
-            Version    = $Miner_Version
             DeviceName = $Miner_Device.Name
             Path       = $Path
             HashSHA256 = $HashSHA256
-            Arguments  = ("$Command$CommonCommands --api-port=$Miner_Port --url=$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user=$($Pools.$Algorithm_Norm.User) --pass=$($Pools.$Algorithm_Norm.Pass) --opencl-platform=$($Miner_Device.PlatformId | Sort-Object -Unique) --opencl-devices=$(($Miner_Device | ForEach-Object { '{0:x}' -f $_.Type_Vendor_Slot }) -join ',')" -replace "\s+", " ").trim()
+            Arguments  = ("$Command$CommonCommands$Fee --api-port=$Miner_Port --url=$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user=$($Pools.$Algorithm_Norm.User) --pass=$($Pools.$Algorithm_Norm.Pass) --opencl-platform=$($Miner_Device.PlatformId | Sort-Object -Unique) --opencl-devices=$(($Miner_Device | ForEach-Object { '{0:x}' -f $_.Type_Vendor_Slot }) -join ',')" -replace "\s+", " ").trim()
             HashRates  = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
             API        = "XmRig"
             Port       = $Miner_Port

@@ -16,10 +16,7 @@ $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty
 $Path = ".\Bin\$($Name)\xmrig-nvidia.exe"
 $ManualUri = "https://github.com/xmrig/xmrig-nvidia"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA")
 
@@ -77,7 +74,7 @@ else { $CommonCommands = "" }
 
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $Pools.$Algorithm_Norm.Host } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB * $_.Threads
@@ -121,8 +118,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
             [PSCustomObject]@{ 
                 Name       = $Miner_Name
-                BaseName   = $Miner_BaseName
-                Version    = $Miner_Version
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256

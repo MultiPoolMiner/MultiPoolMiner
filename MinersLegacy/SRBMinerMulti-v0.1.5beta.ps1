@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\SRBMiner-MULTI.exe"
-$HashSHA256 = ""
-$Uri = "https://github.com/doktor83/SRBMiner-Multi/releases/download/0.1.4/SRBMiner-Multi-0-1-4.zip"
+$HashSHA256 = "826B6C85931825F9D92AC71B0D41F702270F7B6C5C45FE4A44EEC6F0710B8808"
+$Uri = "https://github.com/doktor83/SRBMiner-Multi/releases/download/0.1.5/SRBMiner-Multi-0-1-5.zip"
 $ManualUri = "https://github.com/doktor83/SRBMiner-Multi/releases"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
@@ -20,7 +20,18 @@ $Commands = [PSCustomObject[]]@(
 )
 # Algorithm names are case sensitive!
 $Commands = [PSCustomObject[]]@(
+    [PSCustomObject]@{ Algorithm = "Blake2b";        MinMemGb = 1; Fee = 0;    Vendor = @("CPU", "AMD"); Command = " --algorithm blake2b" }
+    [PSCustomObject]@{ Algorithm = "Blake2s";        MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm blake2s" }
     [PSCustomObject]@{ Algorithm = "CpuPower";       MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm cpupower" }
+    [PSCustomObject]@{ Algorithm = "Eaglesong";      MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm eaglesong" }
+    [PSCustomObject]@{ Algorithm = "Kangaroo12";     MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm k12" }
+    [PSCustomObject]@{ Algorithm = "Mtp";            MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm mtp" }
+    [PSCustomObject]@{ Algorithm = "Rainforestv2";   MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm rainforestv2" }
+    [PSCustomObject]@{ Algorithm = "RandomX";        MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomx" }
+    [PSCustomObject]@{ Algorithm = "RandomXArQmA";   MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomarq" }
+    [PSCustomObject]@{ Algorithm = "RandomXloki";    MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomxl" }
+    [PSCustomObject]@{ Algorithm = "RandomXwow";     MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomwow" }
+    [PSCustomObject]@{ Algorithm = "Yescrypt";       MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm yescrypt" }
     [PSCustomObject]@{ Algorithm = "Yescryptr16";    MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm yescryptr16" }
     [PSCustomObject]@{ Algorithm = "Yescryptr32";    MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm yescryptr32" }
     [PSCustomObject]@{ Algorithm = "Yescryptr8";     MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm yescryptr8" }
@@ -30,15 +41,9 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "Yespowerltncg";  MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm yespowerltncg" }
     [PSCustomObject]@{ Algorithm = "Yespowerr16";    MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm yespowerr16" }
     [PSCustomObject]@{ Algorithm = "Yespowersugar";  MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm yespowersugar" }
-    [PSCustomObject]@{ Algorithm = "Yesyespowerurx"; MinMemGb = 1; Fee = 0;    Vendor = @("CPU")       ; Command = " --algorithm yesyespowerurx" }
-    [PSCustomObject]@{ Algorithm = "Blake2b";        MinMemGb = 1; Fee = 0;    Vendor = @("CPU", "AMD"); Command = " --algorithm blake2b" }
-    [PSCustomObject]@{ Algorithm = "Blake2s";        MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm blake2s" }
-    [PSCustomObject]@{ Algorithm = "Eaglesong";      MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm eaglesong" }
-    [PSCustomObject]@{ Algorithm = "Kangaroo12";     MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm k12" }
-    [PSCustomObject]@{ Algorithm = "Mtp";            MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm mtp" }
-    [PSCustomObject]@{ Algorithm = "Rainforestv2";   MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm rainforestv2" }
-    [PSCustomObject]@{ Algorithm = "Yescrypt";       MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm yescrypt" }
+    [PSCustomObject]@{ Algorithm = "Yespowerurx";    MinMemGb = 1; Fee = 0;    Vendor = @("CPU")       ; Command = " --algorithm yespowerurx" }
 )
+
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
 
@@ -49,7 +54,7 @@ else { $CommonCommands = "" }
 $Devices = $Devices | Where-Object { $_.Type -EQ "CPU" -or $_.Vendor -EQ "AMD" }
 $Devices | Select-Object Model, Type, Vendor  -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Model -EQ $_.Model| Where-Object Type -EQ $_.Type | Where-Object Vendor -EQ $_.Vendor)
-    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
 
     $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $Pools.$Algorithm_Norm.Host -and (($Device.Type | Select-Object -Unique) -in $_.Vendor -or ($Device.Vendor | Select-Object -Unique) -in $_.Vendor) } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
@@ -62,8 +67,6 @@ $Devices | Select-Object Model, Type, Vendor  -Unique | ForEach-Object {
 
             [PSCustomObject]@{ 
                 Name       = $Miner_Name
-                BaseName   = $Miner_BaseName
-                Version    = $Miner_Version
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256

@@ -11,10 +11,7 @@ $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty
 $Path = ".\Bin\$($Name)\CryptoDredge.exe"
 $ManualUri = "https://github.com/technobyl/CryptoDredge"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA")
 
@@ -36,46 +33,46 @@ else {
 }
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{ Algorithm = "Allium";             MinMemGB = 1; Fee = 1; Command = " --algo allium" } #Allium
-    [PSCustomObject]@{ Algorithm = "Argon2CRDS";         MinMemGB = 1; Fee = 1; Command = " --algo argon2d250" } #Argon2CRDS, new in 19.1
-    [PSCustomObject]@{ Algorithm = "Argon2UIS";          MinMemGB = 1; Fee = 1; Command = " --algo argon2d4096" } #Argon2UIS, new in 19.1
-    [PSCustomObject]@{ Algorithm = "Argon2dDYN";         MinMemGB = 1; Fee = 1; Command = " --algo argon2d-dyn" } #Argon2dDYN
-    [PSCustomObject]@{ Algorithm = "Argon2dNIM";         MinMemGB = 1; Fee = 1; Command = " --algo argon2d-nim" } #Argon2d-nim, new in 21.0
-    [PSCustomObject]@{ Algorithm = "BCD";                MinMemGB = 1; Fee = 1; Command = " --algo bcd" } #BitcoinDiamond, new in 0.9.4
-    [PSCustomObject]@{ Algorithm = "Timetravel10";       MinMemGB = 1; Fee = 1; Command = " --algo bitcore" } #Timetravel10
-    [PSCustomObject]@{ Algorithm = "Argon2idChukwa";     MinMemGB = 2; Fee = 1; Command = " --algo chukwa" } #Argon2idChukwa, new in 21.0
-    [PSCustomObject]@{ Algorithm = "Argon2idWRKZ";       MinMemGB = 2; Fee = 1; Command = " --algo chukwa-wrkz" } #Argon2idWRKZ, new in 21.0
-    [PSCustomObject]@{ Algorithm = "CryptonightConceal"; MinMemGB = 2; Fee = 1; Command = " --algo cnconceal" } #CryptonightConceal, new in 21.0
-    [PSCustomObject]@{ Algorithm = "CryptonightFast2";   MinMemGB = 2; Fee = 1; Command = " --algo cnfast2" } #CryptonightFast2, new in 16.2
-    [PSCustomObject]@{ Algorithm = "CryptonightGpu";     MinMemGB = 2; Fee = 1; Command = " --algo cngpu" } #CryptonightGpu, new in 0.17.0
-    [PSCustomObject]@{ Algorithm = "CryptonightHaven";   MinMemGB = 4; Fee = 1; Command = " --algo cnhaven" } #CryptonightHaven, new in 0.9.1
-    [PSCustomObject]@{ Algorithm = "CryptonightHeavy";   MinMemGB = 4; Fee = 1; Command = " --algo cnheavy" } #CryptonightHeavy, new in 0.9
-    [PSCustomObject]@{ Algorithm = "CryptonightLiteV7";  MinMemGB = 1; Fee = 1; Command = " --algo aeon" } #Aeon, new in 0.9 (CryptonightLiteV1 algorithm)
-    [PSCustomObject]@{ Algorithm = "CryptonightSaber";   MinMemGB = 4; Fee = 1; Command = " --algo cnsaber" } #CryptonightHeavyTube (BitTube2), new in 0.9.2
-    [PSCustomObject]@{ Algorithm = "CryptonightTurtle";  MinMemGB = 2; Fee = 1; Command = " --algo cnturtle " } #CryptonightTurtle, new in 0.17.0
-    [PSCustomObject]@{ Algorithm = "CryptonightV8";      MinMemGB = 2; Fee = 1; Command = " --algo cnv8" } #CryptonightV1, new in 0.9.3
-#    [PSCustomObject]@{ Algorithm = "Cuckood29";          MinMemGB = 3; Fee = 1; Command = " --algo aeternity" } #Cuckood29, new in 0.17.0, reported API value too small
-#    [PSCustomObject]@{ Algorithm = "Cuckarood29";         MinMemGB = 6; Fee = 1; Command = " --algo Cuckaroo29 --intensity 5" } #Cuckaroo29, new in 0.17.0; old Grin algo, reported API value too small
-    [PSCustomObject]@{ Algorithm = "Hmq1725";            MinMemGB = 1; Fee = 1; Command = " --algo hmq1725" } #HMQ1725, new in 0.10.0
-    [PSCustomObject]@{ Algorithm = "Lyra2RE3";           MinMemGB = 1; Fee = 1; Command = " --algo lyra2rev3" } #Lyra2REv3, new in 0.14.0 
-    [PSCustomObject]@{ Algorithm = "Lyra2vc0ban";        MinMemGB = 1; Fee = 1; Command = " --algo lyra2vc0ban" } #Lyra2vc0banHash, new in 0.13.0
-    [PSCustomObject]@{ Algorithm = "Lyra2z";             MinMemGB = 1; Fee = 1; Command = " --algo lyra2z" } #Lyra2z, unprofitable algo
-    [PSCustomObject]@{ Algorithm = "Lyra2zz";            MinMemGB = 1; Fee = 1; Command = " --algo lyra2zz" } #Lyra2zz, new in 0.16.0 
-    [PSCustomObject]@{ Algorithm = "Mtp";                MinMemGB = 5; Fee = 2; Command = " --algo mtp" } #MTP, new with 0.15.0; CcminerTrex-v0.12.2b is 10% faster
-    [PSCustomObject]@{ Algorithm = "MtpNicehash";        MinMemGB = 5; Fee = 2; Command = " --algo mtp" } #MTP, new with 0.15.0; CcminerTrex-v0.12.2b is 10% faster
-    [PSCustomObject]@{ Algorithm = "Neoscrypt";          MinMemGB = 1; Fee = 1; Command = " --algo neoscrypt --intensity 7" } #NeoScrypt
-    [PSCustomObject]@{ Algorithm = "Phi2";               MinMemGB = 1; Fee = 1; Command = " --algo phi2 --intensity 8" } #PHI2
-    [PSCustomObject]@{ Algorithm = "Phi2-Lux";           MinMemGB = 1; Fee = 1; Command = " --algo phi2 --intensity 8" } #PHI2-Lux
-    [PSCustomObject]@{ Algorithm = "Pipe" ;              MinMemGB = 1; Fee = 1; Command = " --algo pipe" } #Pipe, new in 12.0
-    [PSCustomObject]@{ Algorithm = "Skunk";              MinMemGB = 1; Fee = 1; Command = " --algo skunk" } #Skunk
-    [PSCustomObject]@{ Algorithm = "Tribus" ;            MinMemGB = 1; Fee = 1; Command = " --algo tribus" } #Tribus, new with 0.8
-    [PSCustomObject]@{ Algorithm = "X16r";               MinMemGB = 1; Fee = 1; Command = " --algo x16r" } #X16R, new in 0.11.0
-    [PSCustomObject]@{ Algorithm = "X16rt";              MinMemGB = 1; Fee = 1; Command = " --algo x16rt" } #X16rt, new in 0.16.0
-    [PSCustomObject]@{ Algorithm = "X16rv2";             MinMemGB = 1; Fee = 1; Command = " --algo x16rv2" } #X16R, new in 0.22.0
-    [PSCustomObject]@{ Algorithm = "X16s";               MinMemGB = 1; Fee = 1; Command = " --algo x16s" } #X16S, new in 0.11.0
-    [PSCustomObject]@{ Algorithm = "X17";                MinMemGB = 1; Fee = 1; Command = " --algo x17" } #X17, new in 0.9.5
-    [PSCustomObject]@{ Algorithm = "X21s";               MinMemGB = 1; Fee = 1; Command = " --algo x21s" } #X21s, new in 0.13.0
-    [PSCustomObject]@{ Algorithm = "X22i";               MinMemGB = 1; Fee = 1; Command = " --algo x22i" } #X22i, new in 0.9.6
+    [PSCustomObject]@{ Algorithm = "Allium";               MinMemGB = 1; Fee = 1; Command = " --algo allium" } #Allium
+    [PSCustomObject]@{ Algorithm = "Argon2CRDS";           MinMemGB = 1; Fee = 1; Command = " --algo argon2d250" } #Argon2CRDS, new in 19.1
+    [PSCustomObject]@{ Algorithm = "Argon2UIS";            MinMemGB = 1; Fee = 1; Command = " --algo argon2d4096" } #Argon2UIS, new in 19.1
+    [PSCustomObject]@{ Algorithm = "Argon2dDYN";           MinMemGB = 1; Fee = 1; Command = " --algo argon2d-dyn" } #Argon2dDYN
+    [PSCustomObject]@{ Algorithm = "Argon2dNIM";           MinMemGB = 1; Fee = 1; Command = " --algo argon2d-nim" } #Argon2d-nim, new in 21.0
+    [PSCustomObject]@{ Algorithm = "BCD";                  MinMemGB = 1; Fee = 1; Command = " --algo bcd" } #BitcoinDiamond, new in 0.9.4
+    [PSCustomObject]@{ Algorithm = "Timetravel10";         MinMemGB = 1; Fee = 1; Command = " --algo bitcore" } #Timetravel10
+    [PSCustomObject]@{ Algorithm = "Argon2idChukwa";       MinMemGB = 2; Fee = 1; Command = " --algo chukwa" } #Argon2idChukwa, new in 21.0
+    [PSCustomObject]@{ Algorithm = "Argon2idWRKZ";         MinMemGB = 2; Fee = 1; Command = " --algo chukwa-wrkz" } #Argon2idWRKZ, new in 21.0
+    [PSCustomObject]@{ Algorithm = "CryptonightConceal";   MinMemGB = 2; Fee = 1; Command = " --algo cnconceal" } #CryptonightConceal, new in 21.0
+    [PSCustomObject]@{ Algorithm = "CryptonightFast2";     MinMemGB = 2; Fee = 1; Command = " --algo cnfast2" } #CryptonightFast2, new in 16.2
+    [PSCustomObject]@{ Algorithm = "CryptonightGpu";       MinMemGB = 2; Fee = 1; Command = " --algo cngpu" } #CryptonightGpu, new in 0.17.0
+    [PSCustomObject]@{ Algorithm = "CryptonightHaven";     MinMemGB = 4; Fee = 1; Command = " --algo cnhaven" } #CryptonightHaven, new in 0.9.1
+    [PSCustomObject]@{ Algorithm = "CryptonightHeavy";     MinMemGB = 4; Fee = 1; Command = " --algo cnheavy" } #CryptonightHeavy, new in 0.9
+    [PSCustomObject]@{ Algorithm = "CryptonightLiteV1";    MinMemGB = 1; Fee = 1; Command = " --algo aeon" } #Aeon, new in 0.9 (CryptonightLiteV1 algorithm)
+    [PSCustomObject]@{ Algorithm = "CryptonightHeavyTube"; MinMemGB = 4; Fee = 1; Command = " --algo cnsaber" } #CryptonightHeavyTube (BitTube2), new in 0.9.2
+    [PSCustomObject]@{ Algorithm = "CryptonightTurtle";    MinMemGB = 2; Fee = 1; Command = " --algo cnturtle " } #CryptonightTurtle, new in 0.17.0
+    [PSCustomObject]@{ Algorithm = "CryptonightV2";        MinMemGB = 2; Fee = 1; Command = " --algo cnv8" } #CryptonightV2, new in 0.9.3
+#    [PSCustomObject]@{ Algorithm = "Cuckood29";            MinMemGB = 3; Fee = 1; Command = " --algo aeternity" } #Cuckood29, new in 0.17.0, reported API value too small
+#    [PSCustomObject]@{ Algorithm = "Cuckarood29";          MinMemGB = 6; Fee = 1; Command = " --algo Cuckaroo29 --intensity 5" } #Cuckaroo29, new in 0.17.0; old Grin algo, reported API value too small
+    [PSCustomObject]@{ Algorithm = "Hmq1725";              MinMemGB = 1; Fee = 1; Command = " --algo hmq1725" } #HMQ1725, new in 0.10.0
+    [PSCustomObject]@{ Algorithm = "Lyra2RE3";             MinMemGB = 1; Fee = 1; Command = " --algo lyra2rev3" } #Lyra2REv3, new in 0.14.0 
+    [PSCustomObject]@{ Algorithm = "Lyra2vc0ban";          MinMemGB = 1; Fee = 1; Command = " --algo lyra2vc0ban" } #Lyra2vc0banHash, new in 0.13.0
+    [PSCustomObject]@{ Algorithm = "Lyra2z";               MinMemGB = 1; Fee = 1; Command = " --algo lyra2z" } #Lyra2z, unprofitable algo
+    [PSCustomObject]@{ Algorithm = "Lyra2zz";              MinMemGB = 1; Fee = 1; Command = " --algo lyra2zz" } #Lyra2zz, new in 0.16.0 
+    [PSCustomObject]@{ Algorithm = "Mtp";                  MinMemGB = 5; Fee = 2; Command = " --algo mtp" } #MTP, new with 0.15.0; CcminerTrex-v0.12.2b is 10% faster
+    [PSCustomObject]@{ Algorithm = "MtpNicehash";          MinMemGB = 5; Fee = 2; Command = " --algo mtp" } #MTP, new with 0.15.0; CcminerTrex-v0.12.2b is 10% faster
+    [PSCustomObject]@{ Algorithm = "Neoscrypt";            MinMemGB = 1; Fee = 1; Command = " --algo neoscrypt --intensity 7" } #NeoScrypt
+    [PSCustomObject]@{ Algorithm = "Phi2";                 MinMemGB = 1; Fee = 1; Command = " --algo phi2 --intensity 8" } #PHI2
+    [PSCustomObject]@{ Algorithm = "Phi2-Lux";             MinMemGB = 1; Fee = 1; Command = " --algo phi2 --intensity 8" } #PHI2-Lux
+    [PSCustomObject]@{ Algorithm = "Pipe" ;                MinMemGB = 1; Fee = 1; Command = " --algo pipe" } #Pipe, new in 12.0
+    [PSCustomObject]@{ Algorithm = "Skunk";                MinMemGB = 1; Fee = 1; Command = " --algo skunk" } #Skunk
+    [PSCustomObject]@{ Algorithm = "Tribus" ;              MinMemGB = 1; Fee = 1; Command = " --algo tribus" } #Tribus, new with 0.8
+    [PSCustomObject]@{ Algorithm = "X16r";                 MinMemGB = 1; Fee = 1; Command = " --algo x16r" } #X16R, new in 0.11.0
+    [PSCustomObject]@{ Algorithm = "X16rt";                MinMemGB = 1; Fee = 1; Command = " --algo x16rt" } #X16rt, new in 0.16.0
+    [PSCustomObject]@{ Algorithm = "X16rv2";               MinMemGB = 1; Fee = 1; Command = " --algo x16rv2" } #X16R, new in 0.22.0
+    [PSCustomObject]@{ Algorithm = "X16s";                 MinMemGB = 1; Fee = 1; Command = " --algo x16s" } #X16S, new in 0.11.0
+    [PSCustomObject]@{ Algorithm = "X17";                  MinMemGB = 1; Fee = 1; Command = " --algo x17" } #X17, new in 0.9.5
+    [PSCustomObject]@{ Algorithm = "X21s";                 MinMemGB = 1; Fee = 1; Command = " --algo x21s" } #X21s, new in 0.13.0
+    [PSCustomObject]@{ Algorithm = "X22i";                 MinMemGB = 1; Fee = 1; Command = " --algo x22i" } #X22i, new in 0.9.6
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
@@ -86,7 +83,7 @@ else { $CommonCommands = " --no-watchdog --no-crashreport $(if (-not $Config.Sho
 
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $Pools.$Algorithm_Norm.Host } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
@@ -102,8 +99,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
             [PSCustomObject]@{ 
                 Name       = $Miner_Name
-                BaseName   = $Miner_BaseName
-                Version    = $Miner_Version
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256

@@ -9,14 +9,11 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\nanominer.exe"
-$HashSHA256 = "1F9F8A968F508543D2BAB22277C9F9321626547E24674D3C2BCED749ED54ADEB"
-$Uri = "https://github.com/nanopool/nanominer/releases/download/v1.6.1/nanominer-windows-1.6.1.zip"
+$HashSHA256 = "783448AAC036D91D67DD00B1C41EA029A3C956FDACD4DB192D7F8C9CBC491B26"
+$Uri = "https://github.com/nanopool/nanominer/releases/download/v1.6.2/nanominer-windows-1.6.2.zip"
 $ManualUri = "https://github.com/nanopool/nanominer/releases"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = $Devices | Where-Object Type -EQ "GPU"
 
@@ -53,7 +50,7 @@ else { $CommonCommands = "" }
 
 $Devices | Select-Object Vendor, Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
-    $Miner_Port = [Int]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
 
     $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $_.Vendor -contains ($Device.Vendor | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $Algorithm = $_.Algorithm -replace "ethash(\dgb)", "Ethash"
@@ -96,8 +93,6 @@ wallet=$($Pools.$Algorithm_Norm.User)"
 
             [PSCustomObject]@{ 
                 Name       = $Miner_Name
-                BaseName   = $Miner_BaseName
-                Version    = $Miner_Version
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256

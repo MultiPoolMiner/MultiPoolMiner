@@ -13,10 +13,7 @@ $HashSHA256 = "F1FEB04097E33DB3A45F3D60EAC386E5EA1212FE1FCC157CA33A59A26EB5B4D5"
 $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.5r_cuda10_win-x64.zip"
 $ManualUri = "https://miniz.ch/download"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA"
 
@@ -46,7 +43,7 @@ else { $CommonCommands = " --latency --show-shares --all-shares --show-pers --sh
 
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = [Int]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm ($_.Algorithm -replace ","); $_ } | Where-Object { $Pools.$Algorithm_Norm.Host } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
@@ -67,8 +64,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
             [PSCustomObject]@{ 
                 Name       = $Miner_Name
-                BaseName   = $Miner_BaseName
-                Version    = $Miner_Version
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256

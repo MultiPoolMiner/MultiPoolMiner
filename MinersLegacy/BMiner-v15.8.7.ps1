@@ -13,17 +13,14 @@ $HashSHA256 = "53FF85689E0A2A1986B23993394B4EA127A3CF822DD2D7CDABA21087C1949F32"
 $Uri = "https://www.bminercontent.com/releases/bminer-lite-v15.8.7-6831c33-amd64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=2519271.0"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config){ $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = $Devices | Where-Object Type -EQ "GPU"
 
 # Miner requires CUDA 9.2.00 or higher
 $CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
 $RequiredCUDAVersion = "9.2.00"
-if ($Devices.Vendor -contains "NVIDIA" -and $CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion){ 
+if ($Devices.Vendor -contains "NVIDIA" -and $CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
     $Devices = $Devices | Where-Object Vendor -NE "NVIDIA"
 }
@@ -54,7 +51,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "tensority";      Protocol = "ethstratum";   SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Bytom
 )
 #Commands from config file take precedence
-if ($Miner_Config.Commands){ $Miner_Config.Commands | ForEach-Object{ $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object{ $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
+if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
 
 $SecondaryAlgoIntensities = [PSCustomObject]@{ 
     "blake14r"  = @(0) # 0 = Auto-Intensity
@@ -63,33 +60,33 @@ $SecondaryAlgoIntensities = [PSCustomObject]@{
     "vbk"       = @(0) # 0 = Auto-Intensity
 }
 #Intensities from config file take precedence
-$Miner_Config.SecondaryAlgoIntensities.PSObject.Properties.Name | Select-Object | ForEach-Object{ 
+$Miner_Config.SecondaryAlgoIntensities.PSObject.Properties.Name | Select-Object | ForEach-Object { 
     $SecondaryAlgoIntensities | Add-Member $_ $Miner_Config.SecondaryAlgoIntensities.$_ -Force
 }
 
-$Commands | ForEach-Object{ 
-    if ($_.SecondaryAlgorithm){ 
+$Commands | ForEach-Object { 
+    if ($_.SecondaryAlgorithm) { 
         $Command = $_
-        $SecondaryAlgoIntensities.$($_.SecondaryAlgorithm) | Select-Object | ForEach-Object{ 
+        $SecondaryAlgoIntensities.$($_.SecondaryAlgorithm) | Select-Object | ForEach-Object { 
             if ($null -ne $Command.SecondaryAlgoIntensity){ 
                 $Command = ($Command | ConvertTo-Json | ConvertFrom-Json)
                 $Command | Add-Member SecondaryAlgoIntensity ([String] $_) -Force
                 $Commands += $Command
             }
-            else{ $Command | Add-Member SecondaryAlgoIntensity $_ }
+            else { $Command | Add-Member SecondaryAlgoIntensity $_ }
         }
     }
 }
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonCommands){ $CommonCommands = $Miner_Config.CommonCommands }
-else{ $CommonCommands = " -watchdog=false" }
+if ($Miner_Config.CommonCommands) { $CommonCommands = $Miner_Config.CommonCommands }
+else { $CommonCommands = " -watchdog=false" }
 
-$Devices | Select-Object Vendor, Model -Unique | ForEach-Object{ 
+$Devices | Select-Object Vendor, Model -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
-    $Commands | ForEach-Object{ $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object{ $_.Vendor -contains ($Device.Vendor | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Host } | ForEach-Object{ 
+    $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $_.Vendor -contains ($Device.Vendor | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Host } | ForEach-Object { 
         $Arguments_Secondary = ""
         $IntervalMultiplier = 1
         $MinMemGB = $_.MinMemGB
@@ -101,18 +98,18 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object{
         #Cuckatoo31 on windows 10 requires 3.5 GB extra
         if ($Algorithm -eq "Cuckatoo31" -and ([System.Version]$PSVersionTable.BuildVersion -ge "10.0.0.0")){ $MinMemGB += 3.5 }
 
-        if ($Miner_Device = @($Device | Where-Object{ $Vendor -contains $_.Vendor -and ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB })){ 
+        if ($Miner_Device = @($Device | Where-Object{ $Vendor -contains $_.Vendor -and ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB })) { 
 
             #Get commands for active miner devices
             $Command = Get-CommandPerDevice -Command $_.Command -DeviceIDs $Miner_Device.Type_Vendor_Index
 
-            if ($Algorithm_Norm -eq "Equihash1445"){ 
+            if ($Algorithm_Norm -eq "Equihash1445") { 
                 #define -pers for equihash1445
                 $AlgoPers = " -pers $(Get-AlgoCoinPers  -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default 'auto')"
             }
-            else{ $AlgoPers = "" }
+            else { $AlgoPers = "" }
 
-            if ($null -ne $_.SecondaryAlgoIntensity){ 
+            if ($null -ne $_.SecondaryAlgoIntensity) { 
                 $Secondary_Algorithm = $_.SecondaryAlgorithm
                 $Secondary_Algorithm_Norm = Get-Algorithm $Secondary_Algorithm
 
@@ -125,31 +122,29 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object{
                 $IntervalMultiplier = 2
                 $WarmupTime = 120
             }
-            else{ 
+            else { 
                 $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object{ $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
                 $WarmupTime = 120
 
-                if ($Algorithm_Norm -like "Ethash*"){ $MinerFeeInPercent = 0.65 } # Ethash fee fixed at 0.65%
+                if ($Algorithm_Norm -like "Ethash*") { $MinerFeeInPercent = 0.65 } # Ethash fee fixed at 0.65%
                 else{ $MinerFeeInPercent = 2 } # Other algos fee fixed at 2%
 
                 $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = $MinerFeeInPercent / 100 }
             }
 
             #Optionally disable dev fee mining
-            if ($null -eq $Miner_Config){ $Miner_Config = [PSCustomObject]@{ DisableDevFeeMining = $Config.DisableDevFeeMining } }
-            if ($Miner_Config.DisableDevFeeMining){ 
+            if ($null -eq $Miner_Config) { $Miner_Config = [PSCustomObject]@{ DisableDevFeeMining = $Config.DisableDevFeeMining } }
+            if ($Miner_Config.DisableDevFeeMining) { 
                 $NoFee = " -nofee"
                 $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = 0 / 100 }
                 if ($Secondary_Algorithm_Norm){ $Miner_Fees | Add-Member $Secondary_Algorithm_Norm (0 / 100) }
             }
-            else{ $NoFee = "" }
+            else { $NoFee = "" }
 
-            if ($null -eq $_.SecondaryAlgoIntensity -or $Pools.$Secondary_Algorithm_Norm.Host){ 
+            if ($null -eq $_.SecondaryAlgoIntensity -or $Pools.$Secondary_Algorithm_Norm.Host) { 
                 [PSCustomObject]@{ 
                     Name               = $Miner_Name
-                    BaseName           = $Miner_BaseName
-                    Version            = $Miner_Version
                     DeviceName         = $Miner_Device.Name
                     Path               = $Path
                     HashSHA256         = $HashSHA256
