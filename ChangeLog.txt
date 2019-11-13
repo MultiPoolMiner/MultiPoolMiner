@@ -17,7 +17,8 @@
 
 #### Miner changes
 - Added CcminerMtpTrc-v1.2.5; support for 'Mtp-Trc' (TecraCoin) algorithm
-- Added SRBMinerMulti-v0.1.4
+- Added CcminerSuprMinerSP-v13
+- Added SRBMinerMulti-v0.1.5beta
 - Changed CcminerKlausT-v8.25; disabled 'Lyra2V2' algorithm, CcminerAlexis-v1.5 is 10%faster
 - Changed BMiner-v15.8.7; disabled 'Equihash' algorithm, DSTMEquihash-v0.6.2 is 15% faster
 - Changed CcminerBMW512-v2.2.5; use faster x86 variant

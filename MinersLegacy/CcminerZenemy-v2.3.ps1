@@ -13,10 +13,7 @@ $HashSHA256 = "8F6FA2209CA28E87E325049182AC9736BF84280A8203ADD34E21EABFF567526A"
 $Uri = "https://github.com/z-enemy/z-enemy/releases/download/ver-2.3/z-enemy-2.3-win-cuda10.1.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3378390.0"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA")
 
@@ -78,8 +75,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         [PSCustomObject]@{ 
             Name       = $Miner_Name
-            BaseName   = $Miner_BaseName
-            Version    = $Miner_Version
             DeviceName = $Miner_Device.Name
             Path       = $Path
             HashSHA256 = $HashSHA256

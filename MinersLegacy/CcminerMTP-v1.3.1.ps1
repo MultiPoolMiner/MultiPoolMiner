@@ -13,10 +13,7 @@ $HashSHA256 = "0298F2D23EB0A1CD42A7736CB4B509B8EC672E385E2AC548D4578E54AC4D1F0E"
 $Uri = "https://github.com/zcoinofficial/ccminer/releases/download/1.3.1/ccminer.exe"
 $ManualUri = "https://github.com/zcoinofficial/ccminer/releases"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA")
 
@@ -40,7 +37,7 @@ else { $CommonCommands = " --no-donation" }
 
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1
+    $Miner_Port = [UInt16]($Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
@@ -60,8 +57,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         }
         [PSCustomObject]@{ 
             Name       = $Miner_Name
-            BaseName   = $Miner_BaseName
-            Version    = $Miner_Version
             DeviceName = $Miner_Device.Name
             Path       = $Path
             HashSHA256 = $HashSHA256

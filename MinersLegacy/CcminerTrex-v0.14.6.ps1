@@ -13,10 +13,7 @@ $HashSHA256 = "350711A14786388296DC0465B7E9A96470A84C456B72E64A0153E27C7024AD67"
 $Uri = "https://github.com/trexminer/T-Rex/releases/download/0.14.6/t-rex-0.14.6-win-cuda10.0.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4432704.0"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject]@{ 
     "AstralHash"  = " -a astralhash -i 23" #GltAstralHash, new in 0.8.6
@@ -61,7 +58,7 @@ else { $CommonCommands = " --no-watchdog" }
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA")
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1
+    $Miner_Port = [UInt16]($Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
@@ -78,8 +75,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         [PSCustomObject]@{ 
             Name       = $Miner_Name
-            BaseName   = $Miner_BaseName
-            Version    = $Miner_Version
             DeviceName = $Miner_Device.Name
             Path       = $Path
             HashSHA256 = $HashSHA256

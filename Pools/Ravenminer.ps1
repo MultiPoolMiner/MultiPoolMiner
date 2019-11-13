@@ -15,7 +15,7 @@ if (-not $Payout_Currencies) {
     return
 }
 
-$PoolRegions = "eu", "us"
+$PoolRegions = "stratum" #Geo-balanced Stratum [recommended] (automatically connect to the best server based on your location, plus auto-failover)
 $PoolAPIStatusUri = "https://ravenminer.com/api/status"
 $RetryCount = 3
 $RetryDelay = 2
@@ -76,6 +76,25 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
                 Pass               = "ID=$($Config.Pools.$PoolName.Worker),c=$_"
                 Region             = $Region_Norm
                 SSL                = $false
+                Updated            = $Stat.Updated
+                Fee                = $Fee
+                Workers            = $Workers
+                EstimateCorrection = $EstimateCorrection
+            }
+            [PSCustomObject]@{ 
+                Algorithm          = $Algorithm_Norm
+                CoinName           = "RavenCoin"
+                CurrencySymbol     = "RVN"
+                Price              = $Stat.Live
+                StablePrice        = $Stat.Week
+                MarginOfError      = $Stat.Week_Fluctuation
+                Protocol           = "stratum+ssl"
+                Host               = "$Region.$PoolHost"
+                Port               = [Int]("1$($Port)")
+                User               = [String]$Wallets.$_
+                Pass               = "ID=$($Config.Pools.$PoolName.Worker),c=$_"
+                Region             = $Region_Norm
+                SSL                = $true
                 Updated            = $Stat.Updated
                 Fee                = $Fee
                 Workers            = $Workers

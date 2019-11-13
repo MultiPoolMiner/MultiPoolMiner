@@ -12,12 +12,9 @@ $HashSHA256 = "BFD886B246DB3F2A8E2E5158DDC52A651B06BD52D7B81B386B0CF0AFDA965D80"
 $Uri = "https://github.com/bubasik/cpuminer-opt-yespower/releases/download/3.8.8.4/Cpuminer-opt-yespower-ytn-ver3.zip"
 $ManualUri = "https://github.com/bubasik/cpuminer-opt-yespower"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
-$Commands = [PSCustomObject]@{
+$Commands = [PSCustomObject]@{ 
     ### CPU PROFITABLE ALGOS AS OF 31/03/2019
     ### these algorithms are profitable algorithms on supported pools
     "allium"        = " -a allium" #Garlicoin (GRLC)
@@ -104,53 +101,51 @@ $Commands = [PSCustomObject]@{
     #"x16r"          = " -a x16r" #x16r
     #"x16s"          = " -a x16s" #X16s
     #"x17"           = " -a x17" #X17
-}
+ }
 #Commands from config file take precedence
-if ($Miner_Config.Commands) {$Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force}}
+if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force } }
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands}
-else {$CommonCommands = ""}
+if ($Miner_Config.CommonCommands) { $CommonCommands = $Miner_Config.CommonCommands = $Miner_Config.CommonCommands }
+else { $CommonCommands = "" }
 
 $Devices = $Devices | Where-Object Type -EQ "CPU"
-$Devices | Select-Object Model -Unique | ForEach-Object {
+$Devices | Select-Object Model -Unique | ForEach-Object { 
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
-    $Miner_Port = $Config.APIPort + ($Devices | Select-Object -First 1 -ExpandProperty Id) + 1
+    $Miner_Port = [UInt16]($Config.APIPort + ($Devices | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     $Paths = @()
-    if ($Miner_Device.CpuFeatures -match "avx")               {$Paths += ".\Bin\$($Name)\cpuminer-Avx.exe"}
-    if ($Miner_Device.CpuFeatures -match "(avx2|[^sha]){2}")  {$Paths += ".\Bin\$($Name)\cpuminer-Avx2.exe"}
-    if ($Miner_Device.CpuFeatures -match "(avx2|sha){2}")     {$Paths += ".\Bin\$($Name)\cpuminer-Avx2-Sha.exe"}
-    if ($Miner_Device.CpuFeatures -match "sse2")              {$Paths += ".\Bin\$($Name)\cpuminer-Sse2.exe"}
-    if ($Miner_Device.CpuFeatures -match "(aes|sse42){2}")    {$Paths += ".\Bin\$($Name)\cpuminer-Aes-Sse42.exe"}
-    if (-not $Paths) {$Paths = @(".\Bin\$($Name)\cpuminer.exe")}
+    if ($Miner_Device.CpuFeatures -match "avx")               { $Paths += ".\Bin\$($Name)\cpuminer-Avx.exe" }
+    if ($Miner_Device.CpuFeatures -match "(avx2|[^sha]){2}")  { $Paths += ".\Bin\$($Name)\cpuminer-Avx2.exe" }
+    if ($Miner_Device.CpuFeatures -match "(avx2|sha){2}")     { $Paths += ".\Bin\$($Name)\cpuminer-Avx2-Sha.exe" }
+    if ($Miner_Device.CpuFeatures -match "sse2")              { $Paths += ".\Bin\$($Name)\cpuminer-Sse2.exe" }
+    if ($Miner_Device.CpuFeatures -match "(aes|sse42){2}")    { $Paths += ".\Bin\$($Name)\cpuminer-Aes-Sse42.exe" }
+    if (-not $Paths) { $Paths = @(".\Bin\$($Name)\cpuminer.exe") }
 
-    $Paths | ForEach-Object {
+    $Paths | ForEach-Object { 
         $Path = $_
-        $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object {$Algorithm_Norm = Get-Algorithm $_; $_} | Where-Object {$Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#>} | ForEach-Object {
-            $Miner_Name = (@($Name -replace "_", "$(($Path -split "\\" | Select-Object -Last 1) -replace "cpuminer" -replace ".exe" -replace "-")_") + @(($Devices.Model | Sort-Object -unique | ForEach-Object {$Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model"}) -join '-') | Select-Object) -join '-'
+        $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
+            $Miner_Name = (@($Name -replace "_", "$(($Path -split "\\" | Select-Object -Last 1) -replace "cpuminer" -replace ".exe" -replace "-")_") + @(($Devices.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) -join '-') | Select-Object) -join '-'
 
             #Get commands for active miner devices
             $Command = Get-CommandPerDevice -Command $Commands.$_ -DeviceIDs $Miner_Device.Type_Vendor_Index
 
-            Switch ($Algorithm_Norm) {
-                "C11"   {$WarmupTime = 60}
-                default {$WarmupTime = 30}
+            Switch ($Algorithm_Norm) { 
+                "C11"   { $WarmupTime = 60 }
+                default { $WarmupTime = 30 }
             }
     
-            [PSCustomObject]@{
+            [PSCustomObject]@{ 
                 Name       = $Miner_Name
-                BaseName   = $Miner_BaseName
-                Version    = $Miner_Version
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
                 Arguments  = ("$Command$CommonCommands -o $($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) -b $Miner_Port" -replace "\s+", " ").trim()
-                HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
+                HashRates  = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
                 API        = "Ccminer"
                 Port       = $Miner_Port
                 URI        = $Uri
-                Fees       = [PSCustomObject]@{$Algorithm_Norm = 0.1 / 100}
+                Fees       = [PSCustomObject]@{ $Algorithm_Norm = 0.1 / 100 }
                 WarmupTime = $WarmupTime #seconds
             }
         }

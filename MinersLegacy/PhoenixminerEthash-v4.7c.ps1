@@ -132,8 +132,6 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             if ($null -eq $_.SecondaryAlgoIntensity -or $Pools.$Secondary_Algorithm_Norm.Host) { 
                 [PSCustomObject]@{ 
                     Name               = $Miner_Name
-                    BaseName           = $Miner_BaseName
-                    Version            = $Miner_Version
                     DeviceName         = $Miner_Device.Name
                     Path               = $Path
                     HashSHA256         = $HashSHA256

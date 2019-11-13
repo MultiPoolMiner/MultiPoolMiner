@@ -51,19 +51,17 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             if ($Miner_Device.Vendor -eq "NVIDIA" -and $Algorithm_Norm -ne "Equihash965") { $Command += " --disable_memcheck 1" }
 
             [PSCustomObject]@{ 
-                Name             = $Miner_Name
-                BaseName         = $Miner_BaseName
-                Version          = $Miner_Version
-                DeviceName       = $Miner_Device.Name
-                Path             = $Path
-                HashSHA256       = $HashSHA256
-                Arguments        = ("$Command$CommonCommands --pool $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.pass) --apiport $Miner_Port$(if ($Pools.$Algorithm_Norm.SSL) { " --tls 1" } else { " --tls 0" }) --devices $(($Miner_Device | ForEach-Object { '{0:x}' -f $_.Type_Slot }) -join ',')").trim()
-                HashRates        = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
-                API              = "lolMinerApi"
-                Port             = $Miner_Port
-                URI              = $Uri
-                Fees             = [PSCustomObject]@{ $Algorithm_Norm = 1 / 100 }
-                WarmupTime       = 45 #seconds
+                Name       = $Miner_Name
+                DeviceName = $Miner_Device.Name
+                Path       = $Path
+                HashSHA256 = $HashSHA256
+                Arguments  = ("$Command$CommonCommands --pool $($Pools.$Algorithm_Norm.Host) --port $($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User) --pass $($Pools.$Algorithm_Norm.pass) --apiport $Miner_Port$(if ($Pools.$Algorithm_Norm.SSL) { " --tls 1" } else { " --tls 0" }) --devices $(($Miner_Device | ForEach-Object { '{0:x}' -f $_.Type_Slot }) -join ',')").trim()
+                HashRates  = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
+                API        = "lolMinerApi"
+                Port       = $Miner_Port
+                URI        = $Uri
+                Fees       = [PSCustomObject]@{ $Algorithm_Norm = 1 / 100 }
+                WarmupTime = 45 #seconds
             }
         }
     }
