@@ -1215,7 +1215,7 @@ function Get-Device {
                 $PlatformId++
             }
 
-            $Global:Devices | Sort-Object Bus | ForEach-Object { 
+            $Global:Devices | Where-Object Bus -Is [Int64] | Sort-Object Bus | ForEach-Object { 
                 $_ | Add-Member @{ 
                     Slot             = [Int]$Slot
                     Type_Slot        = [Int]$Type_Slot.($_.Type)
