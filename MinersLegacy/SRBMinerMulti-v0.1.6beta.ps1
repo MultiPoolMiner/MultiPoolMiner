@@ -9,15 +9,12 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\SRBMiner-MULTI.exe"
-$HashSHA256 = "826B6C85931825F9D92AC71B0D41F702270F7B6C5C45FE4A44EEC6F0710B8808"
-$Uri = "https://github.com/doktor83/SRBMiner-Multi/releases/download/0.1.5/SRBMiner-Multi-0-1-5.zip"
+$HashSHA256 = "DE23432202B4EF01EBA33F831BA95B659AC3FE02E48BFC47AB0A6FB4D211D3E5"
+$Uri = "https://github.com/doktor83/SRBMiner-Multi/releases/download/0.1.6/SRBMiner-Multi-0-1-6.zip"
 $ManualUri = "https://github.com/doktor83/SRBMiner-Multi/releases"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
-$Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{ Algorithm = "argon2d"; MinMemGB = 6; Command = " -a argon2d" } #Argon2dDYN
-)
 # Algorithm names are case sensitive!
 $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "Blake2b";        MinMemGb = 1; Fee = 0;    Vendor = @("CPU", "AMD"); Command = " --algorithm blake2b" }
@@ -49,12 +46,12 @@ if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorit
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonCommands) { $CommonCommands = $Miner_Config.CommonCommands }
-else { $CommonCommands = "" }
+else { $CommonCommands = " --disable-tweaking" }
 
 $Devices = $Devices | Where-Object { $_.Type -EQ "CPU" -or $_.Vendor -EQ "AMD" }
 $Devices | Select-Object Model, Type, Vendor  -Unique | ForEach-Object { 
     $Device = @($Devices | Where-Object Model -EQ $_.Model| Where-Object Type -EQ $_.Type | Where-Object Vendor -EQ $_.Vendor)
-    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
+    $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $Pools.$Algorithm_Norm.Host -and (($Device.Type | Select-Object -Unique) -in $_.Vendor -or ($Device.Vendor | Select-Object -Unique) -in $_.Vendor) } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
@@ -70,7 +67,7 @@ $Devices | Select-Object Model, Type, Vendor  -Unique | ForEach-Object {
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
-                Arguments  = ("$Command$CommonCommands --api-enable --api-port $($Miner_Port)$(if ($Pools.$Algorithm_Norm.Name -eq "NiceHash") { " --nicehash true" }) --tls $(([String]($Pools.$Algorithm_Norm.SSL)).ToLower()) --pool $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --wallet $($Pools.$Algorithm_Norm.User) --password $($Pools.$Algorithm_Norm.Pass) $(if ($Miner_Device.Type -eq "GPU") { "--gpu-id $(($Miner_Device | ForEach-Object { '{0:x}' -f ($_.Type_Vendor_Index) }) -join ',') --disable-cpu" } else { "--disable-gpu" })" -replace "\s+", " ").trim()
+                Arguments  = ("$Command$CommonCommands --api-enable --api-port $($Miner_Port)$(if ($Pools.$Algorithm_Norm.Name -eq "NiceHash") { " --nicehash true" }) --tls $(([String]($Pools.$Algorithm_Norm.SSL)).ToLower()) --pool $($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --wallet $($Pools.$Algorithm_Norm.User) --password $($Pools.$Algorithm_Norm.Pass) $(if ($Miner_Device.Type -eq "GPU") { "--gpu-id $(($Miner_Device | ForEach-Object { '{0:x}' -f ($_.Type_Vendor_Slot) }) -join ',') --disable-cpu" } else { "--disable-gpu" })" -replace "\s+", " ").trim()
                 HashRates  = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
                 API        = "SRBMiner"
                 Port       = $Miner_Port
