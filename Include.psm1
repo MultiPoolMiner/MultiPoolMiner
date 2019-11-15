@@ -88,7 +88,6 @@ function Get-PrePostCommand {
 
     #Get Pre / Post miner exec commands
 
-
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
@@ -1073,7 +1072,7 @@ function Get-Device {
                     Name   = $null
                     Model  = $Device_CIM.Name
                     Type   = "GPU"
-                    Bus    = if ($Device_PNP.DEVPKEY_Device_BusNumber -is [Int64]) { $Device_PNP.DEVPKEY_Device_BusNumber }
+                    Bus    = $(if ($Device_PNP.DEVPKEY_Device_BusNumber -is [Int32] -or $Device_PNP.DEVPKEY_Device_BusNumber -is [Int64]) { $Device_PNP.DEVPKEY_Device_BusNumber })
                     Vendor = $(
                         switch -Regex ([String]$Device_CIM.AdapterCompatibility) { 
                             "Advanced Micro Devices" { "AMD" }
@@ -1094,7 +1093,7 @@ function Get-Device {
                 }
 
                 $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
-                $Device.Model = ((($Device.Model -split ' ' -replace 'Processor','CPU' -replace 'Graphics','GPU') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
+                $Device.Model = ((($Device.Model -split ' ' -replace 'Processor','CPU' -replace 'Graphics','GPU') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)|Series' -replace '[^A-Z0-9]'
 
                 if (-not $Type_Vendor_Id.($Device.Type)) { 
                     $Type_Vendor_Id.($Device.Type) = @{ }
@@ -1134,7 +1133,7 @@ function Get-Device {
                                 default { [String]$Device_OpenCL.Type -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                             }
                         )
-                        Bus    = if ($Device_OpenCL.PCIBus -is [Int64]) { $Device_OpenCL.PCIBus }
+                        Bus    = $(if ($Device_OpenCL.PCIBus -is [Int32] -or $Device_OpenCL.PCIBus -is [Int64]) { $Device_OpenCL.PCIBus })
                         Vendor = $(
                             switch -Regex ([String]$Device_OpenCL.Vendor) { 
                                 "Advanced Micro Devices" { "AMD" }
@@ -1207,7 +1206,7 @@ function Get-Device {
                 $PlatformId++
             }
 
-            $Global:Devices | Sort-Object Bus | ForEach-Object { 
+            $Global:Devices | Where-Object Bus | Sort-Object Bus | ForEach-Object { 
                 $_ | Add-Member @{ 
                     Slot             = [Int]$Slot
                     Type_Slot        = [Int]$Type_Slot.($_.Type)
