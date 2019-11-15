@@ -88,7 +88,6 @@ function Get-PrePostCommand {
 
     #Get Pre / Post miner exec commands
 
-
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
@@ -1074,8 +1073,8 @@ function Get-Device {
                     Model  = $Device_CIM.Name
                     Type   = "GPU"
                     Bus    = $(
-                        if ($Device_PNP.DEVPKEY_Device_BusNumber -is [Int64]) { 
-                            $Device_PNP.DEVPKEY_Device_BusNumber 
+                        if ($Device_PNP.DEVPKEY_Device_BusNumber -is [Int64] -or $Device_PNP.DEVPKEY_Device_BusNumber -is [Int32]) { 
+                            [Int64]$Device_PNP.DEVPKEY_Device_BusNumber
                         }
                     )
                     Vendor = $(
@@ -1139,8 +1138,8 @@ function Get-Device {
                             }
                         )
                         Bus    = $(
-                            if ($Device_OpenCL.PCIBus -is [Int64]) { 
-                                $Device_OpenCL.PCIBus 
+                            if ($Device_OpenCL.PCIBus -is [Int64] -or $Device_OpenCL.PCIBus -is [Int32]) { 
+                                [Int64]$Device_OpenCL.PCIBus
                             }
                         )
                         Vendor = $(
