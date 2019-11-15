@@ -88,7 +88,6 @@ function Get-PrePostCommand {
 
     #Get Pre / Post miner exec commands
 
-
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $true)]
