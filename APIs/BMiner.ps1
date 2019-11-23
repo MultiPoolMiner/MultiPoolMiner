@@ -40,6 +40,8 @@ class BMiner : Miner {
         }
 
         $HashRate = [PSCustomObject]@{}
+        $Shares = [PSCustomObject]@{ }
+
         $HashRate_Name = ""
         $HashRate_Value = [Double]0
         $Shares_Accepted = [Int]0
@@ -58,9 +60,10 @@ class BMiner : Miner {
                 $Shares_Rejected = [Int64]$Data.stratums.$Algorithm.rejected_shares
                 if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) {
                     $this.SetStatus("Failed")
-                    $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (total: $($Shares_Accepted + $Shares_Rejected) / bad: $Shares_Rejected [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
+                    $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (Total: $($Shares_Accepted + $Shares_Rejected), Rejected: $Shares_Rejected [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
                     return @($Request, $Data | ConvertTo-Json -Depth 10 -Compress)
                 }
+                $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
             }
 
             $Data.devices | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {
@@ -78,7 +81,7 @@ class BMiner : Miner {
                 Raw        = $Data
                 HashRate   = $HashRate
                 PowerUsage = (Get-PowerUsage $this.DeviceName)
-                Shares     = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected))
+                Shares     = $Shares
                 Device     = @()
             }
         }
