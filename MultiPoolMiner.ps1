@@ -326,7 +326,7 @@ while (-not $API.Stop) {
     #Load unprofitable algorithms
     if (Test-Path ".\UnprofitableAlgorithms.txt" -PathType Leaf -ErrorAction Ignore) { 
         $UnprofitableAlgorithms = [String[]](Get-Content ".\UnprofitableAlgorithms.txt" | ConvertFrom-Json -ErrorAction SilentlyContinue | Sort-Object -Unique)
-        if ($API) {$API.UnprofitableAlgorithms = $UnprofitableAlgorithms }
+        if ($API) { $API.UnprofitableAlgorithms = $UnprofitableAlgorithms }
     }
 
     #Activate or deactivate donation
@@ -483,7 +483,7 @@ while (-not $API.Stop) {
     #Retrieve collected pool data
     if ($NewPools_Jobs) { 
         if ($NewPools_Jobs | Where-Object State -NE "Completed") { Write-Log "Waiting for pool information. " }
-        $NewPools = @($NewPools_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | Where-Object { $_.Content.Algorithm <#temp fix, Detect broken pool files#>} | ForEach-Object { $_.Content | Add-Member Name $_.Name -Force -PassThru })
+        $NewPools = @($NewPools_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | Where-Object { $_.Content.Algorithm <#temp fix, Detect broken pool files#> } | ForEach-Object { $_.Content | Add-Member Name $_.Name -Force -PassThru })
         $NewPools_JobsDurations = @($NewPools_JobsDurations | Select-Object -Last 20) #Use the last 20 values for better stability
         $NewPools_JobsDurations += (($NewPools_Jobs | Measure-Object PSEndTime -Maximum).Maximum - ($NewPools_Jobs | Measure-Object PSBeginTime -Minimum).Minimum).TotalSeconds
         Remove-Variable NewPools_Jobs
