@@ -621,7 +621,7 @@ function Get-ChildItemContent {
     $DefaultPriority = ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass
     if ($Priority) { ([System.Diagnostics.Process]::GetCurrentProcess()).PriorityClass = $Priority }
 
-    if ($Parameters.JobName) { $JobName = $Parameters.JobName } else { $JobName = "JobName" }
+    if ($Parameters.JobName) { $JobName = $Parameters.JobName } else { $JobName = "JobName" } #temp fix
 
     $Job = Start-Job -InitializationScript ([scriptblock]::Create("Set-Location('$(Get-Location)')")) -Name $JobName -ScriptBlock { 
         param(
