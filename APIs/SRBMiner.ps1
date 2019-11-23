@@ -2,12 +2,12 @@
 
 class SRBMiner : Miner { 
     [String]GetCommandLineParameters() { 
-        if ($this.Arguments -match "^{.*}$") { 
-            return ($this.Arguments | ConvertFrom-Json).Commands
+        if ($this.Arguments -match "^{.+}$") { 
+            return ($this.Arguments | ConvertFrom-Json -ErrorAction SilentlyContinue).Commands
         }
         else { 
             return $this.Arguments
-        }
+        }    
     }
 
     hidden StartMining() { 
@@ -15,11 +15,14 @@ class SRBMiner : Miner {
 
         $this.New = $true
         $this.Activated++
-        if ($this.Arguments -match "^{.*}$") { 
+        $this.Intervals = @()
+        $this.StatusMessage = ""
+
+        if ($this.Arguments -match "^{.+}$") { 
             $Parameters = $this.Arguments | ConvertFrom-Json
 
             #Write config files. Keep separate files, do not overwrite to preserve optional manual customization
-            if (-not (Test-Path "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -PathType Leaf)) { $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -ErrorAction Ignore  }
+            if (-not (Test-Path "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -PathType Leaf)) { $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)" -ErrorAction Ignore }
 
             #Write pool file. Keep separate files
             $Parameters.PoolFile.Content | ConvertTo-Json -Depth 10 | Set-Content "$(Split-Path $this.Path)\$($Parameters.PoolFile.FileName)" -Force -ErrorAction SilentlyContinue
@@ -29,7 +32,10 @@ class SRBMiner : Miner {
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) { 
                 $this.Process | Remove-Job -Force
             }
-
+            if ($this.ProcessId) { 
+                if (Get-Process -Id $this.ProcessId) { Stop-Process -Id $this.ProcessId -Force -ErrorAction Ignore }
+                $this.ProcessId = $null
+            }
             if (-not ($this.Process | Get-Job -ErrorAction SilentlyContinue)) { 
                 $this.Active += $this.Process.PSEndTime - $this.Process.PSBeginTime
                 $this.Process = $null
@@ -39,21 +45,21 @@ class SRBMiner : Miner {
         if (-not $this.Process) { 
             if ($this.ShowMinerWindow) { 
                 if ((Test-Path ".\CreateProcess.cs" -PathType Leaf) -and ($this.API -ne "Wrapper")) { 
-                    $this.Process = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList $this.GetCommandLineParameters() -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object { if ($_ -like "CPU#*") { -2  } else { -1  }  } | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
+                    $this.Process = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList $this.GetCommandLineParameters() -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object { if ($_ -like "CPU#*") { -2 } else { -1 } } | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
                 }
                 else { 
-                    $EnvCmd = ($this.Environment | ForEach-Object { "```$env:$($_)"  }) -join "; "
-                    $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{ desktop = "powershell"; core = "pwsh"  }.$Global:PSEdition) `"-command $EnvCmd```$Process = (Start-Process '$($this.Path)' '$($this.GetCommandLineParameters())' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
+                    $EnvCmd = ($this.Environment | ForEach-Object { "```$env:$($_)" }) -join "; "
+                    $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{ desktop = "powershell"; core = "pwsh" }.$Global:PSEdition) `"-command $EnvCmd```$Process = (Start-Process '$($this.Path)' '$($this.GetCommandLineParameters())' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
                 }
             }
             else { 
                 $this.LogFile = $Global:ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath(".\Logs\$($this.Name)-$($this.Port)_$(Get-Date -Format "yyyy-MM-dd_HH-mm-ss").txt")
-                $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList (($this.GetCommandLineParameters() -replace '\(', '`(') -replace '\)', '`)') -LogPath $this.LogFile -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object { if ($_ -like "CPU#*") { -2  } else { -1  }  } | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
+                $this.Process = Start-SubProcess -FilePath $this.Path -ArgumentList (($this.GetCommandLineParameters() -replace '\(', '`(') -replace '\)', '`)') -LogPath $this.LogFile -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object { if ($_ -like "CPU#*") { -2 } else { -1 } } | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
             }
 
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) { 
                 for ($WaitForPID = 0; $WaitForPID -le 20; $WaitForPID++) { 
-                    if ($this.ProcessId = (Get-CIMInstance CIM_Process | Where-Object { $_.ExecutablePath -eq $this.Path  } | Where-Object { $_.CommandLine -like ("*$($this.Path)*$($this.GetCommandLineParameters())*")  }).ProcessId) { 
+                    if ($this.ProcessId = (Get-CIMInstance CIM_Process | Where-Object { $_.ExecutablePath -eq $this.Path } | Where-Object { $_.CommandLine -like ("*$($this.Path)*$($this.GetCommandLineParameters())*") }).ProcessId) { 
                         $this.Status = [MinerStatus]::Running
                         $this.BeginTime = (Get-Date).ToUniversalTime()
                         break
@@ -87,6 +93,8 @@ class SRBMiner : Miner {
         }
 
         $HashRate = [PSCustomObject]@{ }
+        $Shares = [PSCustomObject]@{ }
+
         $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
         $Shares_Accepted = [Int]0
         $Shares_Rejected = [Int]0
@@ -96,9 +104,10 @@ class SRBMiner : Miner {
             $Shares_Rejected = [Int64]$Data.shares.rejected
             if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) { 
                 $this.SetStatus("Failed")
-                $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (total: $($Shares_Accepted + $Shares_Rejected) / bad: $Shares_Rejected [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
+                $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (Total: $($Shares_Accepted + $Shares_Rejected), Rejected: $Shares_Rejected [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
                 return @($Request, $Data | ConvertTo-Json -Depth 10 -Compress)
             }
+            $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
         }
 
         $HashRate | Add-Member @{ $HashRate_Name = [Double]$Data.hashrate_total_now  }
@@ -109,7 +118,7 @@ class SRBMiner : Miner {
                 Raw        = $Data
                 HashRate   = $HashRate
                 PowerUsage = (Get-PowerUsage $this.DeviceName)
-                Shares     = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected))
+                Shares     = $Shares
                 Device     = @()
             }
         }

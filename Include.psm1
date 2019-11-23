@@ -572,7 +572,7 @@ function Get-Stat {
                         Minute_10             = [Double]$Stat.Minute_10
                         Minute_10_Fluctuation = [Double]$Stat.Minute_10_Fluctuation
                         Hour                  = [Double]$Stat.Hour
-                        Hour_Fluctuation      = [Double]$Stat.Hour_FluctuationFFF
+                        Hour_Fluctuation      = [Double]$Stat.Hour_Fluctuation
                         Day                   = [Double]$Stat.Day
                         Day_Fluctuation       = [Double]$Stat.Day_Fluctuation
                         Week                  = [Double]$Stat.Week
@@ -1477,6 +1477,8 @@ class Miner {
 
         $this.New = $true
         $this.Activated++
+        $this.Intervals = @()
+        $this.StatusMessage = ""
 
         if ($this.Process) { 
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) { 

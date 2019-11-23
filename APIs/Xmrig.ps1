@@ -7,7 +7,7 @@ class XmRig : Miner {
         }
         else { 
             return $this.Arguments
-        }
+        }    
     }
     
     hidden StartMining() { 
@@ -15,6 +15,8 @@ class XmRig : Miner {
 
         $this.New = $true
         $this.Activated++
+        $this.Intervals = @()
+        $this.StatusMessage = ""
 
         if ($this.Arguments -match "^{.+}$") { 
             $Parameters = $this.Arguments | ConvertFrom-Json -ErrorAction SilentlyContinue
@@ -22,7 +24,7 @@ class XmRig : Miner {
             try { 
                 $ConfigFile = "$(Split-Path $this.Path)\$($Parameters.ConfigFile.FileName)"
 
-                $ThreadsConfig = [PSCustomObject]@{  }
+                $ThreadsConfig = [PSCustomObject]@{ }
                 $ThreadsConfigFile = "$(Split-Path $this.Path)\$($Parameters.ThreadsConfigFileName)"
 
                 if ($Parameters.ConfigFile.Content.threads) { 
@@ -35,7 +37,7 @@ class XmRig : Miner {
                     if ($ThreadsConfig.Count -lt 1) { 
                         if (Test-Path "$(Split-Path $this.Path)\$($this.Algorithm | Select-Object -Index 0)-*.json" -PathType Leaf) { 
                             #Remove old config files, thread info is no longer valid
-                            Write-Log -Level Warn "Hardware change detected. Deleting existing configuration files for miner ($($this.Name) { $(($this.Algorithm | Select-Object -Index 0) -Replace 'NiceHash')@$($this.Pool | Select-Object -Index 0) }). "
+                            Write-Log -Level Warn "Hardware change detected. Deleting existing configuration files for miner ($($this.Name) {$(($this.Algorithm | Select-object -Index 0) -replace 'NiceHash')@$($this.PoolName | Select-Object -Index 0)}). "
                             Remove-Item "$(Split-Path $this.Path)\ThreadsConfig-$($this.Algorithm | Select-Object -Index 0)-*.json" -Force -ErrorAction SilentlyContinue
                         }
                         #Temporarily start miner with pre-config file (without threads config). Miner will then update hw config file with threads info
@@ -50,7 +52,6 @@ class XmRig : Miner {
                         if ($this.Process | Get-Job -ErrorAction SilentlyContinue) { 
                             for ($WaitForPID = 0; $WaitForPID -le 20; $WaitForPID++) { 
                                 if ($this.ProcessId = (Get-CIMInstance CIM_Process | Where-Object { $_.ExecutablePath -eq $this.Path -and $_.CommandLine -like "*$($this.Path)*$($Parameters.HwDetectCommands)*" }).ProcessId) { 
-                                    $this.Status = [MinerStatus]::Running
                                     break
                                 }
                                 Start-Sleep -Milliseconds 100
@@ -61,7 +62,7 @@ class XmRig : Miner {
                                         ConvertTo-Json -InputObject @($ThreadsConfig | Sort-Object -Property Index -Unique) -Depth 10 | Set-Content $ThreadsConfigFile -ErrorAction SilentlyContinue -Force
                                     }
                                     else { 
-                                        ConvertTo-Json -InputObject @($ThreadsConfig | Select-Object -Unique) -Depth 10 | Set-Content $ThreadsConfigFile -ErrorAction SilentlyContinue -Force
+                                        ConvertTo-Json -InputObject @($ThreadsConfig| Select-Object -Unique) -Depth 10 | Set-Content $ThreadsConfigFile -ErrorAction SilentlyContinue -Force
                                     }
                                     break
                                 }
@@ -70,7 +71,7 @@ class XmRig : Miner {
                             $this.StopMining()
                         }
                         else { 
-                            Write-Log -Level Error "Running temporary miner failed - cannot create threads config file ($($this.Name) { $(($this.Algorithm | Select-Object -Index 0) -replace 'NiceHash')@$($this.Pool | Select-Object -Index 0) }) [Error: '$($Error[0])']. "
+                            Write-Log -Level Error "Running temporary miner failed - cannot create threads config file ($($this.Name) {$(($this.Algorithm | Select-Object -Index 0) -replace 'NiceHash')@$($this.PoolName | Select-Object -Index 0)}) [Error: '$($Error | Select-Object -Index 0)']. "
                             return
                         }
                     }
@@ -90,28 +91,27 @@ class XmRig : Miner {
                             $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -Force
                         }
                         else { 
-                            Write-Log -Level Error "Error parsing threads config file - cannot create miner config file ($($this.Name) { $(($this.Algorithm | Select-Object -Index 0) -Replace 'NiceHash')@$($this.Pool | Select-Object -Index 0) }) [Error: '$($Error[0])']. "
+                            Write-Log -Level Error "Error parsing threads config file - cannot create miner config file ($($this.Name) {$(($this.Algorithm | Select-Object -Index 0) -replace 'NiceHash')@$($this.PoolName | Select-Object -Index 0)}) [Error: '$($Error | Select-Object -Index 0)']. "
                             return
                         }                
                     }
                 }
             }
             catch { 
-                Write-Log -Level Error "Creating miner config files failed ($($this.Name) { $(($this.Algorithm | Select-Object -Index 0) -replace 'NiceHash')@$($this.Pool | Select-Object -Index 0) }) [Error: '$($Error[0])']. "
+                Write-Log -Level Error "Creating miner config files failed ($($this.Name) { $(($this.Algorithm | Select-Object -Index 0) -replace 'NiceHash')@$($this.Pool | Select-Object -Index 0) }) [Error: '$($Error | Select-Object -Index 0)']. "
                 return
             }
+            
         }
 
         if ($this.Process) { 
             if ($this.Process | Get-Job -ErrorAction SilentlyContinue) { 
                 $this.Process | Remove-Job -Force
             }
-
             if ($this.ProcessId) { 
                 if (Get-Process -Id $this.ProcessId) { Stop-Process -Id $this.ProcessId -Force -ErrorAction Ignore }
                 $this.ProcessId = $null
             }
-
             if (-not ($this.Process | Get-Job -ErrorAction SilentlyContinue)) { 
                 $this.Active += $this.Process.PSEndTime - $this.Process.PSBeginTime
                 $this.Process = $null
@@ -169,6 +169,8 @@ class XmRig : Miner {
         }
 
         $HashRate = [PSCustomObject]@{ }
+        $Shares = [PSCustomObject]@{ }
+
         $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
         $Shares_Accepted = [Int]0
         $Shares_Rejected = [Int]0
@@ -178,12 +180,13 @@ class XmRig : Miner {
             $Shares_Rejected = [Double]($Data.results.shares_total - $Data.results.shares_good)
             if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) { 
                 $this.SetStatus("Failed")
-                $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (total: $($Shares_Accepted + $Shares_Rejected) / bad: $Shares_Rejected [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
+                $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (Total: $($Shares_Accepted + $Shares_Rejected), Rejected: $Shares_Rejected [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
                 return @($Request, $Data | ConvertTo-Json -Depth 10 -Compress)
             }
+            $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
         }
 
-        $HashRate_Value = [Double]$Data.hashrate.total[0]
+        $HashRate_Value = [Double]($Data.hashrate.total | Select-Object -Index 0)
         if (-not $HashRate_Value) { $HashRate_Value = [Double]($Data.hashrate.total | Select-Object -Index 1) } #fix
         if (-not $HashRate_Value) { $HashRate_Value = [Double]($Data.hashrate.total | Select-Object -Index 2) } #fix
         $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
@@ -194,7 +197,7 @@ class XmRig : Miner {
                 Raw        = $Data
                 HashRate   = $HashRate
                 PowerUsage = (Get-PowerUsage $this.DeviceName)
-                Shares     = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected))
+                Shares     = $Shares
                 Device     = @()
             }
         }
