@@ -513,9 +513,10 @@ while (-not $API.Stop) {
     }
     # Calculate corrected estimates
     $NewPools | ForEach-Object { 
-        if ($_.EstimateCorrection -le 0 -or $_.EstimateCorrection -gt 1) { $_.EstimateCorrection = [Double]1 }
-        if ((-not $Config.Pools.$Name.DisableEstimateCorrection) -and (-not $Config.Pools.$($_.Name -Split '-' | Select-Object -Index 0).DisableEstimateCorrection)) {
-            $_.Price = $_.Price * $_.EstimateCorrection; $_.StablePrice = $_.StablePrice * $_.EstimateCorrection
+        if ($_.EstimateCorrection -le 0 -or $_.EstimateCorrection -gt 1) { $_ | Add-Member EstimateCorrection ([Double]1) -Force }
+        if ((-not $Config.Pools.$Name.DisableEstimateCorrection) -and (-not $Config.Pools.($_.Name -Split '-' | Select-Object -Index 0).DisableEstimateCorrection)) {
+            $_.Price *= $_.EstimateCorrection
+            $_.StablePrice *= $_.EstimateCorrection
         }
     }
     if ($API) { $API.NewPools = $NewPools } #Give API access to the current running configuration
