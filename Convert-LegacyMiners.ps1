@@ -4,7 +4,7 @@ Write-Log "Getting miner information. "
 $MinersLegacy = @(
     if (Test-Path "MinersLegacy" -PathType Container -ErrorAction Ignore) { 
         #Strip Model information from devices -> will create only one miner instance
-        if ($Config.DisableDeviceDetection) { $DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object { $_.Model = "" } } else { $DevicesTmp = $Devices }
+        if ($Config.DisableDeviceDetection) { $DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object { $_.Model = $_.Vendor } } else { $DevicesTmp = $Devices }
         Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp; JobName = "MinersLegacy" } -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" }) | ForEach-Object { 
             $_.Content | Add-Member Name $_.Name -PassThru -Force
             $_.Content | Add-Member BaseName ($_.Name -Split '-' | Select-Object -Index 0)
