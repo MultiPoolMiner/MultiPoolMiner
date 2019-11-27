@@ -46,8 +46,8 @@ function Get-MinerConfig {
         [PSCustomObject]$Config
     )
 
-    $Miner_BaseName = $Name -Split '-' | Select-Object -Index 0
-    $Miner_Version = $Name -Split '-' | Select-Object -Index 1
+    $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
+    $Miner_Version = $Name -split '-' | Select-Object -Index 1
     $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
     if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
 
@@ -69,13 +69,13 @@ function Update-APIDeviceStatus {
 
     $API.AllDevices | ForEach-Object { 
         if ($Devices.Name -contains $_.Name) { 
-            if ($Miner = $API.FailedMiners | Where-Object DeviceName -contains $_.Name) { $_ | Add-Member Status "Failed ($($Miner.BaseName)-$($Miner.Version) {$(($Miner.Algorithm | ForEach-Object { "$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))" }) -Join "; ")})" -Force }
+            if ($Miner = $API.FailedMiners | Where-Object DeviceName -contains $_.Name) { $_ | Add-Member Status "Failed ($($Miner.BaseName)-$($Miner.Version) {$(($Miner.Algorithm | ForEach-Object { "$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))" }) -join "; ")})" -Force }
             elseif ($Miner = $API.RunningMiners | Where-Object DeviceName -contains $_.Name) { 
                 if ($Miner.Speed -contains $null) { 
-                    $_ | Add-Member Status "Benchmarking ($($Miner.BaseName)-$($Miner.Version) {$(($Miner.Algorithm | ForEach-Object { "$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))" }) -Join "; ")})" -Force
+                    $_ | Add-Member Status "Benchmarking ($($Miner.BaseName)-$($Miner.Version) {$(($Miner.Algorithm | ForEach-Object { "$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))" }) -join "; ")})" -Force
                 }
                 else { 
-                    $_ | Add-Member Status "Running ($($Miner.BaseName)-$($Miner.Version) {$(($Miner.Algorithm | ForEach-Object { "$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))" }) -Join "; ")})" -Force
+                    $_ | Add-Member Status "Running ($($Miner.BaseName)-$($Miner.Version) {$(($Miner.Algorithm | ForEach-Object { "$($_)@$($Miner.PoolName | Select-Object -Index ([array]::indexof($Miner.Algorithm, $_)))" }) -join "; ")})" -Force
                 }
             }
             else { $_ | Add-Member Status "Idle" -Force }
@@ -132,12 +132,12 @@ function Start-PrePostCommand {
             }
 
             if ($Command -match "^'.*") { 
-                $Exe = ($Command -Split "' " | Select-Object -Index 0) -Replace "'"
-                $Arguments = @($Command -Split "' " | Select-Object -Skip 1) -Join ' '
+                $Exe = ($Command -split "' " | Select-Object -Index 0) -replace "'"
+                $Arguments = @($Command -split "' " | Select-Object -Skip 1) -join ' '
             }
             else { 
-                $Exe = ($Command -Split ' ' | Select-Object -Index 0)
-                $Arguments = @($Command -Split ' ' | Select-Object -Skip 1) -Join ' '
+                $Exe = ($Command -split ' ' | Select-Object -Index 0)
+                $Arguments = @($Command -split ' ' | Select-Object -Skip 1) -join ' '
             }
 
             Start-Process $Exe $Arguments
@@ -300,11 +300,11 @@ function Get-PowerUsage {
         $Hashtable = @{ }
 
         $RegistryValue = Get-ItemProperty $HwINFO64_RegKey
-        $RegistryValue.PSObject.Properties | Where-Object { $_.Name -match "^Label[0-9]+$" -and (Compare-Object @($_.Value -Split ' ' | Select-Object) @($DeviceNames | Select-Object) -IncludeEqual -ExcludeDifferent) } | ForEach-Object { 
-            $Hashtable[(($_.Value -Split ' ') | Select-Object -last 1)] = $RegistryValue.($_.Name -Replace "Label", "Value")
+        $RegistryValue.PSObject.Properties | Where-Object { $_.Name -match "^Label[0-9]+$" -and (Compare-Object @($_.Value -split ' ' | Select-Object) @($DeviceNames | Select-Object) -IncludeEqual -ExcludeDifferent) } | ForEach-Object { 
+            $Hashtable[(($_.Value -split ' ') | Select-Object -last 1)] = $RegistryValue.($_.Name -replace "Label", "Value")
         }
         $DeviceNames | ForEach-Object { 
-            $PowerUsage += [Float]($Hashtable.$_ -Split ' ' | Select-Object -Index 0)
+            $PowerUsage += [Float]($Hashtable.$_ -split ' ' | Select-Object -Index 0)
         }
     }
 
@@ -331,7 +331,7 @@ function Get-CommandPerDevice {
 
     $CommandPerDevice = ""
 
-    " $($Command.TrimStart().TrimEnd())" -Split "(?=\s+[-]{1,2})" | ForEach-Object { 
+    " $($Command.TrimStart().TrimEnd())" -split "(?=\s+[-]{1,2})" | ForEach-Object { 
         $Token = $_
         $Prefix = ""
         $ParameterValueSeparator = ""
@@ -339,12 +339,12 @@ function Get-CommandPerDevice {
         $Values = ""
 
         if ($Token -match "(?:^\s[-=]+)" <#supported prefix characters are listed in brackets [-=]#>) { 
-            $Prefix = "$($Token -Split $Matches[0] | Select-Object -Index 0)$($Matches[0])"
-            $Token = $Token -Split $Matches[0] | Select-Object -Last 1
+            $Prefix = "$($Token -split $Matches[0] | Select-Object -Index 0)$($Matches[0])"
+            $Token = $Token -split $Matches[0] | Select-Object -Last 1
 
             if ($Token -match "(?:[ =]+)" <#supported separators are listed in brackets [ =]#>) { 
                 $ParameterValueSeparator = $Matches[0]
-                $Parameter = $Token -Split $ParameterValueSeparator | Select-Object -Index 0
+                $Parameter = $Token -split $ParameterValueSeparator | Select-Object -Index 0
                 $Values = $Token.Substring(("$Parameter$($ParameterValueSeparator)").length)
 
                 if ($Parameter -notin $ExcludeParameters -and $Values -match "(?:[,; ]{1})" <#supported separators are listed in brackets [,; ]#>) { 
@@ -353,7 +353,7 @@ function Get-CommandPerDevice {
                     $DeviceIDs | ForEach-Object { 
                         $RelevantValues += ($Values.Split($ValueSeparator) | Select-Object -Index $_)
                     }
-                    $CommandPerDevice += "$Prefix$Parameter$ParameterValueSeparator$($RelevantValues -Join $ValueSeparator)"
+                    $CommandPerDevice += "$Prefix$Parameter$ParameterValueSeparator$($RelevantValues -join $ValueSeparator)"
                 }
                 else { $CommandPerDevice += "$Prefix$Parameter$ParameterValueSeparator$Values" }
             }
@@ -769,7 +769,7 @@ function Start-SubProcess {
         [String[]]$EnvBlock
     )
 
-    if ($EnvBlock) { $EnvBlock | ForEach-Object { Set-Item -Path "Env:$($_ -Split '=' | Select-Object -Index 0)" "$($_ -Split '=' | Select-Object -Index 1)" -Force } }
+    if ($EnvBlock) { $EnvBlock | ForEach-Object { Set-Item -Path "Env:$($_ -split '=' | Select-Object -Index 0)" "$($_ -split '=' | Select-Object -Index 1)" -Force } }
 
     $ScriptBlock = "Set-Location '$WorkingDirectory'; (Get-Process -Id `$PID).PriorityClass = '$(@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime"}[$Priority])'; "
     $ScriptBlock += "& '$FilePath'"
@@ -801,7 +801,7 @@ function Start-SubProcessWithoutStealingFocus {
 
     $PriorityNames = [PSCustomObject]@{-2 = "Idle"; -1 = "BelowNormal"; 0 = "Normal"; 1 = "AboveNormal"; 2 = "High"; 3 = "RealTime" }
 
-    if ($EnvBlock) { $EnvBlock | ForEach-Object { Set-Item -Path "Env:$($_ -Split '=' | Select-Object -Index 0)" "$($_ -Split '=' | Select-Object -Index 1)" -Force } }
+    if ($EnvBlock) { $EnvBlock | ForEach-Object { Set-Item -Path "Env:$($_ -split '=' | Select-Object -Index 0)" "$($_ -split '=' | Select-Object -Index 1)" -Force } }
 
     $Job = Start-Job -ArgumentList $PID, (Resolve-Path ".\CreateProcess.cs"), $FilePath, $ArgumentList, $WorkingDirectory, $MinerVisibility, $EnvBlock { 
         param($ControllerProcessID, $CreateProcessPath, $FilePath, $ArgumentList, $WorkingDirectory, $MinerVisibility, $EnvBlock)
@@ -961,7 +961,7 @@ function Get-Device {
     if ($Name) { 
         $DeviceList = Get-Content "Devices.txt" | ConvertFrom-Json
         $Name_Devices = $Name | ForEach-Object { 
-            $Name_Split = $_ -Split '#'
+            $Name_Split = $_ -split '#'
             $Name_Split = @($Name_Split | Select-Object -Index 0) + @($Name_Split | Select-Object -Skip 1 | ForEach-Object { [Int]$_ })
             $Name_Split += @("*") * (100 - $Name_Split.Count)
 
@@ -975,7 +975,7 @@ function Get-Device {
     if ($ExcludeName) { 
         if (-not $DeviceList) { $DeviceList = Get-Content "Devices.txt" | ConvertFrom-Json }
         $ExcludeName_Devices = $ExcludeName | ForEach-Object { 
-            $ExcludeName_Split = $_ -Split '#'
+            $ExcludeName_Split = $_ -split '#'
             $ExcludeName_Split = @($ExcludeName_Split | Select-Object -Index 0) + @($ExcludeName_Split | Select-Object -Skip 1 | ForEach-Object { [Int]$_ })
             $ExcludeName_Split += @("*") * (100 - $ExcludeName_Split.Count)
 
@@ -1024,7 +1024,7 @@ function Get-Device {
                             "Intel" { "INTEL" }
                             "NVIDIA" { "NVIDIA" }
                             "AMD" { "AMD" }
-                            default { $Device_CIM.Manufacturer -Replace '\(R\)|\(TM\)|\(C\)' -Replace '[^A-Z0-9]' }
+                            default { $Device_CIM.Manufacturer -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                         }
                     )
                     Memory = $null
@@ -1038,7 +1038,7 @@ function Get-Device {
                 }
 
                 $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
-                $Device.Model = (($Device.Model -Split ' ' -Replace 'Processor', 'CPU' -Replace 'Graphics', 'GPU') -notmatch $Device.Type -notmatch $Device.Vendor) -Join ' ' -Replace '\(R\)|\(TM\)|\(C\)' -Replace '[^A-Z0-9]'
+                $Device.Model = (($Device.Model -split ' ' -replace 'Processor', 'CPU' -replace 'Graphics', 'GPU') -notmatch $Device.Type -notmatch $Device.Vendor) -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
 
                 if (-not $Type_Vendor_Id.($Device.Type)) { 
                     $Type_Vendor_Id.($Device.Type) = @{ }
@@ -1083,7 +1083,7 @@ function Get-Device {
                             "Intel" { "INTEL" }
                             "NVIDIA" { "NVIDIA" }
                             "AMD" { "AMD" }
-                            default { $Device_CIM.AdapterCompatibility -Replace '\(R\)|\(TM\)|\(C\)' -Replace '[^A-Z0-9]' }
+                            default { $Device_CIM.AdapterCompatibility -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                         }
                     )
                     Memory = [Math]::Max(([UInt64]$Device_CIM.AdapterRAM), ([uInt64]$Device_Reg.'HardwareInformation.qwMemorySize'))
@@ -1097,7 +1097,7 @@ function Get-Device {
                 }
 
                 $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
-                $Device.Model = ((($Device.Model -Split ' ' -Replace 'Processor', 'CPU' -Replace 'Graphics', 'GPU') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -Join ' ' -Replace '\(R\)|\(TM\)|\(C\)' -Replace '[^A-Z0-9]'
+                $Device.Model = ((($Device.Model -split ' ' -replace 'Processor', 'CPU' -replace 'Graphics', 'GPU') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
 
                 if (-not $Type_Vendor_Id.($Device.Type)) { 
                     $Type_Vendor_Id.($Device.Type) = @{ }
@@ -1134,7 +1134,7 @@ function Get-Device {
                             switch -Regex ([String]$Device_OpenCL.Type) { 
                                 "CPU" { "CPU" }
                                 "GPU" { "GPU" }
-                                default { [String]$Device_OpenCL.Type -Replace '\(R\)|\(TM\)|\(C\)' -Replace '[^A-Z0-9]' }
+                                default { [String]$Device_OpenCL.Type -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                             }
                         )
                         Bus    = $(
@@ -1148,7 +1148,7 @@ function Get-Device {
                                 "Intel" { "INTEL" }
                                 "NVIDIA" { "NVIDIA" }
                                 "AMD" { "AMD" }
-                                default { [String]$Device_OpenCL.Vendor -Replace '\(R\)|\(TM\)|\(C\)' -Replace '[^A-Z0-9]' }
+                                default { [String]$Device_OpenCL.Vendor -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]' }
                             }
                         )
                         Memory = [UInt64]$Device_OpenCL.GlobalMemSize
@@ -1162,7 +1162,7 @@ function Get-Device {
                     }
 
                     $Device.Name = "$($Device.Type)#$('{0:D2}' -f $Device.Type_Id)"
-                    $Device.Model = ((($Device.Model -Split ' ' -Replace 'Processor', 'CPU' -Replace 'Graphics', 'GPU') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -Join ' ' -Replace '\(R\)|\(TM\)|\(C\)' -Replace '[^A-Z0-9]'
+                    $Device.Model = ((($Device.Model -split ' ' -replace 'Processor', 'CPU' -replace 'Graphics', 'GPU') -notmatch $Device.Type -notmatch $Device.Vendor -notmatch "$([UInt64]($Device.Memory/1GB))GB") + "$([UInt64]($Device.Memory/1GB))GB") -join ' ' -replace '\(R\)|\(TM\)|\(C\)' -replace '[^A-Z0-9]'
 
                     if ($Global:Devices | Where-Object Type -EQ $Device.Type | Where-Object Bus -EQ $Device.Bus) { 
                         $Device = $Global:Devices | Where-Object Type -EQ $Device.Type | Where-Object Bus -EQ $Device.Bus
@@ -1258,7 +1258,7 @@ function Get-Algorithm {
         $Script:Algorithms = Get-Content "Algorithms.txt" | ConvertFrom-Json
     }
 
-    $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm.ToLower() -Replace "-", " " -Replace "_", " " -Replace "/", " ")) -Replace " "
+    $Algorithm = (Get-Culture).TextInfo.ToTitleCase(($Algorithm.ToLower() -replace "-", " " -replace "_", " " -replace "/", " ")) -replace " "
 
     if ($Script:Algorithms.$Algorithm) { $Script:Algorithms.$Algorithm }
     else { $Algorithm }
@@ -1290,10 +1290,10 @@ function Get-CoinName {
         $Script:CoinNames = Get-Content "CoinNames.txt" | ConvertFrom-Json
     }
 
-    $CoinName = (Get-Culture).TextInfo.ToTitleCase(($CoinName.ToLower() -Replace "-", " " -Replace "_", " ")) -Replace " "
+    $CoinName = (Get-Culture).TextInfo.ToTitleCase(($CoinName.ToLower() -replace "-", " " -replace "_", " ")) -replace " "
 
     if ($Script:CoinNames.$CoinName) { $Script:CoinNames.$CoinName }
-    else { $CoinName -Replace "coin", "Coin" -Replace "cash", "Cash" }
+    else { $CoinName -replace "coin", "Coin" -replace "cash", "Cash" }
 }
 
 function Get-Region { 
@@ -1307,7 +1307,7 @@ function Get-Region {
         $Script:Regions = Get-Content "Regions.txt" | ConvertFrom-Json
     }
 
-    $Region = (Get-Culture).TextInfo.ToTitleCase(($Region -Replace "-", " " -Replace "_", " ")) -Replace " "
+    $Region = (Get-Culture).TextInfo.ToTitleCase(($Region -replace "-", " " -replace "_", " ")) -replace " "
 
     if ($Script:Regions.$Region) { $Script:Regions.$Region }
     else { $Region }
@@ -1497,7 +1497,7 @@ class Miner {
                     $this.Process = Start-SubProcessWithoutStealingFocus -FilePath $this.Path -ArgumentList $this.GetCommandLineParameters() -WorkingDirectory (Split-Path $this.Path) -Priority ($this.DeviceName | ForEach-Object { if ($_ -like "CPU#*") { -2 } else { -1 } } | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum) -EnvBlock $this.Environment
                 }
                 else { 
-                    $EnvCmd = ($this.Environment | Select-Object | ForEach-Object { "```$env:$($_)" }) -Join "; "
+                    $EnvCmd = ($this.Environment | Select-Object | ForEach-Object { "```$env:$($_)" }) -join "; "
                     $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{desktop = "powershell"; core = "pwsh"}.$Global:PSEdition) `"-command $EnvCmd```$Process = (Start-Process '$($this.Path)' '$($this.GetCommandLineParameters())' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
                 }
             }
@@ -1609,15 +1609,15 @@ class Miner {
             $Date = (Get-Date).ToUniversalTime()
 
             $this.Process | Receive-Job | ForEach-Object { 
-                $Line = $_ -Replace "`n|`r", ""
-                $Line_Simple = $Line -Replace "\x1B\[[0-?]*[ -/]*[@-~]", ""
+                $Line = $_ -replace "`n|`r", ""
+                $Line_Simple = $Line -replace "\x1B\[[0-?]*[ -/]*[@-~]", ""
 
                 if ($Line_Simple) { 
                     $HashRates = @()
                     $Devices = @()
 
                     if ($Line_Simple -match "/s") { 
-                        $Words = $Line_Simple -Split " "
+                        $Words = $Line_Simple -split " "
 
                         $Words -match "/s$" | ForEach-Object { 
                             if (($Words | Select-Object -Index $Words.IndexOf($_)) -match "^((?:\d*\.)?\d+)(.*)$") { 
@@ -1642,7 +1642,7 @@ class Miner {
                     }
 
                     if ($Line_Simple -match "gpu|cpu|device") { 
-                        $Words = $Line_Simple -Replace "#", "" -Replace ":", "" -Split " "
+                        $Words = $Line_Simple -replace "#", "" -replace ":", "" -split " "
 
                         $Words -match "^gpu|^cpu|^device" | ForEach-Object { 
                             if (($Words | Select-Object -Index $Words.IndexOf($_)) -match "^(.*)((?:\d*\.)?\d+)$") { 
@@ -1850,7 +1850,7 @@ class Download {
             param($Uri, $DownloadFilePath)
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
             $Download = Invoke-WebRequest $Uri
-            $Download_FileName = [String]($Download.Headers["Content-Disposition"] -Split '; ' | ForEach-Object { [PSCustomObject]@{($_ -Split '=')[0] = ($_ -Split '=')[1] } } | Where-Object filename | Select-Object -Index 0 -ExpandProperty filename)
+            $Download_FileName = [String]($Download.Headers["Content-Disposition"] -split '; ' | ForEach-Object { [PSCustomObject]@{($_ -split '=')[0] = ($_ -split '=')[1] } } | Where-Object filename | Select-Object -Index 0 -ExpandProperty filename)
             [System.IO.File]::WriteAllBytes((Join-Path $DownloadFilePath $Download_FileName), $Download.Content)
         } -ArgumentList $this.Uri.AbsoluteUri, $this.DownloadFilePath.AbsolutePath
 
