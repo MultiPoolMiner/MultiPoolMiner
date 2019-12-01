@@ -1561,13 +1561,13 @@ class Miner {
 
     [DateTime]GetActiveLast() { 
         if ($this.Process.PSBeginTime -and $this.Process.PSEndTime) { 
-            return $this.Process.PSEndTime
+            return $this.Process.PSEndTime.ToUniversalTime()
         }
         elseif ($this.Process.PSBeginTime) { 
-            return (Get-Date).ToUniversalTime()
+            return [DateTime]::Now.ToUniversalTime()
         }
         else { 
-            return [DateTime]::MinValue
+            return [DateTime]::MinValue.ToUniversalTime()
         }
     }
 
@@ -1576,7 +1576,7 @@ class Miner {
             return $this.Active + ($this.Process.PSEndTime - $this.Process.PSBeginTime)
         }
         elseif ($this.Process.PSBeginTime) { 
-            return $this.Active + ((Get-Date).ToUniversalTime() - $this.Process.PSBeginTime)
+            return $this.Active + ((Get-Date) - $this.Process.PSBeginTime)
         }
         else { 
             return $this.Active
