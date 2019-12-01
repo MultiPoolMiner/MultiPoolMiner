@@ -16,8 +16,8 @@ $ManualUri = "https://github.com/ethash/eminer-release"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{ Algorithm = "ethash2gb"; MinMemGB = 2; Command = "" } #Ethash2GB
-    [PSCustomObject]@{ Algorithm = "ethash3gb"; MinMemGB = 3; Command = "" } #Ethash3GB
+    [PSCustomObject]@{ Algorithm = "ethash-2gb";MinMemGB = 2; Command = "" } #Ethash2GB
+    [PSCustomObject]@{ Algorithm = "ethash-3gb";MinMemGB = 3; Command = "" } #Ethash3GB
     [PSCustomObject]@{ Algorithm = "ethash"   ; MinMemGB = 4; Command = "" } #Ethash
 )
 #Commands from config file take precedence
@@ -46,7 +46,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
     $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
-    $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
+    $Commands | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_.Algorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.Algorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
 
         if ($Miner_Device = @($Device | Where-Object { ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB })) { 

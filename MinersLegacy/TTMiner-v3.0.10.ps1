@@ -26,17 +26,19 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
 }
 
 $Commands = [PSCustomObject[]]@(
-#    [PSCustomObject]@{ Algorithm = "ETHASH2gb";   MinMemGB = 2; Command = " -A ETHASH" } #Ethash2GB, PhoenixMiner & ClaymoreDual miner are faster
-#    [PSCustomObject]@{ Algorithm = "ETHASH3gb";   MinMemGB = 3; Command = " -A ETHASH" } #Ethash3GB, PhoenixMiner & ClaymoreDual miner are faster
 #    [PSCustomObject]@{ Algorithm = "ETHASH";      MinMemGB = 4; Command = " -A ETHASH" } #Ethash, PhoenixMiner & ClaymoreDual miner are faster
+#    [PSCustomObject]@{ Algorithm = "ETHASH-2gb";  MinMemGB = 2; Command = " -A ETHASH" } #Ethash2GB, PhoenixMiner & ClaymoreDual miner are faster
+#    [PSCustomObject]@{ Algorithm = "ETHASH-3gb";  MinMemGB = 3; Command = " -A ETHASH" } #Ethash3GB, PhoenixMiner & ClaymoreDual miner are faster
+#    [PSCustomObject]@{ Algorithm = "ETHASH-4gb";  MinMemGB = 4; Command = " -A ETHASH" } #Ethash4GB, PhoenixMiner & ClaymoreDual miner are faster
 #    [PSCustomObject]@{ Algorithm = "LYRA2V3";     MinMemGB = 2; Command = " -A LYRA2V3" } #LYRA2V3, CryptoDredge-v0.21.0 is faster
 #    [PSCustomObject]@{ Algorithm = "MTP";         MinMemGB = 6; Command = " -A MTP" } #MTP, CcminerTrex-v0.12.2b is 20% faster
 #    [PSCustomObject]@{ Algorithm = "MTPNICEHASH"; MinMemGB = 6; Command = " -A MTP" } #MTP; TempFix: NiceHash only, CcminerTrex-v0.12.2b is 20% faster
 #    [PSCustomObject]@{ Algorithm = "MYRGR";       MinMemGB = 2; Command = " -A MYRGR" } #Myriad-Groestl, never profitable
     [PSCustomObject]@{ Algorithm = "UBQHASH";     MinMemGB = 2; Command = " -A UBQHASH" } #Ubqhash
-    [PSCustomObject]@{ Algorithm = "PROGPOW2gb";  MinMemGB = 2; Command = " -A PROGPOW" } #ProgPoW2gb
-    [PSCustomObject]@{ Algorithm = "PROGPOW3gb";  MinMemGB = 3; Command = " -A PROGPOW" } #ProgPoW3gb
     [PSCustomObject]@{ Algorithm = "PROGPOW";     MinMemGB = 4; Command = " -A PROGPOW" } #ProgPoW
+    [PSCustomObject]@{ Algorithm = "PROGPOW-2gb"; MinMemGB = 2; Command = " -A PROGPOW" } #ProgPoW2gb
+    [PSCustomObject]@{ Algorithm = "PROGPOW-3gb"; MinMemGB = 3; Command = " -A PROGPOW" } #ProgPoW3gb
+    [PSCustomObject]@{ Algorithm = "PROGPOW-4gb"; MinMemGB = 4; Command = " -A PROGPOW" } #ProgPoW4gb
     [PSCustomObject]@{ Algorithm = "PROGPOW092";  MinMemGB = 4; Command = " -A PROGPOW092" } #ProgPoW092 (Hydnora)
     [PSCustomObject]@{ Algorithm = "PROGPOWZ";    MinMemGB = 4; Command = " -A PROGPOWZ" } #ProgPoWZ
     [PSCustomObject]@{ Algorithm = "TETHASHV1";   MinMemGB = 4; Command = " -A TETHASHV1" } #TETHASHV1 (Teo)
@@ -52,7 +54,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
-    $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
+    $Commands | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_.Algorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.Algorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
 
         if ($Miner_Device = @($Device | Where-Object { ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB })) { 

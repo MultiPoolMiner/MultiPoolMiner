@@ -21,9 +21,15 @@ class Claymore : Miner {
         $HashRate = [PSCustomObject]@{ }
         $Shares = [PSCustomObject]@{ }
 
-        $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
-        $Shares_Accepted = [Int]0
-        $Shares_Rejected = [Int]0
+        $HashRate_Name = [String]($this.Algorithm -match '^(' + [Regex]::Escape("$(Get-Algorithm ($Data.result[0] -split ' - ')[1])") + '(-.+|))$')[0]
+        if (-not $HashRate_Name -and -not ($Data.result[0] -split ' - ')[1]) { $HashRate_Name = [String]($this.Algorithm -match '^(ethash(-.+|))$')[0] }
+        if (-not $HashRate_Name -and -not ($Data.result[0] -split ' - ')[1]) { $HashRate_Name = [String]$this.Algorithm[0] }
+        $HashRate_Value = [Double]($Data.result[2] -split ";")[0]
+        if ($this.Algorithm -match '^(ethash(-.+|))$' -and $Data.result[0] -notmatch "^TT-Miner") { $HashRate_Value *= 1000 }
+        if ($this.Algorithm -match '^(neoscrypt(-.+|))$') { $HashRate_Value *= 1000 }
+
+        $Shares_Accepted = [Int64]0
+        $Shares_Rejected = [Int64]0
 
         if ($this.AllowedBadShareRatio) { 
             $Shares_Accepted = [Int64]($Data.result[2] -split ";")[1]
@@ -36,13 +42,15 @@ class Claymore : Miner {
             $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
         }
 
-        $HashRate_Value = [Double]($Data.result[2] -split ";")[0]
-        if ($this.Algorithm -like "ethash*" -and $Data.result[0] -notlike "TT-Miner*") { $HashRate_Value *= 1000 }
-        if ($this.Algorithm -eq "neoscrypt") { $HashRate_Value *= 1000 }
-        $HashRate | Add-Member @{ $HashRate_Name = [Int64]$HashRate_Value }
+        if ($HashRate_Name) { 
+            $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
+        }
 
-        if ($this.Algorithm | Select-Object -Index 1) { 
-            $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 1)
+        if ($this.Algorithm -ne $HashRate_Name) { 
+            $HashRate_Name = [String]($this.Algorithm -ne $HashRate_Name)[0]
+            $HashRate_Value = [Double]($Data.result[4] -split ";")[0]
+            if ($this.Algorithm -match '^(ethash(-.+|))$') { $HashRate_Value *= 1000 }
+            if ($this.Algorithm -match '^(neoscrypt(-.+|))$') { $HashRate_Value *= 1000 }
 
             if ($this.AllowedBadShareRatio) { 
                 $Shares_Accepted = [Int64]($Data.result[4] -split ";")[1]
@@ -55,10 +63,9 @@ class Claymore : Miner {
                 $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
             }
 
-            $HashRate_Value = [Double]($Data.result[4] -split ";")[0]
-            if ($this.Algorithm -like "ethash*") { $HashRate_Value *= 1000 }
-            if ($this.Algorithm -eq "neoscrypt") { $HashRate_Value *= 1000 }
-            $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
+            if ($HashRate_Name) { 
+                $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
+            }
         }
 
         if ($HashRate.PSObject.Properties.Value -gt 0) { 

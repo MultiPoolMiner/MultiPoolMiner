@@ -26,9 +26,11 @@ class Gminer : Miner {
         $HashRate = [PSCustomObject]@{ }
         $Shares = [PSCustomObject]@{ }
 
-        $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
-        $Shares_Accepted = [Int]0
-        $Shares_Rejected = [Int]0
+        $HashRate_Name = [String]$this.Algorithm[0]
+        $HashRate_Value = [Double]($Data.devices.speed | Measure-Object -Sum).Sum
+
+        $Shares_Accepted = [Int64]0
+        $Shares_Rejected = [Int64]0
 
         if ($this.AllowedBadShareRatio) { 
             $Shares_Accepted = ($Data.total_accepted_shares)
@@ -41,11 +43,13 @@ class Gminer : Miner {
             $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
         }
 
-        $HashRate | Add-Member @{ $HashRate_Name = [Double]($Data.devices.speed | Measure-Object -Sum).Sum }
+        if ($HashRate_Name) { 
+            $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
+        }
 
-        if ($this.Algorithm | Select-Object -Index 1) { 
-            $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 1)
-            $HashRate_Name = "EagleSong"
+        if ($this.Algorithm -ne $HashRate_Name) { 
+            $HashRate_Name = [String]($this.Algorithm -ne $HashRate_Name)[0]
+            $HashRate_Value = [Double]($Data.devices.speed2 | Measure-Object -Sum).Sum
 
             if ($this.AllowedBadShareRatio) { 
                 $Shares_Accepted = [Int64]($Data.total_accepted_shares2)
@@ -58,7 +62,9 @@ class Gminer : Miner {
                 $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
             }
    
-            $HashRate | Add-Member @{ $HashRate_Name = [Double]($Data.devices.speed2 | Measure-Object -Sum).Sum }
+            if ($HashRate_Name) { 
+                $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
+            }
         }
 
         if ($HashRate.PSObject.Properties.Value -gt 0) { 

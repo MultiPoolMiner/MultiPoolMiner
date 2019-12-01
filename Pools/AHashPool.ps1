@@ -49,7 +49,7 @@ if (($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction I
     return
 }
 
-$Payout_Currencies = (@($Payout_Currencies) + @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object { $Wallets.$_ }  | Sort-Object -Unique
+$Payout_Currencies = (@($Payout_Currencies) + @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object { $Wallets.$_ } | Sort-Object -Unique
 if (-not $Payout_Currencies) { 
     Write-Log -Level Verbose "Cannot mine on pool ($PoolFileName) - no wallet address specified. "
     return
@@ -66,11 +66,10 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
         $CurrencySymbols = @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.algo -eq $Algorithm })
         if ($CurrencySymbols.Count -eq 1) { 
             $CurrencySymbol = [String]($CurrencySymbols -split "-" | Select-Object -First 1)
-            $Algorithm_Norm = Get-AlgorithmFromCurrencySymbol $CurrencySymbol
             $CoinName = Get-CoinName $APICurrenciesResponse.$CurrencySymbols.Name
         }
     }
-    if (-not $Algorithm_Norm) { $Algorithm_Norm = Get-Algorithm $Algorithm }
+    $Algorithm_Norm = Get-Algorithm $Algorithm
     $Workers = [Int]$APIStatusResponse.$_.workers
     $Fee = [Decimal]($APIStatusResponse.$_.Fees / 100)
 
@@ -113,7 +112,7 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
 
 $PoolName = "$($PoolFileName)-Coin"
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
-$APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.hashrate -gt 0 }  | ForEach-Object { 
+$APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.hashrate -gt 0 } | ForEach-Object { 
     $APICurrenciesResponse.$_ | Add-Member Symbol $_ -ErrorAction Ignore
     $Algorithm = [String]$APICurrenciesResponse.$_.algo
 
@@ -122,14 +121,17 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
         $PoolHost = "mine.ahashpool.com"
         $Port = [Int]$APICurrenciesResponse.$_.port
         $CoinName = Get-CoinName $APICurrenciesResponse.$_.name
-        Switch ($CoinName) { #temp fix
+        Switch ($CoinName) {
+            #temp fix
             "BitCash" { $CoinName = "BitCoinCash" } 
         } 
         $CurrencySymbol = "$(($APICurrenciesResponse.$_.symbol | Select-Object -Index 0) -split '-' | Select-Object -Index 0)"
-        $Algorithm_Norm = Get-AlgorithmFromCurrencySymbol $CurrencySymbol
-        if (-not $Algorithm_Norm) { $Algorithm_Norm = Get-Algorithm $Algorithm }
+        $Algorithm_Norm = Get-Algorithm $Algorithm
         $Workers = [Int]$APICurrenciesResponse.$_.workers
         $Fee = [Decimal]($APIStatusResponse.$Algorithm.Fees / 100)
+
+        [Int64]$Block = $APICurrenciesResponse.$_.height
+        if (-not $Block) { [Int64]$Block = $APICurrenciesResponse.$_.lastblock }
 
         $Divisor = 1000000000 <#check#> * [Double]$APIStatusResponse.$Algorithm.mbtc_mh_factor
 
@@ -162,6 +164,29 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
                     Fee                = $Fee
                     Workers            = $Workers
                     EstimateCorrection = $EstimateCorrection
+                }
+
+                if ($Algorithm_Norm -eq "Ethash" -and $Block -gt 0) { 
+                    [PSCustomObject]@{ 
+                        Name               = $PoolName
+                        Algorithm          = "$Algorithm_Norm-$([Math]::Ceiling((Get-EthashSize $Block)/1GB))GB"
+                        CoinName           = $CoinName
+                        CurrencySymbol     = $CurrencySymbol
+                        Price              = $Stat.Live
+                        StablePrice        = $Stat.Week
+                        MarginOfError      = $Stat.Week_Fluctuation
+                        Protocol           = "stratum+tcp"
+                        Host               = "$Algorithm.$PoolHost"
+                        Port               = $Port
+                        User               = [String]$Wallets.$_
+                        Pass               = "ID=$Worker,c=$_"
+                        Region             = $Region_Norm
+                        SSL                = $false
+                        Updated            = $Stat.Updated
+                        Fee                = $Fee
+                        Workers            = $Workers
+                        EstimateCorrection = $EstimateCorrection
+                    }
                 }
             }
         }

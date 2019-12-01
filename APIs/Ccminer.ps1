@@ -21,9 +21,11 @@ class Ccminer : Miner {
         $HashRate = [PSCustomObject]@{ }
         $Shares = [PSCustomObject]@{ }
 
-        $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
-        $Shares_Accepted = [Int]0
-        $Shares_Rejected = [Int]0
+        $HashRate_Name = [String]$this.Algorithm[0]
+        $HashRate_Value = [Double]$Data.KHS * 1000
+
+        $Shares_Accepted = [Int64]0
+        $Shares_Rejected = [Int64]0
 
         if ($this.AllowedBadShareRatio) { 
             $Shares_Accepted = [Int64]($Data.ACC | Measure-Object -Sum).Sum
@@ -36,7 +38,9 @@ class Ccminer : Miner {
             $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
         }
 
-        $HashRate | Add-Member @{ $HashRate_Name = [Double]$Data.KHS * 1000 }
+        if ($HashRate_Name) { 
+            $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
+        }
 
         if ($HashRate.PSObject.Properties.Value -gt 0) { 
             $this.Data += [PSCustomObject]@{ 

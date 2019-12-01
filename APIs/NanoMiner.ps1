@@ -92,22 +92,30 @@ class NanoMiner : Miner {
         $HashRate = [PSCustomObject]@{ }
         $Shares = [PSCustomObject]@{ }
 
-        $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
-        $Shares_Accepted = [Int]0
-        $Shares_Rejected = [Int]0
+        $HashRate_Name = ""
+        $HashRate_Value = [Double]0
+        $Shares_Accepted = [Int64]0
+        $Shares_Rejected = [Int64]0
 
-        if ($this.AllowedBadShareRatio) { 
-            $Shares_Accepted = [Int64](($Data.Algorithms | Select-Object -Index 0).(($Data.Algorithms | Select-Object -Index 0) | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name).Total.Accepted)
-            $Shares_Rejected = [Int64](($Data.Algorithms | Select-Object -Index 0).(($Data.Algorithms | Select-Object -Index 0) | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name).Total.Denied)
-            if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) { 
-                $this.SetStatus("Failed")
-                $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (Total: $($Shares_Accepted + $Shares_Rejected), Rejected: $Shares_Rejected [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
-                return @($Request, $Data | ConvertTo-Json -Depth 10 -Compress)
+        $Data.Algorithms | ForEach-Object { $_ | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name } | Select-Object -Unique | ForEach-Object { 
+            $HashRate_Name = [String]($this.Algorithm -match '^(' + [Regex]::Escape("$(Get-Algorithm $_)") + '(-.+|))$')[0]
+            $HashRate_Value = [Double]($Data.Algorithms.$_.Total.Hashrate | Measure-Object -Sum).Sum
+
+            if ($this.AllowedBadShareRatio) { 
+                $Shares_Accepted = [Int64]($Data.Algorithms.$_.Total.Accepted | Measure-Object -Sum).Sum
+                $Shares_Rejected = [Int64]($Data.Algorithms.$_.Total.Denied | Measure-Object -Sum).Sum
+                if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) { 
+                    $this.SetStatus("Failed")
+                    $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (Total: $($Shares_Accepted + $Shares_Rejected), Rejected: $Shares_Rejected [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
+                    return @($Request, $Data | ConvertTo-Json -Depth 10 -Compress)
+                }
+                $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
             }
-            $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
-        }
 
-        $HashRate | Add-Member @{ $HashRate_Name = [Double](($Data.Algorithms | Select-Object -Index 0).(($Data.Algorithms | Select-Object -Index 0) | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name).Total.Hashrate) }
+            if ($HashRate_Name) { 
+                $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
+            }
+        }
 
         if ($HashRate.PSObject.Properties.Value -gt 0) { 
             $this.Data += [PSCustomObject]@{ 

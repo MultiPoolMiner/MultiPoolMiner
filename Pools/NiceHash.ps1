@@ -60,11 +60,8 @@ $APIResponse.miningAlgorithms | Where-Object { $_.paying -gt 0 } <# algos paying
     $Port = [Int]$_.algodetails.port
     $Algorithm = [String](($_.algorithm).ToLower())
     Switch ($Algorithm) { 
-        "Beam"   { $Algorithm_Norm = "EquihashR15050" } #temp fix
-        "Decred" { $Algorithm_Norm = "DecredNiceHash" } #temp fix
-        "Mtp"    { $Algorithm_Norm = "MtpNiceHash" } #temp fix
-        "Sia"    { $Algorithm_Norm = "SiaNiceHash" } #temp fix
-        default  { $Algorithm_Norm = Get-Algorithm $_ }
+        "Beam" { $Algorithm_Norm = "EquihashR15050" } #temp fix
+        default { $Algorithm_Norm = Get-Algorithm $_ }
     }
  
     $Divisor = 100000000
@@ -77,42 +74,80 @@ $APIResponse.miningAlgorithms | Where-Object { $_.paying -gt 0 } <# algos paying
 
         $Payout_Currencies | ForEach-Object { 
             [PSCustomObject]@{ 
-                Name            = $PoolName
-                Algorithm       = $Algorithm_Norm
-                CoinName        = ""
-                CurrencySymbol  = ""
-                Price           = $Stat.Live
-                StablePrice     = $Stat.Week
-                MarginOfError   = $Stat.Week_Fluctuation
-                Protocol        = "stratum+tcp"
-                Host            = "$Algorithm.$Region.$PoolHost"
-                Port            = $Port
-                User            = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
-                Pass            = "x"
-                Region          = $Region_Norm
-                SSL             = $false
-                Updated         = $Stat.Updated
-                Fee             = $Fee
-                PayoutScheme    = "PPLNS"
+                Name           = $PoolName
+                Algorithm      = $Algorithm_Norm
+                CoinName       = ""
+                CurrencySymbol = ""
+                Price          = $Stat.Live
+                StablePrice    = $Stat.Week
+                MarginOfError  = $Stat.Week_Fluctuation
+                Protocol       = "stratum+tcp"
+                Host           = "$Algorithm.$Region.$PoolHost"
+                Port           = $Port
+                User           = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
+                Pass           = "x"
+                Region         = $Region_Norm
+                SSL            = $false
+                Updated        = $Stat.Updated
+                Fee            = $Fee
+                PayoutScheme   = "PPLNS"
             }
             [PSCustomObject]@{ 
-                Name            = $PoolName
-                Algorithm       = $Algorithm_Norm
-                CoinName        = ""
-                CurrencySymbol  = ""
-                Price           = $Stat.Live
-                StablePrice     = $Stat.Week
-                MarginOfError   = $Stat.Week_Fluctuation
-                Protocol        = "stratum+ssl"
-                Host            = "$Algorithm.$Region.$PoolHost"
-                Port            = $Port
-                User            = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
-                Pass            = "x"
-                Region          = $Region_Norm
-                SSL             = $true
-                Updated         = $Stat.Updated
-                Fee             = $Fee
-                PayoutScheme    = "PPLNS"
+                Name           = $PoolName
+                Algorithm      = $Algorithm_Norm
+                CoinName       = ""
+                CurrencySymbol = ""
+                Price          = $Stat.Live
+                StablePrice    = $Stat.Week
+                MarginOfError  = $Stat.Week_Fluctuation
+                Protocol       = "stratum+ssl"
+                Host           = "$Algorithm.$Region.$PoolHost"
+                Port           = $Port
+                User           = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
+                Pass           = "x"
+                Region         = $Region_Norm
+                SSL            = $true
+                Updated        = $Stat.Updated
+                Fee            = $Fee
+                PayoutScheme   = "PPLNS"
+            }
+            [PSCustomObject]@{ 
+                Name           = $PoolName
+                Algorithm      = "$Algorithm_Norm-NiceHash"
+                CoinName       = ""
+                CurrencySymbol = ""
+                Price          = $Stat.Live
+                StablePrice    = $Stat.Week
+                MarginOfError  = $Stat.Week_Fluctuation
+                Protocol       = "stratum+tcp"
+                Host           = "$Algorithm.$Region.$PoolHost"
+                Port           = $Port
+                User           = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
+                Pass           = "x"
+                Region         = $Region_Norm
+                SSL            = $false
+                Updated        = $Stat.Updated
+                Fee            = $Fee
+                PayoutScheme   = "PPLNS"
+            }
+            [PSCustomObject]@{ 
+                Name           = $PoolName
+                Algorithm      = "$Algorithm_Norm-NiceHash"
+                CoinName       = ""
+                CurrencySymbol = ""
+                Price          = $Stat.Live
+                StablePrice    = $Stat.Week
+                MarginOfError  = $Stat.Week_Fluctuation
+                Protocol       = "stratum+ssl"
+                Host           = "$Algorithm.$Region.$PoolHost"
+                Port           = $Port
+                User           = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
+                Pass           = "x"
+                Region         = $Region_Norm
+                SSL            = $true
+                Updated        = $Stat.Updated
+                Fee            = $Fee
+                PayoutScheme   = "PPLNS"
             }
         }
     }

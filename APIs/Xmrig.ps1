@@ -62,7 +62,7 @@ class XmRig : Miner {
                                         ConvertTo-Json -InputObject @($ThreadsConfig | Sort-Object -Property Index -Unique) -Depth 10 | Set-Content $ThreadsConfigFile -ErrorAction SilentlyContinue -Force
                                     }
                                     else { 
-                                        ConvertTo-Json -InputObject @($ThreadsConfig| Select-Object -Unique) -Depth 10 | Set-Content $ThreadsConfigFile -ErrorAction SilentlyContinue -Force
+                                        ConvertTo-Json -InputObject @($ThreadsConfig | Select-Object -Unique) -Depth 10 | Set-Content $ThreadsConfigFile -ErrorAction SilentlyContinue -Force
                                     }
                                     break
                                 }
@@ -171,13 +171,17 @@ class XmRig : Miner {
         $HashRate = [PSCustomObject]@{ }
         $Shares = [PSCustomObject]@{ }
 
-        $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
-        $Shares_Accepted = [Int]0
-        $Shares_Rejected = [Int]0
+        $HashRate_Name = [String]$this.Algorithm[0]
+        $HashRate_Value = [Double]$Data.hashrate.total[0]
+        if (-not $HashRate_Value) { $HashRate_Value = [Double]$Data.hashrate.total[1] } #fix
+        if (-not $HashRate_Value) { $HashRate_Value = [Double]$Data.hashrate.total[2] } #fix
+
+        $Shares_Accepted = [Int64]0
+        $Shares_Rejected = [Int64]0
 
         if ($this.AllowedBadShareRatio) { 
-            $Shares_Accepted = [Double]$Data.results.shares_good
-            $Shares_Rejected = [Double]($Data.results.shares_total - $Data.results.shares_good)
+            $Shares_Accepted = [Int64]$Data.results.shares_good
+            $Shares_Rejected = [Int64]($Data.results.shares_total - $Data.results.shares_good)
             if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) { 
                 $this.SetStatus("Failed")
                 $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (Total: $($Shares_Accepted + $Shares_Rejected), Rejected: $Shares_Rejected [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
@@ -186,13 +190,12 @@ class XmRig : Miner {
             $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
         }
 
-        $HashRate_Value = [Double]($Data.hashrate.total | Select-Object -Index 0)
-        if (-not $HashRate_Value) { $HashRate_Value = [Double]($Data.hashrate.total | Select-Object -Index 1) } #fix
-        if (-not $HashRate_Value) { $HashRate_Value = [Double]($Data.hashrate.total | Select-Object -Index 2) } #fix
-        $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
+        if ($HashRate_Name) { 
+            $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
+        }
 
         if ($HashRate.PSObject.Properties.Value -gt 0) { 
-                $this.Data += [PSCustomObject]@{ 
+            $this.Data += [PSCustomObject]@{ 
                 Date       = (Get-Date).ToUniversalTime()
                 Raw        = $Data
                 HashRate   = $HashRate

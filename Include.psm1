@@ -1264,18 +1264,35 @@ function Get-Algorithm {
     else { $Algorithm }
 }
 
-function Get-AlgorithmFromCurrencySymbol { 
+function Test-Prime { 
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory = $false)]
-        [String]$CurrencySymbol = ""
+        [Parameter(Mandatory = $true)]
+        [Double]$Number
     )
 
-    if (-not (Test-Path Variable:Script:EthashDAGsize -ErrorAction SilentlyContinue)) { 
-        $Script:EthashDAGsize = Get-Content "EthashDAGsize.txt" | ConvertFrom-Json
-    }
-    if ($Script:EthashDAGsize.$CurrencySymbol) { $Script:EthashDAGsize.$CurrencySymbol }
-    else { $null }
+    for ([Int64]$i = 2; $i -lt [Int64][Math]::Pow($Number, 0.5); $i++) { if ($Number % $i -eq 0) { return $false } }
+
+    return $true
+}
+
+function Get-EthashSize { 
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [Double]$Block
+    )
+
+    $DATASET_BYTES_INIT = [Math]::Pow(2, 30)
+    $DATASET_BYTES_GROWTH = [Math]::Pow(2, 23)
+    $EPOCH_LENGTH = 30000
+    $MIX_BYTES = 128
+
+    $Size = $DATASET_BYTES_INIT + $DATASET_BYTES_GROWTH * [Math]::Floor($Block / $EPOCH_LENGTH)
+    $Size -= $MIX_BYTES
+    while (-not (Test-Prime ($Size / $MIX_BYTES))) { $Size -= 2 * $MIX_BYTES }
+
+    return $Size
 }
 
 function Get-CoinName { 

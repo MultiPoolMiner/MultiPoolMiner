@@ -53,7 +53,7 @@ $Devices | Select-Object Model, Type, Vendor  -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model| Where-Object Type -EQ $_.Type | Where-Object Vendor -EQ $_.Vendor)
     $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
-    $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $Pools.$Algorithm_Norm.Host -and (($Device.Type | Select-Object -Unique) -in $_.Vendor -or ($Device.Vendor | Select-Object -Unique) -in $_.Vendor) } | ForEach-Object { 
+    $Commands | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_.Algorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.Algorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $Pools.$Algorithm_Norm.Host -and (($Device.Type | Select-Object -Unique) -in $_.Vendor -or ($Device.Vendor | Select-Object -Unique) -in $_.Vendor) } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
 
         if ($Miner_Device = @($Device | Where-Object { ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB -or $_.Type -eq "CPU" })) { 

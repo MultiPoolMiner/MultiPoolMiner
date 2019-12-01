@@ -26,9 +26,10 @@ if ($Devices.Vendor -contains "NVIDIA" -and $CUDAVersion -and [System.Version]$C
  }
 
 $Commands = [PSCustomObject[]]@(
-    #[PSCustomObject]@{ Algorithm = "Ethash2gb";               AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = "" } #Ethash2GB, other Ethash miners are faster
-    #[PSCustomObject]@{ Algorithm = "Ethash3gb";               AmdMinMemGB = 3; NvidiaMinMemGB = 3; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = "" } #Ethash3GB, other Ethash miners are faster
     #[PSCustomObject]@{ Algorithm = "Ethash";                  AmdMinMemGB = 4; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = "" } #Ethash, other Ethash miners are faster
+    #[PSCustomObject]@{ Algorithm = "Ethash-2gb";              AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = "" } #Ethash2GB, other Ethash miners are faster
+    #[PSCustomObject]@{ Algorithm = "Ethash-3gb";              AmdMinMemGB = 3; NvidiaMinMemGB = 3; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = "" } #Ethash3GB, other Ethash miners are faster
+    #[PSCustomObject]@{ Algorithm = "Ethash-4gb";              AmdMinMemGB = 4; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = "" } #Ethash4GB, other Ethash miners are faster
     [PSCustomObject]@{ Algorithm = "Ubqhash";                 AmdMinMemGB = 4; NvidiaMinMemGB = 4; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = "" } #Ubqhash
     [PSCustomObject]@{ Algorithm = "CryptoNight";             AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = "" } #Cryptonight
     [PSCustomObject]@{ Algorithm = "CryptoNightR";            AmdMinMemGB = 2; NvidiaMinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Fee = 1; Command = "" } #CryptonightR
@@ -52,7 +53,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Vendor -EQ $_.Vendor | Where-Object Model -EQ $_.Model)
     $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
 
-    $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $_.Vendor -contains ($Device.Vendor | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
+    $Commands | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_.Algorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.Algorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $_.Vendor -contains ($Device.Vendor | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $Algorithm = $_.Algorithm -replace "ethash(\dgb)", "Ethash"
         $Fee = $_.Fee
         $MinMemGB = $_."$($Device.Vendor | Select-Object -Unique)MinMemGB"

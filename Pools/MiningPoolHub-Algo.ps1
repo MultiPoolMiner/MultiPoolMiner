@@ -44,9 +44,8 @@ $APIResponse.return | ForEach-Object {
     $PoolHosts = [String[]]($PoolEntry.all_host_list.split(";"))
     $CoinName = Get-CoinName $PoolEntry.current_mining_coin
     $CurrencySymbol = [String]$PoolEntry.current_mining_coin_symbol
-    $Algorithm_Norm = Get-AlgorithmFromCurrencySymbol $CurrencySymbol
-    if (-not $Algorithm_Norm) { $Algorithm_Norm = Get-Algorithm $PoolEntry.algo }
-    if ($Algorithm_Norm -eq "Sia") { $Algorithm_Norm = "SiaClaymore" } #temp fix
+    $Algorithm_Norm = Get-Algorithm $PoolEntry.algo
+    if ($Algorithm_Norm -eq "Sia") { $Algorithm_Norm = "Sia-Claymore" }
 
     $Divisor = 1000000000
 

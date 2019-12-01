@@ -45,7 +45,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
-    $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm ($_.Algorithm -replace ","); $_ } | Where-Object { $Pools.$Algorithm_Norm.Host } | ForEach-Object { 
+    $Commands | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_.Algorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.Algorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $Pools.$Algorithm_Norm.Host } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
         $Pers = ""
 
@@ -69,7 +69,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 HashSHA256 = $HashSHA256
                 Arguments  = ("$Command$CommonCommands$Pers --telemetry=0.0.0.0:$($Miner_Port) --server=$(if ($Pools.$Algorithm_Norm.SSL) { "ssl://" })$($Pools.$Algorithm_Norm.Host) --port=$($Pools.$Algorithm_Norm.Port) --user=$($Pools.$Algorithm_Norm.User) --pass=$($Pools.$Algorithm_Norm.Pass)$NoFee --cuda-devices=$(($Miner_Device | ForEach-Object { '{0:x}' -f ($_.Type_Vendor_Index) }) -join ' ')" -replace "\s+", " ").trim()
                 HashRates  = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
-                API        = "MiniZ"
+                API        = "DSTM"
                 Port       = $Miner_Port
                 URI        = $Uri
                 Fees       = [PSCustomObject]@{ $Algorithm_Norm = 2 / 100 }

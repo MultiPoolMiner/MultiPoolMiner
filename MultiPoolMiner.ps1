@@ -140,7 +140,7 @@ param(
     [Parameter(Mandatory = $false)]
     [Switch]$DisableEstimateCorrection = $false, #If true MPM will reduce the algo price by a correction factor (actual_last24h / estimate_last24h) to counter pool overestimated prices
     [Parameter(Mandatory = $false)]
-    [PSCustomObject]$IntervalMultiplier = [PSCustomObject]@{"EquihashR15053" = 2; "Mtp" = 2; "MtpNicehash" = 2; "ProgPow" = 2; "Rfv2" = 2; "X16r" = 5; "X16Rt" = 3; "X16RtGin" = 3; "X16RtVeil" = 3 } #IntervalMultiplier per Algo, if algo is not listed the default of 1 is used
+    [PSCustomObject]$IntervalMultiplier = [PSCustomObject]@{"EquihashR15053" = 2; "Mtp" = 2; "ProgPow" = 2; "Rfv2" = 2; "X16r" = 5; "X16Rt" = 3; "X16RtGin" = 3; "X16RtVeil" = 3 } #IntervalMultiplier per Algo, if algo is not listed the default of 1 is used
 )
 
 Clear-Host

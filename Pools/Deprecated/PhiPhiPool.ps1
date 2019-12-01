@@ -64,8 +64,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
         $Port = [Int]$APICurrenciesResponse.$_.port
         $CoinName = Get-CoinName $APICurrenciesResponse.$_.name
         $CurrencySymbol = [String]$APICurrenciesResponse.$_.symbol
-        $Algorithm_Norm = Get-AlgorithmFromCurrencySymbol $CurrencySymbol
-        if (-not $Algorithm_Norm) { $Algorithm_Norm = Get-Algorithm $APICurrenciesResponse.$_.algo }
+        $Algorithm_Norm = Get-Algorithm $APICurrenciesResponse.$_.algo
         $Workers = [Int]$APICurrenciesResponse.$_.workers
         $Fee = [Decimal]($APIStatusResponse.$Algorithm.Fees / 100)
 

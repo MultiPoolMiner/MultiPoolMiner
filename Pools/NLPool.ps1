@@ -48,7 +48,7 @@ if (($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction I
     return
 }
 
-$Payout_Currencies = (@($Payout_Currencies) + @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object { $Wallets.$_ }  | Sort-Object -Unique
+$Payout_Currencies = (@($Payout_Currencies) + @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object { $Wallets.$_ } | Sort-Object -Unique
 if (-not $Payout_Currencies) { 
     Write-Log -Level Verbose "Cannot mine on pool ($PoolFileName) - no wallet address specified. "
     return
@@ -64,22 +64,22 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
         $CurrencySymbols = @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.algo -eq $Algorithm })
         if ($CurrencySymbols.Count -eq 1) { 
             $CurrencySymbol = [String]($CurrencySymbols -split "-" | Select-Object -First 1)
-            $Algorithm_Norm = Get-AlgorithmFromCurrencySymbol $CurrencySymbol
             $CoinName = Get-CoinName $APICurrenciesResponse.$CurrencySymbols.Name
         }
     }
-    if (-not $Algorithm_Norm) { $Algorithm_Norm = Get-Algorithm $Algorithm }
+    $Algorithm_Norm = Get-Algorithm $Algorithm
 
     $Workers = [Int]$APIStatusResponse.$_.workers
     $Fee = [Decimal]($APIStatusResponse.$_.Fees / 100)
 
     $Divisor = 1000000 * [Double]$APIStatusResponse.$_.mbtc_mh_factor
 
-    switch ($Algorithm_Norm) { #Temp fix
+    switch ($Algorithm_Norm) {
+        #Temp fix
         "EquihashR12540" { $Divisor *= 2 } #temp fix
-        "Equihash1445"   { $Divisor *= 2 } #temp fix
-        "Equihash1927"   { $Divisor *= 2 } #temp fix
-        "Verushash"      { $Divisor *= 2 } #temp fix
+        "Equihash1445" { $Divisor *= 2 } #temp fix
+        "Equihash1927" { $Divisor *= 2 } #temp fix
+        "Verushash" { $Divisor *= 2 } #temp fix
     }
 
     if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1) } 

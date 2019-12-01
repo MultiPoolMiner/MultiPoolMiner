@@ -21,13 +21,16 @@ class Dstm : Miner {
         $HashRate = [PSCustomObject]@{ }
         $Shares = [PSCustomObject]@{ }
 
-        $HashRate_Name = [String]($this.Algorithm | Select-Object -Index 0)
-        $Shares_Accepted = [Int]0
-        $Shares_Rejected = [Int]0
+        $HashRate_Name = [String]$this.Algorithm[0]
+        $HashRate_Value = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum
+        if (-not $HashRate_Value) { $HashRate_Value = [Double]($Data.result.sol_ps | Measure-Object -Sum).Sum } #fix
+
+        $Shares_Accepted = [Int64]0
+        $Shares_Rejected = [Int64]0
 
         if ($this.AllowedBadShareRatio) { 
-            $Shares_Accepted = [Double]($Data.result.accepted_shares | Measure-Object -Sum).Sum
-            $Shares_Rejected = [Double]($Data.result.rejected_shares | Measure-Object -Sum).Sum
+            $Shares_Accepted = [Int64]($Data.result.accepted_shares | Measure-Object -Sum).Sum
+            $Shares_Rejected = [Int64]($Data.result.rejected_shares | Measure-Object -Sum).Sum
             if ((-not $Shares_Accepted -and $Shares_Rejected -ge 3) -or ($Shares_Accepted -and ($Shares_Rejected * $this.AllowedBadShareRatio -gt $Shares_Accepted))) { 
                 $this.SetStatus("Failed")
                 $this.StatusMessage = " was stopped because of too many bad shares for algorithm $HashRate_Name (Total: $($Shares_Accepted + $Shares_Rejected), Rejected: $Shares_Rejected [Configured allowed ratio is 1:$(1 / $this.AllowedBadShareRatio)])"
@@ -36,9 +39,9 @@ class Dstm : Miner {
             $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
         }
 
-        $HashRate_Value = [Double]($Data.result.sol_ps | Measure-Object -Sum).Sum
-        if (-not $HashRate_Value) { $HashRate_Value = [Double]($Data.result.speed_sps | Measure-Object -Sum).Sum } #ewbf fix
-        $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
+        if ($HashRate_Name) { 
+            $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
+        }
 
         if ($HashRate.PSObject.Properties.Value -gt 0) { 
             $this.Data += [PSCustomObject]@{ 

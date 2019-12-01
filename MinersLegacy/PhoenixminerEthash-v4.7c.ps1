@@ -24,18 +24,22 @@ if ($UnsupportedDriverVersions -contains $AMDVersion) {
 }
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{ Algorithm = "ethash2gb";  MinMemGB = 2; SecondaryAlgorithm = "";        Command = ""; Coin = "" } #Ethash2GB
-    [PSCustomObject]@{ Algorithm = "ethash2gb";  MinMemGB = 2; SecondaryAlgorithm = "blake2s"; Command = ""; Coin = "" } #Ethash2GB/Blake2s
-    [PSCustomObject]@{ Algorithm = "ethash3gb";  MinMemGB = 3; SecondaryAlgorithm = "";        Command = ""; Coin = "" } #Ethash3GB
-    [PSCustomObject]@{ Algorithm = "ethash3gb";  MinMemGB = 3; SecondaryAlgorithm = "blake2s"; Command = ""; Coin = "" } #Ethash3GB/Blake2s
     [PSCustomObject]@{ Algorithm = "ethash";     MinMemGB = 4; SecondaryAlgorithm = "";        Command = ""; Coin = "" } #Ethash
     [PSCustomObject]@{ Algorithm = "ethash";     MinMemGB = 4; SecondaryAlgorithm = "blake2s"; Command = ""; Coin = "" } #Ethash/Blake2s
-    [PSCustomObject]@{ Algorithm = "progpow2gb"; MinMemGB = 2; SecondaryAlgorithm = "";        Command = ""; Coin = " -coin bci" } #Progpow2GB
-    [PSCustomObject]@{ Algorithm = "progpow3gb"; MinMemGB = 3; SecondaryAlgorithm = "";        Command = ""; Coin = " -coin bci" } #Progpow3GB
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"; MinMemGB = 2; SecondaryAlgorithm = "";        Command = ""; Coin = "" } #Ethash2GB
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"; MinMemGB = 2; SecondaryAlgorithm = "blake2s"; Command = ""; Coin = "" } #Ethash2GB/Blake2s
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"; MinMemGB = 3; SecondaryAlgorithm = "";        Command = ""; Coin = "" } #Ethash3GB
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"; MinMemGB = 3; SecondaryAlgorithm = "blake2s"; Command = ""; Coin = "" } #Ethash3GB/Blake2s
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"; MinMemGB = 4; SecondaryAlgorithm = "";        Command = ""; Coin = "" } #Ethash4GB
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"; MinMemGB = 4; SecondaryAlgorithm = "blake2s"; Command = ""; Coin = "" } #Ethash4GB/Blake2s
     [PSCustomObject]@{ Algorithm = "progpow";    MinMemGB = 4; SecondaryAlgorithm = "";        Command = ""; Coin = " -coin bci" } #Progpow
-    [PSCustomObject]@{ Algorithm = "Ubqhash2GB"; MinMemGB = 4; SecondaryAlgorithm = "";        Command = ""; Coin = " -coin ubq" } #Ubqhash2GB
-    [PSCustomObject]@{ Algorithm = "Ubqhash3GB"; MinMemGB = 4; SecondaryAlgorithm = "";        Command = ""; Coin = " -coin ubq" } #Ubqhash3GB
+    [PSCustomObject]@{ Algorithm = "progpow-2gb";MinMemGB = 2; SecondaryAlgorithm = "";        Command = ""; Coin = " -coin bci" } #Progpow2GB
+    [PSCustomObject]@{ Algorithm = "progpow-3gb";MinMemGB = 3; SecondaryAlgorithm = "";        Command = ""; Coin = " -coin bci" } #Progpow3GB
+    [PSCustomObject]@{ Algorithm = "progpow-4gb";MinMemGB = 4; SecondaryAlgorithm = "";        Command = ""; Coin = " -coin bci" } #Progpow4GB
     [PSCustomObject]@{ Algorithm = "Ubqhash";    MinMemGB = 4; SecondaryAlgorithm = "";        Command = ""; Coin = " -coin ubq" } #Ubqhash
+    [PSCustomObject]@{ Algorithm = "Ubqhash-2gb";MinMemGB = 4; SecondaryAlgorithm = "";        Command = ""; Coin = " -coin ubq" } #Ubqhash2GB
+    [PSCustomObject]@{ Algorithm = "Ubqhash-3gb";MinMemGB = 4; SecondaryAlgorithm = "";        Command = ""; Coin = " -coin ubq" } #Ubqhash3GB
+    [PSCustomObject]@{ Algorithm = "Ubqhash-4gb";MinMemGB = 4; SecondaryAlgorithm = "";        Command = ""; Coin = " -coin ubq" } #Ubqhash4GB
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
@@ -87,7 +91,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         Default { $CommonCommands = $CommonCommandsAll }
     }
 
-    $Commands | ForEach-Object { $Algorithm_Norm = Get-Algorithm $_.Algorithm; $_ } | Where-Object { $Pools.$Algorithm_Norm.Host } | ForEach-Object { 
+    $Commands | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_.Algorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.Algorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $Pools.$Algorithm_Norm.Host } | ForEach-Object { 
         $Arguments_Primary = ""
         $Arguments_Secondary = ""
         $MinMemGB = $_.MinMemGB
@@ -102,14 +106,14 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             $Command = Get-CommandPerDevice -Command $_.Command -DeviceIDs $Miner_Device.Type_Vendor_Index
 
             if ($null -ne $_.SecondaryAlgoIntensity) { 
-                $Secondary_Algorithm = $_.SecondaryAlgorithm
-                $Secondary_Algorithm_Norm = Get-Algorithm $Secondary_Algorithm
+                $SecondaryAlgorithm = $_.SecondaryAlgorithm
+                $SecondaryAlgorithm_Norm = @(@(Get-Algorithm ($_.SecondaryAlgorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.SecondaryAlgorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'
 
-                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) + @("$Algorithm_Norm$($Secondary_Algorithm_Norm -replace 'Nicehash'<#temp fix#>)") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
-                $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week; $Secondary_Algorithm_Norm = $Stats."$($Miner_Name)_$($Secondary_Algorithm_Norm)_HashRate".Week }
+                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) + @("$Algorithm_Norm$($SecondaryAlgorithm_Norm -replace 'Nicehash'<#temp fix#>)") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
+                $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week; $SecondaryAlgorithm_Norm = $Stats."$($Miner_Name)_$($SecondaryAlgorithm_Norm)_HashRate".Week }
 
-                $Arguments_Secondary += " -dcoin $Secondary_Algorithm -dpool $(if ($Pools.$Secondary_Algorithm_Norm.SSL) { "ssl://" })$($Pools.$Secondary_Algorithm_Norm.Host):$($Pools.$Secondary_Algorithm_Norm.Port) -dwal $($Pools.$Secondary_Algorithm_Norm.User) -dpass $($Pools.$Secondary_Algorithm_Norm.Pass)$(if($_.SecondaryAlgoIntensity -ge 0){ " -sci $($_.SecondaryAlgoIntensity)" })"
-                $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = 0.9 / 100; $Secondary_Algorithm_Norm = 0 / 100 }
+                $Arguments_Secondary += " -dcoin $SecondaryAlgorithm -dpool $(if ($Pools.$SecondaryAlgorithm_Norm.SSL) { "ssl://" })$($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpass $($Pools.$SecondaryAlgorithm_Norm.Pass)$(if($_.SecondaryAlgoIntensity -ge 0){ " -sci $($_.SecondaryAlgoIntensity)" })"
+                $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = 0.9 / 100; $SecondaryAlgorithm_Norm = 0 / 100 }
 
                 $IntervalMultiplier = 2
                 $WarmupTime = 60
@@ -129,13 +133,13 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 }
             }
 
-            if ($null -eq $_.SecondaryAlgoIntensity -or $Pools.$Secondary_Algorithm_Norm.Host) { 
+            if ($null -eq $_.SecondaryAlgoIntensity -or $Pools.$SecondaryAlgorithm_Norm.Host) { 
                 [PSCustomObject]@{ 
                     Name               = $Miner_Name
                     DeviceName         = $Miner_Device.Name
                     Path               = $Path
                     HashSHA256         = $HashSHA256
-                    Arguments          = ("$Command$CommonCommands$($Coin.ToLower()) -mport -$Miner_Port$(if(($Pools.$Algorithm_Norm.Name -like "NiceHash*" -or $Pools.$Algorithm_Norm.Name -like "MiningPoolHub*") -and $Algorithm_Norm -like "Ethash*") { " -proto 4" }) -pool $(if ($Pools.$Algorithm_Norm.SSL) { "ssl://" })$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -wal $($Pools.$Algorithm_Norm.User) -pass $($Pools.$Algorithm_Norm.Pass)$Arguments_Primary$Arguments_Secondary$TurboKernel -gpus $(($Miner_Device | ForEach-Object { '{0:x}' -f ($_.Type_Vendor_Slot + 1) }) -join ',')" -replace "\s+", " ").trim()
+                    Arguments          = ("$Command$CommonCommands$($Coin.ToLower()) -mport -$Miner_Port$(if(($Pools.$Algorithm_Norm.Name -like "NiceHash*" -or $Pools.$Algorithm_Norm.Name -like "MiningPoolHub*") -and $Algorithm_Norm -match '^(ethash(-.+|))$') { " -proto 4" }) -pool $(if ($Pools.$Algorithm_Norm.SSL) { "ssl://" })$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -wal $($Pools.$Algorithm_Norm.User) -pass $($Pools.$Algorithm_Norm.Pass)$Arguments_Primary$Arguments_Secondary$TurboKernel -gpus $(($Miner_Device | ForEach-Object { '{0:x}' -f ($_.Type_Vendor_Slot + 1) }) -join ',')" -replace "\s+", " ").trim()
                     HashRates          = $Miner_HashRates
                     API                = "Claymore"
                     Port               = $Miner_Port

@@ -44,12 +44,22 @@ $APIResponse.return | ForEach-Object {
     $CoinName = Get-CoinName $PoolEntry.coin_name
     Switch ($CoinName) {
         "MaxCoin" { $PoolHosts = [String[]]($PoolEntry.host) } #temp Fix
-        default   { $PoolHosts = [String[]]($PoolEntry.host_list.split(";")) }
+        default { $PoolHosts = [String[]]($PoolEntry.host_list.split(";")) }
     }
     $CurrencySymbol = [String]$PoolEntry.symbol
-    $Algorithm_Norm = Get-AlgorithmFromCurrencySymbol $CurrencySymbol
-    if (-not $Algorithm_Norm) { $Algorithm_Norm = Get-Algorithm $PoolEntry.algo }
-    if ($Algorithm_Norm -eq "Sia") { $Algorithm_Norm = "SiaClaymore" } #temp fix
+    $Algorithm_Norm = Get-Algorithm $PoolEntry.algo
+    if ($Algorithm_Norm -eq "Sia") { $Algorithm_Norm = "Sia-Claymore" }
+
+    [Int64]$Block = $_.height
+    if (-not $Block) { [Int64]$Block = $_.lastblock } #incorrect
+
+    [Int64]$Block = $null
+    if ($Algorithm_Norm -eq "Ethash") { 
+        try { 
+            [Int64]$Block = (Invoke-RestMethod "http://$($_.coin_name).miningpoolhub.com/index.php?page=api&action=public" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop).last_block #correct
+        }
+        catch { }
+    }
 
     $Divisor = 1000000000
 
@@ -94,6 +104,43 @@ $APIResponse.return | ForEach-Object {
             SSL            = $true
             Updated        = $Stat.Updated
             Fee            = [Decimal]($PoolEntry.fee / 100)
+        }
+
+        if ($Algorithm_Norm -eq "Ethash" -and $Block -gt 0) { 
+            [PSCustomObject]@{ 
+                Algorithm      = "$Algorithm_Norm-$([Math]::Ceiling((Get-EthashSize $Block)/1GB))GB"
+                CoinName       = $CoinName
+                CurrencySymbol = $CurrencySymbol
+                Price          = $Stat.Live
+                StablePrice    = $Stat.Week
+                MarginOfError  = $Stat.Week_Fluctuation
+                Protocol       = "stratum+tcp"
+                Host           = [String]($PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1)
+                Port           = [Int]$PoolEntry.port
+                User           = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
+                Pass           = "x"
+                Region         = $Region_Norm
+                SSL            = $false
+                Updated        = $Stat.Updated
+                Fee            = [Decimal]($PoolEntry.fee / 100)
+            }
+            [PSCustomObject]@{ 
+                Algorithm      = "$Algorithm_Norm-$([Math]::Ceiling((Get-EthashSize $Block)/1GB))GB"
+                CoinName       = $CoinName
+                CurrencySymbol = $CurrencySymbol
+                Price          = $Stat.Live
+                StablePrice    = $Stat.Week
+                MarginOfError  = $Stat.Week_Fluctuation
+                Protocol       = "stratum+ssl"
+                Host           = [String]($PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1)
+                Port           = [Int]$PoolEntry.port
+                User           = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
+                Pass           = "x"
+                Region         = $Region_Norm
+                SSL            = $true
+                Updated        = $Stat.Updated
+                Fee            = [Decimal]($PoolEntry.fee / 100)
+            }
         }
     }
 }

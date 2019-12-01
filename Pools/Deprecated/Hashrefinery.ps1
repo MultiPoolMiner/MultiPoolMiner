@@ -65,11 +65,10 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
         $CurrencySymbols = @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.algo -eq $Algorithm })
         if ($CurrencySymbols.Count -eq 1) { 
             $CurrencySymbol = [String]($CurrencySymbols -split "-" | Select-Object -First 1)
-            $Algorithm_Norm = Get-AlgorithmFromCurrencySymbol $CurrencySymbol
             $CoinName = Get-CoinName $APICurrenciesResponse.$CurrencySymbols.Name
         }
     }
-    if (-not $Algorithm_Norm) { $Algorithm_Norm = Get-Algorithm $Algorithm }
+    $Algorithm_Norm = Get-Algorithm $Algorithm
     $Workers = [Int]$APIStatusResponse.$_.workers
     $Fee = [Decimal]($APIStatusResponse.$_.Fees / 100)
 
@@ -121,10 +120,12 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
         $Port = [Int]$APICurrenciesResponse.$_.port
         $CoinName = Get-CoinName $APICurrenciesResponse.$_.name
         $CurrencySymbol = [String]($APICurrenciesResponse.$_.symbol | Select-Object -Index 0)
-        $Algorithm_Norm = Get-AlgorithmFromCurrencySymbol $CurrencySymbol
-        if (-not $Algorithm_Norm) { $Algorithm_Norm = Get-Algorithm $APICurrenciesResponse.$_.algo }
+        $Algorithm_Norm = Get-Algorithm $APICurrenciesResponse.$_.algo
         $Workers = [Int]$APICurrenciesResponse.$_.workers
         $Fee = [Decimal]($APIStatusResponse.$Algorithm.Fees / 100)
+
+        [Int64]$Block = $APICurrenciesResponse.$_.height
+        if (-not $Block) { [Int64]$Block = $APICurrenciesResponse.$_.lastblock }
 
         $Divisor = 1000000000000 <#check#> * [Double]$APIStatusResponse.$($APICurrenciesResponse.$_.algo).mbtc_mh_factor
 
@@ -157,6 +158,29 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
                     Fee                = $Fee
                     Workers            = $Workers
                     EstimateCorrection = $EstimateCorrection
+                }
+
+                if ($Algorithm_Norm -eq "Ethash" -and $Block -gt 0) { 
+                    [PSCustomObject]@{
+                        Name               = $PoolName
+                        Algorithm          = "$Algorithm_Norm-$([Math]::Ceiling((Get-EthashSize $Block)/1GB))GB"
+                        CoinName           = $CoinName
+                        CurrencySymbol     = $CurrencySymbol
+                        Price              = $Stat.Live
+                        StablePrice        = $Stat.Week
+                        MarginOfError      = $Stat.Week_Fluctuation
+                        Protocol           = "stratum+tcp"
+                        Host               = "$Algorithm.$Region.$PoolHost"
+                        Port               = $Port
+                        User               = [String]$Wallets.$_
+                        Pass               = "ID=$($Config.Pools.$PoolFileName.Worker),c=$_"
+                        Region             = $Region_Norm
+                        SSL                = $false
+                        Updated            = $Stat.Updated
+                        Fee                = $Fee
+                        Workers            = $Workers
+                        EstimateCorrection = $EstimateCorrection
+                    }
                 }
             }
         }
