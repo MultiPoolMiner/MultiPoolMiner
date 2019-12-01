@@ -37,7 +37,7 @@ class XmRig : Miner {
                     if ($ThreadsConfig.Count -lt 1) { 
                         if (Test-Path "$(Split-Path $this.Path)\$($this.Algorithm | Select-Object -Index 0)-*.json" -PathType Leaf) { 
                             #Remove old config files, thread info is no longer valid
-                            Write-Log -Level Warn "Hardware change detected. Deleting existing configuration files for miner ($($this.Name) {$(($this.Algorithm | Select-object -Index 0) -replace 'NiceHash')@$($this.PoolName | Select-Object -Index 0)}). "
+                            Write-Log -Level Warn "Hardware change detected. Deleting existing configuration files for miner ($($this.Name) {$($this.Algorithm | Select-object -Index 0)@$($this.PoolName | Select-Object -Index 0)}). "
                             Remove-Item "$(Split-Path $this.Path)\ThreadsConfig-$($this.Algorithm | Select-Object -Index 0)-*.json" -Force -ErrorAction SilentlyContinue
                         }
                         #Temporarily start miner with pre-config file (without threads config). Miner will then update hw config file with threads info
@@ -71,7 +71,7 @@ class XmRig : Miner {
                             $this.StopMining()
                         }
                         else { 
-                            Write-Log -Level Error "Running temporary miner failed - cannot create threads config file ($($this.Name) {$(($this.Algorithm | Select-Object -Index 0) -replace 'NiceHash')@$($this.PoolName | Select-Object -Index 0)}) [Error: '$($Error | Select-Object -Index 0)']. "
+                            Write-Log -Level Error "Running temporary miner failed - cannot create threads config file ($($this.Name) {$($this.Algorithm | Select-Object -Index 0)@$($this.PoolName | Select-Object -Index 0)}) [Error: '$($Error | Select-Object -Index 0)']. "
                             return
                         }
                     }
@@ -91,14 +91,14 @@ class XmRig : Miner {
                             $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -Force
                         }
                         else { 
-                            Write-Log -Level Error "Error parsing threads config file - cannot create miner config file ($($this.Name) {$(($this.Algorithm | Select-Object -Index 0) -replace 'NiceHash')@$($this.PoolName | Select-Object -Index 0)}) [Error: '$($Error | Select-Object -Index 0)']. "
+                            Write-Log -Level Error "Error parsing threads config file - cannot create miner config file ($($this.Name) {$($this.Algorithm | Select-Object -Index 0)@$($this.PoolName | Select-Object -Index 0)}) [Error: '$($Error | Select-Object -Index 0)']. "
                             return
                         }                
                     }
                 }
             }
             catch { 
-                Write-Log -Level Error "Creating miner config files failed ($($this.Name) { $(($this.Algorithm | Select-Object -Index 0) -replace 'NiceHash')@$($this.Pool | Select-Object -Index 0) }) [Error: '$($Error | Select-Object -Index 0)']. "
+                Write-Log -Level Error "Creating miner config files failed ($($this.Name) { $($this.Algorithm | Select-Object -Index 0)@$($this.Pool | Select-Object -Index 0) }) [Error: '$($Error | Select-Object -Index 0)']. "
                 return
             }
             

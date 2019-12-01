@@ -109,7 +109,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $SecondaryAlgorithm = $_.SecondaryAlgorithm
                 $SecondaryAlgorithm_Norm = @(@(Get-Algorithm ($_.SecondaryAlgorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.SecondaryAlgorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'
 
-                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) + @("$Algorithm_Norm$($SecondaryAlgorithm_Norm -replace 'Nicehash'<#temp fix#>)") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) + @("$Algorithm_Norm$SecondaryAlgorithm_Norm") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week; $SecondaryAlgorithm_Norm = $Stats."$($Miner_Name)_$($SecondaryAlgorithm_Norm)_HashRate".Week }
 
                 $Arguments_Secondary += " -dcoin $SecondaryAlgorithm -dpool $(if ($Pools.$SecondaryAlgorithm_Norm.SSL) { "ssl://" })$($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpass $($Pools.$SecondaryAlgorithm_Norm.Pass)$(if($_.SecondaryAlgoIntensity -ge 0){ " -sci $($_.SecondaryAlgoIntensity)" })"

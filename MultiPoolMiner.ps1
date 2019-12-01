@@ -541,7 +541,7 @@ while (-not $API.Stop) {
         Where-Object { -not $Config.Pools.$($_.Name).CurrencySymbol -or (Compare-Object @($Config.Pools.$($_.Name).CurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
         Where-Object { -not $Config.ExcludeCurrencySymbol -or -not (Compare-Object @($Config.ExcludeCurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
         Where-Object { -not $Config.Pools.$($_.Name).ExcludeCurrencySymbol -or -not (Compare-Object @($Config.Pools.$($_.Name).ExcludeCurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { $Algorithm = $_.Algorithm -replace "NiceHash"<#temp fix#>; $_.Workers -eq $null -or $_.Workers -ge (($Config.MinWorker.PSObject.Properties.Name | Where-Object { $Algorithm -like $_ } | ForEach-Object { $Config.MinWorker.$_ }) | Measure-Object -Minimum).Minimum } | 
+        Where-Object { $Algorithm = $_.Algorithm; $_.Workers -eq $null -or $_.Workers -ge (($Config.MinWorker.PSObject.Properties.Name | Where-Object { $Algorithm -like $_ } | ForEach-Object { $Config.MinWorker.$_ }) | Measure-Object -Minimum).Minimum } | 
         Where-Object { $PoolName = $_.Name; $_.Workers -eq $null -or $_.Workers -ge (($Config.Pools.$($PoolName).MinWorker.PSObject.Properties.Name | Where-Object { $Algorithm -like $_ } | ForEach-Object { $Config.Pools.$($PoolName).MinWorker.$_ }) | Measure-Object -Minimum).Minimum } | 
         Sort-Object Algorithm
     )

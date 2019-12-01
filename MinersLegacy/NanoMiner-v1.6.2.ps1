@@ -54,7 +54,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Index) + 1)
 
     $Commands | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_.Algorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.Algorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $_.Vendor -contains ($Device.Vendor | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
-        $Algorithm = $_.Algorithm -replace "ethash(\dgb)", "Ethash"
+        $Algorithm = $_.Algorithm
         $Fee = $_.Fee
         $MinMemGB = $_."$($Device.Vendor | Select-Object -Unique)MinMemGB"
 
