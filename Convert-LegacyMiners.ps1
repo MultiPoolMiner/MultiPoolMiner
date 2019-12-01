@@ -1,15 +1,18 @@
 ﻿#Load information about the miners
 Write-Log "Getting miner information. "
-# Get all the miners, get just the .Content property and add the name and complete fees
+# Get all the miners, get just the .Content property and add the name, version and complete fees
 $MinersLegacy = @(
     if (Test-Path "MinersLegacy" -PathType Container -ErrorAction Ignore) { 
         #Strip Model information from devices -> will create only one miner instance
-        if ($Config.DisableDeviceDetection) { $DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object { $_.Model = "" } } else { $DevicesTmp = $Devices }
+        if ($Config.DisableDeviceDetection) { $DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object { $_.Model = $_.Vendor } } else { $DevicesTmp = $Devices }
         Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp; JobName = "MinersLegacy" } -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" }) | ForEach-Object { 
             $_.Content | Add-Member Name $_.Name -PassThru -Force
+            $_.Content | Add-Member BaseName ($_.Name -split '-' | Select-Object -Index 0)
+            $_.Content | Add-Member Version ($_.Name -split '-' | Select-Object -Index 1)
             $_.Content | Add-Member Fees @($null) -ErrorAction SilentlyContinue
             $AllMinerPaths += ($_.Content.Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($_.Content.Path))
         }
+        Remove-Variable DevicesTmp
     }
 )
 $AllMinerPaths = $AllMinerPaths | Sort-Object -Unique
@@ -26,7 +29,9 @@ $AllMiners = @($MinersLegacy |
     Where-Object { $Config.ExcludeMinerName.Count -eq 0 -or (Compare-Object @($Config.ExcludeMinerName | Select-Object) @($_.BaseName, "$($_.BaseName)_$($_.Version)", $_.Name | Select-Object -Unique) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0 } | 
     Where-Object { -not ($Config.DisableMinersWithDevFee -and $_.Fees) } | 
     Where-Object { $Config.MinersLegacy.$($_.BaseName).$($_.Version).ExcludeAlgorithm.Count -eq 0 -or (Compare-Object @($Config.MinersLegacy.$($_.BaseName).$($_.Version).ExcludeAlgorithm | Select-Object) @($_.HashRates.PSObject.Properties.Name -replace 'NiceHash'<#temp fix#> | Select-Object) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0 } | 
-    Where-Object { $Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm.Count -eq 0 -or (Compare-Object @($Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm | Select-Object) @($_.HashRates.PSObject.Properties.Name -replace 'NiceHash'<#temp fix#> | Select-Object) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0 } 
+    Where-Object { $Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm.Count -eq 0 -or (Compare-Object @($Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm | Select-Object) @($_.HashRates.PSObject.Properties.Name -replace 'NiceHash'<#temp fix#> | Select-Object) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0 } | 
+    Where-Object { $Config.MinersLegacy.$($_.BaseName).$($_.Version).ExcludeDeviceName.Count -eq 0 -or (Compare-Object @($Config.MinersLegacy.$($_.BaseName).$($_.Version).ExcludeDeviceName | Select-Object) @($_.DeviceName | Select-Object) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0 } | 
+    Where-Object { $Config.MinersLegacy.$($_.BaseName)."*".ExcludeDeviceName.Count -eq 0 -or (Compare-Object @($Config.MinersLegacy.$($_.BaseName)."*".ExcludeDeviceName | Select-Object) @($_.DeviceName | Select-Object) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0 }
 )
 
 #Miner with 0 hashrate (failed benchmarking) or -1 hashrate (manually disabled in dashboard)
@@ -164,7 +169,7 @@ $AllMiners | ForEach-Object {
     }
 
     $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { 
-        $Miner_Earnings_MarginOfError | Add-Member $_ ([Double]$Pools.$_.MarginOfError * $Pools.$_.EstimateCorrection * (& { if ($Miner_Earning) { ([Double]$Miner.HashRates.$_ * $Pools.$_.StablePrice) / $Miner_Earning } else { 1 } }))
+        $Miner_Earnings_MarginOfError | Add-Member $_ ([Double]$Pools.$_.MarginOfError * (& { if ($Miner_Earning) { ([Double]$Miner.HashRates.$_ * $Pools.$_.StablePrice) / $Miner_Earning } else { 1 } }))
     }
     $Miner_Earning_MarginOfError = [Double]($Miner_Earnings_MarginOfError.PSObject.Properties.Value | Measure-Object -Sum).Sum
 
@@ -226,7 +231,7 @@ $MinersNeedingBenchmark = @($Miners | Where-Object { $_.HashRates.PSObject.Prope
 if ($API) { $API.MinersNeedingBenchmark = $MinersNeedingBenchmark }
 
 #Get miners needing power usage measurement
-$MinersNeedingPowerUsageMeasurement = @($(if ($Config.MeasurePowerUsage) { @($Miners | Where-Object PowerUsage -EQ $null | Where-Object { $_.HashRates.PSObject.Properties.Value -notcontains 0 }) }))
+$MinersNeedingPowerUsageMeasurement = @($(if ($Config.MeasurePowerUsage) { @($Miners | Where-Object PowerUsage -LE 0) }))
 if ($API) { $API.MinersNeedingPowerUsageMeasurement = $MinersNeedingPowerUsageMeasurement }
 
 if ($Miners.Count -ne $AllMiners.Count -and $Downloader.State -ne "Running") { 
@@ -350,3 +355,4 @@ $Miners | ForEach-Object {
         }
     }
 }
+$ActiveMiners = @($ActiveMiners | Where-Object { $_.Earning_Bias -ne 0 -or $_.Earning -ne 0 })
