@@ -34,7 +34,7 @@ catch {
     Add-Type -Path .\~CPUID.dll
 }
 
-function Get-MinerConfig {
+function Get-MinerConfig { 
 
     #Read miner config
 
