@@ -93,7 +93,7 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
 
 
     try { $EstimateCorrection = [Decimal](($APIStatusResponse.$_.actual_last24h / 1000) / $APIStatusResponse.$_.estimate_last24h) }
-    catch { $EstimateCorrection = [Decimal]0 }
+    catch { $EstimateCorrection = [Decimal]1 }
 
     $PoolRegions | ForEach-Object { 
         $Region = $_
