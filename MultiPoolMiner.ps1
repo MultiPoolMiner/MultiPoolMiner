@@ -588,6 +588,12 @@ while (-not $API.Stop) {
     #To-do: change dot to ampersand
     if (Test-Path .\Convert-LegacyMiners.ps1) { . .\Convert-LegacyMiners.ps1 }
 
+    if (-not $MinersNeedingBenchmark.Count) {
+        #Detect miners with unreal profitability (> 10x higher than the best 10% miners, error in data provided by pool?)
+        $ReasonableProfit = [Double]($ActiveMiners | Sort-Object Earning_Bias | Select-Object -First ([Int]($ActiveMiners.Count / 10 )) | Measure-Object Earning_Bias -Average).Average * 10
+        $ActiveMiners = $ActiveMiners | Where-Object { $_.Earning_Bias -lt $ReasonableProfit}
+    }
+
     #Check for failed miner
     $RunningMiners | Where-Object { $_.GetStatus() -ne "Running" } | ForEach-Object { 
         $_.StatusMessage = " exited unexpectedly"
