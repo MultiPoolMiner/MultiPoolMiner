@@ -7,8 +7,8 @@ $MinersLegacy = @(
         if ($Config.DisableDeviceDetection) { $DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object { $_.Model = $_.Vendor } } else { $DevicesTmp = $Devices }
         Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp; JobName = "MinersLegacy" } -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" }) | ForEach-Object { 
             $_.Content | Add-Member Name $_.Name -PassThru -Force
-            $_.Content | Add-Member BaseName ($_.Name -split '-' | Select-Object -Index 0)
-            $_.Content | Add-Member Version ($_.Name -split '-' | Select-Object -Index 1)
+            $_.Content | Add-Member BaseName ($_.Name -Split '-' | Select-Object -Index 0)
+            $_.Content | Add-Member Version ($_.Name -Split '-' | Select-Object -Index 1)
             $_.Content | Add-Member Fees @($null) -ErrorAction SilentlyContinue
             $AllMinerPaths += ($_.Content.Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($_.Content.Path))
         }
@@ -21,9 +21,9 @@ $AllMinerPaths = $AllMinerPaths | Sort-Object -Unique
 # select only the ones that have a HashRate matching our algorithms, and that only include algorithms we have pools for
 # select only the miners that match $Config.MinerName, if specified, and don't match $Config.ExcludeMinerName
 $AllMiners = @($MinersLegacy | 
-    Where-Object { $UnprofitableAlgorithms -notcontains ($_.HashRates.PSObject.Properties.Name | Select-Object -Index 0) } | #filter unprofitable algorithms, allow them as secondary algo
-    Where-Object { $_.HashRates.PSObject.Properties.Value -notcontains 0 } | #filter miner with 0 hashrate
-    Where-Object { $_.HashRates.PSObject.Properties.Value -notcontains -1 } | #filter disabled miner (-1 hashrate)
+    Where-Object { $UnprofitableAlgorithms -Notcontains ($_.HashRates.PSObject.Properties.Name | Select-Object -Index 0) } | #filter unprofitable algorithms, allow them as secondary algo
+    Where-Object { $_.HashRates.PSObject.Properties.Value -Notcontains 0 } | #filter miner with 0 hashrate
+    Where-Object { $_.HashRates.PSObject.Properties.Value -Notcontains -1 } | #filter disabled miner (-1 hashrate)
     Where-Object { -not $Config.SingleAlgoMining -or @($_.HashRates.PSObject.Properties.Name).Count -EQ 1 } | #filter dual algo miners
     Where-Object { $Config.MinerName.Count -eq 0 -or (Compare-Object @($Config.MinerName | Select-Object) @($_.BaseName, "$($_.BaseName)_$($_.Version)", $_.Name | Select-Object -Unique) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0 } | 
     Where-Object { $Config.ExcludeMinerName.Count -eq 0 -or (Compare-Object @($Config.ExcludeMinerName | Select-Object) @($_.BaseName, "$($_.BaseName)_$($_.Version)", $_.Name | Select-Object -Unique) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0 } | 
@@ -35,28 +35,28 @@ $AllMiners = @($MinersLegacy |
 )
 
 #Miner with 0 hashrate (failed benchmarking) or -1 hashrate (manually disabled in dashboard)
-$InactiveMiners = @($MinersLegacy | Where-Object { $_.HashRates.PSObject.Properties.Value -contains 0 -or $_.HashRates.PSObject.Properties.Value -contains -1 } )
+$InactiveMiners = @($MinersLegacy | Where-Object { $_.HashRates.PSObject.Properties.Value -Contains 0 -or $_.HashRates.PSObject.Properties.Value -Contains -1 } )
 $InactiveMiners | ForEach-Object {
-    if ($_.HashRates.PSObject.Properties.Value -contains 0) { $_ | Add-Member Reason "Failed" -ErrorAction SilentlyContinue }
-    elseif ($_.HashRates.PSObject.Properties.Value -contains -1) { $_ | Add-Member Reason "Disabled" -ErrorAction SilentlyContinue }
+    if ($_.HashRates.PSObject.Properties.Value -Contains 0) { $_ | Add-Member Reason "Failed" -ErrorAction SilentlyContinue }
+    elseif ($_.HashRates.PSObject.Properties.Value -Contains -1) { $_ | Add-Member Reason "Disabled" -ErrorAction SilentlyContinue }
 }
 
-$FilteredMiners = @($MinersLegacy | Where-Object { $AllMiners -notcontains $_ } | Where-Object { $InactiveMiners -notcontains $_ } )
+$FilteredMiners = @($MinersLegacy | Where-Object { $AllMiners -Notcontains $_ } | Where-Object { $InactiveMiners -Notcontains $_ } )
 $FilteredMiners | ForEach-Object {
-    if ($UnprofitableAlgorithms -contains ($_.HashRates.PSObject.Properties.Name | Select-Object -Index 0)) { $_ | Add-Member Reason "Unprofitable Algorithm" -ErrorAction SilentlyContinue }
+    if ($UnprofitableAlgorithms -Contains ($_.HashRates.PSObject.Properties.Name | Select-Object -Index 0)) { $_ | Add-Member Reason "Unprofitable Algorithm" -ErrorAction SilentlyContinue }
     elseif ($Config.SingleAlgoMining -and @($_.HashRates.PSObject.Properties.Name).Count -NE 1) { $_ | Add-Member Reason "SingleAlgoMining: true" -ErrorAction SilentlyContinue }
-    elseif (-not ($Config.MinerName.Count -eq 0 -or (Compare-Object @($Config.MinerName | Select-Object) @($_.BaseName, "$($_.BaseName)_$($_.Version)", $_.Name | Select-Object -Unique) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0)) { $_ | Add-Member Reason "MinerName: $($Config.MinerName -join '; ')" -ErrorAction SilentlyContinue }
-    elseif (-not ($Config.ExcludeMinerName.Count -eq 0 -or (Compare-Object @($Config.ExcludeMinerName | Select-Object) @($_.BaseName, "$($_.BaseName)_$($_.Version)", $_.Name | Select-Object -Unique) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0 )) { $_ | Add-Member Reason "ExcludeMinerName: $($Config.ExcludeMinerName -join '; ')" -ErrorAction SilentlyContinue }
+    elseif (-not ($Config.MinerName.Count -eq 0 -or (Compare-Object @($Config.MinerName | Select-Object) @($_.BaseName, "$($_.BaseName)_$($_.Version)", $_.Name | Select-Object -Unique) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0)) { $_ | Add-Member Reason "MinerName: $($Config.MinerName -Join '; ')" -ErrorAction SilentlyContinue }
+    elseif (-not ($Config.ExcludeMinerName.Count -eq 0 -or (Compare-Object @($Config.ExcludeMinerName | Select-Object) @($_.BaseName, "$($_.BaseName)_$($_.Version)", $_.Name | Select-Object -Unique) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0 )) { $_ | Add-Member Reason "ExcludeMinerName: $($Config.ExcludeMinerName -Join '; ')" -ErrorAction SilentlyContinue }
     elseif ($Config.DisableMinersWithDevFee -and $_.Fees) { $_ | Add-Member Reason "DisableMinersWithDevFee: true" -ErrorAction SilentlyContinue }
-    elseif (-not ($Config.MinersLegacy.$($_.BaseName).$($_.Version).ExcludeAlgorithm.Count -eq 0 -or (Compare-Object @($Config.MinersLegacy.$($_.BaseName).$($_.Version).ExcludeAlgorithm | Select-Object) @($_.HashRates.PSObject.Properties.Name | Select-Object) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0)) { $_ | Add-Member Reason "ExcludeAlgorithm (MinerName & Version): $($Config.MinersLegacy.$($_.BaseName).$($_.Version).ExcludeAlgorithm -join '; ')" -ErrorAction SilentlyContinue }
-    elseif (-not ($Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm.Count -eq 0 -or (Compare-Object @($Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm | Select-Object) @($_.HashRates.PSObject.Properties.Name | Select-Object) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0)) { $_ | Add-Member Reason "ExcludeAlgorithm (MinerName): $($Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm -join '; ')" -ErrorAction SilentlyContinue }
+    elseif (-not ($Config.MinersLegacy.$($_.BaseName).$($_.Version).ExcludeAlgorithm.Count -eq 0 -or (Compare-Object @($Config.MinersLegacy.$($_.BaseName).$($_.Version).ExcludeAlgorithm | Select-Object) @($_.HashRates.PSObject.Properties.Name | Select-Object) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0)) { $_ | Add-Member Reason "ExcludeAlgorithm (MinerName & Version): $($Config.MinersLegacy.$($_.BaseName).$($_.Version).ExcludeAlgorithm -Join '; ')" -ErrorAction SilentlyContinue }
+    elseif (-not ($Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm.Count -eq 0 -or (Compare-Object @($Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm | Select-Object) @($_.HashRates.PSObject.Properties.Name | Select-Object) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0)) { $_ | Add-Member Reason "ExcludeAlgorithm (MinerName): $($Config.MinersLegacy.$($_.BaseName)."*".ExcludeAlgorithm -Join '; ')" -ErrorAction SilentlyContinue }
     else { $_ | Add-Member Reason "???" -ErrorAction SilentlyContinue }
 }
 
 $AllMiners | ForEach-Object {
     $_ | Add-Member IntervalMultiplier (@(@($_.HashRates.PSObject.Properties.Name | ForEach-Object { $Config.IntervalMultiplier.$_ } | Select-Object) + 1 + $($_.IntervalMultiplier)) | Measure-Object -Maximum).Maximum -Force #default interval multiplier is 1
     $_ | Add-Member ShowMinerWindow $Config.ShowMinerWindow -ErrorAction SilentlyContinue #default ShowMinerWindow 
-    $_ | Add-Member WarmupTime $Config.WarmupTime -ErrorAction SilentlyContinue #default WarmupTime is taken from config file
+    if ($_.WarmupTime -eq $null) { $_ | Add-Member WarmupTime $Config.WarmupTime -Force } #default WarmupTime is taken from config file
 }
 
 if ($API) {
@@ -79,7 +79,7 @@ if ($Balances_Jobs) {
 #Update the exchange rates
 Write-Log "Updating exchange rates from CryptoCompare. "
 try { 
-    $NewRates = Invoke-RestMethod "https://min-api.cryptocompare.com/data/pricemulti?fsyms=$((@([PSCustomObject]@{Currency = "BTC"}) + @($Balances) | Select-Object -ExpandProperty Currency -Unique | ForEach-Object {$_.ToUpper()}) -join ",")&tsyms=$(($Config.Currency | ForEach-Object {$_.ToUpper() -replace "mBTC", "BTC"}) -join ",")&extraParams=http://multipoolminer.io" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    $NewRates = Invoke-RestMethod "https://min-api.cryptocompare.com/data/pricemulti?fsyms=$((@([PSCustomObject]@{Currency = "BTC"}) + @($Balances) | Select-Object -ExpandProperty Currency -Unique | ForEach-Object {$_.ToUpper()}) -Join ",")&tsyms=$(($Config.Currency | ForEach-Object {$_.ToUpper() -Replace "mBTC", "BTC"}) -Join ",")&extraParams=http://multipoolminer.io" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
 }
 catch { 
     Write-Log -Level Warn "CryptoCompare is down. "
@@ -92,13 +92,13 @@ if ($Rates.BTC.BTC -ne 1) {
     $Rates = [PSCustomObject]@{BTC = [PSCustomObject]@{BTC = [Double]1 } }
 }
 #Convert values to milli BTC
-if ($Config.Currency -contains "mBTC" -and $Rates.BTC) { 
+if ($Config.Currency -Contains "mBTC" -and $Rates.BTC) { 
     $Currency = "mBTC"
     $Rates | Add-Member mBTC ($Rates.BTC | ConvertTo-Json -Depth 10 | ConvertFrom-Json) -Force
-    $Rates | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $_ -ne "BTC" } | ForEach-Object { $Rates.$_ | Add-Member mBTC ([Double]($Rates.$_.BTC * 1000)) -ErrorAction SilentlyContinue; if ($Config.Currency -notcontains "BTC") { $Rates.$_.PSObject.Properties.Remove("BTC") } }
+    $Rates | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $_ -ne "BTC" } | ForEach-Object { $Rates.$_ | Add-Member mBTC ([Double]($Rates.$_.BTC * 1000)) -ErrorAction SilentlyContinue; if ($Config.Currency -Notcontains "BTC") { $Rates.$_.PSObject.Properties.Remove("BTC") } }
     $Rates.mBTC | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object { $Rates.mBTC.$_ /= 1000 }
     $Rates.BTC | Add-Member mBTC 1000 -Force
-    if ($Config.Currency -notcontains "BTC") { $Rates.BTC.PSObject.Properties.Remove("BTC") }
+    if ($Config.Currency -Notcontains "BTC") { $Rates.BTC.PSObject.Properties.Remove("BTC") }
     $Balances | ForEach-Object { if ($_.Currency -eq "BTC") { $_.Currency = "mBTC"; $_.Balance *= 1000; $_.Pending *= 1000; $_.Total *= 1000 } }
 }
 else { $Currency = "BTC" }
@@ -227,7 +227,7 @@ $Miners = @($AllMiners | Where-Object { (Test-Path $_.Path -PathType Leaf -Error
 if ($API) { $API.Miners = $Miners } #Give API access to the miners information
 
 #Get miners needing benchmarking
-$MinersNeedingBenchmark = @($Miners | Where-Object { $_.HashRates.PSObject.Properties.Value -contains $null })
+$MinersNeedingBenchmark = @($Miners | Where-Object { $_.HashRates.PSObject.Properties.Value -Contains $null })
 if ($API) { $API.MinersNeedingBenchmark = $MinersNeedingBenchmark }
 
 #Get miners needing power usage measurement
@@ -246,7 +246,7 @@ if (Get-Command "Get-MpPreference" -ErrorAction Ignore) {
         if (Get-Command "Get-NetFirewallRule" -ErrorAction Ignore) { 
             if ($null -eq $MinerFirewalls) { $MinerFirewalls = Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program }
             if (@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ "=>") { 
-                Start-Process (@{desktop = "powershell"; core = "pwsh" }.$PSEdition) ("-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1'; ('$(@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ '=>' | Select-Object -ExpandProperty InputObject | ConvertTo-Json -Compress)' | ConvertFrom-Json) | ForEach-Object {New-NetFirewallRule -DisplayName (Split-Path `$_ -leaf) -Program `$_ -Description 'Inbound rule added by MultiPoolMiner $Version on $((Get-Date).ToString())' -Group 'Cryptocurrency Miner'}" -replace '"', '\"') -Verb runAs
+                Start-Process (@{desktop = "powershell"; core = "pwsh" }.$PSEdition) ("-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1'; ('$(@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ '=>' | Select-Object -ExpandProperty InputObject | ConvertTo-Json -Compress)' | ConvertFrom-Json) | ForEach-Object {New-NetFirewallRule -DisplayName (Split-Path `$_ -leaf) -Program `$_ -Description 'Inbound rule added by MultiPoolMiner $Version on $((Get-Date).ToString())' -Group 'Cryptocurrency Miner'}" -Replace '"', '\"') -Verb runAs
                 Remove-Variable MinerFirewalls
             }
         }
@@ -258,13 +258,13 @@ $Miners = @(
     $Miners | Where-Object { 
         $Miner = $_
         $Miner_WatchdogTimers = @($WatchdogTimers | Where-Object MinerName -EQ $Miner.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval * $Miner.IntervalMultiplier) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset))
-        ($Miner_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>2 -and ($Miner_WatchdogTimers | Where-Object { $Miner.HashRates.PSObject.Properties.Name -contains $_.Algorithm } | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>1
+        ($Miner_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>2 -and ($Miner_WatchdogTimers | Where-Object { $Miner.HashRates.PSObject.Properties.Name -Contains $_.Algorithm } | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>1
     }
 )
 
 #Use only use the most profitable miner per algo and device. E.g. if there are several miners available to mine the same algo, only the most profitable of them will ever be used in the further calculations, all other will also be hidden in the summary screen
 if (-not $Config.ShowAllMiners) { 
-    $Miners = @($Miners | Where-Object { ($MinersNeedingBenchmark.DeviceName | Select-Object -Unique) -notcontains $_.DeviceName -and ($MinersNeedingPowerUsageMeasurement.DeviceName | Select-Object -Unique) -notcontains $_.DeviceName } | Sort-Object -Descending { "$($_.DeviceName -join '')$(($_.HashRates.PSObject.Properties.Name | ForEach-Object {$_ -split "-" | Select-Object -Index 0}) -join '')" }, { ($_ | Where-Object Profit -EQ $null | Measure-Object).Count }, Profit_Bias, { ($_ | Where-Object Profit -NE 0 | Measure-Object).Count } | Group-Object { "$($_.DeviceName -join '')$(($_.HashRates.PSObject.Properties.Name | ForEach-Object {$_ -split "-" | Select-Object -Index 0}) -join '')" } | ForEach-Object { $_.Group[0] }) + @($Miners | Where-Object { ($MinersNeedingBenchmark.DeviceName | Select-Object -Unique) -contains $_.DeviceName -or ($MinersNeedingPowerUsageMeasurement.DeviceName | Select-Object -Unique) -contains $_.DeviceName })
+    $Miners = @($Miners | Where-Object { ($MinersNeedingBenchmark.DeviceName | Select-Object -Unique) -Notcontains $_.DeviceName -and ($MinersNeedingPowerUsageMeasurement.DeviceName | Select-Object -Unique) -Notcontains $_.DeviceName } | Sort-Object -Descending { "$($_.DeviceName -Join '')$(($_.HashRates.PSObject.Properties.Name | ForEach-Object {$_ -Split "-" | Select-Object -Index 0}) -Join '')" }, { ($_ | Where-Object Profit -EQ $null | Measure-Object).Count }, Profit_Bias, { ($_ | Where-Object Profit -NE 0 | Measure-Object).Count } | Group-Object { "$($_.DeviceName -Join '')$(($_.HashRates.PSObject.Properties.Name | ForEach-Object {$_ -Split "-" | Select-Object -Index 0}) -Join '')" } | ForEach-Object { $_.Group[0] }) + @($Miners | Where-Object { ($MinersNeedingBenchmark.DeviceName | Select-Object -Unique) -Contains $_.DeviceName -or ($MinersNeedingPowerUsageMeasurement.DeviceName | Select-Object -Unique) -Contains $_.DeviceName })
 }
 
 #Update the active miners
@@ -292,7 +292,7 @@ $Miners | ForEach-Object {
     $ActiveMiner = $ActiveMiners | Where-Object { 
         $_.Name -eq $Miner.Name -and 
         $_.Path -eq $Miner.Path -and 
-        ($_.Arguments -eq $Miner.Arguments -or ($_.New -and $_.Speed -contains $null <#Keep benchmarking miners to prevent switching#>)) -and 
+        ($_.Arguments -eq $Miner.Arguments -or ($_.New -and $_.Speed -Contains $null <#Keep benchmarking miners to prevent switching#>)) -and 
         $_.API -eq $Miner.API -and 
         $_.Port -eq $Miner.Port -and 
         $_.ShowMinerWindow -eq $Miner.ShowMinerWindow -and 
@@ -314,7 +314,7 @@ $Miners | ForEach-Object {
         $ActiveMiner.ShowMinerWindow = $Miner.ShowMinerWindow
         $ActiveMiner.PowerCost = $Miner.PowerCost
         $ActiveMiner.PowerUsage = $Miner.PowerUsage
-        $ActiveMiner.WarmupTime = $(if ($Miner.Speed_Live -contains $null -or $Miner.WarmupTime -eq 0) { $Miner.WarmupTime } else { $Config.WarmupTime })
+        $ActiveMiner.WarmupTime = $(if ($Miner.Speed_Live -Contains $null -or $Miner.WarmupTime -eq 0) { $Miner.WarmupTime } else { $Config.WarmupTime })
         $ActiveMiner.AllowedBadShareRatio = $Miner.AllowedBadShareRatio
     }
     else { 
