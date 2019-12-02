@@ -1436,50 +1436,60 @@ class Miner {
     static [Pool[]]$Pools = @()
     [Pool[]]$Pool = @()
 
-    $Name
-    $BaseName
-    $Version
-    $Path
-    $Arguments
-    $API
-    $Port
-    hidden [DateTime]$BeginTime = 0
-    hidden [DateTime]$EndTime = 0
-    [string[]]$Algorithm = @()
+    [String]$Name
+    [String]$Path
+    [String]$Arguments
+    [UInt16]$Port
     [String[]]$DeviceName = @()
-    [PSCustomObject[]]$Device = @()
+    [String[]]$Algorithm = @()
+    [String[]]$Algorithm_Base = @()
+    [String[]]$PoolName = @()
+    [String[]]$PoolName_Base = @()
+    [Double]$Profit
+    [Double]$Profit_Comparison
+    [Double]$Profit_Accuracy
+    [Double]$Profit_Bias
+    [Double]$Profit_Unbias
+    [Double[]]$PoolFee = @()
+    [Double[]]$PoolPrice = @()
+    [Double[]]$Fee = @()
+    [Double[]]$Speed = @()
+    [Double[]]$Speed_Live = @()
+    [Boolean]$Benchmark = $false
+    [Boolean]$Fastest = $false
+    [Boolean]$Best = $false
+    [Boolean]$Best_Comparison = $false
+    [Boolean]$New = $false
+    hidden [System.Management.Automation.Job]$Process = $null
+    hidden [TimeSpan]$Active = [TimeSpan]::Zero
+    hidden [Int]$Activated = 0
+    hidden [MinerStatus]$Status = [MinerStatus]::Idle
+    [TimeSpan[]]$Intervals = @()
+    [String]$LogFile
+    hidden [Array]$Data = @()
+    [Boolean]$ShowMinerWindow = $false
+    [Double]$IntervalMultiplier = 1
+    [String[]]$Environment = @()
+
+    #Under review
+    $AllowedBadShareRatio
+    $API
+    $BaseName
+    $BeginTime
+    $Benchmarked
+    $Device = @()
     $Earning
+    $Earning_Bias
     $Earning_Comparison
     $Earning_MarginOfError
-    $Earning_Bias
     $Earning_Unbias
-    $Profit
-    $Profit_Comparison
-    $Profit_Bias
-    $Profit_Unbias
-    $Speed
-    $Speed_Live
-    $Best
-    $Best_Comparison
-    hidden [System.Management.Automation.Job]$Process = $null
-    [Boolean]$New
-    hidden [TimeSpan]$Active = [TimeSpan]::Zero
-    hidden [Int64]$Activated = 0
-    hidden [MinerStatus]$Status = [MinerStatus]::Idle
-    $LogFile
-    [String[]]$PoolName = @()
-    hidden [Array]$Data = @()
-    $ShowMinerWindow
-    $IntervalMultiplier
-    $Benchmarked
-    $Intervals
-    $ProcessId
+    $EndTime
     $PowerCost
     $PowerUsage
-    $Environment
-    $WarmupTime
-    $AllowedBadShareRatio
+    $ProcessId
     $StatusMessage
+    $Version
+    $WarmupTime
 
     [String]GetCommandLineParameters() { 
         return $this.Arguments
