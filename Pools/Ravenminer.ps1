@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [TimeSpan]$StatSpan,
+    [TimeSpan]$StatSpan, 
     [PSCustomObject]$Config #to be removed
 )
 
@@ -20,29 +20,29 @@ $PoolAPIStatusUri = "https://ravenminer.com/api/status"
 $RetryCount = 3
 $RetryDelay = 2
 
-while (-not ($APIStatusResponse) -and $RetryCount -gt 0) {
+while (-not ($APIStatusResponse) -and $RetryCount -gt 0) { 
     try { 
         $APIStatusResponse = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
     }
-    catch { } 
+    catch { }
     if (-not $APIStatusResponse) { 
         Start-Sleep -Seconds $RetryDelay
         $RetryCount--
     }
 }
 
-if (-not $APIStatusResponse) {
+if (-not $APIStatusResponse) { 
     Write-Log -Level Warn "Pool API ($PoolName) has failed. "
     return
 }
 
-if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) { 
     Write-Log -Level Warn "Pool API ($PoolName) [StatusUri] returned nothing. "
     return
 }
 
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
-$APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APIStatusResponse.$_.hashrate -gt 0 } | ForEach-Object {
+$APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APIStatusResponse.$_.hashrate -gt 0 } | ForEach-Object { 
     $PoolHost = "ravenminer.com"
     $Port = [Int]$APIStatusResponse.$_.port
     $Algorithm_Norm = Get-Algorithm $APIStatusResponse.$_.name

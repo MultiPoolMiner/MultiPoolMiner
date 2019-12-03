@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [TimeSpan]$StatSpan,
+    [TimeSpan]$StatSpan, 
     [PSCustomObject]$Config #to be removed
 )
 
@@ -10,7 +10,7 @@ $Wallets = $Config.Pools.$PoolFileName.Wallets #to be removed
 
 # Guaranteed payout currencies
 $Payout_Currencies = @("BTC") | Where-Object { $Wallets.$_ }
-if (-not $Payout_Currencies) {
+if (-not $Payout_Currencies) { 
     Write-Log -Level Verbose "Cannot mine on pool ($PoolFileName) - no wallet address specified. "
     return
 }
@@ -21,8 +21,8 @@ $PoolAPICurrenciesUri = "http://pool.hashrefinery.com/api/currencies"
 $RetryCount = 3
 $RetryDelay = 2
 
-while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -gt 0) {
-    try {
+while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -gt 0) { 
+    try { 
         if (-not $APIStatusResponse) { $APIStatusResponse = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
         if (-not $APICurrenciesResponse) { $APICurrenciesResponse = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
@@ -33,35 +33,35 @@ while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -g
     }
 }
 
-if (-not ($APIStatusResponse -and $APICurrenciesResponse)) {
+if (-not ($APIStatusResponse -and $APICurrenciesResponse)) { 
     Write-Log -Level Warn "Pool API ($PoolFileName) has failed. "
     return
 }
 
-if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) { 
     Write-Log -Level Warn "Pool API ($PoolFileName) [StatusUri] returned nothing. "
     return
 }
 
-if (($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+if (($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) { 
     Write-Log -Level Warn "Pool API ($PoolFileName) [CurrenciesUri] returned nothing. "
     return
 }
 
 $Payout_Currencies = (@($Payout_Currencies) + @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object { $Wallets.$_ } | Sort-Object -Unique
-if (-not $Payout_Currencies) {
+if (-not $Payout_Currencies) { 
     Write-Log -Level Verbose "Cannot mine on pool ($PoolFileName) - no wallet address specified. "
     return
 }
 
 $PoolName = "$($PoolFileName)-Algo"
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
-$APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APIStatusResponse.$_.hashrate -gt 0 } | Where-Object { $APIStatusResponse.$_.mbtc_mh_factor -gt 0 } | ForEach-Object {
+$APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APIStatusResponse.$_.hashrate -gt 0 } | Where-Object { $APIStatusResponse.$_.mbtc_mh_factor -gt 0 } | ForEach-Object { 
     $PoolHost = "hashrefinery.com"
     $Port = [Int]$APIStatusResponse.$_.port
     $Algorithm = [String]$APIStatusResponse.$_.name
     $Algorithm_Norm = ""; $CoinName = ""; $CurrencySymbol = ""
-    if ($APIStatusResponse.$_.coins -eq 1) {
+    if ($APIStatusResponse.$_.coins -eq 1) { 
         $CurrencySymbols = @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.algo -eq $Algorithm })
         if ($CurrencySymbols.Count -eq 1) { 
             $CurrencySymbol = [String]($CurrencySymbols -split "-" | Select-Object -First 1)
@@ -80,12 +80,12 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
     try { $EstimateCorrection = [Decimal](($APIStatusResponse.$_.actual_last24h / 1000) / $APIStatusResponse.$_.estimate_last24h) }
     catch { $EstimateCorrection = [Decimal]0 }
 
-    $PoolRegions | ForEach-Object {
+    $PoolRegions | ForEach-Object { 
         $Region = $_
         $Region_Norm = Get-Region $Region
 
-        $Payout_Currencies | ForEach-Object {
-            [PSCustomObject]@{
+        $Payout_Currencies | ForEach-Object { 
+            [PSCustomObject]@{ 
                 Name               = $PoolName
                 Algorithm          = $Algorithm_Norm
                 CoinName           = $CoinName
@@ -111,11 +111,11 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
 
 $PoolName = "$($PoolFileName)-Coin"
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
-$APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.hashrate -gt 0 } | ForEach-Object {
+$APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.hashrate -gt 0 } | ForEach-Object { 
     $APICurrenciesResponse.$_ | Add-Member Symbol $_ -ErrorAction Ignore
 
     # Not all algorithms are always exposed in API
-    if ($APIStatusResponse.$($APICurrenciesResponse.$_.algo).mbtc_mh_factor -gt 0) {
+    if ($APIStatusResponse.$($APICurrenciesResponse.$_.algo).mbtc_mh_factor -gt 0) { 
         $PoolHost = "hashrefinery.com"
         $Port = [Int]$APICurrenciesResponse.$_.port
         $CoinName = Get-CoinName $APICurrenciesResponse.$_.name
@@ -134,12 +134,12 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
         try { $EstimateCorrection = ($APIStatusResponse.$($APICurrenciesResponse.$_.algo).actual_last24h / 1000) / $APIStatusResponse.$($APICurrenciesResponse.$_.algo).estimate_last24h }
         catch { }
 
-        $PoolRegions | ForEach-Object {
+        $PoolRegions | ForEach-Object { 
             $Region = $_
             $Region_Norm = Get-Region $Region
 
-            $Payout_Currencies | ForEach-Object {
-                [PSCustomObject]@{
+            $Payout_Currencies | ForEach-Object { 
+                [PSCustomObject]@{ 
                     Name               = $PoolName
                     Algorithm          = $Algorithm_Norm
                     CoinName           = $CoinName
@@ -161,7 +161,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
                 }
 
                 if (($Algorithm_Norm -eq "Ethash" -or $Algorithm_Norm -eq "ProgPoW") -and $Block -gt 0) { 
-                    [PSCustomObject]@{
+                    [PSCustomObject]@{ 
                         Name               = $PoolName
                         Algorithm          = "$Algorithm_Norm-$([Math]::Ceiling((Get-EthashSize $Block)/1GB))GB"
                         CoinName           = $CoinName

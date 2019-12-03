@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [TimeSpan]$StatSpan,
+    [TimeSpan]$StatSpan, 
     [PSCustomObject]$Config #to be removed
 )
 
@@ -63,7 +63,7 @@ $APIResponse.miningAlgorithms | Where-Object { $_.paying -gt 0 } <# algos paying
         "Beam" { $Algorithm_Norm = "EquihashR15050" } #temp fix
         default { $Algorithm_Norm = Get-Algorithm $_ }
     }
- 
+
     $Divisor = 100000000
 
     $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($_.paying / $Divisor) -Duration $StatSpan -ChangeDetection $true

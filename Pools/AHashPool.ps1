@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [TimeSpan]$StatSpan,
+    [TimeSpan]$StatSpan, 
     [PSCustomObject]$Config #to be removed
 )
 
@@ -23,7 +23,7 @@ $RetryCount = 3
 $RetryDelay = 2
 
 while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -gt 0) { 
-    try {
+    try { 
         if (-not $APIStatusResponse) { $APIStatusResponse = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
         if (-not $APICurrenciesResponse) { $APICurrenciesResponse = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
@@ -57,12 +57,12 @@ if (-not $Payout_Currencies) {
 
 $PoolName = "$($PoolFileName)-Algo"
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
-$APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APIStatusResponse.$_.hashrate -gt 0 } | Where-Object { $APIStatusResponse.$_.mbtc_mh_factor -gt 0 } | ForEach-Object {
+$APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APIStatusResponse.$_.hashrate -gt 0 } | Where-Object { $APIStatusResponse.$_.mbtc_mh_factor -gt 0 } | ForEach-Object { 
     $PoolHost = "mine.ahashpool.com"
     $Port = [Int]$APIStatusResponse.$_.port
     $Algorithm = [String]$APIStatusResponse.$_.name
     $Algorithm_Norm = ""; $CoinName = ""; $CurrencySymbol = ""
-    if ($APIStatusResponse.$_.coins -eq 1) {
+    if ($APIStatusResponse.$_.coins -eq 1) { 
         $CurrencySymbols = @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.algo -eq $Algorithm })
         if ($CurrencySymbols.Count -eq 1) { 
             $CurrencySymbol = [String]($CurrencySymbols -split "-" | Select-Object -First 1)
@@ -75,8 +75,8 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
 
     $Divisor = 1000000 <#check#> * [Double]$APIStatusResponse.$_.mbtc_mh_factor
 
-    if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1) } 
-    else { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true } 
+    if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1) }
+    else { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true }
 
     try { $EstimateCorrection = [Decimal](($APIStatusResponse.$_.actual_last24h / 1000) / $APIStatusResponse.$_.estimate_last24h) }
     catch { $EstimateCorrection = [Decimal]1 }
@@ -121,10 +121,10 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
         $PoolHost = "mine.ahashpool.com"
         $Port = [Int]$APICurrenciesResponse.$_.port
         $CoinName = Get-CoinName $APICurrenciesResponse.$_.name
-        Switch ($CoinName) {
+        Switch ($CoinName) { 
             #temp fix
-            "BitCash" { $CoinName = "BitCoinCash" } 
-        } 
+            "BitCash" { $CoinName = "BitCoinCash" }
+        }
         $CurrencySymbol = "$(($APICurrenciesResponse.$_.symbol | Select-Object -Index 0) -split '-' | Select-Object -Index 0)"
         $Algorithm_Norm = Get-Algorithm $Algorithm
         $Workers = [Int]$APICurrenciesResponse.$_.workers
@@ -137,7 +137,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
 
         $Stat = Set-Stat -Name "$($PoolName)_$($CurrencySymbol)-$($Algorithm_Norm)_Profit" -Value ($APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
-        try { $EstimateCorrection = [Decimal](($APIStatusResponse.$Algorithm.actual_last24h / 1000) / $APIStatusResponse.$Algorithm.estimate_last24h) } 
+        try { $EstimateCorrection = [Decimal](($APIStatusResponse.$Algorithm.actual_last24h / 1000) / $APIStatusResponse.$Algorithm.estimate_last24h) }
         catch { $EstimateCorrection = [Decimal]0 }
 
         $PoolRegions | ForEach-Object { 

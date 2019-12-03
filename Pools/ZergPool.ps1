@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [TimeSpan]$StatSpan,
+    [TimeSpan]$StatSpan, 
     [PSCustomObject]$Config #to be removed
 )
 
@@ -24,7 +24,7 @@ $RetryCount = 3
 $RetryDelay = 2
 
 while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -gt 0) { 
-    try {
+    try { 
         if (-not $APIStatusResponse) { $APIStatusResponse = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
         if (-not $APICurrenciesResponse) { $APICurrenciesResponse = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
@@ -58,12 +58,12 @@ if (-not $Payout_Currencies) {
 
 $PoolName = "$($PoolFileName)-Algo"
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
-$APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APIStatusResponse.$_.hashrate -gt 0 } | Where-Object { $APIStatusResponse.$_.mbtc_mh_factor -gt 0 } | ForEach-Object {
+$APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APIStatusResponse.$_.hashrate -gt 0 } | Where-Object { $APIStatusResponse.$_.mbtc_mh_factor -gt 0 } | ForEach-Object { 
     $PoolHost = "mine.zergpool.com"
     $Port = [Int]$APIStatusResponse.$_.port
     $Algorithm = [String]$APIStatusResponse.$_.name
     $Algorithm_Norm = ""; $CoinName = ""; $CurrencySymbol = ""
-    if ($APIStatusResponse.$_.coins -eq 1) {
+    if ($APIStatusResponse.$_.coins -eq 1) { 
         $CurrencySymbols = @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.algo -eq $Algorithm })
         if ($CurrencySymbols.Count -eq 1) { 
             $CurrencySymbol = [String]($CurrencySymbols -split "-" | Select-Object -First 1)
@@ -79,9 +79,9 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
     if ($Divisor -eq 0) { 
         Write-Log -Level Info "$($PoolName): Unable to determine divisor for algorithm $Algorithm_Norm. "
     }
-    else {
-        if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1) } 
-        else { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true } 
+    else { 
+        if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1) }
+        else { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true }
 
         try { $EstimateCorrection = [Decimal](($APIStatusResponse.$_.actual_last24h / 1000) / $APIStatusResponse.$_.estimate_last24h) }
         catch { $EstimateCorrection = [Decimal]1 }
@@ -119,7 +119,7 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
 
 $PoolName = "$($PoolFileName)-Coin"
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
-$APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.hashrate -gt 0 } | ForEach-Object {
+$APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.hashrate -gt 0 } | ForEach-Object { 
     $APICurrenciesResponse.$_ | Add-Member Symbol $_ -ErrorAction Ignore
 
     # Not all algorithms are always exposed in API
@@ -140,7 +140,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
 
         $Stat = Set-Stat -Name "$($PoolName)_$($CurrencySymbol)-$($Algorithm_Norm)_Profit" -Value ($APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
-        try { $EstimateCorrection = [Decimal](($APIStatusResponse.$Algorithm.actual_last24h / 1000) / $APIStatusResponse.$Algorithm.estimate_last24h) } 
+        try { $EstimateCorrection = [Decimal](($APIStatusResponse.$Algorithm.actual_last24h / 1000) / $APIStatusResponse.$Algorithm.estimate_last24h) }
         catch { $EstimateCorrection = [Decimal]1 }
 
         $PoolRegions | ForEach-Object { 

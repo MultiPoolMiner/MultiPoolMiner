@@ -1,14 +1,14 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [TimeSpan]$StatSpan,
+    [TimeSpan]$StatSpan, 
     [PSCustomObject]$Config #to be removed
 )
 
 $PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 $Wallets = $Config.Pools.$PoolName.Wallets #to be removed
 
-if (-not ($Wallets | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) -ne "BTC") {
+if (-not ($Wallets | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) -ne "BTC") { 
     Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
 }
@@ -19,8 +19,8 @@ $PoolAPICurrenciesUri = "http://www.phi-phi-pool.com/api/currencies"
 $RetryCount = 3
 $RetryDelay = 2
 
-while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -gt 0) {
-    try {
+while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -gt 0) { 
+    try { 
         if (-not $APIStatusResponse) { $APIStatusResponse = Invoke-RestMethod $PoolAPIStatusUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
         if (-not $APICurrenciesResponse) { $APICurrenciesResponse = Invoke-RestMethod $PoolAPICurrenciesUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
@@ -31,33 +31,33 @@ while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -g
     }
 }
 
-if (-not ($APIStatusResponse -and $APICurrenciesResponse)) {
+if (-not ($APIStatusResponse -and $APICurrenciesResponse)) { 
     Write-Log -Level Warn "Pool API ($PoolName) has failed. "
     return
 }
 
-if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) { 
     Write-Log -Level Warn "Pool API ($PoolName) [StatusUri] returned nothing. "
     return
 }
 
-if (($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) {
+if (($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) { 
     Write-Log -Level Warn "Pool API ($PoolName) [CurrenciesUri] returned nothing. "
     return
 }
 
 #Pool does not do auto conversion to BTC
 $Payout_Currencies = @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) | Where-Object { $Wallets.$_ } | Sort-Object -Unique
-if (-not $Payout_Currencies) {
+if (-not $Payout_Currencies) { 
     Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
 }
 
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
-$APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.hashrate -gt 0 } | ForEach-Object {
+$APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $APICurrenciesResponse.$_.hashrate -gt 0 } | ForEach-Object { 
 
     # Not all algorithms are always exposed in API
-    if ($APIStatusResponse.$($APICurrenciesResponse.$_.algo)) {
+    if ($APIStatusResponse.$($APICurrenciesResponse.$_.algo)) { 
         $APICurrenciesResponse.$_ | Add-Member Symbol $_ -ErrorAction SilentlyContinue
 
         $PoolHost = "phi-phi-pool.com"
@@ -75,11 +75,11 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
         try { $EstimateCorrection = [Decimal](($APIStatusResponse.$($APICurrenciesResponse.$_.algo).actual_last24h / 1000) / $APIStatusResponse.$($APICurrenciesResponse.$_.algo).estimate_last24h) }
         catch { $EstimateCorrection = [Decimal]0 }
 
-        $PoolRegions | ForEach-Object {
+        $PoolRegions | ForEach-Object { 
             $Region = $_
             $Region_Norm = Get-Region $Region
 
-            [PSCustomObject]@{
+            [PSCustomObject]@{ 
                 Algorithm          = $Algorithm_Norm
                 CoinName           = $CoinName
                 CurrencySymbol     = $CurrencySymbol

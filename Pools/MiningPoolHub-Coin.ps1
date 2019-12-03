@@ -1,7 +1,7 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [TimeSpan]$StatSpan,
+    [TimeSpan]$StatSpan, 
     [PSCustomObject]$Config #to be removed
 )
 
@@ -42,7 +42,7 @@ Write-Log -Level Verbose "Processing pool data ($PoolName). "
 $APIResponse.return | Where-Object { $_.profit -gt 0 } | ForEach-Object { 
     $PoolEntry = $_
     $CoinName = Get-CoinName $PoolEntry.coin_name
-    Switch ($CoinName) {
+    Switch ($CoinName) { 
         "MaxCoin" { $PoolHosts = [String[]]($PoolEntry.host) } #temp Fix
         default { $PoolHosts = [String[]]($PoolEntry.host_list.split(";")) }
     }
