@@ -7,13 +7,13 @@
 - Added auto-correction features for stats if stat is outside fault tolerance for 3 times in a row
 - Changed bestpool sorting; reduce miner switching when benchmarking
 - Changed 'MiningCurrency' to 'CurrencySymbol' (same as in ticker symbol); Note: this may also require changes to customizations made in config file (e.g. 'ExcludeMiningCurrency' -> 'ExcludeCurrencySymbol')
-- Changed number of listed miner-algo combinations in normal mode. MPM will only list miners that are at least half as profitable as the best earning miner (per device group).
+- Changed number of listed miner-algo combinations in normal mode. MPM will only list miners that are at least half as profitable as the best earning miner (per device group). 
 - Fixed broken UnprofitableAlgorithm list (regression from https://github.com/MultiPoolMiner/MultiPoolMiner/commit/202a7b56f8a6f2ebff0c6fad01864cec0d86a7d5)
 - Fixed issue where power measurement could go on forever
 - Fixed parameters '-DeviceName' and '-ExcludeDeviceName'
 - Fixed pool balances, ensure MPM will always use latest data
 - Fixed profitability comparison info when profit is negative
-- Removed 'DevicePciOrderMapping'. Please report back if automatic device selection is not working for you.
+- Removed 'DevicePciOrderMapping'. Please report back if automatic device selection is not working for you. 
 
 #### Miner changes
 - Added CcminerMtpTrc-v1.2.5; support for 'Mtp-Trc' (TecraCoin) algorithm
@@ -28,7 +28,7 @@
 - Removed EDSTMEquihash-v0.6.2 (moved to 'Deprecated' folder); Equihash is no longer profitable
 - Removed EwbfEquihash-v0.3.4b (moved to 'Deprecated' folder); Equihash is no longer profitable
 - Updated BMiner-v15.8.7; disabled dual mining with 'Blake2s' algorithm (rejected shares), improve the performance of automatic tuning of dual mining parameters
-- Updated CcminerAlexis-v1.5.1; better compatibility with 'Skein' algorithm, dropped 'Hsr', 'KeccakC' & 'Poly' support 
+- Updated CcminerAlexis-v1.5.1; better compatibility with 'Skein' algorithm, dropped 'Hsr', 'KeccakC' & 'Poly' support
 - Updated CcminerMTP-v1.3.1.ps1
 - Updated CcminerTrex-v0.14.6; added support for 'X16rv2' algorithm
 - Updated CcminerZenemy-v2.3; added support for 'X16rv2' algorithm
@@ -367,7 +367,7 @@ This will trigger all benchmarks to be re-executed (unless you were running MPM 
 - Added config item 'DevicePciOrderMapping' for configurations where PCI deviceID order does not match OpenCL deviceID order (see README)
 - Added parameter '-DisableMinersWithDevFee'
 - API: updated to version 0.95; added '/alldevices', '/allminers' & '/intervals'
-- Fixed miners Claymore*, Gminer, lolMinerEquihash, Nanominer, SRBMinerCryptonight & Wildrig; device enumeration can now use mapping as configured by 'DevicePciOrderMapping' 
+- Fixed miners Claymore*, Gminer, lolMinerEquihash, Nanominer, SRBMinerCryptonight & Wildrig; device enumeration can now use mapping as configured by 'DevicePciOrderMapping'
 - Improved config file validation
 - Parameters '-MinerName' and '-ExcludeMinerName' can be in one of the 3 forms: MinerBaseName e.g. 'AMD-TeamRed'; MinerBaseName_Version, e.g. 'AMD-TeamRed_v0.5.2' or MinerName, e.g. 'AMD-TeamRed_v0.5.2-1xEllesmere8GB'
 - Removed code for '-UseDeviceNameForStatsFileNaming'
@@ -534,7 +534,7 @@ This will trigger all benchmarks to be re-executed (unless you were running MPM 
 - Changed APIs files; simplified algo name detection
 - Changed defaults parameter values for fresh installations; enabled 'CreateMinerInstancePerDeviceModel' and 'UseDeviceNameForStatsFileNaming' in config file
 - Changed exchange rate currency name to be displayed in upper case
-- Changed list of default algos in start batch files:
+- Changed list of default algos in start batch files: 
   - Start-MiningPoolHub: removed lyra2re2
   - Start_Zpool: aded hex,x16r,x16s,x17,x22i; removed lyra2re2
 
