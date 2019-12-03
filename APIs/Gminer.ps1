@@ -61,7 +61,7 @@ class Gminer : Miner {
                 }
                 $Shares | Add-Member @{ $HashRate_Name = @($Shares_Accepted, $Shares_Rejected, $($Shares_Accepted + $Shares_Rejected)) }
             }
-   
+
             if ($HashRate_Name) { 
                 $HashRate | Add-Member @{ $HashRate_Name = [Double]$HashRate_Value }
             }

@@ -7,9 +7,9 @@ class XmRig : Miner {
         }
         else { 
             return $this.Arguments
-        }    
+        }
     }
-    
+
     hidden StartMining() { 
         $this.Status = [MinerStatus]::Failed
 
@@ -32,7 +32,7 @@ class XmRig : Miner {
                     $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -ErrorAction SilentlyContinue -Force
                 }
                 else { 
-                    #Check if we have a valid hw file for all installed hardware. If hardware / device order has changed we need to re-create the config files.
+                    #Check if we have a valid hw file for all installed hardware. If hardware / device order has changed we need to re-create the config files. 
                     $ThreadsConfig = Get-Content $ThreadsConfigFile -ErrorAction SilentlyContinue | ConvertFrom-Json -ErrorAction SilentlyContinue
                     if ($ThreadsConfig.Count -lt 1) { 
                         if (Test-Path "$(Split-Path $this.Path)\$($this.Algorithm | Select-Object -Index 0)-*.json" -PathType Leaf) { 
@@ -93,7 +93,7 @@ class XmRig : Miner {
                         else { 
                             Write-Log -Level Error "Error parsing threads config file - cannot create miner config file ($($this.Name) {$($this.Algorithm | Select-Object -Index 0)@$($this.PoolName | Select-Object -Index 0)}) [Error: '$($Error | Select-Object -Index 0)']. "
                             return
-                        }                
+                        }
                     }
                 }
             }
@@ -101,7 +101,7 @@ class XmRig : Miner {
                 Write-Log -Level Error "Creating miner config files failed ($($this.Name) { $($this.Algorithm | Select-Object -Index 0)@$($this.Pool | Select-Object -Index 0) }) [Error: '$($Error | Select-Object -Index 0)']. "
                 return
             }
-            
+
         }
 
         if ($this.Process) { 
@@ -145,7 +145,7 @@ class XmRig : Miner {
             }
         }
     }
-    
+
     [String[]]UpdateMinerData () { 
         if ($this.GetStatus() -ne [MinerStatus]::Running) { return @() }
 

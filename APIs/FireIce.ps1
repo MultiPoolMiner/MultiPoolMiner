@@ -7,9 +7,9 @@ class Fireice : Miner {
         }
         else { 
             return $this.Arguments
-        }    
+        }
     }
-    
+
     hidden StartMining() { 
         $this.Status = [MinerStatus]::Failed
 
@@ -38,7 +38,7 @@ class Fireice : Miner {
                     $Parameters.ConfigFile.Content | ConvertTo-Json -Depth 10 | Set-Content $ConfigFile -ErrorAction SilentlyContinue -Force
                 }
                 else { 
-                    #Check if we have a valid hw file for all installed hardware. If hardware / device order has changed we need to re-create the config files.
+                    #Check if we have a valid hw file for all installed hardware. If hardware / device order has changed we need to re-create the config files. 
                     if (-not (Test-Path $PlatformThreadsConfigFile -PathType Leaf)) { 
                         if (Test-Path "$(Split-Path $this.Path)\ThreadsConfig-$($Platform)-$($this.Algorithm | Select-Object -Index 0)-*.txt" -PathType Leaf) { 
                             #Remove old config files, thread info is no longer valid
@@ -54,7 +54,7 @@ class Fireice : Miner {
                             $EnvCmd = ($this.Environment | ForEach-Object { "```$env:$($_)" }) -join "; "
                             $this.Process = Start-Job ([ScriptBlock]::Create("Start-Process $(@{ desktop = "powershell"; core = "pwsh" }.$Global:PSEdition) `"-command $EnvCmd```$Process = (Start-Process '$($this.Path)' '$($Parameters.HwDetectCommands)' -WorkingDirectory '$(Split-Path $this.Path)' -WindowStyle Minimized -PassThru).Id; Wait-Process -Id `$PID; Stop-Process -Id ```$Process`" -WindowStyle Hidden -Wait"))
                         }
-                        
+
                         if ($this.Process | Get-Job -ErrorAction SilentlyContinue) { 
                             for ($WaitForPID = 0; $WaitForPID -le 20; $WaitForPID++) { 
                                 if ($this.ProcessId = (Get-CIMInstance CIM_Process | Where-Object { $_.ExecutablePath -eq $this.Path -and $_.CommandLine -like "*$($this.Path)*$($Parameters.HwDetectCommands)*" }).ProcessId) { 
@@ -146,7 +146,7 @@ class Fireice : Miner {
             }
         }
     }
-    
+
     [String[]]UpdateMinerData () { 
         if ($this.GetStatus() -ne [MinerStatus]::Running) { return @() }
 

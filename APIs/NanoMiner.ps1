@@ -7,7 +7,7 @@ class NanoMiner : Miner {
         }
         else { 
             return $this.Arguments
-        }    
+        }
     }
 
     hidden StartMining() { 

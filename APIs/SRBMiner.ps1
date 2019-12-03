@@ -7,7 +7,7 @@ class SRBMiner : Miner {
         }
         else { 
             return $this.Arguments
-        }    
+        }
     }
 
     hidden StartMining() { 
