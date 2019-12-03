@@ -12,7 +12,7 @@ $Payout_Currencies = @("BTC", "LTC", "DASH") | Where-Object { $Wallets.$_ }
 if (-not $Payout_Currencies) { 
     Write-Log -Level Verbose "Cannot get balance on pool ($Name) - no wallet address specified. "
     return
- }
+}
 
 $RetryCount = 1
 $RetryDelay = 2
@@ -22,7 +22,7 @@ while (-not ($APIResponse) -and $RetryCount -gt 0) {
         $APIResponse = Invoke-RestMethod "https://www.zpool.ca/api/currencies" -UseBasicParsing -Headers @{ "Cache-Control" = "no-cache" } -TimeoutSec 3 -ErrorAction Stop
     }
     catch { }
-    if (-not $APIResponse) {  
+    if (-not $APIResponse) { 
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
         $RetryCount--
     }

@@ -24,7 +24,7 @@ while (-not ($APIResponse -and $APIResponse) -and $RetryCount -gt 0) {
         if (-not $APIResponse) { $APIResponse = Invoke-RestMethod $APIUri -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
     catch { }
-    if (-not $APIResponse) {  
+    if (-not $APIResponse) { 
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
         $RetryCount--
     }

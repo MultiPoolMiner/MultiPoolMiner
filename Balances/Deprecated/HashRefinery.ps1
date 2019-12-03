@@ -20,12 +20,12 @@ while (-not ($APIResponse) -and $RetryCount -gt 0) {
     try { 
         $APIResponse = Invoke-RestMethod "http://pool.hashrefinery.com/api/wallet?address=$($Wallets.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
     }
-    catch { } 
-    if (-not $APIResponse) {  
+    catch { }
+    if (-not $APIResponse) { 
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
         $RetryCount--
-    } 
-} 
+    }
+}
 
 if (-not $APIResponse) { 
     Write-Log -Level Warn "Pool Balance API ($Name) has failed. "

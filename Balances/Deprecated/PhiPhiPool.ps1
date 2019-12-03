@@ -18,12 +18,12 @@ while (-not ($APIResponse) -and $RetryCount -gt 0) {
     try { 
         if (-not $APIResponse) { $APIResponse = Invoke-RestMethod "http://phi-phi-pool.com/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
-    catch { } 
-    if (-not $APIResponse) {  
+    catch { }
+    if (-not $APIResponse) { 
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
         $RetryCount--
-   } 
-} 
+    }
+}
 
 if (-not $APIResponse) { 
     Write-Log -Level Warn "Pool Balance API ($Name) has failed. "
@@ -45,7 +45,7 @@ if ($Payout_Currencies) {
 Write-Log -Level Verbose "Processing balances information ($Name). "
 $Payout_Currencies | ForEach-Object { 
     $Payout_Currency = $_
-    $APIResponse = ""        
+    $APIResponse = ""
     $RetryCount = 3
     $RetryDelay = 2
     while (-not ($APIResponse) -and $RetryCount -gt 0) { 
@@ -60,7 +60,7 @@ $Payout_Currencies | ForEach-Object {
 
     if (($APIResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -le 1) { 
         Write-Log -Level Warn "Pool Balance API ($Name) for $Payout_Currency has failed. "
-        
+
     }
     else { 
         [PSCustomObject]@{ 

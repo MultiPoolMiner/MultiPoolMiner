@@ -21,7 +21,7 @@ while (-not ($APIResponse) -and $RetryCount -gt 0) {
         $APIResponse = Invoke-RestMethod "http://www.nlpool.nl/api/currencies" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
     }
     catch { }
-    if (-not $APIResponse) {  
+    if (-not $APIResponse) { 
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
         $RetryCount--
     }

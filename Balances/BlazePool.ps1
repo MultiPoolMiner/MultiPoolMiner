@@ -20,12 +20,12 @@ while (-not ($APIResponse) -and $RetryCount -gt 0) {
     try { 
         if (-not $APIResponse) { $APIResponse = Invoke-RestMethod "http://api.blazepool.com/wallet/$($Wallets.BTC)" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop }
     }
-    catch { } 
-    if (-not $APIResponse) {  
+    catch { }
+    if (-not $APIResponse) { 
         Start-Sleep -Seconds $RetryDelay # Pool might not like immediate requests
         $RetryCount--
-    } 
-} 
+    }
+}
 
 if (-not $APIResponse) { 
     Write-Log -Level Warn "Pool Balance API ($Name) has failed. "
