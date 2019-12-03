@@ -108,7 +108,7 @@ $APIResponse.return | Where-Object { $_.profit -gt 0 } | ForEach-Object {
             EstimateCorrection = [Decimal]1
         }
 
-        if ($Algorithm_Norm -eq "Ethash" -and $Block -gt 0) { 
+        if (($Algorithm_Norm -eq "Ethash" -or $Algorithm_Norm -eq "ProgPoW") -and $Block -gt 0) { 
             [PSCustomObject]@{ 
                 Algorithm          = "$Algorithm_Norm-$([Math]::Ceiling((Get-EthashSize $Block)/1GB))GB"
                 CoinName           = $CoinName

@@ -170,7 +170,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
                     EstimateCorrection = $EstimateCorrection
                 }
 
-                if ($Algorithm_Norm -eq "Ethash" -and $Block -gt 0) { 
+                if (($Algorithm_Norm -eq "Ethash" -or $Algorithm_Norm -eq "ProgPoW") -and $Block -gt 0) { 
                     [PSCustomObject]@{ 
                         Name               = $PoolName
                         Algorithm          = "$Algorithm_Norm-$([Math]::Ceiling((Get-EthashSize $Block)/1GB))GB"
@@ -217,7 +217,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
                         EstimateCorrection = $EstimateCorrection
                     }
 
-                    if ($Algorithm_Norm -eq "Ethash" -and $Block -gt 0) { 
+                    if (($Algorithm_Norm -eq "Ethash" -or $Algorithm_Norm -eq "ProgPoW") -and $Block -gt 0) { 
                         #Option 2
                         [PSCustomObject]@{ 
                             Name               = $PoolName
