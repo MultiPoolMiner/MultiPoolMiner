@@ -56,8 +56,8 @@
 
                 # Parse any parameters in the URL - $Request.Url.Query looks like "+ ?a=b&c=d&message=Hello%20world"
                 $Parameters = @{ }
-                $Request.Url.Query -Replace "\?", "" -Split '&' | Foreach-Object { 
-                    $key, $value = $_ -Split '='
+                $Request.Url.Query -Replace "\?", "" -split '&' | Foreach-Object { 
+                    $key, $value = $_ -split '='
                     # Decode any url escaped characters in the key and value
                     $key = [URI]::UnescapeDataString($key)
                     $value = [URI]::UnescapeDataString($value)

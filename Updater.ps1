@@ -10,7 +10,7 @@ $ProgressPreferenceBackup = $ProgressPreference
 Function Get-Version ($Version) {
     # System.Version objects can be compared with -gt and -lt properly
     # This strips out anything that doens't belong in a version, eg. v at the beginning, or -preview1 at the end, and returns a version object
-    Return [System.Version]($Version -Split "-" -Replace "[^0-9.]")[0]
+    Return [System.Version]($Version -split "-" -Replace "[^0-9.]")[0]
 }
 
 # Support SSL connection
