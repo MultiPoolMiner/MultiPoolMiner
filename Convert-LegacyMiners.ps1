@@ -36,13 +36,13 @@ $AllMiners = @($MinersLegacy |
 
 #Miner with 0 hashrate (failed benchmarking) or -1 hashrate (manually disabled in dashboard)
 $InactiveMiners = @($MinersLegacy | Where-Object { $_.HashRates.PSObject.Properties.Value -contains 0 -or $_.HashRates.PSObject.Properties.Value -contains -1 } )
-$InactiveMiners | ForEach-Object {
+$InactiveMiners | ForEach-Object { 
     if ($_.HashRates.PSObject.Properties.Value -contains 0) { $_ | Add-Member Reason "Failed" -ErrorAction SilentlyContinue }
     elseif ($_.HashRates.PSObject.Properties.Value -contains -1) { $_ | Add-Member Reason "Disabled" -ErrorAction SilentlyContinue }
 }
 
 $FilteredMiners = @($MinersLegacy | Where-Object { $AllMiners -notcontains $_ } | Where-Object { $InactiveMiners -notcontains $_ } )
-$FilteredMiners | ForEach-Object {
+$FilteredMiners | ForEach-Object { 
     if ($UnprofitableAlgorithms -contains ($_.HashRates.PSObject.Properties.Name | Select-Object -Index 0)) { $_ | Add-Member Reason "Unprofitable Algorithm" -ErrorAction SilentlyContinue }
     elseif ($Config.SingleAlgoMining -and @($_.HashRates.PSObject.Properties.Name).Count -NE 1) { $_ | Add-Member Reason "SingleAlgoMining: true" -ErrorAction SilentlyContinue }
     elseif (-not ($Config.MinerName.Count -eq 0 -or (Compare-Object @($Config.MinerName | Select-Object) @($_.BaseName, "$($_.BaseName)_$($_.Version)", $_.Name | Select-Object -Unique) -IncludeEqual -ExcludeDifferent | Measure-Object).Count -gt 0)) { $_ | Add-Member Reason "MinerName: $($Config.MinerName -join '; ')" -ErrorAction SilentlyContinue }
@@ -53,13 +53,13 @@ $FilteredMiners | ForEach-Object {
     else { $_ | Add-Member Reason "???" -ErrorAction SilentlyContinue }
 }
 
-$AllMiners | ForEach-Object {
+$AllMiners | ForEach-Object { 
     $_ | Add-Member IntervalMultiplier (@(@($_.HashRates.PSObject.Properties.Name | ForEach-Object { $Config.IntervalMultiplier.$_ } | Select-Object) + 1 + $($_.IntervalMultiplier)) | Measure-Object -Maximum).Maximum -Force #default interval multiplier is 1
-    $_ | Add-Member ShowMinerWindow $Config.ShowMinerWindow -ErrorAction SilentlyContinue #default ShowMinerWindow 
+    $_ | Add-Member ShowMinerWindow $Config.ShowMinerWindow -ErrorAction SilentlyContinue #default ShowMinerWindow
     $_ | Add-Member WarmupTime $Config.WarmupTime -ErrorAction SilentlyContinue #default WarmupTime is taken from config file
 }
 
-if ($API) {
+if ($API) { 
     #Give API access to the information
     $API.AllMiners = $AllMiners
     $API.InactiveMiners = $InactiveMiners
@@ -117,7 +117,7 @@ if ($Config.PowerPrices | Sort-Object | Get-Member -MemberType NoteProperty -Err
 }
 if ($Rates.BTC.$FirstCurrency) { 
     if ($API) { $API.BTCRateFirstCurrency = $Rates.BTC.$FirstCurrency }
-    if ($Config.MeasurePowerUsage -and $PowerPrice) {
+    if ($Config.MeasurePowerUsage -and $PowerPrice) { 
         $PowerCostBTCperW = [Double](1 / 1000 * 24 * $PowerPrice / $Rates.BTC.$FirstCurrency)
         $BasePowerCost = [Double]($Config.BasePowerUsage / 1000 * 24 * $PowerPrice / $Rates.BTC.$FirstCurrency)
     }

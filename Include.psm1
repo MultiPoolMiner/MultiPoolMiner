@@ -276,7 +276,7 @@ function Get-PowerUsage {
 
     # Reads current power draw from devices
     #
-    # returned values are:
+    # returned values are: 
     # PowerDraw:    0 - max (in watts)
     #
     # Requirement: Running instance of HWiNFO64
@@ -383,8 +383,8 @@ function Write-Log {
         if (-not $PSBoundParameters.ContainsKey('Verbose')) { $VerbosePreference = $PSCmdlet.GetVariableValue('VerbosePreference') }
         if (-not $PSBoundParameters.ContainsKey('Debug')) { $DebugPreference = $PSCmdlet.GetVariableValue('DebugPreference') }
 
-        # Get mutex named MPMWriteLog. Mutexes are shared across all threads and processes.
-        # This lets us ensure only one thread is trying to write to the file at a time.
+        # Get mutex named MPMWriteLog. Mutexes are shared across all threads and processes. 
+        # This lets us ensure only one thread is trying to write to the file at a time. 
         $mutex = New-Object System.Threading.Mutex($false, "MPMWriteLog")
 
         $filename = ".\Logs\MultiPoolMiner_$(Get-Date -Format "yyyy-MM-dd").txt"
@@ -415,7 +415,7 @@ function Write-Log {
             }
         }
 
-        # Attempt to aquire mutex, waiting up to 1 second if necessary.  If aquired, write to the log file and release mutex.  Otherwise, display an error.
+        # Attempt to aquire mutex, waiting up to 1 second if necessary.  If aquired, write to the log file and release mutex.  Otherwise, display an error. 
         if ($mutex.WaitOne(1000)) { 
             "$date $LevelText $Message" | Out-File -FilePath $filename -Append -Encoding utf8
             $mutex.ReleaseMutex()
@@ -613,7 +613,7 @@ function Get-ChildItemContent {
         [Parameter(Mandatory = $false)]
         [Hashtable]$Parameters = @{ }, 
         [Parameter(Mandatory = $false)]
-        [Switch]$Threaded = $false,
+        [Switch]$Threaded = $false, 
         [Parameter(Mandatory = $false)]
         [String]$Priority
     )
@@ -628,7 +628,7 @@ function Get-ChildItemContent {
             [Parameter(Mandatory = $true)]
             [String]$Path, 
             [Parameter(Mandatory = $false)]
-            [Hashtable]$Parameters = @{ },
+            [Hashtable]$Parameters = @{ }, 
             [Parameter(Mandatory = $false)]
             [String]$Priority
         )
@@ -1173,7 +1173,7 @@ function Get-Device {
                         if (-not $Type_Vendor_Id.($Device.Type)) { 
                             $Type_Vendor_Id.($Device.Type) = @{ }
                         }
-        
+
                         $Id++
                         $Vendor_Id.($Device.Vendor)++
                         $Type_Vendor_Id.($Device.Type).($Device.Vendor)++

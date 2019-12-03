@@ -24,17 +24,17 @@ param(
     [Switch]$SSL = $false, 
     [Parameter(Mandatory = $false)]
     [Alias("Device", "Type")]
-    [String[]]$DeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc.
+    [String[]]$DeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc. 
     [Parameter(Mandatory = $false)]
     [String[]]$Currency = ("BTC", "USD"), #i.e. GBP, EUR, ZEC, ETH etc., the first currency listed will be used as base currency for profit calculations
     [Parameter(Mandatory = $false)]
     [String[]]$ExcludeDeviceName = @(), #i.e. CPU, GPU, GPU#02, AMD, NVIDIA, AMD#02, OpenCL#03#02 etc. will not be used for mining
     [Parameter(Mandatory = $false)]
-    [String[]]$Algorithm = @(), #i.e. Ethash, Equihash, CryptonightV7 etc.
+    [String[]]$Algorithm = @(), #i.e. Ethash, Equihash, CryptonightV7 etc. 
     [Parameter(Mandatory = $false)]
-    [String[]]$CoinName = @(), #i.e. Monero, Zcash etc.
+    [String[]]$CoinName = @(), #i.e. Monero, Zcash etc. 
     [Parameter(Mandatory = $false)]
-    [String[]]$CurrencySymbol = @(), #i.e. LUX, XVG etc.
+    [String[]]$CurrencySymbol = @(), #i.e. LUX, XVG etc. 
     [Parameter(Mandatory = $false)]
     [Alias("Miner")]
     [String[]]$MinerName = @(), 
@@ -42,11 +42,11 @@ param(
     [Alias("Pool")]
     [String[]]$PoolName = @(), 
     [Parameter(Mandatory = $false)]
-    [String[]]$ExcludeAlgorithm = @(), #i.e. Ethash, Equihash, CryptonightV7 etc.
+    [String[]]$ExcludeAlgorithm = @(), #i.e. Ethash, Equihash, CryptonightV7 etc. 
     [Parameter(Mandatory = $false)]
-    [String[]]$ExcludeCoinName = @(), #i.e. Monero, Zcash etc.
+    [String[]]$ExcludeCoinName = @(), #i.e. Monero, Zcash etc. 
     [Parameter(Mandatory = $false)]
-    [String[]]$ExcludeCurrencySymbol = @(), #i.e. LUX, XVG etc.
+    [String[]]$ExcludeCurrencySymbol = @(), #i.e. LUX, XVG etc. 
     [Parameter(Mandatory = $false)]
     [Alias("ExcludeMiner")]
     [String[]]$ExcludeMinerName = @(), 
@@ -89,7 +89,7 @@ param(
     [ValidateRange(1, 999)]
     [Int]$PoolBalancesUpdateInterval = 15, #MPM will force update balances every n minutes to limit pool API requests (but never more than ONCE per loop). Allowed values 1 - 999 minutes
     [Parameter(Mandatory = $false)]
-    [Switch]$DisableDeviceDetection = $false, #if true MPM won't create separate miner instances per device model. This will decrease profitability.
+    [Switch]$DisableDeviceDetection = $false, #if true MPM won't create separate miner instances per device model. This will decrease profitability. 
     [Parameter(Mandatory = $false)]
     [String]$ConfigFile = ".\Config.txt", #default config file
     [ValidateRange(5, 20)]
@@ -119,18 +119,18 @@ param(
     [Float]$ProfitabilityThreshold = 0, #Minimum profit (in $Currency[0]) that must be made otherwise all mining will stop, set to 0 to allow mining even when making losses. Allowed values: 0.0 - 999
     [Parameter(Mandatory = $false)]
     [ValidateRange(0, 60)]
-    [Int]$WarmupTime = 30, #Time the miner are allowed to warm up, e.g. to compile the binaries or to get the APi reads before it get marked as failed. Default 30 (seconds).
+    [Int]$WarmupTime = 30, #Time the miner are allowed to warm up, e.g. to compile the binaries or to get the APi reads before it get marked as failed. Default 30 (seconds). 
     [Parameter(Mandatory = $false)]
     [PSCustomObject]$HWiNFO64_SensorMapping, #custom HWiNFO64 sensor mapping, only required when $MeasurePowerUsage is $true, see ConfigHWinfo64.pdf
     [Parameter(Mandatory = $false)]
-    [PSCustomObject]$MinWorker = [PSCustomObject]@{"*" = 10 }, #One entry per Algorithm name (wildcards like * and ? are supported) and workers that must be available for the algorithm, low number of workers is similar to solo mining :-(. Default for all algorithms is 10. Note: Wildcards (* and ?) for the algorithm names are supported. If an algorithm name/wildcard matches more than one entry then the lower number takes priority.
+    [PSCustomObject]$MinWorker = [PSCustomObject]@{"*" = 10 }, #One entry per Algorithm name (wildcards like * and ? are supported) and workers that must be available for the algorithm, low number of workers is similar to solo mining :-(. Default for all algorithms is 10. Note: Wildcards (* and ?) for the algorithm names are supported. If an algorithm name/wildcard matches more than one entry then the lower number takes priority. 
     [Parameter(Mandatory = $false)]
     [ValidateRange(0, 100)]
     [Float]$AllowedBadShareRatio = 0, #Allowed ratio of bad shares (total / bad) as reported by the miner. If the ratio exceeds the configured threshold then the miner will marked as failed. Allowed values: 0.00 - 1.00. Default of 0 disables this check
     [Parameter(Mandatory = $false)]
     [Int]$APIPort = 3999, #Port for the MPM API. The miner port range will start from $APIPort +1. Default: 3999, 
     [Parameter(Mandatory = $false)]
-    [Switch]$ShowAllPoolBalances, #Include this command to display the balances of all pools (including those that are excluded with '-ExcludePoolName') on the summary screen and in the web dashboard.
+    [Switch]$ShowAllPoolBalances, #Include this command to display the balances of all pools (including those that are excluded with '-ExcludePoolName') on the summary screen and in the web dashboard. 
     [Parameter(Mandatory = $false)]
     [Switch]$Dashboard = $false, #If true launch dashboard
     [Parameter(Mandatory = $false)]
@@ -384,7 +384,7 @@ while (-not $API.Stop) {
     $WatchdogInterval = ($WatchdogInterval / $Strikes * ($Strikes - 1)) + $StatSpan.TotalSeconds
     $WatchdogReset = ($WatchdogReset / ($Strikes * $Strikes * $Strikes) * (($Strikes * $Strikes * $Strikes) - 1)) + $StatSpan.TotalSeconds
 
-    if ($API.WatchdogTimersReset) {
+    if ($API.WatchdogTimersReset) { 
         $WatchdogTimers = @()
         $API.WatchdogTimersReset = $false
     }
@@ -483,7 +483,7 @@ while (-not $API.Stop) {
     #Retrieve collected pool data
     if ($NewPools_Jobs) { 
         if ($NewPools_Jobs | Where-Object State -NE "Completed") { Write-Log "Waiting for pool information. " }
-        $NewPools = @($NewPools_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | Where-Object { $_.Content.Algorithm <#temp fix, Detect broken pool files#>} | ForEach-Object { $_.Content | Add-Member Name $_.Name -Force -PassThru })
+        $NewPools = @($NewPools_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | Where-Object { $_.Content.Algorithm <#temp fix, Detect broken pool files#> } | ForEach-Object { $_.Content | Add-Member Name $_.Name -Force -PassThru })
         $NewPools_JobsDurations = @($NewPools_JobsDurations | Select-Object -Last 20) #Use the last 20 values for better stability
         $NewPools_JobsDurations += (($NewPools_Jobs | Measure-Object PSEndTime -Maximum).Maximum - ($NewPools_Jobs | Measure-Object PSBeginTime -Minimum).Minimum).TotalSeconds
         Remove-Variable NewPools_Jobs
@@ -502,11 +502,11 @@ while (-not $API.Stop) {
 
     #Apply PricePenaltyFactor to pools
     $NewPools | ForEach-Object { 
-        if ($Config.Pools.$($_.Name).PricePenaltyFactor -gt 0) {
+        if ($Config.Pools.$($_.Name).PricePenaltyFactor -gt 0) { 
             $_.Price = [Double]($_.Price * $Config.Pools.$($_.Name).PricePenaltyFactor)
             $_.StablePrice = [Double]($_.StablePrice * $Config.Pools.$($_.Name).PricePenaltyFactor)
         }
-        elseif ($Config.Pools.$($_.Name -split '-' | Select-Object -Index 0).PricePenaltyFactor -gt 0) {
+        elseif ($Config.Pools.$($_.Name -split '-' | Select-Object -Index 0).PricePenaltyFactor -gt 0) { 
             $_.Price = [Double]($_.Price * $Config.Pools.$($_.Name -split '-' | Select-Object -Index 0).PricePenaltyFactor)
             $_.StablePrice = [Double]($_.StablePrice * $Config.Pools.$($_.Name -split '-' | Select-Object -Index 0).PricePenaltyFactor)
         }
@@ -514,7 +514,7 @@ while (-not $API.Stop) {
     # Calculate corrected estimates
     $NewPools | ForEach-Object { 
         if ($_.EstimateCorrection -le 0 -or $_.EstimateCorrection -gt 1) { $_ | Add-Member EstimateCorrection ([Double]1) -Force }
-        if ((-not $Config.Pools.$Name.DisableEstimateCorrection) -and (-not $Config.Pools.($_.Name -split '-' | Select-Object -Index 0).DisableEstimateCorrection)) {
+        if ((-not $Config.Pools.$Name.DisableEstimateCorrection) -and (-not $Config.Pools.($_.Name -split '-' | Select-Object -Index 0).DisableEstimateCorrection)) { 
             $_.Price *= $_.EstimateCorrection
             $_.StablePrice *= $_.EstimateCorrection
         }
@@ -522,10 +522,10 @@ while (-not $API.Stop) {
     if ($API) { $API.NewPools = $NewPools } #Give API access to the current running configuration
 
     #This finds any pools that were already in $AllPools (from a previous loop) but not in $NewPools. Add them back to the list. Their API likely didn't return in time, but we don't want to cut them off just yet
-    #since mining is probably still working.  Then it filters out any algorithms that aren't being used.
+    #since mining is probably still working.  Then it filters out any algorithms that aren't being used. 
     $AllPools = @(@($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object { $AllPools | Where-Object Name -EQ $_ }) | 
         Where-Object { $_.MarginOfError -le (1 - $Config.MinAccuracy) } | 
-        Where-Object { $_.Price -gt 0 -and $_.StablePrice -gt 0 } |
+        Where-Object { $_.Price -gt 0 -and $_.StablePrice -gt 0 } | 
         Where-Object { -not $Config.PoolName -or (Compare-Object @($Config.PoolName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
         Where-Object { -not $Config.ExcludePoolName -or -not (Compare-Object @($Config.ExcludePoolName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
         Where-Object { -not $Config.Algorithm -or (Compare-Object @($Config.Algorithm | Select-Object) @($(for ($i = ($_.Algorithm -split "-").Length; $i -ge 1; $i--) { ($_.Algorithm -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
@@ -587,10 +587,10 @@ while (-not $API.Stop) {
     #To-do: change dot to ampersand
     if (Test-Path .\Convert-LegacyMiners.ps1) { . .\Convert-LegacyMiners.ps1 }
 
-    if (-not $MinersNeedingBenchmark.Count) {
+    if (-not $MinersNeedingBenchmark.Count) { 
         #Detect miners with unreal profitability (> 10x higher than the best 10% miners, error in data provided by pool?)
         $ReasonableProfit = [Double]($ActiveMiners | Sort-Object Earning_Bias | Select-Object -First ([Int]($ActiveMiners.Count / 10 )) | Measure-Object Earning_Bias -Average).Average * 10
-        $ActiveMiners = $ActiveMiners | Where-Object { $_.Earning_Bias -lt $ReasonableProfit}
+        $ActiveMiners = $ActiveMiners | Where-Object { $_.Earning_Bias -lt $ReasonableProfit }
     }
 
     #Check for failed miner
@@ -852,7 +852,7 @@ while (-not $API.Stop) {
         $MinersDeviceGroupNeedingBenchmark = @($MinersDeviceGroup | Where-Object { $_.HashRates.PSObject.Properties.Value -contains $null })
         $MinersDeviceGroupNeedingPowerUsageMeasurement = @($(if ($Config.MeasurePowerUsage) { @($MinersDeviceGroup | Where-Object PowerUsage -le 0) }))
         $MinersDeviceGroup | Where-Object { 
-            $Config.ShowAllMiners -or  <#List all miners#>
+            $Config.ShowAllMiners -or <#List all miners#>
             $MinersDeviceGroupNeedingBenchmark.Count -or <#List all miners when benchmarking#>
             $MinersDeviceGroupNeedingPowerUsageMeasurement.Count -or <#List all miners when measuring power consumption#>
             $_.Earning_Unbias -ge ($MinersDeviceGroup.Earning_Unbias | Sort-Object -Descending | Select-Object -Index 4) -or <#Always list at least the top 5 unbiased earning miners per device group#>
@@ -1064,7 +1064,7 @@ while (-not $API.Stop) {
         }
 
         #No pre-loading when benchmarking CPU miners
-        if (-not ($RunningMiners | Where-Object { $Miner_Name = $_.Name; $_.DeviceName -like "CPU#*" -and ($_.Algorithm | Where-Object { -not (Get-Stat -Name "$($Miner_Name)_$($_)_HashRate") }) })) {
+        if (-not ($RunningMiners | Where-Object { $Miner_Name = $_.Name; $_.DeviceName -like "CPU#*" -and ($_.Algorithm | Where-Object { -not (Get-Stat -Name "$($Miner_Name)_$($_)_HashRate") }) })) { 
             #Preload pool information - code to be removed
             if ((-not $NewPools_Jobs) -and (Test-Path "Pools" -PathType Container -ErrorAction Ignore) -and ((($StatEnd - (Get-Date).ToUniversalTime()).TotalSeconds) -le $($NewPools_JobsDurations | Measure-Object -Average).Average)) { 
                 if ($PoolsRequest = @(Get-ChildItem "Pools" -File -ErrorAction Ignore | Where-Object { $Config.Pools.$($_.BaseName) } | Where-Object { -not $Config.ExcludePoolName -or -not (Compare-Object @($Config.ExcludePoolName | Select-Object) @($_.BaseName | Select-Object) -IncludeEqual -ExcludeDifferent) } | Where-Object { -not $Config.PoolName -or (Compare-Object @($Config.PoolName | Foreach-Object { ($_ -split "-" | Select-Object -First ($_.BaseName -split "-").Length) -join "-" } | Select-Object) @($(for ($i = ($_.BaseName -split "-").Length; $i -ge 1; $i--) { ($_.BaseName -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | Sort-Object BaseName)) { 
@@ -1146,7 +1146,7 @@ while (-not $API.Stop) {
 
         #Read power usage from miner data
         if ($Config.MeasurePowerUsage -and $Miner.GetStatus() -eq "Running" -or -not (Get-Stat -Name "$($Miner_Name)_$($_)_HashRate")) { 
-            $Miner_PowerUsage = [Double]($Miner.GetPowerUsage(($Miner.New -and $Miner.Benchmarked -lt $Miner.IntervalMultiplier) -and $Miner.Intervals.Count -lt $Miner.IntervalMultiplier + $Strikes)) 
+            $Miner_PowerUsage = [Double]($Miner.GetPowerUsage(($Miner.New -and $Miner.Benchmarked -lt $Miner.IntervalMultiplier) -and $Miner.Intervals.Count -lt $Miner.IntervalMultiplier + $Strikes))
             if (($Miner_PowerUsage -and $Miner.Intervals.Count -ge $Miner.IntervalMultiplier) -or $Miner.Intervals.Count -ge ($Miner.IntervalMultiplier + $Strikes) -or $Miner.GetActivateCount() -ge $Strikes) { 
                 Write-Log -Level Verbose "Saving power usage ($($Miner_Name)$(if (@($Miner.Algorithm).Count -eq 1) { "_$($Miner.Algorithm)" })_PowerUsage: $($Miner_PowerUsage.ToString("N2"))W)$(if  (-not (Get-Stat -Name "$($Miner_Name)$(if (@($Miner.Algorithm).Count -eq 1) { "_$($Miner.Algorithm)" })_PowerUsage")) { " [Power measurement done]" })"
                 $Stat = Set-Stat -Name  "$($Miner_Name)$(if (@($Miner.Algorithm).Count -eq 1) { "_$($Miner.Algorithm)" })_PowerUsage" -Value $Miner_PowerUsage -Duration ([Long]($Miner.Intervals | Measure-Object Ticks -Sum).Sum) -FaultDetection ($Miner.IntervalMultiplier -le 1)

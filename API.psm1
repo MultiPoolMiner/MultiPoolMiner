@@ -12,7 +12,7 @@
     $API.Stop = $false
     $API.Pause = $false
     $API.Port = $Port
-    
+
     # Setup runspace to launch the API webserver in a separate thread
     $newRunspace = [runspacefactory]::CreateRunspace()
     $newRunspace.Open()
@@ -313,9 +313,9 @@
                 }
 
                 # If $Data is null, the API will just return whatever data was in the previous request.  Instead, show an error
-                # This happens if the script just started and hasn't filled all the properties in yet.
-                if ($Data -eq $Null) {  
-                    $Data = @{  "Error" = "API data not available"  } | ConvertTo-Json
+                # This happens if the script just started and hasn't filled all the properties in yet. 
+                if ($Data -eq $Null) { 
+                    $Data = @{  "Error" = "API data not available" } | ConvertTo-Json
                 }
 
                 # Send the response
