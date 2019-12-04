@@ -3,13 +3,13 @@
 #XmRig AMD / Nvidia requires the explicit use of detailled thread information in the config file
 #these values are different for each card model and algorithm
 #API will check for hw change and briefly start miner with an incomplete dummy config
-#The miner binary will add the thread element(s) to the config file on first start for all installed cards 
+#The miner binary will add the thread element(s) to the config file on first start for all installed cards
 #Once this file is current we can retrieve the threads info
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -24,67 +24,67 @@ $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "AMD")
 
 $Commands = [PSCustomObject[]]@(
-    # Note: For fine tuning directly edit the config file in the miner binary directory
-    #       'Config-[Pool]_[Algorithm_Norm]-[GPU-List]-[Port].json'
-    [PSCustomObject]@{ Algorithm = "cn/0";          MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # Cryptonight
-    [PSCustomObject]@{ Algorithm = "cn/1";          MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightV1
-    [PSCustomObject]@{ Algorithm = "cn/2";          MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=2 --opencl-mem-chunk=1" } # CryptonightV2, new with 2.8.1
-    [PSCustomObject]@{ Algorithm = "cn/double";     MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightDouble, new with 2.14.0
-    [PSCustomObject]@{ Algorithm = "cn/gpu";        MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightGpu, new with 2.11.0
-    [PSCustomObject]@{ Algorithm = "cn/half";       MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightHalf, new with 2.9.1
-    [PSCustomObject]@{ Algorithm = "cn/msr";        MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightMsr
-    [PSCustomObject]@{ Algorithm = "cn/r";          MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightR, new with 2.13.0
-    [PSCustomObject]@{ Algorithm = "cn/rto";        MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightRto
-    [PSCustomObject]@{ Algorithm = "cn/rwz";        MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightRwz, new with 2.14.0
-    [PSCustomObject]@{ Algorithm = "cn/trtl";       MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightTurtle, new with 2.10.0
-    [PSCustomObject]@{ Algorithm = "cn/xao";        MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightXao
-    [PSCustomObject]@{ Algorithm = "cn/xtl";        MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightXtl
-    [PSCustomObject]@{ Algorithm = "cn/zls";        MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightZls, new with 2.14.0
-    [PSCustomObject]@{ Algorithm = "cn-lite/0";     MinMemGB = 1; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightLite
-    [PSCustomObject]@{ Algorithm = "cn-lite/1";     MinMemGB = 1; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightLiteV1
-    [PSCustomObject]@{ Algorithm = "cn-heavy";      MinMemGB = 4; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightHeavy
-    [PSCustomObject]@{ Algorithm = "cn-heavy/tube"; MinMemGB = 4; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightHeavyTube
-    [PSCustomObject]@{ Algorithm = "cn-heavy/xhv";  MinMemGB = 4; Threads = 1; Command = " --opencl-strided-index=1" } # CryptonightHeavyXhv
+    #Note: For fine tuning directly edit the config file in the miner binary directory
+    #      'Config-[Pool]_[Algorithm_Norm]-[GPU-List]-[Port].json'
+    [PSCustomObject]@{ Algorithm = "cn/0"         ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #Cryptonight
+    [PSCustomObject]@{ Algorithm = "cn/1"         ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightV1
+    [PSCustomObject]@{ Algorithm = "cn/2"         ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=2 --opencl-mem-chunk=1"; } #CryptonightV2, new with 2.8.1
+    [PSCustomObject]@{ Algorithm = "cn/double"    ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightDouble, new with 2.14.0
+    [PSCustomObject]@{ Algorithm = "cn/gpu"       ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightGpu, new with 2.11.0
+    [PSCustomObject]@{ Algorithm = "cn/half"      ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightHalf, new with 2.9.1
+    [PSCustomObject]@{ Algorithm = "cn/msr"       ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightMsr
+    [PSCustomObject]@{ Algorithm = "cn/r"         ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightR, new with 2.13.0
+    [PSCustomObject]@{ Algorithm = "cn/rto"       ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightRto
+    [PSCustomObject]@{ Algorithm = "cn/rwz"       ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightRwz, new with 2.14.0
+    [PSCustomObject]@{ Algorithm = "cn/trtl"      ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightTurtle, new with 2.10.0
+    [PSCustomObject]@{ Algorithm = "cn/xao"       ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightXao
+    [PSCustomObject]@{ Algorithm = "cn/xtl"       ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightXtl
+    [PSCustomObject]@{ Algorithm = "cn/zls"       ; MinMemGB = 2; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightZls, new with 2.14.0
+    [PSCustomObject]@{ Algorithm = "cn-lite/0"    ; MinMemGB = 1; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightLite
+    [PSCustomObject]@{ Algorithm = "cn-lite/1"    ; MinMemGB = 1; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightLiteV1
+    [PSCustomObject]@{ Algorithm = "cn-heavy"     ; MinMemGB = 4; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightHeavy
+    [PSCustomObject]@{ Algorithm = "cn-heavy/tube"; MinMemGB = 4; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightHeavyTube
+    [PSCustomObject]@{ Algorithm = "cn-heavy/xhv" ; MinMemGB = 4; Threads = 1; Command = " --opencl-strided-index=1"                     ; } #CryptonightHeavyXhv
 
-    [PSCustomObject]@{ Algorithm = "cn/0";          MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # Cryptonight
-    [PSCustomObject]@{ Algorithm = "cn/1";          MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightV1
-    [PSCustomObject]@{ Algorithm = "cn/2";          MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=2 --opencl-mem-chunk=1" } # CryptonightV2, new with 2.8.1
-    [PSCustomObject]@{ Algorithm = "cn/double";     MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightDouble, new with 2.14.0
-    [PSCustomObject]@{ Algorithm = "cn/gpu";        MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightGpu, new with 2.11.0
-    [PSCustomObject]@{ Algorithm = "cn/half";       MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightHalfV8, new with 2.9.1
-    [PSCustomObject]@{ Algorithm = "cn/msr";        MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightMsr
-    [PSCustomObject]@{ Algorithm = "cn/r";          MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightR, new with 2.13.0
-    [PSCustomObject]@{ Algorithm = "cn/rto";        MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightRto
-    [PSCustomObject]@{ Algorithm = "cn/rwz";        MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightRwz, new with 2.14.0
-    [PSCustomObject]@{ Algorithm = "cn/trtl";       MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightTurtle, new with 2.10.0
-    [PSCustomObject]@{ Algorithm = "cn/xao";        MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightXao
-    [PSCustomObject]@{ Algorithm = "cn/xtl";        MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightXtl
-    [PSCustomObject]@{ Algorithm = "cn/zls";        MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightZls, new with 2.14.0
-    [PSCustomObject]@{ Algorithm = "cn-lite/0";     MinMemGB = 1; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightLite
-    [PSCustomObject]@{ Algorithm = "cn-lite/1";     MinMemGB = 1; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightLiteV1
-    [PSCustomObject]@{ Algorithm = "cn-heavy";      MinMemGB = 4; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightHeavy
-    [PSCustomObject]@{ Algorithm = "cn-heavy/tube"; MinMemGB = 4; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightHeavyTube
-    [PSCustomObject]@{ Algorithm = "cn-heavy/xhv";  MinMemGB = 4; Threads = 2; Command = " --opencl-strided-index=1" } # CryptonightHeavyXhv
+    [PSCustomObject]@{ Algorithm = "cn/0"         ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #Cryptonight
+    [PSCustomObject]@{ Algorithm = "cn/1"         ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightV1
+    [PSCustomObject]@{ Algorithm = "cn/2"         ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=2 --opencl-mem-chunk=1"; } #CryptonightV2, new with 2.8.1
+    [PSCustomObject]@{ Algorithm = "cn/double"    ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightDouble, new with 2.14.0
+    [PSCustomObject]@{ Algorithm = "cn/gpu"       ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightGpu, new with 2.11.0
+    [PSCustomObject]@{ Algorithm = "cn/half"      ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightHalfV8, new with 2.9.1
+    [PSCustomObject]@{ Algorithm = "cn/msr"       ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightMsr
+    [PSCustomObject]@{ Algorithm = "cn/r"         ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightR, new with 2.13.0
+    [PSCustomObject]@{ Algorithm = "cn/rto"       ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightRto
+    [PSCustomObject]@{ Algorithm = "cn/rwz"       ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightRwz, new with 2.14.0
+    [PSCustomObject]@{ Algorithm = "cn/trtl"      ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightTurtle, new with 2.10.0
+    [PSCustomObject]@{ Algorithm = "cn/xao"       ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightXao
+    [PSCustomObject]@{ Algorithm = "cn/xtl"       ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightXtl
+    [PSCustomObject]@{ Algorithm = "cn/zls"       ; MinMemGB = 2; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightZls, new with 2.14.0
+    [PSCustomObject]@{ Algorithm = "cn-lite/0"    ; MinMemGB = 1; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightLite
+    [PSCustomObject]@{ Algorithm = "cn-lite/1"    ; MinMemGB = 1; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightLiteV1
+    [PSCustomObject]@{ Algorithm = "cn-heavy"     ; MinMemGB = 4; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightHeavy
+    [PSCustomObject]@{ Algorithm = "cn-heavy/tube"; MinMemGB = 4; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightHeavyTube
+    [PSCustomObject]@{ Algorithm = "cn-heavy/xhv" ; MinMemGB = 4; Threads = 2; Command = " --opencl-strided-index=1"                     ; } #CryptonightHeavyXhv
 
-    [PSCustomObject]@{ Algorithm = "cn/0";          MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # Cryptonight
-    [PSCustomObject]@{ Algorithm = "cn/1";          MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightV1
-    [PSCustomObject]@{ Algorithm = "cn/2";          MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=2 --opencl-mem-chunk=1" } # CryptonightV1, new with 2.8.1
-    [PSCustomObject]@{ Algorithm = "cn/double";     MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightDouble, new with 2.14.0
-    [PSCustomObject]@{ Algorithm = "cn/gpu";        MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightGpu, new with 2.11.0
-    [PSCustomObject]@{ Algorithm = "cn/half";       MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightHalfV8, new with 2.9.1
-    [PSCustomObject]@{ Algorithm = "cn/msr";        MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightMsr
-    [PSCustomObject]@{ Algorithm = "cn/r";          MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightR, new with 2.13.0
-    [PSCustomObject]@{ Algorithm = "cn/rto";        MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightRto
-    [PSCustomObject]@{ Algorithm = "cn/rwz";        MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightRwz, new with 2.14.0
-    [PSCustomObject]@{ Algorithm = "cn/trtl";       MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightTurtle, new with 2.10.0
-    [PSCustomObject]@{ Algorithm = "cn/xao";        MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightXao
-    [PSCustomObject]@{ Algorithm = "cn/xtl";        MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightXtl
-    [PSCustomObject]@{ Algorithm = "cn/zls";        MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightZls, new with 2.14.0
-    [PSCustomObject]@{ Algorithm = "cn-lite/0";     MinMemGB = 1; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightLite
-    [PSCustomObject]@{ Algorithm = "cn-lite/1";     MinMemGB = 1; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightLiteV1
-    [PSCustomObject]@{ Algorithm = "cn-heavy";      MinMemGB = 4; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightHeavy
-    [PSCustomObject]@{ Algorithm = "cn-heavy/tube"; MinMemGB = 4; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightHeavyTube
-    [PSCustomObject]@{ Algorithm = "cn-heavy/xhv";  MinMemGB = 4; Threads = 3; Command = " --opencl-strided-index=1" } # CryptonightHeavyXhv
+    [PSCustomObject]@{ Algorithm = "cn/0"         ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #Cryptonight
+    [PSCustomObject]@{ Algorithm = "cn/1"         ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightV1
+    [PSCustomObject]@{ Algorithm = "cn/2"         ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=2 --opencl-mem-chunk=1"; } #CryptonightV1, new with 2.8.1
+    [PSCustomObject]@{ Algorithm = "cn/double"    ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightDouble, new with 2.14.0
+    [PSCustomObject]@{ Algorithm = "cn/gpu"       ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightGpu, new with 2.11.0
+    [PSCustomObject]@{ Algorithm = "cn/half"      ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightHalfV8, new with 2.9.1
+    [PSCustomObject]@{ Algorithm = "cn/msr"       ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightMsr
+    [PSCustomObject]@{ Algorithm = "cn/r"         ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightR, new with 2.13.0
+    [PSCustomObject]@{ Algorithm = "cn/rto"       ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightRto
+    [PSCustomObject]@{ Algorithm = "cn/rwz"       ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightRwz, new with 2.14.0
+    [PSCustomObject]@{ Algorithm = "cn/trtl"      ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightTurtle, new with 2.10.0
+    [PSCustomObject]@{ Algorithm = "cn/xao"       ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightXao
+    [PSCustomObject]@{ Algorithm = "cn/xtl"       ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightXtl
+    [PSCustomObject]@{ Algorithm = "cn/zls"       ; MinMemGB = 2; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightZls, new with 2.14.0
+    [PSCustomObject]@{ Algorithm = "cn-lite/0"    ; MinMemGB = 1; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightLite
+    [PSCustomObject]@{ Algorithm = "cn-lite/1"    ; MinMemGB = 1; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightLiteV1
+    [PSCustomObject]@{ Algorithm = "cn-heavy"     ; MinMemGB = 4; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightHeavy
+    [PSCustomObject]@{ Algorithm = "cn-heavy/tube"; MinMemGB = 4; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightHeavyTube
+    [PSCustomObject]@{ Algorithm = "cn-heavy/xhv" ; MinMemGB = 4; Threads = 3; Command = " --opencl-strided-index=1"                     ; } #CryptonightHeavyXhv
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
@@ -111,15 +111,15 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             $PoolParameters = " --url=$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --userpass=$($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass) --keepalive$(if ($Pools.$Algorithm_Norm.Name -eq 'Nicehash') { " --nicehash" })$(if ($Pools.$Algorithm_Norm.SSL) { " --tls" })"
 
             $Arguments = [PSCustomObject]@{ 
-                ConfigFile = [PSCustomObject]@{ 
+                ConfigFile            = [PSCustomObject]@{ 
                     FileName = $ConfigFileName
                     Content  = [PSCustomObject]@{ 
                         "algo"            = $_.Algorithm
-                        "api" = [PSCustomObject]@{ 
+                        "api"             = [PSCustomObject]@{ 
                             "port"         = $Miner_Port
                             "access-token" = $null
                             "worker-id"    = $null
-                         }
+                        }
                         "background"      = $false
                         "cache"           = $true
                         "colors"          = $true
@@ -131,10 +131,10 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                         "opencl-platform" = ($Miner_Device.PlatformId | Select-Object -Unique)
                     }
                 }
-                Commands = ("$Command$CommonCommands$PoolParameters$(if ($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker) { " --rig-id=$($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker)" }) --config=$ConfigFileName --opencl-devices=$(($Miner_Device | ForEach-Object { '{0:x}' -f $_.Type_Vendor_Index }) -join ',')" -replace "\s+", " ").trim()
-                HwDetectCommands = "$Command$CommonCommands$PoolParameters --config=$ThreadsConfigFileName"
-                Devices = @($Miner_Device.Type_Vendor_Index)
-                Threads = $_.Threads
+                Commands              = ("$Command$CommonCommands$PoolParameters$(if ($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker) { " --rig-id=$($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker)" }) --config=$ConfigFileName --opencl-devices=$(($Miner_Device | ForEach-Object { '{0:x}' -f $_.Type_Vendor_Index }) -join ',')" -replace "\s+", " ").trim()
+                HwDetectCommands      = "$Command$CommonCommands$PoolParameters --config=$ThreadsConfigFileName"
+                Devices               = @($Miner_Device.Type_Vendor_Index)
+                Threads               = $_.Threads
                 ThreadsConfigFileName = $ThreadsConfigFileName
             }
 
@@ -149,7 +149,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 Port       = $Miner_Port
                 URI        = $Uri
                 Fees       = [PSCustomObject]@{ $Algorithm_Norm = 1 / 100 }
-             }
-         }
-     }
- }
+            }
+        }
+    }
+}

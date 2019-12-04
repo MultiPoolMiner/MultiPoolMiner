@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,15 +16,15 @@ $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = $Devices | Where-Object Type -EQ "CPU"
 
-if ($Devices.CpuFeatures -match "avx2")     { $Miner_Path = ".\Bin\$($Name)\cpuminer-Avx2.exe" }
-elseif ($Devices.CpuFeatures -match "avx")  { $Miner_Path = ".\Bin\$($Name)\cpuminer-Avx.exe" }
-elseif ($Devices.CpuFeatures -match "aes")  { $Miner_Path = ".\Bin\$($Name)\cpuminer-Aes-Sse42.exe" }
+if ($Devices.CpuFeatures -match "avx2") { $Miner_Path = ".\Bin\$($Name)\cpuminer-Avx2.exe" }
+elseif ($Devices.CpuFeatures -match "avx") { $Miner_Path = ".\Bin\$($Name)\cpuminer-Avx.exe" }
+elseif ($Devices.CpuFeatures -match "aes") { $Miner_Path = ".\Bin\$($Name)\cpuminer-Aes-Sse42.exe" }
 elseif ($Devices.CpuFeatures -match "sse2") { $Miner_Path = ".\Bin\$($Name)\cpuminer-Sse2.exe" }
 else { return }
 
 $Commands = [PSCustomObject]@{ 
-    ### CPU PROFITABLE ALGOS AS OF 30/03/2019
-    ### these algorithms are profitable algorithms on supported pools
+    #CPU PROFITABLE ALGOS AS OF 30/03/2019
+    #these algorithms are profitable algorithms on supported pools
     "allium"        = " -a allium" #Garlicoin
     "blake2b"       = " -a blake2b" #Blake2b, new in 3.9.6.2
     "bmw512"        = " -a bmw512" #Bmw512, new in 3.9.6
@@ -44,11 +44,11 @@ $Commands = [PSCustomObject]@{
     "x16rv2"        = " -a x16rv2" #X16rt-veil, new in 3.9.8
     "x13bcd"        = " -a x13bcd" #X13bcd, new in 3.9.6
     "x21s"          = " -a x21s" #X212, new in 3.9.6
-    ### MAYBE PROFITABLE ALGORITHMS - NOT MINEABLE IN SUPPORTED POOLS AS OF 30/03/20198
-    ### these algorithms are not mineable on supported pools but may be profitable
-    ### once/if support begins. They should be classified accordingly when or if
-    ### an algo becomes supported by one of the pools.
-    "anime"         = " -a anime" #Anime 
+    #MAYBE PROFITABLE ALGORITHMS - NOT MINEABLE IN SUPPORTED POOLS AS OF 30/03/20198
+    #these algorithms are not mineable on supported pools but may be profitable
+    #once/if support begins. They should be classified accordingly when or if
+    #an algo becomes supported by one of the pools. 
+    "anime"         = " -a anime" #Anime
     "argon2"        = " -a argon2" #Argon2
     "argon2d-crds"  = " -a argon2d-crds" #Argon2Credits
     "argon2d-dyn"   = " -a argon2d-dyn" #Argon2Dynamic
@@ -58,7 +58,7 @@ $Commands = [PSCustomObject]@{
     #"bitcore"       = " -a bitcore" #Timetravel10 and Bitcore are technically the same
     "bmw"           = " -a bmw" #bmw
     "deep"          = " -a deep" #deep
-    "drop"          = " -a drop" #drop    
+    "drop"          = " -a drop" #drop
     "fresh"         = " -a fresh" #fresh
     "heavy"         = " -a heavy" #heavy
     "jha"           = " -a jha" #JHA
@@ -135,7 +135,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         Switch ($Algorithm_Norm) { 
-            "C11"   { $WarmupTime = 60 }
+            "C11" { $WarmupTime = 60 }
             default { $WarmupTime = 30 }
         }
 

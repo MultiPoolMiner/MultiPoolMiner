@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,34 +16,34 @@ $ManualUri = "https://bitcointalk.org/index.php?topic=1433925.0"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{ Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "";        Command = "" } #Ethash
-    [PSCustomObject]@{ Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "blake2s"; Command = "" } #Ethash/Blake2s
-    [PSCustomObject]@{ Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "decred";  Command = "" } #Ethash/Decred
-    [PSCustomObject]@{ Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "keccak";  Command = "" } #Ethash/Keccak
-    [PSCustomObject]@{ Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "lbry";    Command = "" } #Ethash/Lbry
-    [PSCustomObject]@{ Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "pascal";  Command = "" } #Ethash/Pascal
-    [PSCustomObject]@{ Algorithm = "ethash";    MinMemGB = 4; SecondaryAlgorithm = "sia";     Command = "" } #Ethash/Sia
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";MinMemGB = 2; SecondaryAlgorithm = "";        Command = "" } #Ethash2gb
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";MinMemGB = 2; SecondaryAlgorithm = "blake2s"; Command = "" } #Ethash2gb/Blake2s
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";MinMemGB = 2; SecondaryAlgorithm = "decred";  Command = "" } #Ethash2GB/Decred
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";MinMemGB = 2; SecondaryAlgorithm = "keccak";  Command = "" } #Ethash2GB/Keccak
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";MinMemGB = 2; SecondaryAlgorithm = "lbry";    Command = "" } #Ethash2GB/Lbry
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";MinMemGB = 2; SecondaryAlgorithm = "pascal";  Command = "" } #Ethash2GB/Pascal
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";MinMemGB = 2; SecondaryAlgorithm = "sia";     Command = "" } #Ethash2GB/Sia
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";MinMemGB = 3; SecondaryAlgorithm = "";        Command = "" } #Ethash3GB
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";MinMemGB = 3; SecondaryAlgorithm = "blake2s"; Command = "" } #Ethash3GB/Blake2s
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";MinMemGB = 3; SecondaryAlgorithm = "decred";  Command = "" } #Ethash3GB/Decred
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";MinMemGB = 3; SecondaryAlgorithm = "keccak";  Command = "" } #Ethash3GB/Keccak
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";MinMemGB = 3; SecondaryAlgorithm = "lbry";    Command = "" } #Ethash3GB/Lbry
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";MinMemGB = 3; SecondaryAlgorithm = "pascal";  Command = "" } #Ethash3GB/Pascal
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";MinMemGB = 3; SecondaryAlgorithm = "sia";     Command = "" } #Ethash3GB/Sia
-    [PSCustomObject]@{ Algorithm = "ethash-4gb";MinMemGB = 4; SecondaryAlgorithm = "";        Command = "" } #Ethash4GB
-    [PSCustomObject]@{ Algorithm = "ethash-4gb";MinMemGB = 4; SecondaryAlgorithm = "blake2s"; Command = "" } #Ethash4GB/Blake2s
-    [PSCustomObject]@{ Algorithm = "ethash-4gb";MinMemGB = 4; SecondaryAlgorithm = "decred";  Command = "" } #Ethash4GB/Decred
-    [PSCustomObject]@{ Algorithm = "ethash-4gb";MinMemGB = 4; SecondaryAlgorithm = "keccak";  Command = "" } #Ethash4GB/Keccak
-    [PSCustomObject]@{ Algorithm = "ethash-4gb";MinMemGB = 4; SecondaryAlgorithm = "lbry";    Command = "" } #Ethash4GB/Lbry
-    [PSCustomObject]@{ Algorithm = "ethash-4gb";MinMemGB = 4; SecondaryAlgorithm = "pascal";  Command = "" } #Ethash4GB/Pascal
-    [PSCustomObject]@{ Algorithm = "ethash-4gb";MinMemGB = 4; SecondaryAlgorithm = "sia";     Command = "" } #Ethash4GB/Sia
+    [PSCustomObject]@{ Algorithm = "ethash"    ; MinMemGB = 4; SecondaryAlgorithm = ""       ; Command = "" } #Ethash
+    [PSCustomObject]@{ Algorithm = "ethash"    ; MinMemGB = 4; SecondaryAlgorithm = "blake2s"; Command = "" } #Ethash/Blake2s
+    [PSCustomObject]@{ Algorithm = "ethash"    ; MinMemGB = 4; SecondaryAlgorithm = "decred" ; Command = "" } #Ethash/Decred
+    [PSCustomObject]@{ Algorithm = "ethash"    ; MinMemGB = 4; SecondaryAlgorithm = "keccak" ; Command = "" } #Ethash/Keccak
+    [PSCustomObject]@{ Algorithm = "ethash"    ; MinMemGB = 4; SecondaryAlgorithm = "lbry"   ; Command = "" } #Ethash/Lbry
+    [PSCustomObject]@{ Algorithm = "ethash"    ; MinMemGB = 4; SecondaryAlgorithm = "pascal" ; Command = "" } #Ethash/Pascal
+    [PSCustomObject]@{ Algorithm = "ethash"    ; MinMemGB = 4; SecondaryAlgorithm = "sia"    ; Command = "" } #Ethash/Sia
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"; MinMemGB = 2; SecondaryAlgorithm = ""       ; Command = "" } #Ethash2gb
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"; MinMemGB = 2; SecondaryAlgorithm = "blake2s"; Command = "" } #Ethash2gb/Blake2s
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"; MinMemGB = 2; SecondaryAlgorithm = "decred" ; Command = "" } #Ethash2GB/Decred
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"; MinMemGB = 2; SecondaryAlgorithm = "keccak" ; Command = "" } #Ethash2GB/Keccak
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"; MinMemGB = 2; SecondaryAlgorithm = "lbry"   ; Command = "" } #Ethash2GB/Lbry
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"; MinMemGB = 2; SecondaryAlgorithm = "pascal" ; Command = "" } #Ethash2GB/Pascal
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"; MinMemGB = 2; SecondaryAlgorithm = "sia"    ; Command = "" } #Ethash2GB/Sia
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"; MinMemGB = 3; SecondaryAlgorithm = ""       ; Command = "" } #Ethash3GB
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"; MinMemGB = 3; SecondaryAlgorithm = "blake2s"; Command = "" } #Ethash3GB/Blake2s
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"; MinMemGB = 3; SecondaryAlgorithm = "decred" ; Command = "" } #Ethash3GB/Decred
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"; MinMemGB = 3; SecondaryAlgorithm = "keccak" ; Command = "" } #Ethash3GB/Keccak
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"; MinMemGB = 3; SecondaryAlgorithm = "lbry"   ; Command = "" } #Ethash3GB/Lbry
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"; MinMemGB = 3; SecondaryAlgorithm = "pascal" ; Command = "" } #Ethash3GB/Pascal
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"; MinMemGB = 3; SecondaryAlgorithm = "sia"    ; Command = "" } #Ethash3GB/Sia
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"; MinMemGB = 4; SecondaryAlgorithm = ""       ; Command = "" } #Ethash4GB
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"; MinMemGB = 4; SecondaryAlgorithm = "blake2s"; Command = "" } #Ethash4GB/Blake2s
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"; MinMemGB = 4; SecondaryAlgorithm = "decred" ; Command = "" } #Ethash4GB/Decred
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"; MinMemGB = 4; SecondaryAlgorithm = "keccak" ; Command = "" } #Ethash4GB/Keccak
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"; MinMemGB = 4; SecondaryAlgorithm = "lbry"   ; Command = "" } #Ethash4GB/Lbry
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"; MinMemGB = 4; SecondaryAlgorithm = "pascal" ; Command = "" } #Ethash4GB/Pascal
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"; MinMemGB = 4; SecondaryAlgorithm = "sia"    ; Command = "" } #Ethash4GB/Sia
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
@@ -103,7 +103,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
     if ($Device.Model -notmatch "^GTX10.*|^Baffin.*|^Ellesmere.*|^Polaris.*|^Vega.*|^gfx900.*") { 
         $CommonCommands = $CommonCommands -replace " -strap [\d,]{1,}"
     }
-    
+
     $Commands | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_.Algorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.Algorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $Pools.$Algorithm_Norm.Host } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
 
@@ -130,9 +130,9 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week; $SecondaryAlgorithm_Norm = $Stats."$($Miner_Name)_$($SecondaryAlgorithm_Norm)_HashRate".Week }
 
                 switch ($_.SecondaryAlgorithm_Norm) { 
-                    "Decred"      { $SecondaryAlgorithm = "dcr" }
-                    "Lbry"        { $SecondaryAlgorithm = "lbc" }
-                    "Pascal"      { $SecondaryAlgorithm = "pasc" }
+                    "Decred" { $SecondaryAlgorithm = "dcr" }
+                    "Lbry" { $SecondaryAlgorithm = "lbc" }
+                    "Pascal" { $SecondaryAlgorithm = "pasc" }
                     "Sia-Claymore" { $SecondaryAlgorithm = "sc" }
                 }
                 $Arguments_Secondary = " -dcoin $SecondaryAlgorithm -dpool $($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port) -dwal $($Pools.$SecondaryAlgorithm_Norm.User) -dpsw $($Pools.$SecondaryAlgorithm_Norm.Pass)$(if($_.SecondaryAlgoIntensity -ge 0){ " -dcri $($_.SecondaryAlgoIntensity)" })"
@@ -158,7 +158,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             #Avoid DAG switching
             switch ($Algorithm_Norm) { 
                 "Ethash" { $Allcoins = " -allcoins etc" }
-                default  { $Allcoins = " -allcoins 1" }
+                default { $Allcoins = " -allcoins 1" }
             }
 
             #Optionally disable dev fee mining

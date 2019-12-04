@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -22,16 +22,16 @@ $Commands = [PSCustomObject]@{
     "lyra2v2"   = " -a lyra2v2" #Lyra2RE2
     "skein"     = " -a skein" #Skein
     "xevan"     = " -a xevan" #Xevan
-    
-    # ASIC - never profitable 12/05/2018
-    #"decred"   = " -a decred" #Decred
-    #"lbry"     = " -a lbry" #Lbry
-    #"myr-gr"   = " -a myr-gr" #MyriadGroestl
-    #"nist5"    = " -a nist5" #Nist5
-    #"qubit"    = " -a qubit" #Qubit
-    #"quark"    = " -a quark" #Quark
-    #"x12"      = " -a x12" #X12
-    #"x14"      = " -a x14" #X14
+
+    #ASIC - never profitable 12/05/2018
+    #"decred"    = " -a decred" #Decred
+    #"lbry"      = " -a lbry" #Lbry
+    #"myr-gr"    = " -a myr-gr" #MyriadGroestl
+    #"nist5"     = " -a nist5" #Nist5
+    #"qubit"     = " -a qubit" #Qubit
+    #"quark"     = " -a quark" #Quark
+    #"x12"       = " -a x12" #X12
+    #"x14"       = " -a x14" #X14
 }
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force } }

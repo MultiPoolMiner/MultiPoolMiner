@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -41,10 +41,10 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         Switch ($Algorithm_Norm) { 
-            "C11"    { $WarmupTime = 60 }
-            "X16r"   { $WarmupTime = 60 }
+            "C11" { $WarmupTime = 60 }
+            "X16r" { $WarmupTime = 60 }
             "X16rv2" { $WarmupTime = 60 }
-            default  { $WarmupTime = 30 }
+            default { $WarmupTime = 30 }
         }
 
         [PSCustomObject]@{ 

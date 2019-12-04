@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -18,8 +18,8 @@ $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = $Devices | Where-Object Type -EQ "GPU"
 
-# Miner requires CUDA 9.1.00 or higher
-$CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+#Miner requires CUDA 9.1.00 or higher
+$CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ", ""
 $RequiredCUDAVersion = "9.1.00"
 if ($Devices.Vendor -contains "NVIDIA" -and $CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
@@ -27,30 +27,30 @@ if ($Devices.Vendor -contains "NVIDIA" -and $CUDAVersion -and [System.Version]$C
 }
 
 $Commands = [PSCustomObject[]]@(
-    # [PSCustomObject]@{ Algorithm = "Ethash";      SecondaryAlgorithm = "";          MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 0;  Fee = 0.65; Vendor = @("NVIDIA");        Command = " --algo ethash" } #Ethash; ClaymoreDual & Phoenix are approx 10% faster          
-    # [PSCustomObject]@{ Algorithm = "Ethash-2gb";  SecondaryAlgorithm = "";          MinMemGB = 2; MinMemGBWin10 = 2;  SecondaryIntensity = 0;  Fee = 0.65; Vendor = @("NVIDIA");        Command = " --algo ethash" } #Ethash2GB; ClaymoreDual & Phoenix are approx 10% faster          
-    # [PSCustomObject]@{ Algorithm = "Ethash-3gb";  SecondaryAlgorithm = "";          MinMemGB = 3; MinMemGBWin10 = 3;  SecondaryIntensity = 0;  Fee = 0.65; Vendor = @("NVIDIA");        Command = " --algo ethash" } #Ethash3GB; ClaymoreDual & Phoenix are approx 10% faster          
-    # [PSCustomObject]@{ Algorithm = "Ethash-4gb";  SecondaryAlgorithm = "";          MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 0;  Fee = 0.65; Vendor = @("NVIDIA");        Command = " --algo ethash" } #Ethash4GB; ClaymoreDual & Phoenix are approx 10% faster          
-    [PSCustomObject]@{ Algorithm = "CuckooBFC";   SecondaryAlgorithm = "";          MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo bfc" } #CuckooBFC, new in 26.0
-    [PSCustomObject]@{ Algorithm = "Cuckarood29"; SecondaryAlgorithm = "";          MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo cuckarood" } #Cuckarood29
-    [PSCustomObject]@{ Algorithm = "Cuckaroo29s"; SecondaryAlgorithm = "";          MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo cuckaroo_swap" } #Cuckaroo29s (Swap29)
-    [PSCustomObject]@{ Algorithm = "Cuckatoo31";  SecondaryAlgorithm = "";          MinMemGB = 8; MinMemGBWin10 = 10; SecondaryIntensity = 0;  Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo cuckatoo" } #Cuckatoo31 (Grin31)
-    [PSCustomObject]@{ Algorithm = "Cuckoo29";    SecondaryAlgorithm = "";          MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo cuckoo_ae" } #Cuckoo29 (Aeternity)
-    [PSCustomObject]@{ Algorithm = "Eaglesong";   SecondaryAlgorithm = "";          MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo eaglesong" } #Eaglesong (CBK), AMD new in 26.1
-    [PSCustomObject]@{ Algorithm = "Ethash";      SecondaryAlgorithm = "Eaglesong"; MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 3;    Vendor = @("AMD", "NVIDIA"); Command = " --algo eaglesong_ethash" } #Eaglesong (CBK) & Ethash, new in 26.1
-    [PSCustomObject]@{ Algorithm = "Ethash-2gb";  SecondaryAlgorithm = "Eaglesong"; MinMemGB = 2; MinMemGBWin10 = 2;  SecondaryIntensity = 17; Fee = 3;    Vendor = @("AMD", "NVIDIA"); Command = " --algo eaglesong_ethash" } #Eaglesong (CBK) & Ethash2GB, new in 26.1
-    [PSCustomObject]@{ Algorithm = "Ethash-3gb";  SecondaryAlgorithm = "Eaglesong"; MinMemGB = 3; MinMemGBWin10 = 3;  SecondaryIntensity = 17; Fee = 3;    Vendor = @("AMD", "NVIDIA"); Command = " --algo eaglesong_ethash" } #Eaglesong (CBK) & Ethash3GB, new in 26.1
-    [PSCustomObject]@{ Algorithm = "Ethash-4gb";  SecondaryAlgorithm = "Eaglesong"; MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 3;    Vendor = @("AMD", "NVIDIA"); Command = " --algo eaglesong_ethash" } #Eaglesong (CBK) & Ethash4GB, new in 26.1
-    [PSCustomObject]@{ Algorithm = "ProgPoWSERO"; SecondaryAlgorithm = "";          MinMemGB = 5; MinMemGBWin10 = 6;  SecondaryIntensity = 0;  Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo progpow_sero" } #Progpow92 (Sero)
-    [PSCustomObject]@{ Algorithm = "ScryptSIPC";  SecondaryAlgorithm = "";          MinMemGB = 1; MinMemGBWin10 = 1;  SecondaryIntensity = 0;  Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo sipc" } #ScryptSIPC, new in 24.3
-    [PSCustomObject]@{ Algorithm = "Tensority";   SecondaryAlgorithm = "";          MinMemGB = 1; MinMemGBWin10 = 1;  SecondaryIntensity = 0;  Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo tensority" } #Tensority (BTM)
-    [PSCustomObject]@{ Algorithm = "Ethash";      SecondaryAlgorithm = "Tensority"; MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 3;    Vendor = @("NVIDIA");        Command = " --algo tensority_ethash" } #Tensority (BTM) & Ethash
-    [PSCustomObject]@{ Algorithm = "Ethash-2gb";  SecondaryAlgorithm = "Tensority"; MinMemGB = 2; MinMemGBWin10 = 2;  SecondaryIntensity = 17; Fee = 3;    Vendor = @("NVIDIA");        Command = " --algo tensority_ethash" } #Tensority (BTM) & Ethash2GB
-    [PSCustomObject]@{ Algorithm = "Ethash-3gb";  SecondaryAlgorithm = "Tensority"; MinMemGB = 3; MinMemGBWin10 = 3;  SecondaryIntensity = 17; Fee = 3;    Vendor = @("NVIDIA");        Command = " --algo tensority_ethash" } #Tensority (BTM) & Ethash3GB
-    [PSCustomObject]@{ Algorithm = "Ethash-4gb";  SecondaryAlgorithm = "Tensority"; MinMemGB = 4; MinMemGBWin10 = 4;  SecondaryIntensity = 17; Fee = 3;    Vendor = @("NVIDIA");        Command = " --algo tensority_ethash" } #Tensority (BTM) & Ethash4GB
+    #[PSCustomObject]@{ Algorithm = "Ethash"     ; SecondaryAlgorithm = ""         ; MinMemGB = 4; MinMemGBWin10 = 4 ; SecondaryIntensity = 0 ; Fee = 0.65; Vendor = @("NVIDIA")       ; Command = " --algo ethash"          ; } #Ethash; ClaymoreDual & Phoenix are approx 10% faster
+    #[PSCustomObject]@{ Algorithm = "Ethash-2gb" ; SecondaryAlgorithm = ""         ; MinMemGB = 2; MinMemGBWin10 = 2 ; SecondaryIntensity = 0 ; Fee = 0.65; Vendor = @("NVIDIA")       ; Command = " --algo ethash"          ; } #Ethash2GB; ClaymoreDual & Phoenix are approx 10% faster
+    #[PSCustomObject]@{ Algorithm = "Ethash-3gb" ; SecondaryAlgorithm = ""         ; MinMemGB = 3; MinMemGBWin10 = 3 ; SecondaryIntensity = 0 ; Fee = 0.65; Vendor = @("NVIDIA")       ; Command = " --algo ethash"          ; } #Ethash3GB; ClaymoreDual & Phoenix are approx 10% faster
+    #[PSCustomObject]@{ Algorithm = "Ethash-4gb" ; SecondaryAlgorithm = ""         ; MinMemGB = 4; MinMemGBWin10 = 4 ; SecondaryIntensity = 0 ; Fee = 0.65; Vendor = @("NVIDIA")       ; Command = " --algo ethash"          ; } #Ethash4GB; ClaymoreDual & Phoenix are approx 10% faster
+    [PSCustomObject]@{ Algorithm = "CuckooBFC"  ; SecondaryAlgorithm = ""         ; MinMemGB = 5; MinMemGBWin10 = 6 ; SecondaryIntensity = 0 ; Fee = 2   ; Vendor = @("NVIDIA")       ; Command = " --algo bfc"             ; } #CuckooBFC, new in 26.0
+    [PSCustomObject]@{ Algorithm = "Cuckarood29"; SecondaryAlgorithm = ""         ; MinMemGB = 5; MinMemGBWin10 = 6 ; SecondaryIntensity = 0 ; Fee = 2   ; Vendor = @("NVIDIA")       ; Command = " --algo cuckarood"       ; } #Cuckarood29
+    [PSCustomObject]@{ Algorithm = "Cuckaroo29s"; SecondaryAlgorithm = ""         ; MinMemGB = 5; MinMemGBWin10 = 6 ; SecondaryIntensity = 0 ; Fee = 2   ; Vendor = @("NVIDIA")       ; Command = " --algo cuckaroo_swap"   ; } #Cuckaroo29s (Swap29)
+    [PSCustomObject]@{ Algorithm = "Cuckatoo31" ; SecondaryAlgorithm = ""         ; MinMemGB = 8; MinMemGBWin10 = 10; SecondaryIntensity = 0 ; Fee = 2   ; Vendor = @("NVIDIA")       ; Command = " --algo cuckatoo"        ; } #Cuckatoo31 (Grin31)
+    [PSCustomObject]@{ Algorithm = "Cuckoo29"   ; SecondaryAlgorithm = ""         ; MinMemGB = 5; MinMemGBWin10 = 6 ; SecondaryIntensity = 0 ; Fee = 2   ; Vendor = @("NVIDIA")       ; Command = " --algo cuckoo_ae"       ; } #Cuckoo29 (Aeternity)
+    [PSCustomObject]@{ Algorithm = "Eaglesong"  ; SecondaryAlgorithm = ""         ; MinMemGB = 4; MinMemGBWin10 = 4 ; SecondaryIntensity = 17; Fee = 2   ; Vendor = @("AMD", "NVIDIA"); Command = " --algo eaglesong"       ; } #Eaglesong (CBK), AMD new in 26.1
+    [PSCustomObject]@{ Algorithm = "Ethash"     ; SecondaryAlgorithm = "Eaglesong"; MinMemGB = 4; MinMemGBWin10 = 4 ; SecondaryIntensity = 17; Fee = 3   ; Vendor = @("AMD", "NVIDIA"); Command = " --algo eaglesong_ethash"; } #Eaglesong (CBK) & Ethash, new in 26.1
+    [PSCustomObject]@{ Algorithm = "Ethash-2gb" ; SecondaryAlgorithm = "Eaglesong"; MinMemGB = 2; MinMemGBWin10 = 2 ; SecondaryIntensity = 17; Fee = 3   ; Vendor = @("AMD", "NVIDIA"); Command = " --algo eaglesong_ethash"; } #Eaglesong (CBK) & Ethash2GB, new in 26.1
+    [PSCustomObject]@{ Algorithm = "Ethash-3gb" ; SecondaryAlgorithm = "Eaglesong"; MinMemGB = 3; MinMemGBWin10 = 3 ; SecondaryIntensity = 17; Fee = 3   ; Vendor = @("AMD", "NVIDIA"); Command = " --algo eaglesong_ethash"; } #Eaglesong (CBK) & Ethash3GB, new in 26.1
+    [PSCustomObject]@{ Algorithm = "Ethash-4gb" ; SecondaryAlgorithm = "Eaglesong"; MinMemGB = 4; MinMemGBWin10 = 4 ; SecondaryIntensity = 17; Fee = 3   ; Vendor = @("AMD", "NVIDIA"); Command = " --algo eaglesong_ethash"; } #Eaglesong (CBK) & Ethash4GB, new in 26.1
+    [PSCustomObject]@{ Algorithm = "ProgPoWSERO"; SecondaryAlgorithm = ""         ; MinMemGB = 5; MinMemGBWin10 = 6 ; SecondaryIntensity = 0 ; Fee = 2   ; Vendor = @("AMD", "NVIDIA"); Command = " --algo progpow_sero"    ; } #Progpow92 (Sero)
+    [PSCustomObject]@{ Algorithm = "ScryptSIPC" ; SecondaryAlgorithm = ""         ; MinMemGB = 1; MinMemGBWin10 = 1 ; SecondaryIntensity = 0 ; Fee = 2   ; Vendor = @("NVIDIA")       ; Command = " --algo sipc"            ; } #ScryptSIPC, new in 24.3
+    [PSCustomObject]@{ Algorithm = "Tensority"  ; SecondaryAlgorithm = ""         ; MinMemGB = 1; MinMemGBWin10 = 1 ; SecondaryIntensity = 0 ; Fee = 2   ; Vendor = @("NVIDIA")       ; Command = " --algo tensority"       ; } #Tensority (BTM)
+    [PSCustomObject]@{ Algorithm = "Ethash"     ; SecondaryAlgorithm = "Tensority"; MinMemGB = 4; MinMemGBWin10 = 4 ; SecondaryIntensity = 17; Fee = 3   ; Vendor = @("NVIDIA")       ; Command = " --algo tensority_ethash"; } #Tensority (BTM) & Ethash
+    [PSCustomObject]@{ Algorithm = "Ethash-2gb" ; SecondaryAlgorithm = "Tensority"; MinMemGB = 2; MinMemGBWin10 = 2 ; SecondaryIntensity = 17; Fee = 3   ; Vendor = @("NVIDIA")       ; Command = " --algo tensority_ethash"; } #Tensority (BTM) & Ethash2GB
+    [PSCustomObject]@{ Algorithm = "Ethash-3gb" ; SecondaryAlgorithm = "Tensority"; MinMemGB = 3; MinMemGBWin10 = 3 ; SecondaryIntensity = 17; Fee = 3   ; Vendor = @("NVIDIA")       ; Command = " --algo tensority_ethash"; } #Tensority (BTM) & Ethash3GB
+    [PSCustomObject]@{ Algorithm = "Ethash-4gb" ; SecondaryAlgorithm = "Tensority"; MinMemGB = 4; MinMemGBWin10 = 4 ; SecondaryIntensity = 17; Fee = 3   ; Vendor = @("NVIDIA")       ; Command = " --algo tensority_ethash"; } #Tensority (BTM) & Ethash4GB
 )
 #Commands from config file take precedence
-if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm -and $_.SecondaryAlgorithm -ne $SecondaryAlgorithm}; $Commands += $_ } }
+if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm -and $_.SecondaryAlgorithm -ne $SecondaryAlgorithm }; $Commands += $_ } }
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonCommands) { $CommonCommands = $Miner_Config.CommonCommands }
@@ -73,7 +73,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
             #Get commands for active miner devices
             $Command = Get-CommandPerDevice -Command $_.Command -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.($DeviceEnumerator)
-            
+
             if ($Miner_Device.Vendor -eq "AMD") { $Platform = " --platform 2" }
             if ($Miner_Device.Vendor -eq "NVIDIA") { $Platform = " --platform 1" }
 
@@ -85,7 +85,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
 
             #Tensority: higher fee on Touring cards
             if ($Algorithm_Norm -eq "Tensority" -and $Miner_Device.Model -match "^GTX16.+|^RTX20.+") { $Fee = 3 }
-            
+
             $Arguments = " --url $($Main_Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --user $($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass)"
             $HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
             $Fees = [PSCustomObject]@{ $Algorithm_Norm = $Fee / 100 }
@@ -106,7 +106,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $Fees = [PSCustomObject]@{ $Algorithm_Norm = $Fee / 100; $SecondaryAlgorithm_Norm = $Fee / 100 }
                 $WarmupTime = 45
             }
-            
+
             if (-not $SecondaryAlgorithm -or $Pools.$SecondaryAlgorithm_Norm.Host) { 
                 [PSCustomObject]@{ 
                     Name       = $Miner_Name

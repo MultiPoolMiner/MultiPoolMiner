@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -17,8 +17,8 @@ $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA")
 
-# Miner requires CUDA 10.0.00
-$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+#Miner requires CUDA 10.0.00
+$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ", ""
 $RequiredCUDAVersion = "10.0.00"
 if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
@@ -30,7 +30,7 @@ $Commands = [PSCustomObject]@{
     "Allium"         = " -a allium" #Allium
     "Bastion"        = " -a bastion" #Bastion
     "Bitcore"        = " -a bitcore" #Timetravel10 and Bitcore are technically the same
-    "Blake2b"        = " -a blake2b" # new with 2.3.1
+    "Blake2b"        = " -a blake2b" #new with 2.3.1
     "Bmw"            = " -a bmw" #BMW
     "C11/flax"       = " -a c11/flax" #C11
     "Deep"           = " -a deep" #Deep
@@ -46,16 +46,16 @@ $Commands = [PSCustomObject]@{
     "Keccakc"        = " -a keccakc" #KeccakC
     "Luffa"          = " -a luffa" #Luffa
     "Lyra2v2"        = " -a lyra2v2" #Lyra2RE2
-    "Lyra2v3"        = " -a lyra2v3" # new with 2.3.1
+    "Lyra2v3"        = " -a lyra2v3" #new with 2.3.1
     "Lyra2z"         = " -a lyra2z" #Lyra2z, ZCoin
-#    "Neoscrypt"      = " -a neoscrypt --intensity 22.2" #NeoScrypt, CcminerKlausT-v8.25 is faster
+    #"Neoscrypt"      = " -a neoscrypt --intensity 22.2" #NeoScrypt, CcminerKlausT-v8.25 is faster
     "Penta"          = " -a penta" #Pentablake
     "Phi1612"        = " -a phi1612" #PHI, e.g. Seraph
     "Phi2"           = " -a phi2" #PHI2
     "Phi2-Lux"       = " -a phi2" #PHI2 LUX
     "Polytimos"      = " -a polytimos" #Polytimos
     "Scrypt-jane"    = " -a scrypt-jane" #ScryptJaneNF
-    "Sha256q"        = " -a sha256q" # new with 2.3.1
+    "Sha256q"        = " -a sha256q" #new with 2.3.1
     "Sha256t"        = " -a sha256t" #SHA256t
     #"Skein2"         = " -a skein2" #Skein2, NVIDIA-CcminerAlexis_v1.5 is faster
     "Skunk"          = " -a skunk" #Skunk
@@ -72,15 +72,15 @@ $Commands = [PSCustomObject]@{
     #"X11evo"         = " -a x11evo" #X11evo; CcminerAlexis_v1.5 is faster
     "X12"            = " -a x12 -i 21" #X12
     #"X16r"           = " -a x16r" #X16R; Other free miners are faster
-    #"X16s"          = " -a X16s" #X16S
-    #"x17"           = " -a x17" #x17
+    #"X16s"           = " -a X16s" #X16S
+    #"x17"            = " -a x17" #x17
     "Zr5"            = " -a zr5" #zr5
 
-    # ASIC - never profitable 28/08/2019
+    #ASIC - never profitable 28/08/2019
     #"Blake"         = " -a blake" #blake
     #"Blakecoin"     = " -a blakecoin" #Blakecoin
     #"Blake2s"       = " -a blake2s" #Blake2s
-    #"CryptonightV1"  = " -a monero" # -> CryptonightV1
+    #"CryptonightV1" = " -a monero" #CryptonightV1
     #"Cryptolight"   = " -a cryptolight" #CryptonightLite
     #"Cryptonight"   = " -a cryptonight" #Cryptonight
     #"Groestl"       = " -a groestl" #Groestl
@@ -114,7 +114,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = [UInt16]($Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
-    $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { if ($_ -eq "monero") { $Algorithm_Norm = "cryptonight7" }<#temp fix, monero is no longer using cn7#> else  { $Algorithm_Norm = @(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-' }; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
+    $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { if ($_ -eq "monero") { $Algorithm_Norm = "cryptonight7" }<#temp fix, monero is no longer using cn7#> else { $Algorithm_Norm = @(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-' }; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
 
         #Get commands for active miner devices

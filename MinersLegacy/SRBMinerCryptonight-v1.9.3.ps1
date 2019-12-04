@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -14,44 +14,44 @@ $Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/SRBMi
 $ManualUri = "https://bitcointalk.org/index.php?topic=3167363.0"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
-               
-# Algorithm names are case sensitive!
+
+#Algorithm names are case sensitive!
 $Commands = [PSCustomObject[]]@(
-    # Note: For fine tuning directly edit GpuConf_[HW]-[Algorithm]-[User]-[Pass].json in the miner binary directory 
-    [PSCustomObject]@{ Algorithm = "alloy";       MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightXao
-    [PSCustomObject]@{ Algorithm = "artocash";    MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightRto
-    [PSCustomObject]@{ Algorithm = "b2n";         MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightB2N
-    [PSCustomObject]@{ Algorithm = "bittubev2";   MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightHeavyTube 
-    [PSCustomObject]@{ Algorithm = "conceal";     MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightConceal, new in 1.7.9
-    [PSCustomObject]@{ Algorithm = "fast2";       MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightFast2
-    [PSCustomObject]@{ Algorithm = "gpu";         MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightRwzV8
-    [PSCustomObject]@{ Algorithm = "graft";       MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightV2
-    [PSCustomObject]@{ Algorithm = "haven";       MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightHeavyHaven
-    [PSCustomObject]@{ Algorithm = "hospital";    MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightV1
-    [PSCustomObject]@{ Algorithm = "hycon";       MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightV1, new in 1.7.3
-    [PSCustomObject]@{ Algorithm = "litev7";      MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightLiteV7
-    [PSCustomObject]@{ Algorithm = "marketcash";  MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightMarketCash
-    [PSCustomObject]@{ Algorithm = "mox";         MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightRed
-    [PSCustomObject]@{ Algorithm = "normalv4";    MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # Cryptonight
-    [PSCustomObject]@{ Algorithm = "normalv7";    MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightV1
-    [PSCustomObject]@{ Algorithm = "normalv8";    MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightV2, new in 1.6.8
-    [PSCustomObject]@{ Algorithm = "stellitev8";  MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightHalf, new in 1.7.3
-    [PSCustomObject]@{ Algorithm = "turtle";      MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightTurtle, new in 1.7.4
-    [PSCustomObject]@{ Algorithm = "upx2";        MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightUpx2, new in 1.8.6
-    [PSCustomObject]@{ Algorithm = "xcash";       MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightDouble???, new in 1.7.9
-    [PSCustomObject]@{ Algorithm = "zelerius";    MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightZls, new in 1.7.9
-    # Obsolete, but still supported (20170711)
-    #[PSCustomObject]@{ Algorithm = "normal";      MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # Cryptonight
-    #[PSCustomObject]@{ Algorithm = "dark";        MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightHeavyTube
-    #[PSCustomObject]@{ Algorithm = "fast";        MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightFast
-    #[PSCustomObject]@{ Algorithm = "festival";    MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightFestival
-    #[PSCustomObject]@{ Algorithm = "heavy";       MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightHeavy
-    #[PSCustomObject]@{ Algorithm = "italo";       MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightItalo
-    #[PSCustomObject]@{ Algorithm = "lite";        MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightLite
-    #[PSCustomObject]@{ Algorithm = "normalv4_64"; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightV4_64
-    #[PSCustomObject]@{ Algorithm = "stellitev4";  MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # CryptonightLite
-    #[PSCustomObject]@{ Algorithm = "upx";         MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # Cryptonight???, new in 1.7.3
-    #[PSCustomObject]@{ Algorithm = "wownero";     MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } # Cryptonight???, new in 1.7.9
+    #Note: For fine tuning directly edit GpuConf_[HW]-[Algorithm]-[User]-[Pass].json in the miner binary directory
+    [PSCustomObject]@{ Algorithm = "alloy"      ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightXao
+    [PSCustomObject]@{ Algorithm = "artocash"   ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightRto
+    [PSCustomObject]@{ Algorithm = "b2n"        ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightB2N
+    [PSCustomObject]@{ Algorithm = "bittubev2"  ; MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightHeavyTube
+    [PSCustomObject]@{ Algorithm = "conceal"    ; MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightConceal, new in 1.7.9
+    [PSCustomObject]@{ Algorithm = "fast2"      ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightFast2
+    [PSCustomObject]@{ Algorithm = "gpu"        ; MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightRwzV8
+    [PSCustomObject]@{ Algorithm = "graft"      ; MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightV2
+    [PSCustomObject]@{ Algorithm = "haven"      ; MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightHeavyHaven
+    [PSCustomObject]@{ Algorithm = "hospital"   ; MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightV1
+    [PSCustomObject]@{ Algorithm = "hycon"      ; MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightV1, new in 1.7.3
+    [PSCustomObject]@{ Algorithm = "litev7"     ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightLiteV7
+    [PSCustomObject]@{ Algorithm = "marketcash" ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightMarketCash
+    [PSCustomObject]@{ Algorithm = "mox"        ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightRed
+    [PSCustomObject]@{ Algorithm = "normalv4"   ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #Cryptonight
+    [PSCustomObject]@{ Algorithm = "normalv7"   ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightV1
+    [PSCustomObject]@{ Algorithm = "normalv8"   ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightV2, new in 1.6.8
+    [PSCustomObject]@{ Algorithm = "stellitev8" ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightHalf, new in 1.7.3
+    [PSCustomObject]@{ Algorithm = "turtle"     ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightTurtle, new in 1.7.4
+    [PSCustomObject]@{ Algorithm = "upx2"       ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightUpx2, new in 1.8.6
+    [PSCustomObject]@{ Algorithm = "xcash"      ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightDouble???, new in 1.7.9
+    [PSCustomObject]@{ Algorithm = "zelerius"   ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightZls, new in 1.7.9
+    #Obsolete, but still supported (20170711)
+    #[PSCustomObject]@{ Algorithm = "normal"     ; MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } #Cryptonight
+    #[PSCustomObject]@{ Algorithm = "dark"       ; MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightHeavyTube
+    #[PSCustomObject]@{ Algorithm = "fast"       ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightFast
+    #[PSCustomObject]@{ Algorithm = "festival"   ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightFestival
+    #[PSCustomObject]@{ Algorithm = "heavy"      ; MinMemGb = 2; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightHeavy
+    #[PSCustomObject]@{ Algorithm = "italo"      ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightItalo
+    #[PSCustomObject]@{ Algorithm = "lite"       ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightLite
+    #[PSCustomObject]@{ Algorithm = "normalv4_64"; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightV4_64
+    #[PSCustomObject]@{ Algorithm = "stellitev4" ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #CryptonightLite
+    #[PSCustomObject]@{ Algorithm = "upx"        ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #Cryptonight???, new in 1.7.3
+    #[PSCustomObject]@{ Algorithm = "wownero"    ; MinMemGb = 1; Command = ""; Intensity = @(); DoubleThreads = $true } #Cryptonight???, new in 1.7.9
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
@@ -83,37 +83,41 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                 ConfigFile = [PSCustomObject]@{ 
                     FileName = $ConfigFileName
                     Content  = [PSCustomObject]@{ 
-                        cryptonight_type = $Algorithm
-                        double_threads = $DoubleThreads
-                        gpu_conf = @($Miner_Device.Vendor_Slot | ForEach-Object { 
-                            [PSCustomObject]@{ 
-                                "id"        = $_  
-                                "intensity" = $(if ($Intensity | Select-Object -Index $_ -ErrorAction SilentlyContinue) { $Intensity | Select-Object -Index $_ } else { 0 })
-                                "platform"  = "OpenCL"
-                                #"threads"   = [Int]1
-                                #"worksize"  = [Int]8
+                        cryptonight_type       = $Algorithm
+                        double_threads         = $DoubleThreads
+                        gpu_conf               = @(
+                            $Miner_Device.Vendor_Slot | ForEach-Object { 
+                                [PSCustomObject]@{ 
+                                    "id"        = $_
+                                    "intensity" = $(if ($Intensity | Select-Object -Index $_ -ErrorAction SilentlyContinue) { $Intensity | Select-Object -Index $_ } else { 0 })
+                                    "platform"  = "OpenCL"
+                                    #"threads"   = [Int]1
+                                    #"worksize"  = [Int]8
+                                }
                             }
-                        })
-                        intensity = 0
-                        min_rig_speed = $(if($Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week) { [Int]($Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week * 0.9) } else { 0 })
-                        min_rig_speed_duration = 60 
+                        )
+                        intensity              = 0
+                        min_rig_speed          = $(if ($Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week) { [Int]($Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week * 0.9) } else { 0 })
+                        min_rig_speed_duration = 60
                     }
                 }
-                PoolFile = [PSCustomObject]@{ 
+                PoolFile   = [PSCustomObject]@{ 
                     FileName = $PoolFileName
                     Content  = [PSCustomObject]@{ 
-                        pools = @([PSCustomObject]@{ 
-                            pool = "$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)"
-                            wallet = "$($Pools.$Algorithm_Norm.User)"
-                            password = "$($Pools.$Algorithm_Norm.Pass)"
-                            pool_use_tls = $($Pools.$Algorithm_Norm.SSL)
-                            nicehash = $($Pools.$Algorithm_Norm.Name -eq 'NiceHash')
-                        })
+                        pools = @(
+                            [PSCustomObject]@{ 
+                                pool         = "$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)"
+                                wallet       = "$($Pools.$Algorithm_Norm.User)"
+                                password     = "$($Pools.$Algorithm_Norm.Pass)"
+                                pool_use_tls = $($Pools.$Algorithm_Norm.SSL)
+                                nicehash     = $($Pools.$Algorithm_Norm.Name -eq 'NiceHash')
+                            }
+                        )
                     }
                 }
-                Commands = ("$Command$CommonCommands --config $ConfigFileName --pools $PoolFileName --apienable --apiport $Miner_Port$(if($Config.Pools.$($Pools.$Algorithm_Norm.Name).Worker) { " --apirigname $($Config.Pools.$($Pools.$Algorithm_Norm.Name).Worker)" })" -replace "\s+", " ").trim()
+                Commands   = ("$Command$CommonCommands --config $ConfigFileName --pools $PoolFileName --apienable --apiport $Miner_Port$(if($Config.Pools.$($Pools.$Algorithm_Norm.Name).Worker) { " --apirigname $($Config.Pools.$($Pools.$Algorithm_Norm.Name).Worker)" })" -replace "\s+", " ").trim()
             }
-                        
+
             [PSCustomObject]@{ 
                 Name       = $Miner_Name
                 DeviceName = $Miner_Device.Name

@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,9 +16,9 @@ $ManualUri = "https://bitcointalk.org/index.php?topic=4466962.0"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{ Algorithm = "Equihash965";  MinMemGB = 1.8; Command = " --algo 96_5" }
-    # [PSCustomObject]@{ Algorithm = "Equihash1445"; MinMemGB = 1.7; Command = " --algo 144_5" } # Gminer 1.55 & MiniZ 1.5p is faster
-    # [PSCustomObject]@{ Algorithm = "Equihash1927"; MinMemGB = 2.7; Command = " --algo 192_7" } # Gminer 1.55 & MiniZ 1.5p is faster
+    [PSCustomObject]@{ Algorithm = "Equihash965" ; MinMemGB = 1.8; Command = " --algo 96_5" }
+    #[PSCustomObject]@{ Algorithm = "Equihash1445"; MinMemGB = 1.7; Command = " --algo 144_5" } #Gminer 1.55 & MiniZ 1.5p is faster
+    #[PSCustomObject]@{ Algorithm = "Equihash1927"; MinMemGB = 2.7; Command = " --algo 192_7" } #Gminer 1.55 & MiniZ 1.5p is faster
     [PSCustomObject]@{ Algorithm = "Equihash2109"; MinMemGB = 1.3; Command = " --algo 210_9" }
 )
 #Commands from config file take precedence

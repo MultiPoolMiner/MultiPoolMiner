@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -17,8 +17,8 @@ $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA" | Where-Object { $_.OpenCL.GlobalMemsize -ge 2GB })
 
-# Miner requires CUDA 9.2
-$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+#Miner requires CUDA 9.2
+$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ", ""
 $RequiredCUDAVersion = "9.2.00"
 if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
@@ -27,8 +27,8 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
 
 $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "bitcash"; MinMemGb = 1; Command = " -a bitcash"; WarmupTime = 60 } #Bitcash
-    [PSCustomObject]@{ Algorithm = "cuckoo";  MinMemGb = 1; Command = " -a cuckoo"; WarmupTime = 60 } #Merit
-    [PSCustomObject]@{ Algorithm = "x22i";    MinMemGb = 1; Command = " -a x22i"; WarmupTime = 0 } #SUQA
+    [PSCustomObject]@{ Algorithm = "cuckoo" ; MinMemGb = 1; Command = " -a cuckoo" ; WarmupTime = 60 } #Merit
+    [PSCustomObject]@{ Algorithm = "x22i"   ; MinMemGb = 1; Command = " -a x22i"   ; WarmupTime = 00 } #SUQA
 )
 #Commands from config file take precedence
 $Miner_Config | Select-Object | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ }
@@ -43,7 +43,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
     $Commands | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_.Algorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.Algorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $Pools.$Algorithm_Norm.Host } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
-        
+
         if ($Miner_Device = @($Device | Where-Object { ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB })) { 
             $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
 

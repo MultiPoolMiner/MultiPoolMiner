@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -23,7 +23,7 @@ $Commands = [PSCustomObject]@{
     "C11"         = " -a c11 -i 26" #C11
     "Dedal"       = " -a dedal -i 23" #Defal, re-added in 0.13.0
     "Geek"        = " -a geek -i 23" #Geek, new in 0.8.0
-    # "HMQ1725"     = " -a hmq1725" #Hmq1725, new in 0.6.4; NVIDIA-CryptoDredge_v0.21.0 is faster
+    #"HMQ1725"     = " -a hmq1725" #Hmq1725, new in 0.6.4; NVIDIA-CryptoDredge_v0.21.0 is faster
     "Honeycomb"   = " -a honeycomb -i 26" #Honeycomb, new in 12.0
     "JeongHash"   = " -a jeonghash -i 23" #GltJeongHash, new in 0.8.6
     "Lyra2Z"      = " -a lyra2z" #Lyra2z
@@ -67,10 +67,10 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         Switch ($Algorithm_Norm) { 
-            "C11"         { $WarmupTime = 60 }
-            "MTP"         { $WarmupTime = 60 }
+            "C11" { $WarmupTime = 60 }
+            "MTP" { $WarmupTime = 60 }
             "MTPNicehash" { $WarmupTime = 60 }
-            default       { $WarmupTime = 45 }
+            default { $WarmupTime = 45 }
         }
 
         [PSCustomObject]@{ 

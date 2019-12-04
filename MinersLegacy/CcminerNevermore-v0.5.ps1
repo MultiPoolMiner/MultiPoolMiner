@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,29 +16,29 @@ $ManualUri = "https://github.com/nemosminer/ccminerx16r-x16s"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject]@{ 
-    "bitcore"     = " -a bitcore" #Timetravel10 and Bitcore are technically the same
-    #"c11"         = " -a c11" #C11, NVIDIA-CcminerAlexis_v1.5 is faster
+    "bitcore"    = " -a bitcore" #Timetravel10 and Bitcore are technically the same
+    #"c11"        = " -a c11" #C11, NVIDIA-CcminerAlexis_v1.5 is faster
     #"equihash"   = " -a equihash" #Equihash - Beaten by Bminer by 30%
-    "hmq1725"     = " -a hmq1725" #HMQ1725
-    "hsr"         = " -a hsr" #HSR
-    "jha"         = " -a jha" #JHA - NOT TESTED
-    "keccak"      = " -a keccak" #Keccak
-    "keccakc"     = " -a keccakc" #Keccakc
-    "lyra2v2"     = " -a lyra2v2" #Lyra2RE2
-    "lyra2z"      = " -a lyra2z" #Lyra2z
-    # "neoscrypt"   = " -a neoscrypt" #NeoScrypt, CcminerKlausT-v8.25 is faster
-    "phi"         = " -a phi" #PHI
-    "polytimos"   = " -a polytimos" #Polytimos - NOT TESTED
-    "skein"       = " -a skein" #Skein
-    "skunk"       = " -a skunk" #Skunk
-    "timetravel"  = " -a timetravel" #Timetravel
-    "tribus"      = " -a tribus" #Tribus
-    "veltor"      = " -a veltor" #Veltor - NOT TESTED
-    "x11evo"      = " -a x11evo" #X11evo
-    "x16r"        = " -a x16r" #X16R
-    #"x17"         = " -a x17" #X17, NVIDIA-CcminerAlexis_v1.5 is faster
-    
-    # ASIC - never profitable 24/06/2018
+    "hmq1725"    = " -a hmq1725" #HMQ1725
+    "hsr"        = " -a hsr" #HSR
+    "jha"        = " -a jha" #JHA - NOT TESTED
+    "keccak"     = " -a keccak" #Keccak
+    "keccakc"    = " -a keccakc" #Keccakc
+    "lyra2v2"    = " -a lyra2v2" #Lyra2RE2
+    "lyra2z"     = " -a lyra2z" #Lyra2z
+    #"neoscrypt"  = " -a neoscrypt" #NeoScrypt, CcminerKlausT-v8.25 is faster
+    "phi"        = " -a phi" #PHI
+    "polytimos"  = " -a polytimos" #Polytimos - NOT TESTED
+    "skein"      = " -a skein" #Skein
+    "skunk"      = " -a skunk" #Skunk
+    "timetravel" = " -a timetravel" #Timetravel
+    "tribus"     = " -a tribus" #Tribus
+    "veltor"     = " -a veltor" #Veltor - NOT TESTED
+    "x11evo"     = " -a x11evo" #X11evo
+    "x16r"       = " -a x16r" #X16R
+    #"x17"        = " -a x17" #X17, NVIDIA-CcminerAlexis_v1.5 is faster
+
+    #ASIC - never profitable 24/06/2018
     #"blake"      = " -a blake" #blake
     #"blakecoin"  = " -a blakecoin" #Blakecoin
     #"blake2s"    = " -a blake2s" #Blake2s
@@ -70,7 +70,7 @@ $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "N
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = [UInt16]($Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1)
-        
+
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
 
@@ -78,7 +78,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         Switch ($Algorithm_Norm) { 
-            "C11"   { $WarmupTime = 60 }
+            "C11" { $WarmupTime = 60 }
             default { $WarmupTime = 30 }
         }
 

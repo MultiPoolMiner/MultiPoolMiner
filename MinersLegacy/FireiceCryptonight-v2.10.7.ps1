@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,69 +16,68 @@ $ManualUri = "https://github.com/fireice-uk/xmr-stak"
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0
 $Miner_Version = $Name -split '-' | Select-Object -Index 1
 $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) {$Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*"}
+if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
 
-# Miner requires CUDA 9.0.00 or higher
-$CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+#Miner requires CUDA 9.0.00 or higher
+$CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ", ""
 $RequiredCUDAVersion = "9.0.00"
-if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) {
+if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
     return
 }
 
 $Commands = [PSCustomObject[]]@(
-    # Note: For fine tuning directly edit the config files in the miner binary directory
-    #       'ThreadsConfig-[Algorithm_Norm]-[Hardware].json' & 'Config-[Algorithm_Norm]-[Hardware]-[Port].json'
-    #                             Miner algo name                MinMem        Command       
-    [PSCustomObject]@{Algorithm = "cryptonight_bittube2";        MinMemGB = 4; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightHeavyTube
-    [PSCustomObject]@{Algorithm = "cryptonight_gpu";             MinMemGB = 1; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightGpu
-    [PSCustomObject]@{Algorithm = "cryptonight_lite";            MinMemGB = 1; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightLite
-    [PSCustomObject]@{Algorithm = "cryptonight_lite_v7";         MinMemGB = 1; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightLiteV7
-    [PSCustomObject]@{Algorithm = "cryptonight_lite_v7_xor";     MinMemGB = 1; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightLiteIpbc
-    [PSCustomObject]@{Algorithm = "cryptonight_haven";           MinMemGB = 4; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightHeavyHaven
-    [PSCustomObject]@{Algorithm = "cryptonight_heavy";           MinMemGB = 4; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightHeavy
-    [PSCustomObject]@{Algorithm = "cryptonight_masari";          MinMemGB = 2; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightMsr
-    [PSCustomObject]@{Algorithm = "cryptonight_r";               MinMemGB = 2; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightR, new in 2.10.0
-    [PSCustomObject]@{Algorithm = "cryptonight_v8_double";       MinMemGB = 4; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightDouvleV8, new in 2.10.0
-    [PSCustomObject]@{Algorithm = "cryptonight_v8_reversewaltz"; MinMemGB = 2; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightRwzV8, new in 2.10.0
-    [PSCustomObject]@{Algorithm = "cryptonight_v7";              MinMemGB = 2; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightV7
-    [PSCustomObject]@{Algorithm = "cryptonight_v7_stellite";     MinMemGB = 2; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightXtl
-    [PSCustomObject]@{Algorithm = "cryptonight_v8";              MinMemGB = 2; Vendor = @("CPU" <#, "AMD", "NVIDIA"#>); Command = ""} #CryptonightV8
-    
-    # ASIC (09/07/2018)
-    #[PSCustomObject]@{Algorithm = "cryptonight";                 MinMemGB = 2; Command = @()} #CryptoNight
+    #Note: For fine tuning directly edit the config files in the miner binary directory
+    #      'ThreadsConfig-[Algorithm_Norm]-[Hardware].json' & 'Config-[Algorithm_Norm]-[Hardware]-[Port].json'
+    [PSCustomObject]@{ Algorithm = "cryptonight_bittube2"       ; MinMemGB = 4; Vendor = @("CPU")                  ; Command = "" } #CryptonightHeavyTube
+    [PSCustomObject]@{ Algorithm = "cryptonight_gpu"            ; MinMemGB = 1; Vendor = @("CPU")                  ; Command = "" } #CryptonightGpu
+    [PSCustomObject]@{ Algorithm = "cryptonight_lite"           ; MinMemGB = 1; Vendor = @("CPU")                  ; Command = "" } #CryptonightLite
+    [PSCustomObject]@{ Algorithm = "cryptonight_lite_v7"        ; MinMemGB = 1; Vendor = @("CPU")                  ; Command = "" } #CryptonightLiteV7
+    [PSCustomObject]@{ Algorithm = "cryptonight_lite_v7_xor"    ; MinMemGB = 1; Vendor = @("CPU")                  ; Command = "" } #CryptonightLiteIpbc
+    [PSCustomObject]@{ Algorithm = "cryptonight_haven"          ; MinMemGB = 4; Vendor = @("CPU")                  ; Command = "" } #CryptonightHeavyHaven
+    [PSCustomObject]@{ Algorithm = "cryptonight_heavy"          ; MinMemGB = 4; Vendor = @("CPU")                  ; Command = "" } #CryptonightHeavy
+    [PSCustomObject]@{ Algorithm = "cryptonight_masari"         ; MinMemGB = 2; Vendor = @("CPU")                  ; Command = "" } #CryptonightMsr
+    [PSCustomObject]@{ Algorithm = "cryptonight_r"              ; MinMemGB = 2; Vendor = @("CPU")                  ; Command = "" } #CryptonightR, new in 2.10.0
+    [PSCustomObject]@{ Algorithm = "cryptonight_v8_double"      ; MinMemGB = 4; Vendor = @("CPU")                  ; Command = "" } #CryptonightDouvleV8, new in 2.10.0
+    [PSCustomObject]@{ Algorithm = "cryptonight_v8_reversewaltz"; MinMemGB = 2; Vendor = @("CPU")                  ; Command = "" } #CryptonightRwzV8, new in 2.10.0
+    [PSCustomObject]@{ Algorithm = "cryptonight_v7"             ; MinMemGB = 2; Vendor = @("CPU")                  ; Command = "" } #CryptonightV7
+    [PSCustomObject]@{ Algorithm = "cryptonight_v7_stellite"    ; MinMemGB = 2; Vendor = @("CPU")                  ; Command = "" } #CryptonightXtl
+    [PSCustomObject]@{ Algorithm = "cryptonight_v8"             ; MinMemGB = 2; Vendor = @("CPU")                  ; Command = "" } #CryptonightV8
+
+    #ASIC (09/07/2018)
+    #[PSCustomObject]@{Algorithm = "cryptonight"                 ; MinMemGB = 2; Vendor = @("CPU")                  ; Command = "" } #CryptoNight
 )
 #Commands from config file take precedence
-if ($Miner_Config.Commands) {$Miner_Config.Commands | ForEach-Object {$Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object {$_.Algorithm -ne $Algorithm}; $Commands += $_}}
+if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
 
 #CommonCommands from config file take precedence
-if ($Miner_Config.CommonCommands) {$CommonCommands = $Miner_Config.CommonCommands}
-else {$CommonCommands = ""}
+if ($Miner_Config.CommonCommands) { $CommonCommands = $Miner_Config.CommonCommands }
+else { $CommonCommands = "" }
 
-$Coins = @("aeon7", "bbscoin", "bittube", "freehaven", "graft", "haven", "intense", "masari", "monero" ,"qrl", "ryo", "stellite", "turtlecoin")
+$Coins = @("aeon7", "bbscoin", "bittube", "freehaven", "graft", "haven", "intense", "masari", "monero" , "qrl", "ryo", "stellite", "turtlecoin")
 
-$Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
+$Devices | Select-Object Vendor, Model -Unique | ForEach-Object { 
     $Devices_Platform = @($Devices | Where-Object Vendor -EQ $_.Vendor)
     $Device = @($Devices_Platform | Where-Object Model -EQ $_.Model)
-    
+
     $Miner_Port = [UInt16]($Config.APIPort + ($Device | Select-Object -First 1 -ExpandProperty Id) + 1)
 
-    $Commands | ForEach-Object {$Algorithm_Norm = @(@(Get-Algorithm ($_.Algorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.Algorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_} | Where-Object {$_.Vendor -contains ($Device.Vendor | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Host} | ForEach-Object {
+    $Commands | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_.Algorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.Algorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $_.Vendor -contains ($Device.Vendor | Select-Object -Unique) -and $Pools.$Algorithm_Norm.Host } | ForEach-Object { 
         $MinMemGB = $_.MinMemGB
 
-        if ($Miner_Device = @($Device | Where-Object {$_.Type -eq "CPU" -or ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB})) {
-            $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object {$Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model"}) | Select-Object) -join '-'
-            $Currency = if ($Coins -icontains $Pools.$Algorithm_Norm.CoinName) {$Pools.$Algorithm_Norm.CoinName} else {$_.Algorithm}
-            
-            if ($Miner_Device.Type -eq "CPU") {
+        if ($Miner_Device = @($Device | Where-Object { $_.Type -eq "CPU" -or ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB })) { 
+            $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
+            $Currency = if ($Coins -icontains $Pools.$Algorithm_Norm.CoinName) { $Pools.$Algorithm_Norm.CoinName } else { $_.Algorithm }
+
+            if ($Miner_Device.Type -eq "CPU") { 
                 $Platform = "CPU"
                 $NoPlatform = " --noAMD --noNVIDIA"
             }
-            elseif ($Miner_Device.Vendor -eq "NVIDIA") {
+            elseif ($Miner_Device.Vendor -eq "NVIDIA") { 
                 $Platform = "NVIDIA"
                 $NoPlatform = " --noCPU --noAMD"
             }
-            else {
+            else { 
                 $Platform = "AMD"
                 $NoPlatform = " --noNVIDIA --noCPU"
             }
@@ -91,11 +90,11 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             $PlatformThreadsConfigFile = "$((@("HwConfig") + @($Platform) + @($Algorithm_Norm) + @(($Devices_Platform.Model | Sort-Object -unique | Sort-Object Name | ForEach-Object {$Model = $_; "$(@($Devices_Platform | Where-Object Model -eq $Model).Count)x$Model($(($Devices_Platform | Sort-Object Name | Where-Object Model -eq $Model).Name -join ';'))"} | Select-Object) -join '-') | Select-Object) -join '-').txt"
             $PoolFileName = "$((@("PoolConf") + @($Pools.$Algorithm_Norm.Name) + @($Algorithm_Norm) + @($Pools.$Algorithm_Norm.User) + @($Pools.$Algorithm_Norm.Pass) | Select-Object) -join '-').txt"
 
-            $Parameters = [PSCustomObject]@{
-                PoolFile = [PSCustomObject]@{
+            $Parameters = [PSCustomObject]@{ 
+                PoolFile                  = [PSCustomObject]@{ 
                     FileName = $PoolFileName
-                    Content  = [PSCustomObject]@{
-                        pool_list = @([PSCustomObject]@{
+                    Content  = [PSCustomObject]@{ 
+                        pool_list = @([PSCustomObject]@{ 
                                 pool_address    = "$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port)"
                                 wallet_address  = $Pools.$Algorithm_Norm.User
                                 pool_password   = $Pools.$Algorithm_Norm.Pass
@@ -106,12 +105,12 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                                 rig_id          = "$($Config.Pools.$($Pools.$Algorithm_Norm.Name).Worker)"
                             }
                         )
-                        currency = $Currency
+                        currency  = $Currency
                     }
                 }
-                ConfigFile = [PSCustomObject]@{
+                ConfigFile                = [PSCustomObject]@{ 
                     FileName = $ConfigFileName
-                    Content  = [PSCustomObject]@{
+                    Content  = [PSCustomObject]@{ 
                         call_timeout    = 10
                         retry_time      = 10
                         giveup_limit    = 0
@@ -130,18 +129,18 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                         prefer_ipv4     = $true
                     }
                 }
-                Commands = ("$Command$CommonCommands --poolconf $PoolFileName --config $ConfigFileName$NoPlatform --$($Platform.ToLower()) $MinerThreadsConfigFile$(if ($Platform -eq 'NVIDIA') {' --openCLVendor NVIDIA'}) --noUAC --httpd $($Miner_Port)").trim()
-                Devices  = @($Miner_Device.Type_Vendor_Index)
-                HwDetectCommands = ("$Command$CommonCommands --poolconf $PoolFileName --config $ConfigFileName$NoPlatform --$($Platform.ToLower()) $PlatformThreadsConfigFile$(if ($Platform -eq 'NVIDIA') {' --openCLVendor NVIDIA'}) --httpd $($Miner_Port)").trim()
-                MinerThreadsConfigFile = $MinerThreadsConfigFile
-                Platform = $Platform
+                Commands                  = ("$Command$CommonCommands --poolconf $PoolFileName --config $ConfigFileName$NoPlatform --$($Platform.ToLower()) $MinerThreadsConfigFile$(if ($Platform -eq 'NVIDIA') {' --openCLVendor NVIDIA'}) --noUAC --httpd $($Miner_Port)").trim()
+                Devices                   = @($Miner_Device.Type_Vendor_Index)
+                HwDetectCommands          = ("$Command$CommonCommands --poolconf $PoolFileName --config $ConfigFileName$NoPlatform --$($Platform.ToLower()) $PlatformThreadsConfigFile$(if ($Platform -eq 'NVIDIA') {' --openCLVendor NVIDIA'}) --httpd $($Miner_Port)").trim()
+                MinerThreadsConfigFile    = $MinerThreadsConfigFile
+                Platform                  = $Platform
                 PlatformThreadsConfigFile = $PlatformThreadsConfigFile
-                Threads = 1
+                Threads                   = 1
             }
 
-            if ($Miner_Device.PlatformId) {$Parameters.ConfigFile.Content | Add-Member "platform_index" (($Miner_Device | Select-Object PlatformId -Unique).PlatformId)}
+            if ($Miner_Device.PlatformId) { $Parameters.ConfigFile.Content | Add-Member "platform_index" (($Miner_Device | Select-Object PlatformId -Unique).PlatformId) }
 
-            [PSCustomObject]@{
+            [PSCustomObject]@{ 
                 Name       = $Miner_Name
                 BaseName   = $Miner_BaseName
                 Version    = $Miner_Version
@@ -149,12 +148,12 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 Path       = $Path
                 HashSHA256 = $HashSHA256
                 Arguments  = $Parameters
-                HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week}
+                HashRates  = [PSCustomObject]@{$Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
                 API        = "Fireice"
                 Port       = $Miner_Port
                 URI        = $Uri
-                Fees       = [PSCustomObject]@{$Algorithm_Norm = 2 / 100}
-                WarmupTime = $(if($Platform -eq "AMD") {120} else {60}) #seconds
+                Fees       = [PSCustomObject]@{$Algorithm_Norm = 2 / 100 }
+                WarmupTime = $(if ($Platform -eq "AMD") { 120 } else { 60 }) #seconds
             }
         }
     }

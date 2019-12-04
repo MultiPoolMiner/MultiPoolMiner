@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -35,7 +35,7 @@ $Commands = [PSCustomObject]@{
     "spread"        = " -a spread" #Spread
     #"x17"           = " -a x17" #x17, NVIDIA-CcminerAlexis_v1.5 is faster
 
-    # ASIC - never profitable 24/06/2018
+    #ASIC - never profitable 24/06/2018
     #"blake"         = " -a blake" #blake
     #"blakecoin"     = " -a blakecoin" #Blakecoin
     #"blake2s"       = " -a blake2s" #Blake2s
@@ -76,7 +76,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         Switch ($Algorithm_Norm) { 
-            "C11"   { $WarmupTime = 60 }
+            "C11" { $WarmupTime = 60 }
             default { $WarmupTime = 30 }
         }
 

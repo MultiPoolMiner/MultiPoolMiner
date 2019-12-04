@@ -1,12 +1,12 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
- 
+
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\sgminer.exe"
 $Uri = "https://github.com/fancyIX/sgminer-phi2-branch/releases/download/5.6.1.3.b6/sgminer-phi2-fancyIX-win64-0.6.0.0.zip"
@@ -15,17 +15,17 @@ $ManualUri = "https://github.com/fancyIX/sgminer-phi2-branch"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject]@{ 
-    "Allium"      = " --kernel allium --gpu-threads 1 --worksize 256 --intensity 20"
-    "Argon2d"     = " --kernel argon2d --gpu-threads 2 --worksize 64"
-    "Ethash"      = " --kernel ethash --worksize 64 --xintensity 1024"
-    "Lyra2v3"     = " --kernel lyra2v3 --gpu-threads 1 --worksize 256 --intensity 24"
-    "Lyra2z"      = " --kernel lyra2z --gpu-threads 1 --worksize 256 --intensity 23"
-    "Lyra2zz"     = " --kernel lyra2zz --gpu-threads 1 --worksize 256 --intensity 23"
-    #"Mtp"         = " --kernel mtp --intensity 18 -p 0,strict,verbose,d=700"; SgminerMTP is faster
-    "Phi2"        = " --kernel phi2 --gpu-threads 1 --worksize 256 --intensity 23"
-    "Phi2-Lux"    = " --kernel phi2 --gpu-threads 1 --worksize 256 --intensity 23" # Phi2-Lux
-    "X22i"        = " --kernel x22i --gpu-threads 2 --worksize 256 --intensity 23"
-    "X25x"        = " --kernel x25x --gpu-threads 4 --worksize 256 --intensity 22"
+    "Allium"   = " --kernel allium --gpu-threads 1 --worksize 256 --intensity 20"
+    "Argon2d"  = " --kernel argon2d --gpu-threads 2 --worksize 64"
+    "Ethash"   = " --kernel ethash --worksize 64 --xintensity 1024"
+    "Lyra2v3"  = " --kernel lyra2v3 --gpu-threads 1 --worksize 256 --intensity 24"
+    "Lyra2z"   = " --kernel lyra2z --gpu-threads 1 --worksize 256 --intensity 23"
+    "Lyra2zz"  = " --kernel lyra2zz --gpu-threads 1 --worksize 256 --intensity 23"
+    #"Mtp"      = " --kernel mtp --intensity 18 -p 0,strict,verbose,d=700" #SgminerMTP is faster
+    "Phi2"     = " --kernel phi2 --gpu-threads 1 --worksize 256 --intensity 23"
+    "Phi2-Lux" = " --kernel phi2 --gpu-threads 1 --worksize 256 --intensity 23" #Phi2-Lux
+    "X22i"     = " --kernel x22i --gpu-threads 2 --worksize 256 --intensity 23"
+    "X25x"     = " --kernel x25x --gpu-threads 4 --worksize 256 --intensity 22"
 }
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force } }
@@ -48,7 +48,8 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         #Allow time to build binaries
         if (-not (Get-Stat "$($Miner_Name)_$($Algorithm_Norm)_HashRate")) { $WarmupTime = 120 } else { $WarmupTime = 30 }
 
-        if ($Algorithm_Norm -ne "Ethash" -or $Pools.$Algorithm_Norm.Name -ne "NiceHash") {  #Ethash on Nicehash does not work (Error 'Rejected untracked stratum share from daggerhashimoto.eu-new.nicehash.com')
+        if ($Algorithm_Norm -ne "Ethash" -or $Pools.$Algorithm_Norm.Name -ne "NiceHash") {
+            #Ethash on Nicehash does not work (Error 'Rejected untracked stratum share from daggerhashimoto.eu-new.nicehash.com')
             [PSCustomObject]@{ 
                 Name        = $Miner_Name
                 DeviceName  = $Miner_Device.Name

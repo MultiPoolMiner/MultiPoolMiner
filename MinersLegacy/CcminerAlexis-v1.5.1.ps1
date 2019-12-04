@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -20,19 +20,19 @@ $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "N
 $Commands = [PSCustomObject]@{ 
     #GPU - profitable 16/05/2018
     #Intensities and parameters tested by nemosminer on 10603gb to 1080ti
-    "C11"          = " -a c11 -i 22.1" #X11evo; fix for default intensity
-    "Keccak"       = " -a keccak -m 2 -i 29" #Keccak; fix for default intensity, difficulty x M
-    "Lyra2v2"      = " -a lyra2v2" #lyra2v2
+    "C11"       = " -a c11 -i 22.1" #X11evo; fix for default intensity
+    "Keccak"    = " -a keccak -m 2 -i 29" #Keccak; fix for default intensity, difficulty x M
+    "Lyra2v2"   = " -a lyra2v2" #lyra2v2
     #"Neoscrypt"   = " -a neoscrypt -i 15.5" #NeoScrypt, CcminerKlausT-v8.25 is faster
-    "Skein"        = " -a skein" #Skein
-    "Skein2"       = " -a skein2 -i 31" #skein2
-    "Veltor"       = " -a veltor -i 23" #Veltor; fix for default intensity
-    "Whirlcoin"    = " -a whirlcoin" #WhirlCoin
-    "Whirlpool"    = " -a whirlpool" #Whirlpool
-    "X11evo"       = " -a x11evo -i 21" #X11evo; fix for default intensity
-    "X17"          = " -a x17 -i 22.1" #x17; fix for default intensity
+    "Skein"     = " -a skein" #Skein
+    "Skein2"    = " -a skein2 -i 31" #skein2
+    "Veltor"    = " -a veltor -i 23" #Veltor; fix for default intensity
+    "Whirlcoin" = " -a whirlcoin" #WhirlCoin
+    "Whirlpool" = " -a whirlpool" #Whirlpool
+    "X11evo"    = " -a x11evo -i 21" #X11evo; fix for default intensity
+    "X17"       = " -a x17 -i 22.1" #x17; fix for default intensity
 
-    # ASIC - never profitable 11/08/2018
+    #ASIC - never profitable 11/08/2018
     #"Blake2s"     = " -a blake2s" #Blake2s
     #"Blake"       = " -a blake" #blake
     #"Blakecoin"   = " -a blakecoin" #Blakecoin
@@ -65,7 +65,7 @@ else { $CommonCommands = " --cuda-schedule 2 -N 1" }
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = $Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1
-        
+
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
 
@@ -73,7 +73,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         Switch ($Algorithm_Norm) { 
-            "C11"   { $WarmupTime = 60 }
+            "C11" { $WarmupTime = 60 }
             default { $WarmupTime = 30 }
         }
 

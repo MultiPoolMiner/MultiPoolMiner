@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -19,14 +19,14 @@ $Commands = [PSCustomObject]@{
     "bitcore"    = " -a bitcore" #Timetravel10 and Bitcore are technically the same
     "blake2s"    = " -a blake2s" #Blake2s
     "blakecoin"  = " -a blakecoin" #Blakecoin
-    # "c11"        = " -a c11" #C11, NVIDIA-CcminerAlexis_v1.5 is faster
+    #"c11"        = " -a c11" #C11, NVIDIA-CcminerAlexis_v1.5 is faster
     "hmq1725"    = " -a hmq1725" #HMQ1725
     "hsr"        = " -a hsr" #HSR
     "keccak"     = " -a keccak" #Keccak
     "keccakc"    = " -a keccakc" #Keccakc
     "lyra2v2"    = " -a lyra2v2" #Lyra2RE2
     "lyra2z"     = " -a lyra2z" #Lyra2z
-#    "neoscrypt"  = " -a neoscrypt --intensity 21.6" #NeoScrypt, CcminerKlausT-v8.25 is faster
+    #"neoscrypt"  = " -a neoscrypt --intensity 21.6" #NeoScrypt, CcminerKlausT-v8.25 is faster
     "phi"        = " -a phi" #PHI
     "skunk"      = " -a skunk" #Skunk
     "timetravel" = " -a timetravel" #Timetravel
@@ -36,8 +36,8 @@ $Commands = [PSCustomObject]@{
     "x16rtveil"  = " -a x16rt" #X16Rt, for Veil only (see https://github.com/ocminer/suprminer/issues/5)
     "x16s"       = " -a x16s" #X16S
     #"x17"        = " -a x17" #X17, NVIDIA-CcminerAlexis_v1.5 is faster
-    
-    # ASIC - never profitable 06/08/2019
+
+    #ASIC - never profitable 06/08/2019
     #"decred"     = " -a decred" #Decred
     #"groestl"    = " -a groestl" #Groestl
     #"lbry"       = " -a lbry" #Lbry
@@ -71,7 +71,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         Switch ($Algorithm_Norm) { 
-            "C11"   { $WarmupTime = 60 }
+            "C11" { $WarmupTime = 60 }
             default { $WarmupTime = 30 }
         }
 

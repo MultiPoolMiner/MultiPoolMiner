@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -17,8 +17,8 @@ $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = $Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA"
 
-# Miner requires CUDA 10.0.00 or higher
-$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+#Miner requires CUDA 10.0.00 or higher
+$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ", ""
 $RequiredCUDAVersion = "10.0.00"
 if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
@@ -26,13 +26,13 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
 }
 
 $Commands = [PSCustomObject[]]@(
-#    [PSCustomObject]@{ Algorithm = "Equihash965";    MinMemGB = 2.0; Command = " --par=96,5" } # Gminer-v1.66 is faster
-    [PSCustomObject]@{ Algorithm = "Equihash1254";   MinMemGB = 3.0; Command = " --par=125,4" }
-#    [PSCustomObject]@{ Algorithm = "Equihash1445";   MinMemGB = 2.0; Command = " --par=144,5" } # Gminer-v1.66 is faster
-#    [PSCustomObject]@{ Algorithm = "EquihashR15050"; MinMemGB = 2.0; Command = " --par=150,5" } #Bad shares
-    [PSCustomObject]@{ Algorithm = "EquihashR15053"; MinMemGB = 2.0; Command = " --par=150,5,3" }
-#    [PSCustomObject]@{ Algorithm = "Equihash1927";   MinMemGB = 3.0; Command = " --par=192,7" } # Gminer-v1.66 is faster
-    [PSCustomObject]@{ Algorithm = "Equihash2109";   MinMemGB = 1.0; Command = " --par=210,9" }
+    #[PSCustomObject]@{ Algorithm = "Equihash965"   ; MinMemGB = 2.0; Command = " --par=96,5" ; } #Gminer-v1.66 is faster
+    [PSCustomObject]@{ Algorithm = "Equihash1254"  ; MinMemGB = 3.0; Command = " --par=125,4"; }
+    #[PSCustomObject]@{ Algorithm = "Equihash1445"  ; MinMemGB = 2.0; Command = " --par=144,5"; } #Gminer-v1.66 is faster
+    #[PSCustomObject]@{ Algorithm = "EquihashR15050"; MinMemGB = 2.0; Command = " --par=150,5"; } #Bad shares
+    [PSCustomObject]@{ Algorithm = "EquihashR15053"; MinMemGB = 2.0; Command = " --par=150,5,3"; }
+    #[PSCustomObject]@{ Algorithm = "Equihash1927"  ; MinMemGB = 3.0; Command = " --par=192,7"; } #Gminer-v1.66 is faster
+    [PSCustomObject]@{ Algorithm = "Equihash2109"  ; MinMemGB = 1.0; Command = " --par=210,9"; }
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
@@ -54,11 +54,11 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
             #Get commands for active miner devices
             $Command = Get-CommandPerDevice -Command $_.Command -ExcludeParameters @("par") -DeviceIDs $Miner_Device.Type_Vendor_Index
-            
+
             Switch ($Algorithm_Norm) { 
-                "Equihash1445"   { $Pers = Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default "auto" }
+                "Equihash1445" { $Pers = Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default "auto" }
                 "EquihashR15053" { $Pers = Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName }
-                "Equihash1927"   { $Pers = Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default "auto" }
+                "Equihash1927" { $Pers = Get-AlgoCoinPers -Algorithm $Algorithm_Norm -CoinName $Pools.$Algorithm_Norm.CoinName -Default "auto" }
             }
             if ($Pers) { $Pers = " --pers $Pers" } else { $Pers = "" }
 

@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -36,18 +36,18 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         #Get commands for active miner devices
         $Command = Get-CommandPerDevice -Command $Commands.$_ -DeviceIDs $Miner_Device.Type_Vendor_Index
-        
+
         [PSCustomObject]@{ 
-            Name                 = $Miner_Name
-            DeviceName           = $Miner_Device.Name
-            Path                 = $Path
-            HashSHA256           = $HashSHA256
-            Arguments            = ("$Command$CommonCommands -o $($Pools.PHI2.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) -d $(($Miner_Device | ForEach-Object { '{0:x}' -f $_.Type_Vendor_Index }) -join '')" -replace "\s+", " ").trim()
-            HashRates            = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
-            API                  = "Wrapper"
-            Port                 = $Miner_Port
-            URI                  = $Uri
-            Fees                 = [PSCustomObject]@{ $Algorithm_Norm = 1 / 100 }
+            Name       = $Miner_Name
+            DeviceName = $Miner_Device.Name
+            Path       = $Path
+            HashSHA256 = $HashSHA256
+            Arguments  = ("$Command$CommonCommands -o $($Pools.PHI2.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) -u $($Pools.$Algorithm_Norm.User) -p $($Pools.$Algorithm_Norm.Pass) -d $(($Miner_Device | ForEach-Object { '{0:x}' -f $_.Type_Vendor_Index }) -join '')" -replace "\s+", " ").trim()
+            HashRates  = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
+            API        = "Wrapper"
+            Port       = $Miner_Port
+            URI        = $Uri
+            Fees       = [PSCustomObject]@{ $Algorithm_Norm = 1 / 100 }
         }
     }
 }

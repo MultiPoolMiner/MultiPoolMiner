@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,9 +16,9 @@ $ManualUri = "https://github.com/brian112358/avermore-miner"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject]@{ 
-    "X16r"  = " --kernel X16r -g 2 -w 64 -X 64"
-    #"X16s"  = " --kernel X16s -g 2 -w 64 -X 64" # AMD-SgminerKL_v1.0.9 is 25 % faster
-    #"Xevan" = " --kernel Xevan -g 2 -w 64 -X 64" # AMD-SgminerKL_v1.0.9 is faster
+    "X16r" = " --kernel X16r -g 2 -w 64 -X 64"
+    #"X16s"  = " --kernel X16s -g 2 -w 64 -X 64" #AMD-SgminerKL_v1.0.9 is 25 % faster
+    #"Xevan" = " --kernel Xevan -g 2 -w 64 -X 64" #AMD-SgminerKL_v1.0.9 is faster
 }
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force } }

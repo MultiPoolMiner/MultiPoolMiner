@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -35,7 +35,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
         #Get commands for active miner devices
         $Command = Get-CommandPerDevice -Command $Commands.$_ -DeviceIDs $Miner_Device.Type_Vendor_Index
-        
+
         [PSCustomObject]@{ 
             Name       = $Miner_Name
             DeviceName = $Miner_Device.Name

@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -18,33 +18,33 @@ $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 $Commands = [PSCustomObject]@{ 
     "Aergo"          = " --algo=aergo"
     "Bcd"            = " --algo=bcd"
-    # "bitcore"      = " --algo=bitcore"; Same as Timetravel10
-    "Blake2b-Btcc"   = " --algo=blake2b-btcc" # new in 0.17.5 preview 8
-    "blake2b-Glt"    = " --algo=blake2b-glt" # new in 0.17.5 preview 8
-    "Bmw512"         = " --algo=bmw512" # new in 0.15.4 preview 8
+    #"bitcore"        = " --algo=bitcore" #Same as Timetravel10
+    "Blake2b-Btcc"   = " --algo=blake2b-btcc" #new in 0.17.5 preview 8
+    "blake2b-Glt"    = " --algo=blake2b-glt" #new in 0.17.5 preview 8
+    "Bmw512"         = " --algo=bmw512" #new in 0.15.4 preview 8
     "C11"            = " --algo=c11"
     "Dedal"          = " --algo=dedal"
     "Exosis"         = " --algo=exosis"
     "Geek"           = " --algo=geek"
     "Glt-Astralhash" = " --algo=glt-astralhash"
-    "Glt-Globalhash" = " --algo=glt-globalhash" # new in 0.18.0
+    "Glt-Globalhash" = " --algo=glt-globalhash" #new in 0.18.0
     "Glt-Jeonghash"  = " --algo=glt-jeonghash"
     "Glt-Padihash"   = " --algo=glt-padihash"
     "Glt-Pawelhash"  = " --algo=glt-pawelhash"
     "Hex"            = " --algo=hex"
     "Hmq1725"        = " --algo=hmq1725"
-    "Honeycomb"      = " --algo=honeycomb" # new in 0.16.0
+    "Honeycomb"      = " --algo=honeycomb" #new in 0.16.0
     "Lyra2v3"        = " --algo=lyra2v3"
     "Lyra2vc0ban"    = " --algo=lyra2vc0ban"
-    "Mtp"            = " --algo=mtp" # new in 0.20.0
-    "MtpTcr"         = " --algo=mtp-tcr" # new in 0.20.0
+    "Mtp"            = " --algo=mtp" #new in 0.20.0
+    "MtpTcr"         = " --algo=mtp-tcr" #new in 0.20.0
     "Phi"            = " --algo=phi"
     "Polytimos"      = " --algo=polytimos"
     "Rainforest"     = " --algo=rainforest"
     "Renesis"        = " --algo=renesis"
     "Sha256q"        = " --algo=sha256q"
     "Sha256t"        = " --algo=sha256t"
-    "Skein2"         = " --algo=skein2" # new in 0.17.6
+    "Skein2"         = " --algo=skein2" #new in 0.17.6
     #"skunk"          = " --algo=skunkhash" #Unprofitable
     "Sonoa"          = " --algo=sonoa"
     "Timetravel"     = " --algo=timetravel"
@@ -53,14 +53,14 @@ $Commands = [PSCustomObject]@{
     "Wildkeccak"     = " --algo=wildkeccak"
     "X16r"           = " --algo=x16r"
     "X16rt"          = " --algo=x16rt"
-    "X16rv2"         = " --algo=x16rv2" # new in 0.19.2
+    "X16rv2"         = " --algo=x16rv2" #new in 0.19.2
     "X16s"           = " --algo=x16s"
     "X17"            = " --algo=x17"
     "X18"            = " --algo=x18"
     "X20r"           = " --algo=x20r"
     "X21s"           = " --algo=x21s"
     "X22i"           = " --algo=x22i"
-    "X25x"           = " --algo=x25x" # new in 0.17.0
+    "X25x"           = " --algo=x25x" #new in 0.17.0
     "Xevan"          = " --algo=xevan"
 }
 #Commands from config file take precedence
@@ -82,8 +82,10 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         #Optionally disable dev fee mining, cannot be done for Honeycomb or Wildkeccak algorithm
-        if ($null -eq $Miner_Config) { $Miner_Config = [PSCustomObject]@{ DisableDevFeeMining = $Config.DisableDevFeeMining } }
-        if ($Miner_Config.DisableDevFeeMining) {
+        if ($null -eq $Miner_Config) {
+            $Miner_Config = [PSCustomObject]@{ DisableDevFeeMining = $Config.DisableDevFeeMining } 
+        }
+        if ($Miner_Config.DisableDevFeeMining) { 
             if ($Algorithm_Norm -match "Honeycomb|MtpTcr") { 
                 $Fee = " --donate-level 1"
                 $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = 1 / 100 }
@@ -99,7 +101,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         }
 
         Switch ($Algorithm_Norm) { 
-            "C11"   { $WarmupTime = 60 }
+            "C11" { $WarmupTime = 60 }
             default { $WarmupTime = $(if (@($Device | Where-Object { $_.Type -eq "CPU" -or ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge 2 })) { 30 } else { 60 }) }
         }
 

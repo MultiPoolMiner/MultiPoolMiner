@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,7 +16,7 @@ $ManualUri = "https://github.com/nicehash/ccminer-nanashi"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject]@{ 
-    #"blake2s"  = " -a blake2s" #Blake2s - Beaten by ccminerSib by 150%
+    #"blake2s"   = " -a blake2s" #Blake2s - Beaten by ccminerSib by 150%
     "blakecoin" = " -a blakecoin" #Blakecoin
     "c11"       = " -a c11" #C11
     "keccak"    = " -a keccak" #Keccak
@@ -24,15 +24,15 @@ $Commands = [PSCustomObject]@{
     "neoscrypt" = " -a neoscrypt" #NeoScrypt
     "skein"     = " -a skein" #Skein
     "x17"       = " -a x17" #X17
-    
-    # ASIC - never profitable 24/06/2018
-    #"decred"   = " -a decred" #Decred
-    #"groestl"  = " -a groestl" #Groestl
-    #"myr-gr"   = " -a myr-gr" #MyriadGroestl
-    #"nist5"    = " -a nist5" #Nist5
-    #"qubit"    = " -a qubit" #qubit
-    #"quark"    = " -a quark" #Quark
-    #"sib"      = " -a sib" #Sib
+
+    #ASIC - never profitable 24/06/2018
+    #"decred"    = " -a decred" #Decred
+    #"groestl"   = " -a groestl" #Groestl
+    #"myr-gr"    = " -a myr-gr" #MyriadGroestl
+    #"nist5"     = " -a nist5" #Nist5
+    #"qubit"     = " -a qubit" #qubit
+    #"quark"     = " -a quark" #Quark
+    #"sib"       = " -a sib" #Sib
 }
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force } }
@@ -53,7 +53,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Command = Get-CommandPerDevice -Command $Commands.$_ -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         Switch ($Algorithm_Norm) { 
-            "C11"   { $WarmupTime = 60 }
+            "C11" { $WarmupTime = 60 }
             default { $WarmupTime = 30 }
         }
 

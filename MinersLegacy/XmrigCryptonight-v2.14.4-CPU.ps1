@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -19,27 +19,27 @@ $Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
 if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
 
 $Commands = [PSCustomObject[]]@(
-    # Note: For fine tuning directly edit [Pool]_[Algorithm]-[Port]-[User]-[Pass].json in the miner binary directory 
-    [PSCustomObject]@{ Algorithm = "Cryptonight/0";          MinMemGB = 2; Threads = 1; Command = "" } # Cryptonight    
-    [PSCustomObject]@{ Algorithm = "Cryptonight/1";          MinMemGB = 2; Threads = 1; Command = "" } # CryptonightV7
-    [PSCustomObject]@{ Algorithm = "Cryptonight/2";          MinMemGB = 2; Threads = 1; Command = "" } # CryptonightV8, new with 2.8.1
-    [PSCustomObject]@{ Algorithm = "Cryptonight/double";     MinMemGB = 2; Threads = 1; Command = "" } # CryptonightDoubleV8, new with 2.14.1
-    [PSCustomObject]@{ Algorithm = "Cryptonight/gpu";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightGpu, new with 2.11.0
-    [PSCustomObject]@{ Algorithm = "Cryptonight/half";       MinMemGB = 2; Threads = 1; Command = "" } # CryptonightHalfV8, new with 2.9.1
-    [PSCustomObject]@{ Algorithm = "Cryptonight/msr";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightMsr
-    [PSCustomObject]@{ Algorithm = "Cryptonight/r";          MinMemGB = 2; Threads = 1; Command = "" } # CryptonightR, new with 2.13.1
-    [PSCustomObject]@{ Algorithm = "Cryptonight/rto";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightRto
-    [PSCustomObject]@{ Algorithm = "Cryptonight/rwz";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightRwzV8, new with 2.14.1
-    [PSCustomObject]@{ Algorithm = "Cryptonight/trtl";       MinMemGB = 2; Threads = 1; Command = "" } # CryptonightTrtl, new with 2.10.0
-    [PSCustomObject]@{ Algorithm = "Cryptonight/xao";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightXao
-    [PSCustomObject]@{ Algorithm = "Cryptonight/xtl";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightXtl
-    [PSCustomObject]@{ Algorithm = "Cryptonight/zls";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightZls, new with 2.14.1
-    [PSCustomObject]@{ Algorithm = "Cryptonight-lite/0";     MinMemGB = 1; Threads = 1; Command = "" } # CryptonightLite
-    [PSCustomObject]@{ Algorithm = "Cryptonight-lite/1";     MinMemGB = 1; Threads = 1; Command = "" } # CryptonightLiteV7
-    [PSCustomObject]@{ Algorithm = "Cryptonight-lite/2";     MinMemGB = 1; Threads = 1; Command = "" } # CryptonightLiteV8
-    [PSCustomObject]@{ Algorithm = "Cryptonight-heavy";      MinMemGB = 4; Threads = 1; Command = "" } # CryptonightHeavy
-    [PSCustomObject]@{ Algorithm = "Cryptonight-heavy/tube"; MinMemGB = 4; Threads = 1; Command = "" } # CryptonightHeavyTube
-    [PSCustomObject]@{ Algorithm = "Cryptonight-heavy/xhv";  MinMemGB = 4; Threads = 1; Command = "" } # CryptonightHeavyHaven
+    #Note: For fine tuning directly edit [Pool]_[Algorithm]-[Port]-[User]-[Pass].json in the miner binary directory
+    [PSCustomObject]@{ Algorithm = "Cryptonight/0"         ; MinMemGB = 2; Threads = 1; Command = "" } #Cryptonight
+    [PSCustomObject]@{ Algorithm = "Cryptonight/1"         ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightV7
+    [PSCustomObject]@{ Algorithm = "Cryptonight/2"         ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightV8, new with 2.8.1
+    [PSCustomObject]@{ Algorithm = "Cryptonight/double"    ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightDoubleV8, new with 2.14.1
+    [PSCustomObject]@{ Algorithm = "Cryptonight/gpu"       ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightGpu, new with 2.11.0
+    [PSCustomObject]@{ Algorithm = "Cryptonight/half"      ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightHalfV8, new with 2.9.1
+    [PSCustomObject]@{ Algorithm = "Cryptonight/msr"       ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightMsr
+    [PSCustomObject]@{ Algorithm = "Cryptonight/r"         ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightR, new with 2.13.1
+    [PSCustomObject]@{ Algorithm = "Cryptonight/rto"       ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightRto
+    [PSCustomObject]@{ Algorithm = "Cryptonight/rwz"       ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightRwzV8, new with 2.14.1
+    [PSCustomObject]@{ Algorithm = "Cryptonight/trtl"      ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightTrtl, new with 2.10.0
+    [PSCustomObject]@{ Algorithm = "Cryptonight/xao"       ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightXao
+    [PSCustomObject]@{ Algorithm = "Cryptonight/xtl"       ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightXtl
+    [PSCustomObject]@{ Algorithm = "Cryptonight/zls"       ; MinMemGB = 2; Threads = 1; Command = "" } #CryptonightZls, new with 2.14.1
+    [PSCustomObject]@{ Algorithm = "Cryptonight-lite/0"    ; MinMemGB = 1; Threads = 1; Command = "" } #CryptonightLite
+    [PSCustomObject]@{ Algorithm = "Cryptonight-lite/1"    ; MinMemGB = 1; Threads = 1; Command = "" } #CryptonightLiteV7
+    [PSCustomObject]@{ Algorithm = "Cryptonight-lite/2"    ; MinMemGB = 1; Threads = 1; Command = "" } #CryptonightLiteV8
+    [PSCustomObject]@{ Algorithm = "Cryptonight-heavy"     ; MinMemGB = 4; Threads = 1; Command = "" } #CryptonightHeavy
+    [PSCustomObject]@{ Algorithm = "Cryptonight-heavy/tube"; MinMemGB = 4; Threads = 1; Command = "" } #CryptonightHeavyTube
+    [PSCustomObject]@{ Algorithm = "Cryptonight-heavy/xhv" ; MinMemGB = 4; Threads = 1; Command = "" } #CryptonightHeavyHaven
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
@@ -67,11 +67,11 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             $PoolParameters = " --url=$($Pools.$Algorithm_Norm.Protocol)://$($Pools.$Algorithm_Norm.Host):$($Pools.$Algorithm_Norm.Port) --userpass=$($Pools.$Algorithm_Norm.User):$($Pools.$Algorithm_Norm.Pass) --keepalive$(if ($Pools.$Algorithm_Norm.Name -eq 'Nicehash') { " --nicehash" })$(if ($Pools.$Algorithm_Norm.SSL) { " --tls" })"
 
             $Arguments = [PSCustomObject]@{ 
-                ConfigFile = [PSCustomObject]@{ 
+                ConfigFile            = [PSCustomObject]@{ 
                     FileName = $ConfigFileName
-                    Content = [PSCustomObject]@{ 
+                    Content  = [PSCustomObject]@{ 
                         "algo"         = $_.Algorithm
-                        "api" = [PSCustomObject]@{ 
+                        "api"          = [PSCustomObject]@{ 
                             "port"         = $Miner_Port
                             "access-token" = $null
                             "worker-id"    = $null
@@ -86,9 +86,9 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
                         "retry-pause"  = 5
                     }
                 }
-                Commands = ("$Command$CommonCommands$PoolParameters$(if ($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker) { " --rig-id=$($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker)" }) --config=$ConfigFileName" -replace "\s+", " ").trim()
-                HwDetectCommands = "$Command$CommonCommands$PoolParameters --config=$ThreadsConfigFileName"
-                Threads = $_.Threads * (($Miner_Device.CIM | Measure-Object ThreadCount -Minimum).Minimum -1)
+                Commands              = ("$Command$CommonCommands$PoolParameters$(if ($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker) { " --rig-id=$($Config.Pools.($Pools.$Algorithm_Norm.Name).Worker)" }) --config=$ConfigFileName" -replace "\s+", " ").trim()
+                HwDetectCommands      = "$Command$CommonCommands$PoolParameters --config=$ThreadsConfigFileName"
+                Threads               = $_.Threads * (($Miner_Device.CIM | Measure-Object ThreadCount -Minimum).Minimum - 1)
                 ThreadsConfigFileName = $ThreadsConfigFileName
             }
 
@@ -108,4 +108,4 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             }
         }
     }
- }
+}

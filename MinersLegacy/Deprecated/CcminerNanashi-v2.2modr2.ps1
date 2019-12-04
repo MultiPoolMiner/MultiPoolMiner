@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -45,36 +45,36 @@ $Commands = [PSCustomObject]@{
     "timetravel"    = " -a timetravel" #Timetravel
     "tribus"        = " -a tribus" #Tribus
     "veltor"        = " -a veltor" #Veltor
-    #"whirlpool"    = " -a whirlpool" #Whirlpool
+    #"whirlpool"     = " -a whirlpool" #Whirlpool
     "wildkeccak"    = " -a wildkeccak" #wildkeccak
     "x11evo"        = " -a x11evo" #X11evo
     "x17"           = " -a x17" #x17
     "zr5"           = " -a zr5" #zr5
 
-    # ASIC - never profitable 11/08/2018
-    #"blake"        = " -a blake" #blake
-    #"blakecoin"    = " -a blakecoin" #Blakecoin
-    #"blake2s"      = " -a blake2s" #Blake2s
-    #"cryptolight"  = " -a cryptolight" #cryptolight
-    #"cryptonight"  = " -a cryptonight" #CryptoNight
-    #"decred"       = " -a decred" #Decred
-    #"groestl"      = " -a groestl" #Groestl
-    #"lbry"         = " -a lbry" #Lbry
-    #"lyra2"        = " -a lyra2" #lyra2re
-    #"myr-gr"       = " -a myr-gr" #MyriadGroestl
-    #"nist5"        = " -a nist5" #Nist5
-    #"quark"        = " -a quark" #Quark
-    #"qubit"        = " -a qubit" #Qubit
-    #"scrypt"       = " -a scrypt" #Scrypt
-    #"scrypt:N"     = " -a scrypt:N" #scrypt:N
-    #"sha256d"      = " -a sha256d" #sha256d
-    #"sia"          = " -a sia" #SiaCoin
-    #"sib"          = " -a sib" #Sib
-    #"vanilla"      = " -a vanilla" #BlakeVanilla
-    #"x11"          = " -a x11" #X11
-    #"x13"          = " -a x13" #x13
-    #"x14"          = " -a x14" #x14
-    #"x15"          = " -a x15" #x15
+    #ASIC - never profitable 11/08/2018
+    #"blake"         = " -a blake" #blake
+    #"blakecoin"     = " -a blakecoin" #Blakecoin
+    #"blake2s"       = " -a blake2s" #Blake2s
+    #"cryptolight"   = " -a cryptolight" #cryptolight
+    #"cryptonight"   = " -a cryptonight" #CryptoNight
+    #"decred"        = " -a decred" #Decred
+    #"groestl"       = " -a groestl" #Groestl
+    #"lbry"          = " -a lbry" #Lbry
+    #"lyra2"         = " -a lyra2" #lyra2re
+    #"myr-gr"        = " -a myr-gr" #MyriadGroestl
+    #"nist5"         = " -a nist5" #Nist5
+    #"quark"         = " -a quark" #Quark
+    #"qubit"         = " -a qubit" #Qubit
+    #"scrypt"        = " -a scrypt" #Scrypt
+    #"scrypt:N"      = " -a scrypt:N" #scrypt:N
+    #"sha256d"       = " -a sha256d" #sha256d
+    #"sia"           = " -a sia" #SiaCoin
+    #"sib"           = " -a sib" #Sib
+    #"vanilla"       = " -a vanilla" #BlakeVanilla
+    #"x11"           = " -a x11" #X11
+    #"x13"           = " -a x13" #x13
+    #"x14"           = " -a x14" #x14
+    #"x15"           = " -a x15" #x15
 }
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force } }
@@ -87,7 +87,7 @@ $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "N
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = [UInt16]($Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1)
-    
+
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
 
@@ -95,7 +95,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Command = Get-CommandPerDevice -Command $Commands.$_ -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         Switch ($Algorithm_Norm) { 
-            "C11"   { $WarmupTime = 60 }
+            "C11" { $WarmupTime = 60 }
             default { $WarmupTime = 30 }
         }
 

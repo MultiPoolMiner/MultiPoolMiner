@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,9 +16,9 @@ $ManualUri = "https://github.com/ethereum-mining/ethminer"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";MinMemGB = 2; Command = "" } #Ethash2GB
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";MinMemGB = 3; Command = "" } #Ethash3GB
-    [PSCustomObject]@{ Algorithm = "ethash"   ; MinMemGB = 4; Command = "" } #Ethash
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"; MinMemGB = 2; Command = "" } #Ethash2GB
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"; MinMemGB = 3; Command = "" } #Ethash3GB
+    [PSCustomObject]@{ Algorithm = "ethash"    ; MinMemGB = 4; Command = "" } #Ethash
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
@@ -48,7 +48,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             $Command = Get-CommandPerDevice -Command $_.Command -DeviceIDs $Miner_Device.Type_Vendor_Index
 
             $Protocol = "stratum$(if ($Pools.$Algorithm_Norm.Name -like "NiceHash*") { "2" })$(if ($Pools.$Algorithm_Norm.SSL) { "+ssl" } else { "+tcp" })://"
-            
+
             [PSCustomObject]@{ 
                 Name       = $Miner_Name
                 DeviceName = $Miner_Device.Name

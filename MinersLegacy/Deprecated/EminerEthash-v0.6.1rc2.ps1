@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,9 +16,9 @@ $ManualUri = "https://github.com/ethash/eminer-release"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";MinMemGB = 2; Command = "" } #Ethash2GB
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";MinMemGB = 3; Command = "" } #Ethash3GB
-    [PSCustomObject]@{ Algorithm = "ethash"   ; MinMemGB = 4; Command = "" } #Ethash
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"; MinMemGB = 2; Command = "" } #Ethash2GB
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"; MinMemGB = 3; Command = "" } #Ethash3GB
+    [PSCustomObject]@{ Algorithm = "ethash"    ; MinMemGB = 4; Command = "" } #Ethash
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
@@ -27,8 +27,8 @@ if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorit
 if ($Miner_Config.CommonCommands) { $CommonCommands = $Miner_Config.CommonCommands }
 else { $CommonCommands = " -intensity 64" }
 
-# Set devfee default coin, it may reduce DAG changes
-$DevFeeCoin  = [PSCustomObject]@{ 
+#Set devfee default coin, it may reduce DAG changes
+$DevFeeCoin = [PSCustomObject]@{ 
     "Ethereum"        = " -devfee-coin ETH"
     "Eth"             = " -devfee-coin ETH"
     "EthereumClassic" = " -devfee-coin ETC"

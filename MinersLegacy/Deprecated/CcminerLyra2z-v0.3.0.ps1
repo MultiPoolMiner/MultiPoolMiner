@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -21,14 +21,14 @@ $Commands = [PSCustomObject]@{
     "c11"       = " -a c11" #C11
     "keccak"    = " -a keccak" #Keccak
     "lyra2h"    = " -a lyra2h" #Lyra2h
-    #"lyra2v2"  = " -a lyra2v2" #Lyra2RE2 - Beaten by ccminerXevan by 80%
+    #"lyra2v2"   = " -a lyra2v2" #Lyra2RE2 - Beaten by ccminerXevan by 80%
     "lyra2z"    = " -a lyra2z" #Lyra2z
     "neoscrypt" = " -a neoscrypt" #NeoScrypt
     "skein"     = " -a skein" #Skein
     "x11evo"    = " -a x11evo" #X11evo
     "x17"       = " -a x17" #X17
-    
-    # ASIC - never profitable 24/06/2018
+
+    #ASIC - never profitable 24/06/2018
     #"decred"    = " -a decred" #Decred
     #"groestl"   = " -a groestl" #Groestl
     #"lbry"      = " -a lbry" #Lbry
@@ -61,7 +61,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Command = Get-CommandPerDevice -Command $Commands.$_ -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         Switch ($Algorithm_Norm) { 
-            "C11"   { $WarmupTime = 60 }
+            "C11" { $WarmupTime = 60 }
             default { $WarmupTime = 30 }
         }
 

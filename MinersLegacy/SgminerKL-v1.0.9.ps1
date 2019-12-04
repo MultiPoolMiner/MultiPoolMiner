@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,16 +16,16 @@ $ManualUri = "https://github.com/KL0nLutiy/sgminer-kl"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject]@{ 
-    "aergo"     = " --kernel aergo -X 256 -g 2" #Aergo
-    "geek"      = " --kernel geek -X 256 -g 2" # Geek
-    "phi"       = " --kernel phi -X 256 -g 2 -w 256" # Phi
-    # "polytimos" = " --kernel polytimos -X 256 -g 2 -w 256" # Polytimos, 	WildRig-v0.19.1 is 50% faster
-    "skunk"     = " --kernel skunk -X 256 -g 2 -w 256" # Skunk
-    "tribus"    = " --kernel tribus -X 256 -g 2" #Tribus
-    # "xevan"     = " --kernel xevan -X 256 -g 2" #Xevan, AMD-SgminerAvermore_v1.4.1 is 20% faster
-    "x16s"      = " --kernel x16s -X 256 -g 2" #X16S Pigeoncoin
-    "x16r"      = " --kernel x16r -X 256 -g 2" #X16R Ravencoin
-    "x17"       = " --kernel x17 -X 256 -g 2"
+    "aergo"  = " --kernel aergo -X 256 -g 2" #Aergo
+    "geek"   = " --kernel geek -X 256 -g 2" #Geek
+    "phi"    = " --kernel phi -X 256 -g 2 -w 256" #Phi
+    #"polytimos" = " --kernel polytimos -X 256 -g 2 -w 256" #Polytimos, WildRig-v0.19.1 is 50% faster
+    "skunk"  = " --kernel skunk -X 256 -g 2 -w 256" #Skunk
+    "tribus" = " --kernel tribus -X 256 -g 2" #Tribus
+    #"xevan"     = " --kernel xevan -X 256 -g 2" #Xevan, AMD-SgminerAvermore_v1.4.1 is 20% faster
+    "x16s"   = " --kernel x16s -X 256 -g 2" #X16S Pigeoncoin
+    "x16r"   = " --kernel x16r -X 256 -g 2" #X16R Ravencoin
+    "x17"    = " --kernel x17 -X 256 -g 2"
 }
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force } }

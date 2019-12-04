@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,27 +16,27 @@ $ManualUri = "https://github.com/nicehash/sgminer"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject]@{ 
-    "yescrypt"     = " --kernel yescrypt --worksize 4 --rawintensity 256" #Yescrypt
+    "yescrypt" = " --kernel yescrypt --worksize 4 --rawintensity 256" #Yescrypt
 
-    # Unprofitable algirithms as of 09/08/2019
-    #"groestlcoin"  = " --kernel groestlcoin --gpu-threads 2 --worksize 128 --intensity d" #Groestl
-    #"lbry"         = " --kernel lbry" #Lbry
-    #"lyra2rev2"    = " --kernel lyra2rev2 --gpu-threads 2 --worksize 128 --intensity d" #Lyra2RE2
-    #"neoscrypt"    = " --kernel neoscrypt --gpu-threads 1 --worksize 64 --intensity 15" #NeoScrypt, broken
-    #"sibcoin-mod"  = " --kernel sibcoin-mod" #Sib
-    #"skein"        = " --kernel skein --gpu-threads 2 --worksize 256 --intensity d" #Skein
+    #Unprofitable algirithms as of 09/08/2019
+    #"groestlcoin"        = " --kernel groestlcoin --gpu-threads 2 --worksize 128 --intensity d" #Groestl
+    #"lbry"               = " --kernel lbry" #Lbry
+    #"lyra2rev2"          = " --kernel lyra2rev2 --gpu-threads 2 --worksize 128 --intensity d" #Lyra2RE2
+    #"neoscrypt"          = " --kernel neoscrypt --gpu-threads 1 --worksize 64 --intensity 15" #NeoScrypt, broken
+    #"sibcoin-mod"        = " --kernel sibcoin-mod" #Sib
+    #"skein"              = " --kernel skein --gpu-threads 2 --worksize 256 --intensity d" #Skein
 
-    # ASIC - never profitable 23/05/2018    
-    #"blake2s"     = "" #Blake2s
-    #"blake"       = "" #Blakecoin
-    #"cryptonight" = " --gpu-threads 1 --worksize 8 --rawintensity 896" #CryptoNight
-    #"decred"      = "" #Decred
-    #"lbry"        = "" #Lbry
-    #"maxcoin"     = "" #Keccak
+    #ASIC - never profitable 23/05/2018
+    #"blake2s"            = "" #Blake2s
+    #"blake"              = "" #Blakecoin
+    #"cryptonight"        = " --gpu-threads 1 --worksize 8 --rawintensity 896" #CryptoNight
+    #"decred"             = "" #Decred
+    #"lbry"               = "" #Lbry
+    #"maxcoin"            = "" #Keccak
     #"myriadcoin-groestl" = " --gpu-threads 2 --worksize 64 --intensity d" #MyriadGroestl
-    #"nist5"       = "" #Nist5
-    #"pascal"      = "" #Pascal
-    #"vanilla"     = " --intensity d" #BlakeVanilla
+    #"nist5"              = "" #Nist5
+    #"pascal"             = "" #Pascal
+    #"vanilla"            = " --intensity d" #BlakeVanilla
 }
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force } }

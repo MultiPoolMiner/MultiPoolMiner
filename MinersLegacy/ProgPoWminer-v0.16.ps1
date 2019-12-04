@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -15,10 +15,10 @@ $ManualUri = "https://nemosminer.com"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
-$Devices = @($Devices | Where-Object Type -EQ "GPU"| Where-Object Vendor -EQ "NVIDIA")
+$Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA")
 
-# Miner requires CUDA 10.0.00 or higher
-$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+#Miner requires CUDA 10.0.00 or higher
+$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ", ""
 $RequiredCUDAVersion = "10.0.00"
 if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
@@ -26,7 +26,7 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
 }
 
 $Commands = [PSCustomObject[]]@(
-    [PSCustomObject]@{ Algorithm = "ProgPow";     MinMemGB = 4; Command = "" } #ProgPoW
+    [PSCustomObject]@{ Algorithm = "ProgPow"    ; MinMemGB = 4; Command = "" } #ProgPoW
     [PSCustomObject]@{ Algorithm = "ProgPow-2gb"; MinMemGB = 2; Command = "" } #ProgPoW2gb
     [PSCustomObject]@{ Algorithm = "ProgPow-3gb"; MinMemGB = 3; Command = "" } #ProgPoW3gb
     [PSCustomObject]@{ Algorithm = "ProgPow-4gb"; MinMemGB = 4; Command = "" } #ProgPoW4gb

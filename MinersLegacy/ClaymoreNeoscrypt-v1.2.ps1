@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -21,7 +21,7 @@ $Commands = [PSCustomObject]@{
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force } }
 
-##CommonCommands from config file take precedence
+#CommonCommands from config file take precedence
 if ($Miner_Config.CommonCommands) { $CommonCommands = $Miner_Config.CommonCommands }
 else { $CommonCommands = " -r -1 -a 2 -dbg -1" } #turn off all logs
 
@@ -40,7 +40,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         else { $Miner_Fee = 2 }
 
         #Optionally disable dev fee mining
-            if ($null -eq $Miner_Config) { $Miner_Config = [PSCustomObject]@{ DisableDevFeeMining = $Config.DisableDevFeeMining } }
+        if ($null -eq $Miner_Config) { $Miner_Config = [PSCustomObject]@{ DisableDevFeeMining = $Config.DisableDevFeeMining } }
         if ($Miner_Config.DisableDevFeeMining) { 
             $NoFee = " -nofee 1"
             $Miner_Fee = 0

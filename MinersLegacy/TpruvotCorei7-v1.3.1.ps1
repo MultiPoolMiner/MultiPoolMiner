@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,13 +16,13 @@ $ManualUri = "https://github.com/tpruvot/cpuminer-multi"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject]@{ 
-    # CPU Only algos 3/27/2018
-    "yescrypt"       = " -a yescrypt" #Yescrypt
-    "axiom"          = " -a axiom" #axiom
-    
-    # CPU & GPU - still profitable 31/03/2019
-    "shavite3"       = " -a shavite3" #shavite3
-    "timetravel"     = " -a timetravel" #Timetravel
+    #CPU Only algos 3/27/2018
+    "yescrypt"   = " -a yescrypt" #Yescrypt
+    "axiom"      = " -a axiom" #axiom
+
+    #CPU & GPU - still profitable 31/03/2019
+    "shavite3"   = " -a shavite3" #shavite3
+    "timetravel" = " -a timetravel" #Timetravel
 
     #GPU - never profitable 27/03/2018
     #"bastion"       = " -a bastion" #bastion
@@ -80,7 +80,7 @@ $Devices = $Devices | Where-Object Type -EQ "CPU" | Where-Object { (-not $_.CpuF
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
     $Miner_Port = [UInt16]($Config.APIPort + ($Miner_Device | Select-Object -First 1 -ExpandProperty Id) + 1)
-                
+
     $Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Algorithm_Norm = @(@(Get-Algorithm ($_ -split '-' | Select-Object -First 1) | Select-Object) + @($_ -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'; $_ } | Where-Object { $Pools.$Algorithm_Norm.Protocol -eq "stratum+tcp" <#temp fix#> } | ForEach-Object { 
         $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
 
@@ -88,7 +88,7 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
         $Command = Get-CommandPerDevice -Command $Commands.$_ -ExcludeParameters @("a", "algo") -DeviceIDs $Miner_Device.Type_Vendor_Index
 
         Switch ($Algorithm_Norm) { 
-            "C11"   { $WarmupTime = 60 }
+            "C11" { $WarmupTime = 60 }
             default { $WarmupTime = 30 }
         }
 

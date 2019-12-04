@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,10 +16,10 @@ $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = $Devices | Where-Object Type -EQ "CPU"
 
-if ($Devices.CpuFeatures -match "sha2")     { $Miner_Path = ".\Bin\$($Name)\cpuminer-Avx2-Sha.exe" }
+if ($Devices.CpuFeatures -match "sha2") { $Miner_Path = ".\Bin\$($Name)\cpuminer-Avx2-Sha.exe" }
 elseif ($Devices.CpuFeatures -match "avx2") { $Miner_Path = ".\Bin\$($Name)\cpuminer-Avx2.exe" }
-elseif ($Devices.CpuFeatures -match "avx")  { $Miner_Path = ".\Bin\$($Name)\cpuminer-Avx.exe" }
-elseif ($Devices.CpuFeatures -match "aes")  { $Miner_Path = ".\Bin\$($Name)\cpuminer-Aes-Sse42.exe" }
+elseif ($Devices.CpuFeatures -match "avx") { $Miner_Path = ".\Bin\$($Name)\cpuminer-Avx.exe" }
+elseif ($Devices.CpuFeatures -match "aes") { $Miner_Path = ".\Bin\$($Name)\cpuminer-Aes-Sse42.exe" }
 elseif ($Devices.CpuFeatures -match "sse2") { $Miner_Path = ".\Bin\$($Name)\cpuminer-Sse2.exe" }
 else { $Miner_Path = ".\Bin\$($Name)\cpuminer.exe" }
 

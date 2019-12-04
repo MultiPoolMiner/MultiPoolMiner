@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -17,8 +17,8 @@ $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = $Devices | Where-Object Type -EQ "GPU"
 
-# Miner requires CUDA 9.2.00 or higher
-$CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+#Miner requires CUDA 9.2.00 or higher
+$CUDAVersion = (($Devices | Where-Object Vendor -EQ "NVIDIA").OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ", ""
 $RequiredCUDAVersion = "9.2.00"
 if ($Devices.Vendor -contains "NVIDIA" -and $CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
@@ -27,42 +27,42 @@ if ($Devices.Vendor -contains "NVIDIA" -and $CUDAVersion -and [System.Version]$C
 
 $Commands = [PSCustomObject[]]@(
     #Single algo mining
-    [PSCustomObject]@{ Algorithm = "EquihashR15053"; Protocol = "beamhash2";    SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Command = "" } #EquihashR15053, new in 11.3.0
-    [PSCustomObject]@{ Algorithm = "cuckarood29";    Protocol = "cuckaroo29d";  SecondaryAlgorithm = "";          ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = " --fast" } #Cuckarood29, new in 15.7.1
-    [PSCustomObject]@{ Algorithm = "cuckatoo31";     Protocol = "cuckatoo31";   SecondaryAlgorithm = "";          ; MinMemGB = 8; Vendor = @("NVIDIA"); Command = "" } #Cuckatoo31, new in 14.2.0, requires GTX 1080Ti or RTX 2080Ti
-    [PSCustomObject]@{ Algorithm = "aeternity";      Protocol = "aeternity";    SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = " --fast" } #Aeternity, new in 11.1.0
-    #[PSCustomObject]@{ Algorithm = "equihash";       Protocol = "stratum";      SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Equihash, DSTMEquihash-v0.6.2 is 15% faster
-    #[PSCustomObject]@{ Algorithm = "equihash1445";   Protocol = "equihash1445"; SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Equihash1445, AMD_NVIDIA-Gminer_v1.52 is faster
-    [PSCustomObject]@{ Algorithm = "ethash";         Protocol = "ethstratum";   SecondaryAlgorithm = "";          ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = "" } #Ethash
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Ethash2GB
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "";          ; MinMemGB = 3; Vendor = @("NVIDIA"); Command = "" } #Ethash3GB
-    [PSCustomObject]@{ Algorithm = "ethash-4gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "";          ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = "" } #Ethash4GB
-    [PSCustomObject]@{ Algorithm = "ethash";         Protocol = "ethstratum";   SecondaryAlgorithm = "blake14r";  ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = "" } #Ethash & Blake14r dual mining
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "blake14r";  ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Ethash2GB & Blake14r dual mining
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "blake14r";  ; MinMemGB = 3; Vendor = @("NVIDIA"); Command = "" } #Ethash3GB & Blake14r dual mining
-    [PSCustomObject]@{ Algorithm = "ethash-4gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "blake14r";  ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = "" } #Ethash4GB & Blake14r dual mining
-    # [PSCustomObject]@{ Algorithm = "ethash";         Protocol = "ethstratum";   SecondaryAlgorithm = "blake2s";   ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = "" } #Ethash & Blake2s dual mining; rejected shares
-    # [PSCustomObject]@{ Algorithm = "ethash-2gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "blake2s";   ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Ethash2GB & Blake2s dual mining; rejected shares
-    # [PSCustomObject]@{ Algorithm = "ethash-3gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "blake2s";   ; MinMemGB = 3; Vendor = @("NVIDIA"); Command = "" } #Ethash3GB & Blake2s dual mining; rejected shares
-    # [PSCustomObject]@{ Algorithm = "ethash-4gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "blake2s";   ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = "" } #Ethash4GB & Blake2s dual mining; rejected shares
-    [PSCustomObject]@{ Algorithm = "ethash";         Protocol = "ethstratum";   SecondaryAlgorithm = "tensority"; ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = "" } #Ethash & Bytom dual mining
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "tensority"; ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Ethash2GB & Bytom dual mining
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "tensority"; ; MinMemGB = 3; Vendor = @("NVIDIA"); Command = "" } #Ethash3GB & Bytom dual mining
-    [PSCustomObject]@{ Algorithm = "ethash-4gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "tensority"; ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = "" } #Ethash4GB & Bytom dual mining
-    [PSCustomObject]@{ Algorithm = "ethash";         Protocol = "ethstratum";   SecondaryAlgorithm = "vbk";       ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = "" } #Ethash & Vbk dual mining
-    [PSCustomObject]@{ Algorithm = "ethash-2gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "vbk";       ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Ethash2GB & Vbk dual mining
-    [PSCustomObject]@{ Algorithm = "ethash-3gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "vbk";       ; MinMemGB = 3; Vendor = @("NVIDIA"); Command = "" } #Ethash3GB & Vbk dual mining
-    [PSCustomObject]@{ Algorithm = "ethash-4gb";     Protocol = "ethstratum";   SecondaryAlgorithm = "vbk";       ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = "" } #Ethash4GB & Vbk dual mining
-    [PSCustomObject]@{ Algorithm = "tensority";      Protocol = "ethstratum";   SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Bytom
+    [PSCustomObject]@{ Algorithm = "EquihashR15053"; Protocol = "beamhash2"   ; SecondaryAlgorithm = ""         ; MinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Command = ""       ; } #EquihashR15053, new in 11.3.0
+    [PSCustomObject]@{ Algorithm = "cuckarood29"   ; Protocol = "cuckaroo29d" ; SecondaryAlgorithm = ""         ; MinMemGB = 4; Vendor = @("NVIDIA")       ; Command = " --fast"; } #Cuckarood29, new in 15.7.1
+    [PSCustomObject]@{ Algorithm = "cuckatoo31"    ; Protocol = "cuckatoo31"  ; SecondaryAlgorithm = ""         ; MinMemGB = 8; Vendor = @("NVIDIA")       ; Command = ""       ; } #Cuckatoo31, new in 14.2.0, requires GTX 1080Ti or RTX 2080Ti
+    [PSCustomObject]@{ Algorithm = "aeternity"     ; Protocol = "aeternity"   ; SecondaryAlgorithm = ""         ; MinMemGB = 2; Vendor = @("NVIDIA")       ; Command = " --fast"; } #Aeternity, new in 11.1.0
+    #[PSCustomObject]@{ Algorithm = "equihash"      ; Protocol = "stratum"     ; SecondaryAlgorithm = ""         ; MinMemGB = 2; Vendor = @("NVIDIA")       ; Command = ""       ; } #Equihash, DSTMEquihash-v0.6.2 is 15% faster
+    #[PSCustomObject]@{ Algorithm = "equihash1445"  ; Protocol = "equihash1445"; SecondaryAlgorithm = ""         ; MinMemGB = 2; Vendor = @("NVIDIA")       ; Command = ""       ; } #Equihash1445, AMD_NVIDIA-Gminer_v1.52 is faster
+    [PSCustomObject]@{ Algorithm = "ethash"        ; Protocol = "ethstratum"  ; SecondaryAlgorithm = ""         ; MinMemGB = 4; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = ""         ; MinMemGB = 2; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash2GB
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = ""         ; MinMemGB = 3; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash3GB
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = ""         ; MinMemGB = 4; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash4GB
+    [PSCustomObject]@{ Algorithm = "ethash"        ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "blake14r" ; MinMemGB = 4; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash & Blake14r dual mining
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "blake14r" ; MinMemGB = 2; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash2GB & Blake14r dual mining
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "blake14r" ; MinMemGB = 3; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash3GB & Blake14r dual mining
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "blake14r" ; MinMemGB = 4; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash4GB & Blake14r dual mining
+    #[PSCustomObject]@{ Algorithm = "ethash"        ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "blake2s"  ; MinMemGB = 4; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash & Blake2s dual mining; rejected shares
+    #[PSCustomObject]@{ Algorithm = "ethash-2gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "blake2s"  ; MinMemGB = 2; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash2GB & Blake2s dual mining; rejected shares
+    #[PSCustomObject]@{ Algorithm = "ethash-3gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "blake2s"  ; MinMemGB = 3; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash3GB & Blake2s dual mining; rejected shares
+    #[PSCustomObject]@{ Algorithm = "ethash-4gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "blake2s"  ; MinMemGB = 4; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash4GB & Blake2s dual mining; rejected shares
+    [PSCustomObject]@{ Algorithm = "ethash"        ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "tensority"; MinMemGB = 4; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash & Bytom dual mining
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "tensority"; MinMemGB = 2; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash2GB & Bytom dual mining
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "tensority"; MinMemGB = 3; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash3GB & Bytom dual mining
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "tensority"; MinMemGB = 4; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash4GB & Bytom dual mining
+    [PSCustomObject]@{ Algorithm = "ethash"        ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "vbk"      ; MinMemGB = 4; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash & Vbk dual mining
+    [PSCustomObject]@{ Algorithm = "ethash-2gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "vbk"      ; MinMemGB = 2; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash2GB & Vbk dual mining
+    [PSCustomObject]@{ Algorithm = "ethash-3gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "vbk"      ; MinMemGB = 3; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash3GB & Vbk dual mining
+    [PSCustomObject]@{ Algorithm = "ethash-4gb"    ; Protocol = "ethstratum"  ; SecondaryAlgorithm = "vbk"      ; MinMemGB = 4; Vendor = @("NVIDIA")       ; Command = ""       ; } #Ethash4GB & Vbk dual mining
+    [PSCustomObject]@{ Algorithm = "tensority"     ; Protocol = "ethstratum"  ; SecondaryAlgorithm = ""         ; MinMemGB = 2; Vendor = @("NVIDIA")       ; Command = ""       ; } #Bytom
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
 
 $SecondaryAlgoIntensities = [PSCustomObject]@{ 
-    "blake14r"  = @(0) # 0 = Auto-Intensity
-    "blake2s"   = @(20, 40, 60) # 0 = Auto-Intensity not working with blake2s
-    "tensority" = @(0) # 0 = Auto-Intensity
-    "vbk"       = @(0) # 0 = Auto-Intensity
+    "blake14r"  = @(0) #0 = Auto-Intensity
+    "blake2s"   = @(20, 40, 60) #0 = Auto-Intensity not working with blake2s
+    "tensority" = @(0) #0 = Auto-Intensity
+    "vbk"       = @(0) #0 = Auto-Intensity
 }
 #Intensities from config file take precedence
 $Miner_Config.SecondaryAlgoIntensities.PSObject.Properties.Name | Select-Object | ForEach-Object { 
@@ -73,7 +73,7 @@ $Commands | ForEach-Object {
     if ($_.SecondaryAlgorithm) { 
         $Command = $_
         $SecondaryAlgoIntensities.$($_.SecondaryAlgorithm) | Select-Object | ForEach-Object { 
-            if ($null -ne $Command.SecondaryAlgoIntensity){ 
+            if ($null -ne $Command.SecondaryAlgoIntensity) { 
                 $Command = ($Command | ConvertTo-Json | ConvertFrom-Json)
                 $Command | Add-Member SecondaryAlgoIntensity ([String] $_) -Force
                 $Commands += $Command
@@ -96,14 +96,14 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
         $IntervalMultiplier = 1
         $MinMemGB = $_.MinMemGB
         $Protocol = $_.Protocol
-        if ($Pools.$Algorithm_Norm.SSL){ $Protocol = "$($Protocol)+ssl" }
+        if ($Pools.$Algorithm_Norm.SSL) { $Protocol = "$($Protocol)+ssl" }
         $Vendor = $_.Vendor
         $WarmupTime = $null
 
         #Cuckatoo31 on windows 10 requires 3.5 GB extra
-        if ($Algorithm -eq "Cuckatoo31" -and ([System.Version]$PSVersionTable.BuildVersion -ge "10.0.0.0")){ $MinMemGB += 3.5 }
+        if ($Algorithm -eq "Cuckatoo31" -and ([System.Version]$PSVersionTable.BuildVersion -ge "10.0.0.0")) { $MinMemGB += 3.5 }
 
-        if ($Miner_Device = @($Device | Where-Object{ $Vendor -contains $_.Vendor -and ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB })) { 
+        if ($Miner_Device = @($Device | Where-Object { $Vendor -contains $_.Vendor -and ([math]::Round((10 * $_.OpenCL.GlobalMemSize / 1GB), 0) / 10) -ge $MinMemGB })) { 
 
             #Get commands for active miner devices
             $Command = Get-CommandPerDevice -Command $_.Command -DeviceIDs $Miner_Device.Type_Vendor_Index
@@ -118,22 +118,22 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
                 $SecondaryAlgorithm = $_.SecondaryAlgorithm
                 $SecondaryAlgorithm_Norm = @(@(Get-Algorithm ($_.SecondaryAlgorithm -split '-' | Select-Object -First 1) | Select-Object) + @($_.SecondaryAlgorithm -split '-' | Select-Object -Skip 1) | Select-Object -Unique) -join '-'
 
-                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object{ $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) + @("$Algorithm_Norm$SecondaryAlgorithm_Norm") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) + @("$Algorithm_Norm$SecondaryAlgorithm_Norm") + @($_.SecondaryAlgoIntensity) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week; $SecondaryAlgorithm_Norm = $Stats."$($Miner_Name)_$($SecondaryAlgorithm_Norm)_HashRate".Week }
 
                 $Arguments_Secondary = " -uri2 $($SecondaryAlgorithm)$(if ($Pools.$SecondaryAlgorithm_Norm.SSL){ '+ssl' })://$([System.Web.HttpUtility]::UrlEncode($Pools.$SecondaryAlgorithm_Norm.User)):$([System.Web.HttpUtility]::UrlEncode($Pools.$SecondaryAlgorithm_Norm.Pass))@$($Pools.$SecondaryAlgorithm_Norm.Host):$($Pools.$SecondaryAlgorithm_Norm.Port)$(if($_.SecondaryAlgoIntensity -ge 0){ " -dual-intensity $($_.SecondaryAlgoIntensity)" })"
-                $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = 1.3 / 100; $SecondaryAlgorithm_Norm = 0 / 100 } # Fixed at 1.3%, secondary algo no fee
+                $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = 1.3 / 100; $SecondaryAlgorithm_Norm = 0 / 100 } #Fixed at 1.3%, secondary algo no fee
 
                 $IntervalMultiplier = 2
                 $WarmupTime = 120
             }
             else { 
-                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object{ $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
+                $Miner_Name = (@($Name) + @($Miner_Device.Model | Sort-Object -unique | ForEach-Object { $Model = $_; "$(@($Miner_Device | Where-Object Model -eq $Model).Count)x$Model" }) | Select-Object) -join '-'
                 $Miner_HashRates = [PSCustomObject]@{ $Algorithm_Norm = $Stats."$($Miner_Name)_$($Algorithm_Norm)_HashRate".Week }
                 $WarmupTime = 120
 
-                if ($Algorithm_Norm -match '^(ethash(-.+|))$') { $MinerFeeInPercent = 0.65 } # Ethash fee fixed at 0.65%
-                else{ $MinerFeeInPercent = 2 } # Other algos fee fixed at 2%
+                if ($Algorithm_Norm -match '^(ethash(-.+|))$') { $MinerFeeInPercent = 0.65 } #Ethash fee fixed at 0.65%
+                else { $MinerFeeInPercent = 2 } #Other algos fee fixed at 2%
 
                 $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = $MinerFeeInPercent / 100 }
             }
@@ -143,7 +143,7 @@ $Devices | Select-Object Vendor, Model -Unique | ForEach-Object {
             if ($Miner_Config.DisableDevFeeMining) { 
                 $NoFee = " -nofee"
                 $Miner_Fees = [PSCustomObject]@{ $Algorithm_Norm = 0 / 100 }
-                if ($SecondaryAlgorithm_Norm){ $Miner_Fees | Add-Member $SecondaryAlgorithm_Norm (0 / 100) }
+                if ($SecondaryAlgorithm_Norm) { $Miner_Fees | Add-Member $SecondaryAlgorithm_Norm (0 / 100) }
             }
             else { $NoFee = "" }
 

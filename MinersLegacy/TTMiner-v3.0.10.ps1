@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -17,8 +17,8 @@ $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA")
 
-# Miner requires CUDA 9.2.148 or higher
-$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
+#Miner requires CUDA 9.2.148 or higher
+$CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ", ""
 $RequiredCUDAVersion = "9.2.148"
 if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
@@ -26,22 +26,22 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
 }
 
 $Commands = [PSCustomObject[]]@(
-#    [PSCustomObject]@{ Algorithm = "ETHASH";      MinMemGB = 4; Command = " -A ETHASH" } #Ethash, PhoenixMiner & ClaymoreDual miner are faster
-#    [PSCustomObject]@{ Algorithm = "ETHASH-2gb";  MinMemGB = 2; Command = " -A ETHASH" } #Ethash2GB, PhoenixMiner & ClaymoreDual miner are faster
-#    [PSCustomObject]@{ Algorithm = "ETHASH-3gb";  MinMemGB = 3; Command = " -A ETHASH" } #Ethash3GB, PhoenixMiner & ClaymoreDual miner are faster
-#    [PSCustomObject]@{ Algorithm = "ETHASH-4gb";  MinMemGB = 4; Command = " -A ETHASH" } #Ethash4GB, PhoenixMiner & ClaymoreDual miner are faster
-#    [PSCustomObject]@{ Algorithm = "LYRA2V3";     MinMemGB = 2; Command = " -A LYRA2V3" } #LYRA2V3, CryptoDredge-v0.21.0 is faster
-#    [PSCustomObject]@{ Algorithm = "MTP";         MinMemGB = 6; Command = " -A MTP" } #MTP, CcminerTrex-v0.12.2b is 20% faster
-#    [PSCustomObject]@{ Algorithm = "MTPNICEHASH"; MinMemGB = 6; Command = " -A MTP" } #MTP; TempFix: NiceHash only, CcminerTrex-v0.12.2b is 20% faster
-#    [PSCustomObject]@{ Algorithm = "MYRGR";       MinMemGB = 2; Command = " -A MYRGR" } #Myriad-Groestl, never profitable
-    [PSCustomObject]@{ Algorithm = "UBQHASH";     MinMemGB = 2; Command = " -A UBQHASH" } #Ubqhash
-    [PSCustomObject]@{ Algorithm = "PROGPOW";     MinMemGB = 4; Command = " -A PROGPOW" } #ProgPoW
-    [PSCustomObject]@{ Algorithm = "PROGPOW-2gb"; MinMemGB = 2; Command = " -A PROGPOW" } #ProgPoW2gb
-    [PSCustomObject]@{ Algorithm = "PROGPOW-3gb"; MinMemGB = 3; Command = " -A PROGPOW" } #ProgPoW3gb
-    [PSCustomObject]@{ Algorithm = "PROGPOW-4gb"; MinMemGB = 4; Command = " -A PROGPOW" } #ProgPoW4gb
-    [PSCustomObject]@{ Algorithm = "PROGPOW092";  MinMemGB = 4; Command = " -A PROGPOW092" } #ProgPoW092 (Hydnora)
-    [PSCustomObject]@{ Algorithm = "PROGPOWZ";    MinMemGB = 4; Command = " -A PROGPOWZ" } #ProgPoWZ
-    [PSCustomObject]@{ Algorithm = "TETHASHV1";   MinMemGB = 4; Command = " -A TETHASHV1" } #TETHASHV1 (Teo)
+    #[PSCustomObject]@{ Algorithm = "ETHASH"     ; MinMemGB = 4; Command = " -A ETHASH"    ; } #Ethash, PhoenixMiner & ClaymoreDual miner are faster
+    #[PSCustomObject]@{ Algorithm = "ETHASH-2gb" ; MinMemGB = 2; Command = " -A ETHASH"    ; } #Ethash2GB, PhoenixMiner & ClaymoreDual miner are faster
+    #[PSCustomObject]@{ Algorithm = "ETHASH-3gb" ; MinMemGB = 3; Command = " -A ETHASH"    ; } #Ethash3GB, PhoenixMiner & ClaymoreDual miner are faster
+    #[PSCustomObject]@{ Algorithm = "ETHASH-4gb" ; MinMemGB = 4; Command = " -A ETHASH"    ; } #Ethash4GB, PhoenixMiner & ClaymoreDual miner are faster
+    #[PSCustomObject]@{ Algorithm = "LYRA2V3"    ; MinMemGB = 2; Command = " -A LYRA2V3"   ; } #LYRA2V3, CryptoDredge-v0.21.0 is faster
+    #[PSCustomObject]@{ Algorithm = "MTP"        ; MinMemGB = 6; Command = " -A MTP"       ; } #MTP, CcminerTrex-v0.12.2b is 20% faster
+    #[PSCustomObject]@{ Algorithm = "MTPNICEHASH"; MinMemGB = 6; Command = " -A MTP"       ; } #MTP; TempFix: NiceHash only, CcminerTrex-v0.12.2b is 20% faster
+    #[PSCustomObject]@{ Algorithm = "MYRGR"      ; MinMemGB = 2; Command = " -A MYRGR"     ; } #Myriad-Groestl, never profitable
+    [PSCustomObject]@{ Algorithm = "UBQHASH"    ; MinMemGB = 2; Command = " -A UBQHASH"   ; } #Ubqhash
+    [PSCustomObject]@{ Algorithm = "PROGPOW"    ; MinMemGB = 4; Command = " -A PROGPOW"   ; } #ProgPoW
+    [PSCustomObject]@{ Algorithm = "PROGPOW-2gb"; MinMemGB = 2; Command = " -A PROGPOW"   ; } #ProgPoW2gb
+    [PSCustomObject]@{ Algorithm = "PROGPOW-3gb"; MinMemGB = 3; Command = " -A PROGPOW"   ; } #ProgPoW3gb
+    [PSCustomObject]@{ Algorithm = "PROGPOW-4gb"; MinMemGB = 4; Command = " -A PROGPOW"   ; } #ProgPoW4gb
+    [PSCustomObject]@{ Algorithm = "PROGPOW092" ; MinMemGB = 4; Command = " -A PROGPOW092"; } #ProgPoW092 (Hydnora)
+    [PSCustomObject]@{ Algorithm = "PROGPOWZ"   ; MinMemGB = 4; Command = " -A PROGPOWZ"  ; } #ProgPoWZ
+    [PSCustomObject]@{ Algorithm = "TETHASHV1"  ; MinMemGB = 4; Command = " -A TETHASHV1" ; } #TETHASHV1 (Teo)
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }

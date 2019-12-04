@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -48,6 +48,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             Port       = $Miner_Port
             URI        = $Uri
             Fees       = [PSCustomObject]@{ $Algorithm_Norm = 2 / 100 }
-        } 
+        }
     }
 }

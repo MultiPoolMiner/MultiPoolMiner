@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -15,8 +15,8 @@ $ManualUri = "https://github.com/bubasik/cpuminer-opt-yespower"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject]@{ 
-    ### CPU PROFITABLE ALGOS AS OF 31/03/2019
-    ### these algorithms are profitable algorithms on supported pools
+    #CPU PROFITABLE ALGOS AS OF 31/03/2019
+    #these algorithms are profitable algorithms on supported pools
     "allium"        = " -a allium" #Garlicoin (GRLC)
     "hmq1725"       = " -a hmq1725" #Espers
     "hodl"          = " -a hodl" #Hodlcoin
@@ -26,10 +26,10 @@ $Commands = [PSCustomObject]@{
     "yescrypt"      = " -a yescrypt" #Globlboost-Y (BSTY)
     "yescryptr16"   = " -a yescryptr16" #Yenten (YTN)
 
-    ### MAYBE PROFITABLE ALGORITHMS - NOT MINEABLE IN SUPPORTED POOLS AS OF 30/03/2019
-    ### these algorithms are not mineable on supported pools but may be profitable
-    ### once/if support begins. They should be classified accordingly when or if
-    ### an algo becomes supported by one of the pools.
+    #MAYBE PROFITABLE ALGORITHMS - NOT MINEABLE IN SUPPORTED POOLS AS OF 30/03/2019
+    #these algorithms are not mineable on supported pools but may be profitable
+    #once/if support begins. They should be classified accordingly when or if
+    #an algo becomes supported by one of the pools. 
     "anime"         = " -a anime" #Animecoin (ANI)
     "argon2"        = " -a argon2" #Argon2 Coin (AR2)
     "argon2d250"    = " -a argon2d250" #argon2d-crds, Credits (CRDS)
@@ -101,7 +101,7 @@ $Commands = [PSCustomObject]@{
     #"x16r"          = " -a x16r" #x16r
     #"x16s"          = " -a x16s" #X16s
     #"x17"           = " -a x17" #X17
- }
+}
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $Commands | Add-Member $_ $($Miner_Config.Commands.$_) -Force } }
 
@@ -115,11 +115,11 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
     $Miner_Port = [UInt16]($Config.APIPort + ($Devices | Select-Object -First 1 -ExpandProperty Id) + 1)
 
     $Paths = @()
-    if ($Miner_Device.CpuFeatures -match "avx")               { $Paths += ".\Bin\$($Name)\cpuminer-Avx.exe" }
-    if ($Miner_Device.CpuFeatures -match "(avx2|[^sha]){2}")  { $Paths += ".\Bin\$($Name)\cpuminer-Avx2.exe" }
-    if ($Miner_Device.CpuFeatures -match "(avx2|sha){2}")     { $Paths += ".\Bin\$($Name)\cpuminer-Avx2-Sha.exe" }
-    if ($Miner_Device.CpuFeatures -match "sse2")              { $Paths += ".\Bin\$($Name)\cpuminer-Sse2.exe" }
-    if ($Miner_Device.CpuFeatures -match "(aes|sse42){2}")    { $Paths += ".\Bin\$($Name)\cpuminer-Aes-Sse42.exe" }
+    if ($Miner_Device.CpuFeatures -match "avx") { $Paths += ".\Bin\$($Name)\cpuminer-Avx.exe" }
+    if ($Miner_Device.CpuFeatures -match "(avx2|[^sha]){2}") { $Paths += ".\Bin\$($Name)\cpuminer-Avx2.exe" }
+    if ($Miner_Device.CpuFeatures -match "(avx2|sha){2}") { $Paths += ".\Bin\$($Name)\cpuminer-Avx2-Sha.exe" }
+    if ($Miner_Device.CpuFeatures -match "sse2") { $Paths += ".\Bin\$($Name)\cpuminer-Sse2.exe" }
+    if ($Miner_Device.CpuFeatures -match "(aes|sse42){2}") { $Paths += ".\Bin\$($Name)\cpuminer-Aes-Sse42.exe" }
     if (-not $Paths) { $Paths = @(".\Bin\$($Name)\cpuminer.exe") }
 
     $Paths | ForEach-Object { 
@@ -131,10 +131,10 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
             $Command = Get-CommandPerDevice -Command $Commands.$_ -DeviceIDs $Miner_Device.Type_Vendor_Index
 
             Switch ($Algorithm_Norm) { 
-                "C11"   { $WarmupTime = 60 }
+                "C11" { $WarmupTime = 60 }
                 default { $WarmupTime = 30 }
             }
-    
+
             [PSCustomObject]@{ 
                 Name       = $Miner_Name
                 DeviceName = $Miner_Device.Name

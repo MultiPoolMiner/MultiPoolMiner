@@ -1,9 +1,9 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [PSCustomObject]$Pools,
-    [PSCustomObject]$Stats,
-    [PSCustomObject]$Config,
+    [PSCustomObject]$Pools, 
+    [PSCustomObject]$Stats, 
+    [PSCustomObject]$Config, 
     [PSCustomObject[]]$Devices
 )
 
@@ -16,14 +16,14 @@ $ManualUri = "https://bitcointalk.org/index.php?topic=4724735.0"
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject[]]@(
-#    [PSCustomObject]@{ Algorithm = "Equihash1445";    MinMemGB = 1.85; Vendor = @("AMD", "NVIDIA"); Command = " --coin AUTO144_5" } # Gminer-v1.66 is faster
-    [PSCustomObject]@{ Algorithm = "Equihash1927";    MinMemGB = 3.0;  Vendor = @("AMD" <#, "NVIDIA"#>); Command = " --coin AUTO192_7" } # MiniZEquihash-v1.5p is faster on NVIDIA
-    [PSCustomObject]@{ Algorithm = "Equihash2109";    MinMemGB = 1.0;  Vendor = @("AMD", "NVIDIA"); Command = " --coin AOIN" } # new with 0.6 alpha 3
-    [PSCustomObject]@{ Algorithm = "Equihash965";     MinMemGB = 1.35; Vendor = @("AMD" <#, "NVIDIA"#>); Command = " --coin MNX" } # Ewbf2Equihash-v0.6 is faster on NVIDIA
-    [PSCustomObject]@{ Algorithm = "EquihashR12540";  MinMemGB = 3.00; Vendor = @("AMD" <#, "NVIDIA"#>); Command = " --coin ZEL" } # MiniZEquihash-v1.5p is faster on NVIDIA
-    [PSCustomObject]@{ Algorithm = "EquihashR150503"; MinMemGB = 2.75; Vendor = @("AMD", "NVIDIA"); Command = " --coin BEAM" }
-    [PSCustomObject]@{ Algorithm = "Cuckarood29";     MinMemGB = 4.0;  Vendor = @("AMD", "NVIDIA"); Command = " --coin GRIN-AD29" } # new with 0.8
-    [PSCustomObject]@{ Algorithm = "Cuckatoo31";      MinMemGB = 4.0;  Vendor = @("AMD", "NVIDIA"); Command = " --coin GRIN-AT31" } # new with 0.8
+    #[PSCustomObject]@{ Algorithm = "Equihash1445"   ; MinMemGB = 1.85; Vendor = @("AMD", "NVIDIA"); Command = " --coin AUTO144_5"; } #Gminer-v1.66 is faster
+    [PSCustomObject]@{ Algorithm = "Equihash1927"   ; MinMemGB = 3.0 ; Vendor = @("AMD")          ; Command = " --coin AUTO192_7"; } #MiniZEquihash-v1.5p is faster on NVIDIA
+    [PSCustomObject]@{ Algorithm = "Equihash2109"   ; MinMemGB = 1.0 ; Vendor = @("AMD", "NVIDIA"); Command = " --coin AOIN"     ; } #new with 0.6 alpha 3
+    [PSCustomObject]@{ Algorithm = "Equihash965"    ; MinMemGB = 1.35; Vendor = @("AMD")          ; Command = " --coin MNX"      ; } #Ewbf2Equihash-v0.6 is faster on NVIDIA
+    [PSCustomObject]@{ Algorithm = "EquihashR12540" ; MinMemGB = 3.00; Vendor = @("AMD")          ; Command = " --coin ZEL"      ; } #MiniZEquihash-v1.5p is faster on NVIDIA
+    [PSCustomObject]@{ Algorithm = "EquihashR150503"; MinMemGB = 2.75; Vendor = @("AMD", "NVIDIA"); Command = " --coin BEAM"     ; }
+    [PSCustomObject]@{ Algorithm = "Cuckarood29"    ; MinMemGB = 4.0 ; Vendor = @("AMD", "NVIDIA"); Command = " --coin GRIN-AD29"; } #new with 0.8
+    [PSCustomObject]@{ Algorithm = "Cuckatoo31"     ; MinMemGB = 4.0 ; Vendor = @("AMD", "NVIDIA"); Command = " --coin GRIN-AT31"; } #new with 0.8
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
