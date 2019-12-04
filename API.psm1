@@ -6,7 +6,7 @@
 
     # Create a global synchronized hashtable that all threads can access to pass data between the main script and API
     $Global:API = [hashtable]::Synchronized(@{ })
-    $API.APIVersion = 0.98
+    $API.APIVersion = "0.98.1"
 
     # Setup flags for controlling script execution
     $API.Stop = $false
@@ -56,7 +56,7 @@
 
                 # Parse any parameters in the URL - $Request.Url.Query looks like "+ ?a=b&c=d&message=Hello%20world"
                 $Parameters = @{ }
-                $Request.Url.Query -Replace "\?", "" -split '&' | Foreach-Object { 
+                $Request.Url.Query -replace "\?", "" -split '&' | Foreach-Object { 
                     $key, $value = $_ -split '='
                     # Decode any url escaped characters in the key and value
                     $key = [URI]::UnescapeDataString($key)
@@ -210,6 +210,10 @@
                         $Data = ConvertTo-Json @($API.Pools | Select-Object)
                         Break
                     }
+                    "/powerprice" { 
+                        $Data = ConvertTo-Json @($API.PowerPrice | Select-Object)
+                        Break
+                    }
                     "/rates" { 
                         $Data = ConvertTo-Json @($API.Rates | Select-Object)
                         Break
@@ -289,7 +293,7 @@
                                         $IncludeFile = $BasePath + '/' + $_.Groups[1].Value
                                         if (Test-Path $IncludeFile -PathType Leaf) { 
                                             $IncludeData = Get-Content $IncludeFile -Raw
-                                            $Data = $Data -Replace $_.Value, $IncludeData
+                                            $Data = $Data -replace $_.Value, $IncludeData
                                         }
                                     }
                                 }
@@ -315,7 +319,7 @@
                 # If $Data is null, the API will just return whatever data was in the previous request.  Instead, show an error
                 # This happens if the script just started and hasn't filled all the properties in yet. 
                 if ($Data -eq $Null) { 
-                    $Data = @{  "Error" = "API data not available" } | ConvertTo-Json
+                    $Data = @{ "Error" = "API data not available" } | ConvertTo-Json
                 }
 
                 # Send the response
