@@ -1,164 +1,164 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-      <link rel="shortcut icon" type="image/x-icon" href="https://multipoolminer.io/images/mpm_logo64.ico" />
-      <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.15.4/bootstrap-table.min.css" integrity="sha256-Bfo5E75379SXUZYuhGkuEc1K8EjSSpR/VF/axOVB8nw=" crossorigin="anonymous" />
-      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.15.4/extensions/filter-control/bootstrap-table-filter-control.css" integrity="sha256-C0jk9HXxhy9YH9lM/eDmMiuGhboaRnU3e657i4/K+uw=" crossorigin="anonymous" />
-      <link rel="stylesheet" href="/css/dashboard.css">
-      <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.15.4/bootstrap-table.min.js" integrity="sha256-zuYwDcub7myT0FRW3/WZI7JefCjyTmBJIoCS7Rb9xQc=" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.15.4/extensions/auto-refresh/bootstrap-table-auto-refresh.min.js" integrity="sha256-t1Sn47i78a1PGn8O0dam252nu9eV5wrgqjgxAo0SLy4=" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.15.4/extensions/filter-control/bootstrap-table-filter-control.min.js" integrity="sha256-5EseDwRjjb49pNGkjVzU/wjc5xSPxXz5vsbFOee4syI=" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.15.4/extensions/export/bootstrap-table-export.min.js" integrity="sha256-mHqQ/3HK2kJ4EzAou4bBreGhVAP9m8AHat5Hd126AcA=" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js" integrity="sha256-+JMHsXRyeTsws/tzbIh5YHQxRdKCuNjmvNcTFtY6DLc=" crossorigin="anonymous"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" integrity="sha256-Uv9BNBucvCPipKQ2NS9wYpJmi8DTOEfTA/nH2aoJALw=" crossorigin="anonymous"></script>
-      <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" integrity="sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe" crossorigin="anonymous"></script>
-      <script src="/js/utilities.js"></script>
-      <script src="/js/bootstrap-table-contextmenu.js"></script>
-      <title>MultiPoolMiner Local Dashboard</title>
-    </head>
-    <body>
-    <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-      <a class="navbar-brand" href="/">MultiPoolMiner</a>
-      <div class="text-white" id="profit"></div>
-      <div class="text-white" id="exchangerates"></div>
-    </nav>
-    
-    <div class="container-fluid">
-      <div class="row">
-        <nav class="d-none d-md-block bg-light sidebar nav-collapse" id="sidebar">
-          <div class="sidebar-sticky">
-            <ul class="nav flex-column">
-              <li class="nav-item">
-                <a id="navdashboard" class="nav-link" href="/">
-                  <span data-feather="home"></span>
-                  Dashboard
-                </a>
-              </li>
-            </ul>
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-              <span>Devices</span>
-            </h6>
-            <ul class="nav flex-column mb-2">
-              <li class="nav-item">
-                <a id="navdevices" class="nav-link" href="devices.html">
-                  <i class="fas fa-microchip"></i>Devices
-                </a>
-            </ul>
-
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-              <span>Pools</span>
-            </h6>
-            <ul class="nav flex-column mb-2">
-              <li class="nav-item">
-                <a id="navbestpools" class="nav-link" href="bestpools.html">
-                  <i class="fas fa-folder"></i>Best Pools
-                </a>
-              </li>
-              <li class="nav-item">
-                <a id="navallpools" class="nav-link" href="allpools.html">
-                  <i class="fas fa-folder-open"></i>All Pools
-                </a>
-              </li>
-            </ul>
-
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-              <span>Miners</span>
-            </h6>
-            <ul class="nav flex-column mb-2">
-              <li class="nav-item">
-                <a id="navminers" class="nav-link" href="miners.html">
-                  <i class="fas fa-folder"></i>Miners
-                </a>
-              </li>
-              <li class="nav-item">
-                <a id="navactiveminers" class="nav-link" href="activeminers.html">
-                  <i class="fas fa-folder-open"></i>Active Miners
-                </a>
-              </li>
-              <li class="nav-item">
-                <a id="navinactiveminers" class="nav-link" href="inactiveminers.html">
-                  <i class="fas fa-folder-open"></i>Inactive Miners
-                </a>
-              </li>
-              <li class="nav-item">
-                <a id="navfilteredminers" class="nav-link" href="filteredminers.html">
-                  <i class="fas fa-folder-open"></i>Filtered Miners
-                </a>
-              </li>
-              <li class="nav-item">
-                <a id="navminerstats" class="nav-link" href="minerstats.html">
-                  <i class="fas fa-folder-open"></i>Manage Stats
-                </a>
-              </li>
-              <li class="nav-item">
-                <a id="navwatchdog" class="nav-link" href="watchdog.html">
-                  <i class="fas fa-folder-open"></i>Watchdog
-                </a>
-              </li>
-            </ul>
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-              <span>Config</span>
-            </h6>
-            <ul class="nav flex-column mb-2">
-              <li class="nav-item">
-                <a id="navrunningconfig" class="nav-link" href="runningconfig.html">
-                  <i class="fas fa-folder-open"></i>Running Config
-                </a>
-              </li>
-              <li class="nav flex-column mb-2">
-                <a id="navsavedconfig" class="nav-link" href="savedconfig.html">
-                  <i class="fas fa-folder-open"></i>Saved Config
-                </a>
-              </li>
-              <li class="nav flex-column mb-2">
-                <a id="navunprofitablealgorithms" class="nav-link" href="unprofitablealgorithms.html">
-                  <i class="fas fa-folder-open"></i>Unprofitable Algorithms
-                </a>
-              </li>
-            </ul>
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-              <span>Links</span>
-            </h6>
-            <ul class="nav flex-column mb-2">
-              <li class="nav-item">
-                <a class="nav-link" href="https://multipoolminer.io">
-                  <i class="fas fa-external-link-alt"></i>Website
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="https://github.com/MultiPoolMiner/MultiPoolMiner">
-                  <i class="fab fa-github"></i>Github
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="APIDocs.html">
-                  <i class="fas fa-book"></i>API Documentation
-                </a>
-              </li>
-            </ul>
-          </div>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+            <link rel="shortcut icon" type="image/x-icon" href="https://multipoolminer.io/images/mpm_logo64.ico" />
+            <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.15.4/bootstrap-table.min.css" integrity="sha256-Bfo5E75379SXUZYuhGkuEc1K8EjSSpR/VF/axOVB8nw=" crossorigin="anonymous" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.15.4/extensions/filter-control/bootstrap-table-filter-control.css" integrity="sha256-C0jk9HXxhy9YH9lM/eDmMiuGhboaRnU3e657i4/K+uw=" crossorigin="anonymous" />
+            <link rel="stylesheet" href="/css/dashboard.css">
+            <script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.15.4/bootstrap-table.min.js" integrity="sha256-zuYwDcub7myT0FRW3/WZI7JefCjyTmBJIoCS7Rb9xQc=" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.15.4/extensions/auto-refresh/bootstrap-table-auto-refresh.min.js" integrity="sha256-t1Sn47i78a1PGn8O0dam252nu9eV5wrgqjgxAo0SLy4=" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.15.4/extensions/filter-control/bootstrap-table-filter-control.min.js" integrity="sha256-5EseDwRjjb49pNGkjVzU/wjc5xSPxXz5vsbFOee4syI=" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.15.4/extensions/export/bootstrap-table-export.min.js" integrity="sha256-mHqQ/3HK2kJ4EzAou4bBreGhVAP9m8AHat5Hd126AcA=" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.11/handlebars.min.js" integrity="sha256-+JMHsXRyeTsws/tzbIh5YHQxRdKCuNjmvNcTFtY6DLc=" crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" integrity="sha256-Uv9BNBucvCPipKQ2NS9wYpJmi8DTOEfTA/nH2aoJALw=" crossorigin="anonymous"></script>
+            <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" integrity="sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe" crossorigin="anonymous"></script>
+            <script src="/js/utilities.js"></script>
+            <script src="/js/bootstrap-table-contextmenu.js"></script>
+            <title>MultiPoolMiner Local Dashboard</title>
+        </head>
+        <body>
+        <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+            <a class="navbar-brand" href="/">MultiPoolMiner</a>
+            <div class="text-white" id="profit"></div>
+            <div class="text-white" id="exchangerates"></div>
         </nav>
-        <main role="main" class="main col-sm-12">
         
-        <!-- Modal -->
-        <div class="modal fade" id="myModal" role="dialog">
-          <div class="modal-dialog">
-            <!-- Modal content-->
-            <div class="modal-content">
-              <div class="modal-header">
-                <h4 class="modal-title"></h4>
-              </div>
-              <div class="modal-body">
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="container-fluid">
+            <div class="row">
+                <nav class="d-none d-md-block bg-light sidebar nav-collapse" id="sidebar">
+                    <div class="sidebar-sticky">
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                <a id="navdashboard" class="nav-link" href="/">
+                                    <span data-feather="home"></span>
+                                    Dashboard
+                                </a>
+                            </li>
+                        </ul>
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                            <span>Devices</span>
+                        </h6>
+                        <ul class="nav flex-column mb-2">
+                            <li class="nav-item">
+                                <a id="navdevices" class="nav-link" href="devices.html">
+                                    <i class="fas fa-microchip"></i>Devices
+                                </a>
+                        </ul>
+
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                            <span>Pools</span>
+                        </h6>
+                        <ul class="nav flex-column mb-2">
+                            <li class="nav-item">
+                                <a id="navbestpools" class="nav-link" href="bestpools.html">
+                                    <i class="fas fa-folder"></i>Best Pools
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a id="navallpools" class="nav-link" href="allpools.html">
+                                    <i class="fas fa-folder-open"></i>All Pools
+                                </a>
+                            </li>
+                        </ul>
+
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                            <span>Miners</span>
+                        </h6>
+                        <ul class="nav flex-column mb-2">
+                            <li class="nav-item">
+                                <a id="navminers" class="nav-link" href="miners.html">
+                                    <i class="fas fa-folder"></i>Miners
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a id="navactiveminers" class="nav-link" href="activeminers.html">
+                                    <i class="fas fa-folder-open"></i>Active Miners
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a id="navinactiveminers" class="nav-link" href="inactiveminers.html">
+                                    <i class="fas fa-folder-open"></i>Inactive Miners
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a id="navfilteredminers" class="nav-link" href="filteredminers.html">
+                                    <i class="fas fa-folder-open"></i>Filtered Miners
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a id="navminerstats" class="nav-link" href="minerstats.html">
+                                    <i class="fas fa-folder-open"></i>Manage Stats
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a id="navwatchdog" class="nav-link" href="watchdog.html">
+                                    <i class="fas fa-folder-open"></i>Watchdog
+                                </a>
+                            </li>
+                        </ul>
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                            <span>Config</span>
+                        </h6>
+                        <ul class="nav flex-column mb-2">
+                            <li class="nav-item">
+                                <a id="navrunningconfig" class="nav-link" href="runningconfig.html">
+                                    <i class="fas fa-folder-open"></i>Running Config
+                                </a>
+                            </li>
+                            <li class="nav flex-column mb-2">
+                                <a id="navsavedconfig" class="nav-link" href="savedconfig.html">
+                                    <i class="fas fa-folder-open"></i>Saved Config
+                                </a>
+                            </li>
+                            <li class="nav flex-column mb-2">
+                                <a id="navunprofitablealgorithms" class="nav-link" href="unprofitablealgorithms.html">
+                                    <i class="fas fa-folder-open"></i>Unprofitable Algorithms
+                                </a>
+                            </li>
+                        </ul>
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                            <span>Links</span>
+                        </h6>
+                        <ul class="nav flex-column mb-2">
+                            <li class="nav-item">
+                                <a class="nav-link" href="https://multipoolminer.io">
+                                    <i class="fas fa-external-link-alt"></i>Website
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="https://github.com/MultiPoolMiner/MultiPoolMiner">
+                                    <i class="fab fa-github"></i>Github
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="APIDocs.html">
+                                    <i class="fas fa-book"></i>API Documentation
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+                <main role="main" class="main col-sm-12">
+                
+                <!-- Modal -->
+                <div class="modal fade" id="myModal" role="dialog">
+                    <div class="modal-dialog">
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title"></h4>
+                            </div>
+                            <div class="modal-body">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
