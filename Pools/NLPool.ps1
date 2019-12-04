@@ -34,23 +34,23 @@ while (-not ($APIStatusResponse -and $APICurrenciesResponse) -and $RetryCount -g
 }
 
 if (-not ($APIStatusResponse -and $APICurrenciesResponse)) { 
-    Write-Log -Level Warn "Pool API ($PoolFileName) has failed. "
+    Write-Log -Level Warn "Pool API ($PoolName) has failed. "
     return
 }
 
 if (($APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) { 
-    Write-Log -Level Warn "Pool API ($PoolFileName) [StatusUri] returned nothing. "
+    Write-Log -Level Warn "Pool API ($PoolName) [StatusUri] returned nothing. "
     return
 }
 
 if (($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Measure-Object Name).Count -lt 1) { 
-    Write-Log -Level Warn "Pool API ($PoolFileName) [CurrenciesUri] returned nothing. "
+    Write-Log -Level Warn "Pool API ($PoolName) [CurrenciesUri] returned nothing. "
     return
 }
 
 $Payout_Currencies = (@($Payout_Currencies) + @($APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name)) | Where-Object { $Wallets.$_ } | Sort-Object -Unique
 if (-not $Payout_Currencies) { 
-    Write-Log -Level Verbose "Cannot mine on pool ($PoolFileName) - no wallet address specified. "
+    Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
 }
 
@@ -82,15 +82,8 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
         "Verushash" { $Divisor *= 2 } #temp fix
     }
 
-    if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1) }
-    else { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true }
-
-
-
-
-
-
-
+    if ((Get-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit") -eq $null) { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_last24h / $Divisor) -Duration (New-TimeSpan -Days 1) } 
+    else { $Stat = Set-Stat -Name "$($PoolName)_$($Algorithm_Norm)_Profit" -Value ($APIStatusResponse.$_.estimate_current / $Divisor) -Duration $StatSpan -ChangeDetection $true } 
 
     try { $EstimateCorrection = [Decimal](($APIStatusResponse.$_.actual_last24h / 1000) / $APIStatusResponse.$_.estimate_last24h) }
     catch { $EstimateCorrection = [Decimal]1 }
