@@ -1491,12 +1491,20 @@ class Miner {
     $Version
     $WarmupTime
 
+    [String[]]GetProcessNames() { 
+        return @(([IO.FileInfo]($this.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName)
+    }
+
     [String]GetCommandLineParameters() { 
         return $this.Arguments
     }
 
     [String]GetCommandLine() { 
         return "$($this.Path) $($this.GetCommandLineParameters())"
+    }
+
+    [Int32]GetProcessId() { 
+        return Get-CimInstance CIM_Process | Where-Object CommandLine -EQ $this.GetCommandLine() | Select-Object -ExpandProperty ProcessId
     }
 
     hidden StartMining() { 
