@@ -1,121 +1,140 @@
 <!--#include file="/parts/head.html" -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-  <h1 id="title" class="h2"data-navbaractive="navminers">Miners</h1>
+    <h1 id="title" class="h2" data-navbaractive="navminers">Miners</h1>
 </div>
 <div class="alert alert-info" role="alert">Shows all available miners for each algorithm</div>
 
-<table id="miners"
-  data-buttons-align="left"
-  data-url="/miners"
-  data-response-handler="formatMiners"
-  data-filter-control="true"
-  data-filter-show-clear="true"
-  data-sort-order="desc"
-  data-sort-name="Profit"
-  data-cache="false"
-  data-show-columns="true"
-  data-show-toggle="true"
-  data-show-refresh="true"
-  data-icons-prefix="fa"
-  data-icons="icons"
-  data-detail-view="true"
-  data-detail-formatter="detailFormatter"
-  >
-  <div class="row">
+<div id="toolbar">
+    <button id="re-benchmark" class="btn btn-primary">Trigger re-benchmarking</button>
+    <button id="re-measure" class="btn btn-primary">Trigger re-measuring power usage</button>
+    <button id="failed" class="btn btn-warning">Mark Miner as failed</button>
+    <button id="disable" class="btn btn-danger">Disable Miner</button>
+</div>
+
+<table id="miners" class="table"
+    data-icons="icons"
+    data-toolbar="#toolbar"
+    data-url="/miners"
+    data-cache="false"
+    data-toggle="table"
+    data-response-handler="formatMiners"
+    data-filter-control="true"
+    data-show-search-clear-button="true"
+    data-sort-order="desc"
+    data-sort-name="Profit"
+    data-remember-order="true"
+    data-filter-control="true"
+    data-detail-formatter="detailFormatter"
+    data-show-button-text="true"
+    data-show-columns="true"
+    data-show-refresh="true"
+    data-detail-view="true"
+    data-click-to-select="true">
+
     <thead>
-      <tr>
-        <th data-field="Name" data-sortable="true" data-filter-control="input" data-filter-strict-search="false">Name</th>
-        <th data-field="tDevices" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Devices</th>
-        <th data-field="Profit" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit</th>
-        <th data-field="Profit_Bias" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit Bias</th>
-        <th data-field="Earning" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning</th>
-        <th data-field="Earning_Bias" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning Bias</th>
-        <th data-field="PowerUsage" data-align="right" data-sortable="true" data-formatter="formatWatt">Power Usage</th>
-        <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Primary Algorithm</th>
-        <th data-field="tPrimaryHashRate" data-align="right"  data-sortable="true" data-formatter="formatHashRateValue">Speed</th>
-        <th data-field="tPrimaryFee" data-align="right" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
-        <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Secondary Algorithm</th>
-        <th data-field="tSecondaryHashRate" data-align="right"  data-sortable="true" data-formatter="formatHashRateValue">Speed</th>
-        <th data-field="tSecondaryFee" data-align="right" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
-      </tr>
+        <tr>
+            <th data-field="state" data-checkbox="true"></th>
+            <th data-field="Name" data-sortable="true" data-filter-control="input" data-filter-strict-search="false">Name</th>
+            <th data-field="BaseName" data-sortable="true" data-filter-control="select" data-filter-strict-search="false" data-visible="false">BaseName</th>
+            <th data-field="Version" data-sortable="true" data-filter-control="select" data-filter-strict-search="false" data-visible="false">Version</th>
+            <th data-field="tDevices" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Devices</th>
+            <th data-field="Profit" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit</th>
+            <th data-field="Profit_Bias" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit Bias</th>
+            <th data-field="Earning" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning</th>
+            <th data-field="Earning_Bias" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning Bias</th>
+            <th data-field="PowerUsage" data-align="right" data-sortable="true" data-filter-control="input" data-formatter="formatWatt">Power Usage</th>
+            <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Primary Algorithm</th>
+            <th data-field="tPrimaryHashRate" data-align="right"  data-sortable="true" data-filter-control="input" data-formatter="formatHashRateValue">Speed</th>
+            <th data-field="tPrimaryFee" data-align="right" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
+            <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Secondary Algorithm</th>
+            <th data-field="tSecondaryHashRate" data-align="right"  data-sortable="true" data-filter-control="input" data-formatter="formatHashRateValue">Speed</th>
+            <th data-field="tSecondaryFee" data-align="right" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
+            <th data-field="API" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-visible="false">API</th>
+            <th data-field="Port" data-sortable="true" data-filter-control="select" data-visible="false">API Port</th>
+            <th data-field="WarmupTime" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-visible="false" data-width=3>WarmupTime</th>
+            <th data-field="IntervalMultiplier" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-visible="false" data-width=2>IntervalMultiplier</th>
+            <th data-field="ShowMinerWindow" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-visible="false">ShowMinerWindow</th>
+        </tr>
     </thead>
-  </div>  
 </table>
 
-<!-- context menu -->
-<ul id="context-menu" class="dropdown-menu">
-    <li data-item="re-benchmark"><a class="dropdown-item" href="#">Trigger re-benchmarking</a></li>
-    <li data-item="re-measure"><a class="dropdown-item" href="#">Trigger re-measuring power usage</a></li>
-    <li data-item="failed"><a class="dropdown-item" href="#">Mark miner / algo combo as failed</a></li>
-    <li data-item="disable"><a class="dropdown-item" href="#">Disable miner / algo combo</a></li>
-</ul>
-
 <script>
-  $(function() {
-    $("#miners").bootstrapTable({
-      contextMenu: "#context-menu",
-      onContextMenuItem: function(row, $el) {
-        if ($el.data("item") == "re-benchmark") {
-          Command = "scripts/managestat.ps1?Type=HashRate&Action=Remove&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.tPrimaryAlgorithm) + "," + encodeURIComponent(row.tSecondaryAlgorithm)
-          $(".modal-body").load(Command, function() {
-            $(".modal-title").text(row.Name);
-            $("#myModal").modal({show:true});
-          });
-        }
-        if ($el.data("item") == "re-measure") {
-          Command = "scripts/managestat.ps1?Type=PowerUsage&Action=Remove&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.tPrimaryAlgorithm) + "," + encodeURIComponent(row.tSecondaryAlgorithm)
-          $(".modal-body").load(Command, function() {
-            $(".modal-title").text(row.Name);
-            $("#myModal").modal({show:true});
-          });
-        }
-        if ($el.data("item") == "disable") {
-          Command = "scripts/managestat.ps1?Type=Hashrate&Action=Set&Value=-1&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.tPrimaryAlgorithm) + "," + encodeURIComponent(row.tSecondaryAlgorithm)
-          $(".modal-body").load(Command, function() {
-            $(".modal-title").text(row.Name);
-            $("#myModal").modal({show:true});
-            $table.bootstrapTable("updateCell", {
-              index: row.index,
-              field: "Status",
-              value: "Disabled"
-            })
-          });
-        }
-        if ($el.data("item") == "failed") {
-          Command = "scripts/managestat.ps1?Type=Hashrate&Action=Set&Value=0&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.tPrimaryAlgorithm) + "," + encodeURIComponent(row.tSecondaryAlgorithm)
-          $(".modal-body").load(Command, function() {
-            $(".modal-title").text(row.Name);
-            $("#myModal").modal({show:true});
-          });
-        }
-      }
+    var $table = $('#miners')
+
+    $(function () {
+        $("#re-benchmark").click(function () {
+            $data = JSON.stringify($table.bootstrapTable('getSelections'));
+            if ($data != "[]") {
+                $Command = "scripts/managestat.ps1?DataSet=Miners&Action=RemoveStat&Type=HashRate&Data=" + encodeURIComponent($data)
+                $(".modal-body").load($Command, function() {
+                    $(".modal-title").text($("#re-benchmark").text());
+                    $("#myModal").modal({show:true});
+                });
+            };
+        });
+
+        $("#re-measure").click(function () {
+            $data = JSON.stringify($table.bootstrapTable('getSelections'));
+            if ($data != "[]") {
+                $Command = "scripts/managestat.ps1?DataSet=Miners&Action=RemoveStat&Type=PowerUsage&Data=" + encodeURIComponent($data)
+                $(".modal-body").load($Command, function() {
+                    $(".modal-title").text($("#re-measure").text());
+                    $("#myModal").modal({show:true});
+                });
+            };
+        });
+
+        $("#failed").click(function () {
+            $data = JSON.stringify($table.bootstrapTable('getSelections'));
+            if ($data != "[]") {
+                $Command = "scripts/managestat.ps1?DataSetStat=Miners&Action=Set&Type=HashRate&Value=0&Data=" + encodeURIComponent($data)
+                $(".modal-body").load($Command, function() {
+                    $(".modal-title").text($("#failed").text());
+                    $("#myModal").modal({show:true});
+                });
+            };
+        });
+
+        $("#disable").click(function () {
+            $data = JSON.stringify($table.bootstrapTable('getSelections'));
+            if ($data != "[]") {
+                $Command = "scripts/managestat.ps1?DataSetStat=Miners&Action=Set&Type=HashRate&Value=-1&Data=" + encodeURIComponent($data)
+                $(".modal-body").load($Command, function() {
+                    $(".modal-title").text($("#disable").text());
+                    $("#myModal").modal({show:true});
+                });
+            };
+        });
     });
-  });
+
+    $("#myModal").on('hidden.bs.modal', function () {
+        $table.bootstrapTable("refresh");
+    });
+
 </script>
 
 <!-- Start of page scripts -->
 <script type="text/javascript">
-  function formatMiners(data) {
-    // This function can alter the returned data before building the table, formatting it in a way
-    // that is easier to display and manipulate in a table
-    $.each(data, function(index, item) {
-      item.index = index;
+    function formatMiners(data) {
+        // This function can alter the returned data before building the table, formatting it in a way
+        // that is easier to display and manipulate in a table
+        $.each(data, function(index, item) {
 
-      // Format the device(s)
-      item.tDevices = item.DeviceName.toString();
+            // Format the device(s)
+            item.tDevices = item.DeviceName.toString();
 
-      // Format the algorithms, hashrates & fees
-      var algorithms = Object.keys(item.HashRates);
-      item.tPrimaryAlgorithm = algorithms[0];
-      item.tSecondaryAlgorithm = algorithms[1];
-      item.tPrimaryHashRate = item.HashRates[algorithms[0]];
-      item.tSecondaryHashRate = item.HashRates[algorithms[1]];
-      var fees = Object.values(item.Fees);
-      item.tPrimaryFee = fees[0];
-      item.tSecondaryFee = fees[1];
-    });
-    return data;
-  }
+            // Format the algorithms, hashrates & fees
+            var algorithms = Object.keys(item.HashRates);
+            item.tPrimaryAlgorithm = algorithms[0];
+            item.tSecondaryAlgorithm = algorithms[1];
+            item.tPrimaryHashRate = item.HashRates[algorithms[0]];
+            item.tSecondaryHashRate = item.HashRates[algorithms[1]];
+            var fees = Object.values(item.Fees);
+            item.tPrimaryFee = fees[0];
+            item.tSecondaryFee = fees[1];
+        });
+        return data;
+    }
 </script>
 <!-- End of page scripts -->
 <!--#include file="/parts/foot.html" -->

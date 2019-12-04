@@ -1,6 +1,6 @@
 <!--#include file="/parts/head.html" -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-  <h1 id="title" data-navbaractive="navrunprofitablealgorithms" class="h2">Unprofitable Algorithms</h1>
+    <h1 id="title" data-navbaractive="navrunprofitablealgorithms" class="h2">Unprofitable Algorithms</h1>
 </div>
 <div class="alert alert-info" role="alert">This is the static list of unprofitable algorithms.</br>Feel free to edit 'UnprofitableAlgorithms.txt'.</div>
 <pre id="config">
@@ -9,11 +9,11 @@
 
 <!-- End of page scripts -->
 <script type="text/javascript">
-  $(function() {
-    $.ajax({url: '/unprofitablealgorithms', success: function(result) {
+    $(function() {
+      $.ajax({url: '/unprofitablealgorithms', success: function(result) {
         $("#config").empty();
         $("#config").append(JSON.stringify(result, undefined, 4));
       }});
-  });
+    });
 </script>
 <!--#include file="/parts/foot.html" -->

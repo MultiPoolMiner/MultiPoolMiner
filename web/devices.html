@@ -1,76 +1,132 @@
 <!--#include file="/parts/head.html" -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-  <h1 id="title" data-navbaractive="navdevices" class="h2">Devices</h1>
+    <h1 id="title" class="h2" data-navbaractive="navdevices">Devices</h1>
 </div>
 <div class="alert alert-info" role="alert">These are the devices (GPUs and CPUs) detected by MultiPoolMiner. </div>
 
+<div id="toolbar">
+    <button id="enable-device" class="btn btn-success">Enable device</button>
+    <button id="disable-device" class="btn btn-danger">Disable Device</button>
+</div>
+
 <table id="devices" class="table"
-  data-buttons-align="left"
-  data-toggle="table"
-  data-url="/alldevices"
-  data-response-handler="formatDevices"
-  data-cache="false"
-  data-show-columns="true"
-  data-show-toggle="true"
-  data-show-refresh="true"
-  data-sort-order="desc"
-  data-sort-name="Status, Name"
-  data-icons-prefix="fa"
-  data-icons="icons"
-  data-detail-view="true"
-  data-detail-formatter="detailFormatter"
->
-  <thead>
-    <tr>
-      <th data-field="Name" data-sortable="true">Name</th>
-      <th data-field="Vendor" data-sortable="true">Vendor</th>
-      <th data-field="Model" data-sortable="true">Model</th>
-      <th data-field="Status" data-sortable="true">Status</th>
-      <th data-field="tMemory" data-sortable="true">Memory</th>
-      <th data-field="tCores" data-sortable="true">Cores/Stream Processors</th>
-      <th data-field="tClockSpeed" data-sortable="true">Clock Speed</th>
-      <th data-field="tDriverVersion">Driver Version</th>
-    </tr>
-  </thead>
+    data-icons="icons"
+    data-toolbar="#toolbar"
+    data-url="/alldevices"
+    data-cache="false"
+    data-toggle="table"
+    data-response-handler="formatDevices"
+    data-filter-control="true"
+    data-detail-formatter="detailFormatter"
+    data-detail-view="true"
+    data-show-button-text="true"
+    data-show-columns="true"
+    data-show-toggle="true"
+    data-show-refresh="true"
+    data-detail-view="true"
+    data-click-to-select="true">
+
+    <thead>
+        <tr>
+            <th data-field="state" data-checkbox="true"></th>
+            <th data-field="Name" data-sortable="true">Name</th>
+            <th data-field="Vendor" data-sortable="true">Vendor</th>
+            <th data-field="Model" data-sortable="true">Model</th>
+            <th data-field="Status" data-sortable="true">Status</th>
+            <th data-field="tMemory" data-sortable="true">Memory</th>
+            <th data-field="tCores" data-sortable="true">Cores/Stream Processors</th>
+            <th data-field="tClockSpeed" data-sortable="true">Clock Speed</th>
+            <th data-field="tDriverVersion">Driver Version</th>
+            <th data-field="Bus" data-sortable="true">PCI Bus Id</th>
+            <th data-field="Id" data-visible="false" data-sortable="true">Id</th>
+            <th data-field="Type_Id" data-visible="false" data-sortable="true">Type_Id</th>
+            <th data-field="Vendor_Id" data-visible="false" data-sortable="true">Vendor_Id</th>
+            <th data-field="Type_Vendor_Id" data-visible="false" data-sortable="true">Type_Vendor_Id</th>
+            <th data-field="Slot" data-visible="false" data-sortable="true">Slot</th>
+            <th data-field="Type_Slot" data-visible="false" data-sortable="true">Type_Slot</th>
+            <th data-field="Vendor_Slot" data-visible="false" data-sortable="true">Vendor_Slot</th>
+            <th data-field="Type_Vendor_Slot" data-visible="false" data-sortable="true">Type_Vendor_Slot</th>
+            <th data-field="Index" data-visible="false" data-sortable="true">Index</th>
+            <th data-field="Type_Index" data-visible="false" data-sortable="true">Type_Index</th>
+            <th data-field="Vendor_Index" data-visible="false" data-sortable="true">Vendor_Index</th>
+            <th data-field="Type_Vendor_Index" data-visible="false" data-sortable="true">Type_Vendor_Index</th>
+            <th data-field="PlatformId" data-visible="false" data-sortable="true">PlatformId</th>
+            <th data-field="PlatformId_Index" data-visible="false" data-sortable="true">PlatformId_Index</th>
+            <th data-field="Type_PlatformId_Index" data-visible="false" data-sortable="true">Type_PlatformId_Index</th>
+        </tr>
+    </thead>
 </table>
 
-<!-- End of page scripts -->
-<script type="text/javascript">
-  function formatDevices(data) {
-  // This function can alter the returned data before building the table, formatting it in a way
-  // that is easier to display and manipulate in a table
-  $.each(data, function(index, item) {
-    // Format the device(s)
-    if (item.OpenCL) {
-      item.tMemory = formatBytes(item.OpenCL.GlobalMemSize)
-    } else {
-      item.tMemory = "N/A"
-    }
-    
-    if (item.OpenCL) {
-      item.tClockSpeed = item.OpenCL.MaxClockFrequency
-    } else if (item.CIM) {
-      item.tClockSpeed = item.CIM.MaxClockSpeed
-    } else {
-      item.tClockSpeed = "N/A"
-    }
-    
-    if (item.OpenCL) {
-      item.tDriverVersion = item.OpenCL.DriverVersion
-    } else {
-      item.tDriverVersion = "N/A"
-    }
-    
-    if (item.OpenCL) {
-      item.tCores = item.OpenCL.MaxComputeUnits
-    } else if (item.CIM) {
-      item.tCores = item.CIM.NumberOfLogicalProcessors
-    } else {
-      item.tCores = "N/A"
-    }
-    
-  });
-  return data;
-}
+<script>
+    var $table = $('#devices')
+
+    $(function () {
+        $("#enable-device").click(function () {
+            $data =  JSON.stringify($table.bootstrapTable('getSelections').map(item => item.Name));
+            if ($data != "[]") {
+                $Command = "scripts/manageconfig.ps1?Action=Remove&Key=ExcludeDeviceName&DataSet=AllDevices&Data=" + encodeURIComponent($data)
+                $(".modal-body").load($Command, function() {
+                    $(".modal-title").text($("#enable-device").text());
+                    $("#myModal").modal({show:true});
+                });
+            };
+        });
+
+        $("#disable-device").click(function () {
+            $data =  JSON.stringify($table.bootstrapTable('getSelections').map(item => item.Name));
+            if ($data != "[]") {
+                $Command = "scripts/manageconfig.ps1?Action=Add&Key=ExcludeDeviceName&DataSet=AllDevices&Data=" + encodeURIComponent($data)
+                $(".modal-body").load($Command, function() {
+                    $(".modal-title").text($("#disable-device").text());
+                    $("#myModal").modal({show:true});
+                });
+            };
+        });
+    });
+
+    $("#myModal").on('hidden.bs.modal', function () {
+        $table.bootstrapTable("refresh");
+    });
+
 </script>
+
+<!-- Start of page scripts -->
+<script type="text/javascript">
+    function formatDevices(data) {
+        // This function can alter the returned data before building the table, formatting it in a way
+        // that is easier to display and manipulate in a table
+        $.each(data, function(index, item) {
+            // Format the device(s)
+            if (item.OpenCL) {
+                item.tMemory = formatBytes(item.OpenCL.GlobalMemSize)
+            } else {
+                item.tMemory = "N/A"
+            }
+
+            if (item.OpenCL) {
+                item.tClockSpeed = item.OpenCL.MaxClockFrequency
+            } else if (item.CIM) {
+                item.tClockSpeed = item.CIM.MaxClockSpeed
+            } else {
+                item.tClockSpeed = "N/A"
+            }
+
+            if (item.OpenCL) {
+                item.tDriverVersion = item.OpenCL.DriverVersion
+            } else {
+                item.tDriverVersion = "N/A"
+            }
+
+            if (item.OpenCL) {
+                item.tCores = item.OpenCL.MaxComputeUnits
+            } else if (item.CIM) {
+                item.tCores = item.CIM.NumberOfLogicalProcessors
+            } else {
+                item.tCores = "N/A"
+            }
+        });
+        return data;
+    }
+</script>
+<!-- End of page scripts -->
 <!--#include file="/parts/foot.html" -->

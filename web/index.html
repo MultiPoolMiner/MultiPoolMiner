@@ -1,43 +1,61 @@
 <!--#include file="/parts/head.html" -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-  <h1 id="title" data-navbaractive="navdashboard" class="h2">Dashboard</h1>
+    <h1 id="title" data-navbaractive="navdashboard" class="h2">Dashboard</h1>
+</div>
+
+<div id="toolbar">
+    <button id="re-benchmark" class="btn btn-primary">Trigger re-benchmarking</button>
+    <button id="re-measure" class="btn btn-primary">Trigger re-measuring power usage</button>
+    <button id="failed" class="btn btn-warning">Mark Miner as failed</button>
+    <button id="disable" class="btn btn-danger">Disable Miner</button>
 </div>
 
 <h3>Running Miners</h3>
+
 <table id="miners" class="table mb-4"
-  data-toggle="table"
-  data-url="/runningminers"
-  data-response-handler="formatRunningMiners"
-  data-buttons-align="left"
-  data-sort-order="desc"
-  data-sort-name="Profit"
-  data-cache="false"
-  data-show-columns="true"
-  data-show-toggle="true"
-  data-show-refresh="true"
-  data-icons-prefix="fa"
-  data-icons="icons"
-  data-detail-view="true"
-  data-detail-formatter="detailFormatter"
-  data-remember-order="true"
-  data-auto-refresh="false"
->
-  <thead>
-    <tr>
-      <th data-field="Name" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Name</th>
-      <th data-field="PoolName" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Pool</th>
-      <th data-field="tDevices" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Devices</th>
-      <th data-field="Profit" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit</th>
-      <th data-field="Earning" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning</th>
-      <th data-field="PowerUsage" data-align="right" data-sortable="true" data-formatter="formatWatt">Power Usage</th>
-      <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Algorithm</th>
-      <th data-field="tPrimaryHashRate" data-sortable="true" data-formatter="formatHashRateValue" data-filter-strict-search="true">Benchmarked Speed</th>
-      <th data-field="tPrimaryHashRateLive" data-sortable="true" data-formatter="formatHashRateValue">Actual Speed</th>
-      <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Secondary Algorithm</th>
-      <th data-field="tSecondaryHashRate" data-sortable="true" data-formatter="formatHashRateValue">Benchmarked Speed</th>
-      <th data-field="tSecondaryHashRateLive" data-sortable="true" data-formatter="formatHashRateValue">Actual Speed</th>
-    </tr>
-  </thead>
+    data-icons="icons"
+    data-toolbar="#toolbar"
+    data-toggle="table"
+    data-url="/runningminers"
+    data-response-handler="formatRunningMiners"
+    data-sort-order="desc"
+    data-sort-name="Profit"
+    data-remember-order="true"
+    data-cache="false"
+    data-detail-formatter="detailFormatter"
+    data-show-button-text="true"
+    data-show-columns="true"
+    data-show-toggle="true"
+    data-show-refresh="true"
+    data-icons-prefix="fa"
+    data-icons="icons"
+    data-detail-view="true"
+    data-auto-refresh="false"
+    >
+
+    <thead>
+        <tr>
+            <th data-field="state" data-checkbox="true"></th>
+            <th data-field="Name" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Name</th>
+            <th data-field="PoolName" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Pool</th>
+            <th data-field="tDevices" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Devices</th>
+            <th data-field="Profit" data-align="right" data-sortable="true" data-formatter="formatBTC">Profit</th>
+            <th data-field="Earning" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning</th>
+            <th data-field="PowerUsage" data-align="right" data-sortable="true" data-formatter="formatWatt">Power Usage</th>
+            <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Primary Algorithm</th>
+            <th data-field="tPrimaryHashRate" data-sortable="true" data-formatter="formatHashRateValue" data-filter-strict-search="true">Benchmarked Speed</th>
+            <th data-field="tPrimaryHashRateLive" data-sortable="true" data-formatter="formatHashRateValue">Actual Speed</th>
+            <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Secondary Algorithm</th>
+            <th data-field="tSecondaryHashRate" data-sortable="true" data-formatter="formatHashRateValue">Benchmarked Speed</th>
+            <th data-field="tSecondaryHashRateLive" data-sortable="true" data-formatter="formatHashRateValue">Actual Speed</th>
+            <th data-field="API" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-visible="false">API</th>
+            <th data-field="Port" data-sortable="true" data-filter-control="select" data-visible="false">API Port</th>
+            <th data-field="Best" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-visible="false">Best</th>
+            <th data-field="IntervalMultiplier" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-visible="false" data-width=2>IntervalMultiplier</th>
+            <th data-field="Activated" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-visible="false">Activated</th>
+            <th data-field="New" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-visible="false">New</th>
+        </tr>
+    </thead>
 </table>
 
 <h3 class="mt-4">Balances</h3>
@@ -45,102 +63,141 @@
 
 <!-- End of page scripts -->
 <script id="poolbalance_template" type="text/x-handlebars-template">
-  <div class="mb-2 card {{#if total}}text-white bg-primary {{else}}text-dark bg-light{{/if}}" style="min-width: {{#if total}}100%{{else}}200px{{/if}}";>
-    <div class="card-header text-center">
-      <h5>{{#if total}}{{name}}{{else}}<a href="{{url}}" target="_blank">{{name}}</a>{{/if}}</h5>
-      {{lastupdated}}
+    <div class="mb-2 card {{#if total}}text-white bg-primary {{else}}text-dark bg-light{{/if}}" style="min-width: {{#if total}}100%{{else}}200px{{/if}}";>
+        <div class="card-header text-center">
+            <h5>{{#if total}}{{name}}{{else}}<a href="{{url}}" target="_blank">{{name}}</a>{{/if}}</h5>
+            {{lastupdated}}
+        </div>
+        <div class="card-body text-center">
+            <p class="card-text currencies">
+                {{#each balances}}
+                <span class="currencyname font-weight-bold">{{@key}}:</span> <span>{{this}}</span><br/>
+                {{/each}}
+            </p>
+        </div>
     </div>
-    <div class="card-body text-center">
-      <p class="card-text currencies">
-        {{#each balances}}
-          <span class="currencyname font-weight-bold">{{@key}}:</span> <span>{{this}}</span><br/>
-        {{/each}}
-      </p>
-    </div>
-  </div>
 </script>
 
 <script type="text/javascript">
-  $(function() {
-    function updatePoolBalances() {
-      var rates;
-      $.ajax({url: '/rates', success: function(result) {
-        console.log(result);
-        rates = result[0];
-      }});
-      var data_total = {name: "Total Balance From All Pools", balances: {}, total: true};
-      $.ajax({url: '/balances', success: function(result) {
-        console.log(result);
-        $("#balanceboxes").empty();
-        var template = Handlebars.compile($("#poolbalance_template").html());
-        var footer = new RegExp("-.+|=.+");
-        $.each(result, function(index, item) {
-          if (!(footer.test(item.Name))) {
-            var currencies = Object.keys(rates[item.Currency]);
-            var data = {name: item.Name, lastupdated: formatDate(item.LastUpdated), url: item.Url, balances: {}};
-            $.each(currencies, function(cindex, currency) {
-              data["balances"][currency] = (item.Total * rates[item.Currency][currency]).toFixed(10);
-              if (!(data_total["balances"][currency])) {data_total["balances"][currency] = 0}
-              data_total["balances"][currency] = data_total["balances"][currency] + item.Total * rates[item.Currency][currency];
+    var $table = $('#miners')
+
+    $("#re-benchmark").click(function () {
+        $data = JSON.stringify($table.bootstrapTable('getSelections'));
+        if ($data != "[]") {
+            $Command = "scripts/managestat.ps1?DataSet=RunningMiners&Action=RemoveStat&Type=HashRate&Data=" + encodeURIComponent($data)
+            $(".modal-body").load($Command, function() {
+                $(".modal-title").text($("#re-benchmark").text());
+                $("#myModal").modal({show:true});
             });
-            $("#balanceboxes").append(template(data));
-          }
+        };
+    });
+
+    $("#re-measure").click(function () {
+        $data = JSON.stringify($table.bootstrapTable('getSelections'));
+        if ($data != "[]") {
+            $Command = "scripts/managestat.ps1?DataSet=RunningMiners&Action=RemoveStat&Type=PowerUsage&Data=" + encodeURIComponent($data)
+            $(".modal-body").load($Command, function() {
+                $(".modal-title").text($("#re-measure").text());
+                $("#myModal").modal({show:true});
+            });
+        };
+    });
+
+    $("#failed").click(function () {
+        $data = JSON.stringify($table.bootstrapTable('getSelections'));
+        if ($data != "[]") {
+            $Command = "scripts/managestat.ps1?DataSet=RunningMiners&Action=SetStat&Type=HashRate&Value=0&Data=" + encodeURIComponent($data)
+            $(".modal-body").load($Command, function() {
+                $(".modal-title").text($("#failed").text());
+                $("#myModal").modal({show:true});
+            });
+        };
+    });
+
+    $("#disable").click(function () {
+        $data = JSON.stringify($table.bootstrapTable('getSelections'));
+        if ($data != "[]") {
+            $Command = "scripts/managestat.ps1?DataSet=RunningMiners&Action=SetStat&Type=HashRate&Value=-1&Data=" + encodeURIComponent($data)
+            $(".modal-body").load($Command, function() {
+                $(".modal-title").text($("#disable").text());
+                $("#myModal").modal({show:true});
+            });
+        };
+    });
+
+    $("#myModal").on('hidden.bs.modal', function () {
+        $table.bootstrapTable("refresh");
+    });
+
+    $(function() {
+        function updatePoolBalances() {
+            var rates;
+            $.ajax({url: '/rates', success: function(result) {
+                console.log(result);
+                rates = result[0];
+            }});
+            var data_total = {name: "Total Balance From All Pools", balances: {}, total: true};
+            $.ajax({url: '/balances', success: function(result) {
+                console.log(result);
+                $("#balanceboxes").empty();
+                var template = Handlebars.compile($("#poolbalance_template").html());
+                var footer = new RegExp("-.+|=.+");
+                $.each(result, function(index, item) {
+                    if (!(footer.test(item.Name))) {
+                        var currencies = Object.keys(rates[item.Currency]);
+                        var data = {name: item.Name, lastupdated: formatDate(item.LastUpdated), url: item.Url, balances: {}};
+                        $.each(currencies, function(cindex, currency) {
+                            data["balances"][currency] = (item.Total * rates[item.Currency][currency]).toFixed(10);
+                            if (!(data_total["balances"][currency])) {data_total["balances"][currency] = 0}
+                            data_total["balances"][currency] = data_total["balances"][currency] + item.Total * rates[item.Currency][currency];
+                        });
+                        $("#balanceboxes").append(template(data));
+                    }
+                });
+                $("#balanceboxes").append(template(data_total));
+            }});
+        };
+
+        updatePoolBalances();
+        window.setInterval(function() { updatePoolBalances();}, 60000);
+    });
+
+    function formatRunningMiners(data) {
+        // This function can alter the returned data before building the table, formatting it in a way
+        // that is easier to display and manipulate in a table
+        $.each(data, function(index, item) {
+            // Format the type(s)
+            console.log(data);
+            console.log(item);
+            item.tDevices = item.DeviceName.toString();
+
+            // Format the algorithms and hashrates
+
+            // Algorithm is always an array, sometimes has 2 elements
+            item.tPrimaryAlgorithm = item.Algorithm[0];
+            try { item.tSecondaryAlgorithm = item.Algorithm[1]; } catch (error) { /* ignore */ }
+
+            // Speed is an array if there are multiple algorithms, or a single number otherwise
+            if (Array.isArray(item.Speed)) {
+                item.tPrimaryHashRate = item.Speed[0];
+                item.tSecondaryHashRate = item.Speed[1];
+            } else {
+                item.tPrimaryHashRate = item.Speed;
+            }
+
+            if (Array.isArray(item.Speed_Live)) {
+                item.tPrimaryHashRateLive = item.Speed_Live[0];
+                item.tSecondaryHashRateLive = item.Speed_Live[1];
+            } else {
+                item.tPrimaryHashRateLive = item.Speed_Live;
+            }
         });
-        $("#balanceboxes").append(template(data_total));
-      }});
-    }
+        return data;
+    };
 
-    updatePoolBalances();
-    window.setInterval(function() { updatePoolBalances();}, 60000);
-  });
-  
-  function formatRunningMiners(data) {
-    // This function can alter the returned data before building the table, formatting it in a way
-    // that is easier to display and manipulate in a table
-    $.each(data, function(index, item) {
-      // Format the type(s)
-      console.log(data);
-      console.log(item);
-      item.tDevices = item.DeviceName.toString();
+    function formatDate(data) {
+        return timeSince(new Date(data));
+    };
 
-      // Format the algorithms and hashrates
-      
-      // Algorithm is always an array, sometimes has 2 elements
-      item.tPrimaryAlgorithm = item.Algorithm[0];
-      try { item.tSecondaryAlgorithm = item.Algorithm[1]; } catch (error) { /* ignore */ }
-      
-      // Speed is an array if there are multiple algorithms, or a single number otherwise
-      if (Array.isArray(item.Speed)) {
-        item.tPrimaryHashRate = item.Speed[0];
-        item.tSecondaryHashRate = item.Speed[1];
-      } else {
-        item.tPrimaryHashRate = item.Speed;
-      }
-      
-      if (Array.isArray(item.Speed_Live)) {
-        item.tPrimaryHashRateLive = item.Speed_Live[0];
-        item.tSecondaryHashRateLive = item.Speed_Live[1];
-      } else {
-        item.tPrimaryHashRateLive = item.Speed_Live;
-      }
-    });
-    return data;
-  }
-
-  $(function() {
-    $('#miners').bootstrapTable({
-      contextMenu: '#context-menu',
-      onContextMenuItem: function(row, $el){
-        if($el.data("item") == "edit"){
-          alert(row.itemid);
-        }
-      }
-    });
-  });
-  
-  function formatDate(data) {
-    return timeSince(new Date(data));
-    return new Date(parseInt(data.replace(/\D/g,''))).toLocaleString();
-  }
 </script>
 <!--#include file="/parts/foot.html" -->

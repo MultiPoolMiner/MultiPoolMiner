@@ -1,6 +1,6 @@
 <html>
   <body>
-    <h1>MultiPoolMiner API (version 0.98)</h1>
+    <h1>MultiPoolMiner API (version 0.96)</h1>
     
     API data is available at http://localhost:[API port]/&lt;resource&gt;
 
@@ -103,10 +103,6 @@
     <a href="http://localhost:3999/failedminers">/failedminers</a>
     <p>Shows data about all miners that are failed.</p>
     
-    <h3>Filtered Miners</h3>
-    <a href="http://localhost:3999/filteredminers">/filteredminers</a>
-    <p>Shows data about all miners that are filtered out.</p>
-
     <h3>Intervals</h3>
     <a href="http://localhost:3999/intervals">/intervals</a>
     <p>Collection of intervals (StartStart & StartEnd)</p>
@@ -170,6 +166,10 @@
     <h3>WatchdogTimers</h3>
     <a href="http://localhost:3999/watchdogtimers">/watchdogtimers</a>
     <p>Dump of the $WatchdogTimers variable, used only for debugging. WatchdogTimers data is used for internal MPM calculations.</p>
+
+    <h3>WatchdogTimersReset</h3>
+    <a href="http://localhost:3999/watchdogtimersreset">/watchdogtimersreset</a>
+    <p>Tells the script to reset all watchdog timers. Resetting watchdog timers will re-enable all bloked miner/algos on next run.</p>
 
     <a href="https://multipoolminer.io">MultiPoolMiner.io</a>
   </body>

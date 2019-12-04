@@ -1,91 +1,90 @@
 <!--#include file="/parts/head.html" -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-  <h1 id="title" data-navbaractive="navbestpools" class="h2">Best Pools</h1>
+    <h1 id="title" class="h2" data-navbaractive="navbestpools">Best Pools</h1>
 </div>
 <div class="alert alert-info" role="alert">Shows the pool for each algorithm that was selected as the most profitable</div>
 
-<table id="pools"
-  data-buttons-align="left"
-  data-url="/pools"
-  data-filter-control="true"
-  data-filter-show-clear="true"
-  data-sort-order="asc"
-  data-sort-name="Algorithm"
-  data-cache="false"
-  data-show-columns="true"
-  data-show-toggle="true"
-  data-show-refresh="true"
-  data-icons-prefix="fa"
-  data-icons="icons"
-  data-detail-view="true"
-  data-detail-formatter="detailFormatter"
-  data-response-handler="formatPools"
-  #data-pagination="true"
-  #data-page-list="[10, 25, 50, 100, all]"
-  >
-  <div class="row">
+
+<div id="toolbar">
+    <button id="reset-data" class="btn btn-primary">Reset stats data</button>
+</div>
+
+<table id="pools" class="table table-striped table-bordered table-sm" width="50%"
+    data-show-fullscreen="true"
+    data-icons="icons"
+    data-toolbar="#toolbar"
+    data-url="/pools"
+    data-cache="false"
+    data-toggle="table"
+    data-filter-control="true"
+    data-show-search-clear-button="true"
+    data-sort-order="asc"
+    data-sort-name="Algorithm"
+    data-remember-order="true"
+    data-filter-control="true"
+    data-detail-formatter="detailFormatter"
+    data-response-handler="formatPools"
+    data-show-button-text="true"
+    data-show-columns="true"
+    data-show-refresh="true"
+    data-detail-view="true"
+    data-click-to-select="true">
+
     <thead>
-      <tr>
-        <th data-field="Name" data-sortable="true" data-filter-control="select">Name</th>
-        <th data-field="Algorithm" data-sortable="true" data-filter-control="select">Algorithm</th>
-        <th data-field="CoinName" data-sortable="true" data-filter-control="select">CoinName</th>
-        <th data-field="CurrencySymbol" data-sortable="true" data-filter-control="select">Currency</th>
-        <th data-field="Price" data-align="right" data-sortable="true" data-formatter="formatPrices">BTC/GH/Day</th>
-        <th data-field="StablePrice" data-align="right" data-sortable="true" data-formatter="formatPrices">BTC/GH/Day (Week)</th>
-        <th data-field="MarginOfError" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=2>MarginOfError</th>
-        <th data-field="Host" data-sortable="true" data-filter-control="input" data-filter-strict-search="false">Host</th>
-        <th data-field="Port" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-width=1>Port&nbsp</th>
-        <th data-field="Workers" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Workers</th>
-        <th data-field="Region" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Region</th>
-        <th data-field="SSL" data-sortable="true" data-width=4>SSL</th>
-        <th data-field="Fee" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
-        <th data-field="Updated" data-sortable="true" data-formatter="formatDate">Last Updated</th>
-      </tr>
+        <tr>
+            <th data-field="state" data-checkbox="true"></th>
+            <th data-field="Name" data-sortable="true" data-filter-control="select">Name</th>
+            <th data-field="Algorithm" data-sortable="true" data-filter-control="select">Algorithm</th>
+            <th data-field="CoinName" data-sortable="true" data-filter-control="select">CoinName</th>
+            <th data-field="CurrencySymbol" data-sortable="true" data-filter-control="select">Currency</th>
+            <th data-field="Updated" data-sortable="true" data-formatter="formatDate">Last Updated</th>
+            <th data-field="Price" data-align="right" data-sortable="true" data-formatter="formatPrices" data-visible="false">BTC/GH/Day</th>
+            <th data-field="StablePrice" data-align="right" data-sortable="true" data-formatter="formatPrices" data-visible="false">BTC/GH/Day (Week)</th>
+            <th data-field="MarginOfError" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=2>MarginOfError</th>
+            <th data-field="Host" data-sortable="true" data-filter-control="input" data-filter-strict-search="false">Host</th>
+            <th data-field="Port" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-width=1>Port&nbsp</th>
+            <th data-field="Protocol" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-visible="false">Protocol</th>
+            <th data-field="Workers" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Workers</th>
+            <th data-field="EstimateCorrection" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=2>EstimateCorrection</th>
+            <th data-field="Region" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Region</th>
+            <th data-field="SSL" data-sortable="true">SSL</th>
+            <th data-field="Fee" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
+        </tr>
     </thead>
-  </div>
 </table>
 
-<!-- context menu -->
-<ul id="context-menu" class="dropdown-menu">
-  <li data-item="reset-data"><a class="dropdown-item" href="#">Reset data</a></li>
-</ul>
-
+<!-- Start of page scripts -->
 <script>
-  $(function() {
-    $("#pools").bootstrapTable({
-      contextMenu: "#context-menu",
-      onContextMenuItem: function(row, $el) {
-        if ($el.data("item") == "reset-data") {
-          Command = "scripts/managestat.ps1?Type=Profit&Action=Remove&Minername=" + encodeURIComponent(row.Name) + "&Algorithms=" + encodeURIComponent(row.Algorithm)
-          $(".modal-body").load(Command, function() {
-            $(".modal-title").text(row.Name + ": " + row.Algorithm);
-            $("#myModal").modal({show:true});
-          });
-        }
-      }
+    var $table = $('#pools')
+
+    $(function () {
+        $("#reset-data").click(function () {
+            $data = JSON.stringify($table.bootstrapTable('getSelections'));
+            if ($data != "[]") {
+                $Command = "scripts/managestat.ps1?DataSet=Pools&Action=RemoveStat&Type=Profit&Data=" + encodeURIComponent($data)
+                $(".modal-body").load($Command, function() {
+                    $(".modal-title").text($("#reset-data").text());
+                    $("#myModal").modal({show:true});
+                });
+            };
+        });
     });
-  });
+
+    $("#myModal").on('hidden.bs.modal', function () {
+        $table.bootstrapTable("refresh");
+    });
+
 </script>
 
-<!-- End of page scripts -->
 <script type="text/javascript">
- 
-  function formatPools(data) {
-    data = data[0];
-    var items = new Array();
-    $.each(Object.keys(data), function (index, item) {
-      items.push(data[item]);
-    });
-    return items;
-  }
-  
-  function formatPrices(data) {
-    return (data * 1000000000).toFixed(10);
-  }
-  
-  function formatDate(data) {
-    return timeSince(new Date(data));
-    return new Date(parseInt(data.replace(/\D/g,''))).toLocaleString();
-  }
+    function formatPools(data) {
+        data = data[0];
+        var items = new Array();
+        $.each(Object.keys(data), function (index, item) {
+            items.push(data[item]);
+        });
+        return items;
+    }
 </script>
+<!-- End of page scripts -->
 <!--#include file="/parts/foot.html" -->

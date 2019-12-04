@@ -4,32 +4,37 @@
 </div>
 <div class="alert alert-info" role="alert">Shows all watchdog timers. </div>
 
-<div class="d-flex align-items-center">
-    <div class="m-2">
-        <a href="#" id="resetwatchdog" class="btn btn-primary">Reset Watchdog Timers</a>
-    </div>
+<div id="toolbar">
+    <button id="resetwatchdog" class="btn btn-primary">Reset Watchdog Timers</button>
 </div>
-
+    
 <table id="watchdog" class="table"
-       data-toggle="table"
-       data-url="/watchdogtimers"
-       data-response-handler="formatWatchdogTimers"
-       data-filter-control="true"
-       data-filter-show-clear="true"
-       data-sort-order="asc"
-       data-sort-name="tMinerName"
-       data-cache="false"
-       data-show-columns="true"
-       data-show-toggle="true"
-       data-show-refresh="true"
-       data-show-footer="false"
-       data-icons-prefix="fa"
-       data-icons="icons"
-       data-detail-view="true"
-       data-detail-formatter="detailFormatter">
+    data-icons="icons"
+    data-toolbar="#toolbar"
+    data-toggle="table"
+    data-url="/watchdogtimers"
+    data-response-handler="formatWatchdogTimers"
+    data-filter-control="true"
+    data-filter-show-clear="true"
+    data-sort-order="asc"
+    data-sort-name="tMinerName"
+    data-cache="false"
+    data-detail-view="true"
+    data-detail-formatter="detailFormatter"
+    data-filter-control="true"
+    data-show-button-text="true"
+    data-show-columns="true"
+    data-show-toggle="true"
+    data-show-refresh="true"
+    data-show-search-clear-button="true"
+    data-detail-view="true">
+   
     <thead>
         <tr>
-            <th data-field="MinerName" data-sortable="true" data-filter-control="select">Name</th>
+            <!-- <th data-field="state" data-checkbox="true"></th> -->
+            <th data-field="MinerName" data-sortable="true" data-filter-control="input" data-filter-strict-search="false">Name</th>
+            <th data-field="BaseName" data-sortable="true" data-filter-control="select" data-filter-strict-search="false" data-visible="false">BaseName</th>
+            <th data-field="Version" data-sortable="true" data-filter-control="select" data-filter-strict-search="false" data-visible="false">Version</th>
             <th data-field="Algorithm" data-sortable="true" data-filter-control="select">Algorithm</th>
             <th data-field="Device" data-sortable="true" data-filter-control="select">Device</th>
             <th data-field="PoolName" data-sortable="true" data-filter-control="select">Pool</th>
@@ -55,7 +60,6 @@
         // This function can alter the returned data before building the table, formatting it in a way
         // that is easier to display and manipulate in a table
         $.each(data, function (index, item) {
-            item.tMinerName = item.MinerName.replace(/-.+$/, '')
             var diff = (new Date).getTime() - (new Date(item.Kicked)).getTime()
             var days = Math.floor(diff / (1000 * 60 * 60 * 24));
             diff -= days * (1000 * 60 * 60 * 24);
