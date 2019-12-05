@@ -490,7 +490,8 @@ while (-not $API.Stop) {
         $NewPools_Jobs = $null
     }
 
-    #TempFix: Gin and Veil are separate implementations of the same algorithm which are not compatible with all miners
+    #To Be Removed
+    #temp fix, Gin and Veil are separate implementations of the same algorithm which are not compatible with all miners
     $NewPools | Where-Object Algorithm -EQ "X16rt" | Where-Object CoinName -match "GinCoin|Veil" | ForEach-Object { 
         $Pool = $_ | ConvertTo-Json | ConvertFrom-Json
         Switch ($_.CoinName) { 
@@ -500,6 +501,7 @@ while (-not $API.Stop) {
         Remove-Variable Pool
     }
 
+    #To Be Removed
     #Apply PricePenaltyFactor to pools
     $NewPools | ForEach-Object { 
         if ($Config.Pools.$($_.Name).PricePenaltyFactor -gt 0) { 
@@ -511,7 +513,9 @@ while (-not $API.Stop) {
             $_.StablePrice = [Double]($_.StablePrice * $Config.Pools.$($_.Name -split '-' | Select-Object -Index 0).PricePenaltyFactor)
         }
     }
-    # Calculate corrected estimates
+
+    #To Be Removed
+    #Calculate corrected estimates to pools
     $NewPools | ForEach-Object { 
         if ($_.EstimateCorrection -le 0 -or $_.EstimateCorrection -gt 1) { $_ | Add-Member EstimateCorrection ([Double]1) -Force }
         if ((-not $Config.Pools.$Name.DisableEstimateCorrection) -and (-not $Config.Pools.($_.Name -split '-' | Select-Object -Index 0).DisableEstimateCorrection)) { 
@@ -520,6 +524,80 @@ while (-not $API.Stop) {
         }
     }
     if ($API) { $API.NewPools = $NewPools } #Give API access to the current running configuration
+
+    #Add new pools
+    Compare-Object @([Miner]::Pools | Select-Object Name, Algorithm, CoinName, Protocol, Host, Port, User, Pass, Region, SSL, PayoutScheme -Unique) @($NewPools | Select-Object Name, Algorithm, CoinName, Protocol, Host, Port, User, Pass, Region, SSL, PayoutScheme -Unique) -Property Name, Algorithm, CoinName, Protocol, Host, Port, User, Pass, Region, SSL, PayoutScheme | Where-Object SideIndicator -EQ "=>" | ForEach-Object { 
+        [Pool]$Pool = $null
+
+        $Pool = $NewPools | 
+        Where-Object Name -eq $_.Name | 
+        Where-Object Algorithm -eq $_.Algorithm | 
+        Where-Object CoinName -eq $_.CoinName | 
+        Where-Object Protocol -eq $_.Protocol | 
+        Where-Object Host -eq $_.Host | 
+        Where-Object Port -eq $_.Port | 
+        Where-Object User -eq $_.User | 
+        Where-Object Pass -eq $_.Pass | 
+        Where-Object Region -eq $_.Region | 
+        Where-Object SSL -eq $_.SSL | 
+        Where-Object PayoutScheme -eq $_.PayoutScheme | 
+        Select-Object -First 1
+
+        if ($Pool) { [Miner]::Pools += $Pool }
+    }
+
+    #Update existing pools
+    [Miner]::Pools | 
+    Where-Object { -not $Config.PoolName -or (Compare-Object @($Config.PoolName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.ExcludePoolName -or -not (Compare-Object @($Config.ExcludePoolName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.Algorithm -or (Compare-Object @($Config.Algorithm | Select-Object) @($(for ($i = ($_.Algorithm -split "-").Length; $i -ge 1; $i--) { ($_.Algorithm -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.ExcludeAlgorithm -or -not (Compare-Object @($Config.ExcludeAlgorithm | Select-Object) @($(for ($i = ($_.Algorithm -split "-").Length; $i -ge 1; $i--) { ($_.Algorithm -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.Pools.$($_.Name).ExcludeAlgorithm -or (Compare-Object @($Config.Pools.$($_.Name).ExcludeAlgorithm | Select-Object) @($_.Algorithm, ($_.Algorithm -split "-" | Select-Object -Index 0) | Select-Object -Unique)  -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0 } | 
+    Where-Object { -not $Config.Pools.$($_.Name).Region -or (Compare-Object @($Config.Pools.$($_.Name).Region | Select-Object) @($_.Region) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.Pools.$($_.Name).ExcludeRegion -or -not (Compare-Object @($Config.Pools.$($_.Name).ExcludeRegion | Select-Object) @($_.Region) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.CoinName -or (Compare-Object @($Config.CoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.Pools.$($_.Name).CoinName -or (Compare-Object @($Config.Pools.$($_.Name).CoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.ExcludeCoinName -or -not (Compare-Object @($Config.ExcludeCoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.Pools.$($_.Name).ExcludeCoinName -or -not (Compare-Object @($Config.Pools.$($_.Name).ExcludeCoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.CurrencySymbol -or (Compare-Object @($Config.CurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.Pools.$($_.Name).CurrencySymbol -or (Compare-Object @($Config.Pools.$($_.Name).CurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.ExcludeCurrencySymbol -or -not (Compare-Object @($Config.ExcludeCurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.Pools.$($_.Name).ExcludeCurrencySymbol -or -not (Compare-Object @($Config.Pools.$($_.Name).ExcludeCurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    ForEach-Object { 
+        [Pool]$Pool = $null
+
+        $Pool = $NewPools | 
+        Where-Object Name -eq $_.Name | 
+        Where-Object Algorithm -eq $_.Algorithm | 
+        Where-Object CoinName -eq $_.CoinName | 
+        Where-Object Protocol -eq $_.Protocol | 
+        Where-Object Host -eq $_.Host | 
+        Where-Object Port -eq $_.Port | 
+        Where-Object User -eq $_.User | 
+        Where-Object Pass -eq $_.Pass | 
+        Where-Object Region -eq $_.Region | 
+        Where-Object SSL -eq $_.SSL | 
+        Where-Object PayoutScheme -eq $_.PayoutScheme | 
+        Select-Object -First 1
+
+        if ($Pool) { 
+            $_.Fee = $Pool.Fee
+            $_.Price = $Pool.Price
+            $_.Price_Bias = $Pool.Price * (1 - ($Pool.MarginOfError * $(if ($_.PayoutScheme -eq "PPLNS") { $Config.SwitchingPrevention } else { 1 }) * (1 - $Pool.Fee) * [Math]::Pow($DecayBase, $DecayExponent)))
+            $_.Price_Unbias = $Pool.Price * (1 - $Pool.Fee)
+            $_.StablePrice = $Pool.StablePrice
+            $_.MarginOfError = $Pool.MarginOfError
+            $_.Updated = $Pool.Updated
+        }
+    }
+
+    #If all the live pool prices don't represent the same period of time then use historic pricing for the same period
+    if (([Miner]::Pools | Where-Object Price_Bias | Select-Object -ExpandProperty Name -Unique | ForEach-Object { [Miner]::Pools | Where-Object Name -EQ $_ | Measure-Object Updated -Maximum | Select-Object -ExpandProperty Maximum } | Select-Object -Unique | Measure-Object -Minimum -Maximum | ForEach-Object { $_.Maximum - $_.Minimum }).TotalMinutes -gt $SyncWindow) { 
+        Write-Log -Level Warn "Pool prices are out of sync ($([Int]([Miner]::Pools | Where-Object Price_Bias | Select-Object -ExpandProperty Name -Unique | ForEach-Object { [Miner]::Pools | Where-Object Name -EQ $_ | Measure-Object Updated -Maximum | Select-Object -ExpandProperty Maximum} | Select-Object -Unique | Measure-Object -Minimum -Maximum | ForEach-Object { $_.Maximum - $_.Minimum }).TotalMinutes) minutes). "
+        [Miner]::Pools | Where-Object Price_Bias | ForEach-Object { $_.Price_Bias = $_.StablePrice }
+    }
+
+    #To-do: replace $AllPools with [Miner]::Pools
 
     #This finds any pools that were already in $AllPools (from a previous loop) but not in $NewPools. Add them back to the list. Their API likely didn't return in time, but we don't want to cut them off just yet
     #since mining is probably still working.  Then it filters out any algorithms that aren't being used. 
