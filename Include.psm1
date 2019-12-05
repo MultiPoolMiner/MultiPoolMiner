@@ -1421,9 +1421,10 @@ class Pool {
     [Double]$MarginOfError
     [DateTime]$Updated
 
-    #[Int]$Workers
-    #[Double]$EstimateCorrection
-    #[String]$CurrencySymbol
+    #Under review
+    $CurrencySymbol
+    $EstimateCorrection
+    $Workers
 }
 
 enum MinerStatus { 
