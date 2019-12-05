@@ -481,13 +481,13 @@ while (-not $API.Stop) {
     }
 
     #Retrieve collected pool data
+    [Pool[]]$NewPools = @()
     if ($NewPools_Jobs) { 
         if ($NewPools_Jobs | Where-Object State -NE "Completed") { Write-Log "Waiting for pool information. " }
-        $NewPools = @($NewPools_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | Where-Object { $_.Content.Algorithm <#temp fix, Detect broken pool files#> } | ForEach-Object { $_.Content | Add-Member Name $_.Name -Force -PassThru })
-        $NewPools_JobsDurations = @($NewPools_JobsDurations | Select-Object -Last 20) #Use the last 20 values for better stability
-        $NewPools_JobsDurations += (($NewPools_Jobs | Measure-Object PSEndTime -Maximum).Maximum - ($NewPools_Jobs | Measure-Object PSBeginTime -Minimum).Minimum).TotalSeconds
-        Remove-Variable NewPools_Jobs
-        if ($API) { $API.NewPools_Jobs = $null }
+        $NewPools_Jobs | Wait-Job -Timeout 10 | Out-Null
+        $NewPools = @($NewPools_Jobs | Where-Object State -EQ "Completed" | Receive-Job | ForEach-Object { $_.Content | Add-Member Name $_.Name -PassThru } | Select-Object Name, Algorithm, CoinName, Protocol, Host, Port, User, Pass, Region, SSL, PayoutScheme, Fee, Price, StablePrice, MarginOfError, Updated, CurrencySymbol, EstimateCorrection, Workers)
+        $NewPools_Jobs | Remove-Job -Force
+        $NewPools_Jobs = $null
     }
 
     #TempFix: Gin and Veil are separate implementations of the same algorithm which are not compatible with all miners
