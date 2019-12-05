@@ -73,7 +73,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
         $Stat = Set-Stat -Name "$($PoolName)_$($CurrencySymbol)_Profit" -Value ($APICurrenciesResponse.$_.estimate / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
         try { $EstimateCorrection = [Decimal](($APIStatusResponse.$($APICurrenciesResponse.$_.algo).actual_last24h / 1000) / $APIStatusResponse.$($APICurrenciesResponse.$_.algo).estimate_last24h) }
-        catch { $EstimateCorrection = [Decimal]0 }
+        catch { $EstimateCorrection = [Decimal]1 }
 
         $PoolRegions | ForEach-Object { 
             $Region = $_
