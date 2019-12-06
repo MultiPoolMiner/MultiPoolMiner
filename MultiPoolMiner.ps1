@@ -485,7 +485,7 @@ while (-not $API.Stop) {
     if ($NewPools_Jobs) { 
         if ($NewPools_Jobs | Where-Object State -NE "Completed") { Write-Log "Waiting for pool information. " }
         $NewPools_Jobs | Wait-Job -Timeout 10 | Out-Null
-        $NewPools = @($NewPools_Jobs | Where-Object State -EQ "Completed" | Receive-Job | ForEach-Object { $_.Content | Add-Member Name $_.Name -PassThru } | Select-Object Name, Algorithm, CoinName, Protocol, Host, Port, User, Pass, Region, SSL, PayoutScheme, Fee, Price, StablePrice, MarginOfError, Updated, CurrencySymbol, EstimateCorrection, Workers)
+        $NewPools = @($NewPools_Jobs | Where-Object State -EQ "Completed" | Receive-Job | ForEach-Object { if (-not $_.Content.Name) { $_.Content | Add-Member Name $_.Name -Force }; $_.Content } | Select-Object Name, Algorithm, CoinName, Protocol, Host, Port, User, Pass, Region, SSL, PayoutScheme, Fee, Price, StablePrice, MarginOfError, Updated, CurrencySymbol, EstimateCorrection, Workers)
         $NewPools_Jobs | Remove-Job -Force
         $NewPools_Jobs = $null
     }

@@ -6,11 +6,12 @@ $MinersLegacy = @(
         #Strip Model information from devices -> will create only one miner instance
         if ($Config.DisableDeviceDetection) { $DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object { $_.Model = $_.Vendor } } else { $DevicesTmp = $Devices }
         Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp; JobName = "MinersLegacy" } -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" }) | ForEach-Object { 
-            $_.Content | Add-Member Name $_.Name -PassThru -Force
+            if (-not $_.Content.Name) { $_.Content | Add-Member Name $_.Name -Force }
             $_.Content | Add-Member BaseName ($_.Name -split '-' | Select-Object -Index 0)
             $_.Content | Add-Member Version ($_.Name -split '-' | Select-Object -Index 1)
             $_.Content | Add-Member Fees @($null) -ErrorAction SilentlyContinue
             $AllMinerPaths += ($_.Content.Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($_.Content.Path))
+            $_.Content
         }
         Remove-Variable DevicesTmp
     }
@@ -71,7 +72,7 @@ Remove-Variable InactiveMiners
 #Retrieve collected balance data
 if ($Balances_Jobs) { 
     if ($Balances_Jobs | Where-Object State -NE "Completed") { Write-Log "Waiting for balances information. " }
-    $Balances = @((@($Balances) + @($Balances_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Content | Where-Object Total -GT 0)) | Group-Object Name | ForEach-Object { $_.Group | Sort-Object LastUpdated | Select-Object -Last 1 })
+    $Balances = @((@($Balances | Select-Object) + @($Balances_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | ForEach-Object { if (-not $_.Content.Name) { $_.Content | Add-Member Name $_.Name -Force }; $_.Content } | Select-Object | Where-Object Total -GT 0)) | Group-Object Name | ForEach-Object { $_.Group | Sort-Object LastUpdated | Select-Object -Last 1 })
     Remove-Variable Balances_Jobs
     if ($API) { $API.Balances_Jobs = $null }
 }

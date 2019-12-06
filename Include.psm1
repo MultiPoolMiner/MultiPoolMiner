@@ -672,12 +672,7 @@ function Get-ChildItemContent {
                 if ($null -eq $Content) { $Content = $_ | Get-Content }
             }
             $Content | ForEach-Object { 
-                if ($_.Name) { 
-                    [PSCustomObject]@{Name = $_.Name; Content = $_ }
-                }
-                else { 
-                    [PSCustomObject]@{Name = $Name; Content = $_ }
-                }
+                [PSCustomObject]@{ Name = $Name; Content = $_ }
             }
         }
     } -ArgumentList $Path, $Parameters, $Priority
