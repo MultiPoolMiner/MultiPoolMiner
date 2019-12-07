@@ -1,12 +1,13 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [TimeSpan]$StatSpan, 
-    [PSCustomObject]$Config #to be removed
+    [TimeSpan]$StatSpan, #to be removed
+    [PSCustomObject]$Wallets, #under review
+    [Double]$EstimateCorrection, #to be removed
+    [Double]$PricePenaltyFactor #to be removed
 )
 
 $PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-$Wallets = $Config.Pools.$PoolName.Wallets #to be removed
 
 if (-not ($Wallets | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) -ne "BTC") { 
     Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
@@ -97,6 +98,7 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
                 Fee                = $Fee
                 Workers            = $Workers
                 EstimateCorrection = $EstimateCorrection
+                PricePenaltyFactor = $PricePenaltyFactor
             }
         }
     }

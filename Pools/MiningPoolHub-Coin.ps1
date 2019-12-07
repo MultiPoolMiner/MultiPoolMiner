@@ -1,13 +1,16 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [TimeSpan]$StatSpan, 
-    [PSCustomObject]$Config #to be removed
+    [TimeSpan]$StatSpan, #to be removed
+    [string]$User, 
+    [String]$Worker, #under review
+    [Double]$EstimateCorrection, #to be removed
+    [Double]$PricePenaltyFactor #to be removed
 )
 
 $PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
-if (-not $Config.Pools.$PoolName.User) { 
+if (-not $User) { 
     Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no username specified. "
     return
 }
@@ -65,9 +68,7 @@ $APIResponse.return | Where-Object { $_.profit -gt 0 } | ForEach-Object {
 
     $Stat = Set-Stat -Name "$($PoolName)_$($CurrencySymbol)-$($Algorithm_Norm)_Profit" -Value ($_.profit / $Divisor) -Duration $StatSpan -ChangeDetection $true
 
-    if ($PoolHosts.Count -gt 1) { $Regions = $PoolRegions } else { $Regions = $Config.Region } #Do not create multiple pool objects if there is only one host
-
-    $Regions | ForEach-Object { 
+    $PoolRegions | ForEach-Object { 
         $Region = $_
         $Region_Norm = Get-Region ($Region -replace "^us-east$", "us")
 
@@ -81,7 +82,7 @@ $APIResponse.return | Where-Object { $_.profit -gt 0 } | ForEach-Object {
             Protocol           = "stratum+tcp"
             Host               = [String]($PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1)
             Port               = [Int]$PoolEntry.port
-            User               = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
+            User               = "$User.$Worker"
             Pass               = "x"
             Region             = $Region_Norm
             SSL                = $false
@@ -99,7 +100,7 @@ $APIResponse.return | Where-Object { $_.profit -gt 0 } | ForEach-Object {
             Protocol           = "stratum+ssl"
             Host               = [String]($PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1)
             Port               = [Int]$PoolEntry.port
-            User               = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
+            User               = "$User.$Worker"
             Pass               = "x"
             Region             = $Region_Norm
             SSL                = $true
@@ -119,7 +120,7 @@ $APIResponse.return | Where-Object { $_.profit -gt 0 } | ForEach-Object {
                 Protocol           = "stratum+tcp"
                 Host               = [String]($PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1)
                 Port               = [Int]$PoolEntry.port
-                User               = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
+                User               = "$User.$Worker"
                 Pass               = "x"
                 Region             = $Region_Norm
                 SSL                = $false
@@ -137,7 +138,7 @@ $APIResponse.return | Where-Object { $_.profit -gt 0 } | ForEach-Object {
                 Protocol           = "stratum+ssl"
                 Host               = [String]($PoolHosts | Sort-Object -Descending { $_ -ilike "$Region*" } | Select-Object -First 1)
                 Port               = [Int]$PoolEntry.port
-                User               = "$($Config.Pools.$PoolName.User).$($Config.Pools.$PoolName.Worker)"
+                User               = "$User.$Worker"
                 Pass               = "x"
                 Region             = $Region_Norm
                 SSL                = $true

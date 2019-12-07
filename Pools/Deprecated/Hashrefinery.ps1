@@ -1,12 +1,14 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [TimeSpan]$StatSpan, 
-    [PSCustomObject]$Config #to be removed
+    [TimeSpan]$StatSpan, #to be removed
+    [PSCustomObject]$Wallets, #under review
+    [String]$Worker, #under review
+    [Double]$EstimateCorrection, #to be removed
+    [Double]$PricePenaltyFactor #to be removed
 )
 
 $PoolFileName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-$Wallets = $Config.Pools.$PoolFileName.Wallets #to be removed
 
 # Guaranteed payout currencies
 $Payout_Currencies = @("BTC") | Where-Object { $Wallets.$_ }
@@ -104,6 +106,7 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
                 Fee                = $Fee
                 Workers            = $Workers
                 EstimateCorrection = $EstimateCorrection
+                PricePenaltyFactor = $PricePenaltyFactor
             }
         }
     }
@@ -151,13 +154,14 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
                     Host               = "$Algorithm.$Region.$PoolHost"
                     Port               = $Port
                     User               = [String]$Wallets.$_
-                    Pass               = "ID=$($Config.Pools.$PoolFileName.Worker),c=$_"
+                    Pass               = "ID=$Worker,c=$_"
                     Region             = $Region_Norm
                     SSL                = $false
                     Updated            = $Stat.Updated
                     Fee                = $Fee
                     Workers            = $Workers
                     EstimateCorrection = $EstimateCorrection
+                    PricePenaltyFactor = $PricePenaltyFactor
                 }
 
                 if (($Algorithm_Norm -eq "Ethash" -or $Algorithm_Norm -eq "ProgPoW") -and $Block -gt 0) { 
@@ -173,13 +177,14 @@ $APICurrenciesResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore
                         Host               = "$Algorithm.$Region.$PoolHost"
                         Port               = $Port
                         User               = [String]$Wallets.$_
-                        Pass               = "ID=$($Config.Pools.$PoolFileName.Worker),c=$_"
+                        Pass               = "ID=$Worker,c=$_"
                         Region             = $Region_Norm
                         SSL                = $false
                         Updated            = $Stat.Updated
                         Fee                = $Fee
                         Workers            = $Workers
                         EstimateCorrection = $EstimateCorrection
+                        PricePenaltyFactor = $PricePenaltyFactor
                     }
                 }
             }

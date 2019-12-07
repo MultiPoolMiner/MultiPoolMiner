@@ -1,14 +1,18 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [TimeSpan]$StatSpan, 
-    [PSCustomObject]$Config #to be removed
+    [TimeSpan]$StatSpan, #to be removed
+    [PSCustomObject]$Wallets, #under review
+    [String]$Worker, #under review
+    [Boolean]$IsInternalWallet, #under review
+    [Double]$EstimateCorrection, #to be removed
+    [Double]$PricePenaltyFactor #to be removed
 )
 
 $PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
 
 #Pool currenctly allows payout in BTC only
-$Payout_Currencies = @("BTC") | Where-Object { $Config.Pools.$PoolName.Wallets.$_ }
+$Payout_Currencies = @("BTC") | Where-Object { $Wallets.$_ }
 if (-not $Payout_Currencies) { 
     Write-Log -Level Verbose "Cannot mine on pool ($PoolName) - no wallet address specified. "
     return
@@ -52,7 +56,7 @@ if ($APIResponseAlgoDetails.miningAlgorithms.count -le 1) {
     return
 }
 
-if ($Config.Pools.$PoolName.IsInternalWallet) { $Fee = [Decimal]0.01 } else { $Fee = [Decimal]0.03 }
+if ($IsInternalWallet) { $Fee = [Decimal]0.01 } else { $Fee = [Decimal]0.03 }
 
 Write-Log -Level Verbose "Processing pool data ($PoolName). "
 $APIResponse.miningAlgorithms | ForEach-Object { $Algorithm = $_.algorithm; $_ | Add-Member -force @{ algodetails = $APIResponseAlgoDetails.miningAlgorithms | Where-Object { $_.Algorithm -eq $Algorithm } } }
@@ -84,7 +88,7 @@ $APIResponse.miningAlgorithms | Where-Object { $_.paying -gt 0 } <# algos paying
                 Protocol           = "stratum+tcp"
                 Host               = "$Algorithm.$Region.$PoolHost"
                 Port               = $Port
-                User               = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
+                User               = "$($Wallets.$_).$Worker"
                 Pass               = "x"
                 Region             = $Region_Norm
                 SSL                = $false
@@ -104,7 +108,7 @@ $APIResponse.miningAlgorithms | Where-Object { $_.paying -gt 0 } <# algos paying
                 Protocol           = "stratum+ssl"
                 Host               = "$Algorithm.$Region.$PoolHost"
                 Port               = $Port
-                User               = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
+                User               = "$($Wallets.$_).$Worker"
                 Pass               = "x"
                 Region             = $Region_Norm
                 SSL                = $true
@@ -125,7 +129,7 @@ $APIResponse.miningAlgorithms | Where-Object { $_.paying -gt 0 } <# algos paying
                 Protocol           = "stratum+tcp"
                 Host               = "$Algorithm.$Region.$PoolHost"
                 Port               = $Port
-                User               = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
+                User               = "$($Wallets.$_).$Worker"
                 Pass               = "x"
                 Region             = $Region_Norm
                 SSL                = $false
@@ -145,7 +149,7 @@ $APIResponse.miningAlgorithms | Where-Object { $_.paying -gt 0 } <# algos paying
                 Protocol           = "stratum+ssl"
                 Host               = "$Algorithm.$Region.$PoolHost"
                 Port               = $Port
-                User               = "$($Config.Pools.$PoolName.Wallets.$_).$($Config.Pools.$PoolName.Worker)"
+                User               = "$($Wallets.$_).$Worker"
                 Pass               = "x"
                 Region             = $Region_Norm
                 SSL                = $true

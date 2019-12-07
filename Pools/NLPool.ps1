@@ -1,12 +1,14 @@
 ﻿using module ..\Include.psm1
 
 param(
-    [TimeSpan]$StatSpan, 
-    [PSCustomObject]$Config #to be removed
+    [TimeSpan]$StatSpan, #to be removed
+    [PSCustomObject]$Wallets, #under review
+    [String]$Worker, #under review
+    [Double]$EstimateCorrection, #to be removed
+    [Double]$PricePenaltyFactor #to be removed
 )
 
 $PoolName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-$Wallets = $Config.Pools.$PoolName.Wallets #to be removed
 
 # Guaranteed payout currencies
 $Payout_Currencies = @("BTC", "LTC") | Where-Object { $Wallets.$_ }
@@ -104,13 +106,14 @@ $APIStatusResponse | Get-Member -MemberType NoteProperty -ErrorAction Ignore | S
                 Host               = $PoolHost
                 Port               = $Port
                 User               = [String]$Wallets.$_
-                Pass               = "$($Config.Pools.$PoolName.Worker),c=$_"
+                Pass               = "$Worker,c=$_"
                 Region             = $Region_Norm
                 SSL                = $false
                 Updated            = $Stat.Updated
                 Fee                = $Fee
                 Workers            = $Workers
                 EstimateCorrection = $EstimateCorrection
+                PricePenaltyFactor = $PricePenaltyFactor
             }
         }
     }

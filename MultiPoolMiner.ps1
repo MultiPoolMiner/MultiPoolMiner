@@ -406,7 +406,9 @@ while (-not $API.Stop) {
             $NewPools_Jobs = @(
                 $PoolsRequest | ForEach-Object { 
                     $Pool_Name = $_.BaseName
-                    $Pool_Parameters = @{StatSpan = $StatSpan; Config = $Config; JobName = "Pool_$($_.BaseName)" <#temp fix#> }
+                    $Pool_Parameters = @{ }
+                    $Pool_Parameters.StatSpan = $StatSpan #to be removed
+                    $Pool_Parameters.JobName = "Pool_$($_.BaseName)" #to be removed
                     $Config.Pools.$Pool_Name | Get-Member -MemberType NoteProperty | ForEach-Object { $Pool_Parameters.($_.Name) = $Config.Pools.$Pool_Name.($_.Name) }
                     Get-ChildItemContent "Pools\$($_.Name)" -Parameters $Pool_Parameters -Threaded -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" })
                 } | Select-Object
@@ -502,27 +504,16 @@ while (-not $API.Stop) {
     }
 
     #To Be Removed
-    #Apply PricePenaltyFactor to pools
+    #temp fix, apply PricePenaltyFactor and EstimateCorrection
     $NewPools | ForEach-Object { 
-        if ($Config.Pools.$($_.Name).PricePenaltyFactor -gt 0) { 
-            $_.Price = [Double]($_.Price * $Config.Pools.$($_.Name).PricePenaltyFactor)
-            $_.StablePrice = [Double]($_.StablePrice * $Config.Pools.$($_.Name).PricePenaltyFactor)
-        }
-        elseif ($Config.Pools.$($_.Name -split '-' | Select-Object -Index 0).PricePenaltyFactor -gt 0) { 
-            $_.Price = [Double]($_.Price * $Config.Pools.$($_.Name -split '-' | Select-Object -Index 0).PricePenaltyFactor)
-            $_.StablePrice = [Double]($_.StablePrice * $Config.Pools.$($_.Name -split '-' | Select-Object -Index 0).PricePenaltyFactor)
-        }
+        if (-not $_.PricePenaltyFactor) { $_.PricePenaltyFactor = 1 }
+        if (-not $_.EstimateCorrection) { $_.EstimateCorrection = 1 }
+        $_.Price *= $_.PricePenaltyFactor
+        $_.StablePrice *= $_.PricePenaltyFactor
+        $_.Price *= $_.EstimateCorrection
+        $_.StablePrice *= $_.EstimateCorrection
     }
 
-    #To Be Removed
-    #Calculate corrected estimates to pools
-    $NewPools | ForEach-Object { 
-        if ($_.EstimateCorrection -le 0 -or $_.EstimateCorrection -gt 1) { $_ | Add-Member EstimateCorrection ([Double]1) -Force }
-        if ((-not $Config.Pools.$Name.DisableEstimateCorrection) -and (-not $Config.Pools.($_.Name -split '-' | Select-Object -Index 0).DisableEstimateCorrection)) { 
-            $_.Price *= $_.EstimateCorrection
-            $_.StablePrice *= $_.EstimateCorrection
-        }
-    }
     if ($API) { $API.NewPools = $NewPools } #Give API access to the current running configuration
 
     #Add new pools

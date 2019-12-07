@@ -1417,9 +1417,10 @@ class Pool {
     [DateTime]$Updated
 
     #Under review
-    $CurrencySymbol
-    $EstimateCorrection
-    $Workers
+    [String]$CurrencySymbol
+    [Double]$EstimateCorrection
+    [Double]$PricePenaltyFactor
+    [Int]$Workers
 }
 
 enum MinerStatus { 

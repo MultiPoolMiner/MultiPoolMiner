@@ -9,5 +9,6 @@
     "na":  "US",
     "sea":  "Asia",
     "us":  "US",
+    "useast":  "US",
     "usa":  "US"
 }
