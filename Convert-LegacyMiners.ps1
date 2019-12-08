@@ -5,7 +5,7 @@ $MinersLegacy = @(
     if (Test-Path "MinersLegacy" -PathType Container -ErrorAction Ignore) { 
         #Strip Model information from devices -> will create only one miner instance
         if ($Config.DisableDeviceDetection) { $DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object { $_.Model = $_.Vendor } } else { $DevicesTmp = $Devices }
-        Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $Pools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp; JobName = "MinersLegacy" } -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" }) | ForEach-Object { 
+        Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $LegacyPools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp; JobName = "MinersLegacy" } -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" }) | ForEach-Object { 
             if (-not $_.Content.Name) { $_.Content | Add-Member Name $_.Name -Force }
             $_.Content | Add-Member BaseName ($_.Name -split '-' | Select-Object -Index 0)
             $_.Content | Add-Member Version ($_.Name -split '-' | Select-Object -Index 1)
@@ -141,15 +141,15 @@ $AllMiners | ForEach-Object {
     $Miner.HashRates.PSObject.Properties.Name | ForEach-Object { #temp fix, must use 'PSObject.Properties' to preserve order
         $Miner_HashRates | Add-Member $_ ([Double]$Miner.HashRates.$_)
         $Miner_Fees | Add-Member $_ ([Double]$Miner.Fees.$_)
-        $Miner_Pools | Add-Member $_ ([PSCustomObject]$Pools.$_)
-        $Miner_Pools_Comparison | Add-Member $_ ([PSCustomObject]$Pools.$_)
+        $Miner_Pools | Add-Member $_ ([PSCustomObject]$LegacyPools.$_)
+        $Miner_Pools_Comparison | Add-Member $_ ([PSCustomObject]$LegacyPools.$_)
 
         if ($Config.IgnoreFees) { $Miner_Fee_Factor = 1 } else { $Miner_Fee_Factor = 1 - $Miner.Fees.$_ }
 
-        $Miner_Earnings | Add-Member $_ ([Double]$Miner.HashRates.$_ * $Pools.$_.Price * $Miner_Fee_Factor)
-        $Miner_Earnings_Comparison | Add-Member $_ ([Double]$Miner.HashRates.$_ * $Pools.$_.StablePrice * $Miner_Fee_Factor)
-        $Miner_Earnings_Bias | Add-Member $_ ([Double]$Miner.HashRates.$_ * $Pools.$_.Price_Bias * $Miner_Fee_Factor)
-        $Miner_Earnings_Unbias | Add-Member $_ ([Double]$Miner.HashRates.$_ * $Pools.$_.Price_Unbias * $Miner_Fee_Factor)
+        $Miner_Earnings | Add-Member $_ ([Double]$Miner.HashRates.$_ * $LegacyPools.$_.Price * $Miner_Fee_Factor)
+        $Miner_Earnings_Comparison | Add-Member $_ ([Double]$Miner.HashRates.$_ * $LegacyPools.$_.StablePrice * $Miner_Fee_Factor)
+        $Miner_Earnings_Bias | Add-Member $_ ([Double]$Miner.HashRates.$_ * $LegacyPools.$_.Price_Bias * $Miner_Fee_Factor)
+        $Miner_Earnings_Unbias | Add-Member $_ ([Double]$Miner.HashRates.$_ * $LegacyPools.$_.Price_Unbias * $Miner_Fee_Factor)
     }
 
     #Earning calculation
@@ -170,7 +170,7 @@ $AllMiners | ForEach-Object {
     }
 
     $Miner.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { 
-        $Miner_Earnings_MarginOfError | Add-Member $_ ([Double]$Pools.$_.MarginOfError * (& { if ($Miner_Earning) { ([Double]$Miner.HashRates.$_ * $Pools.$_.StablePrice) / $Miner_Earning } else { 1 } }))
+        $Miner_Earnings_MarginOfError | Add-Member $_ ([Double]$LegacyPools.$_.MarginOfError * (& { if ($Miner_Earning) { ([Double]$Miner.HashRates.$_ * $LegacyPools.$_.StablePrice) / $Miner_Earning } else { 1 } }))
     }
     $Miner_Earning_MarginOfError = [Double]($Miner_Earnings_MarginOfError.PSObject.Properties.Value | Measure-Object -Sum).Sum
 

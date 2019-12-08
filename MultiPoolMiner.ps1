@@ -275,7 +275,7 @@ while (-not $API.Stop) {
         Write-Log -Level Info "Port for web dashboard and API has changed ($($API.Port) -> $($Config.APIPort)). $(if ($ActiveMiners | Where-Object Best) { "Stopping all runnig miners. " })"
         $RunningMiners | ForEach-Object { 
             $Miner = $_
-            Write-Log "Stopping miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Pools.$_.Name)"}) -join "; ")}). "
+            Write-Log "Stopping miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($LegacyPools.$_.Name)"}) -join "; ")}). "
             $Miner.SetStatus("Idle")
             $Miner.StatusMessage = " stopped gracefully (initiated by API port change)"
             $RunningMiners = @($RunningMiners | Where-Object { $_ -ne $Miner })
@@ -360,7 +360,7 @@ while (-not $API.Stop) {
     #Check if the configuration has changed
     if (($OldConfig | ConvertTo-Json -Compress -Depth 10) -ne ($Config | ConvertTo-Json -Compress -Depth 10)) { 
         if ($AllDevices) { Write-Log -Level Info "Config change detected. " }
-        $AllPools | Select-Object | ForEach-Object { $_.Price = 0 }
+        [Miner]::Pools | ForEach-Object { $_.Price = $_.StablePrice = 0 }
         $AllDevices = @(Get-Device -Refresh | Select-Object)
     }
     if ($API) { $API.AllDevices = $AllDevices } #Give API access to the device information
@@ -588,69 +588,31 @@ while (-not $API.Stop) {
         [Miner]::Pools | Where-Object Price_Bias | ForEach-Object { $_.Price_Bias = $_.StablePrice }
     }
 
-    #To-do: replace $AllPools with [Miner]::Pools
+    #Apply watchdog to pools
+    [Miner]::Pools | Where-Object { ($WatchdogTimers | Where-Object PoolName -EQ $_.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset) | Measure-Object | Select-Object -ExpandProperty Count) -ge <#stage#>3 } | ForEach-Object { $_.Price_Bias = 0 }
+    [Miner]::Pools | Where-Object { ($WatchdogTimers | Where-Object PoolName -EQ $_.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset) | Where-Object Algorithm -EQ $_.Algorithm | Measure-Object | Select-Object -ExpandProperty Count) -ge <#statge#>2 } | ForEach-Object { $_.Price_Bias = 0 }
 
-    #This finds any pools that were already in $AllPools (from a previous loop) but not in $NewPools. Add them back to the list. Their API likely didn't return in time, but we don't want to cut them off just yet
-    #since mining is probably still working.  Then it filters out any algorithms that aren't being used. 
-    $AllPools = @(@($NewPools) + @(Compare-Object @($NewPools | Select-Object -ExpandProperty Name -Unique) @($AllPools | Select-Object -ExpandProperty Name -Unique) | Where-Object SideIndicator -EQ "=>" | Select-Object -ExpandProperty InputObject | ForEach-Object { $AllPools | Where-Object Name -EQ $_ }) | 
-        Where-Object { $_.MarginOfError -le (1 - $Config.MinAccuracy) } | 
-        Where-Object { $_.Price -gt 0 -and $_.StablePrice -gt 0 } | 
-        Where-Object { -not $Config.PoolName -or (Compare-Object @($Config.PoolName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.ExcludePoolName -or -not (Compare-Object @($Config.ExcludePoolName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.Algorithm -or (Compare-Object @($Config.Algorithm | Select-Object) @($(for ($i = ($_.Algorithm -split "-").Length; $i -ge 1; $i--) { ($_.Algorithm -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.ExcludeAlgorithm -or -not (Compare-Object @($Config.ExcludeAlgorithm | Select-Object) @($(for ($i = ($_.Algorithm -split "-").Length; $i -ge 1; $i--) { ($_.Algorithm -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.Pools.$($_.Name).ExcludeAlgorithm -or (Compare-Object @($Config.Pools.$($_.Name).ExcludeAlgorithm | Select-Object) @($_.Algorithm, ($_.Algorithm -split "-" | Select-Object -Index 0) | Select-Object -Unique)  -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0 } | 
-        Where-Object { -not $Config.Pools.$($_.Name).Region -or (Compare-Object @($Config.Pools.$($_.Name).Region | Select-Object) @($_.Region) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.Pools.$($_.Name).ExcludeRegion -or -not (Compare-Object @($Config.Pools.$($_.Name).ExcludeRegion | Select-Object) @($_.Region) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.CoinName -or (Compare-Object @($Config.CoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.Pools.$($_.Name).CoinName -or (Compare-Object @($Config.Pools.$($_.Name).CoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.ExcludeCoinName -or -not (Compare-Object @($Config.ExcludeCoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.Pools.$($_.Name).ExcludeCoinName -or -not (Compare-Object @($Config.Pools.$($_.Name).ExcludeCoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.CurrencySymbol -or (Compare-Object @($Config.CurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.Pools.$($_.Name).CurrencySymbol -or (Compare-Object @($Config.Pools.$($_.Name).CurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.ExcludeCurrencySymbol -or -not (Compare-Object @($Config.ExcludeCurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { -not $Config.Pools.$($_.Name).ExcludeCurrencySymbol -or -not (Compare-Object @($Config.Pools.$($_.Name).ExcludeCurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-        Where-Object { $Algorithm = $_.Algorithm; $_.Workers -eq $null -or $_.Workers -ge (($Config.MinWorker.PSObject.Properties.Name | Where-Object { $Algorithm -like $_ } | ForEach-Object { $Config.MinWorker.$_ }) | Measure-Object -Minimum).Minimum } | 
-        Where-Object { $PoolName = $_.Name; $_.Workers -eq $null -or $_.Workers -ge (($Config.Pools.$($PoolName).MinWorker.PSObject.Properties.Name | Where-Object { $Algorithm -like $_ } | ForEach-Object { $Config.Pools.$($PoolName).MinWorker.$_ }) | Measure-Object -Minimum).Minimum } | 
-        Sort-Object Algorithm
-    )
-    Remove-Variable NewPools
+    #Pre-sort all pools
+    [Miner]::Pools = [Miner]::Pools | Sort-Object -Descending { -not $Config.PoolName -or (Compare-Object @($Config.PoolName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) }, { ($Timer - $_.Updated).TotalMinutes -le ($SyncWindow * $Strikes) }, { $_.StablePrice * (1 - $_.MarginOfError) }, { $_.Region -EQ $Config.Region }, { $_.SSL -EQ $Config.SSL }
 
-    if ($API) { $API.AllPools = $AllPools } #Give API access to the current running configuration
+    if ($API) { $API.AllPools = [Miner]::Pools } #Give API access to the current running configuration
 
-    if ($AllPools.Count -eq 0) { 
+    if ([Miner]::Pools.Count -eq 0) {
         Write-Log -Level Warn "No pools available. "
         while ((Get-Date).ToUniversalTime() -lt $StatEnd) { Start-Sleep 10 }
         continue
     }
-    #Apply watchdog to pools
-    $AllPools = @(
-        $AllPools | Where-Object { 
-            $Pool = $_
-            $Pool_WatchdogTimers = @($WatchdogTimers | Where-Object PoolName -EQ $Pool.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset))
-            ($Pool_WatchdogTimers | Measure-Object | Select-Object -ExpandProperty Count) -lt <#stage#>3 -and ($Pool_WatchdogTimers | Where-Object { $Pool.Algorithm -contains $_.Algorithm } | Measure-Object | Select-Object -ExpandProperty Count) -lt <#statge#>2
-        }
-    )
 
-    #Update the active pools
-    Write-Log "Selecting best pool for each algorithm (from $($AllPools.Count) pools). "
-    $Pools = [PSCustomObject]@{ }
-    $AllPools.Algorithm | Select-Object | ForEach-Object { $_.ToLower() } | Select-Object -Unique | ForEach-Object { $Pools | Add-Member $_ ($AllPools | Where-Object Algorithm -EQ $_ | Sort-Object -Descending { -not $Config.PoolName -or (Compare-Object @($Config.PoolName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) }, { ($Timer - $_.Updated).TotalMinutes -le ($SyncWindow * $Strikes) }, { $_.StablePrice * (1 - $_.MarginOfError) }, { $_.Region -EQ $Config.Region }, { $_.SSL -EQ $Config.SSL } | Select-Object -Index 0) }
-    if (($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object { $Pools.$_.Name } | Select-Object -Unique | ForEach-Object { $AllPools | Where-Object Name -EQ $_ | Measure-Object Updated -Maximum | Select-Object -ExpandProperty Maximum } | Measure-Object -Minimum -Maximum | ForEach-Object { $_.Maximum - $_.Minimum } | Select-Object -ExpandProperty TotalMinutes) -gt $SyncWindow) { 
-        Write-Log -Level Warn "Pool prices are out of sync ($([Int]($Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object {$Pools.$_} | Measure-Object Updated -Minimum -Maximum | ForEach-Object {$_.Maximum - $_.Minimum} | Select-Object -ExpandProperty TotalMinutes)) minutes). "
-        $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object { $Pools.$_ | Add-Member Price_Bias ($Pools.$_.StablePrice * (1 - ($Pools.$_.MarginOfError * $(if ($Pools.$_.PayoutScheme -eq "PPLNS") { $Config.SwitchingPrevention } else { 1 }) * (1 - $Pools.$_.Fee) * [Math]::Pow($DecayBase, $DecayExponent)))) -Force }
-        $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object { $Pools.$_ | Add-Member Price_Unbias ($Pools.$_.StablePrice * (1 - $Pools.$_.Fee)) -Force }
-    }
-    else { 
-        $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object { $Pools.$_ | Add-Member Price_Bias ($Pools.$_.Price * (1 - ($Pools.$_.MarginOfError * $(if ($Pools.$_.PayoutScheme -eq "PPLNS") { $Config.SwitchingPrevention } else { 1 }) * (1 - $Pools.$_.Fee) * [Math]::Pow($DecayBase, $DecayExponent)))) -Force }
-        $Pools | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object { $Pools.$_ | Add-Member Price_Unbias ($Pools.$_.Price * (1 - $Pools.$_.Fee)) -Force }
-    }
-    if ($API) { $API.Pools = $Pools } #Give API access to the pools information
-
-    #Load the stats, to improve performance only read PowerUsage stats when required
+    #Load the stats
     Write-Log "Loading saved statistics. "
     Get-Stat | Out-Null #temp fix for legacy miners
     if ($API) { $API.Stats = $Stats } #Give API access to the current stats
+
+    #Update the legacy pools
+    Write-Log "Selecting best pool for each algorithm. "
+    $LegacyPools = [PSCustomObject]@{ }
+    [Miner]::Pools | Select-Object -ExpandProperty Algorithm -Unique | ForEach-Object { $_.ToLower() } | Select-Object -Unique | ForEach-Object { $LegacyPools | Add-Member $_ ([Miner]::Pools | Where-Object Algorithm -EQ $_ | Select-Object -First 1) }
+    if ($API) { $API.Pools = $LegacyPools } #Give API access to the current running configuration
 
     #Load legacy miners
     #To-do: change dot to ampersand
@@ -666,7 +628,7 @@ while (-not $API.Stop) {
     $RunningMiners | Where-Object { $_.GetStatus() -ne "Running" } | ForEach-Object { 
         $_.StatusMessage = " exited unexpectedly"
         $_.SetStatus("Failed")
-        Write-Log -Level Error "Miner ($($_.Name) {$(($_.Algorithm | ForEach-Object { "$($_)@$($Pools.$_.Name)" }) -join "; ")})$(if ($_.StatusMessage) { $_.StatusMessage } else { " has failed" }). "
+        Write-Log -Level Error "Miner ($($_.Name) {$(($_.Algorithm | ForEach-Object { "$($_)@$($LegacyPools.$_.Name)" }) -join "; ")})$(if ($_.StatusMessage) { $_.StatusMessage } else { " has failed" }). "
 
         #Post miner failure exec
         $Command = ($ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $_ -Config $Config -Event "PostStop"))).Trim()
@@ -788,12 +750,12 @@ while (-not $API.Stop) {
             $Miner_IntervalMultiplier = $Miner.IntervalMultiplier
             $Miner.Algorithm | ForEach-Object { 
                 $Miner_Algorithm = $_
-                $WatchdogTimer = $WatchdogTimers | Where-Object { $_.MinerName -eq $Miner.Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm }
+                $WatchdogTimer = $WatchdogTimers | Where-Object { $_.MinerName -eq $Miner.Name -and $_.PoolName -eq $LegacyPools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm }
                 if ($WatchdogTimer) { 
                     if ($WatchdogTimer.Kicked -lt $Timer.AddSeconds( - $WatchdogInterval * $Miner_IntervalMultiplier)) { 
                         $Miner.SetStatus("Failed")
                         $Miner.StatusMessage = " was temporarily disabled by watchdog"
-                        Write-Log -Level Warn "Watchdog: Miner ($Miner.Name {$(($Miner.Algorithm | ForEach-Object { "$($_)@$($Pools.$_.Name)" }) -join "; ")}) temporarily disabled. "
+                        Write-Log -Level Warn "Watchdog: Miner ($Miner.Name {$(($Miner.Algorithm | ForEach-Object { "$($_)@$($LegacyPools.$_.Name)" }) -join "; ")}) temporarily disabled. "
                     }
                     else { 
                         $WatchdogTimers = @($WatchdogTimers -notmatch $WatchdogTimer)
@@ -826,7 +788,7 @@ while (-not $API.Stop) {
             $Command = ($ExecutionContext.InvokeCommand.ExpandString((Get-PrePostCommand -Miner $Miner -Config $Config -Event "PreStart"))).Trim()
             if ($Command) { Start-PrePostCommand -Command $Command -Event "PreStart" }
             Remove-Variable Command
-            Write-Log "Starting miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object { "$($_)@$($Pools.$_.Name)" }) -join "; ")}). "
+            Write-Log "Starting miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object { "$($_)@$($LegacyPools.$_.Name)" }) -join "; ")}). "
             Write-Log -Level Verbose $Miner.GetCommandLine().Replace("$(Convert-Path '.\')\", "")
             $Miner.SetStatus("Running")
             $RunningMiners += $Miner #Update API miner information
@@ -841,11 +803,11 @@ while (-not $API.Stop) {
             if ($Config.Watchdog -and ($Miner.Algorithm | Where-Object { (Get-Stat -Name "$($Miner.Name)_$($_)_HashRate") }) -and -not $(if ($Config.MeasurePowerUsage) { $Miner.PowerUsage -EQ $null })) { 
                 $Miner.Algorithm | ForEach-Object { 
                     $Miner_Algorithm = $_
-                    $WatchdogTimer = $WatchdogTimers | Where-Object { $_.MinerName -eq $Miner.Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm }
+                    $WatchdogTimer = $WatchdogTimers | Where-Object { $_.MinerName -eq $Miner.Name -and $_.PoolName -eq $LegacyPools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm }
                     if (-not $WatchdogTimer) { 
                         $WatchdogTimers += [PSCustomObject]@{ 
                             MinerName = $Miner.Name
-                            PoolName  = $Pools.$Miner_Algorithm.Name
+                            PoolName  = $LegacyPools.$Miner_Algorithm.Name
                             Algorithm = $Miner_Algorithm
                             Device    = "{$($Miner.DeviceName -join "; ")}"
                             Kicked    = $Timer
@@ -1083,7 +1045,7 @@ while (-not $API.Stop) {
         $RunningMiners | Where-Object { $_.GetStatus() -ne "Running" } | ForEach-Object { 
             #Failed miner detected
             $Miner = $_
-            Write-Log -Level Error "Miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($Pools.$_.Name)"}) -join "; ")})$(if ($Miner.StatusMessage) { $Miner.StatusMessage } else { " has failed" }). "
+            Write-Log -Level Error "Miner ($($Miner.Name) {$(($Miner.Algorithm | ForEach-Object {"$($_)@$($LegacyPools.$_.Name)"}) -join "; ")})$(if ($Miner.StatusMessage) { $Miner.StatusMessage } else { " has failed" }). "
             if ($Miner.New) { $Miner.Benchmarked-- }
             $RunningMiners = @($RunningMiners | Where-Object { $_ -ne $Miner })
             $FailedMiners += $Miner
@@ -1232,12 +1194,12 @@ while (-not $API.Stop) {
                     Write-Log -Level Verbose "Saving hash rate ($($Miner_Name)_$($Miner_Algorithm)_HashRate: $(($Miner_Speed | ConvertTo-Hash) -replace ' '))$(if  (-not (Get-Stat -Name "$($Miner_Name)_$($Miner_Algorithm)_HashRate")) { " [Benchmark done]" })"
                     $Stat = Set-Stat -Name "$($Miner_Name)_$($Miner_Algorithm)_HashRate" -Value $Miner_Speed -Duration ([Long]($Miner.Intervals | Measure-Object Ticks -Sum).Sum) -FaultDetection ($Miner.IntervalMultiplier -le 1)
                     if (-not $Miner_Speed) { 
-                        Write-Log -Level Warn "Miner ($($Miner_Name) {$($Miner_Algorithm)@$($Pools.$Miner_Algorithm.Name)}) did not report any valid hashrate and will be disabled. To re-enable remove the stats file ($($Miner.Name)_$($_)_HashRate.txt). "
+                        Write-Log -Level Warn "Miner ($($Miner_Name) {$($Miner_Algorithm)@$($LegacyPools.$Miner_Algorithm.Name)}) did not report any valid hashrate and will be disabled. To re-enable remove the stats file ($($Miner.Name)_$($_)_HashRate.txt). "
                     }
                 }
 
                 #Update watchdog timer
-                $WatchdogTimer = $WatchdogTimers | Where-Object { $_.MinerName -eq $Miner_Name -and $_.PoolName -eq $Pools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm }
+                $WatchdogTimer = $WatchdogTimers | Where-Object { $_.MinerName -eq $Miner_Name -and $_.PoolName -eq $LegacyPools.$Miner_Algorithm.Name -and $_.Algorithm -eq $Miner_Algorithm }
                 if ($Stat -and $WatchdogTimer -and $Stat.Updated -gt $WatchdogTimer.Kicked) { 
                     $WatchdogTimer.Kicked = $Stat.Updated
                 }
