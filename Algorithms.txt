@@ -86,7 +86,7 @@
     "cryptonightfast":  "CryptonightFast",
     "cryptonightfast2":  "CryptonightFast2",
     "cryptonightgraft":  "CryptonightGraft",
-    "cryptonightgpu":  "CryptonightRwz",
+    "cryptonightgpu":  "CryptonightGpu",
     "cryptonighthalf":  "CryptonightHalf",
     "cryptonightheavyxhv":  "CryptonightHeavyXhv",
     "cryptonightheavyhaven":  "CryptonightHeavyHaven",
