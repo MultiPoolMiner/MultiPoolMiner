@@ -1,15 +1,14 @@
 ﻿#Load information about the miners
-Write-Log "Getting miner information. "
-# Get all the miners, get just the .Content property and add the name, version and complete fees
 $MinersLegacy = @(
+Write-Log "Getting legacy miner information. "
     if (Test-Path "MinersLegacy" -PathType Container -ErrorAction Ignore) { 
         #Strip Model information from devices -> will create only one miner instance
         if ($Config.DisableDeviceDetection) { $DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object { $_.Model = $_.Vendor } } else { $DevicesTmp = $Devices }
         Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $LegacyPools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp; JobName = "MinersLegacy" } -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" }) | ForEach-Object { 
             if (-not $_.Content.Name) { $_.Content | Add-Member Name $_.Name -Force }
-            $_.Content | Add-Member BaseName ($_.Name -split '-' | Select-Object -Index 0)
-            $_.Content | Add-Member Version ($_.Name -split '-' | Select-Object -Index 1)
-            $_.Content | Add-Member Fees @($null) -ErrorAction SilentlyContinue
+            $_.Content | Add-Member BaseName ($_.Name -split '-' | Select-Object -Index 0) #temp fix
+            $_.Content | Add-Member Version ($_.Name -split '-' | Select-Object -Index 1) #temp fix
+            $_.Content | Add-Member Fees @($null) -ErrorAction SilentlyContinue #temp fix
             $AllMinerPaths += ($_.Content.Path = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($_.Content.Path))
             $_.Content
         }

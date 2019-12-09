@@ -597,7 +597,7 @@ while (-not $API.Stop) {
 
     if ($API) { $API.AllPools = [Miner]::Pools } #Give API access to the current running configuration
 
-    if ([Miner]::Pools.Count -eq 0) {
+    if ([Miner]::Pools.Count -eq 0) { 
         Write-Log -Level Warn "No pools available. "
         while ((Get-Date).ToUniversalTime() -lt $StatEnd) { Start-Sleep 10 }
         continue
@@ -609,7 +609,7 @@ while (-not $API.Stop) {
     if ($API) { $API.Stats = $Stats } #Give API access to the current stats
 
     #Update the legacy pools
-    Write-Log "Selecting best pool for each algorithm. "
+    Write-Log "Selecting best pool for each algorithm for legacy miners. "
     $LegacyPools = [PSCustomObject]@{ }
     [Miner]::Pools | Select-Object -ExpandProperty Algorithm -Unique | ForEach-Object { $_.ToLower() } | Select-Object -Unique | ForEach-Object { $LegacyPools | Add-Member $_ ([Miner]::Pools | Where-Object Algorithm -EQ $_ | Select-Object -First 1) }
     if ($API) { $API.Pools = $LegacyPools } #Give API access to the current running configuration
@@ -728,7 +728,6 @@ while (-not $API.Stop) {
     Remove-Variable SmallestProfitBias
     Remove-Variable SmallestProfitComparison
 
-
     #Stop miners in the active list depending on if they are the most profitable
     $ActiveMiners | Where-Object { $_.GetActivateCount() } | Where-Object { $Miner = $_; $_.Best -EQ $false -or (-not ($Miner.Benchmarked % $Miner.IntervalMultiplier) -and [Boolean]($Miner.Algorithm | Where-Object { -not (Get-Stat -Name "$($Miner.Name)_$($_)_HashRate") })) -or ($Config.ShowMinerWindow -ne $OldConfig.ShowMinerWindow) } | ForEach-Object { 
         $Miner = $_
@@ -829,8 +828,8 @@ while (-not $API.Stop) {
         }
         if ($API) { $API.WatchdogTimers = $WatchdogTimers } #Give API access to WatchdogTimers information
     }
-    Clear-Host
 
+    Clear-Host
 
     #Display mining information
     [System.Collections.ArrayList]$Miner_Table = @(
