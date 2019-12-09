@@ -1,6 +1,6 @@
 ﻿#Load information about the miners
-$MinersLegacy = @(
 Write-Log "Getting legacy miner information. "
+$LegacyMiners = @(
     if (Test-Path "MinersLegacy" -PathType Container -ErrorAction Ignore) { 
         #Strip Model information from devices -> will create only one miner instance
         if ($Config.DisableDeviceDetection) { $DevicesTmp = $Devices | ConvertTo-Json -Depth 10 | ConvertFrom-Json; $DevicesTmp | ForEach-Object { $_.Model = $_.Vendor } } else { $DevicesTmp = $Devices }
@@ -20,7 +20,7 @@ $AllMinerPaths = $AllMinerPaths | Sort-Object -Unique
 # Select only the ones that match our $Config.DeviceName (CPU, AMD, NVIDIA) or all of them if type is unset, 
 # select only the ones that have a HashRate matching our algorithms, and that only include algorithms we have pools for
 # select only the miners that match $Config.MinerName, if specified, and don't match $Config.ExcludeMinerName
-$AllMiners = @($MinersLegacy | 
+$AllMiners = @($LegacyMiners | 
     Where-Object { $UnprofitableAlgorithms -notcontains ($_.HashRates.PSObject.Properties.Name | Select-Object -Index 0) } | #filter unprofitable algorithms, allow them as secondary algo
     Where-Object { $_.HashRates.PSObject.Properties.Value -notcontains 0 } | #filter miner with 0 hashrate
     Where-Object { $_.HashRates.PSObject.Properties.Value -notcontains -1 } | #filter disabled miner (-1 hashrate)
@@ -35,13 +35,13 @@ $AllMiners = @($MinersLegacy |
 )
 
 #Miner with 0 hashrate (failed benchmarking) or -1 hashrate (manually disabled in dashboard)
-$InactiveMiners = @($MinersLegacy | Where-Object { $_.HashRates.PSObject.Properties.Value -contains 0 -or $_.HashRates.PSObject.Properties.Value -contains -1 } )
+$InactiveMiners = @($LegacyMiners | Where-Object { $_.HashRates.PSObject.Properties.Value -contains 0 -or $_.HashRates.PSObject.Properties.Value -contains -1 } )
 $InactiveMiners | ForEach-Object { 
     if ($_.HashRates.PSObject.Properties.Value -contains 0) { $_ | Add-Member Reason "Failed" -ErrorAction SilentlyContinue }
     elseif ($_.HashRates.PSObject.Properties.Value -contains -1) { $_ | Add-Member Reason "Disabled" -ErrorAction SilentlyContinue }
 }
 
-$FilteredMiners = @($MinersLegacy | Where-Object { $AllMiners -notcontains $_ } | Where-Object { $InactiveMiners -notcontains $_ } )
+$FilteredMiners = @($LegacyMiners | Where-Object { $AllMiners -notcontains $_ } | Where-Object { $InactiveMiners -notcontains $_ } )
 $FilteredMiners | ForEach-Object { 
     if ($UnprofitableAlgorithms -contains ($_.HashRates.PSObject.Properties.Name | Select-Object -Index 0)) { $_ | Add-Member Reason "Unprofitable Algorithm" -ErrorAction SilentlyContinue }
     elseif ($Config.SingleAlgoMining -and @($_.HashRates.PSObject.Properties.Name).Count -NE 1) { $_ | Add-Member Reason "SingleAlgoMining: true" -ErrorAction SilentlyContinue }
