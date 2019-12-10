@@ -4,13 +4,12 @@ param(
     [TimeSpan]$StatSpan, #to be removed
     [PSCustomObject]$Wallets, #under review
     [String]$Worker, #under review
-    [String]$PasswordSuffix, #to be removed
+    [PSCustomObject]$PasswordSuffix, #to be removed
     [Double]$EstimateCorrection, #to be removed
     [Double]$PricePenaltyFactor #to be removed
 )
 
 $PoolFileName = Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName
-$PasswordSuffix = [String]$Config.Pools.$PoolFileName.PasswordSuffix #to be removed
 
 # Guaranteed payout currencies
 $Payout_Currencies = @("BCH", "BTC", "LTC", "DASH", "DOGE") | Where-Object { $Wallets.$_ }
