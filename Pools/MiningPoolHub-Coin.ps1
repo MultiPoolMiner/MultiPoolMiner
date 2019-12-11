@@ -46,6 +46,7 @@ $APIResponse.return | Where-Object { $_.profit -gt 0 } | ForEach-Object {
     $PoolEntry = $_
     $CoinName = Get-CoinName $PoolEntry.coin_name
     Switch ($CoinName) { 
+        "Ethersocial" { $PoolHosts = [String[]]($PoolEntry.host) } #temp Fix
         "MaxCoin" { $PoolHosts = [String[]]($PoolEntry.host) } #temp Fix
         default { $PoolHosts = [String[]]($PoolEntry.host_list.split(";")) }
     }
