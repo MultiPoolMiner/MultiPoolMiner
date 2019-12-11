@@ -616,7 +616,128 @@ while (-not $API.Stop) {
 
     #Load legacy miners
     #To-do: change dot to ampersand
-    if (Test-Path .\Convert-LegacyMiners.ps1) { . .\Convert-LegacyMiners.ps1 }
+    [Miner[]]$LegacyMiners = @(if (Test-Path .\Convert-LegacyMiners.ps1) { . .\Convert-LegacyMiners.ps1 }) | Select-Object
+
+    #Add new miners
+    Compare-Object @($ActiveMiners | Select-Object Name, Path, Arguments, Port, ShowMinerWindow -Unique) @($LegacyMiners | Select-Object Name, Path, Arguments, Port, ShowMinerWindow -Unique) -Property Name, Path, Arguments, Port, ShowMinerWindow | Where-Object SideIndicator -EQ "=>" | ForEach-Object { 
+        [Miner]$Miner = $null
+
+        $Miner = $LegacyMiners | 
+        Where-Object Name -eq $_.Name | 
+        Where-Object Path -eq $_.Path | 
+        Where-Object Arguments -eq $_.Arguments | 
+        Where-Object Port -eq $_.Port | 
+        Where-Object ShowMinerWindow -eq $_.ShowMinerWindow | 
+        Select-Object -First 1
+
+        if ($Miner) { $ActiveMiners += $Miner }
+    }
+
+    #Reset existing pools
+    $ActiveMiners | ForEach-Object { 
+        $_.Profit = 0
+        $_.Profit_Comparison = 0
+        $_.Profit_Accuracy = 0
+        $_.Profit_Bias = 0
+        $_.Profit_Unbias = 0
+        $_.Benchmark = $false
+        $_.Fastest = $false
+        $_.Best = $false
+        $_.Best_Comparison = $false
+    }
+
+    #Update existing miners
+    $ActiveMiners | 
+    Where-Object { -not (Compare-Object @($Devices.Name | Select-Object) $_.DeviceName | Where-Object SideIndicator -EQ "=>") } | 
+    #Where-Object { -not $UnprofitableAlgorithms -or (Compare-Object @($UnprofitableAlgorithms | Select-Object) $_.Algorithm_Base -IncludeEqual -ExcludeDifferent | Measure-Object).Count -lt $_.Algorithm_Base.Count } | #filter unprofitable algorithms, allow them as secondary algo
+    #Where-Object { -not $Config.SingleAlgoMining -or $_.Algorithm.Count -eq 1 } | #filter dual algo miners
+    Where-Object { -not $Config.MinerName -or (Compare-Object @($Config.MinerName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    Where-Object { -not $Config.ExcludeMinerName -or -not (Compare-Object @($Config.ExcludeMinerName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
+    ForEach-Object { 
+        $_.Refresh()
+    }
+
+    if (-not (($ActiveMiners | Where-Object Profit_Bias) -or ($ActiveMiners | Where-Object Benchmark))) { 
+        Write-Log -Level Warn "No miners available. "
+        while ((Get-Date).ToUniversalTime() -lt $StatEnd) { Start-Sleep 10 }
+        continue
+    }
+
+    $ActiveMiners | Where-Object { $_.GetStatus() -EQ "Running" } | ForEach-Object { $_.Profit_Bias = $_.Profit_Unbias } #Don't penalize active miners
+    $ActiveMiners = $ActiveMiners | Sort-Object -Descending { $_.Profit -Like ([Double]::NaN) }, Profit_Bias, { $_.Intervals.Count }
+
+    #Apply watchdog to miners
+    $ActiveMiners | Where-Object { ($WatchdogTimers | Where-Object MinerName -EQ $_.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval * $_.IntervalMultiplier) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset) | Measure-Object | Select-Object -ExpandProperty Count) -ge <#stage#>2 } | ForEach-Object { $_.Profit_Bias = 0 }
+    $ActiveMiners | Where-Object { ($WatchdogTimers | Where-Object MinerName -EQ $_.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval * $_.IntervalMultiplier) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset) | Where-Object Algorithm -EQ $_.Algorithm | Measure-Object | Select-Object -ExpandProperty Count) -ge <#stage#>1 } | ForEach-Object { $_.Profit_Bias = 0 }
+
+    #Retrieve collected balance data
+    if ($Balances_Jobs) { 
+        if ($Balances_Jobs | Where-Object State -NE "Completed") { Write-Log "Waiting for balances information. " }
+        $Balances = @((@($Balances | Select-Object) + @($Balances_Jobs | Receive-Job -Wait -AutoRemoveJob -ErrorAction SilentlyContinue | ForEach-Object { if (-not $_.Content.Name) { $_.Content | Add-Member Name $_.Name -Force }; $_.Content } | Select-Object | Where-Object Total -GT 0)) | Group-Object Name | ForEach-Object { $_.Group | Sort-Object LastUpdated | Select-Object -Last 1 })
+        Remove-Variable Balances_Jobs
+        if ($API) { $API.Balances_Jobs = $null }
+    }
+
+    #Update the exchange rates
+    Write-Log "Updating exchange rates from CryptoCompare. "
+    try { 
+        $NewRates = Invoke-RestMethod "https://min-api.cryptocompare.com/data/pricemulti?fsyms=$((@([PSCustomObject]@{Currency = "BTC"}) + @($Balances) | Select-Object -ExpandProperty Currency -Unique | ForEach-Object {$_.ToUpper()}) -join ",")&tsyms=$(($Config.Currency | ForEach-Object {$_.ToUpper() -replace "mBTC", "BTC"}) -join ",")&extraParams=http://multipoolminer.io" -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    }
+    catch { 
+        Write-Log -Level Warn "CryptoCompare is down. "
+    }
+    if ($NewRates) { 
+        $Rates = $NewRates
+        $Rates | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object { $Rates.($_) | Add-Member $_ ([Double]1) -Force }
+    }
+    if ($Rates.BTC.BTC -ne 1) { 
+        $Rates = [PSCustomObject]@{BTC = [PSCustomObject]@{BTC = [Double]1 } }
+    }
+    #Convert values to milli BTC
+    if ($Config.Currency -contains "mBTC" -and $Rates.BTC) { 
+        $Currency = "mBTC"
+        $Rates | Add-Member mBTC ($Rates.BTC | ConvertTo-Json -Depth 10 | ConvertFrom-Json) -Force
+        $Rates | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $_ -ne "BTC" } | ForEach-Object { $Rates.$_ | Add-Member mBTC ([Double]($Rates.$_.BTC * 1000)) -ErrorAction SilentlyContinue; if ($Config.Currency -notcontains "BTC") { $Rates.$_.PSObject.Properties.Remove("BTC") } }
+        $Rates.mBTC | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | ForEach-Object { $Rates.mBTC.$_ /= 1000 }
+        $Rates.BTC | Add-Member mBTC 1000 -Force
+        if ($Config.Currency -notcontains "BTC") { $Rates.BTC.PSObject.Properties.Remove("BTC") }
+        $Balances | ForEach-Object { if ($_.Currency -eq "BTC") { $_.Currency = "mBTC"; $_.Balance *= 1000; $_.Pending *= 1000; $_.Total *= 1000 } }
+    }
+    else { $Currency = "BTC" }
+    if ($API) { 
+        $API.Balances = $Balances #Give API access to the pool balances
+        $API.Rates = $Rates #Give API access to the exchange rates
+    }
+
+    #Power price
+    if ($Config.PowerPrices | Sort-Object | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name) { 
+        if ($null -eq $Config.PowerPrices."00:00") { 
+            #00:00h power price is the same as the last price of the day
+            $Config.PowerPrices | Add-Member "00:00" ($Config.PowerPrices.($Config.PowerPrices | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Sort-Object | Select-Object -Last 1))
+        }
+        $PowerPrice = [Double]($Config.PowerPrices.($Config.PowerPrices | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Sort-Object | Where-Object { $_ -lt (Get-Date -Format HH:mm).ToString() } | Select-Object -Last 1))
+    }
+    if ($Rates.BTC.$FirstCurrency) { 
+        if ($API) { $API.BTCRateFirstCurrency = $Rates.BTC.$FirstCurrency }
+        if ($Config.MeasurePowerUsage -and $PowerPrice) { 
+            $PowerCostBTCperW = [Double](1 / 1000 * 24 * $PowerPrice / $Rates.BTC.$FirstCurrency)
+            $BasePowerCost = [Double]($Config.BasePowerUsage / 1000 * 24 * $PowerPrice / $Rates.BTC.$FirstCurrency)
+        }
+    }
+
+    #Open firewall ports for all miners
+    #temp fix, needs removing from loop as it requires admin rights
+    if (Get-Command "Get-MpPreference" -ErrorAction Ignore) { 
+        if ((Get-Command "Get-MpComputerStatus" -ErrorAction Ignore) -and (Get-MpComputerStatus -ErrorAction Ignore)) { 
+            if (Get-Command "Get-NetFirewallRule" -ErrorAction Ignore) { 
+                if ($null -eq $MinerFirewalls) { $MinerFirewalls = Get-NetFirewallApplicationFilter | Select-Object -ExpandProperty Program }
+                if (@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ "=>") { 
+                    Start-Process (@{desktop = "powershell"; core = "pwsh" }.$PSEdition) ("-Command Import-Module '$env:Windir\System32\WindowsPowerShell\v1.0\Modules\NetSecurity\NetSecurity.psd1'; ('$(@($AllMiners | Select-Object -ExpandProperty Path -Unique) | Compare-Object @($MinerFirewalls) | Where-Object SideIndicator -EQ '=>' | Select-Object -ExpandProperty InputObject | ConvertTo-Json -Compress)' | ConvertFrom-Json) | ForEach-Object {New-NetFirewallRule -DisplayName (Split-Path `$_ -leaf) -Program `$_ -Description 'Inbound rule added by MultiPoolMiner $Version on $((Get-Date).ToString())' -Group 'Cryptocurrency Miner'}" -replace '"', '\"') -Verb runAs
+                    Remove-Variable MinerFirewalls
+                }
+            }
+        }
+    }
 
     if (-not $MinersNeedingBenchmark.Count) { 
         #Detect miners with unreal profitability (> 10x higher than the best 10% miners, error in data provided by pool?)

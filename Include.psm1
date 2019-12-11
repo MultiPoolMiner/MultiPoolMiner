@@ -1438,21 +1438,21 @@ class Miner {
     [String]$Arguments
     [UInt16]$Port
     [String[]]$DeviceName = @()
-    [String[]]$Algorithm = @()
-    [String[]]$Algorithm_Base = @()
-    [String[]]$PoolName = @()
-    [String[]]$PoolName_Base = @()
-    [Double]$Profit
-    [Double]$Profit_Comparison
-    [Double]$Profit_Accuracy
-    [Double]$Profit_Bias
-    [Double]$Profit_Unbias
-    [Double[]]$PoolFee = @()
-    [Double[]]$PoolPrice = @()
+    [String[]]$Algorithm = @() #derived from pool
+    [String[]]$Algorithm_Base = @() #derived from pool
+    [String[]]$PoolName = @() #derived from pool
+    [String[]]$PoolName_Base = @() #derived from pool
+    [Double]$Profit #derived from pool and stats
+    [Double]$Profit_Comparison #derived from pool and stats
+    [Double]$Profit_Accuracy #derived from pool and stats
+    [Double]$Profit_Bias #derived from pool and stats
+    [Double]$Profit_Unbias #derived from pool and stats
+    [Double[]]$PoolFee = @() #derived from pool
+    [Double[]]$PoolPrice = @() #derived from pool
     [Double[]]$Fee = @()
-    [Double[]]$Speed = @()
+    [Double[]]$Speed = @() #derived from stats
     [Double[]]$Speed_Live = @()
-    [Boolean]$Benchmark = $false
+    [Boolean]$Benchmark = $false #derived from stats
     [Boolean]$Fastest = $false
     [Boolean]$Best = $false
     [Boolean]$Best_Comparison = $false
@@ -1798,6 +1798,10 @@ class Miner {
         else { 
             return $PowerUsages_Average
         }
+    }
+
+    Refresh() { 
+        #to-do
     }
 }
 
