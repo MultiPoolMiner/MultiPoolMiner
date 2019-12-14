@@ -1813,7 +1813,44 @@ class Miner {
     }
 
     Refresh() { 
-        #to-do
+        $this.Workers | ForEach-Object { 
+            $_.Profit = $_.Pool.Price * (($_.Speed * ([Double]1 - $_.Fee)) * (1 - $_.Pool.Fee))
+            $_.Profit_Comparison = $_.Pool.StablePrice * (($_.Speed * ([Double]1 - $_.Fee)) * (1 - $_.Pool.Fee))
+            $_.Profit_Accuracy = ([Double]1 - $_.Pool.MarginOfError)
+            $_.Profit_Bias = $_.Pool.Price_Bias * (($_.Speed * ([Double]1 - $_.Fee)) * (1 - $_.Pool.Fee))
+            $_.Profit_Unbias = $_.Pool.Price_Unbias * (($_.Speed * ([Double]1 - $_.Fee)) * (1 - $_.Pool.Fee))
+        }
+
+        $this.Algorithm = $this.Workers.Pool | Select-Object -ExpandProperty Algorithm
+        $this.Algorithm_Base = $this.Algorithm -replace '-.+'
+        $this.PoolName = $this.Workers.Pool | Select-Object -ExpandProperty Name
+        $this.PoolName_Base = $this.PoolName -replace '-.+'
+        $this.PoolFee = $this.Workers.Pool | Select-Object -ExpandProperty Fee
+        $this.PoolPrice = $this.Workers.Pool | Select-Object -ExpandProperty Price
+        $this.Fee = $this.Workers | Select-Object -ExpandProperty Fee
+        $this.Speed = $this.Workers | Select-Object -ExpandProperty Speed
+        $this.Benchmark = $this.Workers | Sort-Object Benchmark -Descending | Select-Object -ExpandProperty Benchmark -First 1
+
+        $this.Profit = 0
+        $this.Profit_Comparison = 0
+        $this.Profit_Accuracy = 0
+        $this.Profit_Bias = 0
+        $this.Profit_Unbias = 0
+
+        $this.Workers | ForEach-Object { 
+            $this.Profit += $_.Profit
+            $this.Profit_Comparison += $_.Profit_Comparison
+            $this.Profit_Accuracy += $_.Profit_Accuracy * $_.Profit
+            $this.Profit_Bias += $_.Profit_Bias
+            $this.Profit_Unbias += $_.Profit_Unbias
+        }
+
+        if ($this.Profit -eq 0) { 
+            $this.Profit_Accuracy = 1
+        }
+        else { 
+            $this.Profit_Accuracy /= $this.Profit
+        }
     }
 }
 
