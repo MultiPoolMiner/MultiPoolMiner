@@ -6,7 +6,7 @@
 
     # Create a global synchronized hashtable that all threads can access to pass data between the main script and API
     $Global:API = [hashtable]::Synchronized(@{ })
-    $API.APIVersion = "0.98.1"
+    $API.APIVersion = "0.98.3"
 
     # Setup flags for controlling script execution
     $API.Stop = $false
@@ -51,6 +51,7 @@
                 $Request = $Context.Request
                 $URL = $Request.Url.OriginalString
 
+$URL >> ".\logs\api_requests.txt"
                 # Determine the requested resource and parse query strings
                 $Path = $Request.Url.LocalPath
 
@@ -174,6 +175,10 @@
                         $Data = ConvertTo-Json @($API.InactiveMiners | Select-Object)
                         Break
                     }
+                    "/inactivepools" { 
+                        $Data = ConvertTo-Json @($API.InactivePools | Select-Object)
+                        Break
+                    }
                     "/intervals" { 
                         $Data = ConvertTo-Json @($API.Intervals | Select-Object)
                         Break
@@ -184,6 +189,10 @@
                     }
                     "/minersneedingbenchmark" { 
                         $Data = ConvertTo-Json @($API.MinersNeedingBenchmark | Select-Object)
+                        Break
+                    }
+                    "/minersneedingpowerusagemeasurement" { 
+                        $Data = ConvertTo-Json @($API.MinersNeedingPowerUsageMeasurement | Select-Object)
                         Break
                     }
                     "/miningcost" { 
