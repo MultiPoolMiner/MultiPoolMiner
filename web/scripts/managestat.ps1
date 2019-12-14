@@ -11,14 +11,6 @@ if ($Data.Count) {
     #Work on a defined set of stats
     Switch -regex ($Parameters.Action) { 
         "GetStat" { 
-    #        if ($Data.Count) { 
-    #            #Get stat files for given miner name
-    #            if ($Parameters.MinerName) { 
-    #                @($Parameters.Algorithms -split ", ") | ForEach-Object { 
-    #                    $Text +="`n$($Parameters.MinerName)_$($_)_$($Parameters.Type)`n"
-    #                }
-    #            }
-    #        }
             if ($Parameters.Value -ne $null) { 
                 #Get stat files with given value
                 if ($Stats = $API.Stats | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $_ -like "*$($Parameters.Type)" } | Where-Object { $API.Stats.$_.Minute -eq $Parameters.Value }) { 
@@ -64,6 +56,9 @@ if ($Data.Count) {
                         
                         $API."ActiveMiners" = $API."ActiveMiners" | ForEach-Object {
                             if ($_.Name -like "$Name*" -and -not (Compare-Object @($Algorithms | Select-Object) @($_.Algorithm | Select-Object))) { 
+                                
+                                $Text += "`n$Name {$($Algorithms -join "; ")}"
+
                                 if ($Parameters.Value -eq $null) { 
                                     if ($Parameters.Type -eq "HashRate") { 
                                         #Clear speed and earning data in API
@@ -82,6 +77,9 @@ if ($Data.Count) {
 
                         $API."InactiveMiners" = $API."InactiveMiners" | ForEach-Object {
                             if ($_.Name -like "$Name*" -and -not (Compare-Object @($Algorithms | Select-Object) @($_.Hashrates.PSObject.Properties.Name | Select-Object))) { 
+
+                                if ($_.Reason -eq "Failed" -or $_.Reason -eq "Disabled") { $Text += "`n$Name {$($Algorithms -join "; ")}" }
+
                                 if ($Parameters.Value -ne $null) { 
                                     #Miner has been set as disabled or failed
                                     #Update API with new Reason value
@@ -99,6 +97,9 @@ if ($Data.Count) {
 
                         $API."Miners" = $API."Miners" | ForEach-Object { 
                             if ($_.Name -like "$Name*" -and -not (Compare-Object @($Algorithms | Select-Object) @($_.Hashrates.PSObject.Properties.Name | Select-Object))) { 
+    
+                                $Text += "`n$Name {$($Algorithms -join "; ")}"
+
                                 if ($Parameters.Type -eq "HashRate") { 
                                     #Clear speed and earning data in API
                                     ForEach ($Algorithm in $Algorithms) { 
@@ -117,9 +118,6 @@ if ($Data.Count) {
                             #Always keep record in API
                             $_ 
                         }
-
-                        if ($_.Reason -eq "Failed" -or $_.Reason -eq "Disabled") { $Text += "`n$Name {$($Algorithms -join "; ")}" }
-
                     }
                 }
             }
@@ -139,26 +137,33 @@ if ($Data.Count) {
 }
 else {
     #Work an all stats matching a criteria
-    if ($Parameters.Value -eq $null) { 
-        #Remove all stat files, no matter what value
-        if ($Stats = $API.Stats | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $_ -like "*$($Parameters.Type)" }) { 
-            $Stats | ForEach-Object { 
-                Remove-Stat -Name $_
-                $API.Stats.PSObject.Properties.Remove($_)
-            }
-            $Text = "`nRemoved $($Stats.Count) $($Parameters.Type) stat file$(if ($Stats.Count -ne 1) { "s" }). "
+    Switch -regex ($Parameters.Action) { 
+        "GetStat" {
+            <#To do#>
         }
-    }
-    if ($Parameters.Value) { 
-        #Remove stat files with given value
-        if ($Stats = $API.Stats | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $_ -like "*$($Parameters.Type)" } | Where-Object { $API.Stats.$_.Minute -eq $Parameters.Value }) { 
-            $Stats | ForEach-Object { 
-                Remove-Stat -Name $_
-                $API.Stats.PSObject.Properties.Remove($_)
-                $Text += "`n$($_ -replace "_$($Parameters.Type)")"
+        "RemoveStat|SetStat" { 
+            if ($Parameters.Value -eq $null) { 
+                #Remove all stat files, no matter what value
+                if ($Stats = $API.Stats | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $_ -like "*$($Parameters.Type)" }) { 
+                    $Stats | ForEach-Object { 
+                        Remove-Stat -Name $_
+                        $API.Stats.PSObject.Properties.Remove($_)
+                    }
+                    $Text = "`nRemoved $($Stats.Count) $($Parameters.Type) stat file$(if ($Stats.Count -ne 1) { "s" }). "
+                }
             }
-            if ($Parameters.Value -eq 0) { $Text += "`n`n$($Stats.Count) stat file$(if ($Stats.Count -ne 1) { "s" }) with $($Parameters.Value)$($Parameters.Unit) $($Parameters.Type). " }
-            if ($Parameters.Value -eq -1) { $Text += "`n`n$($Stats.Count) disabled miner$(if ($Stats.Count -ne 1) { "s" }). " }
+            if ($Parameters.Value) { 
+                #Remove stat files with given value
+                if ($Stats = $API.Stats | Get-Member -MemberType NoteProperty -ErrorAction Ignore | Select-Object -ExpandProperty Name | Where-Object { $_ -like "*$($Parameters.Type)" } | Where-Object { $API.Stats.$_.Minute -eq $Parameters.Value }) { 
+                    $Stats | ForEach-Object { 
+                        Remove-Stat -Name $_
+                        $API.Stats.PSObject.Properties.Remove($_)
+                        $Text += "`n$($_ -replace "_$($Parameters.Type)")"
+                    }
+                    if ($Parameters.Value -eq 0) { $Text += "`n`n$($Stats.Count) stat file$(if ($Stats.Count -ne 1) { "s" }) with $($Parameters.Value)$($Parameters.Unit) $($Parameters.Type). " }
+                    if ($Parameters.Value -eq -1) { $Text += "`n`n$($Stats.Count) disabled miner$(if ($Stats.Count -ne 1) { "s" }). " }
+                }
+            }
         }
     }
 }
