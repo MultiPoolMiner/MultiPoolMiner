@@ -1420,7 +1420,7 @@ class Pool {
     [String]$CurrencySymbol
     [Double]$EstimateCorrection
     [Double]$PricePenaltyFactor
-    [Int]$Workers
+    [Nullable[Int]]$Workers
 }
 
 enum MinerStatus { 
@@ -1442,11 +1442,11 @@ class Miner {
     [String[]]$Algorithm_Base = @() #derived from pool
     [String[]]$PoolName = @() #derived from pool
     [String[]]$PoolName_Base = @() #derived from pool
-    [Double]$Profit #derived from pool and stats
-    [Double]$Profit_Comparison #derived from pool and stats
-    [Double]$Profit_Accuracy #derived from pool and stats
-    [Double]$Profit_Bias #derived from pool and stats
-    [Double]$Profit_Unbias #derived from pool and stats
+    [Nullable[Double]]$Profit #derived from pool and stats
+    [Nullable[Double]]$Profit_Comparison #derived from pool and stats
+    [Nullable[Double]]$Profit_Accuracy #derived from pool and stats
+    [Nullable[Double]]$Profit_Bias #derived from pool and stats
+    [Nullable[Double]]$Profit_Unbias #derived from pool and stats
     [Double[]]$PoolFee = @() #derived from pool
     [Double[]]$PoolPrice = @() #derived from pool
     [Double[]]$Fee = @()
@@ -1469,24 +1469,24 @@ class Miner {
     [String[]]$Environment = @()
 
     #Under review
-    $AllowedBadShareRatio
+    [Int]$AllowedBadShareRatio
     $API
-    $BaseName
+    [String]$BaseName
     $BeginTime
     $Benchmarked
     $Device = @()
-    $Earning
-    $Earning_Bias
-    $Earning_Comparison
-    $Earning_MarginOfError
-    $Earning_Unbias
+    [Nullable[Double]]$Earning #derived from pool and stats
+    [Nullable[Double]]$Earning_Bias #derived from pool and stats
+    [Nullable[Double]]$Earning_Comparison #derived from pool and stats
+    [Nullable[Double]]$Earning_MarginOfError #derived from pool and stats
+    [Nullable[Double]]$Earning_Unbias #derived from pool and stats
     $EndTime
     $PowerCost
     $PowerUsage
     $ProcessId
-    $StatusMessage
-    $Version
-    $WarmupTime
+    [String]$StatusMessage
+    [String]$Version
+    [Int]$WarmupTime
 
     [String[]]GetProcessNames() { 
         return @(([IO.FileInfo]($this.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName)
@@ -1722,8 +1722,8 @@ class Miner {
 
         #During benchmarking strip some of the lowest and highest sample values
         if ($Safe) { 
-            if ($this.IntervalMultiplier -le 1) { $SkipSamples = [math]::Round($HashRates_Samples.Count * 0.1) }
-            else { $SkipSamples = [math]::Round($HashRates_Samples.Count * 0.2) }
+            if ($this.IntervalMultiplier -gt 1) { $Hashrates_Samples = $Hashrates_Samples | Where-Object { $_.Date -ge $this.BeginTime.AddSeconds($this.WarmupTime) } }
+            $SkipSamples = [math]::Floor($HashRates_Samples.Count) * 0.1
         }
         else { $SkipSamples = 0 }
 
