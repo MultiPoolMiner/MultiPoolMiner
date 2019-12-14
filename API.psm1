@@ -51,7 +51,6 @@
                 $Request = $Context.Request
                 $URL = $Request.Url.OriginalString
 
-$URL >> ".\logs\api_requests.txt"
                 # Determine the requested resource and parse query strings
                 $Path = $Request.Url.LocalPath
 
