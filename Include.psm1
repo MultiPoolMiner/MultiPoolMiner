@@ -1423,6 +1423,18 @@ class Pool {
     [Int]$Workers
 }
 
+class Worker {
+    [Pool]$Pool
+    [Double]$Fee
+    [Double]$Speed
+    [Boolean]$Benchmark
+    [Double]$Profit
+    [Double]$Profit_Comparison
+    [Double]$Profit_Accuracy
+    [Double]$Profit_Bias
+    [Double]$Profit_Unbias
+}
+
 enum MinerStatus { 
     Running
     Idle
@@ -1431,7 +1443,7 @@ enum MinerStatus {
 
 class Miner { 
     static [Pool[]]$Pools = @()
-    [Pool[]]$Pool = @()
+    [Worker[]]$Workers = @()
 
     [String]$Name
     [String]$Path

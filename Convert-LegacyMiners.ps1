@@ -6,9 +6,10 @@ if (Test-Path "MinersLegacy" -PathType Container -ErrorAction Ignore) {
 
     Get-ChildItemContent "MinersLegacy" -Parameters @{Pools = $LegacyPools; Stats = $Stats; Config = $Config; Devices = $DevicesTmp; JobName = "MinersLegacy" } -Priority $(if ($RunningMiners | Where-Object { $_.DeviceName -like "CPU#*" }) { "Normal" }) | ForEach-Object { 
         $LegacyMiner_Fees = $_.Content.Fees
+        $LegacyMiner_HashRates = $_.Content.HashRates
 
         @{ 
-            Pool               = $_.Content.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $LegacyPools.$_ }
+            Workers            = $_.Content.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { @{ Pool = $LegacyPools.$_; Fee = $LegacyMiner_Fees.$_; Speed = $LegacyMiner_HashRates.$_; Benchmark = $LegacyMiner_HashRates.$_ -eq $null } }
 
             Name               = $(
                 if ($_.Content.Name -isnot [String]) { 
@@ -29,8 +30,6 @@ if (Test-Path "MinersLegacy" -PathType Container -ErrorAction Ignore) {
             )
             Port               = $_.Content.Port
             DeviceName         = $_.Content.DeviceName
-
-            Fee                = $_.Content.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { $LegacyMiner_Fees.$_ }
 
             ShowMinerWindow    = $_.Content.ShowMinerWindow
             IntervalMultiplier = $(
