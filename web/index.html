@@ -80,49 +80,74 @@
 
 <script type="text/javascript">
     var $table = $('#miners')
+    var $querysize = 10000
 
     $("#re-benchmark").click(function () {
-        $data = JSON.stringify($table.bootstrapTable('getSelections'));
-        if ($data != "[]") {
-            $Command = "scripts/managestat.ps1?DataSet=RunningMiners&Action=RemoveStat&Type=HashRate&Data=" + encodeURIComponent($data)
-            $(".modal-body").load($Command, function() {
-                $(".modal-title").text($("#re-benchmark").text());
-                $("#myModal").modal({show:true});
-            });
-        };
+        var $data = $table.bootstrapTable('getSelections');
+        if ($data.length >= 1) {
+            $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithms: Object.values($element.Algorithm)})));
+            if ($data.length >= $querysize) {
+                alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')');
+            }
+            else {
+                $command = 'scripts/managestat.ps1?DataSet=InactiveMiners&Action=RemoveStat&Type=HashRate&Data=' + encodeURIComponent($data);
+                $('.modal-body').load($command, function() {
+                    $('.modal-title').text($('#re-benchmark').text());
+                    $('#myModal').modal({show:true});
+                });
+            }
+        }
     });
 
     $("#re-measure").click(function () {
-        $data = JSON.stringify($table.bootstrapTable('getSelections'));
-        if ($data != "[]") {
-            $Command = "scripts/managestat.ps1?DataSet=RunningMiners&Action=RemoveStat&Type=PowerUsage&Data=" + encodeURIComponent($data)
-            $(".modal-body").load($Command, function() {
-                $(".modal-title").text($("#re-measure").text());
-                $("#myModal").modal({show:true});
-            });
-        };
+        var $data = $table.bootstrapTable('getSelections');
+        if ($data.length >= 1) {
+            $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithms: Object.values($element.Algorithm)})));
+            if ($data.length >= $querysize) {
+                alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')');
+            }
+            else {
+                $command = "scripts/managestat.ps1?DataSet=RunningMiners&Action=RemoveStat&Type=PowerUsage&Data=" + encodeURIComponent($data);
+                $(".modal-body").load($command, function() {
+                    $(".modal-title").text($("#re-measure").text());
+                    $("#myModal").modal({show:true});
+                });
+            }
+        }
     });
 
     $("#failed").click(function () {
-        $data = JSON.stringify($table.bootstrapTable('getSelections'));
-        if ($data != "[]") {
-            $Command = "scripts/managestat.ps1?DataSet=RunningMiners&Action=SetStat&Type=HashRate&Value=0&Data=" + encodeURIComponent($data)
-            $(".modal-body").load($Command, function() {
-                $(".modal-title").text($("#failed").text());
-                $("#myModal").modal({show:true});
-            });
-        };
+        var $data = $table.bootstrapTable('getSelections');
+        if ($data.length >= 1) {
+            $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithms: Object.values($element.Algorithm)})));
+            if ($data.length >= $querysize) {
+                alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')');
+            }
+            else {
+                $command = "scripts/managestat.ps1?DataSet=RunningMiners&Action=SetStat&Type=HashRate&Value=0&Data=" + encodeURIComponent($data);
+                $(".modal-body").load($command, function() {
+                    $(".modal-title").text($("#failed").text());
+                    $("#myModal").modal({show:true});
+                });
+            }
+        }
     });
 
     $("#disable").click(function () {
-        $data = JSON.stringify($table.bootstrapTable('getSelections'));
-        if ($data != "[]") {
-            $Command = "scripts/managestat.ps1?DataSet=RunningMiners&Action=SetStat&Type=HashRate&Value=-1&Data=" + encodeURIComponent($data)
-            $(".modal-body").load($Command, function() {
-                $(".modal-title").text($("#disable").text());
-                $("#myModal").modal({show:true});
-            });
-        };
+        var $data = $table.bootstrapTable('getSelections');
+        if ($data.length >= 1) {
+            $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithms: Object.values($element.Algorithm)})));
+            if ($data.length >= $querysize) {
+                alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')');
+            }
+            else {
+                $command = "scripts/managestat.ps1?DataSet=RunningMiners&Action=SetStat&Type=HashRate&Value=-1&Data=" + encodeURIComponent($data);
+                $(".modal-body").load($command, function() {
+                    $(".modal-title").text($("#disable").text());
+                    $("#myModal").modal({show:true});
+                });
+            }
+        }
     });
 
     $("#myModal").on('hidden.bs.modal', function () {
@@ -156,7 +181,7 @@
                 });
                 $("#balanceboxes").append(template(data_total));
             }});
-        };
+        }
 
         updatePoolBalances();
         window.setInterval(function() { updatePoolBalances();}, 60000);
@@ -167,8 +192,6 @@
         // that is easier to display and manipulate in a table
         $.each(data, function(index, item) {
             // Format the type(s)
-            console.log(data);
-            console.log(item);
             item.tDevices = item.DeviceName.toString();
 
             // Format the algorithms and hashrates
@@ -191,6 +214,12 @@
             } else {
                 item.tPrimaryHashRateLive = item.Speed_Live;
             }
+
+            // Get effective command line from argument json
+            var arguments = new Object(item.Arguments);
+            if (arguments.Commands) {
+                item.Arguments = arguments.Commands;
+            }
         });
         return data;
     };
@@ -198,6 +227,5 @@
     function formatDate(data) {
         return timeSince(new Date(data));
     };
-
 </script>
 <!--#include file="/parts/foot.html" -->

@@ -6,10 +6,10 @@
 
 
 <div id="toolbar">
-    <button id="reset-data" class="btn btn-primary">Reset stats data</button>
+    <button id="reset-data" class="btn btn-primary">Reset stat data</button>
 </div>
 
-<table id="pools" class="table table-striped table-bordered table-sm" width="50%"
+<table id="pools" class="table"
     data-show-fullscreen="true"
     data-icons="icons"
     data-toolbar="#toolbar"
@@ -45,6 +45,7 @@
             <th data-field="Port" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-width=1>Port&nbsp</th>
             <th data-field="Protocol" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-visible="false">Protocol</th>
             <th data-field="Workers" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Workers</th>
+            <th data-field="PricePenaltyFactor" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=2>PricePenaltyFactor</th>
             <th data-field="EstimateCorrection" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=2>EstimateCorrection</th>
             <th data-field="Region" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Region</th>
             <th data-field="SSL" data-sortable="true">SSL</th>
@@ -53,30 +54,33 @@
     </thead>
 </table>
 
-<!-- Start of page scripts -->
-<script>
+<script type="text/javascript">
     var $table = $('#pools')
+    var $querysize = 10000
 
     $(function () {
-        $("#reset-data").click(function () {
-            $data = JSON.stringify($table.bootstrapTable('getSelections'));
-            if ($data != "[]") {
-                $Command = "scripts/managestat.ps1?DataSet=Pools&Action=RemoveStat&Type=Profit&Data=" + encodeURIComponent($data)
-                $(".modal-body").load($Command, function() {
-                    $(".modal-title").text($("#reset-data").text());
-                    $("#myModal").modal({show:true});
-                });
-            };
+        $('#reset-data').click(function () {
+            var $data = $table.bootstrapTable('getSelections');
+            if ($data.length >= 1) {
+                $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithm: $element.Algorithm, CurrencySymbol: $element.CurrencySymbol})));
+                if ($data.length >= $querysize) {
+                    alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')');
+                }
+                else {
+                    $Command = 'scripts/managestat.ps1?DataSet=Pools&Action=RemoveStat&Type=Profit&Data=' + encodeURIComponent($data);
+                    $('.modal-body').load($Command, function() {
+                        $('.modal-title').text($('#reset-data').text());
+                        $('#myModal').modal({show:true});
+                    });
+                }
+            }
         });
     });
 
-    $("#myModal").on('hidden.bs.modal', function () {
-        $table.bootstrapTable("refresh");
+    $('#myModal').on('hidden.bs.modal', function () {
+        $table.bootstrapTable('refresh');
     });
 
-</script>
-
-<script type="text/javascript">
     function formatPools(data) {
         data = data[0];
         var items = new Array();
@@ -86,5 +90,4 @@
         return items;
     }
 </script>
-<!-- End of page scripts -->
 <!--#include file="/parts/foot.html" -->

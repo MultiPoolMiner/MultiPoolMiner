@@ -43,9 +43,9 @@
             <th data-field="Earning" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning</th>
             <th data-field="Earning_Bias" data-align="right" data-sortable="true" data-formatter="formatBTC">Earning Bias</th>
             <th data-field="PowerUsage" data-align="right" data-sortable="true" data-formatter="formatWatt">Power Usage</th>
-            <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Primary Algorithm</th>
+            <th data-field="tPrimaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="false">Primary Algorithm</th>
             <th data-field="tPrimarySpeed" data-align="right" data-sortable="true" data-formatter="formatHashRateValue">Primary Speed</th>
-            <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Secondary Algorithm</th>
+            <th data-field="tSecondaryAlgorithm" data-sortable="true" data-filter-control="select" data-filter-strict-search="false">Secondary Algorithm</th>
             <th data-field="tSecondarySpeed" data-align="right" data-sortable="true" data-formatter="formatHashRateValue">Secondary Speed</th>
             <th data-field="API" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-visible="false">API</th>
             <th data-field="Port" data-sortable="true" data-filter-control="select" data-visible="false">API Port</th>
@@ -57,61 +57,82 @@
     </thead>
 </table>
 
-<script>
-    var $table = $('#miners')
-
-    $("#re-benchmark").click(function () {
-        $data = JSON.stringify($table.bootstrapTable('getSelections'));
-        if ($data != "[]") {
-            $Command = "scripts/managestat.ps1?DataSet=ActiveMiners&Action=RemoveStat&Type=HashRate&Data=" + encodeURIComponent($data)
-            $(".modal-body").load($Command, function() {
-                $(".modal-title").text($("#re-benchmark").text());
-                $("#myModal").modal({show:true});
-            });
-        };
-    });
-
-    $("#re-measure").click(function () {
-        $data = JSON.stringify($table.bootstrapTable('getSelections'));
-        if ($data != "[]") {
-            $Command = "scripts/managestat.ps1?DataSet=ActiveMiners&Action=RemoveStat&Type=PowerUsage&Data=" + encodeURIComponent($data)
-            $(".modal-body").load($Command, function() {
-                $(".modal-title").text($("#re-measure").text());
-                $("#myModal").modal({show:true});
-            });
-        };
-    });
-
-    $("#failed").click(function () {
-        $data = JSON.stringify($table.bootstrapTable('getSelections'));
-        if ($data != "[]") {
-            $Command = "scripts/managestat.ps1?DataSet=ActiveMiners&Action=SetStat&Type=HashRate&Value=0&Data=" + encodeURIComponent($data)
-            $(".modal-body").load($Command, function() {
-                $(".modal-title").text($("#failed").text());
-                $("#myModal").modal({show:true});
-            });
-        };
-    });
-
-    $("#disable").click(function () {
-        $data = JSON.stringify($table.bootstrapTable('getSelections'));
-        if ($data != "[]") {
-            $Command = "scripts/managestat.ps1?DataSet=ActiveMiners&Action=SetStat&Type=HashRate&Value=-1&Data=" + encodeURIComponent($data)
-            $(".modal-body").load($Command, function() {
-                $(".modal-title").text($("#disable").text());
-                $("#myModal").modal({show:true});
-            });
-        };
-    });
-
-    $("#myModal").on('hidden.bs.modal', function () {
-        $table.bootstrapTable("refresh");
-    });
-
-</script>
-
-<!-- Start of page scripts -->
 <script type="text/javascript">
+    var $table = $('#miners')
+    var $querysize = 10000
+
+    $('#re-benchmark').click(function () {
+        var $data = $table.bootstrapTable('getSelections');
+        if ($data.length >= 1) {
+            $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithms: $element.Algorithm})));
+            if ($data.length >= $querysize) {
+                alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')');
+            }
+            else {
+                $command = 'scripts/managestat.ps1?DataSet=ActiveMiners&Action=RemoveStat&Type=HashRate&Data=' + encodeURIComponent($data);
+                $('.modal-body').load($command, function() {
+                    $('.modal-title').text($('#re-benchmark').text());
+                    $('#myModal').modal({show:true});
+                });
+            }
+        }
+    });
+
+    $('#re-measure').click(function () {
+        var $data = $table.bootstrapTable('getSelections');
+        if ($data.length >= 1) {
+            $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithms: $element.Algorithm})));
+            if ($data.length >= $querysize) {
+                alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')');
+            }
+            else {
+                $command = 'scripts/managestat.ps1?DataSet=ActiveMiners&Action=RemoveStat&Type=PowerUsage&Data=' + encodeURIComponent($data);
+                $('.modal-body').load($command, function() {
+                    $('.modal-title').text($('#re-measure').text());
+                    $('#myModal').modal({show:true});
+                });
+            }
+        }
+    });
+
+    $('#failed').click(function () {
+        var $data = $table.bootstrapTable('getSelections');
+        if ($data.length >= 1) {
+            $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithms: $element.Algorithm})));
+            if ($data.length >= $querysize) {
+                alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')');
+            }
+            else {
+                $command = 'scripts/managestat.ps1?DataSet=ActiveMiners&Action=SetStat&Type=HashRate&Value=0&Data=' + encodeURIComponent($data);
+                $('.modal-body').load($command, function() {
+                    $('.modal-title').text($('#failed').text());
+                    $('#myModal').modal({show:true});
+                });
+            }
+        }
+    });
+
+    $('#disable').click(function () {
+        var $data = $table.bootstrapTable('getSelections');
+        if ($data.length >= 1) {
+            $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithms: $element.Algorithm})));
+            if ($data.length >= $querysize) {
+                alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')')
+            }
+            else {
+                $command = 'scripts/managestat.ps1?DataSet=ActiveMiners&Action=SetStat&Type=HashRate&Value=-1&Data=' + encodeURIComponent($data);
+                $('.modal-body').load($command, function() {
+                    $('.modal-title').text($('#disable').text());
+                    $('#myModal').modal({show:true});
+                });
+            }
+        }
+    });
+
+    $('#myModal').on('hidden.bs.modal', function () {
+        $table.bootstrapTable('refresh');
+    });
+
     function formatActiveMiners(data) {
         // This function can alter the returned data before building the table, formatting it in a way
         // that is easier to display and manipulate in a table
@@ -130,9 +151,14 @@
             } else {
                 item.tPrimarySpeed = item.Speed;
             }
+
+            // Get effective command line from argument json
+            var arguments = new Object(item.Arguments);
+            if (arguments.Commands) {
+                item.Arguments = arguments.Commands;
+            }
         });
         return data;
     }
 </script>
-<!-- End of page scripts -->
 <!--#include file="/parts/foot.html" -->

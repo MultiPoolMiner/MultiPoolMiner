@@ -58,63 +58,83 @@
     </thead>
 </table>
 
-<script>
+<script type="text/javascript">
     var $table = $('#miners')
+    var $querysize = 10000
 
     $(function () {
-        $("#re-benchmark").click(function () {
-            $data = JSON.stringify($table.bootstrapTable('getSelections'));
-            if ($data != "[]") {
-                $Command = "scripts/managestat.ps1?DataSet=Miners&Action=RemoveStat&Type=HashRate&Data=" + encodeURIComponent($data)
-                $(".modal-body").load($Command, function() {
-                    $(".modal-title").text($("#re-benchmark").text());
-                    $("#myModal").modal({show:true});
-                });
-            };
+        $('#re-benchmark').click(function () {
+            var $data = $table.bootstrapTable('getSelections');
+            if ($data.length >= 1) {
+                $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithms: Object.keys($element.HashRates)})));
+                if ($data.length >= $querysize) {
+                    alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')');
+                }
+                else {
+                    $command = 'scripts/managestat.ps1?DataSet=Miners&Action=RemoveStat&Type=HashRate&Data=' + encodeURIComponent($data);
+                    $('.modal-body').load($command, function() {
+                        $('.modal-title').text($('#re-benchmark').text());
+                        $('#myModal').modal({show:true});
+                    });
+                }
+            }
         });
 
-        $("#re-measure").click(function () {
-            $data = JSON.stringify($table.bootstrapTable('getSelections'));
-            if ($data != "[]") {
-                $Command = "scripts/managestat.ps1?DataSet=Miners&Action=RemoveStat&Type=PowerUsage&Data=" + encodeURIComponent($data)
-                $(".modal-body").load($Command, function() {
-                    $(".modal-title").text($("#re-measure").text());
-                    $("#myModal").modal({show:true});
-                });
-            };
+        $('#re-measure').click(function () {
+            var $data = $table.bootstrapTable('getSelections');
+            if ($data.length >= 1) {
+                $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithms: Object.keys($element.HashRates)})));
+                if ($data.length >= $querysize) {
+                    alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')');
+                }
+                else {
+                    $command = 'scripts/managestat.ps1?DataSet=Miners&Action=RemoveStat&Type=PowerUsage&Data=' + encodeURIComponent($data);
+                    $('.modal-body').load($command, function() {
+                        $('.modal-title').text($('#re-measure').text());
+                        $('#myModal').modal({show:true});
+                    });
+                }
+            }
         });
 
-        $("#failed").click(function () {
-            $data = JSON.stringify($table.bootstrapTable('getSelections'));
-            if ($data != "[]") {
-                $Command = "scripts/managestat.ps1?DataSetStat=Miners&Action=Set&Type=HashRate&Value=0&Data=" + encodeURIComponent($data)
-                $(".modal-body").load($Command, function() {
-                    $(".modal-title").text($("#failed").text());
-                    $("#myModal").modal({show:true});
-                });
-            };
+        $('#failed').click(function () {
+            var $data = $table.bootstrapTable('getSelections');
+            if ($data.length >= 1) {
+                $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithms: Object.keys($element.HashRates)})));
+                if ($data.length >= $querysize) {
+                    alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')');
+                }
+                else {
+                    $command = 'scripts/managestat.ps1?DataSet=Miners&Action=SetStat&Type=HashRate&Value=0&Data=' + encodeURIComponent($data);
+                    $('.modal-body').load($command, function() {
+                        $('.modal-title').text($('#failed').text());
+                        $('#myModal').modal({show:true});
+                    });
+                }
+            }
         });
 
-        $("#disable").click(function () {
-            $data = JSON.stringify($table.bootstrapTable('getSelections'));
-            if ($data != "[]") {
-                $Command = "scripts/managestat.ps1?DataSetStat=Miners&Action=Set&Type=HashRate&Value=-1&Data=" + encodeURIComponent($data)
-                $(".modal-body").load($Command, function() {
-                    $(".modal-title").text($("#disable").text());
-                    $("#myModal").modal({show:true});
-                });
-            };
+        $('#disable').click(function () {
+            if ($data.length >= 1) {
+                $data = JSON.stringify($data.map($element => ({Name: $element.Name, Algorithms: Object.keys($element.HashRates)})));
+                if ($data.length >= $querysize) {
+                    alert('Too many objects selected, cannot proceed.\nUnselect some objects and try again.\n\n(Query size: ' + $data.length + '/' + $querysize + ')');
+                }
+                else {
+                    $command = 'scripts/managestat.ps1?DataSet=Miners&Action=SetStat&Type=HashRate&Value=-1&Data=' + encodeURIComponent($data);
+                    $('.modal-body').load($command, function() {
+                        $('.modal-title').text($('#disable').text());
+                        $('#myModal').modal({show:true});
+                    });
+                }
+            }
         });
     });
 
-    $("#myModal").on('hidden.bs.modal', function () {
-        $table.bootstrapTable("refresh");
+    $('#myModal').on('hidden.bs.modal', function () {
+        $table.bootstrapTable('refresh');
     });
 
-</script>
-
-<!-- Start of page scripts -->
-<script type="text/javascript">
     function formatMiners(data) {
         // This function can alter the returned data before building the table, formatting it in a way
         // that is easier to display and manipulate in a table
@@ -132,9 +152,14 @@
             var fees = Object.values(item.Fees);
             item.tPrimaryFee = fees[0];
             item.tSecondaryFee = fees[1];
+
+            // Get effective command line from argument json
+            var arguments = new Object(item.Arguments);
+            if (arguments.Commands) {
+                item.Arguments = arguments.Commands;
+            }
         });
         return data;
     }
 </script>
-<!-- End of page scripts -->
 <!--#include file="/parts/foot.html" -->
