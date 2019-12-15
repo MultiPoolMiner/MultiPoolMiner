@@ -665,7 +665,7 @@ while (-not $API.Stop) {
     }
 
     $ActiveMiners | Where-Object { $_.GetStatus() -EQ "Running" } | ForEach-Object { $_.Profit_Bias = $_.Profit_Unbias } #Don't penalize active miners
-    $ActiveMiners = $ActiveMiners | Sort-Object -Descending { $_.Profit -Like ([Double]::NaN) }, Profit_Bias, { $_.Intervals.Count }
+    $ActiveMiners = $ActiveMiners | Sort-Object -Descending Benchmark, Profit_Bias, { $_.Intervals.Count }
 
     #Apply watchdog to miners
     $ActiveMiners | Where-Object { ($WatchdogTimers | Where-Object MinerName -EQ $_.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval * $_.IntervalMultiplier) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset) | Measure-Object | Select-Object -ExpandProperty Count) -ge <#stage#>2 } | ForEach-Object { $_.Profit_Bias = 0 }

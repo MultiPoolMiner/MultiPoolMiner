@@ -9,7 +9,7 @@ if (Test-Path "MinersLegacy" -PathType Container -ErrorAction Ignore) {
         $LegacyMiner_HashRates = $_.Content.HashRates
 
         @{ 
-            Workers            = $_.Content.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { @{ Pool = $LegacyPools.$_; Fee = $LegacyMiner_Fees.$_; Speed = $LegacyMiner_HashRates.$_; Benchmark = $LegacyMiner_HashRates.$_ -eq $null } }
+            Workers            = $_.Content.HashRates | Get-Member -MemberType NoteProperty | Select-Object -ExpandProperty Name | ForEach-Object { @{ Pool = $LegacyPools.$_; Fee = $LegacyMiner_Fees.$_; Speed = $(if ($LegacyMiner_HashRates.$_ -eq $null) { [Double]::NaN } else { $LegacyMiner_HashRates.$_ }); Benchmark = $LegacyMiner_HashRates.$_ -eq $null } }
 
             Name               = $(
                 if ($_.Content.Name -isnot [String]) { 
