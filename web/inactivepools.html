@@ -1,17 +1,13 @@
 <!--#include file="/parts/head.html" -->
 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 id="title" class="h2" data-navbaractive="navallpools">All Pools</h1>
+    <h1 id="title" class="h2" data-navbaractive="navinactivepools">Inactive Pools</h1>
 </div>
-<div class="alert alert-info" role="alert">Shows all available pools for each algorithm</div>
-
-<div id="toolbar">
-    <button id="reset-data" class="btn btn-primary">Reset stat data</button>
-</div>
+<div class="alert alert-info" role="alert">Shows all inactive pools. The column 'Reason' shows the config property that inactivates the pool.</div>
 
 <table id="pools" class="table"
+    data-show-fullscreen="true"
     data-icons="icons"
-    data-toolbar="#toolbar"
-    data-url="/allpools"
+    data-url="/inactivepools"
     data-cache="false"
     data-toggle="table"
     data-filter-control="true"
@@ -24,16 +20,16 @@
     data-show-button-text="true"
     data-show-columns="true"
     data-show-refresh="true"
-    data-detail-view="true"
-    data-click-to-select="true">
-
+    data-detail-view="true">
+    
     <thead>
         <tr>
-            <th data-field="state" data-checkbox="true"></th>
             <th data-field="Name" data-sortable="true" data-filter-control="select">Name</th>
             <th data-field="Algorithm" data-sortable="true" data-filter-control="select">Algorithm</th>
             <th data-field="CoinName" data-sortable="true" data-filter-control="select">CoinName</th>
             <th data-field="CurrencySymbol" data-sortable="true" data-filter-control="select">Currency</th>
+            <th data-field="Reason" data-sortable="true" data-filter-control="select" data-filter-strict-search="true">Reason</th>
+            <th data-field="Updated" data-sortable="true" data-formatter="formatDate">Last Updated</th>
             <th data-field="Price" data-align="right" data-sortable="true" data-formatter="formatPrices" data-visible="false">BTC/GH/Day</th>
             <th data-field="StablePrice" data-align="right" data-sortable="true" data-formatter="formatPrices" data-visible="false">BTC/GH/Day (Week)</th>
             <th data-field="MarginOfError" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=2>MarginOfError</th>
@@ -41,37 +37,14 @@
             <th data-field="Port" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-width=1>Port&nbsp</th>
             <th data-field="Protocol" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-visible="false">Protocol</th>
             <th data-field="Workers" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Workers</th>
-            <th data-field="EstimateCorrection" data-sortable="true" data-filter-control="input" data-filter-strict-search="false"data-formatter="formatPercent" data-width=2>EstimateCorrection</th>
+            <th data-field="PricePenaltyFactor" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=2>PricePenaltyFactor</th>
+            <th data-field="EstimateCorrection" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=2>EstimateCorrection</th>
             <th data-field="Region" data-sortable="true" data-filter-control="select" data-filter-strict-search="true" data-width=1>Region</th>
-            <th data-field="SSL" data-sortable="true" data-width=4>SSL</th>
+            <th data-field="SSL" data-sortable="true">SSL</th>
             <th data-field="Fee" data-sortable="true" data-filter-control="input" data-filter-strict-search="false" data-formatter="formatPercent" data-width=1>Fee&nbsp&nbsp</th>
-            <th data-field="Updated" data-sortable="true" data-formatter="formatDate">Last Updated</th>
         </tr>
     </thead>
 </table>
-
-<!-- Start of page scripts -->
-<script>
-    var $table = $('#pools')
-
-    $(function () {
-        $("#reset-data").click(function () {
-            $data = JSON.stringify($table.bootstrapTable('getSelections'));
-            if ($data != "[]") {
-                $Command = "scripts/managestat.ps1?DataSet=AllPools&Action=RemoveStat&Type=Profit&Data=" + encodeURIComponent($data)
-                $(".modal-body").load($Command, function() {
-                    $(".modal-title").text($("#reset-data").text());
-                    $("#myModal").modal({show:true});
-                });
-            };
-        });
-    });
-
-    $("#myModal").on('hidden.bs.modal', function () {
-        $table.bootstrapTable("refresh");
-    });
-
-</script>
 
 <script type="text/javascript">
     function formatPools(data) {
@@ -83,5 +56,5 @@
         return items;
     }
 </script>
-<!-- End of page scripts -->
+
 <!--#include file="/parts/foot.html" -->

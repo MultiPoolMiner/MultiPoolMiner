@@ -32,7 +32,7 @@ function timeSince(date) {
 }
 
 function formatHashRateValue(value) {
-    var sizes = ['H/s','kH/s','MH/s','GH/s','TH/s'];
+    var sizes = ['H/s','kH/s','MH/s','GH/s','TH/s','PH/s','EH/s', 'ZH/s', 'YH/s'];
     if (isNaN(value)) return '-';
     if (value == "0.0") return '-';
     if (value > 0 && value <= 1) return value.toFixed(2) + ' H/s';
@@ -103,9 +103,8 @@ function formatBytes(bytes) {
     decimals = 2
     if(bytes == 0) return '0 Bytes';
     var k = 1024,
-        dm = decimals || 2,
-        sizes = ['Bytes', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
-        i = Math.floor(Math.log(bytes) / Math.log(k));
+    dm = decimals || 2,
+    sizes = ['Bytes', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+    i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 }
-    

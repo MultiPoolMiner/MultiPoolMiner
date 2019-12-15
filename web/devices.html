@@ -57,41 +57,37 @@
     </thead>
 </table>
 
-<script>
+<script type='text/javascript'>
     var $table = $('#devices')
 
     $(function () {
-        $("#enable-device").click(function () {
+        $('#enable-device').click(function () {
             $data =  JSON.stringify($table.bootstrapTable('getSelections').map(item => item.Name));
-            if ($data != "[]") {
-                $Command = "scripts/manageconfig.ps1?Action=Remove&Key=ExcludeDeviceName&DataSet=AllDevices&Data=" + encodeURIComponent($data)
-                $(".modal-body").load($Command, function() {
-                    $(".modal-title").text($("#enable-device").text());
-                    $("#myModal").modal({show:true});
+            if ($data != '[]') {
+                $Command = 'scripts/manageconfig.ps1?Action=Remove&Key=ExcludeDeviceName&DataSet=AllDevices&Data=' + encodeURIComponent($data)
+                $('.modal-body').load($Command, function() {
+                    $('.modal-title').text($('#enable-device').text());
+                    $('#myModal').modal({show:true});
                 });
             };
         });
 
-        $("#disable-device").click(function () {
-            $data =  JSON.stringify($table.bootstrapTable('getSelections').map(item => item.Name));
-            if ($data != "[]") {
-                $Command = "scripts/manageconfig.ps1?Action=Add&Key=ExcludeDeviceName&DataSet=AllDevices&Data=" + encodeURIComponent($data)
-                $(".modal-body").load($Command, function() {
-                    $(".modal-title").text($("#disable-device").text());
-                    $("#myModal").modal({show:true});
+        $('#disable-device').click(function () {
+            $data = JSON.stringify($table.bootstrapTable('getSelections').map(item => item.Name));
+            if ($data != '[]') {
+                $Command = 'scripts/manageconfig.ps1?Action=Add&Key=ExcludeDeviceName&DataSet=AllDevices&Data=' + encodeURIComponent($data)
+                $('.modal-body').load($Command, function() {
+                    $('.modal-title').text($('#disable-device').text());
+                    $('#myModal').modal({show:true});
                 });
             };
         });
     });
 
-    $("#myModal").on('hidden.bs.modal', function () {
-        $table.bootstrapTable("refresh");
+    $('#myModal').on('hidden.bs.modal', function () {
+        $table.bootstrapTable('refresh');
     });
 
-</script>
-
-<!-- Start of page scripts -->
-<script type="text/javascript">
     function formatDevices(data) {
         // This function can alter the returned data before building the table, formatting it in a way
         // that is easier to display and manipulate in a table
@@ -100,7 +96,7 @@
             if (item.OpenCL) {
                 item.tMemory = formatBytes(item.OpenCL.GlobalMemSize)
             } else {
-                item.tMemory = "N/A"
+                item.tMemory = 'N/A'
             }
 
             if (item.OpenCL) {
@@ -108,13 +104,13 @@
             } else if (item.CIM) {
                 item.tClockSpeed = item.CIM.MaxClockSpeed
             } else {
-                item.tClockSpeed = "N/A"
+                item.tClockSpeed = 'N/A'
             }
 
             if (item.OpenCL) {
                 item.tDriverVersion = item.OpenCL.DriverVersion
             } else {
-                item.tDriverVersion = "N/A"
+                item.tDriverVersion = 'N/A'
             }
 
             if (item.OpenCL) {
@@ -122,11 +118,10 @@
             } else if (item.CIM) {
                 item.tCores = item.CIM.NumberOfLogicalProcessors
             } else {
-                item.tCores = "N/A"
+                item.tCores = 'N/A'
             }
         });
         return data;
     }
 </script>
-<!-- End of page scripts -->
 <!--#include file="/parts/foot.html" -->

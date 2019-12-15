@@ -1482,24 +1482,24 @@ class Miner {
     [String[]]$Environment = @()
 
     #Under review
-    $AllowedBadShareRatio
+    [Int]$AllowedBadShareRatio
     $API
-    $BaseName
+    [String]$BaseName
     $BeginTime
     $Benchmarked
     $Device = @()
-    $Earning
-    $Earning_Bias
-    $Earning_Comparison
-    $Earning_MarginOfError
-    $Earning_Unbias
+    [Double]$Earning #derived from pool and stats
+    [Double]$Earning_Bias #derived from pool and stats
+    [Double]$Earning_Comparison #derived from pool and stats
+    [Double]$Earning_MarginOfError #derived from pool and stats
+    [Double]$Earning_Unbias #derived from pool and stats
     $EndTime
     $PowerCost
     $PowerUsage
     $ProcessId
-    $StatusMessage
-    $Version
-    $WarmupTime
+    [String]$StatusMessage
+    [String]$Version
+    [Int]$WarmupTime
 
     [String[]]GetProcessNames() { 
         return @(([IO.FileInfo]($this.Path | Split-Path -Leaf -ErrorAction Ignore)).BaseName)
@@ -1735,8 +1735,8 @@ class Miner {
 
         #During benchmarking strip some of the lowest and highest sample values
         if ($Safe) { 
-            if ($this.IntervalMultiplier -le 1) { $SkipSamples = [math]::Round($HashRates_Samples.Count * 0.1) }
-            else { $SkipSamples = [math]::Round($HashRates_Samples.Count * 0.2) }
+            if ($this.IntervalMultiplier -gt 1) { $Hashrates_Samples = $Hashrates_Samples | Where-Object { $_.Date -ge $this.BeginTime.AddSeconds($this.WarmupTime) } }
+            $SkipSamples = [math]::Floor($HashRates_Samples.Count) * 0.1
         }
         else { $SkipSamples = 0 }
 

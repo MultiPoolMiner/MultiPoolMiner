@@ -295,7 +295,7 @@ while (-not $API.Stop) {
         $AsyncResult = $TCPClient.BeginConnect("localhost", $Config.APIPort, $null, $null)
         if ($AsyncResult.AsyncWaitHandle.WaitOne(100)) { 
             Write-Log -Level Error "Error starting web dashboard and API on port $($Config.APIPort). Port is in use. "
-            try { $Null = $TCPClient.EndConnect($AsyncResult) }
+            try { $TCPClient.EndConnect($AsyncResult) = $null }
             catch { }
         }
         else { 
@@ -359,7 +359,7 @@ while (-not $API.Stop) {
 
     #Check if the configuration has changed
     if (($OldConfig | ConvertTo-Json -Compress -Depth 10) -ne ($Config | ConvertTo-Json -Compress -Depth 10)) { 
-        if ($AllDevices) { Write-Log -Level Info "Configuration change detected. " }
+        if ($AllDevices) { Write-Log -Level Info "Configuration has changed. Applying new configuration. " }
         [Miner]::Pools | ForEach-Object { $_.Price = $_.StablePrice = 0 }
         $AllDevices = @(Get-Device -Refresh | Select-Object)
     }
@@ -507,8 +507,8 @@ while (-not $API.Stop) {
     #To Be Removed
     #temp fix, apply PricePenaltyFactor and EstimateCorrection
     $NewPools | ForEach-Object { 
-        if (-not $_.PricePenaltyFactor) { $_.PricePenaltyFactor = 1 }
-        if (-not $_.EstimateCorrection) { $_.EstimateCorrection = 1 }
+        if ($_.PricePenaltyFactor -le 0 -or $_.PricePenaltyFactor -gt 1) { $_.PricePenaltyFactor = 1 }
+        if ($_.EstimateCorrection -le 0 -or $_.EstimateCorrection -gt 1) { $_.EstimateCorrection = 1 }
         $_.Price *= $_.PricePenaltyFactor
         $_.StablePrice *= $_.PricePenaltyFactor
         $_.Price *= $_.EstimateCorrection
@@ -517,6 +517,7 @@ while (-not $API.Stop) {
 
     if ($API) { $API.NewPools = $NewPools } #Give API access to the current running configuration
 
+    Write-Log "Had $([Miner]::Pools.Count) active pools, found $($NewPools.Count) new pools. "
     #Add new pools
     Compare-Object @([Miner]::Pools | Select-Object Name, Algorithm, CoinName, Protocol, Host, Port, User, Pass, Region, SSL, PayoutScheme -Unique) @($NewPools | Select-Object Name, Algorithm, CoinName, Protocol, Host, Port, User, Pass, Region, SSL, PayoutScheme -Unique) -Property Name, Algorithm, CoinName, Protocol, Host, Port, User, Pass, Region, SSL, PayoutScheme | Where-Object SideIndicator -EQ "=>" | ForEach-Object { 
         [Pool]$Pool = $null
@@ -533,55 +534,88 @@ while (-not $API.Stop) {
         Where-Object Region -eq $_.Region | 
         Where-Object SSL -eq $_.SSL | 
         Where-Object PayoutScheme -eq $_.PayoutScheme | 
-        Select-Object -First 1
+        Select-Object -Index 0
 
         if ($Pool) { [Miner]::Pools += $Pool }
     }
 
     #Update existing pools
-    [Miner]::Pools | 
-    Where-Object { -not $Config.PoolName -or (Compare-Object @($Config.PoolName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.ExcludePoolName -or -not (Compare-Object @($Config.ExcludePoolName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.Algorithm -or (Compare-Object @($Config.Algorithm | Select-Object) @($(for ($i = ($_.Algorithm -split "-").Length; $i -ge 1; $i--) { ($_.Algorithm -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.ExcludeAlgorithm -or -not (Compare-Object @($Config.ExcludeAlgorithm | Select-Object) @($(for ($i = ($_.Algorithm -split "-").Length; $i -ge 1; $i--) { ($_.Algorithm -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.Pools.$($_.Name).ExcludeAlgorithm -or (Compare-Object @($Config.Pools.$($_.Name).ExcludeAlgorithm | Select-Object) @($_.Algorithm, ($_.Algorithm -split "-" | Select-Object -Index 0) | Select-Object -Unique)  -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0 } | 
-    Where-Object { -not $Config.Pools.$($_.Name).Region -or (Compare-Object @($Config.Pools.$($_.Name).Region | Select-Object) @($_.Region) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.Pools.$($_.Name).ExcludeRegion -or -not (Compare-Object @($Config.Pools.$($_.Name).ExcludeRegion | Select-Object) @($_.Region) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.CoinName -or (Compare-Object @($Config.CoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.Pools.$($_.Name).CoinName -or (Compare-Object @($Config.Pools.$($_.Name).CoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.ExcludeCoinName -or -not (Compare-Object @($Config.ExcludeCoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.Pools.$($_.Name).ExcludeCoinName -or -not (Compare-Object @($Config.Pools.$($_.Name).ExcludeCoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.CurrencySymbol -or (Compare-Object @($Config.CurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.Pools.$($_.Name).CurrencySymbol -or (Compare-Object @($Config.Pools.$($_.Name).CurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.ExcludeCurrencySymbol -or -not (Compare-Object @($Config.ExcludeCurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-    Where-Object { -not $Config.Pools.$($_.Name).ExcludeCurrencySymbol -or -not (Compare-Object @($Config.Pools.$($_.Name).ExcludeCurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent) } | 
-    ForEach-Object { 
-        [Pool]$Pool = $null
+    [Pool[]]$InactivePools = @()
+    [Miner]::Pools = [Miner]::Pools | ForEach-Object {
+        $InactivePool = $null
+        #Allow configured pool names only
+        if ($Config.PoolName -and -not (Compare-Object @($Config.PoolName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "PoolName: $($Config.PoolName -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Filter Excluded pool names
+        elseif ($Config.ExcludePoolName -and (Compare-Object @($Config.ExcludePoolName | Select-Object) @($(for ($i = ($_.Name -split "-").Length; $i -ge 1; $i--) { ($_.Name -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "ExcludePoolName: $($Config.ExcludePoolName -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Allow configured algorithms only
+        elseif ($Config.Algorithm -and -not (Compare-Object @($Config.Algorithm | Select-Object) @($(for ($i = ($_.Algorithm -split "-").Length; $i -ge 1; $i--) { ($_.Algorithm -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "Algorithm: $($Config.Algorithm -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Filter excluded algorithms
+        elseif ($Config.ExcludeAlgorithm -and (Compare-Object @($Config.ExcludeAlgorithm | Select-Object) @($(for ($i = ($_.Algorithm -split "-").Length; $i -ge 1; $i--) { ($_.Algorithm -split "-" | Select-Object -First $i) -join "-" }) | Select-Object) -IncludeEqual -ExcludeDifferent))  { $_ | Add-Member Reason "ExcludeAlgorithm: $($Config.ExcludeAlgorithm -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Filter excluded algorithms per pool
+        elseif ($Config.Pools.($_.Name).ExcludeAlgorithm -and -not (Compare-Object @($Config.Pools.($_.Name).ExcludeAlgorithm | Select-Object) @($_.Algorithm, ($_.Algorithm -split "-" | Select-Object -Index 0) | Select-Object -Unique)  -IncludeEqual -ExcludeDifferent | Measure-Object).Count -eq 0) { $_ | Add-Member Reason "ExcludeAlgorithm ($($_.Name)): $($Config.Pools.($_.Name).ExcludeAlgorithm -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Allow configured region per pool only
+        elseif ($Config.Pools.($_.Name).Region -and -not (Compare-Object @($Config.Pools.($_.Name).Region | Select-Object) @($_.Region) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "Region ($($_.Name)): $($Config.Pools.$($_.Name).Region -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Filter excluded region per pool
+        elseif ($Config.Pools.($_.Name).ExcludeRegion -and (Compare-Object @($Config.Pools.($_.Name).ExcludeRegion | Select-Object) @($_.Region) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "ExcludeRegion ($($_.Name)): $($Config.Pools.($_.Name).ExcludeRegion -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Allow configured coin name only
+        elseif ($Config.CoinName -and -not (Compare-Object @($Config.CoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "CoinName: $($Config.CoinName -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Allow configured coin name per pool only
+        elseif ($Config.Pools.($_.Name).CoinName -and -not (Compare-Object @($Config.Pools.($_.Name).CoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "CoinName ($($_.Name)): $($Config.Pools.($_.Name).CoinName -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Filter excluded coin names
+        elseif ($Config.ExcludeCoinName -and (Compare-Object @($Config.ExcludeCoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "ExcludeCoinName (): $($Config.ExcludeCoinName -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Filter excluded coin names per pool
+        elseif ($Config.Pools.($_.Name).ExcludeCoinName -and (Compare-Object @($Config.Pools.($_.Name).ExcludeCoinName | Select-Object) @($_.CoinName | Select-Object) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "ExcludeCoinName ($($_.Name)): $($Config.Pools.($_.Name).ExcludeCoinName -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Allow configured currency symbols only
+        elseif ($Config.CurrencySymbol -and -not (Compare-Object @($Config.CurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "CurrencySymbol: $($_.CurrencySymbol -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Allow configured currency symbols per pool only
+        elseif ($Config.Pools.($_.Name).CurrencySymbol -and -not (Compare-Object @($Config.Pools.($_.Name).CurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "CurrencySymbol ($($_.Name)): $($Config.Pools.($_.Name).CurrencySymbol -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Filter excluded currency symbols
+        elseif ($Config.ExcludeCurrencySymbol -and (Compare-Object @($Config.ExcludeCurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "ExcludeCurrencySymbol: $($Config.ExcludeCurrencySymbol -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Filter excluded currency symbols per pool
+        elseif ($Config.Pools.($_.Name).ExcludeCurrencySymbol -and (Compare-Object @($Config.Pools.($_.Name).ExcludeCurrencySymbol | Select-Object) @($_.CurrencySymbol | Select-Object) -IncludeEqual -ExcludeDifferent)) { $_ | Add-Member Reason "ExcludeCurrencySymbol ($($_.Name)): $($Config.Pools.($_.Name).ExcludeCurrencySymbol -join '; ')" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Filter insufficient number of workers (any coin name)
+        elseif ($Config.MinWorker."*" -and $_.Workers -ne $null -and ($Config.MinWorker."*" -ge $_.Workers)) { $_ | Add-Member Reason "MinWorkers: $($Config.MinWorker."*")" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Filter insuffient number of workers and pool (any coin name)
+        elseif ($Config.Pools.($_.Name).MinWorker."*" -and $_.Workers -ne $null -and ($Config.Pools.($_.Name).MinWorker."*" -ge $_.Workers)) { $_ | Add-Member Reason "MinWorkers ($($_.Name)): $($Config.Pools.($_.Name).MinWorker."*")" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Filter insuffient number of workers per coin name
+        elseif ($Config.MinWorker.($_.CoinName) -and $_.Workers -ne $null -and ($Config.MinWorker.($_.CoinName) -ge $_.Workers)) { $_ | Add-Member Reason "MinWorkers ($($CoinName)): $($Config.MinWorker.($_.CoinName))" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        #Filter insufficiant nummer of workers per coin name and pool
+        elseif ($Config.Pools.($_.Name).MinWorker.($_.CoinName) -and $_.Workers -ne $null -and ($Config.Pools.($_.Name).MinWorker.($_.CoinName) -ge $_.Workers)) { $_ | Add-Member Reason "MinWorkers ($($_.Name) $($CoinName)): $($Config.Pools.($_.Name).MinWorker.($_.CoinName))" -ErrorAction SilentlyContinue; $InactivePool = $_ }
+        if ($InactivePool) {
+            $InactivePools += $InactivePool
+        } 
+        else {
+            # #Update existing pools
+            [Pool]$Pool = $null
 
-        $Pool = $NewPools | 
-        Where-Object Name -eq $_.Name | 
-        Where-Object Algorithm -eq $_.Algorithm | 
-        Where-Object CoinName -eq $_.CoinName | 
-        Where-Object Protocol -eq $_.Protocol | 
-        Where-Object Host -eq $_.Host | 
-        Where-Object Port -eq $_.Port | 
-        Where-Object User -eq $_.User | 
-        Where-Object Pass -eq $_.Pass | 
-        Where-Object Region -eq $_.Region | 
-        Where-Object SSL -eq $_.SSL | 
-        Where-Object PayoutScheme -eq $_.PayoutScheme | 
-        Select-Object -First 1
+            $Pool = $NewPools | 
+            Where-Object Name -eq $_.Name | 
+            Where-Object Algorithm -eq $_.Algorithm | 
+            Where-Object CoinName -eq $_.CoinName | 
+            Where-Object Protocol -eq $_.Protocol | 
+            Where-Object Host -eq $_.Host | 
+            Where-Object Port -eq $_.Port | 
+            Where-Object User -eq $_.User | 
+            Where-Object Pass -eq $_.Pass | 
+            Where-Object Region -eq $_.Region | 
+            Where-Object SSL -eq $_.SSL | 
+            Where-Object PayoutScheme -eq $_.PayoutScheme | 
+            Select-Object -Index 0
 
-        if ($Pool) { 
-            $_.Fee = $Pool.Fee
-            $_.Price = $Pool.Price
-            $_.Price_Bias = $Pool.Price * (1 - ($Pool.MarginOfError * $(if ($_.PayoutScheme -eq "PPLNS") { $Config.SwitchingPrevention } else { 1 }) * (1 - $Pool.Fee) * [Math]::Pow($DecayBase, $DecayExponent)))
-            $_.Price_Unbias = $Pool.Price * (1 - $Pool.Fee)
-            $_.StablePrice = $Pool.StablePrice
-            $_.MarginOfError = $Pool.MarginOfError
-            $_.Updated = $Pool.Updated
+            if ($Pool) { 
+                $_.Fee = $Pool.Fee
+                $_.Price = $Pool.Price
+                $_.Price_Bias = $Pool.Price * (1 - ($Pool.MarginOfError * $(if ($_.PayoutScheme -eq "PPLNS") { $Config.SwitchingPrevention } else { 1 }) * (1 - $Pool.Fee) * [Math]::Pow($DecayBase, $DecayExponent)))
+                $_.Price_Unbias = $Pool.Price * (1 - $Pool.Fee)
+                $_.StablePrice = $Pool.StablePrice
+                $_.MarginOfError = $Pool.MarginOfError
+                $_.Updated = $Pool.Updated
+            }
+            $_
         }
     }
+
+    if ($API) { $API.InactivePools = $InactivePools}
 
     #If all the live pool prices don't represent the same period of time then use historic pricing for the same period
     if (([Miner]::Pools | Where-Object Price_Bias | Select-Object -ExpandProperty Name -Unique | ForEach-Object { [Miner]::Pools | Where-Object Name -EQ $_ | Measure-Object Updated -Maximum | Select-Object -ExpandProperty Maximum } | Select-Object -Unique | Measure-Object -Minimum -Maximum | ForEach-Object { $_.Maximum - $_.Minimum }).TotalMinutes -gt $SyncWindow) { 
@@ -767,7 +801,7 @@ while (-not $API.Stop) {
     $SmallestEarningComparison = ([Double][Math]::Abs(($ActiveMiners | Sort-Object Earning_Comparison | Select-Object -Index 0).Earning_Comparison)) * 2
     $SmallestProfitBias = ([Double][Math]::Abs(($ActiveMiners | Sort-Object Profit_Bias | Select-Object -Index 0).Profit_Bias)) * 2
     $SmallestProfitComparison = ([Double][Math]::Abs(($ActiveMiners | Sort-Object Profit_Comparison | Select-Object -Index 0).Profit_Comparison)) * 2
-    $ActiveMiners | Where-Object { $null -ne $_.Earning_Bias } | ForEach-Object { $_.Earning_Bias += $SmallestEarningBias; $_.Earning_Comparison += $SmallestEarningComparison; $_.Profit_Bias += $SmallestProfitBias; $_.Profit_Comparison += $SmallestProfitComparison }
+    $ActiveMiners | Where-Object { $_.Earning_Bias -ne $null } | ForEach-Object { $_.Earning_Bias += $SmallestEarningBias; $_.Earning_Comparison += $SmallestEarningComparison; $_.Profit_Bias += $SmallestProfitBias; $_.Profit_Comparison += $SmallestProfitComparison }
 
     #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
     if ($Config.IgnorePowerCost) { 
@@ -827,7 +861,7 @@ while (-not $API.Stop) {
     }
 
     #OK to run miners?
-    if (($MiningEarning - $MiningCost) -ge $Config.ProfitabilityThreshold -or $MinersNeedingBenchmark.Count -gt 0 -or $MinersNeedingPowerUsageMeasurement.Count -gt 0) { 
+    if (($MiningEarning - $MiningCost) -ge $Config.ProfitabilityThreshold -or $MinersNeedingBenchmark -or $MinersNeedingPowerUsageMeasurement) { 
         $BestMiners_Combo | ForEach-Object { $_.Best = $true }
         $BestMiners_Combo_Comparison | ForEach-Object { $_.Best_Comparison = $true }
     }
@@ -837,7 +871,7 @@ while (-not $API.Stop) {
     Remove-Variable BestMiners_Comparison
 
     #Hack part 2: reverse temporarily forced positive earnings & profits
-    $ActiveMiners | Where-Object { $null -ne $_.Earning_Bias } | ForEach-Object { $_.Earning_Bias -= $SmallestEarningBias; $_.Earning_Comparison -= $SmallestEarningComparison; $_.Profit_Bias -= $SmallestProfitBias; $_.Profit_Comparison -= $SmallestProfitComparison }
+    $ActiveMiners | Where-Object { $_.Earning_Bias -ne $null } | ForEach-Object { $_.Earning_Bias -= $SmallestEarningBias; $_.Earning_Comparison -= $SmallestEarningComparison; $_.Profit_Bias -= $SmallestProfitBias; $_.Profit_Comparison -= $SmallestProfitComparison }
     Remove-Variable SmallestEarningBias
     Remove-Variable SmallestEarningComparison
     Remove-Variable SmallestProfitBias
@@ -1034,7 +1068,7 @@ while (-not $API.Stop) {
         else { $API.CurrentEarning = ""; $API.CurrentProfit = "" }
     }
 
-    if ($MinersNeedingBenchmark.Count -eq 0 -and $MinersNeedingPowerUsageMeasurement.Count -eq 0) { 
+    if (-not $MinersNeedingBenchmark -and -not $MinersNeedingPowerUsageMeasurement) { 
         if ($MiningEarning -lt $MiningCost) { 
             #Mining causes a loss
             Write-Host -BackgroundColor Yellow -ForegroundColor Black "Mining is currently NOT profitable and causes a loss of $FirstCurrency $(($MiningEarning - $MiningCost).ToString("N$((Get-Culture).NumberFormat.CurrencyDecimalDigits)"))/day (Earning: $($MiningEarning.ToString("N$((Get-Culture).NumberFormat.CurrencyDecimalDigits)"))/day; Cost: $($MiningCost.ToString("N$((Get-Culture).NumberFormat.CurrencyDecimalDigits)"))/day$(if ($Config.BasePowerUsage) { "; base power cost of $FirstCurrency $(($BasePowerCost * $Rates.BTC.$FirstCurrency).ToString("N$((Get-Culture).NumberFormat.CurrencyDecimalDigits)"))/day for $($Config.BasePowerUsage)W is included in the calculation" })). "
