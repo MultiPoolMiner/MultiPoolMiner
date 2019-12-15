@@ -1420,7 +1420,7 @@ class Pool {
     [String]$CurrencySymbol
     [Double]$EstimateCorrection
     [Double]$PricePenaltyFactor
-    [Nullable[Int]]$Workers
+    [Int]$Workers
 }
 
 enum MinerStatus { 
@@ -1442,11 +1442,11 @@ class Miner {
     [String[]]$Algorithm_Base = @() #derived from pool
     [String[]]$PoolName = @() #derived from pool
     [String[]]$PoolName_Base = @() #derived from pool
-    [Nullable[Double]]$Profit #derived from pool and stats
-    [Nullable[Double]]$Profit_Comparison #derived from pool and stats
-    [Nullable[Double]]$Profit_Accuracy #derived from pool and stats
-    [Nullable[Double]]$Profit_Bias #derived from pool and stats
-    [Nullable[Double]]$Profit_Unbias #derived from pool and stats
+    [Double]$Profit #derived from pool and stats
+    [Double]$Profit_Comparison #derived from pool and stats
+    [Double]$Profit_Accuracy #derived from pool and stats
+    [Double]$Profit_Bias #derived from pool and stats
+    [Double]$Profit_Unbias #derived from pool and stats
     [Double[]]$PoolFee = @() #derived from pool
     [Double[]]$PoolPrice = @() #derived from pool
     [Double[]]$Fee = @()
@@ -1475,11 +1475,11 @@ class Miner {
     $BeginTime
     $Benchmarked
     $Device = @()
-    [Nullable[Double]]$Earning #derived from pool and stats
-    [Nullable[Double]]$Earning_Bias #derived from pool and stats
-    [Nullable[Double]]$Earning_Comparison #derived from pool and stats
-    [Nullable[Double]]$Earning_MarginOfError #derived from pool and stats
-    [Nullable[Double]]$Earning_Unbias #derived from pool and stats
+    [Double]$Earning #derived from pool and stats
+    [Double]$Earning_Bias #derived from pool and stats
+    [Double]$Earning_Comparison #derived from pool and stats
+    [Double]$Earning_MarginOfError #derived from pool and stats
+    [Double]$Earning_Unbias #derived from pool and stats
     $EndTime
     $PowerCost
     $PowerUsage
