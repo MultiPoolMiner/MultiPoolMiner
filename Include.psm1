@@ -1471,7 +1471,7 @@ class Miner {
     [Boolean]$New = $false
     [Boolean]$Active = $false
     hidden [System.Management.Automation.Job]$Process = $null
-    hidden [TimeSpan]$Active = [TimeSpan]::Zero
+#    hidden [TimeSpan]$Active = [TimeSpan]::Zero
     hidden [Int]$Activated = 0
     hidden [MinerStatus]$Status = [MinerStatus]::Idle
     [TimeSpan[]]$Intervals = @()
