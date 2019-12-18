@@ -1469,7 +1469,8 @@ class Miner {
     [Boolean]$Best = $false
     [Boolean]$Best_Comparison = $false
     [Boolean]$New = $false
-    [Boolean]$Active = $false
+    [Boolean]$Cached = $false
+    [Boolean]$Enabled = $false
     hidden [System.Management.Automation.Job]$Process = $null
     hidden [TimeSpan]$Active = [TimeSpan]::Zero
     hidden [Int]$Activated = 0

@@ -5,7 +5,7 @@
     )
 
     # Create a global synchronized hashtable that all threads can access to pass data between the main script and API
-    $Global:API = [hashtable]::Synchronized(@{ })
+    if ($Global:API -isnot [hashtable] -or -not $Global:API.IsSynchronized) { $Global:API = [hashtable]::Synchronized(@{ }) }
     $API.APIVersion = "0.98.3"
 
     # Setup flags for controlling script execution
@@ -74,24 +74,12 @@
 
                 # Set the proper content type, status code and data for each resource
                 Switch ($Path) { 
-                    "/activeminers" { 
-                        $Data = ConvertTo-Json @($API.ActiveMiners | Select-Object)
-                        break
-                    }
                     "/algorithms" { 
                         $Data = ConvertTo-Json @($API.AllPools.Algorithm | Sort-Object -Unique)
                         Break
                     }
                     "/alldevices" { 
                         $Data = ConvertTo-Json @($API.AllDevices | Select-Object)
-                        Break
-                    }
-                    "/allminers" { 
-                        $Data = ConvertTo-Json @($API.AllMiners | Select-Object)
-                        Break
-                    }
-                    "/allpools" { 
-                        $Data = ConvertTo-Json @($API.AllPools | Select-Object)
                         Break
                     }
                     "/apiversion" { 
@@ -104,10 +92,6 @@
                     }
                     "/balances_jobs" { 
                         $Data = ConvertTo-Json @($API.Balances_Jobs | Select-Object)
-                        Break
-                    }
-                    "/bestminers" { 
-                        $Data = ConvertTo-Json @($API.BestMiners | Select-Object)
                         Break
                     }
                     "/bestminers_combo" { 
@@ -158,40 +142,44 @@
                         $Data = ConvertTo-Json @($API.ExchangeRates | Select-Object)
                         Break
                     }
-                    "/failedminers" { 
-                        $Data = ConvertTo-Json @($API.FailedMiners | Select-Object)
-                        Break
-                    }
-                    "/fastestminers" { 
-                        $Data = ConvertTo-Json @($API.FastestMiners | Select-Object)
-                        Break
-                    }
-                    "/filteredminers" { 
-                        $Data = ConvertTo-Json @($API.FilteredMiners | Select-Object)
-                        Break
-                    }
-                    "/inactiveminers" { 
-                        $Data = ConvertTo-Json @($API.InactiveMiners | Select-Object)
-                        Break
-                    }
-                    "/inactivepools" { 
-                        $Data = ConvertTo-Json @($API.InactivePools | Select-Object)
-                        Break
-                    }
                     "/intervals" { 
                         $Data = ConvertTo-Json @($API.Intervals | Select-Object)
+                        Break
+                    }
+                    "/legacyminers" { 
+                        $Data = ConvertTo-Json @($API.LegacyMiners | Select-Object)
+                        Break
+                    }
+                    "/legacypools" { 
+                        $Data = ConvertTo-Json @($API.LegacyPools | Select-Object)
                         Break
                     }
                     "/miners" { 
                         $Data = ConvertTo-Json @($API.Miners | Select-Object)
                         Break
                     }
-                    "/minersneedingbenchmark" { 
-                        $Data = ConvertTo-Json @($API.MinersNeedingBenchmark | Select-Object)
+                    "/miners/enabled" { 
+                        $Data = ConvertTo-Json @($API.Miners | Where-Object Enabled | Select-Object)
                         Break
                     }
-                    "/minersneedingpowerusagemeasurement" { 
-                        $Data = ConvertTo-Json @($API.MinersNeedingPowerUsageMeasurement | Select-Object)
+                    "/miners/best" { 
+                        $Data = ConvertTo-Json @($API.Miners | Where-Object Best | Select-Object)
+                        Break
+                    }
+                    "/miners/failed" { 
+                        $Data = ConvertTo-Json @($API.Miners | Where-Object Status -EQ "Failed" | Select-Object)
+                        Break
+                    }
+                    "/miners/fastest" { 
+                        $Data = ConvertTo-Json @($API.Miners | Where-Object Fastest | Select-Object)
+                        Break
+                    }
+                    "/miners/idle" { 
+                        $Data = ConvertTo-Json @($API.Miners | Where-Object Status -EQ "Idle" | Select-Object)
+                        Break
+                    }
+                    "/miners/running" { 
+                        $Data = ConvertTo-Json @($API.Miners | Where-Object Status -EQ "Running" | Select-Object)
                         Break
                     }
                     "/miningcost" { 
@@ -224,10 +212,6 @@
                     }
                     "/rates" { 
                         $Data = ConvertTo-Json @($API.Rates | Select-Object)
-                        Break
-                    }
-                    "/runningminers" { 
-                        $Data = ConvertTo-Json @($API.RunningMiners | Select-Object)
                         Break
                     }
                     "/stats" { 
