@@ -663,9 +663,39 @@ while (-not $API.Stop) {
     $Miners | Where-Object { ($WatchdogTimers | Where-Object MinerName -EQ $_.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval * $_.IntervalMultiplier) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset) | Measure-Object | Select-Object -ExpandProperty Count) -ge <#stage#>2 } | ForEach-Object { $_.Profit_Bias = 0 }
     $Miners | Where-Object { ($WatchdogTimers | Where-Object MinerName -EQ $_.Name | Where-Object Kicked -LT $Timer.AddSeconds( - $WatchdogInterval * $_.IntervalMultiplier) | Where-Object Kicked -GT $Timer.AddSeconds( - $WatchdogReset) | Where-Object Algorithm -EQ $_.Algorithm | Measure-Object | Select-Object -ExpandProperty Count) -ge <#stage#>1 } | ForEach-Object { $_.Profit_Bias = 0 }
 
-    #Pre-sort miners
-    $SortedMiners = $Miners | Where-Object Enabled | Sort-Object -Descending Benchmark, Profit_Bias, { $_.Intervals.Count }
-    $SortedMiners_Comparison = $Miners | Where-Object Enabled | Sort-Object -Descending Profit_Comparison
+    #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
+    $SortedMiners = $Miners | Where-Object Enabled | Sort-Object -Descending Benchmark, Profit_Bias, { $_.Intervals.Count } #pre-sort
+    $FastestMiners = $SortedMiners | Select-Object DeviceName, Algorithm_Base -Unique | ForEach-Object { $Miner = $_; ($SortedMiners | Where-Object { -not (Compare-Object $Miner $_ -Property DeviceName, Algorithm_Base) } | Select-Object -First 1) } #use a smaller subset of miners
+    $BestMiners = $FastestMiners | Select-Object DeviceName -Unique | ForEach-Object { $Miner = $_; ($FastestMiners | Where-Object { -not (Compare-Object $Miner $_ -Property DeviceName) } | Select-Object -First 1) }
+    $BestMiners_Comparison = $FastestMiners | Select-Object DeviceName -Unique | ForEach-Object { $Miner = $_; ($FastestMiners | Where-Object { -not (Compare-Object $Miner $_ -Property DeviceName) } | Sort-Object -Descending Profit_Comparison | Select-Object -First 1) }
+    $Miners_Device_Combos = (Get-Combination ($FastestMiners | Select-Object DeviceName -Unique) | Where-Object { (Compare-Object ($_.Combination | Select-Object -ExpandProperty DeviceName -Unique) ($_.Combination | Select-Object -ExpandProperty DeviceName) | Measure-Object).Count -eq 0 })
+    $BestMiners_Combos = $Miners_Device_Combos | ForEach-Object { 
+        $Miner_Device_Combo = $_.Combination
+        [PSCustomObject]@{ 
+            Combination = $Miner_Device_Combo | ForEach-Object { 
+                $Miner_Device_Count = $_.DeviceName.Count
+                [Regex]$Miner_Device_Regex = "^(" + (($_.DeviceName | ForEach-Object { [Regex]::Escape($_) }) -join '|') + ")$"
+                $BestMiners | Where-Object { ([Array]$_.DeviceName -notmatch $Miner_Device_Regex).Count -eq 0 -and ([Array]$_.DeviceName -match $Miner_Device_Regex).Count -eq $Miner_Device_Count }
+            }
+        }
+    }
+    $BestMiners_Combos_Comparison = $Miners_Device_Combos | ForEach-Object { 
+        $Miner_Device_Combo = $_.Combination
+        [PSCustomObject]@{ 
+            Combination = $Miner_Device_Combo | ForEach-Object { 
+                $Miner_Device_Count = $_.DeviceName.Count
+                [Regex]$Miner_Device_Regex = "^(" + (($_.DeviceName | ForEach-Object { [Regex]::Escape($_) }) -join '|') + ")$"
+                $BestMiners_Comparison | Where-Object { ([Array]$_.DeviceName -notmatch $Miner_Device_Regex).Count -eq 0 -and ([Array]$_.DeviceName -match $Miner_Device_Regex).Count -eq $Miner_Device_Count }
+            }
+        }
+    }
+    $BestMiners_Combo = $BestMiners_Combos | Sort-Object -Descending { ($_.Combination | Where-Object Profit -Like ([Double]::NaN) | Measure-Object).Count }, { ($_.Combination | Measure-Object Profit_Bias -Sum).Sum }, { ($_.Combination | Where-Object Profit -NE 0 | Measure-Object).Count } | Select-Object -First 1 | Select-Object -ExpandProperty Combination
+    $BestMiners_Combo_Comparison = $BestMiners_Combos_Comparison | Sort-Object -Descending { ($_.Combination | Where-Object Profit -Like ([Double]::NaN) | Measure-Object).Count }, { ($_.Combination | Measure-Object Profit_Comparison -Sum).Sum }, { ($_.Combination | Where-Object Profit -NE 0 | Measure-Object).Count } | Select-Object -First 1 | Select-Object -ExpandProperty Combination
+    $Miners | ForEach-Object { 
+        $_.Fastest = $FastestMiners -eq $_
+        $_.Best = $BestMiners_Combo -eq $_
+        $_.Best_Comparison = $BestMiners_Combo_Comparison -eq $_
+    }
 
     #Retrieve collected balance data
     if ($Balances_Jobs) { 
@@ -752,56 +782,12 @@ while (-not $API.Stop) {
         Remove-Variable Command
     }
 
-    #Don't penalize active or benchmarking miners
-    $Miners | Where-Object { $_.GetStatus() -eq "Running" -or ($_.Intervals.Count -and $_.Speed -contains $null) } | ForEach-Object { $_.Earning_Bias = $_.Earning_Unbias; $_.Profit_Bias = $_.Profit_Unbias }
-
     #Hack: temporarily make all earnings & profits positive, BestMiners_Combos(_Comparison) produces wrong sort order when earnings or profits are negative
     $SmallestEarningBias = ([Double][Math]::Abs(($Miners | Sort-Object Earning_Bias | Select-Object -Index 0).Earning_Bias)) * 2
     $SmallestEarningComparison = ([Double][Math]::Abs(($Miners | Sort-Object Earning_Comparison | Select-Object -Index 0).Earning_Comparison)) * 2
     $SmallestProfitBias = ([Double][Math]::Abs(($Miners | Sort-Object Profit_Bias | Select-Object -Index 0).Profit_Bias)) * 2
     $SmallestProfitComparison = ([Double][Math]::Abs(($Miners | Sort-Object Profit_Comparison | Select-Object -Index 0).Profit_Comparison)) * 2
     $Miners | Where-Object { $_.Earning_Bias -ne $null } | ForEach-Object { $_.Earning_Bias += $SmallestEarningBias; $_.Earning_Comparison += $SmallestEarningComparison; $_.Profit_Bias += $SmallestProfitBias; $_.Profit_Comparison += $SmallestProfitComparison }
-
-    #Get most profitable miner combination i.e. AMD+NVIDIA+CPU
-    if ($Config.IgnorePowerCost) { 
-        $BestMiners = @($Miners | Select-Object DeviceName -Unique | ForEach-Object { $Miner_GPU = $_; ($Miners | Where-Object { (Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0 -and $_.Earning -ne 0 } | Sort-Object -Descending { ($_ | Where-Object Speed -contains $null | Measure-Object).Count }, { $(if ($_.Speed -contains $null) { $_.Intervals.Count, $_.IntervalMultiplier } else { 0, 0 }) }, { $MeasurePowerUsage -and $_.PowerUsage -le 0 }, { $_.Earning_Bias } | Select-Object -Index 0) })
-        $BestMiners_Comparison = @($Miners | Select-Object DeviceName -Unique | ForEach-Object { $Miner_GPU = $_; ($Miners | Where-Object { (Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0 -and $_.Earning -ne 0 } | Sort-Object -Descending { ($_ | Where-Object Speed -contains $null | Measure-Object).Count }, { $(if ($_.Speed -contains $null) { $_.Intervals.Count, $_.IntervalMultiplier } else { 0, 0 }) }, { $MeasurePowerUsage -and $_.PowerUsage -le 0 }, { $_.Earning_Comparison } | Select-Object -Index 0) })
-    }
-    else { 
-        $BestMiners = @($Miners | Select-Object DeviceName -Unique | ForEach-Object { $Miner_GPU = $_; ($Miners | Where-Object { (Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0 -and $_.Earning -ne 0 } | Sort-Object -Descending { ($_ | Where-Object Speed -contains $null | Measure-Object).Count }, { $(if ($_.Speed -contains $null) { $_.Intervals.Count, $_.IntervalMultiplier } else { 0, 0 }) }, { $MeasurePowerUsage -and $_.PowerUsage -le 0 }, { $_.Profit_Bias } | Select-Object -Index 0) })
-        $BestMiners_Comparison = @($Miners | Select-Object DeviceName -Unique | ForEach-Object { $Miner_GPU = $_; ($Miners | Where-Object { (Compare-Object $Miner_GPU.DeviceName $_.DeviceName | Measure-Object).Count -eq 0 -and $_.Earning -ne 0 } | Sort-Object -Descending { ($_ | Where-Object Speed -contains $null | Measure-Object).Count }, { $(if ($_.Speed -contains $null) { $_.Intervals.Count, $_.IntervalMultiplier } else { 0, 0 }) }, { $MeasurePowerUsage -and $_.PowerUsage -le 0 }, { $_.Profit_Comparison } | Select-Object -Index 0) })
-    }
-    $Miners_Device_Combos = @(Get-Combination ($Miners | Select-Object DeviceName -Unique) | Where-Object { (Compare-Object ($_.Combination | Select-Object -ExpandProperty DeviceName -Unique) ($_.Combination | Select-Object -ExpandProperty DeviceName) | Measure-Object).Count -eq 0 })
-    $BestMiners_Combos = @(
-        $Miners_Device_Combos | ForEach-Object { 
-            $Miner_Device_Combo = $_.Combination
-            [PSCustomObject]@{ 
-                Combination = $Miner_Device_Combo | ForEach-Object { 
-                    $Miner_Device_Count = $_.DeviceName.Count
-                    [Regex]$Miner_Device_Regex = "^(" + (($_.DeviceName | ForEach-Object { [Regex]::Escape($_) }) -join '|') + ")$"
-                    $BestMiners | Where-Object { ([Array]$_.DeviceName -notmatch $Miner_Device_Regex).Count -eq 0 -and ([Array]$_.DeviceName -match $Miner_Device_Regex).Count -eq $Miner_Device_Count }
-                }
-            }
-        }
-    )
-    $BestMiners_Combos_Comparison = @(
-        $Miners_Device_Combos | ForEach-Object { 
-            $Miner_Device_Combo = $_.Combination
-            [PSCustomObject]@{ 
-                Combination = $Miner_Device_Combo | ForEach-Object { 
-                    $Miner_Device_Count = $_.DeviceName.Count
-                    [Regex]$Miner_Device_Regex = "^(" + (($_.DeviceName | ForEach-Object { [Regex]::Escape($_) }) -join '|') + ")$"
-                    $BestMiners_Comparison | Where-Object { ([Array]$_.DeviceName -notmatch $Miner_Device_Regex).Count -eq 0 -and ([Array]$_.DeviceName -match $Miner_Device_Regex).Count -eq $Miner_Device_Count }
-                }
-            }
-        }
-    )
-    $BestMiners_Combo = @($BestMiners_Combos | Sort-Object -Descending { ($_.Combination | Where-Object Earning -EQ $null | Measure-Object).Count }, { ($_.Combination | Measure-Object Earning_Bias -Sum).Sum }, { ($_.Combination | Where-Object Earning -NE 0 | Measure-Object).Count } | Select-Object -Index 0 | Select-Object -ExpandProperty Combination)
-    $BestMiners_Combo_Comparison = @($BestMiners_Combos_Comparison | Sort-Object -Descending { ($_.Combination | Where-Object Earning -EQ $null | Measure-Object).Count }, { ($_.Combination | Measure-Object Earning_Comparison -Sum).Sum }, { ($_.Combination | Where-Object Earning -NE 0 | Measure-Object).Count } | Select-Object -Index 0 | Select-Object -ExpandProperty Combination)
-
-    if (($Miners).Count -eq 1) { 
-        $BestMiners_Combo_Comparison = $BestMiners_Combo = @($Miners)
-    }
 
     #ProfitabilityThreshold check
     $MiningEarning = (($BestMiners_Combo | Measure-Object Earning -Sum).Sum) * $Rates.BTC.$FirstCurrency
