@@ -181,7 +181,9 @@ Write-Log "Starting MultiPoolMiner® v$Version © 2017-$((Get-Date).Year) MultiP
 
 #Initialize variables
 New-Variable API ([Hashtable]::Synchronized(@{ })) -Option ReadOnly -Scope "Global" -Force -ErrorAction Stop
+New-Variable Stats ([Hashtable]::Synchronized(@{ })) -Option ReadOnly -Scope "Global" -Force -ErrorAction Stop
 New-Variable Miners ([Miner[]]@()) -Option ReadOnly -Force -ErrorAction Stop
+$API.Miners = $Stats
 $API.Miners = $Miners
 $API.Pools = [Miner]::Pools
 
@@ -1149,8 +1151,8 @@ while (-not $API.Stop) {
     Write-Log "Starting next run. "
 }
 
-
 Remove-Variable Miners -Force
+Remove-Variable Stats -Force
 Remove-Variable API -Force
 
 Write-Log "Stopping MultiPoolMiner® v$Version © 2017-$((Get-Date).Year) MultiPoolMiner.io"

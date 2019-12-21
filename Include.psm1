@@ -435,7 +435,7 @@ function Set-Stat {
         [Parameter(Mandatory = $true)]
         [Double]$Value, 
         [Parameter(Mandatory = $false)]
-        [DateTime]$Updated = (Get-Date).ToUniversalTime(), 
+        [DateTime]$Updated = (Get-Date), 
         [Parameter(Mandatory = $true)]
         [TimeSpan]$Duration, 
         [Parameter(Mandatory = $false)]
@@ -451,7 +451,7 @@ function Set-Stat {
 
     $Stat = Get-Stat $Name
 
-    if ($Stat) { 
+    if ($Stat -is [Hashtable] -and $Stat.IsSynchronized) { 
         $ToleranceMin = $Value
         $ToleranceMax = $Value
 
@@ -473,48 +473,48 @@ function Set-Stat {
             $Span_Day = [Math]::Min($Duration.TotalDays / [Math]::Min($Stat.Duration.TotalDays, 1), 1)
             $Span_Week = [Math]::Min(($Duration.TotalDays / 7) / [Math]::Min(($Stat.Duration.TotalDays / 7), 1), 1)
 
-            $Stat = [PSCustomObject]@{ 
-                Name                  = $Name
-                Live                  = $Value
-                Minute                = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
-                Minute_Fluctuation    = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
-                Minute_5              = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
-                Minute_5_Fluctuation  = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + ($Span_Minute_5 * ([Math]::Abs($Value - $Stat.Minute_5) / [Math]::Max([Math]::Abs($Stat.Minute_5), $SmallestValue)))
-                Minute_10             = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
-                Minute_10_Fluctuation = ((1 - $Span_Minute_10) * $Stat.Minute_10_Fluctuation) + ($Span_Minute_10 * ([Math]::Abs($Value - $Stat.Minute_10) / [Math]::Max([Math]::Abs($Stat.Minute_10), $SmallestValue)))
-                Hour                  = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
-                Hour_Fluctuation      = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + ($Span_Hour * ([Math]::Abs($Value - $Stat.Hour) / [Math]::Max([Math]::Abs($Stat.Hour), $SmallestValue)))
-                Day                   = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
-                Day_Fluctuation       = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + ($Span_Day * ([Math]::Abs($Value - $Stat.Day) / [Math]::Max([Math]::Abs($Stat.Day), $SmallestValue)))
-                Week                  = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
-                Week_Fluctuation      = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
-                Duration              = $Stat.Duration + $Duration
-                Updated               = $Updated
-            }
+            $Stat.Name = $Name
+            $Stat.Live = $Value
+            $Stat.Minute_Fluctuation = ((1 - $Span_Minute) * $Stat.Minute_Fluctuation) + ($Span_Minute * ([Math]::Abs($Value - $Stat.Minute) / [Math]::Max([Math]::Abs($Stat.Minute), $SmallestValue)))
+            $Stat.Minute = ((1 - $Span_Minute) * $Stat.Minute) + ($Span_Minute * $Value)
+            $Stat.Minute_5_Fluctuation = ((1 - $Span_Minute_5) * $Stat.Minute_5_Fluctuation) + ($Span_Minute_5 * ([Math]::Abs($Value - $Stat.Minute_5) / [Math]::Max([Math]::Abs($Stat.Minute_5), $SmallestValue)))
+            $Stat.Minute_5 = ((1 - $Span_Minute_5) * $Stat.Minute_5) + ($Span_Minute_5 * $Value)
+            $Stat.Minute_10_Fluctuation = ((1 - $Span_Minute_10) * $Stat.Minute_10_Fluctuation) + ($Span_Minute_10 * ([Math]::Abs($Value - $Stat.Minute_10) / [Math]::Max([Math]::Abs($Stat.Minute_10), $SmallestValue)))
+            $Stat.Minute_10 = ((1 - $Span_Minute_10) * $Stat.Minute_10) + ($Span_Minute_10 * $Value)
+            $Stat.Hour_Fluctuation = ((1 - $Span_Hour) * $Stat.Hour_Fluctuation) + ($Span_Hour * ([Math]::Abs($Value - $Stat.Hour) / [Math]::Max([Math]::Abs($Stat.Hour), $SmallestValue)))
+            $Stat.Hour = ((1 - $Span_Hour) * $Stat.Hour) + ($Span_Hour * $Value)
+            $Stat.Day_Fluctuation = ((1 - $Span_Day) * $Stat.Day_Fluctuation) + ($Span_Day * ([Math]::Abs($Value - $Stat.Day) / [Math]::Max([Math]::Abs($Stat.Day), $SmallestValue)))
+            $Stat.Day = ((1 - $Span_Day) * $Stat.Day) + ($Span_Day * $Value)
+            $Stat.Week_Fluctuation = ((1 - $Span_Week) * $Stat.Week_Fluctuation) + ($Span_Week * ([Math]::Abs($Value - $Stat.Week) / [Math]::Max([Math]::Abs($Stat.Week), $SmallestValue)))
+            $Stat.Week = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
+            $Stat.Duration = $Stat.Duration + $Duration
+            $Stat.Updated = $Updated
         }
     }
     else { 
-        $Stat = [PSCustomObject]@{ 
-            Name                  = [String]$Name
-            Live                  = [Double]$Value
-            Minute                = [Double]$Value
-            Minute_Fluctuation    = [Double]0
-            Minute_5              = [Double]$Value
-            Minute_5_Fluctuation  = [Double]0
-            Minute_10             = [Double]$Value
-            Minute_10_Fluctuation = [Double]0
-            Hour                  = [Double]$Value
-            Hour_Fluctuation      = [Double]0
-            Day                   = [Double]$Value
-            Day_Fluctuation       = [Double]0
-            Week                  = [Double]$Value
-            Week_Fluctuation      = [Double]0
-            Duration              = [TimeSpan]$Duration
-            Updated               = [DateTime]$Updated
-        }
+        $Global:Stats.$Stat_Name = $Stat = [Hashtable]::Synchronized(
+            @{ 
+                Name                  = [String]$Name
+                Live                  = [Double]$Value
+                Minute                = [Double]$Value
+                Minute_Fluctuation    = [Double]0
+                Minute_5              = [Double]$Value
+                Minute_5_Fluctuation  = [Double]0
+                Minute_10             = [Double]$Value
+                Minute_10_Fluctuation = [Double]0
+                Hour                  = [Double]$Value
+                Hour_Fluctuation      = [Double]0
+                Day                   = [Double]$Value
+                Day_Fluctuation       = [Double]0
+                Week                  = [Double]$Value
+                Week_Fluctuation      = [Double]0
+                Duration              = [TimeSpan]$Duration
+                Updated               = [DateTime]$Updated
+            }
+        )
     }
 
-    [PSCustomObject]@{ 
+    @{ 
         Live                  = [Decimal]$Stat.Live
         Minute                = [Decimal]$Stat.Minute
         Minute_Fluctuation    = [Double]$Stat.Minute_Fluctuation
@@ -532,8 +532,6 @@ function Set-Stat {
         Updated               = [DateTime]$Stat.Updated
     } | ConvertTo-Json | Set-Content $Path
 
-    $Global:Stats | Add-Member $Name $Stat -Force
-
     $Stat
 }
 
@@ -541,14 +539,14 @@ function Get-Stat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = @($Global:Stats.Name | Select-Object) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+        [String[]]$Name = @($Global:Stats.Keys | Select-Object) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
     $Name | Sort-Object -Unique | ForEach-Object { 
         $Stat_Name = $_
-        if (-not $Global:Stats.$Stat_Name) { 
-            if ($Global:Stats -isnot [PSCustomObject]) { 
-                $Global:Stats = [PSCustomObject]@{ }
+        if ($Global:Stats.$Stat_Name -isnot [Hashtable] -or -not $Global:Stats.$Stat_Name.IsSynchronized) { 
+            if ($Global:Stats -isnot [Hashtable] -or -not $Global:Stats.IsSynchronized) { 
+                $Global:Stats = [Hashtable]::Synchronized(@{ })
             }
 
             #Reduce number of errors
@@ -561,8 +559,8 @@ function Get-Stat {
 
             try { 
                 $Stat = Get-Content "Stats\$Stat_Name.txt" -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
-                $Global:Stats | Add-Member @{ 
-                    $Stat_Name = [PSCustomObject]@{ 
+                $Global:Stats.$Stat_Name = [Hashtable]::Synchronized(
+                    @{ 
                         Name                  = [String]$Stat_Name
                         Live                  = [Double]$Stat.Live
                         Minute                = [Double]$Stat.Minute
@@ -580,7 +578,7 @@ function Get-Stat {
                         Duration              = [TimeSpan]$Stat.Duration
                         Updated               = [DateTime]$Stat.Updated
                     }
-                } -Force
+                )
             }
             catch { 
                 Write-Log -Level Warn "Stat file ($Stat_Name) is corrupt and will be reset. "
@@ -596,11 +594,11 @@ function Remove-Stat {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory = $false)]
-        [String[]]$Name = @($Global:Stats.Name | Select-Object) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
+        [String[]]$Name = @($Global:Stats.Keys | Select-Object) + @(Get-ChildItem "Stats" -ErrorAction Ignore | Select-Object -ExpandProperty BaseName)
     )
 
     $Name | Sort-Object -Unique | ForEach-Object { 
-        if ($Global:Stats.$_) { $Global:Stats.PSObject.Properties.Remove($_) }
+        if ($Global:Stats.$_) { $Global:Stats.Remove($_) }
         Remove-Item -Path  "Stats\$_.txt" -Force -Confirm:$false -ErrorAction SilentlyContinue
     }
 }
