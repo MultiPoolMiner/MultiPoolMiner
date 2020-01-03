@@ -10,8 +10,8 @@ param(
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\MiniZ.exe"
 $HashSHA256 = "733963787DD61894DB05297232CB046DB5C3247B601262CD3C26A31DAC25F54A"
-$Uri = "https://github.com/MultiPoolMiner/miner-binaries/releases/download/MiniZ/miniZ_v1.5s_cuda10_win-x64.zip"
-$ManualUri = "https://miniz.ch/download"
+$Uri = "https://miniz.ch/?smd_process_download=1&download_id=3269"
+$ManualUri = "https://miniz.ch"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 

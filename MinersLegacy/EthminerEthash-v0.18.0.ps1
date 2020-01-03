@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ethminer.exe"
-$HashSHA256 = "1203D2AB1B82545B9358EBAE1D67B700DD42C001BC75F4CDAEC1CA7CD370F8A7"
-$Uri = "https://github.com/ethereum-mining/ethminer/releases/download/v0.17.1/ethminer-0.17.1-cuda10.0-windows-amd64.zip"
+$HashSHA256 = "B783C74E53A5FCDF7D798D268E1ABF6F30235B792E041C9972AB844E015B1984"
+$Uri = "https://github.com/ethereum-mining/ethminer/releases/download/v0.18.0/ethminer-0.18.0-cuda10.0-windows-amd64.zip"
 $ManualUri = "https://github.com/ethereum-mining/ethminer"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config

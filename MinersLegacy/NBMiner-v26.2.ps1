@@ -9,9 +9,9 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\nbminer.exe"
-$HashSHA256 = ""
-$Uri = "https://github.com/NebuTech/NBMiner/releases/download/v26.1/NBMiner_26.1_Win.zip"
-$ManualUri = "https://github.com/gangnamtestnet/progminer/releases"
+$HashSHA256 = "76936176731CC07159CE26905DE4F51F164899F69D8468AE4686A3CA4F14EF5D"
+$Uri = "https://github.com/NebuTech/NBMiner/releases/download/v26.2/NBMiner_26.2_Win.zip"
+$ManualUri = "https://github.com/NebuTech/NBMiner"
 $DeviceEnumerator = "Type_Vendor_Index"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config

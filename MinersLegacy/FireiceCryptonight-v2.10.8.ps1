@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\xmr-stak.exe"
-$HashSHA256 = "2E84F0AA1638D5FAC156B45DF149B5B9F0FA2EAFF037FC96BB31822A44F965C6"
-$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.10.7/xmr-stak-win64-2.10.7.zip"
+$HashSHA256 = "1CD3333A4DD24CA3A6674AC3EFAC8CB3FAF4094D39128F808971FCDA2A47401B"
+$Uri = "https://github.com/fireice-uk/xmr-stak/releases/download/2.10.8/xmr-stak-win64-2.10.8.zip"
 $ManualUri = "https://github.com/fireice-uk/xmr-stak"
 
 $Miner_BaseName = $Name -split '-' | Select-Object -Index 0

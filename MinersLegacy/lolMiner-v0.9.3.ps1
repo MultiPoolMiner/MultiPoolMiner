@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\lolminer.exe"
-$HashSHA256 = "4B6916F159A10759CE15C9097F7EBD48FA07BE152B01451135BFA83BB2D1C794"
-$Uri = "https://github.com/Lolliedieb/lolMiner-releases/releases/download/0.8.8/lolMiner_v088_Win64.zip"
+$HashSHA256 = "55E1A3F912E4E299A2A7B15A1A7A4680C73B9E806EC225B53D8CD37C10025BFF"
+$Uri = "https://github.com/Lolliedieb/lolMiner-releases/releases/download/0.93/lolMiner_v093_Win64.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=4724735.0"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config

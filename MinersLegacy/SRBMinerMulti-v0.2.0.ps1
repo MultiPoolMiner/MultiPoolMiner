@@ -9,9 +9,9 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\SRBMiner-MULTI.exe"
-$HashSHA256 = "DE23432202B4EF01EBA33F831BA95B659AC3FE02E48BFC47AB0A6FB4D211D3E5"
-$Uri = "https://github.com/doktor83/SRBMiner-Multi/releases/download/0.1.6/SRBMiner-Multi-0-1-6.zip"
-$ManualUri = "https://github.com/doktor83/SRBMiner-Multi/releases"
+$HashSHA256 = "ED778889BD39FFA37F5F7807F9B63D54225FBDF48E4687C460288E1ABBD187FC"
+$Uri = "https://github.com/doktor83/SRBMiner-Multi/releases/download/0.2.0/SRBMiner-Multi-0-2-0.zip"
+$ManualUri = "https://github.com/doktor83/SRBMiner-Multi"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 

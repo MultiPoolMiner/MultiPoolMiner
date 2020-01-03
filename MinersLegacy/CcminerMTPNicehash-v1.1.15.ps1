@@ -10,8 +10,8 @@ param(
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
 $HashSHA256 = "1AD850A5336A1C76FFA724C8DA0630BAEAF4E9D8A6D59ECDA45336DCD7396C8A"
-$Uri = "https://github.com/nemosminer/ccminer/releases/download/1.1.15/ccminermtp.7z"
-$ManualUri = "https://github.com/nemosminer/ccminer/releases"
+$Uri = "https://github.com/nemosminer/ccminermtpnh/releases/download/1.1.15/ccminermtp.7z"
+$ManualUri = "https://github.com/nemosminer/ccminermtpnh"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 

@@ -9,7 +9,8 @@ param(
  
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\sgminer.exe"
-$Uri = "https://github.com/fancyIX/sgminer-phi2-branch/releases/download/5.6.1.3.b6/sgminer-phi2-fancyIX-win64-0.6.0.0.zip"
+$HashSHA256 = "653BDDE53C0F849A2049D315689D5755BECA0B001E179BF816E376D5C7C55C00"
+$Uri = "https://github.com/fancyIX/sgminer-phi2-branch/releases/download/5.6.1.3.b6a/sgminer-phi2-fancyIX-win64-0.6.0.1.zip"
 $ManualUri = "https://github.com/fancyIX/sgminer-phi2-branch"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config

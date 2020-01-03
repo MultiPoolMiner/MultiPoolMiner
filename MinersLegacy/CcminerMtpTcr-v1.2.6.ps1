@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\ccminer.exe"
-$HashSHA256 = "3C39920B7682B51EEA6D69EAD2CBFF2439F1EE721011E6197C6B0E12E96CE485"
-$Uri = "https://github.com/tecracoin/ccminer/releases/download/1.2.5/ccminer.exe"
+$HashSHA256 = "4E0C991D843F375B84F5541E84EBB9E601F69C3A45EBF0757BF81C9084B58853"
+$Uri = "https://github.com/tecracoin/ccminer/releases/download/1.2.6/ccminer.exe"
 $ManualUri = "https://github.com/tecracoin"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config

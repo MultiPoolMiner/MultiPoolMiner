@@ -9,9 +9,9 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\BMiner.exe"
-$HashSHA256 = "53FF85689E0A2A1986B23993394B4EA127A3CF822DD2D7CDABA21087C1949F32"
+$HashSHA256 = "DE848DABA2FF614CA8488699F71B748816D3ED2B4FEBA4E0CF7FC624A604FDBC"
 $Uri = "https://www.bminercontent.com/releases/bminer-lite-v15.8.7-6831c33-amd64.zip"
-$ManualUri = "https://bitcointalk.org/index.php?topic=2519271.0"
+$ManualUri = "https://www.bminer.me"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 

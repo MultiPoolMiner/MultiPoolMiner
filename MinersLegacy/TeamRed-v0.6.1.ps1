@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\teamredminer.exe"
-$HashSHA256 = "652E42705B6747A0B32B3AD1706ACEC00B5C5CC7C12F2627F0018D969A46AB98"
-$Uri = "https://github.com/todxx/teamredminer/releases/download/0.5.9/teamredminer-v0.5.9-win.zip"
+$HashSHA256 = "0F158A6ACE30011C71EAE5117E54C4729117BE9F2D5B1890972EAADAE3B6B5EC"
+$Uri = "https://github.com/todxx/teamredminer/releases/download/0.6.1/teamredminer-v0.6.1-win.zip"
 $ManualUri = "https://github.com/todxx/teamredminer"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
