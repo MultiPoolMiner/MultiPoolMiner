@@ -13,10 +13,7 @@ $HashSHA256 = "1AAB1D5E9605F10CC87E5811BF165ED812C47395C41676ECE2AC479BAF6B11F9"
 $Uri = "https://github.com/xmrig/xmrig/releases/download/v2.14.4/xmrig-2.14.4-gcc-win64.zip"
 $ManualUri = "https://github.com/xmrig/xmrig"
 
-$Miner_BaseName = $Name -split '-' | Select-Object -Index 0
-$Miner_Version = $Name -split '-' | Select-Object -Index 1
-$Miner_Config = $Config.MinersLegacy.$Miner_BaseName.$Miner_Version
-if (-not $Miner_Config) { $Miner_Config = $Config.MinersLegacy.$Miner_BaseName."*" }
+$Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Commands = [PSCustomObject[]]@(
     # Note: For fine tuning directly edit [Pool]_[Algorithm]-[Port]-[User]-[Pass].json in the miner binary directory 
@@ -94,8 +91,6 @@ $Devices | Select-Object Model -Unique | ForEach-Object {
 
             [PSCustomObject]@{ 
                 Name       = $Miner_Name
-                BaseName   = $Miner_BaseName
-                Version    = $Miner_Version
                 DeviceName = $Miner_Device.Name
                 Path       = $Path
                 HashSHA256 = $HashSHA256
