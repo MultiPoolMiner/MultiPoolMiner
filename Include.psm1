@@ -876,19 +876,34 @@ function Expand-WebRequest {
     # Set current path used by .net methods to the same as the script's path
     [Environment]::CurrentDirectory = $ExecutionContext.SessionState.Path.CurrentFileSystemLocation
 
-    if (-not $Path) { $Path = Join-Path ".\Downloads" ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName }
     if (-not (Test-Path ".\Downloads" -PathType Container)) { New-Item "Downloads" -ItemType "directory" | Out-Null }
-    $FileName = Join-Path ".\Downloads" (Split-Path $Uri -Leaf)
+    $FileName_Leaf = Split-Path $Uri -Leaf
+    [IO.Path]::GetInvalidFileNameChars() | ForEach-Object { $FileName_Leaf = $FileName_Leaf.Replace($_, '-') }
+    $FileName = Join-Path ".\Downloads" $FileName_Leaf
 
     if (Test-Path $FileName -PathType Leaf) { Remove-Item $FileName }
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing
+    $Response = Invoke-WebRequest $Uri -OutFile $FileName -UseBasicParsing -PassThru
 
-    if (".msi", ".exe" -contains ([IO.FileInfo](Split-Path $Uri -Leaf)).Extension) { 
+    $FileName_Fix = $Response.Headers.'Content-Disposition' -split '=' -replace '"' | Select-Object -Index 1
+
+    if ($FileName_Fix -is [String]) { 
+        try { 
+            [IO.Path]::GetInvalidFileNameChars() | ForEach-Object { $FileName_Fix = $FileName_Fix.Replace($_, '-') }
+            Rename-Item $FileName $FileName_Fix -Force -ErrorAction Stop
+            $FileName = Join-Path ".\Downloads" $FileName_Fix
+        }
+        catch { 
+        }
+    }
+
+    if (-not $Path) { $Path = Join-Path ".\Downloads" ([IO.FileInfo](Split-Path $FileName -Leaf)).BaseName }
+
+    if (".msi", ".exe" -contains ([IO.FileInfo](Split-Path $FileName -Leaf)).Extension) { 
         Start-Process $FileName "-qb" -Wait
     }
     else { 
-        $Path_Old = (Join-Path (Split-Path (Split-Path $Path)) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
+        $Path_Old = (Join-Path (Split-Path (Split-Path $Path)) ([IO.FileInfo](Split-Path $FileName -Leaf)).BaseName)
         $Path_New = Split-Path $Path
 
         if (Test-Path $Path_Old -PathType Container) { Remove-Item $Path_Old -Recurse -Force }
@@ -901,7 +916,7 @@ function Expand-WebRequest {
 
         if ($Path_Old) { 
             Move-Item $Path_Old $Path_New -PassThru | ForEach-Object -Process { $_.LastWriteTime = Get-Date }
-            $Path_Old = (Join-Path (Split-Path (Split-Path $Path)) ([IO.FileInfo](Split-Path $Uri -Leaf)).BaseName)
+            $Path_Old = (Join-Path (Split-Path (Split-Path $Path)) ([IO.FileInfo](Split-Path $FileName -Leaf)).BaseName)
             if (Test-Path $Path_Old -PathType Container) { Remove-Item $Path_Old -Recurse -Force }
         }
         else { 
