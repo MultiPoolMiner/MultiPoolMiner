@@ -1398,9 +1398,7 @@ class Pool {
     [String]$Name
     [String]$Algorithm
     [String]$CoinName
-    [String]$Protocol
-    [String]$Host
-    [UInt16]$Port
+    [Uri]$Uri
     [String]$User
     [String]$Pass
     [String]$Region
@@ -1411,8 +1409,11 @@ class Pool {
     [Double]$Price_Bias
     [Double]$Price_Unbias
     [Double]$StablePrice
+    [Double]$ActualPrice
     [Double]$MarginOfError
     [DateTime]$Updated
+    [DateTime]$Cached
+    [Boolean]$Enabled
 
     #Under review
     [String]$CurrencySymbol
