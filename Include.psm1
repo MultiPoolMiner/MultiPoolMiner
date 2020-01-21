@@ -1394,23 +1394,29 @@ function Add-Object {
     $ReferenceObject
 }
 
-class Pool { 
+class Credential { 
+    [Uri]$Uri #Unique Identifier
+    [String]$User #$this.Uri.UserInfo -split ':', 2 | Select-Object -Index 0
+    [String]$Pass #$this.Uri.UserInfo -split ':', 2 | Select-Object -Index 1
+
+    #Info
     [String]$Name
     [String]$Algorithm
     [String]$CoinName
-    [Uri]$Uri
-    [String]$User
-    [String]$Pass
     [String]$Region
     [Boolean]$SSL
     [String]$PayoutScheme
     [Double]$Fee
+
+    #Stats
     [Double]$Price
     [Double]$Price_Bias
     [Double]$Price_Unbias
     [Double]$StablePrice
     [Double]$ActualPrice
     [Double]$MarginOfError
+
+    #Status
     [DateTime]$Updated
     [DateTime]$Cached
     [Boolean]$Enabled
@@ -1422,8 +1428,36 @@ class Pool {
     [Int]$Workers
 }
 
-class Worker {
-    [Pool]$Pool
+class Pool { 
+    static [Credential[]]$Credentials = @()
+    [Credential[]]$Credential = @()
+
+    static [Management.Automation.Job[]]$Requests
+    [Uri[]]$Api
+
+    [String]$Uri
+
+    [String]$Name
+    [String]$Algorithm
+    [String]$Region
+    [String]$SSL
+    [String]$PayoutScheme
+    [String]$Fee
+
+    Update() { 
+        $this.Api | ForEach-Object { 
+            if (-not ($Requests.Name -eq $_)) { 
+                $Requests += Start-Job { Invoke-RestMethod $args[0] -UseBasicParsing -TimeoutSec 10 } -Name $_ -ArgumentList $_
+            }
+        }
+    }
+
+    Refresh() { 
+    }
+}
+
+class Worker { 
+    [Credential]$Pool
     [Double]$Fee
     [Double]$Speed
     [Boolean]$Benchmark
@@ -1441,7 +1475,7 @@ enum MinerStatus {
 }
 
 class Miner { 
-    static [Pool[]]$Pools = @()
+    static [Credential[]]$Pools = @()
     [Worker[]]$Workers = @()
 
     [String]$Name
