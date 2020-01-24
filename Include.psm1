@@ -436,7 +436,7 @@ function Set-Stat {
         [Double]$Value, 
         [Parameter(Mandatory = $false)]
         [DateTime]$Updated = (Get-Date), 
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $false)]
         [TimeSpan]$Duration, 
         [Parameter(Mandatory = $false)]
         [Bool]$FaultDetection = $false, 
@@ -444,7 +444,7 @@ function Set-Stat {
         [Bool]$ChangeDetection = $false
     )
 
-    $Updated = $Updated.ToUniversalTime()
+    $Timer = $Updated = $Updated.ToUniversalTime()
 
     $Path = "Stats\$Name.txt"
     $SmallestValue = 1E-20
@@ -452,6 +452,10 @@ function Set-Stat {
     $Stat = Get-Stat $Name
 
     if ($Stat -is [Hashtable] -and $Stat.IsSynchronized) { 
+        if (-not $Stat.Timer) { $Stat.Timer = $Stat.Updated.AddMinutes(-1) }
+        if (-not $Duration) { $Duration = $Updated - $Stat.Timer }
+        if ($Duration -le 0) { return $Stat }
+
         $ToleranceMin = $Value
         $ToleranceMax = $Value
 
@@ -489,9 +493,12 @@ function Set-Stat {
             $Stat.Week = ((1 - $Span_Week) * $Stat.Week) + ($Span_Week * $Value)
             $Stat.Duration = $Stat.Duration + $Duration
             $Stat.Updated = $Updated
+            $Stat.Timer = $Timer
         }
     }
     else { 
+        if (-not $Duration) { $Duration = [TimeSpan]::FromMinutes(1) }
+
         $Global:Stats.$Stat_Name = $Stat = [Hashtable]::Synchronized(
             @{ 
                 Name                  = [String]$Name
@@ -510,6 +517,7 @@ function Set-Stat {
                 Week_Fluctuation      = [Double]0
                 Duration              = [TimeSpan]$Duration
                 Updated               = [DateTime]$Updated
+                Timer                 = [DateTime]$Timer
             }
         )
     }
