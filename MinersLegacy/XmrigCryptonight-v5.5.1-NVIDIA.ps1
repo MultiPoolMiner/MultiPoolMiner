@@ -27,18 +27,10 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
     return
  }
-
-if ($CUDAVersion -lt [System.Version]"10.0.0") { 
-    $HashSHA256 = "218C5F0B3337C76835E2E5603BD804983A344F88FFFF937BF222F2B16C4F52C9"
-    $Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.14.5/xmrig-nvidia-2.14.5-cuda9_2-win64.zip"
- }
-elseif ($CUDAVersion -lt [System.Version]"10.1.0") { 
-    $HashSHA256 = "8C9C1DFB454A8F56B76CBFB0E1071FAD03D908560CFF05E1DE462825E83DB1A4"
-    $Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.14.5/xmrig-nvidia-2.14.5-cuda10-win64.zip"
- }
-else { 
-    $HashSHA256 = "9450E5483CBBDBEBDB706087E5B468FB716028751667C3F663E07395DCBC0476"
-    $Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.14.5/xmrig-nvidia-2.14.5-cuda10_1-win64.zip"
+ 
+if { 
+    $HashSHA256 = "7B57144B8E5C8E9816ED74658D9A877654DBE64D33A4D9AA736750648C786FD3"
+    $Uri = "https://github.com/xmrig/xmrig/releases/download/v5.5.1/xmrig-5.5.1-msvc-cuda10_1-win64.zip"
  }
 
 $Commands = [PSCustomObject[]]@(
