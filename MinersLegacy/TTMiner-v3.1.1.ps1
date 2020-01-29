@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\TT-Miner.exe"
-$HashSHA256 = "9D92D8659FA86F8FBBB0C96AD59C745EA31591DBAAC7209EBF011406EC4A00A7"
-$Uri = "https://tradeproject.de/download/Miner/TT-Miner-3.0.10.zip"
+$HashSHA256 = "B30C18EFE438AC6D217D11F6B01C0EC23028C2404EBDC3246F204FC784A2ED3D"
+$Uri = "https://tradeproject.de/download/Miner/TT-Miner-3.1.1.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=5025783.0"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
