@@ -8,8 +8,8 @@ param(
 )
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$HashSHA256 = ""
-$Uri = "https://github.com/JayDDee/cpuminer-opt/releases/download/v3.11.0/cpuminer-opt-3.11.0-windows.zip"
+$HashSHA256 = "DC791C5068B2A690A8A9E42D857D0BA353B91BF19EFE6B487AFFBFA618311EEE"
+$Uri = "https://github.com/JayDDee/cpuminer-opt/releases/download/v3.11.7/cpuminer-opt-3.11.7-windows.zip"
 $ManualUri = "https://github.com/JayDDee/cpuminer-opt"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
