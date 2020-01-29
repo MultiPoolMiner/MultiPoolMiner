@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\nanominer.exe"
-$HashSHA256 = "783448AAC036D91D67DD00B1C41EA029A3C956FDACD4DB192D7F8C9CBC491B26"
-$Uri = "https://github.com/nanopool/nanominer/releases/download/v1.6.2/nanominer-windows-1.6.2.zip"
+$HashSHA256 = "F9562406883E31A4E9CA4E2D207769E47ED2E228E5C57EFF132D7D98FDF4D34E"
+$Uri = "https://github.com/nanopool/nanominer/releases/download/v1.7.3/nanominer-windows-1.7.3.zip"
 $ManualUri = "https://github.com/nanopool/nanominer/releases"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
