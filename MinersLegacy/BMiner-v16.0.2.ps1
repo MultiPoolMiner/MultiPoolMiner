@@ -29,7 +29,7 @@ $Commands = [PSCustomObject[]]@(
     #Single algo mining
     [PSCustomObject]@{ Algorithm = "EquihashR15053"; Protocol = "beamhash2";    SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Command = "" } #EquihashR15053, new in 11.3.0
     [PSCustomObject]@{ Algorithm = "cuckarood29";    Protocol = "cuckaroo29d";  SecondaryAlgorithm = "";          ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = " --fast" } #Cuckarood29, new in 15.7.1
-    [PSCustomObject]@{ Algorithm = "cuckatoo31";     Protocol = "cuckatoo31";   SecondaryAlgorithm = "";          ; MinMemGB = 8; Vendor = @("NVIDIA"); Command = "" } #Cuckatoo31, works on 8gb cards on win7/8/8.1 and Linux not windows 10
+    [PSCustomObject]@{ Algorithm = "cuckatoo31";     Protocol = "cuckatoo31";   SecondaryAlgorithm = "";          ; MinMemGB = 8; Vendor = @("NVIDIA"); Command = "" } #Cuckatoo31, new in 14.2.0, requires GTX 1080Ti or RTX 2080Ti
     [PSCustomObject]@{ Algorithm = "aeternity";      Protocol = "aeternity";    SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = " --fast" } #Aeternity, new in 11.1.0
     #[PSCustomObject]@{ Algorithm = "equihash";       Protocol = "stratum";      SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Equihash, DSTMEquihash-v0.6.2 is 15% faster
     #[PSCustomObject]@{ Algorithm = "equihash1445";   Protocol = "equihash1445"; SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Equihash1445, AMD_NVIDIA-Gminer_v1.52 is faster
