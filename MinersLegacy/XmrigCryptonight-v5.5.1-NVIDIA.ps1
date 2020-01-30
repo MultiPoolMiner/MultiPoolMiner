@@ -13,7 +13,7 @@ param(
     [PSCustomObject[]]$Devices
 )
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Path = ".\Bin\$($Name)\xmrig-nvidia.exe"
+$Path = ".\Bin\$($Name)\xmrig.exe"
 $ManualUri = "https://github.com/xmrig/xmrig-nvidia"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
