@@ -11,7 +11,7 @@ $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty
 $Path = ".\Bin\$($Name)\ccminer.exe"
 $HashSHA256 = "65DF5E551A82FBFF16173C1938B54147472ADE44664B0CACD44D6F597850B407"
 $Uri = "https://github.com/Minerx117/ccminer/releases/download/8.21-r18-v5/ccmineryescryptrV5.zip"
-$ManualUri = "https://github.com/tpruvot/ccminer"
+$ManualUri = "https://github.com/Minerx117/ccminer"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
