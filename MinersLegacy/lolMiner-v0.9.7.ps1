@@ -24,6 +24,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "EquihashR150503"; MinMemGB = 2.75; Vendor = @("AMD", "NVIDIA"); Command = " --coin BEAM" }
     [PSCustomObject]@{ Algorithm = "Cuckarood29";     MinMemGB = 4.0;  Vendor = @("AMD", "NVIDIA"); Command = " --coin GRIN-AD29" } # new with 0.8
     [PSCustomObject]@{ Algorithm = "Cuckatoo31";      MinMemGB = 4.0;  Vendor = @("AMD", "NVIDIA"); Command = " --coin GRIN-AT31" } # new with 0.8
+    [PSCustomObject]@{ Algorithm = "Cuckatoo32";      MinMemGB = 4.0;  Vendor = @("AMD", "NVIDIA"); Command = " --coin GRIN-AT32" } # new with 0.9
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
