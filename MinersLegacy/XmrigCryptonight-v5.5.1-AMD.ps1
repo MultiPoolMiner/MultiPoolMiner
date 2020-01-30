@@ -14,7 +14,7 @@ param(
 )
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Path = ".\Bin\$($Name)\xmrig-amd.exe"
+$Path = ".\Bin\$($Name)\xmrig.exe"
 $HashSHA256 = "6DF9967BAE86DD1826BF3A1F9B5F3789D72B4B303AACB59AD696510015AD80FF"
 $Uri = "https://github.com/xmrig/xmrig/releases/download/v5.5.1/xmrig-5.5.1-msvc-win64.zip"
 $ManualUri = "https://github.com/xmrig/xmrig-amd"
