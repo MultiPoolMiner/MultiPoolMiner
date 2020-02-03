@@ -29,8 +29,8 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
  }
 
 if ($CUDAVersion -lt [System.Version]"10.1.0") { 
-    $HashSHA256 = "FEEBBC93355F99718A39239420955F41EA4D37F492229F3CFD3AA3937357E70F"
-    $Uri = "https://github.com/Minerx117/miner-binaries/releases/download/5.5.3/xmrig-5.5.3-msvc-cuda10_1-win64.7z"
+    $HashSHA256 = "4752629B97B87A5E1C7542D70285E6ADFBF354732D6F9828D389F729F0C99538"
+    $Uri = "https://github.com/Minerx117/miner-binaries/releases/download/5.5.3/xmrig-5.5.3.zip"
  }
 
 $Commands = [PSCustomObject[]]@(
