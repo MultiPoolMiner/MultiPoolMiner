@@ -8,9 +8,9 @@ param(
 )
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Path = ".\Bin\$($Name)\MiniZ.exe"
-$HashSHA256 = "733963787DD61894DB05297232CB046DB5C3247B601262CD3C26A31DAC25F54A"
-$Uri = "https://miniz.ch/?smd_process_download=1&download_id=3269"
+$Path = ".\Bin\$($Name)\miniZ.exe"
+$HashSHA256 = "371C035F0D274DCC46A61F00D394EC16178E21EA308205966F29E5D6BC40A634"
+$Uri = "https://github.com/Minerx117/miner-binaries/releases/download/v1.5t/miniZ_v1.5t_cuda10_win-x64.zip"
 $ManualUri = "https://miniz.ch"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
@@ -28,10 +28,10 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
 $Commands = [PSCustomObject[]]@(
 #    [PSCustomObject]@{ Algorithm = "Equihash965";    MinMemGB = 2.0; Command = " --par=96,5" } # Gminer-v1.66 is faster
     [PSCustomObject]@{ Algorithm = "Equihash1254";   MinMemGB = 3.0; Command = " --par=125,4" }
-#    [PSCustomObject]@{ Algorithm = "Equihash1445";   MinMemGB = 2.0; Command = " --par=144,5" } # Gminer-v1.66 is faster
+    [PSCustomObject]@{ Algorithm = "Equihash1445";   MinMemGB = 2.0; Command = " --par=144,5" } #
 #    [PSCustomObject]@{ Algorithm = "EquihashR15050"; MinMemGB = 2.0; Command = " --par=150,5" } #Bad shares
     [PSCustomObject]@{ Algorithm = "EquihashR15053"; MinMemGB = 2.0; Command = " --par=150,5,3" }
-#    [PSCustomObject]@{ Algorithm = "Equihash1927";   MinMemGB = 3.0; Command = " --par=192,7" } # Gminer-v1.66 is faster
+    [PSCustomObject]@{ Algorithm = "Equihash1927";   MinMemGB = 3.0; Command = " --par=192,7" } #
     [PSCustomObject]@{ Algorithm = "Equihash2109";   MinMemGB = 1.0; Command = " --par=210,9" }
 )
 #Commands from config file take precedence
