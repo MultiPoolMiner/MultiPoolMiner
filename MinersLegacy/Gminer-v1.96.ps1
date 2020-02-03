@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -20,8 +20,9 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Main_Algorithm = "BFC";            Secondary_Algorithm = "";          MinMemGB = 4.0; Fee = 3;    Vendor = @("AMD", "NVIDIA"); Command = " --algo bfc" } #new in v1.69
     [PSCustomObject]@{ Main_Algorithm = "Cuckaroo29";     Secondary_Algorithm = "";          MinMemGB = 4.0; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckaroo29" } #new in v1.19; Cuckaroo29 / Grin
     [PSCustomObject]@{ Main_Algorithm = "Cuckaroo29s";    Secondary_Algorithm = "";          MinMemGB = 4.0; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckaroo29s" } #new in v1.34; Cuckaroo29s / Swap
+    [PSCustomObject]@{ Main_Algorithm = "cuckaroom";      Secondary_Algorithm = "";          MinMemGB = 4.0; Fee = 3;    Vendor = @("AMD", "NVIDIA"); Command = " --algo grin29" } #new in v1.9 cuckaroom
     [PSCustomObject]@{ Main_Algorithm = "Cuckatoo31";     Secondary_Algorithm = "";          MinMemGB = 7.4; Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo cuckatoo31" } #new in v1.31; Cuckatoo31 / Grin
-    [PSCustomObject]@{ Main_Algorithm = "Cuckarood29";    Secondary_Algorithm = "";          MinMemGB = 1.0; Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo grin29" } #new in v1.51
+    [PSCustomObject]@{ Main_Algorithm = "Cuckarood29";    Secondary_Algorithm = "";          MinMemGB = 1.0; Fee = 2;    Vendor = @("NVIDIA");        Command = " --algo cuckarood29" } #new in v1.51
     [PSCustomObject]@{ Main_Algorithm = "Cuckoo29";       Secondary_Algorithm = "";          MinMemGB = 4.0; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo cuckoo29" } #new in v1.24; Cuckoo29 / Aeternity
     [PSCustomObject]@{ Main_Algorithm = "CuckooBFC";      Secondary_Algorithm = "";          MinMemGB = 1.0; Fee = 3;    Vendor = @("AMD", "NVIDIA"); Command = " --algo bfc" } #new in v1.69; CuckooBFC
     [PSCustomObject]@{ Main_Algorithm = "Eaglesong";      Secondary_Algorithm = "";          MinMemGB = 0.8; Fee = 2;    Vendor = @("AMD", "NVIDIA"); Command = " --algo ckb" } #new in v1.73
