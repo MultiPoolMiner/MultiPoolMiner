@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\xmrig.exe"
-$HashSHA256 = "BFEFA819EFF6088734CC7D4333392B489EA44D189211990A12D6DC30D03EB03D"
-$Uri = "https://github.com/xmrig/xmrig/releases/download/v5.5.1/xmrig-5.5.1-gcc-win64.zip"
+$HashSHA256 = "E9549EBE2FF59946E8D2462531E528459EAD52EE4E311FFABEC8AB892E7AA99C"
+$Uri = "https://github.com/xmrig/xmrig/releases/download/v5.5.3/xmrig-5.5.3-gcc-win64.zip"
 $ManualUri = "https://github.com/xmrig/xmrig"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
