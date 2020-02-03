@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 #XmRig AMD / Nvidia requires the explicit use of detailled thread information in the config file
 #these values are different for each card model and algorithm
@@ -14,9 +14,9 @@ param(
 )
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Path = ".\Bin\$($Name)\xmrig.exe"
-$HashSHA256 = "8261C67D4E4E5CA1759A16350B9F91B0F64A2266C5C3CB0086329BB2F1ABA6C2"
-$Uri = "https://github.com/xmrig/xmrig/releases/download/v5.5.3/xmrig-5.5.3-msvc-win64.zip"
+$Path = ".\Bin\$($Name)\xmrig-amd.exe"
+$HashSHA256 = "A2B3FCED3BA1A10E7E86CBED089F9D8B7706287EE9F992AD7CE45FFFEB123D04"
+$Uri = "https://github.com/xmrig/xmrig-amd/releases/download/v2.14.6/xmrig-amd-2.14.6-msvc-win64.zip"
 $ManualUri = "https://github.com/xmrig/xmrig-amd"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
