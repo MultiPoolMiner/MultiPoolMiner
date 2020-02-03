@@ -15,8 +15,6 @@ param(
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\xmrig.exe"
 $ManualUri = "https://github.com/xmrig/xmrig-nvidia"
-$HashSHA256 = "D388AF7900F6B5FC18D0EFF25BB7D173F66E5B20C7D77D2570F3484059D54AFA"
-$Uri = "https://github.com/xmrig/xmrig/releases/download/v5.5.3/xmrig-5.5.3-msvc-cuda10_1-win64.zip"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
@@ -30,6 +28,11 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
     return
  }
 
+if ($CUDAVersion -lt [System.Version]"10.1.0") { 
+    $HashSHA256 = "FEEBBC93355F99718A39239420955F41EA4D37F492229F3CFD3AA3937357E70F"
+    $Uri = "https://github.com/Minerx117/miner-binaries/releases/download/5.5.3/xmrig-5.5.3-msvc-cuda10_1-win64.7z"
+ }
+
 $Commands = [PSCustomObject[]]@(
     # Note: For fine tuning directly edit the config file in the miner binary directory
     #       'Config-[Pool]_[Algorithm_Norm]-[GPU-List]-[Port].json'
@@ -40,7 +43,6 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "cn/gpu";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightGpu, new with 2.11.0
     [PSCustomObject]@{ Algorithm = "cn/half";       MinMemGB = 2; Threads = 1; Command = "" } # CryptonightHalf, new with 2.9.1
     [PSCustomObject]@{ Algorithm = "cn/msr";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightMsr
-    [PSCustomObject]@{ Algorithm = "cn/r";          MinMemGB = 2; Threads = 1; Command = "" } # CryptonightR, new with 2.13.0
     [PSCustomObject]@{ Algorithm = "cn/rto";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightRto
     [PSCustomObject]@{ Algorithm = "cn/rwz";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightRwz, new with 2.14.0
     [PSCustomObject]@{ Algorithm = "cn/trtl";       MinMemGB = 2; Threads = 1; Command = "" } # CryptonightTurtle, new with 2.10.0
