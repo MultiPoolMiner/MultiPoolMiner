@@ -49,7 +49,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "ethash3gb";      Protocol = "ethstratum";   SecondaryAlgorithm = "vbk";       ; MinMemGB = 3; Vendor = @("NVIDIA"); Command = "" } #Ethash3GB & Vbk dual mining
     [PSCustomObject]@{ Algorithm = "ethash";         Protocol = "ethstratum";   SecondaryAlgorithm = "vbk";       ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = "" } #Ethash & Vbk dual mining
     [PSCustomObject]@{ Algorithm = "tensority";      Protocol = "ethstratum";   SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Bytom
-    [PSCustomObject]@{ Algorithm = "cuckaroom";      Protocol = "cuckaroo29m";  SecondaryAlgorithm = "";          ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = " --fast" } #Cuckarood29, new in 16.0.0
+   #[PSCustomObject]@{ Algorithm = "cuckaroom";      Protocol = "cuckaroo29m";  SecondaryAlgorithm = "";          ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = " --fast" } #Cuckarood29, new in 16.0.0
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
