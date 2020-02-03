@@ -29,8 +29,8 @@ if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$Required
  }
  
 if { 
-    $HashSHA256 = "7B57144B8E5C8E9816ED74658D9A877654DBE64D33A4D9AA736750648C786FD3"
-    $Uri = "https://github.com/xmrig/xmrig/releases/download/v5.5.1/xmrig-5.5.1-msvc-cuda10_1-win64.zip"
+    $HashSHA256 = "D388AF7900F6B5FC18D0EFF25BB7D173F66E5B20C7D77D2570F3484059D54AFA"
+    $Uri = "https://github.com/xmrig/xmrig/releases/download/v5.5.3/xmrig-5.5.3-msvc-cuda10_1-win64.zip"
  }
 
 $Commands = [PSCustomObject[]]@(
