@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 param(
     [PSCustomObject]$Pools,
@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\xmrig.exe"
-$HashSHA256 = "E9549EBE2FF59946E8D2462531E528459EAD52EE4E311FFABEC8AB892E7AA99C"
-$Uri = "https://github.com/xmrig/xmrig/releases/download/v5.5.3/xmrig-5.5.3-gcc-win64.zip"
+$HashSHA256 = "1AAB1D5E9605F10CC87E5811BF165ED812C47395C41676ECE2AC479BAF6B11F9"
+$Uri = "https://github.com/xmrig/xmrig/releases/download/v2.14.4/xmrig-2.14.4-gcc-win64.zip"
 $ManualUri = "https://github.com/xmrig/xmrig"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
