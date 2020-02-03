@@ -13,24 +13,32 @@ param(
     [PSCustomObject[]]$Devices
 )
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
-$Path = ".\Bin\$($Name)\xmrig.exe"
+$Path = ".\Bin\$($Name)\xmrig-nvidia.exe"
 $ManualUri = "https://github.com/xmrig/xmrig-nvidia"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA")
 
-# Miner requires CUDA 10.1
+# Miner requires CUDA 9.2
 $CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
-$RequiredCUDAVersion = "10.1.00"
+$RequiredCUDAVersion = "9.2.00"
 if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
     return
  }
 
-if ($CUDAVersion -lt [System.Version]"10.1.0") { 
-    $HashSHA256 = "4752629B97B87A5E1C7542D70285E6ADFBF354732D6F9828D389F729F0C99538"
-    $Uri = "https://github.com/Minerx117/miner-binaries/releases/download/5.5.3/xmrig-5.5.3.zip"
+if ($CUDAVersion -lt [System.Version]"10.0.0") { 
+    $HashSHA256 = "218C5F0B3337C76835E2E5603BD804983A344F88FFFF937BF222F2B16C4F52C9"
+    $Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.14.5/xmrig-nvidia-2.14.5-cuda9_2-win64.zip"
+ }
+elseif ($CUDAVersion -lt [System.Version]"10.1.0") { 
+    $HashSHA256 = "8C9C1DFB454A8F56B76CBFB0E1071FAD03D908560CFF05E1DE462825E83DB1A4"
+    $Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.14.5/xmrig-nvidia-2.14.5-cuda10-win64.zip"
+ }
+else { 
+    $HashSHA256 = "9450E5483CBBDBEBDB706087E5B468FB716028751667C3F663E07395DCBC0476"
+    $Uri = "https://github.com/xmrig/xmrig-nvidia/releases/download/v2.14.5/xmrig-nvidia-2.14.5-cuda10_1-win64.zip"
  }
 
 $Commands = [PSCustomObject[]]@(
@@ -43,6 +51,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "cn/gpu";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightGpu, new with 2.11.0
     [PSCustomObject]@{ Algorithm = "cn/half";       MinMemGB = 2; Threads = 1; Command = "" } # CryptonightHalf, new with 2.9.1
     [PSCustomObject]@{ Algorithm = "cn/msr";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightMsr
+    [PSCustomObject]@{ Algorithm = "cn/r";          MinMemGB = 2; Threads = 1; Command = "" } # CryptonightR, new with 2.13.0
     [PSCustomObject]@{ Algorithm = "cn/rto";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightRto
     [PSCustomObject]@{ Algorithm = "cn/rwz";        MinMemGB = 2; Threads = 1; Command = "" } # CryptonightRwz, new with 2.14.0
     [PSCustomObject]@{ Algorithm = "cn/trtl";       MinMemGB = 2; Threads = 1; Command = "" } # CryptonightTurtle, new with 2.10.0
