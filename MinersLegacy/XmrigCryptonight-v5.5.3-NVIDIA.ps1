@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 #XmRig AMD / Nvidia requires the explicit use of detailled thread information in the config file
 #these values are different for each card model and algorithm
@@ -15,22 +15,19 @@ param(
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\xmrig.exe"
 $ManualUri = "https://github.com/xmrig/xmrig-nvidia"
+$HashSHA256 = "D388AF7900F6B5FC18D0EFF25BB7D173F66E5B20C7D77D2570F3484059D54AFA"
+$Uri = "https://github.com/xmrig/xmrig/releases/download/v5.5.3/xmrig-5.5.3-msvc-cuda10_1-win64.zip"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
 
 $Devices = @($Devices | Where-Object Type -EQ "GPU" | Where-Object Vendor -EQ "NVIDIA")
 
-# Miner requires CUDA 9.2
+# Miner requires CUDA 10.1
 $CUDAVersion = ($Devices.OpenCL.Platform.Version | Select-Object -Unique) -replace ".*CUDA ",""
-$RequiredCUDAVersion = "9.2.00"
+$RequiredCUDAVersion = "10.1.00"
 if ($CUDAVersion -and [System.Version]$CUDAVersion -lt [System.Version]$RequiredCUDAVersion) { 
     Write-Log -Level Warn "Miner ($($Name)) requires CUDA version $($RequiredCUDAVersion) or above (installed version is $($CUDAVersion)). Please update your Nvidia drivers. "
     return
- }
- 
-if { 
-    $HashSHA256 = "D388AF7900F6B5FC18D0EFF25BB7D173F66E5B20C7D77D2570F3484059D54AFA"
-    $Uri = "https://github.com/xmrig/xmrig/releases/download/v5.5.3/xmrig-5.5.3-msvc-cuda10_1-win64.zip"
  }
 
 $Commands = [PSCustomObject[]]@(
