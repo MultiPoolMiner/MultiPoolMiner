@@ -25,7 +25,8 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "Mtp";            MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm mtp" }
     [PSCustomObject]@{ Algorithm = "Rainforestv2";   MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm rainforestv2" }
     [PSCustomObject]@{ Algorithm = "RandomX";        MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomx" }
-    [PSCustomObject]@{ Algorithm = "RandomXArQmA";   MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomarq" }
+    [PSCustomObject]@{ Algorithm = "Randomsfx";      MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomsfx" }
+    [PSCustomObject]@{ Algorithm = "Randomarq";      MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomarq" }
     [PSCustomObject]@{ Algorithm = "RandomXloki";    MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomxl" }
     [PSCustomObject]@{ Algorithm = "RandomXwow";     MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomwow" }
     [PSCustomObject]@{ Algorithm = "Yescrypt";       MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm yescrypt" }
