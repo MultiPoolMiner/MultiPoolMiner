@@ -36,7 +36,7 @@ if ($Miner_Config.Commands) { $Miner_Config.Commands | Get-Member -MemberType No
 
 #CommonCommands from config file take precedence
 if ($Miner_Config.CommonCommands) { $CommonCommands = $Miner_Config.CommonCommands }
-else { $CommonCommands = " --submit-stale" }
+else { $CommonCommands = "" }
 
 $Devices | Select-Object Model -Unique | ForEach-Object { 
     $Miner_Device = @($Devices | Where-Object Model -EQ $_.Model)
