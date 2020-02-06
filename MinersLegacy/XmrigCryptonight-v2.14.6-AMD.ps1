@@ -1,4 +1,4 @@
-﻿using module ..\Include.psm1
+using module ..\Include.psm1
 
 #XmRig AMD / Nvidia requires the explicit use of detailled thread information in the config file
 #these values are different for each card model and algorithm

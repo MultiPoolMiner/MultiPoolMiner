@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\SRBMiner-MULTI.exe"
-$HashSHA256 = "ED778889BD39FFA37F5F7807F9B63D54225FBDF48E4687C460288E1ABBD187FC"
-$Uri = "https://github.com/doktor83/SRBMiner-Multi/releases/download/0.2.0/SRBMiner-Multi-0-2-0.zip"
+$HashSHA256 = "EF30A05BF0F29C1C5AB55A57279E4F0DC4856DCA8FF20F983E10A2F78921B547"
+$Uri = "https://github.com/doktor83/SRBMiner-Multi/releases/download/0.3.1/SRBMiner-Multi-0-3-1-win64.zip"
 $ManualUri = "https://github.com/doktor83/SRBMiner-Multi"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
@@ -25,7 +25,8 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "Mtp";            MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm mtp" }
     [PSCustomObject]@{ Algorithm = "Rainforestv2";   MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm rainforestv2" }
     [PSCustomObject]@{ Algorithm = "RandomX";        MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomx" }
-    [PSCustomObject]@{ Algorithm = "RandomXArQmA";   MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomarq" }
+    [PSCustomObject]@{ Algorithm = "Randomsfx";      MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomsfx" }
+    [PSCustomObject]@{ Algorithm = "Randomarq";      MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomarq" }
     [PSCustomObject]@{ Algorithm = "RandomXloki";    MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomxl" }
     [PSCustomObject]@{ Algorithm = "RandomXwow";     MinMemGb = 1; Fee = 0.85; Vendor = @("CPU")       ; Command = " --algorithm randomwow" }
     [PSCustomObject]@{ Algorithm = "Yescrypt";       MinMemGb = 1; Fee = 0.85; Vendor = @("CPU", "AMD"); Command = " --algorithm yescrypt" }
@@ -73,7 +74,7 @@ $Devices | Select-Object Model, Type, Vendor  -Unique | ForEach-Object {
                 Port       = $Miner_Port
                 URI        = $Uri
                 Fees       = [PSCustomObject]@{ $Algorithm_Norm = $_.Fee  / 100 }
-                WarmupTime = 60 #seconds
+                WarmupTime = 120 #seconds
             }
         }
     }

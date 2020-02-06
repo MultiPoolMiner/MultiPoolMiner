@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\z-enemy.exe"
-$HashSHA256 = "8F6FA2209CA28E87E325049182AC9736BF84280A8203ADD34E21EABFF567526A"
-$Uri = "https://github.com/z-enemy/z-enemy/releases/download/ver-2.3/z-enemy-2.3-win-cuda10.1.zip"
+$HashSHA256 = "B3F2A5B46D105DE4BE555BC3BEF38F15691CF98CCCE2FBB7539CC29DC8359DDD"
+$Uri = "https://github.com/Minerx117/miner-binaries/releases/download/v2.4/z-enemy-2.4-win-cuda10.1.zip"
 $ManualUri = "https://bitcointalk.org/index.php?topic=3378390.0"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config

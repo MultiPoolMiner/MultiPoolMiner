@@ -9,8 +9,8 @@ param(
 
 $Name = "$(Get-Item $MyInvocation.MyCommand.Path | Select-Object -ExpandProperty BaseName)"
 $Path = ".\Bin\$($Name)\BMiner.exe"
-$HashSHA256 = "DE848DABA2FF614CA8488699F71B748816D3ED2B4FEBA4E0CF7FC624A604FDBC"
-$Uri = "https://www.bminercontent.com/releases/bminer-lite-v15.8.7-6831c33-amd64.zip"
+$HashSHA256 = "13D52A67371E846F5D9E37F486D6595231999B0BE63105D8C176F3B89F84290B"
+$Uri = "https://github.com/Minerx117/miner-binaries/releases/download/16.0.2/bminer-v16.0.2-9094ce6.zip"
 $ManualUri = "https://www.bminer.me"
 
 $Miner_Config = Get-MinerConfig -Name $Name -Config $Config
@@ -29,7 +29,7 @@ $Commands = [PSCustomObject[]]@(
     #Single algo mining
     [PSCustomObject]@{ Algorithm = "EquihashR15053"; Protocol = "beamhash2";    SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("AMD", "NVIDIA"); Command = "" } #EquihashR15053, new in 11.3.0
     [PSCustomObject]@{ Algorithm = "cuckarood29";    Protocol = "cuckaroo29d";  SecondaryAlgorithm = "";          ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = " --fast" } #Cuckarood29, new in 15.7.1
-    [PSCustomObject]@{ Algorithm = "cuckatoo31";     Protocol = "cuckatoo31";   SecondaryAlgorithm = "";          ; MinMemGB = 8; Vendor = @("NVIDIA"); Command = "" } #Cuckatoo31, new in 14.2.0, requires GTX 1080Ti or RTX 2080Ti
+    [PSCustomObject]@{ Algorithm = "cuckatoo31";     Protocol = "cuckatoo31";   SecondaryAlgorithm = "";          ; MinMemGB = 10; Vendor = @("NVIDIA"); Command = "" } #Cuckatoo31, new in 14.2.0, requires GTX 1080Ti or RTX 2080Ti
     [PSCustomObject]@{ Algorithm = "aeternity";      Protocol = "aeternity";    SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = " --fast" } #Aeternity, new in 11.1.0
     #[PSCustomObject]@{ Algorithm = "equihash";       Protocol = "stratum";      SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Equihash, DSTMEquihash-v0.6.2 is 15% faster
     #[PSCustomObject]@{ Algorithm = "equihash1445";   Protocol = "equihash1445"; SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Equihash1445, AMD_NVIDIA-Gminer_v1.52 is faster
@@ -49,6 +49,7 @@ $Commands = [PSCustomObject[]]@(
     [PSCustomObject]@{ Algorithm = "ethash3gb";      Protocol = "ethstratum";   SecondaryAlgorithm = "vbk";       ; MinMemGB = 3; Vendor = @("NVIDIA"); Command = "" } #Ethash3GB & Vbk dual mining
     [PSCustomObject]@{ Algorithm = "ethash";         Protocol = "ethstratum";   SecondaryAlgorithm = "vbk";       ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = "" } #Ethash & Vbk dual mining
     [PSCustomObject]@{ Algorithm = "tensority";      Protocol = "ethstratum";   SecondaryAlgorithm = "";          ; MinMemGB = 2; Vendor = @("NVIDIA"); Command = "" } #Bytom
+   #[PSCustomObject]@{ Algorithm = "cuckaroom";      Protocol = "cuckaroo29m";  SecondaryAlgorithm = "";          ; MinMemGB = 4; Vendor = @("NVIDIA"); Command = " --fast" } #Cuckarood29, new in 16.0.0
 )
 #Commands from config file take precedence
 if ($Miner_Config.Commands) { $Miner_Config.Commands | ForEach-Object { $Algorithm = $_.Algorithm; $Commands = $Commands | Where-Object { $_.Algorithm -ne $Algorithm }; $Commands += $_ } }
