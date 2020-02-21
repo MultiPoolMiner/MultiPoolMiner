@@ -1441,6 +1441,7 @@ class Pool {
     [Credential[]]$Credential = @()
 
     static [Management.Automation.Job[]]$Requests
+    static [Hashtable[]]$Data = @()
     [Uri[]]$Api
 
     [String]$Uri
@@ -1454,13 +1455,36 @@ class Pool {
 
     Update() { 
         $this.Api | ForEach-Object { 
-            if (-not ($Requests.Name -eq $_)) { 
-                $Requests += Start-Job { Invoke-RestMethod $args[0] -UseBasicParsing -TimeoutSec 10 } -Name $_ -ArgumentList $_
+            if (-not ([Pool]::Requests.Name -eq $_)) { 
+                [Pool]::Requests += Start-Job { Invoke-RestMethod $args[0] -UseBasicParsing -TimeoutSec 10 } -Name $_ -ArgumentList $_
             }
         }
     }
 
     Refresh() { 
+        [Pool]::Requests | ForEach-Object { 
+            $Request = $_
+            $Request | Wait-Job -Timeout 10
+
+            if ($Request.State -eq "Completed") { 
+                $Response = $Request | Receive-Job
+
+                $this.Data += @{ 
+                    API  = $Request.Name
+                    Date = $Request.PSBeginTime
+                    Raw  = $Response
+                }
+            }
+            else { 
+                #error
+            }
+
+            $Request | Remove-Job -Force
+        }
+
+        $this.Data = @($this.Data | Select-Object -Last 100)
+
+        #parse pools
     }
 }
 
